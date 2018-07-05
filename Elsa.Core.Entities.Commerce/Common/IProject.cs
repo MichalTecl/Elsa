@@ -1,4 +1,8 @@
-﻿using Robowire.RobOrm.Core;
+﻿using System.Collections.Generic;
+
+using Elsa.Core.Entities.Commerce.Common.Security;
+
+using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Core.Entities.Commerce.Common
@@ -10,5 +14,7 @@ namespace Elsa.Core.Entities.Commerce.Common
 
         [NVarchar(128, false)]
         string Name { get; set; }
+
+        IEnumerable<IUser> Users { get; }
     }
 }

@@ -62,6 +62,9 @@
     <Compile Include="Common\IAddress.cs" />
     <Compile Include="Common\ICurrency.cs" />
     <Compile Include="Common\IProject.cs" />
+    <Compile Include="Common\Security\IUser.cs" />
+    <Compile Include="Common\Security\IUserRight.cs" />
+    <Compile Include="Common\Security\IUserUserRight.cs" />
     <Compile Include="ConnectionStringProvider.cs" />
     <Compile Include="ElsaDbInstaller.cs" />
     <Compile Include="Integration\IErp.cs" />
