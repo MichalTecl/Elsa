@@ -33,17 +33,9 @@
     <Reference Include="CodeGeneration">
       <HintPath>..\..\Robowire\Robowire.RobOrm.SqlServer\bin\Debug\CodeGeneration.dll</HintPath>
     </Reference>
-    <Reference Include="Robowire">
-      <HintPath>..\..\Robowire\Robowire.RobOrm.SqlServer\bin\Debug\Robowire.dll</HintPath>
-    </Reference>
-    <Reference Include="Robowire.Common.Expressions">
-      <HintPath>..\..\Robowire\Robowire.RobOrm.SqlServer\bin\Debug\Robowire.Common.Expressions.dll</HintPath>
-    </Reference>
-    <Reference Include="Robowire.RobOrm.Core">
-      <HintPath>..\..\Robowire\Robowire.RobOrm.SqlServer\bin\Debug\Robowire.RobOrm.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Robowire.RobOrm.SqlServer">
-      <HintPath>..\..\Robowire\Robowire.RobOrm.SqlServer\bin\Debug\Robowire.RobOrm.SqlServer.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Robowire\Robowire\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -61,9 +53,11 @@
     <Compile Include="Commerce\IPurchaseOrder.cs" />
     <Compile Include="Common\IAddress.cs" />
     <Compile Include="Common\ICurrency.cs" />
+    <Compile Include="Common\Widgets\IAppWidget.cs" />
     <Compile Include="Common\IProject.cs" />
     <Compile Include="Common\Security\IUser.cs" />
     <Compile Include="Common\Security\IUserRight.cs" />
+    <Compile Include="Common\Security\IUserSession.cs" />
     <Compile Include="Common\Security\IUserUserRight.cs" />
     <Compile Include="ConnectionStringProvider.cs" />
     <Compile Include="ElsaDbInstaller.cs" />
@@ -71,7 +65,20 @@
     <Compile Include="Integration\IErpProductMapping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+      <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
+      <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj">
+      <Project>{f2986071-08cd-42de-98fa-57e6fce729c5}</Project>
+      <Name>Robowire.RobOrm.SqlServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
+      <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
+      <Name>Robowire</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

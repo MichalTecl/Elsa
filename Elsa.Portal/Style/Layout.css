@@ -1,0 +1,127 @@
+﻿html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+body, html {
+    background-color: #ababab;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-family: Arial;
+}
+
+.content {
+    background-color: #eeeeee;
+    height: 100%;
+    overflow: auto;
+    font-size: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items:flex-start;
+    align-content:flex-start;
+}
+
+.panel {
+     font-size: 16px;
+     
+     vertical-align: top;
+     margin-left: 0.5%;
+     margin-right: 0.5%;
+     margin-bottom: 10px;
+    background-color: #ffffff;
+}
+
+
+
+.panelHead {
+    background-color: #00bfff;
+    display: flex;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    padding: 10px;
+}
+
+.panelTitle {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.panelToolbox {
+    display: none;
+    float: right;
+    right: 0px;
+}
+
+.panelContent {
+    padding-top: 6px;
+    padding-bottom: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.wTiny { width: 4%; }
+.w1 { width: 24%;  }
+.w2 { width: 49%; }
+.w3 { width: 74%; }
+.w4 { width: 100%; margin-left: 0; margin-right: 0; }
+
+@media only screen and (max-width: 1800px) {
+    .wTiny { width: 24%;}
+    .w1 { width: 32.33%; }
+    .w2 { width: 100%; margin-left: 0; margin-right: 0; }
+    .w3 { width: 100%; margin-left: 0; margin-right: 0; }
+    .w4 { width: 100%; margin-left: 0; margin-right: 0; }
+}
+
+@media only screen and (max-width: 900px) {
+    .wTiny { width: 33.33%;}
+    .w1 { width: 100%; margin-left: 0; margin-right: 0; }
+    .w2 { width: 100%; margin-left: 0; margin-right: 0; }
+    .w3 { width: 100%; margin-left: 0; margin-right: 0; }
+    .w4 { width: 100%; margin-left: 0; margin-right: 0; }
+}
+
+@media only screen and (max-width: 500px) {
+    .wTiny { width: 50%;}
+    .w1 { width: 100%; margin-left: 0; margin-right: 0; }
+    .w2 { width: 100%; margin-left: 0; margin-right: 0; }
+    .w3 { width: 100%; margin-left: 0; margin-right: 0; }
+    .w4 { width: 100%; margin-left: 0; margin-right: 0; }
+}
+
+
+/*-- stack children to right  --*/
+.stackRight {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+}
+
+.centerChildHori {
+    text-align: center;
+}
+
+.centerChildHori > * {
+     text-align: left;
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+}

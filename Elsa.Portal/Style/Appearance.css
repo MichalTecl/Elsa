@@ -1,0 +1,47 @@
+﻿input {
+    height: 2.14285714em;
+    line-height: 1.4285714285714;
+    padding: 4px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3.01px;
+    box-sizing: border-box;
+    font-size: inherit;
+    margin: 0;
+    max-width: 250px;
+    width: 100%;
+    vertical-align: baseline;
+    background-color: rgb(250, 255, 189) !important;
+}
+
+button {
+    box-sizing: border-box;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 3.01px;
+    color: #333;
+    cursor: pointer;
+    display: inline-block;
+    font-family: inherit;
+    font-size: 1em;
+    font-variant: normal;
+    font-weight: normal;
+    height: 2.14285714em;
+    line-height: 1.42857143;
+    padding: 4px 10px;
+    text-decoration: none;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
+label {
+    font-size: 1em;
+    color: #444444;
+    margin-left: 2px;
+    font-weight: 200;
+}
+
+.actionLink {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}

@@ -1,0 +1,82 @@
+﻿<div class="panel w4" id="userPanel">
+    <div class="panelHead">
+        <div class="panelTitle">ELSA</div>
+        
+        <div class="stackRight" style="width: 100%">
+            <span id="loggedUserLabel" class="actionLink" ></span>
+        </div>
+        
+    </div>
+    
+    <div id="userWidget" class="panelContent">
+        <div id="loginPanel" class="centerChildHori">
+            <div>
+                <div>
+                    <label for="tbUser">e-mail</label>
+                    <input id="tbUser" type="text" />
+                </div>
+                <div>
+                    <label for="tbUser">heslo</label>
+                    <input id="tbPwd" type="password" />
+                </div>
+                <div>
+                    <button event-bind="click:onLoginClick($tbUser.value, $tbPwd.value)">Přihlásit</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="userDetail" style="display: none" style="width: 100%">
+            <div class="stackRight">
+                <button event-bind="click:onDisplayPasswordChangeClick()">Změnit heslo</button>
+                <button event-bind="click:onLogoutClick()">Odhlásit</button>
+            </div>
+
+            <div id="passChange" style="display: none">
+                <div class="stackRight">
+                    <div style="width: 340px">
+                        <div>
+                            <label for="tbOldPass">Staré heslo</label>
+                            <input id="tbOldPass" type="password"/>
+                        </div>
+                        <div>
+                            <label for="tbNewPwd">Nové heslo</label>
+                            <input id="tbNewPwd" type="password"/>
+                        </div>
+                        <div>
+                            <label for="tbNewPwdConfirm">Nové heslo potvrzení</label>
+                            <input id="tbNewPwdConfirm" type="password"/>
+                        </div>
+                        <div>
+                            <button event-bind="click:onChangePasswordClick($tbOldPass.value, $tbNewPwd.value, $tbNewPwdConfirm.value)">Uložit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script type="text/javascript" src="/UI/Widgets/User/UserWidget.js"></script>
+    </div>
+    
+   
+    
+
+    <style>
+        #userPanel label {
+            display: block;
+        }
+
+        #userPanel input {
+            margin-bottom: 8px;
+        }
+
+        #userWidget button {
+            margin-top: 8px;
+
+        }
+
+        
+    </style>
+</div>
+

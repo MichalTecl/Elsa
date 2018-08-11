@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ELSA</title>
+    <meta charset="utf-8" />
+    <script src="/Bundles/Bundle.ashx?bundle=Lanta"></script>
+</head>
+<body>
+    <div id="appsPanel" class="content">
+        <div id="appCardTemplate" data-bind="replace-by:WidgetUrl"></div>
+    </div>
+    
+    <script src="Script/Apps/User/UserVM.js"></script>
+    <script src="Script/Apps/WidgetsVM.js"></script>
+    <script>
+        lt.element("appsPanel").withModel("app.widgets.vm").attach(function(appCardTemplate) {
+
+            this.bind(function(widgets) {
+                lt.generate(this, appCardTemplate, widgets, function(w) { return w.Id });
+            });
+
+        });
+    </script>
+    <link href="Style/Layout.css" rel="stylesheet" />
+    <link href="Style/Appearance.css" rel="stylesheet" />
+</body>
+</html>
