@@ -16,8 +16,8 @@ namespace Elsa.Common
     {
         private readonly IDatabase m_database;
 
-        public WidgetsController(ISession session, IDatabase database)
-            : base(session)
+        public WidgetsController(IWebSession webSession, IDatabase database)
+            : base(webSession)
         {
             m_database = database;
         }
@@ -27,7 +27,7 @@ namespace Elsa.Common
         {
             var widgetsQuery = m_database.SelectFrom<IAppWidget>().OrderBy(w => w.ViewOrder);
 
-            if (Session?.User == null || Session.User.UsesDefaultPassword)
+            if (WebSession?.User == null || WebSession.User.UsesDefaultPassword)
             {
                 widgetsQuery.Where(w => w.IsAnonymous);
             }

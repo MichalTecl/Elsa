@@ -47,6 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Automation\IJobExecutionHistory.cs" />
+    <Compile Include="Automation\IScheduledJob.cs" />
     <Compile Include="Commerce\IDirectSaleChannel.cs" />
     <Compile Include="Commerce\IOrderItem.cs" />
     <Compile Include="Commerce\IProduct.cs" />

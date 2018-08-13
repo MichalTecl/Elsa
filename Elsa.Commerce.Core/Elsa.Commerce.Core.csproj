@@ -40,11 +40,44 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ErpDataMapperBase.cs" />
     <Compile Include="IErpClient.cs" />
+    <Compile Include="IErpClientFactory.cs" />
+    <Compile Include="IErpCommonSettings.cs" />
+    <Compile Include="IErpDataMapper.cs" />
+    <Compile Include="Impl\ErpClientFactory.cs" />
+    <Compile Include="IOrderStatusConverter.cs" />
+    <Compile Include="Model\IErpOrderItemModel.cs" />
+    <Compile Include="Model\IErpOrderModel.cs" />
+    <Compile Include="Model\IErpPriceElementModel.cs" />
+    <Compile Include="OrderStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Registry.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+      <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
+      <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
+      <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
+      <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
+      <Project>{d4607e8c-a5d2-423a-8c78-56b188c567ed}</Project>
+      <Name>Elsa.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj">
+      <Project>{91481b08-e437-474d-9793-a135f1db465c}</Project>
+      <Name>Elsa.Core.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
+      <Project>{a9148d58-0f0e-43e7-8a11-a9f9bb04333c}</Project>
+      <Name>Elsa.Users</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

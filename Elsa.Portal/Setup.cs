@@ -16,7 +16,8 @@ namespace Elsa.Portal
         {
             CommonRegistry.SetupContainer(container);
 
-            container.Setup(s => s.For<ISession>().Use<UserSession>());
+            container.Setup(s => s.For<IWebSession>().Use<UserWebSession>());
+            container.Setup(s => s.For<ISession>().Import.FromFactory(l => l.Get<IWebSession>()));
         }
     }
 }

@@ -17,28 +17,28 @@ namespace Elsa.Users
     {
         private readonly IDatabase m_database;
 
-        public UserController(ISession session, IDatabase database)
-            : base(session)
+        public UserController(IWebSession webSession, IDatabase database)
+            : base(webSession)
         {
             m_database = database;
         }
 
         [AllowAnonymous]
-        public ISession Login(string user, string password)
+        public IWebSession Login(string user, string password)
         {
-            Session.Login(user, password);
+            WebSession.Login(user, password);
 
-            return Session;
+            return WebSession;
         }
 
         [AllowAnonymous]
-        public ISession GetCurrentSession()
+        public IWebSession GetCurrentSession()
         {
-            return Session;
+            return WebSession;
         }
 
         [AllowWithDefaultPassword]
-        public ISession ChangePassword(string oldPassword, string newPassword)
+        public IWebSession ChangePassword(string oldPassword, string newPassword)
         {
             oldPassword = oldPassword.Trim();
             newPassword = newPassword.Trim();
@@ -55,13 +55,13 @@ namespace Elsa.Users
             
             using (var tran = m_database.OpenTransaction())
             {
-                var user = m_database.SelectFrom<IUser>().Where(i => i.Id == Session.User.Id).Execute().FirstOrDefault();
+                var user = m_database.SelectFrom<IUser>().Where(i => i.Id == WebSession.User.Id).Execute().FirstOrDefault();
                 if (user == null)
                 {
                     return null;
                 }
 
-                if (!Session.VerifyPassword(user.PasswordHash, oldPassword, user.UsesDefaultPassword))
+                if (!WebSession.VerifyPassword(user.PasswordHash, oldPassword, user.UsesDefaultPassword))
                 {
                     throw new InvalidOperationException("Staré heslo není platné");
                 }
@@ -71,21 +71,21 @@ namespace Elsa.Users
 
                 m_database.Save(user);
 
-                Session.Logout();
-                Session.Login(user.EMail, newPassword);
+                WebSession.Logout();
+                WebSession.Login(user.EMail, newPassword);
 
-                Session.Logout();
+                WebSession.Logout();
 
                 tran.Commit();
             }
 
-            return Session;
+            return WebSession;
         }
 
         [AllowWithDefaultPassword]
         public void Logout()
         {
-            Session.Logout();
+            WebSession.Logout();
         }
 
 

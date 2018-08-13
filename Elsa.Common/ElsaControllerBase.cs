@@ -12,16 +12,16 @@ namespace Elsa.Common
 {
     public abstract class ElsaControllerBase : IControllerInterceptor
     {
-        protected ElsaControllerBase(ISession session)
+        protected ElsaControllerBase(IWebSession webSession)
         {
-            Session = session;
+            WebSession = webSession;
         }
 
-        protected ISession Session { get; }
+        protected IWebSession WebSession { get; }
         
         public bool OnRequest(object controller, RequestContext request)
         {
-            Session.Initialize(request);
+            WebSession.Initialize(request);
 
             return false;
         }
@@ -45,14 +45,14 @@ namespace Elsa.Common
             Func<object> defaultInvocation,
             Action<object> defaultResultWrite)
         {
-            if (Session.User == null)
+            if (WebSession.User == null)
             {
                 if (!Attribute.IsDefined(method, typeof(AllowAnonymousAttribute)))
                 {
                     throw new UnauthorizedAccessException("Requested resource is not accessible to anonymous user");
                 }
             }
-            else if (Session.User.UsesDefaultPassword)
+            else if (WebSession.User.UsesDefaultPassword)
             {
                 if (!method.GetCustomAttributes().OfType<AllowWithDefaultPassword>().Any())
                 {

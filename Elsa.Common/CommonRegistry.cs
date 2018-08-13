@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using Elsa.Common.Configuration;
 using Elsa.Core.Entities.Commerce;
 
 using Robowire;
-using Robowire.RobOrm.SqlServer;
 
 namespace Elsa.Common
 {
@@ -16,6 +10,8 @@ namespace Elsa.Common
         public static void SetupContainer(IContainer container)
         {
             ElsaDbInstaller.Initialize(container);
+
+            container.Setup(c => c.For<IConfigurationRepository>().Use<ConfigurationRepository>());
         }
 
     }

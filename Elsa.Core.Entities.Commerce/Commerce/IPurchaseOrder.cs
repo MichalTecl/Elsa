@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Integration;
 
 using Robowire.RobOrm.Core;
@@ -25,10 +26,10 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         [NVarchar(64, false)]
         string OrderNumber { get; set; }
 
-        [NVarchar(64, false)]
+        [NVarchar(64, true)]
         string PreInvoiceId { get; set; }
 
-        [NVarchar(64, false)]
+        [NVarchar(64, true)]
         string InvoiceId { get; set; }
 
         decimal Price { get; set; }
@@ -66,9 +67,9 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         string CustomerEmail { get; set; }
 
         int? InvoiceAddressId { get; set; }
-        IAddress InvoiceAddress { get; set; }
+        IAddress InvoiceAddress { get; }
         int? DeliveryAddressId { get; set; }
-        IAddress DeliveryAddress { get; set; }
+        IAddress DeliveryAddress { get; }
 
         [NVarchar(-1, true)]
         string CustomerNote { get; set; }
@@ -83,5 +84,9 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         decimal PaymentTaxPercent { get; set; }
 
         IEnumerable<IOrderItem> Items { get; }
+
+        int InsertUserId { get; set; }
+        IUser InsertUser { get; }
+        DateTime InsertDt { get; set; }
     }
 }

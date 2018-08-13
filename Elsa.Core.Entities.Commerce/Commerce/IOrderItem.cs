@@ -11,6 +11,9 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         int ProductId { get; set; }
 
         [NVarchar(255, false)]
+        string ErpOrderItemId { get; set; }
+
+        [NVarchar(255, false)]
         string PlacedName { get; set; }
         decimal Quantity { get; set; }
         decimal TaxedPrice { get; set; }

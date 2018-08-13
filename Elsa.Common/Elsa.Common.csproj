@@ -48,11 +48,22 @@
     <Compile Include="AllowAnonymousAttribute.cs" />
     <Compile Include="AllowWithDefaultPassword.cs" />
     <Compile Include="CommonRegistry.cs" />
+    <Compile Include="Communication\WebFormsClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Communication\IParsedResponse.cs" />
+    <Compile Include="Communication\IPostBuilder.cs" />
+    <Compile Include="Configuration\ConfigClassAttribute.cs" />
     <Compile Include="Configuration\ConfigEntryAttribute.cs" />
+    <Compile Include="Configuration\ConfigEntryScope.cs" />
     <Compile Include="Configuration\ConfigurationRepository.cs" />
+    <Compile Include="Configuration\IConfigEntryDefinition.cs" />
     <Compile Include="Configuration\IConfigurationRepository.cs" />
     <Compile Include="ElsaControllerBase.cs" />
     <Compile Include="ISession.cs" />
+    <Compile Include="IWebSession.cs" />
+    <Compile Include="Logging\ILog.cs" />
+    <Compile Include="Logging\LogFactory.cs" />
     <Compile Include="PasswordHashHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WidgetsController.cs" />

@@ -18,7 +18,7 @@ namespace Elsa.Core.Entities.Commerce.Common
 
         int? UserId { get; set; }
 
-        IUser User { get; set; }
+        IUser User { get;  }
 
         [NVarchar(256, false)]
         string Key { get; set; }

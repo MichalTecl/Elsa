@@ -11,7 +11,7 @@ using Robowire.RobOrm.Core;
 
 namespace Elsa.Users
 {
-    public class UserSession : ISession
+    public class UserWebSession : IWebSession
     {
         private const string c_sessionCookieIdentifier = "elsa_sid";
         private bool m_initialized;
@@ -21,7 +21,7 @@ namespace Elsa.Users
 
         private IUserSession m_session;
 
-        public UserSession(IDatabase database)
+        public UserWebSession(IDatabase database)
         {
             m_database = database;
         }

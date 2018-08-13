@@ -1,12 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using Elsa.Commerce.Core.Model;
+using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Integration;
+using Elsa.Integration.Erp.Flox;
 
 namespace Elsa.Commerce.Core
 {
-    public class IErpClient
+    public interface IErpClient
     {
+        IErp Erp { get; set; }
+
+        IErpDataMapper Mapper { get; }
+
+        IErpCommonSettings CommonSettings { get; }
+
+        IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null, OrderStatus? status = null);
+
+        void ChangeOrderStatus(string orderId, OrderStatus status);
     }
 }

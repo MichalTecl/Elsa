@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common;
 
 using Newtonsoft.Json;
@@ -12,118 +13,111 @@ namespace Elsa.Common.Configuration
 {
     public class ConfigurationRepository : IConfigurationRepository
     {
-        private readonly ISession m_session;
+        private static readonly ILog s_log = LogFactory.Get();
+
         private readonly IDatabase m_database;
 
         private List<ISysConfig> m_allConfig;
 
-        public ConfigurationRepository(ISession session, IDatabase database)
+        public ConfigurationRepository(IDatabase database)
         {
-            m_session = session;
             m_database = database;
         }
-        
-        public string GetJsonValue(int? projectId, int? userId, string key)
-        {
-            return GetEntry(projectId, userId, key)?.ValueJson;
-        }
-
-        public void SetJsonValue(int? projectId, int? userId, string key, string value)
-        {
-            using (var tran = m_database.OpenTransaction())
-            {
-                var entry = GetEntry(projectId, userId, key);
-
-                if (entry != null && entry.ProjectId == projectId && entry.UserId == userId)
-                {
-                    if (entry.ValueJson == value)
-                    {
-                        return;
-                    }
-
-                    if (m_session?.User == null)
-                    {
-                        throw new UnauthorizedAccessException("Anonymous user cannot save a configuration");
-                    }
-
-                    entry.ValidTo = DateTime.Now;
-                    m_allConfig.Remove(entry);
-                    m_database.Save(entry);
-                }
-
-                var newEntry = m_database.New<ISysConfig>();
-
-                newEntry.ProjectId = entry?.ProjectId ?? projectId;
-                newEntry.UserId = entry?.UserId ?? userId;
-                newEntry.InsertUserId = m_session.User.Id;
-                newEntry.ValidFrom = DateTime.Now;
-                newEntry.Key = key;
-                newEntry.ValueJson = value;
-
-                m_database.Save(newEntry);
-                
-                m_allConfig.Add(newEntry);
-
-                tran.Commit();
-            }
-        }
-
+      
         public T Load<T>(int? projectId, int? userId) where T : new()
         {
-            var inst = new T();
+            return (T)Load(typeof(T), projectId, userId);
+        }
+
+        public object Load(Type t, int? projectId, int? userId)
+        {
+            var inst = Activator.CreateInstance(t);
+
+            var propFound = false;
 
             foreach (var prop in inst.GetType().GetProperties())
             {
-                var keyAndDefault = ConfigEntryAttribute.GetConfigKeyAndDefault(prop);
-                if (keyAndDefault == null)
+                var definition = ConfigEntryAttribute.GetDefinition(prop);
+                if (definition == null)
+                {
+                    continue;
+                }
+                propFound = true;
+
+                var entry = GetEntry(projectId, userId, definition);
+
+                var json = entry?.ValueJson;
+                if (string.IsNullOrEmpty(json))
                 {
                     continue;
                 }
 
-                var value = GetJsonValue(projectId, userId, keyAndDefault.Item1) ?? keyAndDefault.Item2;
-
-                if (string.IsNullOrEmpty(value))
-                {
-                    continue;
-                }
-
-                var obj = JsonConvert.DeserializeObject(value, prop.PropertyType);
+                var obj = JsonConvert.DeserializeObject(json, prop.PropertyType);
 
                 prop.SetValue(inst, obj);
+            }
+
+            if (!propFound)
+            {
+                throw new InvalidOperationException($"Requested configuration type {t} doesn't have any configuration property (marked by {typeof(ConfigEntryAttribute)})");
             }
 
             return inst;
         }
 
+        public void Save<T>(int projectId, int userId, T configSet) where T : new()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Save<T>(int? projectId, int? userId, T configSet) where T : new()
         {
-            foreach (var prop in configSet.GetType().GetProperties())
-            {
-                var keyAndDefault = ConfigEntryAttribute.GetConfigKeyAndDefault(prop);
-                if (keyAndDefault == null)
-                {
-                    continue;
-                }
-
-                var objValue = prop.GetValue(configSet);
-                var jsonValue = JsonConvert.SerializeObject(objValue);
-
-                SetJsonValue(projectId, userId, keyAndDefault.Item1, jsonValue);
-            }
+            throw new NotImplementedException();
         }
-
+        
         private List<ISysConfig> GetConfiguration()
         {
-            return m_allConfig ?? (m_allConfig = m_database.SelectFrom<ISysConfig>().Execute().ToList());
+            var now = DateTime.Now;
+            var future = DateTime.Now.AddDays(100);
+
+            return m_allConfig ?? (m_allConfig = m_database.SelectFrom<ISysConfig>()
+                      .Where(i => i.ValidFrom < now
+                         && (i.ValidTo ?? future) > now)
+                         .Execute().ToList());
         }
-
-        private ISysConfig GetEntry(int? projectId, int? userId, string key)
+        
+        private ISysConfig GetEntry(int? projectId, int? userId, IConfigEntryDefinition definition)
         {
-            var allEntries = GetConfiguration().Where(i => i.Key == key && i.ValidFrom < DateTime.Now && (i.ValidTo ?? DateTime.Now.AddDays(10)) > DateTime.Now).ToList();
+            var allEntries = GetConfiguration().Where(i => i.Key == definition.Key).ToList(); 
+                         
+            ISysConfig entry = null;
+            foreach(var scope in definition.Scope)
+            {
+                switch(scope)
+                {
+                    case ConfigEntryScope.User:
+                        entry = allEntries.FirstOrDefault(i => i.ProjectId == projectId && i.UserId == userId);
+                        break;
+                    case ConfigEntryScope.Project:
+                        entry = allEntries.FirstOrDefault(i => i.UserId == null && i.ProjectId == projectId);
+                        break;
+                    case ConfigEntryScope.Global:
+                        entry = allEntries.FirstOrDefault(i => i.ProjectId == null && i.UserId == null);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
-            var entry = allEntries.FirstOrDefault(i => i.InsertUserId == userId && i.ProjectId == projectId)
-                        ?? allEntries.FirstOrDefault(i => i.ProjectId == projectId)
-                        ?? allEntries.FirstOrDefault();
+                if (entry != null)
+                {
+                    break;
+                }
+            }
+
+            if (entry == null)
+            {
+                s_log.Error($"Config entry {definition.Key} not found. ProjectId={projectId}, UserId={userId}");
+            }
 
             return entry;
         }
