@@ -7,5 +7,7 @@ namespace Elsa.Integration.Erp.Flox
         int MaxQueryDays { get; }
 
         DateTime HistoryStart { get; }
+
+        int OrderSyncHistoryDays { get; }
     }
 }

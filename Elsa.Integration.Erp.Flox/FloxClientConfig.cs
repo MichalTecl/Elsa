@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Common.Configuration;
 
@@ -25,5 +21,8 @@ namespace Elsa.Integration.Erp.Flox
 
         [ConfigEntry("Flox.HistoryStart", ConfigEntryScope.Project)]
         public DateTime HistoryStart { get; set; }
+
+        [ConfigEntry("Flox.OrderSyncHistoryDays", ConfigEntryScope.Project, ConfigEntryScope.Global)]
+        public int OrderSyncHistoryDays { get; set; }
     }
 }

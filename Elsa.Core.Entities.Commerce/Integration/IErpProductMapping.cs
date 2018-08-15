@@ -9,22 +9,17 @@ namespace Elsa.Core.Entities.Commerce.Integration
     public interface IErpProductMapping
     {
         int Id { get; }
-  
-        int ErpId { get; set; }
 
-        IErp Erp { get; }
+        [NotFk]
+        [NVarchar(255, false)]
+        string ErpProductId { get; set; }
 
         int ProductId { get; set; }
 
         IProduct Product { get; }
 
-        [NVarchar(255, true)]
-        string ErpProductId { get; set; }
+        int ErpId { get; set; }
 
-        [NVarchar(255, true)]
-        string ErpProductName { get; set; }
-
-        [NVarchar(255, true)]
-        string ErpProductLink { get; set; }
+        IErp Erp { get; }
     }
 }

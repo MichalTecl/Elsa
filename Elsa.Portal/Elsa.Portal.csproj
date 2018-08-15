@@ -107,8 +107,10 @@
     <None Include="Bundles\Lanta" />
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
+    <Content Include="Script\Apps\Orders\Orders.VM.js" />
     <Content Include="Script\Apps\WidgetsVM.js" />
     <Content Include="Script\Apps\User\UserVM.js" />
+    <Content Include="Script\Common\Elsa.UI.buildGrid.js" />
     <Content Include="Script\Lanta\BindingCore.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -183,9 +185,17 @@
       <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
       <Name>Robowire</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.Commerce\Elsa.App.Commerce.csproj">
+      <Project>{92898b3b-012f-43f0-9044-55d6de1a4afb}</Project>
+      <Name>Elsa.App.Commerce</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.Profile\Elsa.App.Profile.csproj">
       <Project>{09e35860-d69e-42a0-aabd-a7431f283c97}</Project>
       <Name>Elsa.App.Profile</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
+      <Project>{61dd96b7-bf13-4c48-9353-08f2f907048e}</Project>
+      <Name>Elsa.Commerce.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>

@@ -40,7 +40,15 @@ namespace Elsa.Jobs.Common.Impl
             }
             catch (Exception ex)
             {
-                historyRecord.ErrorMessage = ex.ToString();
+                //using(var connection = )
+
+                var msg = ex.ToString();
+                if (msg.Length > 256)
+                {
+                    msg = msg.Substring(0, 256);
+                }
+
+                historyRecord.ErrorMessage = msg;
                 historyRecord.LastEndDt = DateTime.Now;
                 
                 m_database.Save(historyRecord);

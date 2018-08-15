@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Elsa.Commerce.Core.Impl;
+﻿using Elsa.Commerce.Core.Impl;
+using Elsa.Commerce.Core.Repositories;
 
 using Robowire;
 
@@ -15,6 +10,13 @@ namespace Elsa.Commerce.Core
         public void Setup(IContainerSetup setup)
         {
             setup.For<IErpClientFactory>().Use<ErpClientFactory>();
+            setup.For<IPurchaseOrderRepository>().Use<PurchaseOrderRepository>();
+            setup.For<ICurrencyRepository>().Use<CurrencyRepository>();
+            setup.For<IProductRepository>().Use<ProductRepository>();
+            setup.For<IOrderStatusMappingRepository>().Use<OrderStatusMappingRepository>();
+            setup.For<IProductMappingRepository>().Use<ProductMappingRepository>();
+            setup.For<IOrderStatusTranslator>().Use<OrderStatusTranslator>();
+            setup.For<IOrderStatusRepository>().Use<OrderStatusRepository>();
         }
     }
 }

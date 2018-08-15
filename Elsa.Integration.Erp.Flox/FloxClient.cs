@@ -36,9 +36,9 @@ namespace Elsa.Integration.Erp.Flox
 
         public IErpCommonSettings CommonSettings => m_config;
 
-        public IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null, OrderStatus? status = null)
+        public IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null)
         {
-            s_log.Debug($"Zacinam stahovani objednavek od={from}, do={to}, status={status}");
+            s_log.Debug($"Zacinam stahovani objednavek od={from}, do={to}");
             EnsureSession();
 
             var xDateFrom = from.ToString("d.+M.+yyyy");
@@ -57,10 +57,10 @@ namespace Elsa.Integration.Erp.Flox
                 fields["pur_date_to"] = to.Value.ToString("yyyy-MM-dd");
             }
 
-            if (status != null)
-            {
-                throw new Exception("TODO - Flox status");
-            }
+            //if (status != null)
+            //{
+            //    throw new Exception("TODO - Flox status");
+            //}
 
             fields["downloadToken"] = dlToken;
 
@@ -84,7 +84,7 @@ namespace Elsa.Integration.Erp.Flox
             return ordersModel.Orders.Orders;
         }
 
-        public void ChangeOrderStatus(string orderId, OrderStatus status)
+        public void ChangeOrderStatus(string orderId)
         {
             throw new NotImplementedException();
         }

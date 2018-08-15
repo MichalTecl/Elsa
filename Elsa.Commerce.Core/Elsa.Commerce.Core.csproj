@@ -41,16 +41,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ErpDataMapperBase.cs" />
+    <Compile Include="ICurrencyRepository.cs" />
     <Compile Include="IErpClient.cs" />
     <Compile Include="IErpClientFactory.cs" />
     <Compile Include="IErpCommonSettings.cs" />
     <Compile Include="IErpDataMapper.cs" />
     <Compile Include="Impl\ErpClientFactory.cs" />
+    <Compile Include="Impl\OrderStatusTranslator.cs" />
     <Compile Include="IOrderStatusConverter.cs" />
+    <Compile Include="IOrderStatusMappingRepository.cs" />
+    <Compile Include="IOrderStatusRepository.cs" />
+    <Compile Include="IOrderStatusTranslator.cs" />
+    <Compile Include="IProductMappingRepository.cs" />
+    <Compile Include="IProductRepository.cs" />
+    <Compile Include="IPurchaseOrderRepository.cs" />
     <Compile Include="Model\IErpOrderItemModel.cs" />
     <Compile Include="Model\IErpOrderModel.cs" />
     <Compile Include="Model\IErpPriceElementModel.cs" />
-    <Compile Include="OrderStatus.cs" />
+    <Compile Include="Model\OrdersOverviewModel.cs" />
+    <Compile Include="OrderIdentifier.cs" />
+    <Compile Include="Repositories\CurrencyRepository.cs" />
+    <Compile Include="Repositories\OrderMapperHost.cs" />
+    <Compile Include="Repositories\OrderStatusMappingRepository.cs" />
+    <Compile Include="Repositories\OrderStatusRepository.cs" />
+    <Compile Include="Repositories\ProductMappingRepository.cs" />
+    <Compile Include="Repositories\ProductRepository.cs" />
+    <Compile Include="Repositories\PurchaseOrderRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
   </ItemGroup>

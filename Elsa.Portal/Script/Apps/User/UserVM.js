@@ -8,6 +8,7 @@ app.user.ViewModel = app.user.ViewModel || function() {
     this.currentSession = null;
 
     var onUserChanged = function (session) {
+        
         self.currentSession = session;
         for (var i = 0; i < callbacks.length; i++) {
             var callback = callbacks[i];
@@ -26,6 +27,7 @@ app.user.ViewModel = app.user.ViewModel || function() {
     this.logout = function() {
         lt.api("/user/logout").get(function() {
             onUserChanged(null);
+            window.location.reload(false);
         });
     }
     
@@ -36,6 +38,7 @@ app.user.ViewModel = app.user.ViewModel || function() {
     this.changePassword = function(oldP, newP) {
         lt.api("/user/changePassword").query({ oldPassword:oldP, newPassword:newP }).get(function(session) {
             onUserChanged(session);
+            window.location.reload(false);
         });
     };
 

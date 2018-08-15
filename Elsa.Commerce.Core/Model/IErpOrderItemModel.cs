@@ -21,7 +21,5 @@ namespace Elsa.Commerce.Core.Model
         string PriceWithoutTax { get; }
 
         string TaxPercent { get; }
-
-
     }
 }

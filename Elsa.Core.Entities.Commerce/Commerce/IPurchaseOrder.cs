@@ -26,9 +26,11 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         [NVarchar(64, false)]
         string OrderNumber { get; set; }
 
+        [NotFk]
         [NVarchar(64, true)]
         string PreInvoiceId { get; set; }
 
+        [NotFk]
         [NVarchar(64, true)]
         string InvoiceId { get; set; }
 
@@ -48,11 +50,13 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         [NVarchar(64, false)]
         string ErpStatusName { get; set; }
 
+        [NotFk]
         [NVarchar(64, false)]
         string ErpStatusId { get; set; }
+        
+        int OrderStatusId { get; set; }
 
-        [NVarchar(64, false)]
-        string ElsaOrderStatus { get; set; }
+        IOrderStatus OrderStatus { get; }
 
         [NVarchar(512, false)]
         string ShippingMethodName { get; set; }
@@ -88,5 +92,8 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         int InsertUserId { get; set; }
         IUser InsertUser { get; }
         DateTime InsertDt { get; set; }
+
+        [NVarchar(32, false)]
+        string OrderHash { get; set; }
     }
 }

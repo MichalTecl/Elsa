@@ -51,6 +51,7 @@
     <Compile Include="Automation\IScheduledJob.cs" />
     <Compile Include="Commerce\IDirectSaleChannel.cs" />
     <Compile Include="Commerce\IOrderItem.cs" />
+    <Compile Include="Commerce\IOrderStatus.cs" />
     <Compile Include="Commerce\IProduct.cs" />
     <Compile Include="Commerce\IPurchaseOrder.cs" />
     <Compile Include="Common\IAddress.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="ConnectionStringProvider.cs" />
     <Compile Include="ElsaDbInstaller.cs" />
     <Compile Include="Integration\IErp.cs" />
+    <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IErpProductMapping.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

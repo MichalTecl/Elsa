@@ -10,9 +10,8 @@ namespace Elsa.Common
         public static void SetupContainer(IContainer container)
         {
             ElsaDbInstaller.Initialize(container);
-
+            
             container.Setup(c => c.For<IConfigurationRepository>().Use<ConfigurationRepository>());
         }
-
     }
 }

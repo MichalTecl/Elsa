@@ -5,7 +5,7 @@ namespace Elsa.Commerce.Core.Model
     public interface IErpOrderModel
     {
         int ErpSystemId { get; }
-
+        
         string ErpOrderId { get; }
         string OrderNumber { get; }
         string DueDate { get; }
@@ -82,10 +82,10 @@ namespace Elsa.Commerce.Core.Model
 
         bool IsPayOnDelivery { get; }
         
-
         IEnumerable<IErpPriceElementModel> OrderPriceElements { get; }
 
         IEnumerable<IErpOrderItemModel> LineItems { get; }
 
+        string OrderHash { get; }
     }
 }

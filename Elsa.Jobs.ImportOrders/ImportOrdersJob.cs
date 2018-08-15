@@ -21,14 +21,16 @@ namespace Elsa.Jobs.ImportOrders
     public class ImportOrdersJob : IExecutableJob
     {
         private readonly IErpClientFactory m_erpClientFactory;
+        private readonly IPurchaseOrderRepository m_purchaseOrderRepository;
         private readonly IDatabase m_database;
         private readonly ISession m_session;
         
-        public ImportOrdersJob(IErpClientFactory erpClientFactory, IDatabase database, ISession session)
+        public ImportOrdersJob(IErpClientFactory erpClientFactory, IDatabase database, ISession session, IPurchaseOrderRepository purchaseOrderRepository)
         {
             m_erpClientFactory = erpClientFactory;
             m_database = database;
             m_session = session;
+            m_purchaseOrderRepository = purchaseOrderRepository;
         }
 
         public void Run(string customDataJson)
@@ -39,21 +41,33 @@ namespace Elsa.Jobs.ImportOrders
 
             try
             {
+                var minDate =
+                    m_database.Sql()
+                        .Execute("SELECT MAX(PurchaseDate) FROM PurchaseOrder WHERE ProjectId = @p")
+                        .WithParam("@p", m_session.Project.Id)
+                        .Scalar();
 
-                var maxDate =
+                /*var minDate =
                     m_database.ExecuteScalar(
                         "SELECT MAX(PurchaseDate) FROM PurchaseOrder WHERE ProjectId = @p",
-                        p => ((SqlParameterCollection)p).AddWithValue("@p", m_session.Project.Id));
+                        p => ((SqlParameterCollection)p).AddWithValue("@p", m_session.Project.Id));*/
 
                 var startDate = erp.CommonSettings.HistoryStart;
-                if ((maxDate != null) && (DBNull.Value != maxDate))
+                if ((minDate != null) && (DBNull.Value != minDate))
                 {
-                    startDate = (DateTime)maxDate;
+                    startDate = (DateTime)minDate;
+
+                    if (startDate > DateTime.Now.AddDays(-1 * erp.CommonSettings.OrderSyncHistoryDays))
+                    {
+                        startDate = DateTime.Now.AddDays(-1 * erp.CommonSettings.OrderSyncHistoryDays);
+                    }
                 }
 
                 while (startDate < DateTime.Now)
                 {
                     var endDate = startDate.AddDays(erp.CommonSettings.MaxQueryDays);
+
+                    m_purchaseOrderRepository.PreloadOrders(startDate, endDate);
 
                     Console.WriteLine($"Stahuji objednavky {startDate} - {endDate}");
 
@@ -65,7 +79,7 @@ namespace Elsa.Jobs.ImportOrders
                     {
                         foreach (var srcOrder in erpOrders)
                         {
-                            erp.Mapper.MapOrder(srcOrder, o => { o.ErpId = cuData.ErpId; });
+                            m_purchaseOrderRepository.ImportErpOrder(srcOrder);
                         }
 
                         trx.Commit();

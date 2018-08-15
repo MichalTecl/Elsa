@@ -9,6 +9,7 @@ namespace Elsa.Core.Entities.Commerce.Common.Security
     {
         long Id { get; }
         
+        [NotFk]
         Guid PublicId { get; set; }
 
         DateTime StartDt { get; set; }

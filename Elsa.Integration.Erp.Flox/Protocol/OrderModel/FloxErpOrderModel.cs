@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Xml.Serialization;
 
 using Elsa.Commerce.Core.Model;
+
+using Newtonsoft.Json;
 
 namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
 {
@@ -193,48 +197,12 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
 
             if (string.IsNullOrWhiteSpace(elm?.Title))
             {
-                throw new Exception("Chubny format - nenalezena informace \"" + elementType + "\"");
+                throw new Exception("Chybny format - nenalezena informace \"" + elementType + "\"");
             }
 
             return elm.Title;
         }
-
-        public string PobockaId
-        {
-            get
-            {
-                //Česká republika - ZÁSILKOVNA - (1044) Praha 5, Anděl, Vltavská 277/28
-                var shippingName = GetElementValue("shipping").ToUpper();
-                if (!shippingName.Contains("ZÁSILKOVNA") && !shippingName.Contains("ZASILKOVNA"))
-                {
-                    return null;
-                }
-
-                var leftBrIndex = shippingName.IndexOf('(');
-
-                if (leftBrIndex < 0)
-                {
-                    throw new Exception("Nezpracovatelny format pobocky \"" + GetElementValue("shipping") + "\"");
-                }
-
-                var rightBrIndex = shippingName.IndexOf(')', leftBrIndex);
-                if (rightBrIndex < 0)
-                {
-                    throw new Exception("Nezpracovatelny format pobocky \"" + GetElementValue("shipping") + "\"");
-                }
-
-                var strPobId = shippingName.Substring(leftBrIndex+1, rightBrIndex - leftBrIndex - 1).Trim();
-
-                int res;
-                if(!int.TryParse(strPobId, out res))
-                {
-                    throw new Exception("Nezpracovatelny format pobocky \"" + GetElementValue("shipping") + "\"");
-                }
-
-                return res.ToString();
-            }
-        }
-
+        
         public bool IsPayOnDelivery
         {
             get
@@ -253,7 +221,23 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
         public IEnumerable<IErpPriceElementModel> OrderPriceElements => PriceElements.Items;
 
         public IEnumerable<IErpOrderItemModel> LineItems => OrderItems.Items;
-        
+
+        [JsonIgnore]
+        public string OrderHash
+        {
+            get
+            {
+                var json = JsonConvert.SerializeObject(this);
+
+                var oData = Encoding.UTF8.GetBytes(json);
+
+                using (var md5 = new MD5CryptoServiceProvider())
+                {
+                    var hash = md5.ComputeHash(oData);
+                    return Convert.ToBase64String(hash);
+                }
+            }
+        }
 
         [XmlIgnore]
         public string Source

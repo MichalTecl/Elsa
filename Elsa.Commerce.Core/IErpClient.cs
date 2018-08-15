@@ -16,8 +16,8 @@ namespace Elsa.Commerce.Core
 
         IErpCommonSettings CommonSettings { get; }
 
-        IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null, OrderStatus? status = null);
+        IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null);
 
-        void ChangeOrderStatus(string orderId, OrderStatus status);
+        void ChangeOrderStatus(string orderId);
     }
 }

@@ -8,8 +8,12 @@ namespace Elsa.Core.Entities.Commerce.Common
     {
         int Id { get; }
         int ProjectId { get; set; }
+        
+        IProject Project { get; }
+
         [NVarchar(8, false)]
         string Symbol { get; set; }
+
         bool IsProjectMainCurrency { get; set; }
     }
 }

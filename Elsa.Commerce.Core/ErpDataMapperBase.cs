@@ -1,102 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Elsa.Commerce.Core.Model;
-using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
-
-using Robowire.RobOrm.Core;
+using Elsa.Core.Entities.Commerce.Integration;
 
 namespace Elsa.Commerce.Core
 {
     public abstract class ErpDataMapperBase : IErpDataMapper
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
 
-        protected ErpDataMapperBase(IDatabase database, ISession session)
+        public void MapOrder(
+            IErpOrderModel source,
+            Func<OrderIdentifier, IPurchaseOrder> orderObjectFactory,
+            Func<string, IOrderItem> orderItemByErpOrderItemId,
+            Func<OrderIdentifier, IAddress> invoiceAddressFactory,
+            Func<OrderIdentifier, IAddress> deliveryAddressFactory,
+            Func<string, ICurrency> currencyByCurrencySymbol,
+            IDictionary<string, IErpOrderStatusMapping> erpOrderStatusMappings,
+            IDictionary<string, IErpProductMapping> erpProductMappings)
         {
-            m_database = database;
-            m_session = session;
-        }
+            var ordid = new OrderIdentifier(GetUniqueOrderNumber(source), source.OrderHash);
 
-        public IPurchaseOrder MapOrder(IErpOrderModel source, Action<IPurchaseOrder> onBeforeSave)
-        {
-            var orderNumber = GetUniqueOrderNumber(source);
-
-            var erpId = source.ErpSystemId;
-            var projectId = m_session.Project.Id;
-
-            var target =
-                m_database.SelectFrom<IPurchaseOrder>()
-                    .Join(p => p.Items)
-                    .Join(p => p.DeliveryAddress)
-                    .Join(p => p.InvoiceAddress)
-                    .Where(p => p.ErpId == erpId)
-                    .Where(p => p.ProjectId == projectId)
-                    .Where(p => p.OrderNumber == orderNumber)
-                    .Execute()
-                    .FirstOrDefault();
-
-            target = target ?? m_database.New<IPurchaseOrder>();
-
-            onBeforeSave(target);
-
-            if (target.Id == 0)
+            var target = orderObjectFactory(ordid);
+            if (target == null)
             {
-                target.ProjectId = projectId;
-                target.ErpId = erpId;
-                target.OrderNumber = orderNumber;
-                target.InsertUserId = m_session.User.Id;
-                target.InsertDt = DateTime.Now;
+                return;
             }
 
             MapTopLevelProperties(source, target);
 
-            m_database.Save(target);
-
-            var updatedItems = new HashSet<string>();
             foreach (var sourceItem in source.LineItems)
             {
-                var erpItemNumber = GetUniqueErpItemId(source, sourceItem);
-                updatedItems.Add(erpItemNumber);
+                var erpItemId = GetUniqueErpItemId(source, sourceItem);
+                var targetItem = orderItemByErpOrderItemId(erpItemId);
 
-                var targetItem = target.Items?.FirstOrDefault(i => i.ErpOrderItemId == erpItemNumber) ?? m_database.New<IOrderItem>();
-
-                targetItem.PurchaseOrderId = target.Id;
-                targetItem.ErpOrderItemId = erpItemNumber;
+                targetItem.ErpOrderItemId = erpItemId;
+                targetItem.ErpProductId = sourceItem.ErpProductId;
                 targetItem.PlacedName = sourceItem.ProductName;
-                targetItem.ProductId = GetProductId(source, sourceItem);
                 targetItem.Quantity = sourceItem.Quantity;
-                targetItem.TaxPercent = ParseMoney(sourceItem.TaxPercent, source, sourceItem, nameof(sourceItem.TaxPercent));
-                targetItem.TaxedPrice = ParseMoney(
-                    sourceItem.TaxedPrice,
-                    source,
-                    sourceItem,
-                    nameof(targetItem.TaxedPrice));
+                targetItem.TaxPercent = ParseMoney(sourceItem.TaxPercent, source, sourceItem, nameof(sourceItem.Quantity));
+                targetItem.TaxedPrice = ParseMoney(sourceItem.TaxedPrice, source, sourceItem, nameof(sourceItem.TaxedPrice));
 
-                m_database.Save(targetItem);
-            }
-
-
-            var itemsToDelete = target.Items?.Where(srcItem => !updatedItems.Contains(srcItem.ErpOrderItemId));
-            if (itemsToDelete != null)
-            {
-                foreach (var i in itemsToDelete)
+                IErpProductMapping productMapping;
+                if (!erpProductMappings.TryGetValue(sourceItem.ErpProductId, out productMapping))
                 {
-                    m_database.Delete(i);
+                    throw new InvalidOperationException($"Není nastaveno mapování produktu ID={sourceItem.ErpProductId} (\"{sourceItem.ProductName}\") pro systém {source.ErpSystemId}");
                 }
+                targetItem.ProductId = productMapping.ProductId;
             }
 
-            return target;
+            var invoiceAddress = invoiceAddressFactory(ordid);
+            MapInvoiceAddress(source, invoiceAddress);
+
+            if (HasDeliveryAddress(source))
+            {
+                var deliveryAddress = deliveryAddressFactory(ordid);
+                MapDeliveryAddress(source, deliveryAddress);
+            }
+
+            currencyByCurrencySymbol(source.CurrencyCode);
+
+            target.OrderStatusId = ResolveOrderStatusId(source, erpOrderStatusMappings);
         }
 
-        protected abstract int GetProductId(IErpOrderModel order, IErpOrderItemModel item);
+        protected virtual int ResolveOrderStatusId(IErpOrderModel source, IDictionary<string, IErpOrderStatusMapping> erpOrderStatusMappings)
+        {
+            if (source.IsPayOnDelivery)
+            {
+                return 3;
+            }
+
+            IErpOrderStatusMapping status;
+            if (!erpOrderStatusMappings.TryGetValue(source.ErpStatus, out status))
+            {
+                throw new InvalidOperationException($"Status mapping not found for ErpId={source.ErpSystemId} and Status=\"{source.ErpStatus}\"");
+            }
+
+            return status.OrderStatusId;
+        }
 
         protected virtual void MapTopLevelProperties(IErpOrderModel source, IPurchaseOrder target)
         {
+            target.OrderHash = source.OrderHash;
             target.PreInvoiceId = source.PreInvId;
             target.InvoiceId = source.InvoiceId;
             target.CustomerName = source.Customer;
@@ -109,8 +96,7 @@ namespace Elsa.Commerce.Core
             
             target.Price = ParseMoney(source.Price, source, null, nameof(source.Price));
             target.PriceWithVat = ParseMoney(source.Price, source, null, nameof(source.Price));
-
-            target.ElsaOrderStatus = ObtainElsaOrderStatus(source);
+            
             target.ShippingMethodName = MapShippingMethodName(source);
             target.PaymentMethodName = MapPaymentMethodName(source);
             target.TaxedShippingCost = ObtainTaxedShippingCost(source);
@@ -121,23 +107,6 @@ namespace Elsa.Commerce.Core
             target.PurchaseDate = ParseDt(source.PurchaseDate, source, null, nameof(source.PurchaseDate));
             target.BuyDate = ParseDt(source.BuyDate, source, null, nameof(source.BuyDate));
             target.DueDate = ParseDt(source.BuyDate, source, null, nameof(source.BuyDate));
-
-            target.CurrencyId = GetElsaCurrency(source.CurrencyCode).Id;
-            
-            var invoiceAddress = target.InvoiceAddress ?? m_database.New<IAddress>();
-            MapInvoiceAddress(source, invoiceAddress);
-            m_database.Save(invoiceAddress);
-            target.InvoiceAddressId = invoiceAddress.Id;
-
-            if (HasDeliveryAddress(source))
-            {
-                var deliveryAddress = target.DeliveryAddress ?? m_database.New<IAddress>();
-                MapDeliveryAddress(source, deliveryAddress);
-                m_database.Save(deliveryAddress);
-                target.DeliveryAddressId = deliveryAddress.Id;
-            }
-
-
         }
 
         protected abstract bool HasDeliveryAddress(IErpOrderModel source);
@@ -181,9 +150,7 @@ namespace Elsa.Commerce.Core
         protected abstract string MapShippingMethodName(IErpOrderModel source);
 
         protected abstract string MapPaymentMethodName(IErpOrderModel source);
-
-        protected abstract string ObtainElsaOrderStatus(IErpOrderModel source);
-
+        
         protected abstract decimal ParseMoney(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName);
 
         protected abstract DateTime ParseDt(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName);
@@ -198,8 +165,6 @@ namespace Elsa.Commerce.Core
             return item.ErpOrderItemId;
         }
 
-        protected abstract ICurrency GetElsaCurrency(string sourceCurrencySymbol);
-
         protected static string Limit(string s, int len)
         {
             if (s.Length > len)
@@ -209,5 +174,6 @@ namespace Elsa.Commerce.Core
 
             return s;
         }
+
     }
 }
