@@ -1,7 +1,10 @@
 ﻿using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce;
+using Elsa.Integration.Erp.Fler;
 using Elsa.Integration.Erp.Flox;
+using Elsa.Integration.PaymentSystems.Common;
+using Elsa.Integration.PaymentSystems.Fio;
 using Elsa.Jobs.Common;
 
 using Robowire;
@@ -23,7 +26,9 @@ namespace Elsa.JobLauncher
             container.Setup(s => s.ScanAssembly(typeof(IScheduledJobsRepository).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(IErpClientFactory).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(FloxClient).Assembly));
-
+            container.Setup(s => s.ScanAssembly(typeof(FlerClient).Assembly));
+            container.Setup(s => s.ScanAssembly(typeof(IPaymentSystemClientFactory).Assembly));
+            container.Setup(s => s.ScanAssembly(typeof(FioClient).Assembly));
 
             return container;
         }

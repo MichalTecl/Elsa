@@ -95,5 +95,7 @@ namespace Elsa.Core.Entities.Commerce.Commerce
 
         [NVarchar(32, false)]
         string OrderHash { get; set; }
+
+        bool IsPayOnDelivery { get; set; }
     }
 }

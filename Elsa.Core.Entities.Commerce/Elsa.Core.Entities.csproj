@@ -56,6 +56,7 @@
     <Compile Include="Commerce\IPurchaseOrder.cs" />
     <Compile Include="Common\IAddress.cs" />
     <Compile Include="Common\ICurrency.cs" />
+    <Compile Include="Common\IPayment.cs" />
     <Compile Include="Common\ISysConfig.cs" />
     <Compile Include="Common\Widgets\IAppWidget.cs" />
     <Compile Include="Common\IProject.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Integration\IErp.cs" />
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IErpProductMapping.cs" />
+    <Compile Include="Integration\IPaymentSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -45,3 +45,50 @@ label {
     text-decoration: underline;
     cursor: pointer;
 }
+
+table.reportTable {
+  border: 1px solid #1C6EA4;
+  background-color: #FFFFFF;
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+table.reportTable td, table.reportTable th {
+  border: 1px solid #AAAAAA;
+  padding: 3px 2px;
+}
+table.reportTable tbody td {
+  font-size: 1em;
+}
+table.reportTable tr:nth-child(even) {
+  background: #FDFDFF;
+}
+table.reportTable thead {
+  background: #1C6EA4;
+}
+table.reportTable thead th {
+  font-size: 15px;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+table.reportTable tfoot td {
+  font-size: 14px;
+}
+table.reportTable tfoot .links {
+  text-align: right;
+}
+table.reportTable tfoot .links a{
+  display: inline-block;
+  background: #1C6EA4;
+  color: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+
+.gridLegend {
+    font-size: 0.8em;
+    font-style: italic;
+    margin-top: 4px;
+    width: 100%;
+    text-align: right;
+}

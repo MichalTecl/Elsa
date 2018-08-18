@@ -26,7 +26,7 @@ lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
 
 lanta.ViewLoading.loader = function(target, value, attribute) {
     
-    lt.api(value).useCache().get(function(html) {
+    lt.api(value).useCache().noJson().get(function(html) {
         
         if (attribute === "fill-by") {
             target.innerHTML = html;

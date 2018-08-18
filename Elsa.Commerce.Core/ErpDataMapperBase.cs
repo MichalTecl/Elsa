@@ -67,11 +67,6 @@ namespace Elsa.Commerce.Core
 
         protected virtual int ResolveOrderStatusId(IErpOrderModel source, IDictionary<string, IErpOrderStatusMapping> erpOrderStatusMappings)
         {
-            if (source.IsPayOnDelivery)
-            {
-                return 3;
-            }
-
             IErpOrderStatusMapping status;
             if (!erpOrderStatusMappings.TryGetValue(source.ErpStatus, out status))
             {
@@ -107,6 +102,7 @@ namespace Elsa.Commerce.Core
             target.PurchaseDate = ParseDt(source.PurchaseDate, source, null, nameof(source.PurchaseDate));
             target.BuyDate = ParseDt(source.BuyDate, source, null, nameof(source.BuyDate));
             target.DueDate = ParseDt(source.BuyDate, source, null, nameof(source.BuyDate));
+            target.IsPayOnDelivery = source.IsPayOnDelivery;
         }
 
         protected abstract bool HasDeliveryAddress(IErpOrderModel source);

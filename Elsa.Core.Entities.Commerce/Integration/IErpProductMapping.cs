@@ -15,7 +15,7 @@ namespace Elsa.Core.Entities.Commerce.Integration
         string ErpProductId { get; set; }
 
         int ProductId { get; set; }
-
+        
         IProduct Product { get; }
 
         int ErpId { get; set; }

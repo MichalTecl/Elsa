@@ -39,18 +39,16 @@ namespace Elsa.Jobs.ImportOrders
 
             var erp = m_erpClientFactory.GetErpClient(cuData.ErpId);
 
+            Console.WriteLine($"ERP = {erp.Erp.Description}");
+
             try
             {
                 var minDate =
                     m_database.Sql()
-                        .Execute("SELECT MAX(PurchaseDate) FROM PurchaseOrder WHERE ProjectId = @p")
+                        .Execute("SELECT MAX(PurchaseDate) FROM PurchaseOrder WHERE ProjectId = @p AND ErpId = @e")
                         .WithParam("@p", m_session.Project.Id)
+                        .WithParam("@e", erp.Erp.Id)
                         .Scalar();
-
-                /*var minDate =
-                    m_database.ExecuteScalar(
-                        "SELECT MAX(PurchaseDate) FROM PurchaseOrder WHERE ProjectId = @p",
-                        p => ((SqlParameterCollection)p).AddWithValue("@p", m_session.Project.Id));*/
 
                 var startDate = erp.CommonSettings.HistoryStart;
                 if ((minDate != null) && (DBNull.Value != minDate))

@@ -12,8 +12,11 @@ elsa.ui.buildGrid = elsa.ui.buildGrid ||
         var table = document.createElement("TABLE");
         target.appendChild(table);
 
+        var thead = document.createElement("THEAD");
+        table.appendChild(thead);
+
         var headerRow = document.createElement("TR");
-        table.appendChild(headerRow);
+        thead.appendChild(headerRow);
 
         var columns = source.Columns;
         for (var columnId = 0; columnId < columns.length; columnId ++) {
@@ -24,11 +27,14 @@ elsa.ui.buildGrid = elsa.ui.buildGrid ||
             headerRow.appendChild(th);
         }
 
+        var tbody = document.createElement("TBODY");
+        table.appendChild(tbody);
+
         var rows = source.Rows;
         for (var rowId = 0; rowId < rows.length; rowId++) {
 
             var tr = document.createElement("TR");
-            table.appendChild(tr);
+            tbody.appendChild(tr);
 
             var values = rows[rowId].Values;
 
@@ -39,6 +45,7 @@ elsa.ui.buildGrid = elsa.ui.buildGrid ||
             }
         }
 
+        table.setAttribute("class", "reportTable");
 
-
+        return table;
     };

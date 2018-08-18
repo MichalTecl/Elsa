@@ -156,6 +156,21 @@ namespace Elsa.Commerce.Core.Repositories
                                         });
         }
 
+        public IEnumerable<IPurchaseOrder> GetOrdersByStatus(IOrderStatus status, DateTime from, DateTime to)
+        {
+            return
+                BuildOrdersQuery()
+                    .Where(o => o.PurchaseDate >= from)
+                    .Where(o => o.PurchaseDate <= to)
+                    .Where(o => o.OrderStatusId == status.Id)
+                    .Execute();
+        }
+
+        public IEnumerable<IPurchaseOrder> GetOrdersByStatus(IOrderStatus status)
+        {
+            return GetOrdersByStatus(status, DateTime.Now.AddYears(-50), DateTime.Now.AddDays(1));
+        }
+
         private IQueryBuilder<IPurchaseOrder> BuildOrdersQuery()
         {
             return
