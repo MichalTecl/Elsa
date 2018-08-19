@@ -36,42 +36,19 @@ namespace Elsa.Commerce.Core.Repositories
             return payment;
         }
 
-        public IPayment SavePayment(IPayment payment)
+        public void SavePayment(IPayment payment)
         {
-            try
+            var alreadyExists = GetPayment(payment.PaymentSourceId, payment.TransactionId);
+            if (alreadyExists != null)
             {
-                IPayment fullPayment;
-
-                payment.ProjectId = m_session.Project.Id;
-
-                var toSave = GetPayment(payment.PaymentSourceId, payment.TransactionId);
-
-                if (toSave == null)
-                { 
-                    m_database.Save(payment);
-
-                    fullPayment = GetPaymentsQuery().Where(p => p.Id == payment.Id).Execute().First();
-
-                    var cachedPayment = m_cache.FirstOrDefault(p => p.Id == payment.Id);
-                    if (cachedPayment != null)
-                    {
-                        m_cache.Remove(cachedPayment);
-                    }
-
-                    m_cache.Add(fullPayment);
-                }
-                else
-                {
-                    fullPayment = GetPaymentsQuery().Where(p => p.Id == payment.Id).Execute().First();
-                }
-
-                return fullPayment;
+                return;
             }
-            catch
-            {
-                m_cache.Clear();
-                throw;
-            }
+
+            payment.ProjectId = m_session.Project.Id;
+
+            var entity = m_database.New(payment);
+            m_database.Save(entity);
+            m_cache.Add(entity);
         }
 
         public IEnumerable<LastPaymentInfo> GetLastPaymentDates()
@@ -100,12 +77,25 @@ namespace Elsa.Commerce.Core.Repositories
             return payments;
         }
 
+        public IEnumerable<IPayment> GetPaymentsByVarSymb(string orderVarSymbol)
+        {
+            var cached = m_cache.Where(p => p.VariableSymbol.Equals(orderVarSymbol, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+            if (cached.Any())
+            {
+                return cached;
+            }
+
+            return GetPaymentsQuery().Where(p => p.VariableSymbol == orderVarSymbol).Execute();
+        }
+
         private IQueryBuilder<IPayment> GetPaymentsQuery()
         {
             return
                 m_database.SelectFrom<IPayment>()
                     .Join(p => p.Currency)
                     .Join(p => p.PaymentSource)
+                    .Join(p => p.Orders)
                     .Where(p => p.ProjectId == m_session.Project.Id);
         }
     }

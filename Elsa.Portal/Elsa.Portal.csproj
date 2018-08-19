@@ -108,6 +108,7 @@
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
+    <Content Include="UI\Pages\PaymentPairing.html" />
     <Content Include="Script\Apps\WidgetsVM.js" />
     <Content Include="Script\Apps\User\UserVM.js" />
     <Content Include="Script\Common\Elsa.UI.buildGrid.js" />

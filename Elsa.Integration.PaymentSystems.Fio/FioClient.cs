@@ -22,6 +22,8 @@ namespace Elsa.Integration.PaymentSystems.Fio
 
         public IPaymentSource Entity { get; set; }
 
+        public IPaymentSystemCommonSettings CommonSettings => m_config;
+
         public IEnumerable<IPayment> GetPayments(DateTime from, DateTime to)
         {
             string token = null;

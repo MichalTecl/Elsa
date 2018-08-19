@@ -97,5 +97,15 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         string OrderHash { get; set; }
 
         bool IsPayOnDelivery { get; set; }
+
+        long? PaymentId { get; set; }
+
+        IPayment Payment { get; }
+
+        int? PaymentPairingUserId { get; set; }
+
+        IUser PaymentPairingUser { get; }
+
+        DateTime? PaymentPairingDt { get; set; }
     }
 }

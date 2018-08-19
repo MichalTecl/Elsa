@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Elsa.App.Commerce.Preview.Model;
 using Elsa.Apps.Common.ViewModels;
 using Elsa.Commerce.Core;
 using Elsa.Common;
@@ -13,11 +14,16 @@ namespace Elsa.App.Commerce.Preview
     public class PreviewController : ElsaControllerBase
     {
         private readonly IPurchaseOrderRepository m_purchaseOrderRepository;
-
         private readonly IOrderStatusTranslator m_statusTranslator;
-        
+        private readonly OverviewsConfig m_config;
 
-        
+        public PreviewController(IWebSession webSession, IPurchaseOrderRepository purchaseOrderRepository, IOrderStatusTranslator statusTranslator, OverviewsConfig config)
+            : base(webSession)
+        {
+            m_purchaseOrderRepository = purchaseOrderRepository;
+            m_statusTranslator = statusTranslator;
+            m_config = config;
+        }
 
         public ReportTableViewModel GetOrdersOverview()
         {
@@ -32,11 +38,11 @@ namespace Elsa.App.Commerce.Preview
             return report;
         }
 
-        public PreviewController(IWebSession webSession, IPurchaseOrderRepository purchaseOrderRepository, IOrderStatusTranslator statusTranslator)
-            : base(webSession)
+        public MissingPaymentsResult GetMissingPaymentsCount()
         {
-            m_purchaseOrderRepository = purchaseOrderRepository;
-            m_statusTranslator = statusTranslator;
+            return new MissingPaymentsResult(
+                       m_config.MissingPaymentDaysTolerance,
+                       m_purchaseOrderRepository.GetMissingPaymentsCount(m_config.MissingPaymentDaysTolerance));
         }
     }
 }

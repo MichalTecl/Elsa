@@ -19,5 +19,9 @@ namespace Elsa.Commerce.Core
         IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null);
 
         void ChangeOrderStatus(string orderId);
+
+        void MarkOrderPaid(string orderNumber);
+
+        IErpOrderModel LoadOrder(string orderNumber);
     }
 }

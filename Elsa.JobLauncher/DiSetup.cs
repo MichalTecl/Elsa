@@ -6,6 +6,8 @@ using Elsa.Integration.Erp.Flox;
 using Elsa.Integration.PaymentSystems.Common;
 using Elsa.Integration.PaymentSystems.Fio;
 using Elsa.Jobs.Common;
+using Elsa.Jobs.PaymentPairing;
+using Elsa.Jobs.PrefillCalender;
 
 using Robowire;
 
@@ -29,7 +31,8 @@ namespace Elsa.JobLauncher
             container.Setup(s => s.ScanAssembly(typeof(FlerClient).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(IPaymentSystemClientFactory).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(FioClient).Assembly));
-
+            container.Setup(s => s.ScanAssembly(typeof(PairPaymentsJob).Assembly));
+            container.Setup(s => s.ScanAssembly(typeof(PrefillCalendarJob).Assembly));
             return container;
         }
     }

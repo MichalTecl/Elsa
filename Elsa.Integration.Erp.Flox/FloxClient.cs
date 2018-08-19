@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using Elsa.Commerce.Core;
@@ -87,6 +88,39 @@ namespace Elsa.Integration.Erp.Flox
         public void ChangeOrderStatus(string orderId)
         {
             throw new NotImplementedException();
+        }
+
+        public void MarkOrderPaid(string orderNumber)
+        {
+            Console.WriteLine($"!!! Flox - MarkOrderPaid({orderNumber}) - neaktivni operace");
+        }
+
+        public IErpOrderModel LoadOrder(string orderNumber)
+        {
+            EnsureSession();
+
+            var dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+
+            var fields = new Dictionary<string, string> { ["downloadToken"] = dlToken, ["order_num"] = orderNumber };
+
+            var post = m_client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
+                        .Field("dataSubset", "a:0:{}")
+                        .Field("data", string.Empty);
+
+            CreateMassFilter(fields, post);
+
+            var stringData = post.Call();
+
+            var ordersModel = ExportDocument.Parse(stringData);
+
+            var result = ordersModel.Orders.Orders;
+
+            foreach (var om in result)
+            {
+                om.ErpSystemId = Erp.Id;
+            }
+
+            return ordersModel.Orders.Orders.FirstOrDefault(o => o.OrderNumber == orderNumber);
         }
 
         private void Login()

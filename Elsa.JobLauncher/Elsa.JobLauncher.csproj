@@ -105,6 +105,14 @@
       <Project>{dac5b9d4-f7a0-49c5-a4bd-45afe0e7c6c1}</Project>
       <Name>Elsa.Jobs.ImportOrders</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.PaymentPairing\Elsa.Jobs.PaymentPairing.csproj">
+      <Project>{A4F5C43F-09C2-4DF4-BBE1-4FA96D17271F}</Project>
+      <Name>Elsa.Jobs.PaymentPairing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.PrefillCalender\Elsa.Jobs.PrefillCalender.csproj">
+      <Project>{5ECCC802-EE9B-468F-B998-AF322356FEA9}</Project>
+      <Name>Elsa.Jobs.PrefillCalender</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{a9148d58-0f0e-43e7-8a11-a9f9bb04333c}</Project>
       <Name>Elsa.Users</Name>

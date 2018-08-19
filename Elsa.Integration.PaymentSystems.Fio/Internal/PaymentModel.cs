@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Commerce.Core;
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Integration;
 
@@ -25,6 +26,7 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
             VariableSymbol = source.VariableSymbol;
             Message = source.Message;
             CurrencyId = currencyRepository.GetCurrency(source.Currency).Id;
+            SearchText = source.SearchText;
         }
 
         public long Id => 0;
@@ -62,5 +64,13 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
         public string Message { get; set; }
 
         public string SearchText { get; set; }
+
+        public IEnumerable<IPurchaseOrder> Orders
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

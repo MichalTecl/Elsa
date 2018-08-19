@@ -30,7 +30,7 @@ namespace Elsa.Common.Utils
 
         private const string c_validChars = "abcdefghijklmnopqrstuvxz123456789";
 
-        public static string NormalizeSearchText(int lenLimit, params string[] inp)
+        public static string NormalizeSearchText(int lenLimit, IEnumerable<string> inp)
         {
             if (inp == null)
             {
@@ -68,5 +68,7 @@ namespace Elsa.Common.Utils
 
             return sb.ToString();
         }
+
+
     }
 }

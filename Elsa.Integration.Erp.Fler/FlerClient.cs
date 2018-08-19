@@ -28,7 +28,7 @@ namespace Elsa.Integration.Erp.Fler
 
         public IErpCommonSettings CommonSettings => m_config;
         
-        public IEnumerable<IErpOrderModel> LoadOrders(DateTime @from, DateTime? to = null)
+        public IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null)
         {
             var orders = m_fler.LoadOrders();
 
@@ -43,6 +43,17 @@ namespace Elsa.Integration.Erp.Fler
         public void ChangeOrderStatus(string orderId)
         {
             throw new NotImplementedException();
+        }
+
+        public void MarkOrderPaid(string orderNumber)
+        {
+            Console.WriteLine($"!!! Fler - MarkOrderPaid({orderNumber}) - neaktivni operace");
+        }
+
+        public IErpOrderModel LoadOrder(string orderNumber)
+        {
+            var detail = m_fler.LoadOrderDetail(orderNumber);
+            return new FlerErpOrder(detail, Erp.Id);
         }
     }
 }

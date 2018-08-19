@@ -18,6 +18,7 @@ namespace Elsa.Commerce.Core
             setup.For<IOrderStatusTranslator>().Use<OrderStatusTranslator>();
             setup.For<IOrderStatusRepository>().Use<OrderStatusRepository>();
             setup.For<IPaymentRepository>().Use<PaymentRepository>();
+            setup.For<IOrdersFacade>().Use<OrdersFacade>();
         }
     }
 }

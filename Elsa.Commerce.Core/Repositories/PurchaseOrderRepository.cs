@@ -12,8 +12,6 @@ namespace Elsa.Commerce.Core.Repositories
 {
     public class PurchaseOrderRepository : IPurchaseOrderRepository
     {
-        
-
         private readonly IErpClientFactory m_erpClientFactory;
         private readonly IDatabase m_database;
         private readonly ISession m_session;
@@ -107,7 +105,7 @@ namespace Elsa.Commerce.Core.Repositories
             return result;
         }
 
-        public IPurchaseOrder TryLoadOrder(string orderNumber)
+        public IPurchaseOrder TryLoadOrderByOrderNumber(string orderNumber)
         {
             var cachedOrder =
                 m_cache.FirstOrDefault(i => i.ProjectId == m_session.Project.Id && i.OrderNumber == orderNumber);
@@ -171,6 +169,24 @@ namespace Elsa.Commerce.Core.Repositories
             return GetOrdersByStatus(status, DateTime.Now.AddYears(-50), DateTime.Now.AddDays(1));
         }
 
+        public IPurchaseOrder GetOrder(long orderId)
+        {
+            return BuildOrdersQuery().Where(o => o.Id == orderId).Execute().FirstOrDefault();
+        }
+
+        public int GetMissingPaymentsCount(int businessDaysTolerance)
+        {
+            const string sql = @"SELECT COUNT(Id)
+                                  FROM PurchaseOrder po
+                                 WHERE po.IsPayOnDelivery = 0                                    
+                                   AND po.OrderStatusId = 2 
+                                   AND dbo.GetBusinessDaysBetween(PurchaseDate, GETDATE()) > {0}  
+                                   AND po.ProjectId = {1} 
+                                ";
+
+            return m_database.Sql().ExecuteWithParams(sql, businessDaysTolerance, m_session.Project.Id).Scalar<int?>() ?? 0;
+        }
+
         private IQueryBuilder<IPurchaseOrder> BuildOrdersQuery()
         {
             return
@@ -183,6 +199,7 @@ namespace Elsa.Commerce.Core.Repositories
                     .Join(o => o.Items)
                     .Join(o => o.OrderStatus)
                     .Join(o => o.Items.Each().Product)
+                    .Join(o => o.Payment)
                     .Where(o => o.ProjectId == m_session.Project.Id);
         }
         

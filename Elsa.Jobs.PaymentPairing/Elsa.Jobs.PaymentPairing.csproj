@@ -44,6 +44,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+      <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
+      <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
       <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>
       <Name>Elsa.Commerce.Core</Name>
@@ -51,6 +55,10 @@
     <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj">
       <Project>{91481B08-E437-474D-9793-A135F1DB465C}</Project>
       <Name>Elsa.Core.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.PaymentSystems.Common\Elsa.Integration.PaymentSystems.Common.csproj">
+      <Project>{FFAB584E-2962-4A9B-82B0-E8309185950A}</Project>
+      <Name>Elsa.Integration.PaymentSystems.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
       <Project>{5EF07762-137B-4BF7-8199-5961768FCAEC}</Project>

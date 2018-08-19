@@ -7,7 +7,7 @@ app.widgets.ViewModel = app.widgets.ViewModel || function() {
     self.widgets = [];
 
     var update = function() {
-        lt.api("/widgets/getWidgets").get(function(widgets) {
+        lt.api("/widgets/getWidgets").ignoreDisabledApi().get(function(widgets) {
             self.widgets = widgets;
         });
     };

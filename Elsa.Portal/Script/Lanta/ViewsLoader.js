@@ -1,7 +1,7 @@
 ﻿var lanta = lanta || {};
 lanta.ViewLoading = lanta.ViewLoading || {};
 lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
-    function(div) {
+    function (div) {
 
         var allScripts = div.getElementsByTagName("script");
 
@@ -24,10 +24,10 @@ lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
 
     };
 
-lanta.ViewLoading.loader = function(target, value, attribute) {
-    
-    lt.api(value).useCache().noJson().get(function(html) {
-        
+lanta.ViewLoading.loader = function (target, value, attribute) {
+
+    lt.api(value).useCache().ignoreDisabledApi().noJson().get(function (html) {
+
         if (attribute === "fill-by") {
             target.innerHTML = html;
             return;
@@ -49,7 +49,7 @@ lanta.ViewLoading.loader = function(target, value, attribute) {
             for (var i = 0; i < els.length; i++) {
                 parent.insertBefore(els[i], target);
             }
-            
+
             parent.removeChild(target);
         }
 

@@ -28,7 +28,7 @@ namespace Elsa.Commerce.Core
             {
                 return;
             }
-
+            
             MapTopLevelProperties(source, target);
 
             foreach (var sourceItem in source.LineItems)
@@ -78,6 +78,7 @@ namespace Elsa.Commerce.Core
 
         protected virtual void MapTopLevelProperties(IErpOrderModel source, IPurchaseOrder target)
         {
+            target.OrderNumber = source.OrderNumber;
             target.OrderHash = source.OrderHash;
             target.PreInvoiceId = source.PreInvId;
             target.InvoiceId = source.InvoiceId;
@@ -153,7 +154,7 @@ namespace Elsa.Commerce.Core
 
         protected virtual string GetUniqueOrderNumber(IErpOrderModel order)
         {
-            return order.ErpOrderId;
+            return order.OrderNumber;
         }
 
         protected virtual string GetUniqueErpItemId(IErpOrderModel order, IErpOrderItemModel item)

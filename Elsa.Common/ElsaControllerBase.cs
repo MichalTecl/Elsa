@@ -21,7 +21,7 @@ namespace Elsa.Common
         
         public bool OnRequest(object controller, RequestContext request)
         {
-            WebSession.Initialize(request);
+            //WebSession.Initialize(request);
 
             return false;
         }

@@ -12,8 +12,10 @@ namespace Elsa.Commerce.Core
 
         IPayment GetPayment(int paymentSourceId, string transactionId);
 
-        IPayment SavePayment(IPayment payment);
+        void SavePayment(IPayment payment);
 
         IEnumerable<LastPaymentInfo> GetLastPaymentDates();
+
+        IEnumerable<IPayment> GetPaymentsByVarSymb(string orderVarSymbol);
     }
 }

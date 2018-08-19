@@ -5,11 +5,19 @@ app.user.ViewModel = app.user.ViewModel || function() {
     var self = this;
     var callbacks = [];
 
+    lt.api.disable();
     this.currentSession = null;
 
     var onUserChanged = function (session) {
         
         self.currentSession = session;
+
+        if ((!!session) && (!!session.User)) {
+            lt.api.enable();
+        } else {
+            lt.api.disable();
+        }
+
         for (var i = 0; i < callbacks.length; i++) {
             var callback = callbacks[i];
             callback();
@@ -18,7 +26,7 @@ app.user.ViewModel = app.user.ViewModel || function() {
     
     this.login = function(user, pwd) {
         
-        lt.api("/user/login").query({ "user": user, "password": pwd }).get(function (session) {
+        lt.api("/user/login").query({ "user": user, "password": pwd }).ignoreDisabledApi().get(function (session) {
             onUserChanged(session);
         });
 
@@ -42,7 +50,7 @@ app.user.ViewModel = app.user.ViewModel || function() {
         });
     };
 
-    lt.api("/user/getCurrentSession").get(function (session) {
+    lt.api("/user/getCurrentSession").ignoreDisabledApi().get(function (session) {
         onUserChanged(session);
     });
 
@@ -50,3 +58,4 @@ app.user.ViewModel = app.user.ViewModel || function() {
 };
 
 app.user.vm = app.user.vm || new app.user.ViewModel();
+

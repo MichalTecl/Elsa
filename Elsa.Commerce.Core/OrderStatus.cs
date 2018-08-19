@@ -14,7 +14,14 @@ namespace Elsa.Commerce.Core
         public static readonly IOrderStatus Returned = new Status(6, "Returned");
         public static readonly IOrderStatus Canceled = new Status(7, "Canceled");
         public static readonly IOrderStatus Failed = new Status(8, "Failed");
-        
+
+        public static bool IsPaid(int orderStatusId)
+        {
+            //We might find in future that some ERP can immediately set some another status 
+            //for example a payment could initiate automatic sending etc
+            return orderStatusId == ReadyToPack.Id;
+        }
+
         private sealed class Status : IOrderStatus
         {
             private readonly int m_id;

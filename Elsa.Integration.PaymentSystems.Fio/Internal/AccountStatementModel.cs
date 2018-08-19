@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Common;
@@ -20,8 +21,9 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
             }
         }
 
-        public class FioPayment 
+        public class FioPayment
         {
+            private static readonly int[] s_excludeFromSearchText = new[] { 22, 0, 1, 3, 12, 14 };
             private const int c_idPohybu = 22;
             private const int c_datum = 0;
             private const int c_objem = 1;
@@ -47,12 +49,10 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
                 SpecificSymbol = transaction.GetValue(c_ss, true, string.Empty);
                 Message = transaction.GetValue(c_zpravaProPrijemce, true, string.Empty);
                 Currency = transaction.GetValue<string>(c_mena);
+                
                 SearchText = StringUtil.NormalizeSearchText(
                     255,
-                    VariableSymbol,
-                    ConstantSymbol,
-                    SpecificSymbol,
-                    Message);
+                    transaction.Values.Where(v => v != null && !s_excludeFromSearchText.Contains(v.Id)).Select(v => v.Value?.Trim().ToLowerInvariant() ?? string.Empty).Distinct());
             }
 
             

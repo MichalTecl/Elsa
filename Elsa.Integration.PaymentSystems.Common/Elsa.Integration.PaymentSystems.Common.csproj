@@ -43,6 +43,7 @@
     <Compile Include="Internal\PaymentSysHub.cs" />
     <Compile Include="IPaymentSystemClient.cs" />
     <Compile Include="IPaymentSystemClientFactory.cs" />
+    <Compile Include="IPaymentSystemCommonSettings.cs" />
     <Compile Include="IPaymentSystemHub.cs" />
     <Compile Include="Internal\PaymentSystemClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

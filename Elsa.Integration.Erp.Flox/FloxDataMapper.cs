@@ -76,11 +76,6 @@ namespace Elsa.Integration.Erp.Flox
 
             return nr;
         }
-
-        protected override int ResolveOrderStatusId(IErpOrderModel source, IDictionary<string, IErpOrderStatusMapping> erpOrderStatusMappings)
-        {
-            return base.ResolveOrderStatusId(source, erpOrderStatusMappings);
-        }
     }
 }
 

@@ -47,7 +47,9 @@
     <Compile Include="IErpCommonSettings.cs" />
     <Compile Include="IErpDataMapper.cs" />
     <Compile Include="Impl\ErpClientFactory.cs" />
+    <Compile Include="Impl\OrdersFacade.cs" />
     <Compile Include="Impl\OrderStatusTranslator.cs" />
+    <Compile Include="IOrdersFacade.cs" />
     <Compile Include="IOrderStatusConverter.cs" />
     <Compile Include="IOrderStatusMappingRepository.cs" />
     <Compile Include="IOrderStatusRepository.cs" />

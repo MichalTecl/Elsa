@@ -11,7 +11,7 @@ namespace Elsa.Commerce.Core
     {
         long ImportErpOrder(IErpOrderModel orderModel);
 
-        IPurchaseOrder TryLoadOrder(string orderNumber);
+        IPurchaseOrder TryLoadOrderByOrderNumber(string orderNumber);
 
         void PreloadOrders(DateTime from, DateTime to);
 
@@ -20,5 +20,9 @@ namespace Elsa.Commerce.Core
         IEnumerable<IPurchaseOrder> GetOrdersByStatus(IOrderStatus status, DateTime from, DateTime to);
 
         IEnumerable<IPurchaseOrder> GetOrdersByStatus(IOrderStatus status);
+
+        IPurchaseOrder GetOrder(long orderId);
+
+        int GetMissingPaymentsCount(int businessDaysTolerance);
     }
 }

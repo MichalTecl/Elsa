@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 
 using Robowire.RobOrm.Core;
@@ -56,5 +58,7 @@ namespace Elsa.Core.Entities.Commerce.Common
         [NVarchar(255, false)]
         string SearchText { get; set; }
 
+        [ForeignKey(nameof(IPurchaseOrder.PaymentId))]
+        IEnumerable<IPurchaseOrder> Orders { get; }
     }
 }

@@ -10,16 +10,27 @@
     <div class="panelContent" id="ordersOvwPanel" style="">
         <div id="grid"></div>
         <p class="gridLegend">Přehled za poslední měsíc</p>
+        
+        <a id="missingPaymentsLink" href="/UI/Pages/PaymentPairing.html"></a>
+
     </div>
 
 </div>
 <script>
-    lt.element("ordersOvwPanel").withModel("app.orders.vm").attach(function(grid) {
+    lt.element("ordersOvwPanel").withModel("app.orders.vm").attach(function (grid, missingPaymentsLink) {
 
         this.bind(function(ordersOverview) {
 
             elsa.ui.buildGrid(ordersOverview, grid);
 
+        });
+
+        this.bind(function (missingPaymentsOverview) {
+            
+            missingPaymentsLink.innerHTML = missingPaymentsOverview.Count +
+                ' nezaplacených objednávek starších než ' +
+                missingPaymentsOverview.BusinessDaysTolerance +
+                ' pracovních dnů';
         });
 
     });

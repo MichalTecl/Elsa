@@ -32,7 +32,13 @@ namespace Elsa.Portal
             Setup.SetupContainer(m_container);
             
             var installer = new RoboApiInstaller();
-            installer.Install(ControllerBuilder.Current, m_container, typeof(ElsaControllerBase).Assembly, typeof(ProfileController).Assembly, typeof(UserController).Assembly);
+            installer.Install(ControllerBuilder.Current, m_container,
+                (context, locator) =>
+                    {
+                        var session = locator.Get<IWebSession>();
+                        session.Initialize(context);
+                    },
+                typeof(ElsaControllerBase).Assembly, typeof(ProfileController).Assembly, typeof(UserController).Assembly);
         }
 
         protected void Session_Start(object sender, EventArgs e)

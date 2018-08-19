@@ -82,7 +82,7 @@ namespace Elsa.Commerce.Core.Repositories
 
         private IPurchaseOrder GetOrder(OrderIdentifier identifier)
         {
-            var order =  m_purchaseOrderRepository.TryLoadOrder(identifier.ErpOrderId);
+            var order =  m_purchaseOrderRepository.TryLoadOrderByOrderNumber(identifier.ErpOrderId);
             if (order == null)
             {
                 order = m_database.New<IPurchaseOrder>();

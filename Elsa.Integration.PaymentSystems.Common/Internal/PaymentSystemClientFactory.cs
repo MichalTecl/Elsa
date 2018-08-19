@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Integration;
@@ -31,10 +32,12 @@ namespace Elsa.Integration.PaymentSystems.Common.Internal
 
         public IPaymentSystemHub GetPaymentSystems()
         {
-            var sources =
-                m_database.SelectFrom<IPaymentSource>().Where(p => p.ProjectId == m_session.Project.Id).Execute().Select(GetClient);
+            return new PaymentSysHub(GetAllPaymentSystemClients());
+        }
 
-            return new PaymentSysHub(sources);
+        public IEnumerable<IPaymentSystemClient> GetAllPaymentSystemClients()
+        {
+            return m_database.SelectFrom<IPaymentSource>().Where(p => p.ProjectId == m_session.Project.Id).Execute().Select(GetClient);
         }
     }
 }
