@@ -58,6 +58,9 @@ namespace Elsa.Core.Entities.Commerce.Common
         [NVarchar(255, false)]
         string SearchText { get; set; }
 
+        [NVarchar(100, true)]
+        string SenderName { get; set; }
+
         [ForeignKey(nameof(IPurchaseOrder.PaymentId))]
         IEnumerable<IPurchaseOrder> Orders { get; }
     }

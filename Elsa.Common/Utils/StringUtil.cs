@@ -69,6 +69,17 @@ namespace Elsa.Common.Utils
             return sb.ToString();
         }
 
+        public static string Nvl(params string[] s)
+        {
+            foreach (var i in s)
+            {
+                if (!string.IsNullOrWhiteSpace(i))
+                {
+                    return i;
+                }
+            }
 
+            return s.LastOrDefault();
+        }
     }
 }

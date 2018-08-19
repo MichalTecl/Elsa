@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Payments\Models\PaymentViewModel.cs" />
+    <Compile Include="Payments\Models\SuggestedPairModel.cs" />
+    <Compile Include="Payments\PaymentsPairingController.cs" />
     <Compile Include="Preview\Model\MissingPaymentsResult.cs" />
     <Compile Include="Preview\PreviewController.cs" />
     <Compile Include="Preview\OverviewsConfig.cs" />

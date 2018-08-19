@@ -36,6 +36,8 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
             private const int c_ss = 6;
             private const int c_zpravaProPrijemce = 16;
 
+
+
             public FioPayment(TransactionModel transaction)
             {
                 TransactionId = transaction.GetValue<string>(c_idPohybu);
@@ -49,6 +51,11 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
                 SpecificSymbol = transaction.GetValue(c_ss, true, string.Empty);
                 Message = transaction.GetValue(c_zpravaProPrijemce, true, string.Empty);
                 Currency = transaction.GetValue<string>(c_mena);
+
+                SenderName = StringUtil.Nvl(
+                    transaction.GetValue(10, true, string.Empty),
+                    transaction.GetValue(7, true, string.Empty),
+                    transaction.GetValue(25, true, string.Empty));
                 
                 SearchText = StringUtil.NormalizeSearchText(
                     255,
@@ -69,6 +76,8 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
             public string Message { get; }
             public string Currency { get; }
             public string SearchText { get; }
+
+            public string SenderName { get; }
         }
     }
 }

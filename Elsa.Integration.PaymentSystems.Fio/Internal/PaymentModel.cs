@@ -27,6 +27,7 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
             Message = source.Message;
             CurrencyId = currencyRepository.GetCurrency(source.Currency).Id;
             SearchText = source.SearchText;
+            SenderName = source.SenderName;
         }
 
         public long Id => 0;
@@ -64,6 +65,8 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
         public string Message { get; set; }
 
         public string SearchText { get; set; }
+
+        public string SenderName { get; set; }
 
         public IEnumerable<IPurchaseOrder> Orders
         {
