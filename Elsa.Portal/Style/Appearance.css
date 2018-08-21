@@ -92,3 +92,7 @@ table.reportTable tfoot .links a{
     width: 100%;
     text-align: right;
 }
+
+button:disabled {
+    opacity: 0.5;
+}

@@ -41,7 +41,7 @@ namespace Elsa.App.Commerce.Payments
 
             var payments = m_paymentRepository.GetPayments(
                 orders.Min(o => o.PurchaseDate).AddDays(-1),
-                DateTime.Now.AddDays(1)).ToList();
+                DateTime.Now.AddDays(1)).Where(p => !p.Orders.Any()).ToList();
 
 
             foreach (var order in orders)

@@ -6,7 +6,17 @@ app.paymentPairing.ViewModel = app.paymentPairing.ViewModel || function() {
 
     this.suggestedPairs = null;
 
-    var receive = function(pairs) {
+    var receive = function (pairs) {
+
+        if (!!pairs) {
+            for (var i = 0; i < pairs.length; i++) {
+                pairs[i].noPayment = (!pairs[i].Payment);
+
+                pairs[i].priceNotMatch = !((!pairs[i].Payment) || pairs[i].Order.Price === pairs[i].Payment.Amount);
+                pairs[i].symbolNotMatch = !((!pairs[i].Payment) || pairs[i].Order.VariableSymbol === pairs[i].Payment.VariableSymbol);
+            }
+        }
+
         self.suggestedPairs = pairs;
     };
 

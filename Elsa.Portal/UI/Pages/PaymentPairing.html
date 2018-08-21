@@ -18,27 +18,27 @@
         </div>    
         <div class="panelContent" id="pairingUi">
             
-            <table id="suggested" class="paymentPairs">
+            <table id="suggested" class="paymentPairs" style="background-color: #eeeeee">
                 
                 <tbody lt-name="suggestedPairTemplate" class="paymentPair">
                     <tr class="divTableRow">
                         <td class="divTableCell" data-bind="text:Order.OrderDate"></td>
                         <td class="divTableCell" data-bind="text:Order.Source"></td>
-                        <td class="divTableCell" data-bind="text:Order.VariableSymbol"></td>
+                        <td class="divTableCell" data-bind="text:Order.VariableSymbol; class.warnCell:symbolNotMatch"></td>
                         <td class="divTableCell" data-bind="text:Order.CustomerName"></td>
-                        <td class="divTableCell" data-bind="text:Order.Price"></td>
-                        <td></td>
+                        <td class="divTableCell" data-bind="text:Order.Price; class.warnCell:priceNotMatch"></td>
+                        <td class="divTableCell"></td>
                     </tr>
-                    <tr class="divTableRow">
+                    <tr class="divTableRow" data-bind="class.warnCell:noPayment">
                         <td class="divTableCell" data-bind="text:Payment.PaymentDate">-</td>
                         <td class="divTableCell" data-bind="text:Payment.SourceName">-</td>
-                        <td class="divTableCell" data-bind="text:Payment.VariableSymbol">-</td>
+                        <td class="divTableCell" data-bind="text:Payment.VariableSymbol; class.warnCell:symbolNotMatch">-</td>
                         <td class="divTableCell" data-bind="text:Payment.Sender">-</td>
-                        <td class="divTableCell" data-bind="text:Payment.Amount">-</td>
+                        <td class="divTableCell" data-bind="text:Payment.Amount; class.warnCell:priceNotMatch">-</td>
                         <td class="divTableCell" data-bind="text:Payment.Message">-</td>
                     </tr>
-                    <tr class="divTableRow">
-                        <td colspan="99" style="border:none"><button>Přijmout</button></td>
+                    <tr class="divTableRow" style="text-align: right">
+                        <td colspan="99" style="border:none"><button style="margin-top: 5px; margin-bottom: 20px; " data-bind="disabled:noPayment" event-bind="click:setPair(Order.OrderId)">Přijmout</button></td>
                     </tr>
                 </tbody>      
 
@@ -59,7 +59,10 @@
                         return pair.Order.OrderId;
                     });
             });
-            
+
+            this.setPair = function(pair) {
+                alert(pair);
+            };
         });
             
     </script>
@@ -73,10 +76,18 @@
       border-collapse: collapse;
     }
     table.paymentPairs td, table.paymentPairs th {
-      border: 1px solid #AAAAAA;
+      border: 1px solid #DADADA;
       padding: 3px 2px;
     }
- 
+    
+    .divTableCell {
+        background-color: #ffffff;
+    }
+
+    .warnCell {
+        color: #9F6000;
+        background-color: #FEEFB3;
+    }
 </style>
 
 </body>
