@@ -17,5 +17,9 @@ namespace Elsa.Commerce.Core
         IEnumerable<LastPaymentInfo> GetLastPaymentDates();
 
         IEnumerable<IPayment> GetPaymentsByVarSymb(string orderVarSymbol);
+
+        IEnumerable<IPayment> GetPayments(DateTime min, DateTime max);
+
+        IPayment GetPayment(long id);
     }
 }

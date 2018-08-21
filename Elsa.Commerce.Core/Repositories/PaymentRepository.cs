@@ -89,6 +89,16 @@ namespace Elsa.Commerce.Core.Repositories
             return GetPaymentsQuery().Where(p => p.VariableSymbol == orderVarSymbol).Execute();
         }
 
+        public IEnumerable<IPayment> GetPayments(DateTime min, DateTime max)
+        {
+            return GetPaymentsQuery().Where(p => p.PaymentDt >= min && p.PaymentDt <= max).Execute();
+        }
+
+        public IPayment GetPayment(long id)
+        {
+            return m_cache.FirstOrDefault(p => p.Id == id) ?? GetPaymentsQuery().Where(p => p.Id == id).Execute().FirstOrDefault();
+        }
+
         private IQueryBuilder<IPayment> GetPaymentsQuery()
         {
             return

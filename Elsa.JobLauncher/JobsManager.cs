@@ -48,7 +48,14 @@ namespace Elsa.JobLauncher
 
                 var launcher = locator.Get<IJobExecutor>();
 
-                launcher.LaunchJob(job);
+                try
+                {
+                    launcher.LaunchJob(job);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
 
             return 1000;

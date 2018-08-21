@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
+﻿
+using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
 using Elsa.Common;
 using Elsa.Users;
@@ -22,6 +19,7 @@ namespace Elsa.Portal
             container.Setup(s => s.For<ISession>().Import.FromFactory(l => l.Get<IWebSession>()));
             container.Setup(s => s.ScanAssembly(typeof(PreviewController).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(IPurchaseOrderRepository).Assembly));
+            container.Setup(s => s.ScanAssembly(typeof(PaymentsPairingController).Assembly));
         }
     }
 }

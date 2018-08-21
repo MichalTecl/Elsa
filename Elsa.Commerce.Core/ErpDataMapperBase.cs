@@ -91,7 +91,7 @@ namespace Elsa.Commerce.Core
             target.ErpStatusName = source.ErpStatusName ?? string.Empty;
             
             target.Price = ParseMoney(source.Price, source, null, nameof(source.Price));
-            target.PriceWithVat = ParseMoney(source.Price, source, null, nameof(source.Price));
+            target.PriceWithVat = ParseMoney(source.PriceWithVat, source, null, nameof(source.PriceWithVat));
             
             target.ShippingMethodName = MapShippingMethodName(source);
             target.PaymentMethodName = MapPaymentMethodName(source);

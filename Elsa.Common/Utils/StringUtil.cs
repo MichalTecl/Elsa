@@ -52,7 +52,7 @@ namespace Elsa.Common.Utils
                         nChar = chr;
                     }
 
-                    if (!c_validChars.Contains(nChar) || nChar == lChar)
+                    if (!c_validChars.Contains(nChar) || ((nChar == lChar && !char.IsDigit(nChar))))
                     {
                         continue;
                     }

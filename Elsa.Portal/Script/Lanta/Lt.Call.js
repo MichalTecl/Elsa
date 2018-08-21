@@ -7,7 +7,7 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
     var useCache = false;
     var noJson = false;
     var throughDisabled = false;
-    var httpMethod = "get";
+    var httpMethod = "GET";
 
     var responseHandler = function (resp) {
         console.log("No response handler. Request=" + url + " response:" + resp);
@@ -69,7 +69,7 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
                 url = url + "?" + queryString;
             }
 
-            xmlHttp.open(method, url, true);
+            xmlHttp.open(httpMethod, url, true);
             xmlHttp.send(bodyJson);
         } catch (error) {
             console.error(error);
@@ -140,6 +140,10 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
         }
 
         return result;
+    };
+
+    this.call = function() {
+        call();
     };
 };
 

@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Elsa.App.Commerce.Payments.Models
 {
     public class SuggestedPairModel
     {
+        public SuggestedPairModel(OrderViewModel order, PaymentViewModel payment)
+        {
+            Order = order;
+            Payment = payment;
+        }
 
+        public OrderViewModel Order { get; }
+        public PaymentViewModel Payment { get; }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
@@ -13,13 +15,15 @@ namespace Elsa.Commerce.Core.Impl
         private readonly IDatabase m_database;
         private readonly IErpClientFactory m_clientFactory;
         private readonly ISession m_session;
+        private readonly IPaymentRepository m_paymentRepository;
 
-        public OrdersFacade(IPurchaseOrderRepository orderRepository, IDatabase database, IErpClientFactory clientFactory, ISession session)
+        public OrdersFacade(IPurchaseOrderRepository orderRepository, IDatabase database, IErpClientFactory clientFactory, ISession session, IPaymentRepository paymentRepository)
         {
             m_orderRepository = orderRepository;
             m_database = database;
             m_clientFactory = clientFactory;
             m_session = session;
+            m_paymentRepository = paymentRepository;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
@@ -30,6 +34,21 @@ namespace Elsa.Commerce.Core.Impl
                 if (order == null)
                 {
                     throw new InvalidOperationException($"Order not found");
+                }
+
+                if (paymentId != null)
+                {
+                    var payment = m_paymentRepository.GetPayment(paymentId.Value);
+                    if (payment == null)
+                    {
+                        throw new InvalidOperationException("Platba neexistuje");
+                    }
+
+                    var ordersList = payment.Orders?.ToList() ?? new List<IPurchaseOrder>(0);
+                    if ((ordersList.SingleOrDefault()?.Id ?? orderId) != orderId)
+                    {
+                        throw new InvalidOperationException("Platba uz je prirazena k jine objednavce");
+                    }
                 }
 
                 order.PaymentId = paymentId;

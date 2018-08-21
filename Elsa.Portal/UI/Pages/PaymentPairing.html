@@ -16,7 +16,68 @@
         <div class="panelHead">
             <div class="panelTitle">Párování plateb</div>
         </div>    
+        <div class="panelContent" id="pairingUi">
+            
+            <table id="suggested" class="paymentPairs">
+                
+                <tbody lt-name="suggestedPairTemplate" class="paymentPair">
+                    <tr class="divTableRow">
+                        <td class="divTableCell" data-bind="text:Order.OrderDate"></td>
+                        <td class="divTableCell" data-bind="text:Order.Source"></td>
+                        <td class="divTableCell" data-bind="text:Order.VariableSymbol"></td>
+                        <td class="divTableCell" data-bind="text:Order.CustomerName"></td>
+                        <td class="divTableCell" data-bind="text:Order.Price"></td>
+                        <td></td>
+                    </tr>
+                    <tr class="divTableRow">
+                        <td class="divTableCell" data-bind="text:Payment.PaymentDate">-</td>
+                        <td class="divTableCell" data-bind="text:Payment.SourceName">-</td>
+                        <td class="divTableCell" data-bind="text:Payment.VariableSymbol">-</td>
+                        <td class="divTableCell" data-bind="text:Payment.Sender">-</td>
+                        <td class="divTableCell" data-bind="text:Payment.Amount">-</td>
+                        <td class="divTableCell" data-bind="text:Payment.Message">-</td>
+                    </tr>
+                    <tr class="divTableRow">
+                        <td colspan="99" style="border:none"><button>Přijmout</button></td>
+                    </tr>
+                </tbody>      
+
+            </table>
+
+        </div>
     </div>
+    
+    <script>
+
+        lt.element("pairingUi").withModel("app.paymentPairing.vm").attach(function(suggested, suggestedPairTemplate) {
+
+            this.bind(function(suggestedPairs) {
+                lt.generate(suggested,
+                    suggestedPairTemplate,
+                    suggestedPairs,
+                    function(pair) {
+                        return pair.Order.OrderId;
+                    });
+            });
+            
+        });
+            
+    </script>
+    
+<script src="/Script/Apps/Orders/PaymentPairing.VM.js"></script>
+    
+<style>
+   table.paymentPairs {
+      width: 100%;
+      text-align: left;
+      border-collapse: collapse;
+    }
+    table.paymentPairs td, table.paymentPairs th {
+      border: 1px solid #AAAAAA;
+      padding: 3px 2px;
+    }
+ 
+</style>
 
 </body>
 </html>

@@ -115,6 +115,11 @@ body, html {
     justify-content: flex-end;
 }
 
+.stackLeft {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
 .centerChildHori {
     text-align: center;
 }
