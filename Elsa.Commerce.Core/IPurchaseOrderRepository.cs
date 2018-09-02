@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Commerce;
 
+using Robowire.RobOrm.Core;
+
 namespace Elsa.Commerce.Core
 {
     public interface IPurchaseOrderRepository
@@ -21,7 +23,11 @@ namespace Elsa.Commerce.Core
 
         IEnumerable<IPurchaseOrder> GetOrdersByStatus(IOrderStatus status);
 
+        IEnumerable<IPurchaseOrder> GetOrders(Action<IQueryBuilder<IPurchaseOrder>> query);
+            
         IPurchaseOrder GetOrder(long orderId);
+
+        IEnumerable<IPurchaseOrder> GetOrdersToMarkPaidInErp();
 
         int GetMissingPaymentsCount(int businessDaysTolerance);
     }

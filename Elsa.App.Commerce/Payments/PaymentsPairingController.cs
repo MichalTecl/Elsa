@@ -9,6 +9,7 @@ using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Integration.Erp.Flox;
 
 using Robowire.RoboApi;
 
@@ -19,12 +20,14 @@ namespace Elsa.App.Commerce.Payments
     {
         private readonly IPurchaseOrderRepository m_orderRepository;
         private readonly IPaymentRepository m_paymentRepository;
-
-        public PaymentsPairingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IPaymentRepository paymentRepository)
+        private readonly IOrdersFacade m_ordersFacade;
+        
+        public PaymentsPairingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IPaymentRepository paymentRepository, IOrdersFacade ordersFacade)
             : base(webSession, log)
         {
             m_orderRepository = orderRepository;
             m_paymentRepository = paymentRepository;
+            m_ordersFacade = ordersFacade;
         }
 
         public IEnumerable<SuggestedPairModel> GetUnpaidOrders()
@@ -56,6 +59,13 @@ namespace Elsa.App.Commerce.Payments
 
                 yield return new SuggestedPairModel(new OrderViewModel(order), payment == null ? null : new PaymentViewModel(payment));
             }
+        }
+
+        public IEnumerable<SuggestedPairModel> Pair(int orderId, long paymentId)
+        {
+            m_ordersFacade.SetOrderPaid(orderId, paymentId);
+            
+            return GetUnpaidOrders();
         }
 
         private IPayment GetBestMatch(IPurchaseOrder order, IEnumerable<IPayment> payments)
@@ -138,3 +148,4 @@ namespace Elsa.App.Commerce.Payments
 
     }
 }
+

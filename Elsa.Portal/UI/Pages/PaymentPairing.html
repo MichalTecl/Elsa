@@ -60,8 +60,18 @@
                     });
             });
 
-            this.setPair = function(pair) {
-                alert(pair);
+            this.setPair = function(orderId) {
+
+                var suggestions = app.paymentPairing.vm.suggestedPairs;
+                
+                for (var i = 0; i < suggestions.length; i++) {
+                    var pair = suggestions[i];
+                    if (pair.Order.OrderId === orderId) {
+                        app.paymentPairing.vm.setOrderPaid(pair.Order.OrderId, pair.Payment.PaymentId);
+                        return;
+                    }
+                }
+
             };
         });
             

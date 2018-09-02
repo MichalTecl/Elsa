@@ -1,0 +1,95 @@
+﻿<script src="/Script/Apps/Jobs/ScheduledJobs.VM.js"></script>
+<div class="panel w2">
+    <div class="panelHead">
+        <div class="panelTitle">Automatické úlohy</div>
+    </div>
+
+    <div class="panelContent" id="jobsPanel" style="">
+        
+        
+        
+        <table class="jobsTable" id="jobsTable">
+            <thead>
+            <tr>
+                <th>Název</th>
+                <th>Naposledy</th>
+                <th>Stav</th>
+                <th>Start</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody lt-name="jobRow">
+                <tr>
+                    <td data-bind="text:Name" style="font-weight: bold"></td>
+                    <td data-bind="text:LastRun"></td>
+                    <td data-bind="text:CurrentStatus"></td>
+                    <td data-bind="text:StartMode"></td>
+                    <td><button event-bind="click:launchJob(ScheduleId)">Spustit</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+<script>
+    lt.element("jobsPanel").withModel("app.scheduledJobs.vm").attach(function(jobsTable, jobRow) {
+
+        this.bind(function(jobs) {
+
+            lt.generate(jobsTable, jobRow, jobs, function(s) { return s.ScheduleId; });
+
+        });
+
+        this.launchJob = function(scheduleId) {
+            app.scheduledJobs.vm.launchJob(scheduleId);
+        };
+
+    });
+</script>
+<style>
+    table.jobsTable {
+  border: 1px solid #1C6EA4;
+  background-color: #EEEEEE;
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+table.jobsTable td, table.jobsTable th {
+  border: 1px solid #AAAAAA;
+  padding: 3px 2px;
+}
+table.jobsTable tbody td {
+  font-size: 13px;
+}
+table.jobsTable tr:nth-child(even) {
+  background: #D0E4F5;
+}
+table.jobsTable thead {
+  background: #1C6EA4;
+  border-bottom: 2px solid #444444;
+}
+table.jobsTable thead th {
+  font-size: 15px;
+  font-weight: bold;
+  color: #FFFFFF;
+  border-left: 2px solid #D0E4F5;
+}
+table.jobsTable thead th:first-child {
+  border-left: none;
+}
+
+table.jobsTable tfoot td {
+  font-size: 14px;
+}
+table.jobsTable tfoot .links {
+  text-align: right;
+}
+table.jobsTable tfoot .links a{
+  display: inline-block;
+  background: #1C6EA4;
+  color: #FFFFFF;
+  padding: 2px 8px;
+  border-radius: 5px;
+}
+</style>

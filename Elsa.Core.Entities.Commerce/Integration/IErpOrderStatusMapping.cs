@@ -21,5 +21,7 @@ namespace Elsa.Core.Entities.Commerce.Integration
         int OrderStatusId { get; set; }
 
         IOrderStatus OrderStatus { get; }
+
+        bool? SetPaidInErp { get; set; }
     }
 }

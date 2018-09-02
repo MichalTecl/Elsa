@@ -107,6 +107,7 @@
     <None Include="Bundles\Lanta" />
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
+    <Content Include="Script\Apps\Jobs\ScheduledJobs.VM.js" />
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
     <Content Include="UI\Pages\PaymentPairing.html" />
@@ -142,6 +143,7 @@
     <Content Include="Script\Lanta\ViewsLoader.js" />
     <Content Include="Style\Appearance.css" />
     <Content Include="Style\Layout.css" />
+    <Content Include="UI\Widgets\Jobs\ScheduledJobsWidget.html" />
     <Content Include="UI\Widgets\Orders\OrdersOverviewWidget.html" />
     <Content Include="UI\Widgets\User\UserWidget.html" />
     <Content Include="UI\Widgets\User\UserWidget.js" />
@@ -195,6 +197,14 @@
       <Project>{09e35860-d69e-42a0-aabd-a7431f283c97}</Project>
       <Name>Elsa.App.Profile</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Apps.Common\Elsa.Apps.Common.csproj">
+      <Project>{b09c721a-b22e-47a6-bc6b-9cd9155e174a}</Project>
+      <Name>Elsa.Apps.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Apps.ScheduledJobs\Elsa.Apps.ScheduledJobs.csproj">
+      <Project>{55482891-37C2-4C35-83BE-68100012AE25}</Project>
+      <Name>Elsa.Apps.ScheduledJobs</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
       <Project>{61dd96b7-bf13-4c48-9353-08f2f907048e}</Project>
       <Name>Elsa.Commerce.Core</Name>
@@ -206,6 +216,42 @@
     <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj">
       <Project>{91481b08-e437-474d-9793-a135f1db465c}</Project>
       <Name>Elsa.Core.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.Erp.Fler\Elsa.Integration.Erp.Fler.csproj">
+      <Project>{AF0625B5-6811-4393-BD3C-3C9C0FC30D8C}</Project>
+      <Name>Elsa.Integration.Erp.Fler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.Erp.Flox\Elsa.Integration.Erp.Flox.csproj">
+      <Project>{DC38D50D-1F5F-44C8-A273-6C57CF26974C}</Project>
+      <Name>Elsa.Integration.Erp.Flox</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.PaymentSystems.Common\Elsa.Integration.PaymentSystems.Common.csproj">
+      <Project>{ffab584e-2962-4a9b-82b0-e8309185950a}</Project>
+      <Name>Elsa.Integration.PaymentSystems.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.PaymentSystems.Fio\Elsa.Integration.PaymentSystems.Fio.csproj">
+      <Project>{1393F234-B177-4411-BB48-364E6BE597D0}</Project>
+      <Name>Elsa.Integration.PaymentSystems.Fio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
+      <Project>{5EF07762-137B-4BF7-8199-5961768FCAEC}</Project>
+      <Name>Elsa.Jobs.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.ImportOrders\Elsa.Jobs.ImportOrders.csproj">
+      <Project>{DAC5B9D4-F7A0-49C5-A4BD-45AFE0E7C6C1}</Project>
+      <Name>Elsa.Jobs.ImportOrders</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.PaymentPairing\Elsa.Jobs.PaymentPairing.csproj">
+      <Project>{A4F5C43F-09C2-4DF4-BBE1-4FA96D17271F}</Project>
+      <Name>Elsa.Jobs.PaymentPairing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.PrefillCalender\Elsa.Jobs.PrefillCalender.csproj">
+      <Project>{5ECCC802-EE9B-468F-B998-AF322356FEA9}</Project>
+      <Name>Elsa.Jobs.PrefillCalender</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.SetPaidStatus\Elsa.Jobs.SetPaidStatus.csproj">
+      <Project>{2F341FE9-F108-4109-BBB4-E7115B0987A5}</Project>
+      <Name>Elsa.Jobs.SetPaidStatus</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{A9148D58-0F0E-43E7-8A11-A9F9BB04333C}</Project>

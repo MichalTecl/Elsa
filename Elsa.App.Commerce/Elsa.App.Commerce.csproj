@@ -82,6 +82,22 @@
       <Project>{91481b08-e437-474d-9793-a135f1db465c}</Project>
       <Name>Elsa.Core.Entities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.Erp.Fler\Elsa.Integration.Erp.Fler.csproj">
+      <Project>{af0625b5-6811-4393-bd3c-3c9c0fc30d8c}</Project>
+      <Name>Elsa.Integration.Erp.Fler</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.Erp.Flox\Elsa.Integration.Erp.Flox.csproj">
+      <Project>{dc38d50d-1f5f-44c8-a273-6c57cf26974c}</Project>
+      <Name>Elsa.Integration.Erp.Flox</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.PaymentSystems.Common\Elsa.Integration.PaymentSystems.Common.csproj">
+      <Project>{ffab584e-2962-4a9b-82b0-e8309185950a}</Project>
+      <Name>Elsa.Integration.PaymentSystems.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.PaymentSystems.Fio\Elsa.Integration.PaymentSystems.Fio.csproj">
+      <Project>{1393f234-b177-4411-bb48-364e6be597d0}</Project>
+      <Name>Elsa.Integration.PaymentSystems.Fio</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{a9148d58-0f0e-43e7-8a11-a9f9bb04333c}</Project>
       <Name>Elsa.Users</Name>

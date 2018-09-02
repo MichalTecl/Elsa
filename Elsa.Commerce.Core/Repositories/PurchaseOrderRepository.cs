@@ -168,9 +168,31 @@ namespace Elsa.Commerce.Core.Repositories
             return GetOrdersByStatus(status, DateTime.Now.AddYears(-50), DateTime.Now.AddDays(1));
         }
 
+        public IEnumerable<IPurchaseOrder> GetOrders(Action<IQueryBuilder<IPurchaseOrder>> query)
+        {
+            var q = BuildOrdersQuery();
+            query(q);
+
+            return q.Execute();
+        }
+
         public IPurchaseOrder GetOrder(long orderId)
         {
             return BuildOrdersQuery().Where(o => o.Id == orderId).Execute().FirstOrDefault();
+        }
+
+        public IEnumerable<IPurchaseOrder> GetOrdersToMarkPaidInErp()
+        {
+            var orderIds = m_database.Sql().Execute(@"SELECT DISTINCT po.Id
+                                          FROM PurchaseOrder po
+                                    INNER JOIN ErpOrderStatusMapping mp ON (po.ErpStatusId = mp.ErpStatusId 
+                                                                        AND po.ErpId = mp.ErpId)
+                                    WHERE mp.SetPaidInErp = 1").MapRows(r => r.GetInt64(0));
+
+            foreach (var orderId in orderIds)
+            {
+                yield return GetOrder(orderId);
+            }
         }
 
         public int GetMissingPaymentsCount(int businessDaysTolerance)

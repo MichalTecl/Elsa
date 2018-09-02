@@ -24,7 +24,25 @@ app.paymentPairing.ViewModel = app.paymentPairing.ViewModel || function() {
         lt.api("/paymentPairing/getUnpaidOrders").useCache().get(receive);
     };
 
+    this.setOrderPaid = function(orderId, paymentId) {
+
+        var i = self.suggestedPairs.length;
+        while (i--) {
+            var pair = self.suggestedPairs[i];
+            if (pair.Order.OrderId === orderId || ((!!pair.Payment) && (pair.Payment.PaymentId === paymentId))) {
+                self.suggestedPairs.splice(i, 1);
+            }
+        }
+
+        lt.notify();
+
+        lt.api("/paymentPairing/pair").query({ "orderId": orderId, "paymentId": paymentId }).get(receive);
+
+    };
+
     self.update();
+
+
 };
 
 app.paymentPairing.vm = app.paymentPairing.vm || new app.paymentPairing.ViewModel();

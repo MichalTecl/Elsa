@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Automation;
 
@@ -17,5 +13,7 @@ namespace Elsa.Jobs.Common
         void MarkJobSucceeded(IJobSchedule job);
 
         void MarkJobFailed(IJobSchedule job);
+
+        IEnumerable<IJobSchedule> GetCompleteScheduler();
     }
 }

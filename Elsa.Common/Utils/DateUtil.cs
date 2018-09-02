@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elsa.Common.Utils
 {
     public static class DateUtil
     {
-        public static string FormatDateWithAgo(DateTime dt)
+        public static string FormatDateWithAgo(DateTime dt, bool includeTime = false)
         {
             var days = (int)((DateTime.Now - dt).TotalDays);
 
@@ -18,6 +14,12 @@ namespace Elsa.Common.Utils
             {
                 case 0:
                     agoWord = "dnes";
+
+                    if (includeTime)
+                    {
+                        agoWord = GetTimeText(dt);
+                    }
+
                     break;
                 case 1:
                     agoWord = "včera";
@@ -33,6 +35,23 @@ namespace Elsa.Common.Utils
             }
 
             return $"{dt:dd.MM.} ({agoWord})";
+        }
+
+        private static string GetTimeText(DateTime dt)
+        {
+            var diff = DateTime.Now - dt;
+
+            if (diff.TotalHours > 1)
+            {
+                return $"Více než {((int)diff.TotalHours)} hodin";
+            }
+
+            if (diff.TotalMinutes < 2)
+            {
+                return "Právě teď";
+            }
+
+            return $"{((int)diff.TotalMinutes)} minut";
         }
     }
 }

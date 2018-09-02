@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Automation;
 
 using Robowire.RobOrm.Core;
@@ -14,10 +15,12 @@ namespace Elsa.Jobs.Common.Impl
     public class ScheduledJobsRepository : IScheduledJobsRepository
     {
         private readonly IDatabase m_database;
+        private readonly ISession m_session;
 
-        public ScheduledJobsRepository(IDatabase database)
+        public ScheduledJobsRepository(IDatabase database, ISession session)
         {
             m_database = database;
+            m_session = session;
         }
 
         public IJobSchedule GetCurrentJob(int projectId)
@@ -108,6 +111,16 @@ namespace Elsa.Jobs.Common.Impl
             job.LastEndDt = DateTime.Now;
             job.LastRunFailed = true;
             m_database.Save(job);
+        }
+
+        public IEnumerable<IJobSchedule> GetCompleteScheduler()
+        {
+            var projectId = m_session.Project.Id;
+            return
+                m_database.SelectFrom<IJobSchedule>()
+                    .Join(s => s.ScheduledJob)
+                    .Where(j => j.ProjectId == projectId)
+                    .Execute();
         }
 
         private static DateTime GetLastHhMmTime(string hhMm)
