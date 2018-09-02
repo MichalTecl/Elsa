@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common.Widgets;
 
 using Robowire.RoboApi;
@@ -16,8 +17,8 @@ namespace Elsa.Common
     {
         private readonly IDatabase m_database;
 
-        public WidgetsController(IWebSession webSession, IDatabase database)
-            : base(webSession)
+        public WidgetsController(IWebSession webSession, IDatabase database, ILog log)
+            : base(webSession, log)
         {
             m_database = database;
         }

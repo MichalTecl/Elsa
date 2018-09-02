@@ -43,16 +43,11 @@ namespace Elsa.JobLauncher
                 Console.WriteLine("Hledam aktualni job:");
                 var job = jobRepo.GetCurrentJob(session.Project.Id);
 
-                if (job == null)
-                {
-                    Console.WriteLine("Nic, cekam 30s...");
-                }
-                else
+                if (job != null)
                 {
                     Console.WriteLine($"Nalezen job {job.ScheduledJob.Name}");
                 }
-                
-                if (job == null)
+                else
                 {
                     return 30000;
                 }

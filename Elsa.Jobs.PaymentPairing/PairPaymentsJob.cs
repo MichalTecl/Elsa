@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Elsa.Commerce.Core;
+using Elsa.Common.Logging;
 using Elsa.Integration.PaymentSystems.Common;
 using Elsa.Jobs.Common;
 
@@ -16,33 +17,35 @@ namespace Elsa.Jobs.PaymentPairing
         private readonly IPaymentRepository m_paymentRepository;
         private readonly IDatabase m_database;
         private readonly IOrdersFacade m_orders;
+        private readonly ILog m_log;
 
         public PairPaymentsJob(
             IPurchaseOrderRepository orderRepository,
             IPaymentSystemClientFactory clientFactory,
             IPaymentRepository paymentRepository,
-            IDatabase database, IOrdersFacade orders)
+            IDatabase database, IOrdersFacade orders, ILog log)
         {
             m_orderRepository = orderRepository;
             m_clientFactory = clientFactory;
             m_paymentRepository = paymentRepository;
             m_database = database;
             m_orders = orders;
+            m_log = log;
         }
 
         public void Run(string customDataJson)
         {
-            Console.WriteLine("Zacinam parovani...");
+            m_log.Info("Zacinam job \"Parovani objednavek\"");
             DownloadPayments();
 
-            Console.WriteLine("Hledam objednavky cekajici na platbu");
+            m_log.Info("Hledam objednavky cekajici na platbu");
             var ordersToBePaired =
                 m_orderRepository.GetOrdersByStatus(OrderStatus.PendingPayment).Where(o => !o.IsPayOnDelivery).ToList();
-            Console.WriteLine($"Nalezeno {ordersToBePaired.Count} zaznamu");
+            m_log.Info($"Nalezeno {ordersToBePaired.Count} zaznamu");
 
             if (ordersToBePaired.Count == 0)
             {
-                Console.WriteLine("Zadne objednavky k parovani");
+                m_log.Info("Zadne objednavky k parovani");
                 return;
             }
 
@@ -59,35 +62,35 @@ namespace Elsa.Jobs.PaymentPairing
                         throw new InvalidOperationException($"Objednavka {order.OrderNumber} ze systemu {order.Erp?.Description} nema variabilni symbol");
                     }
 
-                    Console.WriteLine($"Hledam platbu k objednavce {order.OrderNumber} podle VS={order.VarSymbol}");
+                    m_log.Info($"Hledam platbu k objednavce {order.OrderNumber} podle VS={order.VarSymbol}");
 
                     var payments = m_paymentRepository.GetPaymentsByVarSymb(order.VarSymbol).Where(p => p.Orders == null || !p.Orders.Any()).ToList();
                     if (!payments.Any())
                     {
-                        Console.WriteLine("Platba nenalezena");
+                        m_log.Info("Platba nenalezena");
                         continue;
                     }
 
                     if (payments.Count > 1)
                     {
-                        Console.WriteLine($"Existuje vice nez jedna platba VS={order.VarSymbol}. Nelze parovat.");
+                        m_log.Info($"Existuje vice nez jedna platba VS={order.VarSymbol}. Nelze parovat.");
                         continue;
                     }
 
                     var payment = payments.First();
 
-                    Console.WriteLine("Platba nalezena, paruji...");
+                    m_log.Info("Platba nalezena, paruji...");
 
                     //TODO currencies
                     if (Math.Abs(payment.Value - order.PriceWithVat) > 0.01m)
                     {
-                        Console.WriteLine("Neshoduje se castka, nelze parovat");
+                        m_log.Info("Neshoduje se castka, nelze parovat");
                         continue;
                     }
 
                     m_orders.SetOrderPaid(order.Id, payment.Id);
 
-                    Console.WriteLine("Sparovano");
+                    m_log.Info("Sparovano");
                 }
                 catch (Exception ex)
                 {
@@ -98,6 +101,8 @@ namespace Elsa.Jobs.PaymentPairing
 
         private void DownloadPayments()
         {
+            m_log.Info("Zacinam stahovani plateb");
+
             var lastPayments = m_paymentRepository.GetLastPaymentDates().ToDictionary(p => p.PaymentSourceId, p => p.LastPaymentDt);
 
             var paymentSources = m_clientFactory.GetAllPaymentSystemClients().ToList();
@@ -109,6 +114,8 @@ namespace Elsa.Jobs.PaymentPairing
                     startDt = DateTime.MinValue;
                 }
 
+                m_log.Info($"Posledni platba z '{paymentSource.Entity.Description}' je z {startDt}");
+
                 DownloadPayments(paymentSource, startDt);
             }
         }
@@ -119,18 +126,18 @@ namespace Elsa.Jobs.PaymentPairing
             {
                 startDt = paymentSource.CommonSettings.HistoryStart;
             }
-
+            
             while (startDt < DateTime.Now.AddDays(1))
             {
                 var endDt = startDt.AddDays(paymentSource.CommonSettings.BatchSizeDays);
                 
                 m_paymentRepository.PreloadCache(startDt, endDt);
 
-                Console.WriteLine($"Stahuji platby ze zdroje {paymentSource.Entity.Description} {startDt} - {endDt}");
+                m_log.Info($"Stahuji platby ze zdroje {paymentSource.Entity.Description} {startDt} - {endDt}");
 
                 var payments = paymentSource.GetPayments(startDt, endDt).ToList();
 
-                Console.WriteLine($"Stazeno {payments.Count} zaznamu");
+                m_log.Info($"Stazeno {payments.Count} zaznamu");
 
                 using (var trx = m_database.OpenTransaction())
                 {
@@ -142,11 +149,10 @@ namespace Elsa.Jobs.PaymentPairing
                     trx.Commit();
                 }
                 
-                Console.WriteLine("Ulozeno");
+                m_log.Info("Ulozeno");
 
                 startDt = endDt;
             }
-            
         }
     }
 }

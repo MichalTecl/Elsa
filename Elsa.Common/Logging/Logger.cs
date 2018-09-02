@@ -54,9 +54,12 @@ namespace Elsa.Common.Logging
             Error(s, null, member, path, line);
         }
 
-        public IDisposable StartStopwatch(string actionName)
+        public IDisposable StartStopwatch(string actionName,
+            [CallerMemberName] string member = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0)
         {
-            throw new NotImplementedException();
+            return new StopWatch(this, actionName, member, path, line);
         }
 
         private void CreateEntry(string member, string path, int line, Action<ISysLog> entrySetter)
@@ -71,17 +74,60 @@ namespace Elsa.Common.Logging
                     path = path.Substring(0, path.Length - 3); 
                 }
             }
-            
 
+            var entry = CreateEntry(member, path, line);
+
+            entrySetter(entry);
+
+            AsyncLogger.Write(entry);
+        }
+
+        private ISysLog CreateEntry(string member, string path, int line)
+        {
             var entry = m_database.New<ISysLog>();
 
             entry.EventDt = DateTime.Now;
             entry.SessionId = m_session.SessionId;
             entry.Method = $"{path}.{member}:{line}";
 
-            entrySetter(entry);
-
-            AsyncLogger.Write(entry);
+            return entry;
         }
+
+        private sealed class StopWatch : IDisposable
+        {
+            private readonly Logger m_owner;
+            private readonly DateTime m_startTime;
+            private readonly string m_watchName;
+            private readonly string m_member;
+            private readonly string m_path;
+            private readonly int m_line;
+
+            public StopWatch(Logger owner, string watchName, string member, string path, int line)
+            {
+                m_owner = owner;
+                m_watchName = watchName;
+                m_member = member;
+                m_path = path;
+                m_line = line;
+                m_startTime = DateTime.Now;
+            }
+
+            public void Dispose()
+            {
+                var time = (DateTime.Now - m_startTime).TotalMilliseconds;
+
+                m_owner.CreateEntry(
+                    m_member,
+                    m_path,
+                    m_line,
+                    e =>
+                        {
+                            e.MeasuredTime = (int)time;
+                            e.IsStopWatch = true;
+                            e.Message = m_watchName;
+                        });
+            }
+        }
+
     }
 }

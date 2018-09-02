@@ -6,23 +6,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Routing;
 
+using Elsa.Common.Logging;
+
 using Robowire.RoboApi.Extensibility;
 
 namespace Elsa.Common
 {
     public abstract class ElsaControllerBase : IControllerInterceptor
     {
-        protected ElsaControllerBase(IWebSession webSession)
+        private readonly ILog m_log;
+
+        protected ElsaControllerBase(IWebSession webSession, ILog log)
         {
             WebSession = webSession;
+            m_log = log;
         }
 
         protected IWebSession WebSession { get; }
-        
+
+        protected ILog Log => m_log;
+
         public bool OnRequest(object controller, RequestContext request)
         {
-            //WebSession.Initialize(request);
-
             return false;
         }
 
@@ -59,13 +64,19 @@ namespace Elsa.Common
                     throw new UnauthorizedAccessException("Requested resource is not accessible to users with default password");
                 }
             }
-            
-            defaultResultWrite(defaultInvocation());
+
+            using (m_log.StartStopwatch($"{method.DeclaringType?.Name}.{method.Name}({GetParamString(method, parameters)})"))
+            {
+                defaultResultWrite(defaultInvocation());
+            }
         }
 
         public void OnException(object controller, MethodInfo method, RequestContext context, object[] parameters, Exception exception)
         {
-            context.HttpContext.Response.StatusDescription = exception.Message;
+            var paramString = GetParamString(method, parameters);
+            m_log.Error($"{GetType().Name}.{method.Name}({paramString}) failed: \"{exception?.Message}\"", exception);
+
+            context.HttpContext.Response.StatusDescription = exception?.Message;
             
             if (exception is UnauthorizedAccessException)
             {
@@ -75,7 +86,33 @@ namespace Elsa.Common
             {
                 context.HttpContext.Response.StatusCode = 500;
             }
+        }
 
+        private static string GetParamString(MethodInfo method, object[] parameters)
+        {
+            if (Attribute.IsDefined(method, typeof(DoNotLogParamsAttribute)))
+            {
+                return "?";
+            }
+
+            return string.Join(
+                ", ",
+                parameters.Select(
+                    p =>
+                        {
+                            if (p == null)
+                            {
+                                return "null";
+                            }
+
+                            var sValue = p.ToString();
+                            if (sValue.Length > 10)
+                            {
+                                sValue = $"{sValue.Substring(0, 10)}...";
+                            }
+
+                            return sValue;
+                        }));
         }
     }
 }

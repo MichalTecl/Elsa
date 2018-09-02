@@ -5,6 +5,7 @@ using System.Linq;
 using Elsa.App.Commerce.Payments.Models;
 using Elsa.Commerce.Core;
 using Elsa.Common;
+using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
@@ -19,8 +20,8 @@ namespace Elsa.App.Commerce.Payments
         private readonly IPurchaseOrderRepository m_orderRepository;
         private readonly IPaymentRepository m_paymentRepository;
 
-        public PaymentsPairingController(IWebSession webSession, IPurchaseOrderRepository orderRepository, IPaymentRepository paymentRepository)
-            : base(webSession)
+        public PaymentsPairingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IPaymentRepository paymentRepository)
+            : base(webSession, log)
         {
             m_orderRepository = orderRepository;
             m_paymentRepository = paymentRepository;

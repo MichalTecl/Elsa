@@ -5,6 +5,7 @@ using Elsa.App.Commerce.Preview.Model;
 using Elsa.Apps.Common.ViewModels;
 using Elsa.Commerce.Core;
 using Elsa.Common;
+using Elsa.Common.Logging;
 
 using Robowire.RoboApi;
 
@@ -17,8 +18,8 @@ namespace Elsa.App.Commerce.Preview
         private readonly IOrderStatusTranslator m_statusTranslator;
         private readonly OverviewsConfig m_config;
 
-        public PreviewController(IWebSession webSession, IPurchaseOrderRepository purchaseOrderRepository, IOrderStatusTranslator statusTranslator, OverviewsConfig config)
-            : base(webSession)
+        public PreviewController(IWebSession webSession, ILog log, IPurchaseOrderRepository purchaseOrderRepository, IOrderStatusTranslator statusTranslator, OverviewsConfig config)
+            : base(webSession, log)
         {
             m_purchaseOrderRepository = purchaseOrderRepository;
             m_statusTranslator = statusTranslator;

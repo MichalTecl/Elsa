@@ -52,6 +52,10 @@
       <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>
       <Name>Elsa.Commerce.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
+      <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
+      <Name>Elsa.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj">
       <Project>{91481B08-E437-474D-9793-A135F1DB465C}</Project>
       <Name>Elsa.Core.Entities</Name>

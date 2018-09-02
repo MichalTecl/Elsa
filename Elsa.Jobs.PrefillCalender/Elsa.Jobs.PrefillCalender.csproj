@@ -48,6 +48,10 @@
       <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
       <Name>Robowire.RobOrm.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
+      <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
+      <Name>Elsa.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
       <Project>{5EF07762-137B-4BF7-8199-5961768FCAEC}</Project>
       <Name>Elsa.Jobs.Common</Name>

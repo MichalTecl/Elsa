@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Common;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
 using Robowire.RoboApi;
@@ -16,13 +17,14 @@ namespace Elsa.Users
     public class UserController : ElsaControllerBase
     {
         private readonly IDatabase m_database;
-
-        public UserController(IWebSession webSession, IDatabase database)
-            : base(webSession)
+        
+        public UserController(IWebSession webSession, ILog log, IDatabase database)
+            : base(webSession, log)
         {
             m_database = database;
         }
 
+        [DoNotLogParams]
         [AllowAnonymous]
         public IWebSession Login(string user, string password)
         {
@@ -37,6 +39,7 @@ namespace Elsa.Users
             return WebSession;
         }
 
+        [DoNotLogParams]
         [AllowWithDefaultPassword]
         public IWebSession ChangePassword(string oldPassword, string newPassword)
         {

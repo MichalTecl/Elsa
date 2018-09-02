@@ -20,6 +20,9 @@ namespace Elsa.Common.Logging
             [CallerFilePath] string path = "",
             [CallerLineNumber] int line = 0);
 
-        IDisposable StartStopwatch(string actionName);
+        IDisposable StartStopwatch(string actionName,
+            [CallerMemberName] string member = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0);
     }
 }
