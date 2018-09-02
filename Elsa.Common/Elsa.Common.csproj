@@ -62,8 +62,9 @@
     <Compile Include="ElsaControllerBase.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="IWebSession.cs" />
+    <Compile Include="Logging\AsyncLogger.cs" />
     <Compile Include="Logging\ILog.cs" />
-    <Compile Include="Logging\LogFactory.cs" />
+    <Compile Include="Logging\Logger.cs" />
     <Compile Include="PasswordHashHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\DateUtil.cs" />

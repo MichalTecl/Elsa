@@ -25,6 +25,8 @@ namespace Elsa.JobLauncher
 
         public IProject Project { get; private set; }
 
+        public long? SessionId => null; //TODO
+
         public bool VerifyPassword(string hash, string password, bool isDefault)
         {
             if (isDefault)
@@ -46,6 +48,7 @@ namespace Elsa.JobLauncher
 
             User = userRecord;
             Project = userRecord.Project;
+
         }
     }
 }

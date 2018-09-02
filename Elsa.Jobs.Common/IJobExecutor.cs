@@ -4,6 +4,6 @@ namespace Elsa.Jobs.Common
 {
     public interface IJobExecutor
     {
-        void LaunchJob(IScheduledJob jobEntry);
+        void LaunchJob(IJobSchedule jobEntry);
     }
 }

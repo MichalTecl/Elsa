@@ -47,7 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Automation\IJobExecutionHistory.cs" />
+    <Compile Include="Automation\IJobSchedule.cs" />
     <Compile Include="Automation\IScheduledJob.cs" />
     <Compile Include="Commerce\IDirectSaleChannel.cs" />
     <Compile Include="Commerce\IOrderItem.cs" />
@@ -57,6 +57,7 @@
     <Compile Include="Common\IAddress.cs" />
     <Compile Include="Common\IBaseCalendar.cs" />
     <Compile Include="Common\ICurrency.cs" />
+    <Compile Include="Common\Logging\ISysLog.cs" />
     <Compile Include="Common\IPayment.cs" />
     <Compile Include="Common\ISysConfig.cs" />
     <Compile Include="Common\Widgets\IAppWidget.cs" />
@@ -69,7 +70,6 @@
     <Compile Include="ElsaDbInstaller.cs" />
     <Compile Include="Integration\IErp.cs" />
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
-    <Compile Include="Integration\IErpProductMapping.cs" />
     <Compile Include="Integration\IPaymentSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -19,7 +19,7 @@ namespace Elsa.Commerce.Core
             Func<OrderIdentifier, IAddress> deliveryAddressFactory,
             Func<string, ICurrency> currencyByCurrencySymbol,
             IDictionary<string, IErpOrderStatusMapping> erpOrderStatusMappings,
-            IDictionary<string, IErpProductMapping> erpProductMappings)
+            IProductRepository productRepository)
         {
             var ordid = new OrderIdentifier(GetUniqueOrderNumber(source), source.OrderHash);
 
@@ -43,12 +43,18 @@ namespace Elsa.Commerce.Core
                 targetItem.TaxPercent = ParseMoney(sourceItem.TaxPercent, source, sourceItem, nameof(sourceItem.Quantity));
                 targetItem.TaxedPrice = ParseMoney(sourceItem.TaxedPrice, source, sourceItem, nameof(sourceItem.TaxedPrice));
 
-                IErpProductMapping productMapping;
-                if (!erpProductMappings.TryGetValue(sourceItem.ErpProductId, out productMapping))
+                var product = productRepository.GetProduct(
+                    source.ErpSystemId,
+                    sourceItem.ErpProductId,
+                    target.PurchaseDate,
+                    targetItem.PlacedName);
+
+                if (product == null)
                 {
-                    throw new InvalidOperationException($"Není nastaveno mapování produktu ID={sourceItem.ErpProductId} (\"{sourceItem.ProductName}\") pro systém {source.ErpSystemId}");
+                    throw new InvalidOperationException("Cannot process product");
                 }
-                targetItem.ProductId = productMapping.ProductId;
+
+                targetItem.ProductId = product.Id;
             }
 
             var invoiceAddress = invoiceAddressFactory(ordid);

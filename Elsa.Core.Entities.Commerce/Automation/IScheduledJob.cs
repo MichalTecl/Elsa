@@ -33,7 +33,6 @@ namespace Elsa.Core.Entities.Commerce.Automation
         DateTime ActiveFrom { get; set; }
         
         DateTime? ActiveTo { get; set; }
-
-        IEnumerable<IJobExecutionHistory> History { get; }
+        
     }
 }

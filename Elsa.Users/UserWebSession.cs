@@ -44,6 +44,8 @@ namespace Elsa.Users
             }
         }
 
+        public long? SessionId => m_session?.Id;
+
         public void Login(string user, string password)
         {
             EnsureInitialized();

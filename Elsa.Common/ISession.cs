@@ -9,6 +9,8 @@ namespace Elsa.Common
 
         IProject Project { get; }
 
+        long? SessionId { get; }
+
         bool VerifyPassword(string hash, string password, bool isDefault);
     }
 }

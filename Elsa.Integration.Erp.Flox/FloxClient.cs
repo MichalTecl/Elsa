@@ -15,7 +15,7 @@ namespace Elsa.Integration.Erp.Flox
 {
     public class FloxClient : IErpClient, IDisposable
     {
-        private static readonly ILog s_log = LogFactory.Get();
+        private readonly ILog m_log;
 
         private readonly FloxClientConfig m_config;
 
@@ -25,10 +25,11 @@ namespace Elsa.Integration.Erp.Flox
 
         private readonly WebFormsClient m_client = new WebFormsClient();
 
-        public FloxClient(FloxClientConfig config, FloxDataMapper mapper)
+        public FloxClient(FloxClientConfig config, FloxDataMapper mapper, ILog log)
         {
             m_config = config;
             Mapper = mapper;
+            m_log = log;
         }
 
         public IErp Erp { get; set; }
@@ -39,7 +40,7 @@ namespace Elsa.Integration.Erp.Flox
 
         public IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null)
         {
-            s_log.Debug($"Zacinam stahovani objednavek od={from}, do={to}");
+            m_log.Info($"Zacinam stahovani objednavek od={from}, do={to}");
             EnsureSession();
 
             var xDateFrom = from.ToString("d.+M.+yyyy");
@@ -92,6 +93,7 @@ namespace Elsa.Integration.Erp.Flox
 
         public void MarkOrderPaid(string orderNumber)
         {
+            m_log.Error($"!!! Flox - MarkOrderPaid({orderNumber}) - neaktivni operace");
             Console.WriteLine($"!!! Flox - MarkOrderPaid({orderNumber}) - neaktivni operace");
         }
 
@@ -125,7 +127,7 @@ namespace Elsa.Integration.Erp.Flox
 
         private void Login()
         {
-            s_log.Debug("Prihlasuji se k Floxu");
+            m_log.Info("Prihlasuji se k Floxu");
             
             var result =
                 m_client.Post(ActionUrl("/admin/login/authenticate/"))
@@ -135,7 +137,7 @@ namespace Elsa.Integration.Erp.Flox
 
             if (!result.Success)
             {
-                s_log.Error($"Prihlaseni k Floxu se nezdarilo: \"{result.OriginalMessage}\"");
+                m_log.Error($"Prihlaseni k Floxu se nezdarilo: \"{result.OriginalMessage}\"");
                 throw new Exception(result.OriginalMessage);
             }
             
@@ -174,7 +176,7 @@ namespace Elsa.Integration.Erp.Flox
             }
             catch (Exception ex)
             {
-                s_log.Error("Proihlaseni k Floxu selhalo", ex);
+                m_log.Error("Proihlaseni k Floxu selhalo", ex);
                 throw;
             }
         }

@@ -39,8 +39,19 @@ namespace Elsa.JobLauncher
                 session.Login(m_user, m_password);
 
                 var jobRepo = locator.Get<IScheduledJobsRepository>();
+
+                Console.WriteLine("Hledam aktualni job:");
                 var job = jobRepo.GetCurrentJob(session.Project.Id);
 
+                if (job == null)
+                {
+                    Console.WriteLine("Nic, cekam 30s...");
+                }
+                else
+                {
+                    Console.WriteLine($"Nalezen job {job.ScheduledJob.Name}");
+                }
+                
                 if (job == null)
                 {
                     return 30000;

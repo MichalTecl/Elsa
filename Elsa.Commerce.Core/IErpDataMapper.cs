@@ -18,6 +18,6 @@ namespace Elsa.Commerce.Core
             Func<OrderIdentifier, IAddress> deliveryAddressFactory,
             Func<string, ICurrency> currencyByCurrencySymbol,
             IDictionary<string, IErpOrderStatusMapping> erpOrderStatusMappings,
-            IDictionary<string, IErpProductMapping> erpProductMappings);
+            IProductRepository productRepository);
     }
 }

@@ -1,4 +1,7 @@
-﻿using Elsa.Core.Entities.Commerce.Common;
+﻿using System;
+
+using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Integration;
 
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -15,6 +18,16 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         [NVarchar(255, false)]
         string Name { get; set; }
 
+        int? ErpId { get; set; }
+
+        IErp Erp { get; }
+
         IProject Project { get; }
+
+        [NotFk]
+        [NVarchar(255, true)]
+        string ErpProductId { get; set; }
+
+        DateTime ProductNameReceivedAt { get; set; }
     }
 }

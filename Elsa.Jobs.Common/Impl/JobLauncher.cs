@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Elsa.Common;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Automation;
 
 using Robowire;
@@ -10,53 +11,37 @@ namespace Elsa.Jobs.Common.Impl
 {
     public class JobLauncher : IJobExecutor
     {
-        private readonly IDatabase m_database;
-
         private readonly IServiceLocator m_serviceLocator;
+        private readonly IScheduledJobsRepository m_scheduledJobs;
+        private readonly ILog m_log;
 
-        private readonly ISession m_session;
-
-        public JobLauncher(IDatabase database, IServiceLocator serviceLocator, ISession session)
+        public JobLauncher(IServiceLocator serviceLocator, IScheduledJobsRepository scheduledJobs, ILog log)
         {
-            m_database = database;
             m_serviceLocator = serviceLocator;
-            m_session = session;
+            m_scheduledJobs = scheduledJobs;
+            m_log = log;
         }
 
-        public void LaunchJob(IScheduledJob jobEntry)
+        public void LaunchJob(IJobSchedule jobEntry)
         {
-            var jobExecutable = m_serviceLocator.InstantiateNow<IExecutableJob>(jobEntry.ModuleClass);
+            m_log.Info($"Vytvarim instanci {jobEntry.ScheduledJob.ModuleClass}");
+            var jobExecutable = m_serviceLocator.InstantiateNow<IExecutableJob>(jobEntry.ScheduledJob.ModuleClass);
 
-            var historyRecord = m_database.New<IJobExecutionHistory>();
-            historyRecord.ScheduledJobId = jobEntry.Id;
-            historyRecord.ExecUserId = m_session.User.Id;
-            historyRecord.LastStartDt = DateTime.Now;
 
-            m_database.Save(historyRecord);
+            m_scheduledJobs.MarkJobStarted(jobEntry);
 
             try
             {
-                jobExecutable.Run(jobEntry.CustomData);
+                m_log.Info("Spoustim job");
+                jobExecutable.Run(jobEntry.ScheduledJob.CustomData);
+
+                m_log.Info("Job uspesne dokoncen");
+                m_scheduledJobs.MarkJobSucceeded(jobEntry);
             }
             catch (Exception ex)
             {
-                var msg = ex.ToString();
-                if (msg.Length > 256)
-                {
-                    msg = msg.Substring(0, 256);
-                }
-
-                historyRecord.ErrorMessage = msg.Length > 255 ? msg.Substring(0, 255) : msg;
-                historyRecord.LastEndDt = DateTime.Now;
-                
-                m_database.Save(historyRecord);
-
-                throw;
-            }
-            finally
-            {
-                historyRecord.LastEndDt = DateTime.Now;
-                m_database.Save(historyRecord);
+                m_log.Error("Job selhal", ex);
+                m_scheduledJobs.MarkJobFailed(jobEntry);
             }
         }
     }

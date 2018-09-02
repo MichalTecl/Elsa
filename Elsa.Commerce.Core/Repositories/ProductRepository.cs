@@ -21,53 +21,54 @@ namespace Elsa.Commerce.Core.Repositories
             m_session = session;
         }
 
-        public IProduct GetProduct(string erpProductId)
+        public void PreloadCache(int erpId)
         {
-            throw new NotImplementedException("TODO");
-            /*
-            var product = m_index.FirstOrDefault(p => p.ErpProductId == erpProductId && p.ProjectId == m_session.Project.Id);
-            if (product == null)
-            {
-                product =
-                    m_database.SelectFrom<IProduct>()
-                        .Where(p => p.ProjectId == m_session.Project.Id && p.ErpProductId == erpProductId)
-                        .Execute()
-                        .FirstOrDefault();
-
-                if (product != null)
-                {
-                    m_index.Add(product);
-                }
-            }
-
-            return product;*/
+            m_index.Clear();
+            m_index.AddRange(
+                m_database.SelectFrom<IProduct>()
+                    .Where(p => p.ProjectId == m_session.Project.Id)
+                    .Where(p => p.ErpId == erpId)
+                    .Execute());
         }
 
-        public void SaveProduct(IProduct product)
+        public IProduct GetProduct(int erpId, string erpProductId, DateTime orderDt, string productName)
         {
-            throw new NotImplementedException("TODO");
-            /*
-            var cachedProduct = m_index.FirstOrDefault(p => p.ErpProductId == product.ErpProductId && p.ProjectId == m_session.Project.Id);
-            if (cachedProduct != null)
+            var product =  m_index.FirstOrDefault(p => p.ErpId == erpId && p.ErpProductId == erpProductId)
+                        ?? GetProductFromDatabase(erpId, erpProductId);
+
+            if (product == null)
             {
-                if (product.Id > 0 && product.Id == cachedProduct.Id && product.Name == cachedProduct.Name)
-                {
-                    return;
-                }
+                product = m_database.New<IProduct>();
+                product.ErpId = erpId;
+                product.ErpProductId = erpProductId;
+                product.ProjectId = m_session.Project.Id;
+                product.Name = productName;
+                product.ProductNameReceivedAt = orderDt;
+
+                m_database.Save(product);
+                m_index.Add(product);
+            }
+            else if (product.Name != productName && product.ProductNameReceivedAt < orderDt)
+            {
+                product.Name = productName;
+                product.ProductNameReceivedAt = orderDt;
+
+                m_database.Save(product);
+                m_index.Remove(product);
+                m_index.Add(product);
             }
 
+            return product;
+        }
 
-            if (product.Id > 0 && product.ProjectId != m_session.Project.Id)
-            {
-                throw new InvalidOperationException("Project assignment mischmatch");
-            }
-
-            product.ProjectId = m_session.Project.Id;
-
-            m_database.Save(product);
-
-            m_index.Clear();
-            */
+        private IProduct GetProductFromDatabase(int erpId, string erpProductId)
+        {
+            return
+                m_database.SelectFrom<IProduct>()
+                    .Where(p => p.ErpId == erpId)
+                    .Where(p => p.ErpProductId == erpProductId)
+                    .Execute()
+                    .FirstOrDefault();
         }
     }
 }

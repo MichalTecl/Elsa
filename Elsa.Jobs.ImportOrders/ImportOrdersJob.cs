@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Robowire;
 using Elsa.Commerce.Core;
 using Elsa.Common;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 
 using Robowire.RobOrm.Core;
@@ -24,13 +25,15 @@ namespace Elsa.Jobs.ImportOrders
         private readonly IPurchaseOrderRepository m_purchaseOrderRepository;
         private readonly IDatabase m_database;
         private readonly ISession m_session;
+        private readonly ILog m_log;
         
-        public ImportOrdersJob(IErpClientFactory erpClientFactory, IDatabase database, ISession session, IPurchaseOrderRepository purchaseOrderRepository)
+        public ImportOrdersJob(IErpClientFactory erpClientFactory, IDatabase database, ISession session, IPurchaseOrderRepository purchaseOrderRepository, ILog log)
         {
             m_erpClientFactory = erpClientFactory;
             m_database = database;
             m_session = session;
             m_purchaseOrderRepository = purchaseOrderRepository;
+            m_log = log;
         }
 
         public void Run(string customDataJson)
@@ -39,7 +42,7 @@ namespace Elsa.Jobs.ImportOrders
 
             var erp = m_erpClientFactory.GetErpClient(cuData.ErpId);
 
-            Console.WriteLine($"ERP = {erp.Erp.Description}");
+           m_log.Info($"ERP = {erp.Erp.Description}");
 
             try
             {
@@ -67,11 +70,11 @@ namespace Elsa.Jobs.ImportOrders
 
                     m_purchaseOrderRepository.PreloadOrders(startDate, endDate);
 
-                    Console.WriteLine($"Stahuji objednavky {startDate} - {endDate}");
+                    m_log.Info($"Stahuji objednavky {startDate} - {endDate}");
 
                     var erpOrders = erp.LoadOrders(startDate, endDate).ToList();
 
-                    Console.WriteLine($"Stazeno {erpOrders.Count} zaznamu");
+                    m_log.Info($"Stazeno {erpOrders.Count} zaznamu");
                     
                     using (var trx = m_database.OpenTransaction())
                     {
@@ -81,23 +84,19 @@ namespace Elsa.Jobs.ImportOrders
                         }
 
                         trx.Commit();
-                        Console.WriteLine("Ulozeno");
+                        m_log.Info("Ulozeno");
                     }
 
                     startDate = endDate;
                 }
 
-               Console.WriteLine("a je to");
+               m_log.Info("Job dokoncen");
 
             }
             finally
             {
                 (erp as IDisposable)?.Dispose();
             }
-
-
-
-            ;
         }
     }
 }

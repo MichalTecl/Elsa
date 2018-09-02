@@ -22,7 +22,7 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly ICurrencyRepository m_currencyRepository;
 
         private readonly IOrderStatusMappingRepository m_statusMappingRepository;
-        private readonly IProductMappingRepository m_productMappingRepository;
+        private readonly IProductRepository m_productRepository;
 
         private IPurchaseOrder m_order;
 
@@ -54,7 +54,7 @@ namespace Elsa.Commerce.Core.Repositories
         
         public ICurrency Currency { get; private set; } 
 
-        public OrderMapperHost(IErpDataMapper mapper, IErpOrderModel erpOrder, IPurchaseOrderRepository purchaseOrderRepository, IDatabase database, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductMappingRepository productMappingRepository)
+        public OrderMapperHost(IErpDataMapper mapper, IErpOrderModel erpOrder, IPurchaseOrderRepository purchaseOrderRepository, IDatabase database, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productMappingRepository)
         {
             m_mapper = mapper;
             m_erpOrder = erpOrder;
@@ -62,7 +62,7 @@ namespace Elsa.Commerce.Core.Repositories
             m_database = database;
             m_currencyRepository = currencyRepository;
             m_statusMappingRepository = statusMappingRepository;
-            m_productMappingRepository = productMappingRepository;
+            m_productRepository = productMappingRepository;
         }
 
         public bool Map()
@@ -75,7 +75,7 @@ namespace Elsa.Commerce.Core.Repositories
                 i => GetAddress(i.ErpOrderId, false),
                 GetCurrency,
                 m_statusMappingRepository.GetMappings(m_erpOrder.ErpSystemId),
-                m_productMappingRepository.GetMappings(m_erpOrder.ErpSystemId));
+                m_productRepository);
 
             return !m_stopMapping;
         }

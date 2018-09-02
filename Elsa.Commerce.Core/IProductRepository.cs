@@ -10,8 +10,8 @@ namespace Elsa.Commerce.Core
 {
     public interface IProductRepository
     {
-        IProduct GetProduct(string erpProductId);
+        void PreloadCache(int erpId);
 
-        void SaveProduct(IProduct product);
+        IProduct GetProduct(int erpId, string erpProductId, DateTime orderDt, string productName);
     }
 }

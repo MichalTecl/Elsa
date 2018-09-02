@@ -1,17 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace Elsa.Common.Logging
 {
     public interface ILog
     {
-        void Debug(string s);
+        void Info(string s,
+            [CallerMemberName] string member = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0);
 
-        void Error(string s, Exception e);
+        void Error(string s, Exception e,
+            [CallerMemberName] string member = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0);
 
-        void Error(string s);
+        void Error(string s,
+            [CallerMemberName] string member = "",
+            [CallerFilePath] string path = "",
+            [CallerLineNumber] int line = 0);
+
+        IDisposable StartStopwatch(string actionName);
     }
 }

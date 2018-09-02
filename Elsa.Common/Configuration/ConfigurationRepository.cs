@@ -13,15 +13,16 @@ namespace Elsa.Common.Configuration
 {
     public class ConfigurationRepository : IConfigurationRepository
     {
-        private static readonly ILog s_log = LogFactory.Get();
+        private readonly ILog m_log;
 
         private readonly IDatabase m_database;
 
         private List<ISysConfig> m_allConfig;
 
-        public ConfigurationRepository(IDatabase database)
+        public ConfigurationRepository(IDatabase database, ILog log)
         {
             m_database = database;
+            m_log = log;
         }
       
         public T Load<T>(int? projectId, int? userId) where T : new()
@@ -116,7 +117,7 @@ namespace Elsa.Common.Configuration
 
             if (entry == null)
             {
-                s_log.Error($"Config entry {definition.Key} not found. ProjectId={projectId}, UserId={userId}");
+                m_log.Error($"Config entry {definition.Key} not found. ProjectId={projectId}, UserId={userId}");
             }
 
             return entry;

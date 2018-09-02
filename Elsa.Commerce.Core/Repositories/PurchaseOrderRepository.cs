@@ -16,21 +16,20 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly IDatabase m_database;
         private readonly ISession m_session;
         private readonly IDictionary<int, IErpDataMapper> m_mapperIndex = new Dictionary<int, IErpDataMapper>();
-        
+        private readonly IProductRepository m_productRepository;
+
         private readonly ICurrencyRepository m_currencyRepository;
         private readonly IOrderStatusMappingRepository m_statusMappingRepository;
         private readonly List<IPurchaseOrder> m_cache = new List<IPurchaseOrder>();
-
-        private readonly IProductMappingRepository m_productMappingRepository;
-
-        public PurchaseOrderRepository(IErpClientFactory erpClientFactory, IDatabase database, ISession session, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductMappingRepository productMappingRepository)
+        
+        public PurchaseOrderRepository(IErpClientFactory erpClientFactory, IDatabase database, ISession session, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productRepository)
         {
             m_erpClientFactory = erpClientFactory;
             m_database = database;
             m_session = session;
             m_currencyRepository = currencyRepository;
             m_statusMappingRepository = statusMappingRepository;
-            m_productMappingRepository = productMappingRepository;
+            m_productRepository = productRepository;
         }
 
         public long ImportErpOrder(IErpOrderModel orderModel)
@@ -40,7 +39,7 @@ namespace Elsa.Commerce.Core.Repositories
             {
                 var mapper = GetMapper(orderModel);
 
-                var host = new OrderMapperHost(mapper, orderModel, this, m_database, m_currencyRepository, m_statusMappingRepository, m_productMappingRepository);
+                var host = new OrderMapperHost(mapper, orderModel, this, m_database, m_currencyRepository, m_statusMappingRepository, m_productRepository);
                 if (!host.Map())
                 {
                     trx.Commit();

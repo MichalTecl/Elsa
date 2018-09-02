@@ -55,7 +55,6 @@
     <Compile Include="IOrderStatusRepository.cs" />
     <Compile Include="IOrderStatusTranslator.cs" />
     <Compile Include="IPaymentRepository.cs" />
-    <Compile Include="IProductMappingRepository.cs" />
     <Compile Include="IProductRepository.cs" />
     <Compile Include="IPurchaseOrderRepository.cs" />
     <Compile Include="Model\IErpOrderItemModel.cs" />
@@ -70,7 +69,6 @@
     <Compile Include="Repositories\OrderStatusMappingRepository.cs" />
     <Compile Include="Repositories\OrderStatusRepository.cs" />
     <Compile Include="Repositories\PaymentRepository.cs" />
-    <Compile Include="Repositories\ProductMappingRepository.cs" />
     <Compile Include="Repositories\ProductRepository.cs" />
     <Compile Include="Repositories\PurchaseOrderRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
