@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common.Logging;
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.Erp.Fler.Model;
 using Elsa.Integration.Erp.Flox;
@@ -42,15 +43,15 @@ namespace Elsa.Integration.Erp.Fler
             }
         }
 
-        public void MarkOrderPaid(string orderNumber)
+        public void MarkOrderPaid(IPurchaseOrder po)
         {
             if (!m_config.EnableWriteOperations)
             {
-                m_log.Error($"!!! Fler - MarkOrderPaid({orderNumber}) - neaktivni operace");
+                m_log.Error($"!!! Fler - MarkOrderPaid({po.OrderNumber}) - neaktivni operace");
                 return;
             }
 
-            m_fler.SetOrderPaid(orderNumber);
+            m_fler.SetOrderPaid(po.ErpOrderId);
         }
 
         public IErpOrderModel LoadOrder(string orderNumber)

@@ -11,6 +11,9 @@ namespace Elsa.Common.Communication
     {
         private readonly CookieContainer m_container = new CookieContainer();
 
+       
+        
+
         public IPostBuilder Post(string url)
         {
             return new PostBuilder(this, url);
@@ -46,6 +49,8 @@ namespace Elsa.Common.Communication
             {
                 webRequest.CookieContainer = m_container;
             }
+
+            request.Timeout = 1000 * 60 * 10;
             return request;
         }
 

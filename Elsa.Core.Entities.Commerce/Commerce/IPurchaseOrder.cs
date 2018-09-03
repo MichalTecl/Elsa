@@ -107,5 +107,9 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         IUser PaymentPairingUser { get; }
 
         DateTime? PaymentPairingDt { get; set; }
+
+        [NotFk]
+        [NVarchar(255, false)]
+        string ErpOrderId { get; set; }
     }
 }

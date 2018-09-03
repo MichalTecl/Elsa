@@ -60,7 +60,7 @@ namespace Elsa.Commerce.Core.Impl
                     m_database.Save(order);
 
                     var erp = m_clientFactory.GetErpClient(order.ErpId.Value);
-                    erp.MarkOrderPaid(order.OrderNumber);
+                    erp.MarkOrderPaid(order);
 
                     var erpOrder = erp.LoadOrder(order.OrderNumber);
                     if (erpOrder == null)

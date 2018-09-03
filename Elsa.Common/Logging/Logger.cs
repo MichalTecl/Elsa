@@ -79,6 +79,11 @@ namespace Elsa.Common.Logging
 
             entrySetter(entry);
 
+            if (entry.Message.Length > 1000)
+            {
+                entry.Message = $"{entry.Message.Substring(0, 997)}...";
+            }
+
             AsyncLogger.Write(entry);
         }
 

@@ -84,6 +84,7 @@ namespace Elsa.Commerce.Core
 
         protected virtual void MapTopLevelProperties(IErpOrderModel source, IPurchaseOrder target)
         {
+            target.ErpOrderId = source.ErpOrderId;
             target.OrderNumber = source.OrderNumber;
             target.OrderHash = source.OrderHash;
             target.PreInvoiceId = source.PreInvId;

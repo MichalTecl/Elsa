@@ -7,6 +7,7 @@ using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common.Communication;
 using Elsa.Common.Logging;
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.Erp.Flox.Protocol;
 using Elsa.Integration.Erp.Flox.Protocol.OrderModel;
@@ -103,15 +104,15 @@ namespace Elsa.Integration.Erp.Flox
             }
         }
 
-        public void MarkOrderPaid(string orderNumber)
+        public void MarkOrderPaid(IPurchaseOrder po)
         {
             if (!m_config.EnableWriteOperations)
             {
-                m_log.Error($"!!! Flox - MarkOrderPaid({orderNumber}) - neaktivni operace");
+                m_log.Error($"!!! Flox - MarkOrderPaid({po.OrderNumber}) - neaktivni operace");
                 return;
             }
 
-            ChangeOrderStatus(orderNumber, FloxOrderStatuses.Paid);
+            ChangeOrderStatus(po.ErpOrderId, FloxOrderStatuses.Paid);
         }
 
         public IErpOrderModel LoadOrder(string orderNumber)
