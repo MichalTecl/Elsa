@@ -79,7 +79,7 @@ namespace Elsa.Jobs.PaymentPairing
 
                     var payment = payments.First();
 
-                    m_log.Info("Platba nalezena, paruji...");
+                    m_log.Info($"Platba k objednavce {order.OrderNumber} nalezena, paruji...");
 
                     //TODO currencies
                     if (Math.Abs(payment.Value - order.PriceWithVat) > 0.01m)

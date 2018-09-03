@@ -24,5 +24,8 @@ namespace Elsa.Integration.Erp.Flox
 
         [ConfigEntry("Flox.OrderSyncHistoryDays", ConfigEntryScope.Project, ConfigEntryScope.Global)]
         public int OrderSyncHistoryDays { get; set; }
+
+        [ConfigEntry("Flox.EnableWriteOperations", ConfigEntryScope.User, ConfigEntryScope.Project)]
+        public bool EnableWriteOperations { get; set; }
     }
 }

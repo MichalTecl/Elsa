@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Commerce.Core;
@@ -32,11 +33,19 @@ namespace Elsa.Jobs.SetPaidStatus
 
             foreach (var order in toBePaid)
             {
-                var podText = order.IsPayOnDelivery ? "DOBIRKA" : string.Empty;
+                try
+                {
+                    var podText = order.IsPayOnDelivery ? "DOBIRKA" : string.Empty;
 
-                m_log.Info($"Nastavuji objednavku {order.OrderNumber} '{order.ErpStatusName}' {podText} jako zaplacenou");
-                m_ordersFacade.SetOrderPaid(order.Id, null);
-                m_log.Info($"Objednavka {order.OrderNumber} '{order.ErpStatusName}' {podText} nastavena OK");
+                    m_log.Info(
+                        $"Nastavuji objednavku {order.OrderNumber} '{order.ErpStatusName}' {podText} jako zaplacenou");
+                    m_ordersFacade.SetOrderPaid(order.Id, null);
+                    m_log.Info($"Objednavka {order.OrderNumber} '{order.ErpStatusName}' {podText} nastavena OK");
+                }
+                catch (Exception ex)
+                {
+                    m_log.Error($"Pokus o nastaveni objednavky {order.Erp.Description}:{order.OrderNumber} jako 'Zaplaceno' selhal", ex);
+                }
             }
         }
 

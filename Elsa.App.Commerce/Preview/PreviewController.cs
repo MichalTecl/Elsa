@@ -26,6 +26,7 @@ namespace Elsa.App.Commerce.Preview
             m_config = config;
         }
 
+        [DoNotLog]
         public ReportTableViewModel GetOrdersOverview()
         {
             var report = new ReportTableViewModel();
@@ -39,6 +40,7 @@ namespace Elsa.App.Commerce.Preview
             return report;
         }
 
+        [DoNotLog]
         public MissingPaymentsResult GetMissingPaymentsCount()
         {
             return new MissingPaymentsResult(

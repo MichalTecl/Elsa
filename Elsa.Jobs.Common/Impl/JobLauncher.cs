@@ -1,11 +1,9 @@
 ﻿using System;
 
-using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Automation;
 
 using Robowire;
-using Robowire.RobOrm.Core;
 
 namespace Elsa.Jobs.Common.Impl
 {

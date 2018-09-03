@@ -49,6 +49,7 @@
     <Compile Include="FloxDataMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\DefaultResponse.cs" />
+    <Compile Include="Protocol\FloxOrderStatuses.cs" />
     <Compile Include="Protocol\OrderModel\ExportDocument.cs" />
     <Compile Include="Protocol\OrderModel\FloxErpOrderModel.cs" />
     <Compile Include="Protocol\OrderModel\OrderItem.cs" />

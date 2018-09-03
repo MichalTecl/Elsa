@@ -114,7 +114,7 @@ namespace Elsa.Integration.Erp.Fler.Model
         
         public string FormattedHouseNumber => m_order.address_delivery.address;
 
-        public bool IsPayOnDelivery => m_order.info.payment_is_upfront != 0;
+        public bool IsPayOnDelivery => m_order.info.payment_is_upfront != 1;
         
         public IEnumerable<IErpPriceElementModel> OrderPriceElements
         {

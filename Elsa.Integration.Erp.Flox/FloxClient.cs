@@ -86,15 +86,32 @@ namespace Elsa.Integration.Erp.Flox
             return ordersModel.Orders.Orders;
         }
 
-        public void ChangeOrderStatus(string orderId)
+        private void ChangeOrderStatus(string orderId, string status)
         {
-            throw new NotImplementedException();
+            EnsureSession();
+
+            var result = m_client.Post(ActionUrl("/erp/orders/main/changeStatus"))
+                   .Field("arf", m_csrfToken)
+                   .Field("order_id", orderId)
+                   .Field("status", status)
+                   .Field("statusmail", /*statusmail ? "on" :*/ string.Empty)
+                   .Call<DefaultResponse>();
+
+            if (!result.Success)
+            {
+                throw new Exception(result.OriginalMessage);
+            }
         }
 
         public void MarkOrderPaid(string orderNumber)
         {
-            m_log.Error($"!!! Flox - MarkOrderPaid({orderNumber}) - neaktivni operace");
-            Console.WriteLine($"!!! Flox - MarkOrderPaid({orderNumber}) - neaktivni operace");
+            if (!m_config.EnableWriteOperations)
+            {
+                m_log.Error($"!!! Flox - MarkOrderPaid({orderNumber}) - neaktivni operace");
+                return;
+            }
+
+            ChangeOrderStatus(orderNumber, FloxOrderStatuses.Paid);
         }
 
         public IErpOrderModel LoadOrder(string orderNumber)

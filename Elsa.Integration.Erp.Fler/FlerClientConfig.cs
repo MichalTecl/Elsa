@@ -24,5 +24,7 @@ namespace Elsa.Integration.Erp.Fler
         [ConfigEntry("Fler.Password", ConfigEntryScope.Project)]
         public string Password { get; set; }
 
+        [ConfigEntry("Fler.EnableWriteOperations", ConfigEntryScope.User, ConfigEntryScope.Project)]
+        public bool EnableWriteOperations { get; set; }
     }
 }

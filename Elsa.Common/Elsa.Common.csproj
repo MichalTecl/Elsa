@@ -59,6 +59,7 @@
     <Compile Include="Configuration\ConfigurationRepository.cs" />
     <Compile Include="Configuration\IConfigEntryDefinition.cs" />
     <Compile Include="Configuration\IConfigurationRepository.cs" />
+    <Compile Include="DoNotLogAttribute.cs" />
     <Compile Include="DoNotLogParamsAttribute.cs" />
     <Compile Include="ElsaControllerBase.cs" />
     <Compile Include="ISession.cs" />

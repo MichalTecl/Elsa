@@ -65,7 +65,16 @@ namespace Elsa.Common
                 }
             }
 
-            using (m_log.StartStopwatch($"{method.DeclaringType?.Name}.{method.Name}({GetParamString(method, parameters)})"))
+            if (ShouldBeLogged(method))
+            {
+                using (
+                    m_log.StartStopwatch(
+                        $"{method.DeclaringType?.Name}.{method.Name}({GetParamString(method, parameters)})"))
+                {
+                    defaultResultWrite(defaultInvocation());
+                }
+            }
+            else
             {
                 defaultResultWrite(defaultInvocation());
             }
@@ -113,6 +122,11 @@ namespace Elsa.Common
 
                             return sValue;
                         }));
+        }
+
+        private static bool ShouldBeLogged(MethodInfo method)
+        {
+            return !Attribute.IsDefined(method, typeof(DoNotLogAttribute));
         }
     }
 }

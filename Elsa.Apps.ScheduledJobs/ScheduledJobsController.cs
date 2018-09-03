@@ -27,6 +27,7 @@ namespace Elsa.Apps.ScheduledJobs
             m_executor = executor;
         }
 
+        [DoNotLog]
         public IEnumerable<ScheduledJobStatus> GetStatus()
         {
             var scheduler = m_jobsRepository.GetCompleteScheduler().OrderBy(s => s.LoopLaunchPriority).ToList();
@@ -86,7 +87,7 @@ namespace Elsa.Apps.ScheduledJobs
                 return "Probíhá";
             }
 
-            return (sch.LastRunFailed ?? false) ? "OK" : "Selhal";
+            return (sch.LastRunFailed ?? false) ? "Selhal" : "OK";
         }
 
         private bool IsRunning(IJobSchedule sche)
