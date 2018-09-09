@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{61DD96B7-BF13-4C48-9353-08F2F907048E}</ProjectGuid>
+    <ProjectGuid>{3F09C69A-33B7-4A85-91C6-516BB3E08771}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Elsa.Commerce.Core</RootNamespace>
-    <AssemblyName>Elsa.Commerce.Core</AssemblyName>
+    <RootNamespace>Elsa.Apps.Inventory</RootNamespace>
+    <AssemblyName>Elsa.Apps.Inventory</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -40,56 +44,35 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ErpDataMapperBase.cs" />
-    <Compile Include="ICurrencyRepository.cs" />
-    <Compile Include="IErpClient.cs" />
-    <Compile Include="IErpClientFactory.cs" />
-    <Compile Include="IErpCommonSettings.cs" />
-    <Compile Include="IErpDataMapper.cs" />
-    <Compile Include="IErpRepository.cs" />
-    <Compile Include="Impl\ErpClientFactory.cs" />
-    <Compile Include="Impl\OrdersFacade.cs" />
-    <Compile Include="Impl\OrderStatusTranslator.cs" />
-    <Compile Include="IOrdersFacade.cs" />
-    <Compile Include="IOrderStatusConverter.cs" />
-    <Compile Include="IOrderStatusMappingRepository.cs" />
-    <Compile Include="IOrderStatusRepository.cs" />
-    <Compile Include="IOrderStatusTranslator.cs" />
-    <Compile Include="IPaymentRepository.cs" />
-    <Compile Include="IProductRepository.cs" />
-    <Compile Include="IPurchaseOrderRepository.cs" />
-    <Compile Include="Model\IVirtualProductMappableItem.cs" />
-    <Compile Include="Repositories\ErpRepository.cs" />
-    <Compile Include="Repositories\VirtualProductRepository.cs" />
-    <Compile Include="VirtualProducts\IVirtualProductRepository.cs" />
-    <Compile Include="Model\IErpOrderItemModel.cs" />
-    <Compile Include="Model\IErpOrderModel.cs" />
-    <Compile Include="Model\IErpPriceElementModel.cs" />
-    <Compile Include="Model\LastPaymentInfo.cs" />
-    <Compile Include="Model\OrdersOverviewModel.cs" />
-    <Compile Include="OrderIdentifier.cs" />
-    <Compile Include="OrderStatus.cs" />
-    <Compile Include="Repositories\CurrencyRepository.cs" />
-    <Compile Include="Repositories\OrderMapperHost.cs" />
-    <Compile Include="Repositories\OrderStatusMappingRepository.cs" />
-    <Compile Include="Repositories\OrderStatusRepository.cs" />
-    <Compile Include="Repositories\PaymentRepository.cs" />
-    <Compile Include="Repositories\ProductRepository.cs" />
-    <Compile Include="Repositories\PurchaseOrderRepository.cs" />
+    <Compile Include="Model\MappableItemViewModel.cs" />
+    <Compile Include="Model\VirtualProductViewModel.cs" />
+    <Compile Include="VirtualProductsController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Registry.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Configuration\" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.Common.Expressions\Robowire.Common.Expressions.csproj">
+      <Project>{e9aeacb2-d6e8-4f61-af63-3578f9831594}</Project>
+      <Name>Robowire.Common.Expressions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
+      <Project>{895e4a3c-99d4-4e2e-872c-7479140d0cf5}</Project>
+      <Name>Robowire.RoboApi</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
-      <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
+      <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
       <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj">
+      <Project>{f2986071-08cd-42de-98fa-57e6fce729c5}</Project>
+      <Name>Robowire.RobOrm.SqlServer</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
       <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
+      <Project>{61dd96b7-bf13-4c48-9353-08f2f907048e}</Project>
+      <Name>Elsa.Commerce.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{d4607e8c-a5d2-423a-8c78-56b188c567ed}</Project>
@@ -103,6 +86,9 @@
       <Project>{a9148d58-0f0e-43e7-8a11-a9f9bb04333c}</Project>
       <Name>Elsa.Users</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

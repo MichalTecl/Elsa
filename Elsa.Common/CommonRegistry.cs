@@ -1,4 +1,5 @@
-﻿using Elsa.Common.Configuration;
+﻿using Elsa.Common.Caching;
+using Elsa.Common.Configuration;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce;
 
@@ -16,7 +17,7 @@ namespace Elsa.Common
             
             container.Setup(c => c.For<IConfigurationRepository>().Use<ConfigurationRepository>());
             container.Setup(c => c.For<ILog>().Use<Logger>());
-
+            container.Setup(c => c.For<ICache>().Use<Cache>());
         }
     }
 }

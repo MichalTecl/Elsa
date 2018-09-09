@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Core;
 using Elsa.Core.Entities.Commerce.Integration;
 
 using Robowire.RobOrm.Core;
@@ -10,18 +11,14 @@ using Robowire.RobOrm.SqlServer.Attributes;
 namespace Elsa.Core.Entities.Commerce.Common
 {
     [Entity]
-    public interface IPayment
+    public interface IPayment : IProjectRelatedEntity
     {
         long Id { get; }
-
-        int ProjectId { get; set; }
-
+        
         int PaymentSourceId { get; set; }
 
         IPaymentSource PaymentSource { get; }
-
-        IProject Project { get; }
-
+        
         [NotFk]
         [NVarchar(256, false)]
         string TransactionId { get; set; }

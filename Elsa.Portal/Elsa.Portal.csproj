@@ -107,9 +107,11 @@
     <None Include="Bundles\Lanta" />
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
+    <Content Include="Script\Apps\Inventory\VirtualProducts\VirtualProductsVM.js" />
     <Content Include="Script\Apps\Jobs\ScheduledJobs.VM.js" />
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
+    <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />
     <Content Include="UI\Pages\PaymentPairing.html" />
     <Content Include="Script\Apps\WidgetsVM.js" />
     <Content Include="Script\Apps\User\UserVM.js" />
@@ -200,6 +202,10 @@
     <ProjectReference Include="..\Elsa.Apps.Common\Elsa.Apps.Common.csproj">
       <Project>{b09c721a-b22e-47a6-bc6b-9cd9155e174a}</Project>
       <Name>Elsa.Apps.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Apps.Inventory\Elsa.Apps.Inventory.csproj">
+      <Project>{3F09C69A-33B7-4A85-91C6-516BB3E08771}</Project>
+      <Name>Elsa.Apps.Inventory</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Apps.ScheduledJobs\Elsa.Apps.ScheduledJobs.csproj">
       <Project>{55482891-37C2-4C35-83BE-68100012AE25}</Project>

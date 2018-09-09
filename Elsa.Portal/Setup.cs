@@ -1,6 +1,7 @@
 ﻿
 using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
+using Elsa.Apps.Inventory;
 using Elsa.Apps.ScheduledJobs;
 using Elsa.Common;
 using Elsa.Users;
@@ -43,6 +44,7 @@ namespace Elsa.Portal
                         s.ScanAssembly(typeof(PrefillCalendarJob).Assembly);
                         s.ScanAssembly(typeof(SetOrdersPaid).Assembly);
                         s.ScanAssembly(typeof(IPaymentSystemClientFactory).Assembly);
+                        s.ScanAssembly(typeof(VirtualProductsController).Assembly);
                     });
         }
     }

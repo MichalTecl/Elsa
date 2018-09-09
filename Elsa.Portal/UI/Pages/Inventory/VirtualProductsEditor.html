@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ELSA</title>
+    <meta charset="utf-8" />
+    <script src="/Bundles/Bundle.ashx?bundle=Lanta"></script>
+    <script src="/Script/Apps/User/UserVM.js"></script>
+    <link href="/Style/Appearance.css" rel="stylesheet" />
+    <link href="/Style/Layout.css" rel="stylesheet" />
+</head>
+<body>
+    <div replace-by="/UI/Widgets/User/UserWidget.html"></div>
+
+
+    <div class="panel w4">
+        <div class="panelHead">
+            <div class="panelTitle">Produkty</div>
+        </div>
+        <div class="panelContent" id="pairingUi">
+            <div id="mappablesSearch">
+                <input type="text" id="tbMappablesQuery"/>
+                <button event-bind="click:search($tbMappablesQuery.value)"></button>
+            </div>
+            <div id="mappablesList">
+                <div id="list">
+                    
+                    <div id="itemTemplate">
+                        <div data-bind="text:ViewText"></div>
+                        <div lt-name="mappedVirtuals">
+                            <div lt-name="mappedVpItemTemplate" data-bind="text:Name"></div>
+                        </div>
+                    </div>
+
+                </div>    
+            </div>
+        </div>
+    </div>
+    <script src="/Script/Apps/Inventory/VirtualProducts/VirtualProductsVM.js"></script>
+    
+    <script>
+        lt.element("mappablesSearch").attach(function() {
+            this.search = function(query) {
+                app.virtualProductsEditor.vm.loadMappables(query);
+            };
+        });
+        
+        lt.element("mappablesList").withModel("app.virtualProductsEditor.vm").attach(function(list, itemTemplate) {
+            
+            var itemController = function (mappedVirtuals, mappedVpItemTemplate) {
+
+                this.bind(function(AssignedVirtualProducts) {
+                    lt.generate(mappedVirtuals, mappedVpItemTemplate, AssignedVirtualProducts, function (i) { return i.VirtualProductId; });
+                });
+
+            };
+
+
+            this.bind(function(selectedMappables) {
+
+                lt.generate(list, itemTemplate, selectedMappables, function(i) { return i.Id; }, itemController);
+
+            });
+
+        });
+
+    </script>
+
+</body>
+</html>

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
+using Elsa.Core.Entities.Commerce.Core;
 using Elsa.Core.Entities.Commerce.Integration;
 
 using Robowire.RobOrm.Core;
@@ -12,12 +13,9 @@ using Robowire.RobOrm.SqlServer.Attributes;
 namespace Elsa.Core.Entities.Commerce.Commerce
 {
     [Entity]
-    public interface IPurchaseOrder
+    public interface IPurchaseOrder : IProjectRelatedEntity
     {
         long Id { get; }
-        int ProjectId { get; set; }
-
-        IProject Project { get; }
 
         int? ErpId { get; set; }
 

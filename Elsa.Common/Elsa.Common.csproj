@@ -47,6 +47,8 @@
   <ItemGroup>
     <Compile Include="AllowAnonymousAttribute.cs" />
     <Compile Include="AllowWithDefaultPassword.cs" />
+    <Compile Include="Caching\Cache.cs" />
+    <Compile Include="Caching\ICache.cs" />
     <Compile Include="CommonRegistry.cs" />
     <Compile Include="Communication\WebFormsClient.cs">
       <SubType>Component</SubType>

@@ -1,5 +1,6 @@
 ﻿using Elsa.Commerce.Core.Impl;
 using Elsa.Commerce.Core.Repositories;
+using Elsa.Commerce.Core.VirtualProducts;
 
 using Robowire;
 
@@ -18,6 +19,8 @@ namespace Elsa.Commerce.Core
             setup.For<IOrderStatusRepository>().Use<OrderStatusRepository>();
             setup.For<IPaymentRepository>().Use<PaymentRepository>();
             setup.For<IOrdersFacade>().Use<OrdersFacade>();
+            setup.For<IVirtualProductRepository>().Use<VirtualProductRepository>();
+            setup.For<IErpRepository>().Use<ErpRepository>();
         }
     }
 }

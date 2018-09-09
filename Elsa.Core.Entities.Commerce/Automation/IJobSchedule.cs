@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Core;
 
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -12,14 +13,10 @@ using Robowire.RobOrm.SqlServer.Attributes;
 namespace Elsa.Core.Entities.Commerce.Automation
 {
     [Entity]
-    public interface IJobSchedule
+    public interface IJobSchedule : IProjectRelatedEntity
     {
         int Id { get; }
-
-        int ProjectId { get; set; }
-
-        IProject Project { get; }
-
+        
         int ScheduledJobId { get; set; }
 
         IScheduledJob ScheduledJob { get; }

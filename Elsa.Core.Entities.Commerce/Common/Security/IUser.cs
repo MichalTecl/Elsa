@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Elsa.Core.Entities.Commerce.Core;
+
 using Newtonsoft.Json;
 
 using Robowire.RobOrm.Core;
@@ -8,7 +10,7 @@ using Robowire.RobOrm.SqlServer.Attributes;
 namespace Elsa.Core.Entities.Commerce.Common.Security
 {
     [Entity]
-    public interface IUser
+    public interface IUser : IProjectRelatedEntity
     {
         int Id { get; }
 
@@ -37,11 +39,5 @@ namespace Elsa.Core.Entities.Commerce.Common.Security
 
         [JsonIgnore]
         DateTime? Verified { get; set; }
-
-        [JsonIgnore]
-        int ProjectId { get; set; }
-
-        [JsonIgnore]
-        IProject Project { get; }
     }
 }
