@@ -69,6 +69,11 @@ namespace Elsa.Common.Utils
             return sb.ToString();
         }
 
+        public static string NormalizeSearchText(int lenLimit, params string[] inp)
+        {
+            return NormalizeSearchText(lenLimit, inp.ToList());
+        }
+
         public static string Nvl(params string[] s)
         {
             foreach (var i in s)

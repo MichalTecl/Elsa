@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-using Elsa.Common;
-using Elsa.Jobs.Common;
+﻿using System.Threading;
 
 namespace Elsa.JobLauncher
 {

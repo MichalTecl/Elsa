@@ -111,7 +111,13 @@
     <Content Include="Script\Apps\Jobs\ScheduledJobs.VM.js" />
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
+    <Content Include="UI\Controls\Common\PickItemDialog.html" />
+    <Content Include="UI\Controls\Common\PickItemDialog.js" />
+    <Content Include="UI\Controls\Common\TabControl.js" />
+    <Content Include="UI\Controls\Inventory\TaggingEditor.html" />
+    <Content Include="UI\Controls\Inventory\VirtualProducts.html" />
     <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />
+    <Content Include="UI\Pages\Inventory\VpEditorStyle.css" />
     <Content Include="UI\Pages\PaymentPairing.html" />
     <Content Include="Script\Apps\WidgetsVM.js" />
     <Content Include="Script\Apps\User\UserVM.js" />

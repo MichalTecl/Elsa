@@ -1,0 +1,132 @@
+﻿<div class="panel w4 mappablesEditor">
+    <!--<div class="panelHead">
+        <div class="panelTitle">Produkty</div>
+    </div>-->
+    <div class="panelContent" id="pairingUi">
+        <div id="mappablesSearch">
+            <div class="searchPanel" style="width:100%">
+                <input type="text" id="tbMappablesQuery" />
+                <button event-bind="click:search($tbMappablesQuery.value)" class="fa fa-search"></button>
+            </div>
+        </div>
+        <div id="mappablesList">
+            <div id="list">
+
+                <div id="itemTemplate" class="mappableContainer">
+                    <div data-bind="text:ViewText" class="mappableTitle"></div>
+                    <div lt-name="mappedVirtuals" class="mappableVirtualsContainer">
+                        <div lt-name="mappedVpItemTemplate" class="mappableVirtualItemContainer">
+                            <span data-bind="text:Name" class="mappableItemName" event-bind="click:search(Name)"></span>
+                            <i class="fas fa-cubes" data-bind="class!.hidden:HasMaterial; title:MaterialsText"></i>
+                            <i class="fas fa-unlink unlinkButton faButton" event-bind="click:unlink(VM)" title="Odebrat značku"></i>
+                        </div>
+                    </div>
+                    <i class="fas fa-link tagLinkButton faButton" title="Přidat značku" event-bind="click:link(VM)"></i>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="pickItemTemplate">
+        <i class="far fa-check-square showIfSelected hideIfNotSelected"></i>
+        <div data-bind="text:Name"></div>
+    </div>
+
+</div>
+
+<script>
+
+    console.log("tagging activated");
+
+    lt.element("mappablesSearch").attach(function (tbMappablesQuery) {
+        this.search = function(query) {
+            app.virtualProductsEditor.vm.loadMappables(query);
+        };
+
+        this.bind(function(currentQuery) {
+            tbMappablesQuery.value = currentQuery;
+        }).relativeToGlobal("app.virtualProductsEditor.vm");
+    });
+
+    lt.element("mappablesList").withModel("app.virtualProductsEditor.vm").attach(function(list, itemTemplate) {
+
+        var pickVirtualProductDialog = new app.ui.PickItemDialog();
+        pickVirtualProductDialog.setTitle("Značky");
+
+        pickVirtualProductDialog.setOnSearch(function(query) {
+            app.virtualProductsEditor.vm.searchVirtualProducts(query, function(prods) {
+
+
+                pickVirtualProductDialog.setItems(prods);
+            });
+        });
+
+        pickVirtualProductDialog.setItemTemplate(document.getElementById("pickItemTemplate"));
+
+
+        var itemController = function (mappedVirtuals, mappedVpItemTemplate) {
+
+            this.bind(function(AssignedVirtualProducts) {
+                lt.generate(mappedVirtuals, mappedVpItemTemplate, AssignedVirtualProducts, function (i) { return i.VirtualProductId; });
+            });
+
+        };
+
+
+        this.bind(function(selectedMappables) {
+
+            lt.generate(list, itemTemplate, selectedMappables, function(i) { return i.Id; }, itemController);
+
+        });
+
+        this.search = function(vpName) {
+
+            var newSearch = app.virtualProductsEditor.vm.currentQuery || "";
+
+            if (newSearch.length > 0) {
+                newSearch = newSearch + " ";
+            }
+
+            if (newSearch.indexOf(vpName) > -1) {
+                return;
+            }
+
+            newSearch = newSearch + vpName;
+            app.virtualProductsEditor.vm.loadMappables(newSearch);
+        };
+
+        this.unlink = function(vm) {
+            var result = confirm("Opravdu chcete odpojit značku " +
+                vm.Name +
+                " od položky " +
+                vm.ownerMappableId.OrderItemText +
+                "?");
+
+            if (!result) {
+                return;
+            }
+
+            app.virtualProductsEditor.vm.unmap(vm);
+        };
+
+        this.link = function(vm) {
+            pickVirtualProductDialog.show(function(result) {
+                if (!result) {
+                    return;
+                }
+
+                var selits = pickVirtualProductDialog.getSelectedItems();
+                if ((!selits) || (selits.length === 0)) {
+                    return;
+                }
+
+                app.virtualProductsEditor.vm.mapVpToItem(vm, selits[0]);
+
+            });
+
+        };
+
+    });
+
+</script>

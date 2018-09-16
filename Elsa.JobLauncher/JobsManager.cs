@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Common;
-using Elsa.Core.Entities.Commerce.Automation;
 using Elsa.Jobs.Common;
 
 using Robowire;

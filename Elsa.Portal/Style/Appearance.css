@@ -96,3 +96,149 @@ table.reportTable tfoot .links a{
 button:disabled {
     opacity: 0.5;
 }
+
+div.searchPanel {
+    vertical-align: bottom;
+    padding-bottom: 4px;
+    background-color: #ffffff;
+}
+
+.searchPanel > input {
+    margin-right: 0;
+    border-collapse: collapse;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    vertical-align: bottom;
+}
+
+.searchPanel > button {
+    margin-left: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    vertical-align: bottom;
+    margin-left: -4px;
+}
+
+.searchPanelFull {
+    display: inline-flex;
+    width: 100%;
+}
+
+.searchPanelFull > input {
+    flex-grow: 1;
+    max-width: unset;
+}
+
+.faButton {
+    cursor: pointer;
+}
+
+.modal {
+    display: none; 
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    /*padding: 20px;*/
+    /*border: 1px solid #888;*/
+    width: 50%; /* Could be more or less, depending on screen size */
+    min-width: 450px;
+    max-width: 600px;
+    border-radius: 4px;
+}
+
+.pickItemDialogItems > *[lt-selected = "1"] {
+    background-color: #00bfff;
+}
+
+.pickItemDialogItems > *[lt-selected = "1"] > .showIfSelected {
+    display: block;
+}
+
+.pickItemDialogItems > *:not([lt-selected = "1"]) > .hideIfNotSelected {
+    display: none;
+}
+
+.dialogCloseButton {
+    font-size: 1.3em;
+    margin-left: auto;
+}
+
+.pickItemDialogItems {
+    height: 300px;
+    overflow: auto;
+    border: 1px solid #eeeeee;
+    border-radius:4px;
+    margin-top:6px;
+    margin-bottom:12px;
+    padding-left:6px;
+    padding-right:6px;
+    display:block;
+}
+
+.pickItemDialogItems > div {
+  display: flex;  
+}
+
+.pickItemDialogItems > div > .far{
+  vertical-align:baseline;
+  margin-right:8px;
+  font-size:1.2em;
+}
+
+
+.modalFooter {
+  display:inline-flex;
+  flex-direction:column;
+  align-items:flex-end;
+  width:100%;
+}
+
+.tabPanelHeadersContainer{
+    display:flex;
+    width:100%;    
+    padding-top:10px;
+    border-bottom:#00bfff 10px solid;  
+    flex-direction:row;  
+    align-items:flex-end;
+}
+
+.tabControlTabHead {
+    font-size:1.2em;
+    font-weight:bold;
+    padding:10px;
+    padding-left:15px;
+    padding-right:15px;
+    border-top-left-radius:2px;
+    border-top-right-radius:2px;
+    margin-right:4px;
+    margin-left:4px;    
+    min-width:140px;
+}
+
+.tabControlTabHead[active-tab="1"]{
+    background-color:#00bfff;
+}
+
+.tabControlTabHead:not([active-tab="1"]){
+    background-color:#008ccc;
+    padding:7px;
+    padding-left:15px;
+    padding-right:15px;
+    cursor:pointer;
+}
+
+.hidden {
+    display: none !important;
+}

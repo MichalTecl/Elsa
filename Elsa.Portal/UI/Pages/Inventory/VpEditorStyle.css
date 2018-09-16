@@ -1,0 +1,51 @@
+﻿.mappablesEditor #mappablesList {
+   /* background-color: #eeeeee; */
+}
+
+#mappablesList .mappableContainer {
+    background-color: #ffffff;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 4px;
+    margin-right: 4px;
+    border: 1px solid #00f0f0;
+    border-radius: 4px;
+    padding: 4px;
+    min-height: 50px;
+}
+
+.mappableVirtualsContainer {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.mappableTitle {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.mappableItemName {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
+.mappableVirtualItemContainer {
+    margin-top: 5px;
+}
+
+.unlinkButton {
+    margin-left: 8px;
+    font-size: 0.7em;
+    cursor: pointer;
+}
+
+.tagLinkButton {
+    margin-left: 20px;
+}
+
+
+.fa-cubes{
+    opacity:0.7;
+    font-size:0.8em;
+}

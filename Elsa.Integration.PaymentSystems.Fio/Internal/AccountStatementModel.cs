@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Common.Utils;
-using Elsa.Core.Entities.Commerce.Common;
 
 namespace Elsa.Integration.PaymentSystems.Fio.Internal
 {

@@ -1,0 +1,140 @@
+﻿<div class="modal" id="pickItemDialog">
+    
+    <div class="modal-content">
+        <div id="header" class="panelHead">
+            <div lt-name="dgTitle" class="panelTitle"></div>
+            <i class="far fa-window-close faButton dialogCloseButton" event-bind="click:onCloseClick()"></i>
+        </div>
+        <div lt-name="content" class="modalPanelContent panelContent">
+            <div>
+                <div class="searchPanel searchPanelFull" >
+                    <input type="text" id="tbVpsQuery" />
+                    <button event-bind="click:search($tbVpsQuery.value)" class="fa fa-search"></button>
+                </div>
+            </div>
+            <div lt-name="dgItems" class="pickItemDialogItems">
+
+            </div>
+            <div class="modalFooter">
+                <button event-bind="click:onConfirm">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("pickItemDialog").attach(function (dgTitle, dgItems) {
+
+        var self = this;
+        var items = [];
+        var template = null;
+        var multiMode = false;
+        var onSearch = function (query) { alert('use setOnSearch(query) to handle the search event') };
+        var onClose = function() {};
+
+        var unselectAll = function() {
+            var visualItems = dgItems.children || dgItems.childNodes;
+
+            for (var i = 0; i < visualItems.length; i++) {
+                visualItems[i].removeAttribute("lt-selected");
+            }
+        };
+
+        var itemController = function() {
+
+            this.addEventListener("click",
+                function() {
+
+                    if (!multiMode) {
+                        unselectAll();
+                    }
+
+                    var selected = this.hasAttribute("lt-selected");
+
+                    if (selected) {
+                        this.removeAttribute("lt-selected");
+                        //this.style.backgroundColor = "transparent";
+                    } else {
+                        this.setAttribute("lt-selected", "1");
+                        //this.style.backgroundColor = "blue";
+                    }
+                });
+        };
+
+        var updateItems = function() {
+            
+            if (!template) {
+                return;
+            }
+
+            lt.generate(dgItems, template, items, null, itemController);
+        };
+
+        this.show = function (callback) {
+            onClose = callback;
+            unselectAll();
+            this.style.display = 'block';
+        };
+
+        this.close = function() {
+            this.style.display = 'none';
+        };
+
+        this.setTitle = function(value) {
+            dgTitle.innerHTML = value;
+        };
+
+        this.setOnSearch = function(callback) {
+            onSearch = callback;
+        };
+        
+        this.setItems = function(value) {
+            items = value;
+            updateItems();
+        };
+
+        this.setItemTemplate = function(value) {
+            template = value;
+            updateItems();
+        };
+
+        this.setMultiMode = function(value) {
+            multiMode = value;
+        };
+
+        this.onCloseClick = function () {
+            onClose(false);
+            unselectAll();
+            self.close();
+        };
+
+        this.onConfirm = function() {
+            onClose(true);
+            self.close();
+        };
+
+        this.search = function (query) {
+            onSearch(query);
+        };
+
+        this.getSelectedItems = function() {
+            var visualItems = dgItems.children || dgItems.childNodes;
+
+            var selectedItems = [];
+
+            for (var i = 0; i < visualItems.length; i++) {
+                var visualItem = visualItems[i];
+                
+                if (visualItem.getAttribute("lt-selected") !== "1") {
+                    continue;
+                }
+
+                selectedItems.push(items[i]);
+            }
+
+            return selectedItems;
+        };
+
+        
+    });
+</script>

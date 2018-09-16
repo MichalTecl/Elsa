@@ -18,6 +18,7 @@ namespace Elsa.Common
             container.Setup(c => c.For<IConfigurationRepository>().Use<ConfigurationRepository>());
             container.Setup(c => c.For<ILog>().Use<Logger>());
             container.Setup(c => c.For<ICache>().Use<Cache>());
+            container.Setup(c => c.For<IPerProjectDbCache>().Use<PerProjectDbCache>());
         }
     }
 }

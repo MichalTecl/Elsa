@@ -58,9 +58,14 @@
     <Compile Include="IPaymentRepository.cs" />
     <Compile Include="IProductRepository.cs" />
     <Compile Include="IPurchaseOrderRepository.cs" />
+    <Compile Include="IUnitRepository.cs" />
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
     <Compile Include="Repositories\ErpRepository.cs" />
+    <Compile Include="Repositories\UnitRepository.cs" />
     <Compile Include="Repositories\VirtualProductRepository.cs" />
+    <Compile Include="Units\IUnitConversionHelper.cs" />
+    <Compile Include="Units\UnitConversionHelper.cs" />
+    <Compile Include="VirtualProducts\IMaterialRepository.cs" />
     <Compile Include="VirtualProducts\IVirtualProductRepository.cs" />
     <Compile Include="Model\IErpOrderItemModel.cs" />
     <Compile Include="Model\IErpOrderModel.cs" />
@@ -78,6 +83,11 @@
     <Compile Include="Repositories\PurchaseOrderRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
+    <Compile Include="VirtualProducts\MaterialRepository.cs" />
+    <Compile Include="VirtualProducts\Model\CompositionViewModel.cs" />
+    <Compile Include="VirtualProducts\Model\MaterialComponent.cs" />
+    <Compile Include="VirtualProducts\Model\ExtendedMaterial.cs" />
+    <Compile Include="VirtualProducts\Model\IExtendedMaterialModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\" />

@@ -9,7 +9,6 @@ using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
-using Elsa.Integration.Erp.Flox;
 
 using Robowire.RoboApi;
 

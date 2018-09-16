@@ -16,6 +16,7 @@ namespace Elsa.Commerce.Core.Repositories
     public class VirtualProductRepository : IVirtualProductRepository
     {
         private const string c_vpMappingCacheKey = "AllVirtualProductMappingsBy_ProjectId={0}";
+        private const string c_vpCacheKey = "AllvirtualProductsBy_ProjectId_{0}";
         private readonly ICache m_cache;
         private readonly IDatabase m_database;
         private readonly ISession m_session;
@@ -56,6 +57,7 @@ namespace Elsa.Commerce.Core.Repositories
                 newMapping.ErpProductId = erpProductId;
                 newMapping.ItemName = placedName;
                 newMapping.VirtualProductId = virtualProductId;
+                newMapping.ProjectId = m_session.Project.Id;
                 m_database.Save(newMapping);
             }
             finally
@@ -112,6 +114,22 @@ namespace Elsa.Commerce.Core.Repositories
                 m_cache.Remove(key);
             }
         }
+        
+        public IEnumerable<IVirtualProduct> GetAllVirtualProducts()
+        {
+            var cacheKey = string.Format(c_vpCacheKey, m_session.Project.Id);
+            return m_cache.ReadThrough(cacheKey, TimeSpan.FromMinutes(10),
+                () =>
+                    {
+
+
+                        return
+                            m_database.SelectFrom<IVirtualProduct>()
+                                .Where(p => p.ProjectId == m_session.Project.Id)
+                                .Join(p => p.Materials)
+                                .Execute();
+                    });
+        }
 
         private IEnumerable<IVirtualProductOrderItemMapping> GetAllMappings()
         {
@@ -124,6 +142,7 @@ namespace Elsa.Commerce.Core.Repositories
             return
                 m_database.SelectFrom<IVirtualProductOrderItemMapping>()
                     .Join(m => m.VirtualProduct)
+                    .Join(m => m.VirtualProduct.Materials)
                     .Where(m => m.ProjectId == m_session.Project.Id)
                     .Where(m => m.VirtualProduct.ProjectId == m_session.Project.Id)
                     .Execute();

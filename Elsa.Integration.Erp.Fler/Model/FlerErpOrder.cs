@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Model;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Elsa.Integration.Erp.Fler.Model
 {

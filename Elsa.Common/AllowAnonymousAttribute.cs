@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Elsa.Common
+﻿namespace Elsa.Common
 {
     public class AllowAnonymousAttribute : AllowWithDefaultPassword
     {

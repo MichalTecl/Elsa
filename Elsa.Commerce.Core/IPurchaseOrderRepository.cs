@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Commerce;

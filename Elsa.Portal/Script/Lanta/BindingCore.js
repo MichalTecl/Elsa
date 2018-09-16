@@ -23,7 +23,7 @@ lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager ||
                 current.element.notifyModelChange(current.notificationName);
             }
 
-            var children = current.element.children;
+            var children = current.element.children || current.element.childNodes;
 
             for (var i = 0; i < children.length; i++) {
                 queue.push({ element: children[i], notificationName: current.notificationName });

@@ -11,6 +11,8 @@ using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Integration;
 
+using Newtonsoft.Json;
+
 using Robowire.RoboApi;
 
 namespace Elsa.Apps.Inventory
@@ -34,7 +36,25 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<VirtualProductViewModel> GetVirtualProducts(string searchQuery)
         {
-            throw new NotImplementedException();
+            var normQuery = StringUtil.NormalizeSearchText(99, searchQuery);
+
+            var allProds = m_virtualProductRepository.GetAllVirtualProducts();
+
+            foreach (var prod in allProds)
+            {
+                if (string.IsNullOrWhiteSpace(normQuery))
+                {
+                    yield return new VirtualProductViewModel(prod);
+                }
+                else
+                {
+                    var normName = StringUtil.NormalizeSearchText(200, prod.Name);
+                    if (normName.Contains(normQuery))
+                    {
+                        yield return new VirtualProductViewModel(prod);
+                    }
+                }
+            }
         }
 
         public IEnumerable<MappableItemViewModel> GetMappableItems(string searchQuery)
@@ -57,10 +77,12 @@ namespace Elsa.Apps.Inventory
             throw new NotImplementedException();
         }
 
-        public IEnumerable<MappableItemViewModel> MapOrderItemToProduct(int virtualProductId, string orderItemId, string activeSearchQuery)
+        public IEnumerable<MappableItemViewModel> MapOrderItemToProduct(int virtualProductId, MappableItemViewModel.MappableItemId mappableItemId, string activeSearchQuery)
         {
             try
             {
+                var orderItemId = JsonConvert.SerializeObject(mappableItemId);
+
                 var mappable = GetAllMappablesThroughCache().FirstOrDefault(m => m.Id == orderItemId);
                 if (mappable == null)
                 {
@@ -77,10 +99,12 @@ namespace Elsa.Apps.Inventory
             return GetMappableItems(activeSearchQuery);
         }
 
-        public IEnumerable<MappableItemViewModel> RemoveVirtualProductMapping(int virtualProductId, string orderItemId, string activeSearchQuery)
+        public IEnumerable<MappableItemViewModel> RemoveVirtualProductMapping(int virtualProductId, MappableItemViewModel.MappableItemId mappableItemId, string activeSearchQuery)
         {
             try
             {
+                var orderItemId = JsonConvert.SerializeObject(mappableItemId);
+
                 var mappable = GetAllMappablesThroughCache().FirstOrDefault(m => m.Id == orderItemId);
                 if (mappable == null)
                 {

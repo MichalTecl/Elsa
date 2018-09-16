@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using Elsa.App.Commerce.Preview.Model;
 using Elsa.Apps.Common.ViewModels;

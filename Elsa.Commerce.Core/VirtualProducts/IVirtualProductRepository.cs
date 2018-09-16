@@ -17,5 +17,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
         IEnumerable<IVirtualProductMappableItem> GetMappableItems();
 
         void Unmap(int? erpId, string erpProductId, string placedName, int virtualProductId);
+
+        IEnumerable<IVirtualProduct> GetAllVirtualProducts();
     }
 }

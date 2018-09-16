@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Elsa.Common.Utils;
+﻿using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 
 namespace Elsa.App.Commerce.Payments.Models

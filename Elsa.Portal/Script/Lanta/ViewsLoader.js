@@ -1,7 +1,7 @@
 ﻿var lanta = lanta || {};
 lanta.ViewLoading = lanta.ViewLoading || {};
 lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
-    function (div) {
+    function (div, sourceUrl) {
 
         var allScripts = div.getElementsByTagName("script");
 
@@ -17,19 +17,23 @@ lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
                 }
             }
 
-            newTag.innerHTML = sourceTag.innerHTML;
+            newTag.innerHTML = sourceTag.innerHTML + "\r\n//# sourceURL=" + sourceUrl;
             sourceTag.parentElement.insertBefore(newTag, sourceTag);
             sourceTag.parentElement.removeChild(sourceTag);
         }
 
     };
 
-lanta.ViewLoading.loader = function (target, value, attribute) {
+lanta.ViewLoading.loader = function (target, value, attribute, callback) {
 
     lt.api(value).useCache().ignoreDisabledApi().noJson().get(function (html) {
 
         if (attribute === "fill-by") {
             target.innerHTML = html;
+            lanta.ViewLoading.makeScriptsLive(target, value);
+            if (!!callback) {
+                callback(target);
+            }
             return;
         }
 
@@ -37,7 +41,7 @@ lanta.ViewLoading.loader = function (target, value, attribute) {
             var xdiv = document.createElement("DIV");
             xdiv.innerHTML = html;
 
-            lanta.ViewLoading.makeScriptsLive(xdiv);
+            lanta.ViewLoading.makeScriptsLive(xdiv, value);
 
             var parent = target.parentElement;
 
@@ -47,10 +51,17 @@ lanta.ViewLoading.loader = function (target, value, attribute) {
             }
             xdiv.innerHTML = '';
             for (var i = 0; i < els.length; i++) {
-                parent.insertBefore(els[i], target);
+
+                try {
+                    target.parentNode.insertBefore(els[i], target);
+                }catch (ieieie){}
             }
 
             parent.removeChild(target);
+
+            if (!!callback) {
+                callback(els[0]);
+            }
         }
 
     });
@@ -59,3 +70,11 @@ lanta.ViewLoading.loader = function (target, value, attribute) {
 
 lt.watchCustomAttribute("fill-by", lanta.ViewLoading.loader);
 lt.watchCustomAttribute("replace-by", lanta.ViewLoading.loader);
+
+lt.replaceBy = lt.replaceBy || function (placeholder, src, callback) {
+    lanta.ViewLoading.loader(placeholder, src, "replace-by", callback);
+};
+
+lt.fillBy = lt.fillBy || function (placeholder, src, callback) {
+    lanta.ViewLoading.loader(placeholder, src, "fill-by", callback);
+};

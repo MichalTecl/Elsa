@@ -36,10 +36,11 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
         }
 
         if (!useCache) {
-            self.query({ "_nocache": new Date().getDate() });
+            self.query({ "_nocache": new Date().getTime() });
         }
 
         var xmlHttp = new XMLHttpRequest();
+        
         xmlHttp.onreadystatechange = function () {
             if (xmlHttp.readyState !== 4) {
                 return;
@@ -70,6 +71,7 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
             }
 
             xmlHttp.open(httpMethod, url, true);
+            xmlHttp.setRequestHeader('Content-type', '*/*; charset=utf-8');
             xmlHttp.send(bodyJson);
         } catch (error) {
             console.error(error);

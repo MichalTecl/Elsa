@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Elsa.Common.Communication
+﻿namespace Elsa.Common.Communication
 {
     public interface IParsedResponse
     {

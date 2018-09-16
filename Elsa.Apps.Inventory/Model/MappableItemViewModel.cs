@@ -21,7 +21,7 @@ namespace Elsa.Apps.Inventory.Model
             {
                 if (m_id == null)
                 {
-                    var id = new ItemId
+                    var id = new MappableItemId
                                  {
                                      ErpId = ErpId,
                                      ErpItemId = ErpProductId,
@@ -72,17 +72,17 @@ namespace Elsa.Apps.Inventory.Model
             }
         }
 
-        public static ItemId ParseId(string id)
+        public static MappableItemId ParseId(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<ItemId>(id);
+            return JsonConvert.DeserializeObject<MappableItemId>(id);
         }
 
-        public sealed class ItemId
+        public sealed class MappableItemId
         {
             public int? ErpId { get; set; }
             public string ErpItemId { get; set; }

@@ -63,6 +63,33 @@ if (lanta.Markup.attributeSetters.length === 0) {
 	    return true;
 	});
 
+    //not_class
+	lanta.Markup.attributeSetters.push(function (target, propertyName, value) {
+
+	    if (propertyName.indexOf("class!.") !== 0) {
+	        return false;
+	    }
+
+	    var className = propertyName.substring(7);
+
+	    var currentClasses = target.className.split(" ");
+	    var newClasses = [];
+
+	    for (var i = 0; i < currentClasses.length; i++) {
+	        if (currentClasses[i] !== className) {
+	            newClasses.push(currentClasses[i]);
+	        }
+	    }
+
+	    if (!value) {
+	        newClasses.push(className);
+	    }
+
+	    target.setAttribute("class", newClasses.join(" "));
+
+	    return true;
+	});
+
 	//checked, selected, disabled
 	lanta.Markup.attributeSetters.push(function (target, propertyName, value) {
 
@@ -166,7 +193,9 @@ lanta.Markup.bindItemsSourceExpression = lanta.Markup.bindItemsSourceExpression 
 
     var marker = lanta.Markup.getElementMarker(element);
 
-    var itemTemplate = element.children[0];
+    var children = element.children || element.childNodes;
+
+    var itemTemplate = children[0];
     if (!itemTemplate) {
         throw new Error("Element " +
             element.toString() +
@@ -271,7 +300,11 @@ lanta.Markup.fireEvent = lanta.Markup.fireEvent || function(event, eventInfo) {
             if (argumentExpression === "true") {
                 args.push(true);
                 continue;
-            } else if (argumentExpression === "false") {
+            } else if (argumentExpression === "VM") {
+                args.push(argumentVm);
+                continue;
+            }
+            else if (argumentExpression === "false") {
                 args.push(false);
                 continue;
             } else if (argumentExpression === "this") {

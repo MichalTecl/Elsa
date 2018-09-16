@@ -82,7 +82,8 @@ lanta.CustomAttributes.Watcher = lanta.CustomAttributes.Watcher || function() {
         var config = { attributes: true, childList: true, subtree: true };
 
         var callback = function (mutationsList) {
-            for(var mutation of mutationsList) {
+            for (var i = 0; i < mutationsList.length; i++) {
+                var mutation = mutationsList[i];
                 if (mutation.type === 'attributes') {
                     visitElement(mutation.target, [mutation.attributeName]);
                 }

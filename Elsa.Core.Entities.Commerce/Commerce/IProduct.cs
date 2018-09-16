@@ -1,6 +1,5 @@
 ﻿using System;
 
-using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
 using Elsa.Core.Entities.Commerce.Integration;
 

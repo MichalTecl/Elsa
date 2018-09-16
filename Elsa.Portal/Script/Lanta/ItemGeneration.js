@@ -5,7 +5,7 @@ lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
     function() {
 
         var getChildByKey = function(container, key) {
-            var children = container.children;
+            var children = container.children || container.childNodes;
             for (var i = 0; i < children.length; i++) {
                 var child = children[i];
                 if (child["lt-item-key"] === key) {
@@ -24,13 +24,15 @@ lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
         };
 
         var placeTo = function(container, element, position) {
-            
-            if (position >= container.children.length - 1) {
+
+            var children = container.children || container.childNodes;
+
+            if (position >= children.length - 1) {
                 container.appendChild(element);
                 return;
             }
 
-            var nextChild = container.children[position];
+            var nextChild = children[position];
             if (nextChild === element) {
                 return;
             }
@@ -59,8 +61,10 @@ lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
                     keyIndex[keykey] = 1;
                 }
 
-                for (var i = container.children.length - 1; i >= 0; i--) {
-                    var ch = container.children[i];
+                var children = container.children || container.childNodes;
+
+                for (var i = children.length - 1; i >= 0; i--) {
+                    var ch = children[i];
                     var childKey = ch["lt-item-key"];
 
                     if (!keyIndex[childKey]) {

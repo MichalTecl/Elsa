@@ -3,14 +3,11 @@
 namespace Elsa.Core.Entities.Commerce.Inventory
 {
     [Entity]
-    public interface IVirtualProductMaterial
+    public interface IVirtualProductMaterial : IMaterialCompositionBase
     {
         int Id { get; }
 
         int VirtualProductId { get; set; }
         IVirtualProduct VirtualProduct { get; }
-
-        int MaterialId { get; set; }
-        IMaterial Material { get; }
     }
 }

@@ -49,6 +49,8 @@
     <Compile Include="AllowWithDefaultPassword.cs" />
     <Compile Include="Caching\Cache.cs" />
     <Compile Include="Caching\ICache.cs" />
+    <Compile Include="Caching\IPerProjectDbCache.cs" />
+    <Compile Include="Caching\PerProjectDbCache.cs" />
     <Compile Include="CommonRegistry.cs" />
     <Compile Include="Communication\WebFormsClient.cs">
       <SubType>Component</SubType>
@@ -65,6 +67,7 @@
     <Compile Include="DoNotLogParamsAttribute.cs" />
     <Compile Include="ElsaControllerBase.cs" />
     <Compile Include="ISession.cs" />
+    <Compile Include="IUnitConvertor.cs" />
     <Compile Include="IWebSession.cs" />
     <Compile Include="Logging\AsyncLogger.cs" />
     <Compile Include="Logging\ILog.cs" />

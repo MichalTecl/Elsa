@@ -1,7 +1,5 @@
 ﻿using System;
 
-using Elsa.Core.Entities.Commerce.Common.Security;
-
 using Robowire;
 
 namespace Elsa.Common.Configuration
