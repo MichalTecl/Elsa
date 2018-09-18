@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
+using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 
 namespace Elsa.Commerce.Core.VirtualProducts
 {
-    public interface IVirtualProductRepository
+    public interface IVirtualProductRepository : ICanPostponeCacheRemovals<IDisposableVirtualProductsRepository>
     {
         IEnumerable<IVirtualProduct> GetVirtualProductsByOrderItem(IPurchaseOrder order, IOrderItem item);
 
@@ -19,5 +21,15 @@ namespace Elsa.Commerce.Core.VirtualProducts
         void Unmap(int? erpId, string erpProductId, string placedName, int virtualProductId);
 
         IEnumerable<IVirtualProduct> GetAllVirtualProducts();
+
+        IVirtualProduct GetVirtualProductById(int id);
+
+        IVirtualProduct CreateOrUpdateVirtualProduct(int? virtualProductId, string name);
+
+        void CleanCache();
+    }
+
+    public interface IDisposableVirtualProductsRepository : IVirtualProductRepository, IDisposable
+    {
     }
 }

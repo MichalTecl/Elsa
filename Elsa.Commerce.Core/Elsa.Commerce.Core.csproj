@@ -66,6 +66,7 @@
     <Compile Include="Units\IUnitConversionHelper.cs" />
     <Compile Include="Units\UnitConversionHelper.cs" />
     <Compile Include="VirtualProducts\IMaterialRepository.cs" />
+    <Compile Include="VirtualProducts\IVirtualProductFacade.cs" />
     <Compile Include="VirtualProducts\IVirtualProductRepository.cs" />
     <Compile Include="Model\IErpOrderItemModel.cs" />
     <Compile Include="Model\IErpOrderModel.cs" />
@@ -88,6 +89,8 @@
     <Compile Include="VirtualProducts\Model\MaterialComponent.cs" />
     <Compile Include="VirtualProducts\Model\ExtendedMaterial.cs" />
     <Compile Include="VirtualProducts\Model\IExtendedMaterialModel.cs" />
+    <Compile Include="VirtualProducts\Model\MaterialEntry.cs" />
+    <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\" />

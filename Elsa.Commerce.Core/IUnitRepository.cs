@@ -8,6 +8,8 @@ namespace Elsa.Commerce.Core
     {
         IMaterialUnit GetUnit(int unitId);
 
+        IMaterialUnit GetUnitBySymbol(string symbol);
+
         IEnumerable<IMaterialUnit> GetAllUnits();
     }
 }

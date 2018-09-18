@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -85,6 +86,13 @@ namespace Elsa.Common.Utils
             }
 
             return s.LastOrDefault();
+        }
+
+        public static string FormatDecimal(decimal n)
+        {
+            var s = n.ToString(CultureInfo.InvariantCulture);
+
+            return s.TrimEnd('0', '.');
         }
     }
 }

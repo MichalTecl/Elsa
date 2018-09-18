@@ -13,7 +13,7 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
         private readonly List<IMaterial> m_materialEntities;
 
         public MaterialRepositoryMock(params IMaterial[] materials)
-            : base(null, new SessionMock(), new CacheMock())
+            : base(null, new SessionMock(), new CacheMock(), new UnitConversionHelperMock())
         {
             m_materialEntities = new EditableList<IMaterial>(materials);
         }

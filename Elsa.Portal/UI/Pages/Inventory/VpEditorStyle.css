@@ -49,3 +49,107 @@
     opacity:0.7;
     font-size:0.8em;
 }
+
+.virtualProductItemView{
+    display:flex;
+    margin-top:10px;    
+}
+
+.addVirtualProductBut {
+    margin-right:8px;
+    font-size:1em;    
+}
+
+.virtualProductsListContainer {
+    margin-top: 10px;
+}
+
+
+
+.virtualProductEditItem {
+    margin-top:20px;
+    border:1px solid #eeeeee;
+    padding:4px;
+    margin-bottom:30px;
+    width:620px;    
+}
+
+.itemEditFoot {
+    margin-top:10px;    
+    margin-left:494px;
+}
+
+.itemEditFoot > button {
+    min-width:60px;        
+}
+
+.virtualProductEditItem > input {
+    min-width:600px !important;
+}
+
+
+.materialSuggestions div[lt-selected-item="1"]{
+    font-weight:bold;
+}
+
+.materialEntryInput{
+    min-width:450px;
+    margin-bottom:0 !important;
+}
+
+.materialEntryInput:not(:focus):valid {
+    border:none;
+    background-color:transparent !important;
+}
+
+.matListMainContainer {
+    margin-left:30px;   
+
+}
+
+.addMaterialtoVpButton {
+    margin-top:10px;
+}
+
+.containsTitle {
+    margin-top:8px;
+    margin-bottom:3px;
+    margin-left:16px;
+    font-weight:bold;
+    color:#777799;
+}
+
+.matListMainContainer .fa-minus {
+	display:none;
+	margin-left:4px;
+}
+
+div[lt-name="errorsDisplay"]{
+    color:red;    
+    padding-top:5px;    
+}
+
+.materialSuggestionItem {   
+	margin-top:18px;
+}
+
+.materialSuggestions:last-child {
+    margin-bottom:25px;
+}
+
+.materialSuggestions {
+    background-color:#eeeeee;
+    margin-top:0px;
+    padding:4px;
+    max-width:442px;
+    border-bottom-left-radius:8px;
+    border-bottom-right-radius:8px;
+}
+
+.materialSuggestions > div {
+    margin:6px;    
+}
+
+.materialSuggestions:empty {
+    display:none;
+}

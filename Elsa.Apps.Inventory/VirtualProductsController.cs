@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 using Elsa.Apps.Inventory.Model;
 using Elsa.Commerce.Core;
@@ -25,13 +26,17 @@ namespace Elsa.Apps.Inventory
         private readonly IVirtualProductRepository m_virtualProductRepository;
         private readonly IErpRepository m_erpRepository;
         private readonly ICache m_cache;
+        private readonly IMaterialRepository m_materialRepository;
+        private readonly IVirtualProductFacade m_virtualProductFacade;
         
-        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache)
+        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade)
             : base(webSession, log)
         {
             m_virtualProductRepository = virtualProductRepository;
             m_erpRepository = erpRepository;
             m_cache = cache;
+            m_materialRepository = materialRepository;
+            m_virtualProductFacade = virtualProductFacade;
         }
 
         public IEnumerable<VirtualProductViewModel> GetVirtualProducts(string searchQuery)
@@ -42,18 +47,27 @@ namespace Elsa.Apps.Inventory
 
             foreach (var prod in allProds)
             {
-                if (string.IsNullOrWhiteSpace(normQuery))
-                {
-                    yield return new VirtualProductViewModel(prod);
-                }
-                else
+                if (!string.IsNullOrWhiteSpace(normQuery))
                 {
                     var normName = StringUtil.NormalizeSearchText(200, prod.Name);
-                    if (normName.Contains(normQuery))
+                    if (!normName.Contains(normQuery))
                     {
-                        yield return new VirtualProductViewModel(prod);
+                        continue;
                     }
                 }
+
+                var materials = m_materialRepository.GetMaterialsByVirtualProductId(prod.Id);
+
+                var result = new VirtualProductViewModel(prod);
+                result.MaterialEntries.AddRange(materials.Select(m => new MaterialCompositionInfo(m.Material)
+                                                                          {
+                                                                              UnitId = m.Unit.Id,
+                                                                              UnitSymbol = m.Unit.Symbol,
+                                                                              Amount = m.Amount,
+                                                                              CompositionId = m.CompositionId ?? -1 
+                                                                          }));
+
+                yield return result;
             }
         }
 
@@ -121,6 +135,24 @@ namespace Elsa.Apps.Inventory
             return GetMappableItems(activeSearchQuery);
         }
 
+        public IEnumerable<MaterialInfo> GetAllMaterials()
+        {
+            return m_materialRepository.GetAllMaterials().Select(m => new MaterialInfo(m));
+
+        }
+
+        public void SaveVirtualProduct(VirtualProductEditRequestModel request)
+        {
+            try
+            {
+                m_virtualProductFacade.ProcessVirtualProductEditRequest(request.VirtualProductId, request.UnhashedName, request.Materials.Select(m => m.DisplayText).ToArray());
+            }
+            finally
+            {
+                m_cache.Remove(GetMappablesCacheKey());
+            }
+        }
+
         private List<MappableItemViewModel> GetAllMappablesThroughCache()
         {
             var cacheKey = GetMappablesCacheKey();
@@ -149,14 +181,26 @@ namespace Elsa.Apps.Inventory
                 {
                     if (model.AssignedVirtualProducts.All(existing => existing.VirtualProductId != virtualProduct.Id))
                     {
-                        model.AssignedVirtualProducts.Add(new VirtualProductViewModel(virtualProduct));
+                        var vpvm = new VirtualProductViewModel(virtualProduct);
+
+                        var virtualProductComponents = m_materialRepository.GetMaterialsByVirtualProductId(vpvm.VirtualProductId).ToList();
+                        
+                        var materialsSb = new StringBuilder();
+
+                        foreach (var materialComponent in virtualProductComponents)
+                        {
+                            materialComponent.Material.Print(materialsSb, " ");
+                        }
+
+                        vpvm.MaterialsText = materialsSb.ToString();
+                        model.AssignedVirtualProducts.Add(vpvm);
                     }
                 }
             }
 
             return result;
         }
-
+        
         private string GetMappablesCacheKey()
         {
             return string.Format(c_mappablesCacheKey, WebSession.Project.Id);

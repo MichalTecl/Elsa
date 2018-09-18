@@ -1,0 +1,22 @@
+﻿<div lt-name="matListMainContainer" class="matListMainContainer">
+    
+    <div lt-name="theList">
+        
+        <div lt-name="materialEntryItemTemplate">
+            <div>
+                <input data-bind="value:displayText" required="required" lt-name="tbMaterialEntry" class="materialEntryInput" event-bind="keyup:onMaterialTextChange(VM, this.value); mouseup:onMaterialTextChange(VM, this.value); changed:onMaterialTextChange(VM, this.value);focus:onInputFocus;blur:onInputBlur;keydown:onSuggestionKeyDown(event)"/>
+                <i class="fas fa-minus faButton" lt-name="butMinus" event-bind="click:deleteMaterial(VM)"></i>
+                <div data-bind="text:errors" lt-name="errorsDisplay"></div>
+                <div lt-name="suggestions" style="display:none" class="materialSuggestions">
+                    <div lt-name="suggestionTemplate">
+                        <span data-bind="text:text" class="materialSuggestionItem" event-bind="click:onSuggestionClick(vm)"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+    </div>
+    <i class="fas fa-plus faButton addMaterialtoVpButton" event-bind="click:addMaterial"></i>
+
+</div>

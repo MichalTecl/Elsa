@@ -118,3 +118,15 @@ lanta.CoreOps.attachController = lanta.CoreOps.attachController || function (ele
     }
 };
 
+lt.getViewModel = lt.getViewModel || function(element) {
+    
+    if (!element) {
+        return null;
+    }
+
+    if (!!element["lt_view_model"]) {
+        return element["lt_view_model"];
+    }
+
+    return lt.getViewModel(element.parentElement);
+};

@@ -131,6 +131,61 @@ namespace Elsa.Commerce.Core.Repositories
                     });
         }
 
+        public IVirtualProduct GetVirtualProductById(int id)
+        {
+            return GetAllVirtualProducts().FirstOrDefault(i => i.Id == id);
+        }
+
+        public IVirtualProduct CreateOrUpdateVirtualProduct(int? virtualProductId, string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Tag musí mít název");
+            }
+
+            if (name.Any(char.IsWhiteSpace))
+            {
+                throw new ArgumentException($"Nepovolený název tagu \"{name}\" - tag nesmí obsahovat mezery ani jiné bílé znaky");
+            }
+
+            IVirtualProduct vp;
+            if (virtualProductId == null)
+            {
+                vp = m_database.New<IVirtualProduct>();
+                vp.ProjectId = m_session.Project.Id;
+            }
+            else
+            {
+                vp = GetVirtualProductById(virtualProductId.Value);
+                if (vp == null)
+                {
+                    throw new InvalidOperationException("Invalid VirtualProductId");
+                }
+
+                if (vp.Name == name)
+                {
+                    return vp;
+                }
+            }
+
+            vp.Name = name;
+            m_database.Save(vp);
+            CleanCache();
+
+            return vp;
+        }
+
+        public void CleanCache()
+        {
+            m_cache.Remove(string.Format(c_vpMappingCacheKey, m_session.Project.Id));
+            m_cache.Remove(string.Format(c_vpCacheKey, m_session.Project.Id));
+        }
+        
+        public IDisposableVirtualProductsRepository GetWithPostponedCache()
+        {
+            return new WithPostopnedCacheRemoval(new CacheWithPostponedRemoval(m_cache), m_database, m_session);
+        }
+
         private IEnumerable<IVirtualProductOrderItemMapping> GetAllMappings()
         {
             var key = string.Format(c_vpMappingCacheKey, m_session.Project.Id);
@@ -180,5 +235,21 @@ namespace Elsa.Commerce.Core.Repositories
 
             public string ItemName { get; set; }
         }
+
+        private sealed class WithPostopnedCacheRemoval : VirtualProductRepository, IDisposableVirtualProductsRepository
+        {
+            private readonly CacheWithPostponedRemoval m_ppCache;
+
+            public WithPostopnedCacheRemoval(CacheWithPostponedRemoval cache, IDatabase database, ISession session) : base(cache, database, session)
+            {
+                m_ppCache = cache;
+            }
+            
+            public void Dispose()
+            {
+                m_ppCache.Dispose();
+            }
+        }
     }
 }
+

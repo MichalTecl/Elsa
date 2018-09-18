@@ -24,6 +24,8 @@ namespace Elsa.Commerce.Core
             setup.For<IErpRepository>().Use<ErpRepository>();
             setup.For<IUnitRepository>().Use<UnitRepository>();
             setup.For<IUnitConversionHelper>().Use<UnitConversionHelper>();
+            setup.For<IMaterialRepository>().Use<MaterialRepository>();
+            setup.For<IVirtualProductFacade>().Use<VirtualProductFacade>();
         }
     }
 }

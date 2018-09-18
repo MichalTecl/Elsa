@@ -1,5 +1,6 @@
 ﻿using System.Text;
 
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 
 namespace Elsa.Commerce.Core.VirtualProducts.Model
@@ -34,7 +35,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                 target.Append(depthLevelTrim);
             }
 
-            target.Append(Amount);
+            target.Append(StringUtil.FormatDecimal(Amount));
             target.Append(Unit.Symbol);
             target.Append(" ");
             target.Append(Material.Name);

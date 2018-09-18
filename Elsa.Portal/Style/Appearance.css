@@ -131,6 +131,11 @@ div.searchPanel {
 
 .faButton {
     cursor: pointer;
+    opacity:0.6;
+}
+
+.faButton:hover {
+    opacity:1;
 }
 
 .modal {

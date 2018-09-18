@@ -77,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commerce\Core\VirtualProducts\ExtendedMaterialTests.cs" />
+    <Compile Include="Commerce\Core\VirtualProducts\MaterialEntryTests.cs" />
     <Compile Include="Commerce\Core\VirtualProducts\Mocks\MaterialEntityMock.cs" />
     <Compile Include="Commerce\Core\VirtualProducts\Mocks\MaterialRepositoryMock.cs" />
     <Compile Include="Commerce\Core\VirtualProducts\Mocks\MaterialUnitMock.cs" />

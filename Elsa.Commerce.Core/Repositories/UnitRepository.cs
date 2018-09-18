@@ -28,6 +28,24 @@ namespace Elsa.Commerce.Core.Repositories
             return GetAllUnits().FirstOrDefault(u => u.Id == unitId);
         }
 
+        public IMaterialUnit GetUnitBySymbol(string symbol)
+        {
+            var units =
+                GetAllUnits()
+                    .Where(u => string.Equals(symbol, u.Symbol, StringComparison.InvariantCultureIgnoreCase))
+                    .ToArray();
+
+            switch (units.Length)
+            {
+                case 0:
+                    return null;
+                case 1:
+                    return units[0];
+                default:
+                    return units.FirstOrDefault(u => u.Symbol == symbol);
+            }
+        }
+
         public IEnumerable<IMaterialUnit> GetAllUnits()
         {
             return m_cache.ReadThrough(

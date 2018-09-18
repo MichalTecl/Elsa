@@ -48,7 +48,9 @@
     <Compile Include="AllowAnonymousAttribute.cs" />
     <Compile Include="AllowWithDefaultPassword.cs" />
     <Compile Include="Caching\Cache.cs" />
+    <Compile Include="Caching\CacheWithPostponedRemoval.cs" />
     <Compile Include="Caching\ICache.cs" />
+    <Compile Include="Caching\ICanPostponeCacheRemovals.cs" />
     <Compile Include="Caching\IPerProjectDbCache.cs" />
     <Compile Include="Caching\PerProjectDbCache.cs" />
     <Compile Include="CommonRegistry.cs" />

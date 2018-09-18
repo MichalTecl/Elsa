@@ -6,8 +6,8 @@
                 <button event-bind="click:search($tbVpsQuery.value)" class="fa fa-search"></button>
             </div>
         </div>
-        <div >
-            <button event-bind="click:createNewVp"><i class="fas fa-plus"></i></button>
+        <div class="virtualProductsListContainer" >
+            <button event-bind="click:createNewVp" class="addVirtualProductBut"><i class="fas fa-plus"></i></button>
             <div id="vpsList">
 
                 <div lt-name="vpItemTemplate" class="vpsContainer">
@@ -17,10 +17,15 @@
                     </div>
                     <div data-bind="class!.hidden:editMode" class="virtualProductEditItem">
                         <i class="fas fa-hashtag"></i>
-                        <input data-bind="value:Name" />
+                        <input data-bind="value:unhashedName" event-bind="change:updateModelName(this.value, VM)" />
+                        
+                        <div class="materialEditContainer">
+                            <div class="containsTitle">Skládá se z:</div>
+                            <div class="materialEditor" lt-name="materialEditPlaceholder"></div>
+                        </div>
                         
                         <div class="itemEditFoot">
-                            <button><i class="fas fa-check"></i></button>
+                            <button event-bind="click:save(VM)"><i class="fas fa-check"></i></button>
                             <button event-bind="click:cancelEdit"><i class="fas fa-times"></i></button>
                         </div>
 
@@ -36,9 +41,9 @@
 
 <script>
     lt.element("virtualProductsEditorPanel").withModel("app.virtualProductsEditor.vm").attach(function (vpsList, vpItemTemplate) {
-
-        var vpItemController = function() {
-            
+        
+        var vpItemController = function (materialEditPlaceholder) {
+            app.ui.MaterialList.renderTo(materialEditPlaceholder);
         };
 
         this.bind(function (selectedVirtualProducts) {
@@ -47,7 +52,7 @@
                 vpItemTemplate,
                 selectedVirtualProducts,
                 function(vp) { return vp.VirtualProductId; },
-                vpItemController());
+                vpItemController);
         });
 
         this.search = function(query) {
@@ -66,5 +71,14 @@
             app.virtualProductsEditor.vm.cancelVpEdit();
         };
 
+        this.save = function(model) {
+            console.log(model);
+
+            app.virtualProductsEditor.vm.saveVirtualProduct(model);
+        };
+
+        this.updateModelName = function(newName, model) {
+            model.unhashedName = newName;
+        };
     });
 </script>

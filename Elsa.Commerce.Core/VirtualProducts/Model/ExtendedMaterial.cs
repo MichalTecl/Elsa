@@ -42,7 +42,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             // Batch = 500g
             var batchUnit = conversions.GetPrefferedUnit(preferredBatchUnit, NominalUnit); //g
             var convertedNominalAmount = conversions.ConvertAmount(NominalUnit.Id, batchUnit.Id, NominalAmount); // 1000g
-            var convertedBatchAmount = conversions.ConvertAmount(NominalUnit.Id, batchUnit.Id, batchAmount); //500g
+            var convertedBatchAmount = conversions.ConvertAmount(preferredBatchUnit.Id, batchUnit.Id, batchAmount); //500g
 
             var conversionFactor = convertedBatchAmount / convertedNominalAmount; // 0.5
 
@@ -59,7 +59,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                     sourceComponent.Unit,
                     conversions);
 
-                var batchComponent = new MaterialComponent(sourceComponent.Unit, batchedComponentMaterial, componentBatchAmount);
+                var batchComponent = new MaterialComponent(sourceComponent.Unit, batchedComponentMaterial, componentBatchAmount, null);
                 batchComponents.Add(batchComponent);
             }
 
@@ -86,7 +86,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public void AddComponent(decimal amount, IMaterialUnit unit, IExtendedMaterialModel material)
         {
-            m_components.Add(new MaterialComponent(unit, material, amount));
+            m_components.Add(new MaterialComponent(unit, material, amount, null));
         }
 
         private void AdoptComponents(IEnumerable<MaterialComponent> components)

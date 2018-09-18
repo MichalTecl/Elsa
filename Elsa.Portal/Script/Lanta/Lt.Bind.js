@@ -10,6 +10,19 @@ lanta.BindingCore.BindingBuilder = lanta.BindingCore.BindingBuilder || function(
         return window;
     };
 
+    var findVmSourceFactory = function(owner, expression) {
+        
+        if (!owner) {
+            return null;
+        }
+
+        if (!!owner["lt_view_model"]) {
+            return owner["lt_view_model"];
+        }
+
+        return findVmSourceFactory(owner.parentElement, expression);
+    };
+
     var canBeNullComparer = function(oldValue, newValue) {
         if (oldValue !== newValue) {
             return lanta.BindingCore.ComparerResult.CHANGED;
@@ -21,6 +34,13 @@ lanta.BindingCore.BindingBuilder = lanta.BindingCore.BindingBuilder || function(
     this.canBeNullFunction = function(argument) {
         var param = this.getParamByArgument(argument);
         param.comparer = canBeNullComparer;
+        this.updateBinding();
+        return this;
+    };
+
+    this.relativeToVmFunction = function(argument) {
+        var param = this.getParamByArgument(argument);
+        param.sourceFactory = findVmSourceFactory;
         this.updateBinding();
         return this;
     };
@@ -93,6 +113,7 @@ lanta.BindingCore.BindingBuilder = lanta.BindingCore.BindingBuilder || function(
             builder[argumentName + "CanBeNull"] = (new Function(" return this.canBeNullFunction('" + argumentName + "'); ")).bind(builder);
             builder[argumentName + "ToGlobal"] = (new Function("expression", " return this.toGlobalFunction(expression, '" + argumentName + "'); ")).bind(builder);
             builder[argumentName + "RelativeToGlobal"] = (new Function("expression", " return this.relativeToGlobalFunction(expression, '" + argumentName + "'); ")).bind(builder);
+            builder[argumentName + "RelativeToVm"] = (new Function("expression", " return this.relativeToVmFunction('" + argumentName + "'); ")).bind(builder);
         }
 
         lanta.BindingCore.bind(owner, handler, bindingParams);

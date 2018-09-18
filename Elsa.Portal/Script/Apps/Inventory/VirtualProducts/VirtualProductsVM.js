@@ -29,6 +29,19 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }*/
 
         self.selectedVirtualProducts = vps;
+
+        for (var i = 0; i < vps.length; i++) {
+            var vp = vps[i];
+
+            var unhashedName = vp.Name;
+            if ((!!unhashedName) && (unhashedName.indexOf("#") === 0)) {
+                unhashedName = unhashedName.substr(1);
+            }
+
+            vp.materials = vp.MaterialEntries;
+            vp.unhashedName = unhashedName;
+        }
+
         self.cancelVpEdit(true);
     };
 
@@ -97,11 +110,17 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
 
         if (!found) {
-            var newVp = { editMode: true };
+            var newVp = { editMode: true, materials:[] };
             self.selectedVirtualProducts.unshift(newVp);
         }
 
         lt.notify();
+    };
+
+    self.saveVirtualProduct = function(model) {
+
+        lt.api("/virtualProducts/saveVirtualProduct").body(model).post(function(bk) {});
+
     };
 };
 

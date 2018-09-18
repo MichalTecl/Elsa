@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using Elsa.Core.Entities.Commerce.Inventory;
 
@@ -23,5 +24,7 @@ namespace Elsa.Apps.Inventory.Model
         {
             get; set;
         }
+
+        public List<MaterialCompositionInfo> MaterialEntries { get; } = new List<MaterialCompositionInfo>();
     }
 }
