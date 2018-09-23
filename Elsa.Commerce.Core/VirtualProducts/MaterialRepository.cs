@@ -170,6 +170,12 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_cache.Remove(VirtualProductCompositionsCacheKey);
         }
 
+        public void CleanCache()
+        {
+            m_cache.Remove(VirtualProductCompositionsCacheKey);
+            m_cache.Remove(MaterialsCacheKey);
+        }
+
         public IMaterialRepositoryWithPostponedCache GetWithPostponedCache()
         {
             return new MaterialRepositoryWithPostponedCache(m_database, m_session, new CacheWithPostponedRemoval(m_cache), m_conversionHelper);

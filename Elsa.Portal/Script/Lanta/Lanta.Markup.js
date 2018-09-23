@@ -9,7 +9,8 @@ if (lanta.Markup.attributeSetters.length === 0) {
 
 	// set attribute
 	lanta.Markup.attributeSetters.push(function (target, propertyName, value) {
-		target.setAttribute(propertyName, value);
+	    target.setAttribute(propertyName, value);
+	    target[propertyName] = value;
 	    return true;
 	});
 

@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Core.Entities.Commerce.Inventory;
+
 namespace Elsa.Commerce.Core.VirtualProducts
 {
     public interface IVirtualProductFacade
     {
-        void ProcessVirtualProductEditRequest(int? virtualProductId, string name, string[] materialEntries);
+        IVirtualProduct ProcessVirtualProductEditRequest(int? virtualProductId, string name, string[] materialEntries);
     }
 }

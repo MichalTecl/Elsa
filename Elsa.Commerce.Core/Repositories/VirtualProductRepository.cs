@@ -6,6 +6,7 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 
@@ -20,12 +21,14 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly ICache m_cache;
         private readonly IDatabase m_database;
         private readonly ISession m_session;
+        private readonly ILog m_log;
 
-        public VirtualProductRepository(ICache cache, IDatabase database, ISession session)
+        public VirtualProductRepository(ICache cache, IDatabase database, ISession session, ILog log)
         {
             m_cache = cache;
             m_database = database;
             m_session = session;
+            m_log = log;
         }
 
         public IEnumerable<IVirtualProduct> GetVirtualProductsByOrderItem(IPurchaseOrder order, IOrderItem item)
@@ -151,6 +154,18 @@ namespace Elsa.Commerce.Core.Repositories
             IVirtualProduct vp;
             if (virtualProductId == null)
             {
+                var existing =
+                    m_database.SelectFrom<IVirtualProduct>()
+                        .Where(v => v.ProjectId == m_session.Project.Id)
+                        .Where(v => v.Name == name)
+                        .Execute()
+                        .FirstOrDefault();
+
+                if (existing != null)
+                {
+                    throw new ArgumentException($"Název tagu musí být jedinečný, již existuje \"{existing.Name}\"");
+                }
+
                 vp = m_database.New<IVirtualProduct>();
                 vp.ProjectId = m_session.Project.Id;
             }
@@ -180,10 +195,54 @@ namespace Elsa.Commerce.Core.Repositories
             m_cache.Remove(string.Format(c_vpMappingCacheKey, m_session.Project.Id));
             m_cache.Remove(string.Format(c_vpCacheKey, m_session.Project.Id));
         }
-        
+
+        public void DeleteVirtualProduct(int vpId)
+        {
+            
+            var prid = m_session.Project.Id;
+
+            using (var tx = m_database.OpenTransaction())
+            {
+                var vp =
+                    m_database.SelectFrom<IVirtualProduct>()
+                        .Where(p => p.Id == vpId)
+                        .Where(p => p.ProjectId == prid)
+                        .Execute()
+                        .FirstOrDefault();
+
+                if (vp == null)
+                {
+                    m_log.Info($"VirtualProductId = {vpId} not found");
+                    return;
+                }
+
+                var materialMappings =
+                    m_database.SelectFrom<IVirtualProductMaterial>()
+                        .Join(m => m.Component)
+                        .Where(m => m.Component.ProjectId == prid)
+                        .Where(m => m.VirtualProductId == vpId)
+                        .Execute();
+
+                m_database.DeleteAll(materialMappings);
+
+                var itemMappings =
+                    m_database.SelectFrom<IVirtualProductOrderItemMapping>()
+                        .Where(m => m.ProjectId == prid)
+                        .Where(m => m.VirtualProductId == vpId)
+                        .Execute();
+
+                m_database.DeleteAll(itemMappings);
+
+                m_database.Delete(vp);
+                
+                tx.Commit();
+                CleanCache();
+            }
+        }
+
         public IDisposableVirtualProductsRepository GetWithPostponedCache()
         {
-            return new WithPostopnedCacheRemoval(new CacheWithPostponedRemoval(m_cache), m_database, m_session);
+            return new WithPostopnedCacheRemoval(new CacheWithPostponedRemoval(m_cache), m_database, m_session, m_log);
         }
 
         private IEnumerable<IVirtualProductOrderItemMapping> GetAllMappings()
@@ -240,7 +299,7 @@ namespace Elsa.Commerce.Core.Repositories
         {
             private readonly CacheWithPostponedRemoval m_ppCache;
 
-            public WithPostopnedCacheRemoval(CacheWithPostponedRemoval cache, IDatabase database, ISession session) : base(cache, database, session)
+            public WithPostopnedCacheRemoval(CacheWithPostponedRemoval cache, IDatabase database, ISession session, ILog log) : base(cache, database, session, log)
             {
                 m_ppCache = cache;
             }

@@ -55,20 +55,24 @@ namespace Elsa.Apps.Inventory
                         continue;
                     }
                 }
-
-                var materials = m_materialRepository.GetMaterialsByVirtualProductId(prod.Id);
-
-                var result = new VirtualProductViewModel(prod);
-                result.MaterialEntries.AddRange(materials.Select(m => new MaterialCompositionInfo(m.Material)
-                                                                          {
-                                                                              UnitId = m.Unit.Id,
-                                                                              UnitSymbol = m.Unit.Symbol,
-                                                                              Amount = m.Amount,
-                                                                              CompositionId = m.CompositionId ?? -1 
-                                                                          }));
-
-                yield return result;
+                
+                yield return MapVirtualProductToVm(prod);
             }
+        }
+
+        private VirtualProductViewModel MapVirtualProductToVm(Core.Entities.Commerce.Inventory.IVirtualProduct prod)
+        {
+            var materials = m_materialRepository.GetMaterialsByVirtualProductId(prod.Id);
+
+            var result = new VirtualProductViewModel(prod);
+            result.MaterialEntries.AddRange(materials.Select(m => new MaterialCompositionInfo(m.Material)
+            {
+                UnitId = m.Unit.Id,
+                UnitSymbol = m.Unit.Symbol,
+                Amount = m.Amount,
+                CompositionId = m.CompositionId ?? -1
+            }));
+            return result;
         }
 
         public IEnumerable<MappableItemViewModel> GetMappableItems(string searchQuery)
@@ -138,19 +142,37 @@ namespace Elsa.Apps.Inventory
         public IEnumerable<MaterialInfo> GetAllMaterials()
         {
             return m_materialRepository.GetAllMaterials().Select(m => new MaterialInfo(m));
-
         }
 
-        public void SaveVirtualProduct(VirtualProductEditRequestModel request)
+        public VirtualProductViewModel GetVirtualProductById(int id)
+        {
+            var vp = m_virtualProductRepository.GetVirtualProductById(id);
+            if (vp == null)
+            {
+                return null;
+            }
+
+            return MapVirtualProductToVm(vp);
+        }
+
+        public VirtualProductViewModel SaveVirtualProduct(VirtualProductEditRequestModel request)
         {
             try
             {
-                m_virtualProductFacade.ProcessVirtualProductEditRequest(request.VirtualProductId, request.UnhashedName, request.Materials.Select(m => m.DisplayText).ToArray());
+                var vp = m_virtualProductFacade.ProcessVirtualProductEditRequest(request.VirtualProductId, request.UnhashedName, request.Materials.Select(m => m.DisplayText).ToArray());
+
+                return MapVirtualProductToVm(vp);
             }
             finally
             {
                 m_cache.Remove(GetMappablesCacheKey());
             }
+        }
+
+        public void DeleteVirtualProduct(int vpId)
+        {
+            m_virtualProductRepository.DeleteVirtualProduct(vpId);
+            m_materialRepository.CleanCache();
         }
 
         private List<MappableItemViewModel> GetAllMappablesThroughCache()

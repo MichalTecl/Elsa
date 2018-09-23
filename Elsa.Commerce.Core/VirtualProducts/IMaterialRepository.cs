@@ -20,6 +20,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
         void DetachMaterial(int virtualProductId, int materialId);
 
         void AddOrUpdateComponent(int vpId, int materialId, decimal requestComponentAmount, int unitId);
+
+        void CleanCache();
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }

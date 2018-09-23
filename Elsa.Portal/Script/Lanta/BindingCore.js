@@ -34,9 +34,8 @@ lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager ||
         timer = null;
     };
 
-    self.enqueueNotification = function (name) {
-        
-        queue.push({ element: window.document, notificationName: name });
+    var enqueue = function(owner, name) {
+        queue.push({ element: owner, notificationName: name });
 
         if (queue.length === 1) {
 
@@ -48,12 +47,30 @@ lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager ||
             timer = window.setInterval(tick, 50);
         }
     };
+
+    self.enqueueNotification = function (name) {
+        enqueue(window.document, name);
+    };
+
+    self.notifyElement = function(element) {
+        enqueue(element, "");
+    };
 };
 
 lanta.BindingCore.NotificationManager.instance = lanta.BindingCore.NotificationManager.instance || new lanta.BindingCore.NotificationManager();
 
-lanta.BindingCore.notify = lanta.BindingCore.notify || function(name) {
-    lanta.BindingCore.NotificationManager.instance.enqueueNotification(name);
+lanta.BindingCore.notify = lanta.BindingCore.notify || function (target) {
+
+    try {
+        if (target instanceof HTMLElement) {
+            lanta.BindingCore.NotificationManager.instance.notifyElement(target);
+            return;
+        }
+    } catch (ee) {
+        console.error(ee);
+    }
+
+    lanta.BindingCore.NotificationManager.instance.enqueueNotification(target);
 };
 
 lanta.BindingCore.setViewModel = lanta.BindingCore.setViewModel || function(element, viewModel) {
@@ -200,31 +217,7 @@ lanta.BindingCore.ElementBinding = lanta.BindingCore.ElementBinding || function(
             if (viewModel !== null) {
                 owner["lt_view_model"] = viewModel;
             }
-
-            /* TODO
-            var updateRequired = false;
-    
-            if ((!!viewModel) || (expression === null) || (expression.length === 0)) {
-                updateRequired = true;
-            } else {
-                var terminatedExpression = expression + ".";
-                for (var i = 0; i < parameters.length; i++) {
-                    var parameter = parameters[i];
-                    if (expression.length === 0 ||
-                        expression === parameter.expression ||
-                        parameter.expression.startsWith(terminatedExpression)) {
-    
-                        updateRequired = true;
-                        break;
-                    }
-                }
-            }
-    
-            if (!updateRequired) {
-                return;
-            }
-            */
-
+            
             var result = lanta.BindingCore.ComparerResult.UNCHANGED;
 
             for (var j = 0; j < parameters.length; j++) {
@@ -261,10 +254,10 @@ lanta.BindingCore.ElementBinding = lanta.BindingCore.ElementBinding || function(
 
 var lt = lt || {};
 
-lt.notify = lanta.notify || function(modelName) {
+lt.notify = lanta.notify || function(target) {
     try {
-        modelName = modelName || "";
-        lanta.BindingCore.notify(modelName);
+        target = target || "";
+        lanta.BindingCore.notify(target);
     } catch (e) {
         lanta.Extensions.defaultErrorHandler(e);
     }

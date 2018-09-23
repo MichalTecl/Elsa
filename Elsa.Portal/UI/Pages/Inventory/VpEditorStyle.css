@@ -153,3 +153,16 @@ div[lt-name="errorsDisplay"]{
 .materialSuggestions:empty {
     display:none;
 }
+
+#mainTab {
+    margin-top: 0 !important;
+}
+
+#userPanel {
+    margin-bottom: 0 !important;
+}
+
+.virtualProductEditItem > div.itemEditFoot > i {
+  position:absolute;
+  left:25px;
+}

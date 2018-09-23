@@ -25,6 +25,7 @@
                         </div>
                         
                         <div class="itemEditFoot">
+                            <i class="far fa-trash-alt faButton" event-bind="click:deleteVm(VM)"></i>
                             <button event-bind="click:save(VM)"><i class="fas fa-check"></i></button>
                             <button event-bind="click:cancelEdit"><i class="fas fa-times"></i></button>
                         </div>
@@ -79,6 +80,16 @@
 
         this.updateModelName = function(newName, model) {
             model.unhashedName = newName;
+            lt.notify(this);
+        };
+
+        this.deleteVm = function(model) {
+            var cfm = confirm("Opravdu vymazat '" + model.Name + "'?");
+            if (!cfm) {
+                return;
+            }
+
+            app.virtualProductsEditor.vm.deleteVirtualProduct(model.VirtualProductId);
         };
     });
 </script>

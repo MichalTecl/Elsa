@@ -92,6 +92,9 @@ namespace Elsa.Common
             {
                 context.HttpContext.Response.StatusCode = 500;
             }
+
+            context.HttpContext.Response.ClearContent();
+            context.HttpContext.Response.Write(exception?.Message ?? "Došlo k chybě :(");
         }
 
         private static string GetParamString(MethodInfo method, object[] parameters)

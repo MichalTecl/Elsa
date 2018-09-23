@@ -27,6 +27,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
         IVirtualProduct CreateOrUpdateVirtualProduct(int? virtualProductId, string name);
 
         void CleanCache();
+
+        void DeleteVirtualProduct(int vpId);
     }
 
     public interface IDisposableVirtualProductsRepository : IVirtualProductRepository, IDisposable

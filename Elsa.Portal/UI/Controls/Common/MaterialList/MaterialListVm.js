@@ -360,11 +360,13 @@ app.ui.MaterialList.renderTo = app.ui.MaterialList.renderTo || function(target) 
                 }
 
                 setMaterials(materialsCollection);
+                lt.notify(self);
             };
 
             this.addMaterial = function() {
                 materialsCollection.push({});
                 setMaterials(materialsCollection);
+                lt.notify(self);
             };
 
         });

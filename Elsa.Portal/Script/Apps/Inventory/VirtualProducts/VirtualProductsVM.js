@@ -22,27 +22,48 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         self.selectedMappables = mappables;
     };
 
-    var receiveVirtualProducts = function (vps) {
+    var adjustServerVpObject = function(vp) {
+        var unhashedName = vp.Name;
+        if ((!!unhashedName) && (unhashedName.indexOf("#") === 0)) {
+            unhashedName = unhashedName.substr(1);
+        }
 
-        /*for (var i = 0; i < vps.length; i++) {
-            vps[i].editMode = false;
-        }*/
+        vp.materials = vp.MaterialEntries;
+        vp.unhashedName = unhashedName;
+        vp.editMode = false;
+    };
+
+    var receiveVirtualProducts = function (vps) {
 
         self.selectedVirtualProducts = vps;
 
         for (var i = 0; i < vps.length; i++) {
             var vp = vps[i];
 
-            var unhashedName = vp.Name;
-            if ((!!unhashedName) && (unhashedName.indexOf("#") === 0)) {
-                unhashedName = unhashedName.substr(1);
-            }
-
-            vp.materials = vp.MaterialEntries;
-            vp.unhashedName = unhashedName;
+            adjustServerVpObject(vp);
         }
 
         self.cancelVpEdit(true);
+    };
+
+    var receiveSingleVp = function(vp) {
+        adjustServerVpObject(vp);
+
+        var found = false;
+
+        for (var i = 0; i < self.selectedVirtualProducts.length; i++) {
+            if (self.selectedVirtualProducts[i].VirtualProductId === vp.VirtualProductId) {
+                self.selectedVirtualProducts[i] = vp;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            self.selectedVirtualProducts.push(vp);
+        }
+
+        lt.notify();
     };
 
     self.loadMappables = function (searchQuery) {
@@ -84,6 +105,13 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
 
         for (var i = 0; i < self.selectedVirtualProducts.length; i++) {
+
+            if (!!self.selectedVirtualProducts[i].editMode) {
+                lt.api("/virtualProducts/getVirtualProductById")
+                    .query({ "id": self.selectedVirtualProducts[i].VirtualProductId })
+                    .get(receiveSingleVp);
+            }
+
             self.selectedVirtualProducts[i].editMode = false;
         }
 
@@ -119,8 +147,28 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
     self.saveVirtualProduct = function(model) {
 
-        lt.api("/virtualProducts/saveVirtualProduct").body(model).post(function(bk) {});
+        lt.api("/virtualProducts/saveVirtualProduct").body(model).post(function(savedVp) {
 
+            self.cancelVpEdit(true);
+
+            receiveSingleVp(savedVp);
+
+        });
+
+    };
+
+    self.deleteVirtualProduct = function(vpId) {
+        lt.api("/virtualProducts/deleteVirtualProduct").query({ "vpId": vpId }).get(function(result) {
+            
+            for (var i = 0; i < self.selectedVirtualProducts.length; i++) {
+                if (self.selectedVirtualProducts[i].VirtualProductId === vpId) {
+                    self.selectedVirtualProducts.splice(i, 1);
+                    lt.notify();
+                    return;
+                }
+            }
+
+        });
     };
 };
 

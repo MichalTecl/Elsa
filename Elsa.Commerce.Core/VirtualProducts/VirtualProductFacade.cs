@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
+using Elsa.Core.Entities.Commerce.Inventory;
 
 using Robowire.RobOrm.Core;
 
@@ -26,7 +27,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_database = database;
         }
 
-        public void ProcessVirtualProductEditRequest(int? virtualProductId, string name, string[] materialEntries)
+        public IVirtualProduct ProcessVirtualProductEditRequest(int? virtualProductId, string name, string[] materialEntries)
         {
             using (var tx = m_database.OpenTransaction())
             {
@@ -74,6 +75,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 tx.Commit();
 
                 m_virtualProductRepository.CleanCache();
+
+                return vp;
             }
         }
 

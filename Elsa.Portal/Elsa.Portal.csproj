@@ -171,10 +171,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\..\Lanta\Lanta\Lanta\Lanta.csproj">
-      <Project>{e68cf298-b028-4722-be2d-c7de3512a01d}</Project>
-      <Name>Lanta</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Robowire\Robowire\CodeGeneration\CodeGeneration.csproj">
       <Project>{8d5fb7d2-8960-4bf7-938e-2ec9584bdec5}</Project>
       <Name>CodeGeneration</Name>
