@@ -25,5 +25,10 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
         {
             return a;
         }
+
+        public bool AreCompatible(int unitId1, int unitId2)
+        {
+            return unitId1 == unitId2;
+        }
     }
 }

@@ -6,6 +6,7 @@ using System.Text;
 using Elsa.Apps.Inventory.Model;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.VirtualProducts;
+using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Logging;
@@ -28,8 +29,9 @@ namespace Elsa.Apps.Inventory
         private readonly ICache m_cache;
         private readonly IMaterialRepository m_materialRepository;
         private readonly IVirtualProductFacade m_virtualProductFacade;
+        private readonly IMaterialFacade m_materialFacade;
         
-        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade)
+        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade)
             : base(webSession, log)
         {
             m_virtualProductRepository = virtualProductRepository;
@@ -37,6 +39,7 @@ namespace Elsa.Apps.Inventory
             m_cache = cache;
             m_materialRepository = materialRepository;
             m_virtualProductFacade = virtualProductFacade;
+            m_materialFacade = materialFacade;
         }
 
         public IEnumerable<VirtualProductViewModel> GetVirtualProducts(string searchQuery)
@@ -173,6 +176,47 @@ namespace Elsa.Apps.Inventory
         {
             m_virtualProductRepository.DeleteVirtualProduct(vpId);
             m_materialRepository.CleanCache();
+        }
+
+        public IEnumerable<IExtendedMaterialModel> SearchMaterials(string query)
+        {
+            var allMats = m_materialRepository.GetAllMaterials();
+
+            var normQuery = StringUtil.NormalizeSearchText(99, query);
+
+            if (string.IsNullOrWhiteSpace(normQuery))
+            {
+                return allMats;
+            }
+
+            return allMats.Where(m => StringUtil.NormalizeSearchText(99, m.Name).Contains(normQuery));
+        }
+
+        public IExtendedMaterialModel GetMaterialById(int id)
+        {
+            return m_materialRepository.GetMaterialById(id);
+        }
+
+        public IExtendedMaterialModel SaveMaterial(MaterialEditRequestModel request)
+        {
+            var saved = m_materialFacade.ProcessMaterialEditRequest(
+                request.MaterialId,
+                request.MaterialName,
+                request.NominalAmountText,
+                request.Materials.Select(s => s.DisplayText));
+
+            m_cache.Remove(GetMappablesCacheKey());
+
+            return saved;
+        }
+
+        public void DeleteMaterial(int id)
+        {
+            m_materialRepository.DeleteMaterial(id);
+
+            m_cache.Remove(GetMappablesCacheKey());
+            m_materialRepository.CleanCache();
+            m_virtualProductRepository.CleanCache();
         }
 
         private List<MappableItemViewModel> GetAllMappablesThroughCache()

@@ -116,6 +116,7 @@
     <Content Include="UI\Controls\Common\PickItemDialog.html" />
     <Content Include="UI\Controls\Common\PickItemDialog.js" />
     <Content Include="UI\Controls\Common\TabControl.js" />
+    <Content Include="UI\Controls\Inventory\MaterialsEditor.html" />
     <Content Include="UI\Controls\Inventory\TaggingEditor.html" />
     <Content Include="UI\Controls\Inventory\VirtualProducts.html" />
     <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />

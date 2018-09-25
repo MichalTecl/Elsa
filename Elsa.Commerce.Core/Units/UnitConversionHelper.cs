@@ -46,7 +46,9 @@ namespace Elsa.Commerce.Core.Units
 
         public bool AreCompatible(int unitId1, int unitId2)
         {
-            return unitId1 == unitId2 || GetAllConversions().Any(c => c.SourceUnitId == unitId1 && c.TargetUnitId == unitId2);
+            return unitId1 == unitId2
+                || (   GetAllConversions().Any(c => c.SourceUnitId == unitId1 && c.TargetUnitId == unitId2)
+                    && GetAllConversions().Any(c => c.SourceUnitId == unitId2 && c.TargetUnitId == unitId1));
         }
 
         private ConvertorInstance GetConvertor(int sourceUnit, int targetUnit)

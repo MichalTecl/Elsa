@@ -26,6 +26,7 @@ namespace Elsa.Commerce.Core
             setup.For<IUnitConversionHelper>().Use<UnitConversionHelper>();
             setup.For<IMaterialRepository>().Use<MaterialRepository>();
             setup.For<IVirtualProductFacade>().Use<VirtualProductFacade>();
+            setup.For<IMaterialFacade>().Use<MaterialFacade>();
         }
     }
 }

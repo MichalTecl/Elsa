@@ -8,7 +8,54 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
     self.currentQuery = "";
 
     self.selectedVirtualProducts = [];
+    self.selectedMaterials = [];
     
+    var adjustServerMaterial = function(mat) {
+
+        mat.editMode = false;
+
+        var materials = [];
+
+        for (var i = 0; i < mat.Components.length; i++) {
+
+            var com = mat.Components[i];
+
+            materials.push({ Name: com.Material.Name, Amount: com.Amount, UnitSymbol: com.Unit.Symbol });
+        }
+        mat.materials = materials;
+
+        mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;
+    };
+
+    var receiveMaterials = function (mats) {
+
+        for (var i = 0; i < mats.length; i++) {
+            adjustServerMaterial(mats[i]);
+        }
+
+        self.selectedMaterials = mats;
+    };
+
+    var receiveSingleMaterial = function(mat) {
+
+        adjustServerMaterial(mat);
+
+        try {
+
+            for (var i = 0; i < self.selectedMaterials.length; i++) {
+                if (self.selectedMaterials[i].Id === mat.Id) {
+                    self.selectedMaterials[i] = mat;
+                    return;
+                }
+            }
+
+            self.selectedMaterials.push(mat);
+
+        } finally {
+            self.cancelMaterialEdit(true);
+        }
+    };
+
     var receiveMappables = function (mappables) {
 
         for (var i = 0; i < mappables.length; i++) {
@@ -62,7 +109,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         if (!found) {
             self.selectedVirtualProducts.push(vp);
         }
-
+        
         lt.notify();
     };
 
@@ -95,9 +142,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             .query({ searchQuery: query })
             .get(receiveVirtualProducts);
     };
-
-    setTimeout(self.loadVirtualProducts(""), 10);
-
+    
     self.cancelVpEdit = function(doNotNotify) {
 
         if (self.selectedVirtualProducts.length > 0 && (!self.selectedVirtualProducts[0].VirtualProductId)) {
@@ -170,6 +215,84 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
         });
     };
+
+    self.searchMaterials = function(query) {
+        lt.api("/virtualProducts/searchMaterials").body(query).post(receiveMaterials);
+    };
+
+    self.cancelMaterialEdit = function(doNotNotify) {
+        
+        if (self.selectedMaterials.length > 0 && (!self.selectedMaterials[0].Id)) {
+            self.selectedMaterials.splice(0, 1);
+        }
+
+        for (var i = 0; i < self.selectedMaterials.length; i++) {
+
+            if (!!self.selectedMaterials[i].editMode) {
+                lt.api("/virtualProducts/getMaterialById")
+                    .query({ "id": self.selectedMaterials[i].Id })
+                    .get(receiveSingleMaterial);
+            }
+
+            self.selectedMaterials[i].editMode = false;
+        }
+
+        if (!doNotNotify) {
+            lt.notify();
+        }
+    };
+
+    self.setMaterialEdit = function(id) {
+
+        self.cancelMaterialEdit(true);
+
+        var found = false;
+        for (var i = 0; i < self.selectedMaterials.length; i++) {
+            if (self.selectedMaterials[i].Id === id) {
+                self.selectedMaterials[i].editMode = true;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            self.selectedMaterials.unshift({ editMode: true, materials: [] });
+        }
+
+        lt.notify();
+    };
+
+    self.saveMaterial = function(model) {
+        var request = {
+            MaterialId: model.Id,
+            MaterialName: model.Name,
+            NominalAmountText: model.nominalAmountText,
+            Materials: []
+        };
+
+        for (var i = 0; i < model.materials.length; i++) {
+            request.Materials.push({ DisplayText: model.materials[i].displayText });
+        }
+
+        lt.api("/virtualProducts/saveMaterial").body(request).post(receiveSingleMaterial);
+    };
+
+    self.deleteMaterial = function(id) {
+
+        lt.api("/virtualProducts/deleteMaterial").query({ id: id }).get(function() {
+            for (var i = 0; i < self.selectedMaterials.length; i++) {
+                if (self.selectedMaterials[i].Id === id) {
+                    self.selectedMaterials.splice(i, 1);
+                    return;
+                }
+            }
+        });
+
+    };
+
+
+    setTimeout(self.searchMaterials, 500);
+    setTimeout(self.loadVirtualProducts, 100);
 };
 
 app.virtualProductsEditor.vm = app.virtualProductsEditor.vm || new app.virtualProductsEditor.ViewModel();

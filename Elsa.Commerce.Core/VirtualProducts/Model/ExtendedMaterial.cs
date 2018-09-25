@@ -5,6 +5,8 @@ using System.Text;
 using Elsa.Commerce.Core.Units;
 using Elsa.Core.Entities.Commerce.Inventory;
 
+using Newtonsoft.Json;
+
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {
     internal class ExtendedMaterial : IExtendedMaterialModel
@@ -32,6 +34,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public decimal BatchAmount { get; private set; }
 
+        [JsonIgnore]
         public IMaterial Adaptee { get; }
         
         public IEnumerable<MaterialComponent> Components => m_components;

@@ -1,0 +1,103 @@
+﻿<div class="panel w4" id="materialsEditorPanel">
+    <div class="panelContent" id="matsUi">
+        <div id="matsSearch">
+            <div class="searchPanel" style="width:100%">
+                <input type="text" id="tbMatsQuery" />
+                <button event-bind="click:search($tbMatsQuery.value)" class="fa fa-search"></button>
+            </div>
+        </div>
+        <div class="materialsListContainer">
+            <button event-bind="click:createNewMaterial" class="addMaterialProductBut"><i class="fas fa-plus"></i></button>
+            <div id="materialsList">
+
+                <div lt-name="materialItemTemplate" class="materialItemContainer">
+                    <div data-bind="class.hidden:editMode" class="materialItemView">
+                        <i class="fas fa-edit faButton" event-bind="click:editMaterial(Id)"></i>
+                        <div data-bind="text:Name" class="materialTitle"></div>
+                    </div>
+                    <div data-bind="class!.hidden:editMode" class="materialEditItem">
+                        <i class="fas fa-cube"></i>
+                        <input data-bind="value:Name" event-bind="change:updateModelName(this.value, VM)" />
+
+                        <div class="materialEditContainer">
+                            <div class="containsTitleContainer containsTitle">
+                                <i>Pro výrobu&nbsp;</i><input required="required" data-bind="value:nominalAmountText" event-bind="change:onNominalAmountTextChanged(VM, this.value)"/><i>&nbsp;je třeba:</i>
+                            </div>
+                            <div class="materialEditor" lt-name="materialEditPlaceholder"></div>
+                        </div>
+
+                        <div class="itemEditFoot">
+                            <i class="far fa-trash-alt faButton" event-bind="click:deleteMaterial(VM)"></i>
+                            <button event-bind="click:save(VM)"><i class="fas fa-check"></i></button>
+                            <button event-bind="click:cancelEdit"><i class="fas fa-times"></i></button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    lt.element("materialsEditorPanel").withModel("app.virtualProductsEditor.vm").attach(function (materialsList, materialItemTemplate) {
+
+        var materialItemController = function (materialEditPlaceholder) {
+            app.ui.MaterialList.renderTo(materialEditPlaceholder);
+        };
+
+        this.bind(function (selectedMaterials) {
+
+            lt.generate(materialsList,
+                materialItemTemplate,
+                selectedMaterials,
+                function (m) { return m.Id; },
+                materialItemController);
+        });
+
+        this.search = function (query) {
+            ;
+        };
+
+        this.editMaterial = function (id) {
+            app.virtualProductsEditor.vm.setMaterialEdit(id);
+        };
+
+        this.createNewMaterial = function () {
+            app.virtualProductsEditor.vm.setMaterialEdit(-1);
+        };
+
+        this.cancelEdit = function () {
+            app.virtualProductsEditor.vm.cancelMaterialEdit();
+        };
+
+        this.save = function (model) {
+            console.log(model);
+
+            app.virtualProductsEditor.vm.saveMaterial(model);
+        };
+
+        this.updateModelName = function (newName, model) {
+            model.Name = newName;
+            lt.notify(this);
+        };
+
+        this.onNominalAmountTextChanged = function(model, newNomAm) {
+            model.nominalAmountText = newNomAm;
+            lt.notify(this);
+        };
+
+        this.deleteMaterial = function (model) {
+            var cfm = confirm("Opravdu vymazat '" + model.Name + "'?");
+            if (!cfm) {
+                return;
+            }
+
+            app.virtualProductsEditor.vm.deleteMaterial(model.Id);
+        };
+       
+    });
+</script>

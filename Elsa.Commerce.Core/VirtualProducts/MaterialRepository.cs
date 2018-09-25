@@ -170,10 +170,150 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_cache.Remove(VirtualProductCompositionsCacheKey);
         }
 
+        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId)
+        {
+            IMaterial material;
+            if (materialId != null)
+            {
+                material = GetAllMaterials().FirstOrDefault(m => m.Id == materialId.Value)?.Adaptee;
+                if (material == null)
+                {
+                    throw new InvalidOperationException($"Invalid material Id {materialId}");
+                }
+
+                if (material.Name == name && material.NominalAmount == nominalAmount
+                && material.NominalUnitId == nominalUnitId)
+                {
+                    return GetAllMaterials().Single(m => m.Id == materialId);
+                }
+
+                if (material.NominalUnitId != nominalUnitId)
+                {
+                    if (
+                        m_database.SelectFrom<IMaterialComposition>()
+                            .Where(mc => mc.ComponentId == materialId)
+                            .Execute()
+                            .Any())
+                    {
+                        throw new InvalidOperationException($"Není možné změnit nominální jednotku materiálu, protože tento materiál je již součástí složení jiného materiálu");
+                    }
+
+                    if (
+                        m_database.SelectFrom<IVirtualProductMaterial>()
+                            .Where(mc => mc.ComponentId == materialId)
+                            .Execute()
+                            .Any())
+                    {
+                        throw new InvalidOperationException($"Není možné změnit nominální jednotku materiálu, protože tento materiál je přiřazen k některému tagu");
+                    }
+                }
+
+            }
+            else
+            {
+                if (GetAllMaterials().Any(m => m.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    throw new InvalidOperationException("Název materiálu byl již použit");
+                }
+                
+                material = m_database.New<IMaterial>();
+            }
+
+            material.Name = name;
+            material.NominalUnitId = nominalUnitId;
+            material.NominalAmount = nominalAmount;
+            material.ProjectId = m_session.Project.Id;
+
+            m_database.Save(material);
+
+            CleanCache();
+
+            return GetAllMaterials().Single(m => m.Id == material.Id);
+        }
+
         public void CleanCache()
         {
             m_cache.Remove(VirtualProductCompositionsCacheKey);
             m_cache.Remove(MaterialsCacheKey);
+        }
+
+        public void DetachMaterialComponent(int compositionMaterialId, int componentMaterialId)
+        {
+            var composition =
+                m_database.SelectFrom<IMaterialComposition>()
+                    .Join(c => c.Composition)
+                    .Where(m => m.Composition.ProjectId == m_session.Project.Id)
+                    .Where(c => c.CompositionId == compositionMaterialId && c.ComponentId == componentMaterialId)
+                    .Execute()
+                    .FirstOrDefault();
+
+            if (composition == null)
+            {
+                return;
+            }
+
+            m_database.Delete(composition);
+            CleanCache();
+        }
+
+        public void SetMaterialComponent(int compositionMaterialId, int componentMaterialId, decimal componentAmount, int amountUnit)
+        {
+            var composition = m_database.SelectFrom<IMaterialComposition>()
+                            .Join(c => c.Composition)
+                            .Where(m => m.Composition.ProjectId == m_session.Project.Id)
+                            .Where(c => c.CompositionId == compositionMaterialId && c.ComponentId == componentMaterialId)
+                            .Execute()
+                            .FirstOrDefault();
+
+            if (composition != null)
+            {
+                if (composition.UnitId == amountUnit && composition.Amount == componentAmount)
+                {
+                    return;
+                }
+            }
+            else
+            {
+                composition = m_database.New<IMaterialComposition>();
+            }
+            
+            composition.CompositionId = compositionMaterialId;
+            composition.ComponentId = componentMaterialId;
+            composition.UnitId = amountUnit;
+            composition.Amount = componentAmount;
+
+            m_database.Save(composition);
+            CleanCache();
+        }
+
+        public void DeleteMaterial(int id)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var material =
+                    m_database.SelectFrom<IMaterial>()
+                        .Where(m => m.ProjectId == m_session.Project.Id)
+                        .Where(m => m.Id == id)
+                        .Execute()
+                        .FirstOrDefault();
+
+                if (material == null)
+                {
+                    throw new InvalidOperationException("Material not found");
+                }
+
+                var toVp = m_database.SelectFrom<IVirtualProductMaterial>().Where(t => t.ComponentId == id).Execute();
+                var conns =
+                    m_database.SelectFrom<IMaterialComposition>()
+                        .Where(c => c.CompositionId == id || c.ComponentId == id)
+                        .Execute();
+
+                m_database.DeleteAll(toVp);
+                m_database.DeleteAll(conns);
+                m_database.Delete(material);
+
+                tx.Commit();
+            }
         }
 
         public IMaterialRepositoryWithPostponedCache GetWithPostponedCache()

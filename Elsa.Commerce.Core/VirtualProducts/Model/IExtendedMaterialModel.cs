@@ -20,6 +20,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         decimal BatchAmount { get; }
 
+        IMaterial Adaptee { get; }
+
         IEnumerable<MaterialComponent> Components { get; }
 
         IExtendedMaterialModel CreateBatch(decimal batchAmount, IMaterialUnit preferredBatchUnit, IUnitConversionHelper conversions);

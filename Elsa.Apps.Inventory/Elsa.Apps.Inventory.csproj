@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Model\MappableItemViewModel.cs" />
     <Compile Include="Model\MaterialCompositionInfo.cs" />
+    <Compile Include="Model\MaterialEditRequestModel.cs" />
     <Compile Include="Model\MaterialInfo.cs" />
     <Compile Include="Model\VirtualProductEditRequestModel.cs" />
     <Compile Include="Model\VirtualProductViewModel.cs" />

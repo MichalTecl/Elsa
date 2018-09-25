@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {
@@ -22,7 +19,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             return $"{Amount}{UnitName} {MaterialName}";
         }
 
-        public static MaterialEntry Parse(string entry)
+        public static MaterialEntry Parse(string entry, bool allowMissingMaterialName = false)
         {
             if (string.IsNullOrWhiteSpace(entry))
             {
@@ -44,7 +41,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                     .Where(s => !string.IsNullOrWhiteSpace(s))
                     .ToArray();
 
-            if (grps.Length != 4)
+            int expectedNumberOfMatches = allowMissingMaterialName ? 3 : 4;
+
+            if (grps.Length != expectedNumberOfMatches)
             {
                 throw new ArgumentException($"Chybný formát \"{entry}\"");
             }
@@ -55,7 +54,14 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                 throw new ArgumentException("Chybný formát množství");
             }
 
-            return new MaterialEntry() { Amount = amount, UnitName = grps[2], MaterialName = grps[3] };
+            var result = new MaterialEntry() { Amount = amount, UnitName = grps[2] };
+            
+            if(grps.Length > 3)
+            {
+                result.MaterialName = grps.Last();
+            }
+
+            return result;
         }
     }
 

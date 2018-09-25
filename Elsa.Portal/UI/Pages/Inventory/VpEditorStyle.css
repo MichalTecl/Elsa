@@ -166,3 +166,30 @@ div[lt-name="errorsDisplay"]{
   position:absolute;
   left:25px;
 }
+
+
+div.containsTitleContainer > input {
+   width:100px;
+}
+
+
+.materialEditItem {
+    margin-top:20px;
+    border:1px solid #eeeeee;
+    padding:4px;
+    margin-bottom:30px;
+    width:620px;    
+}
+
+.materialEditItem > input {
+    min-width:595px !important;
+}
+
+.materialEditItem > div.itemEditFoot > i {
+  position:absolute;
+  left:25px;
+}
+
+div.containsTitleContainer > input {
+   width:100px;
+}

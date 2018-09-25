@@ -27,7 +27,19 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts
             Assert.Equal(materialName.Trim(), parsed.MaterialName);
         }
 
+        [Theory]
+        [InlineData("123.456unit")]
+        [InlineData("123.456 unit")]
+        [InlineData("123.456\tunit")]
+        [InlineData(" 123.456unit\t\t")]
+        public void TestParsingOfAmountExpression(string expression)
+        {
+            var parsed = MaterialEntry.Parse(expression, true);
 
+            Assert.NotNull(parsed);
+            Assert.Equal(123.456m, parsed.Amount);
+            Assert.Equal("unit", parsed.UnitName);
+        }
 
 
     }
