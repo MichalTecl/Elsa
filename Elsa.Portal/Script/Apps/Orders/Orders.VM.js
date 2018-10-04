@@ -6,6 +6,7 @@ app.orders.ViewModel = app.orders.ViewModel || function() {
 
     this.ordersOverview = null;
     this.missingPaymentsOverview = null;
+    this.readyToPackCount = null;
 
     var update = function() {
         lt.api("/commerceOverviews/GetOrdersOverview").get(function (orders) {
@@ -13,7 +14,11 @@ app.orders.ViewModel = app.orders.ViewModel || function() {
         });
 
         lt.api("/commerceOverviews/GetMissingPaymentsCount").get(function(missingPayment) {
-                self.missingPaymentsOverview = missingPayment;
+            self.missingPaymentsOverview = missingPayment;
+        });
+
+        lt.api("/commerceOverviews/GetReadyToPackCount").get(function(readyToPack) {
+            self.readyToPackCount = readyToPack;
         });
     };
 

@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ELSA</title>
+    <meta charset="utf-8" />
+    <script src="/Bundles/Bundle.ashx?bundle=Lanta"></script>
+    <script src="/Script/Apps/User/UserVM.js"></script>
+    <link href="/Style/Appearance.css" rel="stylesheet" />
+    <link href="/Style/Layout.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+</head>
+<body>
+    <div class="panel w4">
+        <div class="panelHead">
+            <div class="panelTitle">Balení objednávek</div>
+        </div>    
+        <div class="panelContent" id="packingUi">
+            
+      
+        </div>
+    </div>
+    
+    <script>
+
+        lt.element("packingUi")
+            .withModel("app.ordersPacking.vm")
+            .attach(function() {
+            });
+            
+    </script>
+    
+<script src="/Script/Apps/Orders/PaymentPairing.VM.js"></script>
+    
+
+</body>
+</html>

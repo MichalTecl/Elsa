@@ -1,6 +1,8 @@
 ﻿
 using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
+using Elsa.App.OrdersPacking;
+using Elsa.App.Shipment;
 using Elsa.Apps.Inventory;
 using Elsa.Apps.ScheduledJobs;
 using Elsa.Common;
@@ -12,6 +14,7 @@ using Elsa.Integration.Erp.Fler;
 using Elsa.Integration.Erp.Flox;
 using Elsa.Integration.PaymentSystems.Common;
 using Elsa.Integration.PaymentSystems.Fio;
+using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.ImportOrders;
 using Elsa.Jobs.PaymentPairing;
@@ -28,9 +31,6 @@ namespace Elsa.Portal
 
             container.Setup(s => s.For<IWebSession>().Use<UserWebSession>());
             container.Setup(s => s.For<ISession>().Import.FromFactory(l => l.Get<IWebSession>()));
-            container.Setup(s => s.ScanAssembly(typeof(PreviewController).Assembly));
-            container.Setup(s => s.ScanAssembly(typeof(IPurchaseOrderRepository).Assembly));
-            container.Setup(s => s.ScanAssembly(typeof(PaymentsPairingController).Assembly));
             container.Setup(
                 s =>
                     {
@@ -45,6 +45,12 @@ namespace Elsa.Portal
                         s.ScanAssembly(typeof(SetOrdersPaid).Assembly);
                         s.ScanAssembly(typeof(IPaymentSystemClientFactory).Assembly);
                         s.ScanAssembly(typeof(VirtualProductsController).Assembly);
+                        s.ScanAssembly(typeof(PreviewController).Assembly);
+                        s.ScanAssembly(typeof(IPurchaseOrderRepository).Assembly);
+                        s.ScanAssembly(typeof(PaymentsPairingController).Assembly);
+                        s.ScanAssembly(typeof(ZasilkovnaClient).Assembly);
+                        s.ScanAssembly(typeof(ShipmentController).Assembly);
+                        s.ScanAssembly(typeof(PackingController).Assembly);
                     });
         }
     }

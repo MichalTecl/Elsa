@@ -1,0 +1,26 @@
+﻿
+<script src="/Script/Apps/Orders/Orders.VM.js"></script>
+
+<div class="panel w1" >
+    <div class="panelHead">
+        <div class="panelTitle">Zpracování objednávek</div>
+    </div>
+
+    <div class="panelContent" id="ordersProcessingPanel" style="">
+        <a id="packingLink" href="/UI/Pages/OrdersPacking.html"></a>
+        
+        <br/>
+        
+        <a href="/shipment/GetShipmentRequestDocument">Stáhnout dokument pro Zásilkovnu</a>
+    </div>
+
+</div>
+<script>
+    lt.element("ordersProcessingPanel").withModel("app.orders.vm").attach(function (packingLink) {
+        
+        this.bind(function (readyToPackCount) {
+            packingLink.innerHTML = readyToPackCount + ' objednávek připraveno k balení';
+        });
+
+    });
+</script>

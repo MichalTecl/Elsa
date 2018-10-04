@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Common;
@@ -14,12 +15,14 @@ namespace Elsa.Commerce.Core.Impl
         private readonly IDatabase m_database;
         private readonly ISession m_session;
         private readonly IServiceLocator m_serviceLocator;
+        private readonly IErpRepository m_erpRepository;
         
-        public ErpClientFactory(IDatabase database, ISession session, IServiceLocator serviceLocator)
+        public ErpClientFactory(IDatabase database, ISession session, IServiceLocator serviceLocator, IErpRepository erpRepository)
         {
             m_database = database;
             m_session = session;
             m_serviceLocator = serviceLocator;
+            m_erpRepository = erpRepository;
         }
 
         public IErpClient GetErpClient(int erpId)
@@ -39,6 +42,11 @@ namespace Elsa.Commerce.Core.Impl
             erpClient.Erp = erp;
 
             return erpClient;
+        }
+
+        public IEnumerable<IErpClient> GetAllErpClients()
+        {
+            return m_erpRepository.GetAllErps().Select(e => GetErpClient(e.Id));
         }
     }
 }

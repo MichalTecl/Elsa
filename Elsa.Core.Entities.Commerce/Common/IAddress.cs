@@ -40,5 +40,17 @@ namespace Elsa.Core.Entities.Commerce.Common
 
         [NVarchar(-1, true)]
         string Note { get; set; }
+
+        [NVarchar(16, true)]
+        string Lat { get; set; }
+
+        [NVarchar(16, true)]
+        string Lon { get; set; }
+
+        [NVarchar(512, true)]
+        string GeoInfo { get; set; }
+
+        [NVarchar(512, true)]
+        string GeoQuery { get; set; }
     }
 }

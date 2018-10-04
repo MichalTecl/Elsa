@@ -20,17 +20,20 @@ namespace Elsa.Integration.Erp.Flox
 
         private readonly FloxClientConfig m_config;
 
+        private readonly IOrderStatusMappingRepository m_statusMappingRepository;
+
         private string m_csrfToken;
 
         private DateTime m_lastAccess = DateTime.MinValue;
 
         private readonly WebFormsClient m_client = new WebFormsClient();
 
-        public FloxClient(FloxClientConfig config, FloxDataMapper mapper, ILog log)
+        public FloxClient(FloxClientConfig config, FloxDataMapper mapper, ILog log, IOrderStatusMappingRepository statusMappingRepository)
         {
             m_config = config;
             Mapper = mapper;
             m_log = log;
+            m_statusMappingRepository = statusMappingRepository;
         }
 
         public IErp Erp { get; set; }
@@ -41,50 +44,24 @@ namespace Elsa.Integration.Erp.Flox
 
         public IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null)
         {
-            m_log.Info($"Zacinam stahovani objednavek od={from}, do={to}");
-            EnsureSession();
+            return LoadOrders(from, to, null);
+        }
 
-            var xDateFrom = from.ToString("d.+M.+yyyy");
-            var nDateFrom = from.ToString("yyyy-MM-dd");
-            var dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+        public IEnumerable<IErpOrderModel> LoadPaidOrders(DateTime from, DateTime to)
+        {
+            var mappings = m_statusMappingRepository.GetMappings(Erp.Id);
 
-            var fields = new Dictionary<string, string>
-                             {
-                                 ["pur_date_from_xdate"] = xDateFrom,
-                                 ["pur_date_from"] = nDateFrom
-                             };
-
-            if (to != null)
+            foreach (var m in mappings)
             {
-                fields["pur_date_to_xdate"] = to.Value.ToString("d.+M.+yyyy");
-                fields["pur_date_to"] = to.Value.ToString("yyyy-MM-dd");
+                if (OrderStatus.IsPaid(m.Value.OrderStatusId))
+                {
+                    foreach (var order in LoadOrders(from, to, m.Key))
+                    {
+                        yield return order;
+                    }
+                }
+
             }
-
-            //if (status != null)
-            //{
-            //    throw new Exception("TODO - Flox status");
-            //}
-
-            fields["downloadToken"] = dlToken;
-
-            var post = m_client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
-                        .Field("dataSubset", "a:0:{}")
-                        .Field("data", string.Empty);
-
-            CreateMassFilter(fields, post);
-
-            var stringData = post.Call();
-
-            var ordersModel = ExportDocument.Parse(stringData);
-
-            var result = ordersModel.Orders.Orders;
-
-            foreach (var om in result)
-            {
-                om.ErpSystemId = Erp.Id;
-            }
-
-            return ordersModel.Orders.Orders;
         }
 
         private void ChangeOrderStatus(string orderId, string status)
@@ -202,6 +179,54 @@ namespace Elsa.Integration.Erp.Flox
         public void Dispose()
         {
             m_client.Dispose();
+        }
+
+        private IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to, string status)
+        {
+            m_log.Info($"Zacinam stahovani objednavek od={from}, do={to}, status={status}");
+            EnsureSession();
+
+            var xDateFrom = from.ToString("d.+M.+yyyy");
+            var nDateFrom = from.ToString("yyyy-MM-dd");
+            var dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+
+            var fields = new Dictionary<string, string>
+            {
+                ["pur_date_from_xdate"] = xDateFrom,
+                ["pur_date_from"] = nDateFrom
+            };
+
+            if (to != null)
+            {
+                fields["pur_date_to_xdate"] = to.Value.ToString("d.+M.+yyyy");
+                fields["pur_date_to"] = to.Value.ToString("yyyy-MM-dd");
+            }
+
+            if (status != null)
+            {
+                fields["status"] = status;
+            }
+
+            fields["downloadToken"] = dlToken;
+
+            var post = m_client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
+                        .Field("dataSubset", "a:0:{}")
+                        .Field("data", string.Empty);
+
+            CreateMassFilter(fields, post);
+
+            var stringData = post.Call();
+
+            var ordersModel = ExportDocument.Parse(stringData);
+
+            var result = ordersModel.Orders.Orders;
+
+            foreach (var om in result)
+            {
+                om.ErpSystemId = Erp.Id;
+            }
+
+            return ordersModel.Orders.Orders;
         }
 
         private static void CreateMassFilter(Dictionary<string, string> parameters, IPostBuilder post)

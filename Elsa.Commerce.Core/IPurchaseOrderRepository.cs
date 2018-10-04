@@ -29,5 +29,7 @@ namespace Elsa.Commerce.Core
         IEnumerable<IPurchaseOrder> GetOrdersToMarkPaidInErp();
 
         int GetMissingPaymentsCount(int businessDaysTolerance);
+
+        IEnumerable<IOrderItem> GetChildItemsByParentItemId(long parentItemId);
     }
 }

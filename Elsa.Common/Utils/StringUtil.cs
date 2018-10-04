@@ -31,6 +31,25 @@ namespace Elsa.Common.Utils
 
         private const string c_validChars = "abcdefghijklmnopqrstuvxz123456789";
 
+        public static string RemoveNumericChars(string inp)
+        {
+            if (string.IsNullOrWhiteSpace(inp))
+            {
+                return inp;
+            }
+
+            var sb = new StringBuilder(inp.Length);
+            foreach (var ch in inp)
+            {
+                if (!char.IsDigit(ch))
+                {
+                    sb.Append(ch);
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public static string NormalizeSearchText(int lenLimit, IEnumerable<string> inp)
         {
             if (inp == null)
@@ -93,6 +112,21 @@ namespace Elsa.Common.Utils
             var s = n.ToString(CultureInfo.InvariantCulture);
 
             return s.TrimEnd('0', '.');
+        }
+
+        public static string Limit(string inp, int len)
+        {
+            if (string.IsNullOrEmpty(inp))
+            {
+                return inp;
+            }
+
+            if (inp.Length > len)
+            {
+                return inp.Substring(0, len);
+            }
+
+            return inp;
         }
     }
 }

@@ -16,11 +16,13 @@ namespace Elsa.Integration.Erp.Fler
         private readonly FlerClientConfig m_config;
         private readonly Infrastructure.Fler m_fler;
         private readonly ILog m_log;
+        private readonly IOrderStatusMappingRepository m_mappingRepository;
 
-        public FlerClient(FlerClientConfig config, ILog log)
+        public FlerClient(FlerClientConfig config, ILog log, IOrderStatusMappingRepository mappingRepository)
         {
             m_config = config;
             m_log = log;
+            m_mappingRepository = mappingRepository;
             m_fler = new Infrastructure.Fler();
             m_fler.LogIn(config.User, config.Password);
         }
@@ -39,6 +41,31 @@ namespace Elsa.Integration.Erp.Fler
             {
                 var detail = m_fler.LoadOrderDetail(order.OrderId.ToString());
 
+                yield return new FlerErpOrder(detail, Erp.Id);
+            }
+        }
+
+        public IEnumerable<IErpOrderModel> LoadPaidOrders(DateTime @from, DateTime to)
+        {
+            var mappings = m_mappingRepository.GetMappings(Erp.Id);
+            
+            var orders = m_fler.LoadOrders();
+
+            foreach (var order in orders)
+            {
+                IErpOrderStatusMapping mapping;
+                if (!mappings.TryGetValue(order.State, out mapping))
+                {
+                    m_log.Error($"Nenalezeno mapovani stavu objednavky pro Fler order.state = \"{order.State}\"");
+                    continue;
+                }
+
+                if (!OrderStatus.IsPaid(mapping.OrderStatusId))
+                {
+                    continue;
+                }
+
+                var detail = m_fler.LoadOrderDetail(order.OrderId.ToString());
                 yield return new FlerErpOrder(detail, Erp.Id);
             }
         }

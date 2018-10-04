@@ -89,6 +89,10 @@
       <Project>{dc38d50d-1f5f-44c8-a273-6c57cf26974c}</Project>
       <Name>Elsa.Integration.Erp.Flox</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.Geocoding.OpenStreetMap\Elsa.Integration.Geocoding.OpenStreetMap.csproj">
+      <Project>{24964543-9286-4D4B-8CBA-F15B61E3BDF6}</Project>
+      <Name>Elsa.Integration.Geocoding.OpenStreetMap</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Integration.PaymentSystems.Common\Elsa.Integration.PaymentSystems.Common.csproj">
       <Project>{FFAB584E-2962-4A9B-82B0-E8309185950A}</Project>
       <Name>Elsa.Integration.PaymentSystems.Common</Name>
@@ -100,6 +104,10 @@
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
       <Project>{5ef07762-137b-4bf7-8199-5961768fcaec}</Project>
       <Name>Elsa.Jobs.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.GeocodeAddresses\Elsa.Jobs.GeocodeAddresses.csproj">
+      <Project>{21605D9D-A85D-458A-9D38-0EF57EA7BF64}</Project>
+      <Name>Elsa.Jobs.GeocodeAddresses</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.ImportOrders\Elsa.Jobs.ImportOrders.csproj">
       <Project>{dac5b9d4-f7a0-49c5-a4bd-45afe0e7c6c1}</Project>

@@ -1,4 +1,6 @@
-﻿using Robowire.RobOrm.Core;
+﻿using System.Collections.Generic;
+
+using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Core.Entities.Commerce.Commerce
@@ -7,7 +9,7 @@ namespace Elsa.Core.Entities.Commerce.Commerce
     public interface IOrderItem
     {
         long Id { get; }
-        long PurchaseOrderId { get; set; }
+        long? PurchaseOrderId { get; set; }
         int ProductId { get; set; }
 
         [NotFk]
@@ -27,5 +29,14 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         IPurchaseOrder PurchaseOrder { get; }
 
         IProduct Product { get; }
+
+        long? KitParentId { get; set; }
+
+        IOrderItem KitParent { get; }
+
+        [ForeignKey(nameof(IOrderItem.KitParentId))]
+        IEnumerable<IOrderItem> KitChildren { get; }
+
+        int? KitItemIndex { get; set; }
     }
 }

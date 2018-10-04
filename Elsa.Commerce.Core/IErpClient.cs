@@ -17,7 +17,9 @@ namespace Elsa.Commerce.Core
         IErpCommonSettings CommonSettings { get; }
 
         IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null);
-        
+
+        IEnumerable<IErpOrderModel> LoadPaidOrders(DateTime from, DateTime to);
+
         void MarkOrderPaid(IPurchaseOrder po);
 
         IErpOrderModel LoadOrder(string orderNumber);

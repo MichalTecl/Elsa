@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Common;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 
 using Robowire.RobOrm.Core;
@@ -16,14 +17,16 @@ namespace Elsa.Commerce.Core.Impl
         private readonly IErpClientFactory m_clientFactory;
         private readonly ISession m_session;
         private readonly IPaymentRepository m_paymentRepository;
+        private readonly ILog m_log;
 
-        public OrdersFacade(IPurchaseOrderRepository orderRepository, IDatabase database, IErpClientFactory clientFactory, ISession session, IPaymentRepository paymentRepository)
+        public OrdersFacade(IPurchaseOrderRepository orderRepository, IDatabase database, IErpClientFactory clientFactory, ISession session, IPaymentRepository paymentRepository, ILog log)
         {
             m_orderRepository = orderRepository;
             m_database = database;
             m_clientFactory = clientFactory;
             m_session = session;
             m_paymentRepository = paymentRepository;
+            m_log = log;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
@@ -89,6 +92,36 @@ namespace Elsa.Commerce.Core.Impl
             }
 
             return order;
+        }
+
+        public IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth)
+        {
+            m_log.Info($"Nacitam zaplacene objednavky od {historyDepth}");
+
+            var erps = m_clientFactory.GetAllErpClients().ToList();
+
+            m_orderRepository.PreloadOrders(historyDepth, DateTime.Now.AddDays(1));
+
+            foreach (var erpClient in erps)
+            {
+                m_log.Info($"Nacitam zaplacene objednavky od {historyDepth} z ERP = {erpClient.Erp.Description}");
+
+                var paidOrders = erpClient.LoadPaidOrders(historyDepth, DateTime.Now.AddDays(1)).ToList();
+                m_log.Info($"Stazeno {paidOrders.Count} objednavek");
+
+                if (!paidOrders.Any())
+                {
+                    continue;
+                }
+
+                foreach (var paidOrder in paidOrders)
+                {
+                    var importedId = m_orderRepository.ImportErpOrder(paidOrder);
+                    yield return m_orderRepository.GetOrder(importedId);
+                }
+            }
+
+            m_log.Info("Hotovo");
         }
     }
 }

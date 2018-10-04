@@ -63,10 +63,14 @@
     <Compile Include="IProductRepository.cs" />
     <Compile Include="IPurchaseOrderRepository.cs" />
     <Compile Include="IUnitRepository.cs" />
+    <Compile Include="IKitProductRepository.cs" />
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
+    <Compile Include="Model\KitItemsCollection.cs" />
     <Compile Include="Repositories\ErpRepository.cs" />
+    <Compile Include="Repositories\KitProductRepository.cs" />
     <Compile Include="Repositories\UnitRepository.cs" />
     <Compile Include="Repositories\VirtualProductRepository.cs" />
+    <Compile Include="Shipment\IShipmentProvider.cs" />
     <Compile Include="Units\IUnitConversionHelper.cs" />
     <Compile Include="Units\UnitConversionHelper.cs" />
     <Compile Include="VirtualProducts\IMaterialFacade.cs" />

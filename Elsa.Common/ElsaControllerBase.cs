@@ -62,6 +62,14 @@ namespace Elsa.Common
                 }
             }
 
+            if (typeof(ICustomResult).IsAssignableFrom(method.ReturnType))
+            {
+                defaultResultWrite = r =>
+                    {
+                        ((ICustomResult)r).WriteResponse(context.HttpContext);
+                    };
+            }
+
             if (ShouldBeLogged(method))
             {
                 using (

@@ -58,6 +58,15 @@ namespace Elsa.Jobs.ImportOrders
                     }
                 }
 
+                if (cuData.HistoryDepthDays != null)
+                {
+                    startDate = startDate.AddDays(-1 * cuData.HistoryDepthDays.Value);
+                    if (startDate < erp.CommonSettings.HistoryStart)
+                    {
+                        startDate = erp.CommonSettings.HistoryStart;
+                    }
+                }
+
                 while (startDate < DateTime.Now)
                 {
                     var endDate = startDate.AddDays(erp.CommonSettings.MaxQueryDays);

@@ -25,20 +25,25 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IErp GetErp(int id)
         {
+            return GetAllErps().FirstOrDefault(e => e.Id == id);
+        }
+
+        public IEnumerable<IErp> GetAllErps()
+        {
             var allErps = m_cache.ReadThrough<List<IErp>>(
                 $"GetAllErpsBy_ProjectId:{m_session.Project.Id}",
                 TimeSpan.FromHours(100),
                 () =>
-                    {
-                        return
-                            m_database.SelectFrom<IErp>()
-                                .Join(e => e.Project)
-                                .Where(e => e.ProjectId == m_session.Project.Id)
-                                .Execute()
-                                .ToList();
-                    });
+                {
+                    return
+                        m_database.SelectFrom<IErp>()
+                            .Join(e => e.Project)
+                            .Where(e => e.ProjectId == m_session.Project.Id)
+                            .Execute()
+                            .ToList();
+                });
 
-            return allErps.FirstOrDefault(e => e.Id == id);
+            return allErps;
         }
     }
 }

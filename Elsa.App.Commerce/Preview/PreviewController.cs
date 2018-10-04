@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 using Elsa.App.Commerce.Preview.Model;
 using Elsa.Apps.Common.ViewModels;
@@ -45,6 +46,16 @@ namespace Elsa.App.Commerce.Preview
             return new MissingPaymentsResult(
                        m_config.MissingPaymentDaysTolerance,
                        m_purchaseOrderRepository.GetMissingPaymentsCount(m_config.MissingPaymentDaysTolerance));
+        }
+
+        [DoNotLog]
+        public int GetReadyToPackCount()
+        {
+            return
+                m_purchaseOrderRepository.GetOrdersByStatus(
+                    OrderStatus.ReadyToPack,
+                    DateTime.Now.AddDays(-365),
+                    DateTime.Now.AddDays(1)).Count();
         }
     }
 }
