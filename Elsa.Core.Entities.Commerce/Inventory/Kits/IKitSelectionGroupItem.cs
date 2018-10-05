@@ -1,4 +1,6 @@
-﻿using Robowire.RobOrm.Core;
+﻿using Newtonsoft.Json;
+
+using Robowire.RobOrm.Core;
 
 namespace Elsa.Core.Entities.Commerce.Inventory.Kits
 {
@@ -7,8 +9,10 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Kits
     {
         int Id { get; }
 
+        [JsonIgnore]
         int KitSelectionGroupId { get; set; }
 
+        [JsonIgnore]
         IKitSelectionGroup KitSelectionGroup { get; }
     }
 }

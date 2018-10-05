@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Core.Entities.Commerce.Inventory.Kits
@@ -13,8 +15,10 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Kits
     {
         int Id { get; }
 
+        [JsonIgnore]
         int KitDefinitionId { get; set; }
 
+        [JsonIgnore]
         IKitDefinition KitDefinition { get; }
 
         IEnumerable<IKitSelectionGroupItem> Items { get; }

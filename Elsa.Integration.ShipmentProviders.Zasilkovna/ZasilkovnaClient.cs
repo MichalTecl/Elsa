@@ -73,6 +73,11 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             dobirkovaCastka = ((int)double.Parse(dobirkovaCastka)).ToString();
                         }
 
+                        if (!order.IsPayOnDelivery)
+                        {
+                            dobirkovaCastka = string.Empty;
+                        }
+
                         var pobockaId = GetPobockaId(order);
 
                         if (string.IsNullOrWhiteSpace(order.CustomerEmail)
@@ -104,7 +109,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             .CellOpt(order.DeliveryAddress?.Phone, order.InvoiceAddress?.Phone) //7
                             .CellOpt(dobirkovaCastka) //8
                             .CellMan(order.Currency.Symbol) //9
-                            .CellMan(order.PriceWithVat) //10
+                            .CellMan(StringUtil.FormatDecimal(order.PriceWithVat)) //10
                             .CellOpt() //11
                             .CellMan(pobockaId) //12
                             .CellMan( /*"biorythme.cz"*/m_config.ClientName) //13

@@ -111,7 +111,12 @@ namespace Elsa.Common.Utils
         {
             var s = n.ToString(CultureInfo.InvariantCulture);
 
-            return s.TrimEnd('0', '.');
+            if (s.Contains(".") || s.Contains(","))
+            {
+                s = s.TrimEnd('0');
+            }
+            
+            return s.TrimEnd('.');
         }
 
         public static string Limit(string inp, int len)
