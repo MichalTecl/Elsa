@@ -4,8 +4,8 @@ namespace Elsa.Commerce.Core.Model
 {
     public interface IErpOrderModel
     {
-        int ErpSystemId { get; }
-        
+        int ErpSystemId { get; set; }
+
         string ErpOrderId { get; }
         string OrderNumber { get; }
         string DueDate { get; }
@@ -87,5 +87,7 @@ namespace Elsa.Commerce.Core.Model
         IEnumerable<IErpOrderItemModel> LineItems { get; }
 
         string OrderHash { get; }
+
+        void SetDebugNumber(string nnum);
     }
 }

@@ -130,3 +130,8 @@ lt.getViewModel = lt.getViewModel || function(element) {
 
     return lt.getViewModel(element.parentElement);
 };
+
+lt.setViewModel = lt.setViewModel || function(element, vm) {
+    lanta.BindingCore.setViewModel(element, vm);
+    lt.notify(element);
+};

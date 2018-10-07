@@ -38,7 +38,7 @@ namespace Elsa.Integration.Erp.Fler.Model
             }
         }
 
-        public int ErpSystemId { get; }
+        public int ErpSystemId { get; set; }
 
         public string ErpOrderId => m_order.order.id;
 
@@ -139,6 +139,11 @@ namespace Elsa.Integration.Erp.Fler.Model
                     return Convert.ToBase64String(hash);
                 }
             }
+        }
+
+        public void SetDebugNumber(string nnum)
+        {
+            throw new NotImplementedException();
         }
 
         private static IEnumerable<string> GetComponents(string inp, int count)

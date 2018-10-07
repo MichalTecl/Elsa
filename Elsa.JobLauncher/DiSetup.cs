@@ -1,6 +1,7 @@
 ﻿using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce;
+using Elsa.Integration.Erp.Elerp;
 using Elsa.Integration.Erp.Fler;
 using Elsa.Integration.Erp.Flox;
 using Elsa.Integration.Geocoding.OpenStreetMap.Model;
@@ -39,6 +40,7 @@ namespace Elsa.JobLauncher
             container.Setup(s => s.ScanAssembly(typeof(SetOrdersPaid).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(OsmGeoResponse).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(LoadGeo).Assembly));
+            container.Setup(s => s.ScanAssembly(typeof(ElerpClient).Assembly));
             return container;
         }
     }

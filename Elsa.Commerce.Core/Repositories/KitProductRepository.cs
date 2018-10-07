@@ -82,7 +82,8 @@ namespace Elsa.Commerce.Core.Repositories
                 }
 
                 var found = false;
-                foreach (var group in currentKit)
+                
+                foreach (var group in currentKit.Where(g => g.KitItemIndex == kitItemIndex))
                 {
                     var targetKitItem = group.GroupItems.FirstOrDefault(i => i.Id == kitItemId);
                     if (targetKitItem == null)
@@ -104,9 +105,10 @@ namespace Elsa.Commerce.Core.Repositories
                         orderItem.KitParentId = item.Id;
                         orderItem.PlacedName = targetKitItem.ItemName;
                         orderItem.Quantity = 1;
-                        
+                        orderItem.KitItemIndex = kitItemIndex;
+
                         m_database.Save(orderItem);
-                        
+
                         tx.Commit();
                         break;
                     }

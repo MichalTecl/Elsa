@@ -10,6 +10,7 @@ using Elsa.Users;
 
 using Robowire;
 using Elsa.Commerce.Core;
+using Elsa.Integration.Erp.Elerp;
 using Elsa.Integration.Erp.Fler;
 using Elsa.Integration.Erp.Flox;
 using Elsa.Integration.PaymentSystems.Common;
@@ -51,6 +52,7 @@ namespace Elsa.Portal
                         s.ScanAssembly(typeof(ZasilkovnaClient).Assembly);
                         s.ScanAssembly(typeof(ShipmentController).Assembly);
                         s.ScanAssembly(typeof(PackingController).Assembly);
+                        s.ScanAssembly(typeof(ElerpClient).Assembly);
                     });
         }
     }

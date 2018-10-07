@@ -239,6 +239,14 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
             }
         }
 
+        public void SetDebugNumber(string nnum)
+        {
+            OrderNumber = nnum;
+            InvoiceId = nnum;
+            PreInvId = nnum;
+            VarSymb = nnum;
+        }
+
         [XmlIgnore]
         public string Source
         {
