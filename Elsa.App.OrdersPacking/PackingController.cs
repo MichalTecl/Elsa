@@ -86,6 +86,25 @@ namespace Elsa.App.OrdersPacking
             return MapOrder(filtered.Single());
         }
 
+        public PackingOrderModel SelectKitItem(long orderId, long orderItemId, int kitItemId, int kitItemIndex)
+        {
+            var order = m_orderRepository.GetOrder(orderId);
+            if (order == null)
+            {
+                throw new InvalidOperationException("Objednavka nenalezena");
+            }
+
+            var item = order.Items.FirstOrDefault(i => i.Id == orderItemId);
+            if (item == null)
+            {
+                throw new InvalidOperationException("Polozka objednavky nenalezena");
+            }
+
+            m_kitProductRepository.SetKitItemSelection(order, item, kitItemId, kitItemIndex);
+
+            return MapOrder(order);
+        }
+
         private PackingOrderModel MapOrder(IPurchaseOrder entity)
         {
             var orderModel = new PackingOrderModel

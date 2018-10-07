@@ -7,12 +7,15 @@ namespace Elsa.Commerce.Core.Model
 {
     public class KitItemsCollection
     {
-        public KitItemsCollection(IEnumerable<IKitSelectionGroupItem> groupItems, IOrderItem selectedItem, int kitItemIndex)
+        public KitItemsCollection(IEnumerable<IKitSelectionGroupItem> groupItems, IOrderItem selectedItem, int kitItemIndex, int groupId)
         {
             GroupItems = groupItems;
             SelectedItem = selectedItem;
             KitItemIndex = kitItemIndex;
+            GroupId = groupId;
         }
+
+        public int GroupId { get; }
 
         public int KitItemIndex { get; }
 

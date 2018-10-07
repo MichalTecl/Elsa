@@ -30,4 +30,13 @@
 
 #orderItemsContainer {
     flex-grow:1;
+    overflow-y:auto;
+}
+
+.itemQty {
+    
+}
+
+.highlightQuantity {
+    color: orange;
 }

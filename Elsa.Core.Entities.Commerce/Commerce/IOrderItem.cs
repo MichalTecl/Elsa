@@ -10,10 +10,10 @@ namespace Elsa.Core.Entities.Commerce.Commerce
     {
         long Id { get; }
         long? PurchaseOrderId { get; set; }
-        int ProductId { get; set; }
+        int? ProductId { get; set; }
 
         [NotFk]
-        [NVarchar(255, false)]
+        [NVarchar(255, true)]
         string ErpOrderItemId { get; set; }
 
         [NVarchar(255, false)]
@@ -23,7 +23,7 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         decimal TaxPercent { get; set; }
 
         [NotFk]
-        [NVarchar(255, false)]
+        [NVarchar(255, true)]
         string ErpProductId { get; set; }
 
         IPurchaseOrder PurchaseOrder { get; }

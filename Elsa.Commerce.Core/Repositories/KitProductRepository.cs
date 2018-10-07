@@ -65,7 +65,7 @@ namespace Elsa.Commerce.Core.Repositories
                             }
                         }
 
-                        yield return new KitItemsCollection(selection.Items, selectedItem, kitItemIndex);
+                        yield return new KitItemsCollection(selection.Items, selectedItem, kitItemIndex, selection.Id);
                     }
                 }
             }
