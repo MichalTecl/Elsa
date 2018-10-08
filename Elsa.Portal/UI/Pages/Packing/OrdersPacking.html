@@ -32,27 +32,27 @@
                         <i id="lblSourceErp" data-bind="text:currentOrder.ErpName"></i>
                     </div>
                     <div id="orderNotesPanel">
-                        <div id="customerNotePanel" data-bind="class!.hidden:currentOrder.hasCustomerNote">
-                            <div id="customerNoteTitle">Vzkaz od zákazníka</div>
-                            <p id="customerNoteBody" data-bind="text:currentOrder.CustomerNote"></p>
+                        <div id="customerNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.hasCustomerNote">
+                            <div id="customerNoteTitle" class="noteTitle">Vzkaz od zákazníka</div>
+                            <p id="customerNoteBody" class="noteBody" data-bind="text:currentOrder.CustomerNote"></p>
                         </div>
-                        <div id="internalNotePanel" data-bind="class!.hidden:currentOrder.hasInternalNote">
-                            <div id="internalNoteTitle">Interní poznámka</div>
-                            <p id="internalNoteBody" data-bind="text:currentOrder.InternalNote"></p>
+                        <div id="internalNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.hasInternalNote">
+                            <div id="internalNoteTitle" class="noteTitle">Interní poznámka</div>
+                            <p id="internalNoteBody" class="noteBody" data-bind="text:currentOrder.InternalNote"></p>
                         </div>
                     </div>
                     <div id="orderItemsContainer">
                         
                         <div id="itemsList">
                             
-                            <div id="itemTemplate">
+                            <div id="itemTemplate" class="pckOrderItemContainer lt-template">
                                 <div class="stackLeft">
                                     <div class="itemQty" data-bind="text:Quantity; class.highlightQuantity:highlightQuantity"></div>
                                     <div class="multiply" data-bind="class.highlightQuantity:highlightQuantity">x</div>
                                     <div class="itemTitle" data-bind="text:ProductName"> </div>
                                 </div>
                                 
-                                <div lt-name="kitGroupsList" data-bind="class!.hidden:isKit">
+                                <div lt-name="kitGroupsList" class="kitGroupsList" data-bind="class!.hidden:isKit">
                                     
                                 </div>
 
@@ -60,21 +60,37 @@
 
                         </div>
                         
-                        <div id="kitGroupTemplate">
-                            <div class="kitSelectedItemContainer" data-bind="class!.hidden:hasSelectedItem">
-                                <div class="kitSelectedItem" data-bind="text:SelectedItem.PlacedName" style="font-weight: bold"></div>
-                                <i class="fas fa-undo faButton" event-bind="click:onKitItemSelectionCancel(VM)"></i>
+                        <div id="kitGroupTemplate" class="kitGroupContainer lt-template" data-bind="class.hasSelectedItem:hasSelectedItem; class!.needsSelection:hasSelectedItem">
+                            <div class="kitItemIndexMarker" data-bind="class!.hidden:isKitItemIndexHead; text:kitItemIndexText"></div>
+                            <div class="stackLeft">
+                                <div class="selectionGroupName" data-bind="text:GroupName"></div>
+                                <div class="kitSelectedItemContainer stackLeft" data-bind="class!.hidden:hasSelectedItem">
+                                    <div class="kitSelectedItem" data-bind="text:SelectedItem.PlacedName"></div>
+                                    <i class="fas fa-circle-notch faButton" event-bind="click:onKitItemSelectionCancel(VM)"></i>
+                                </div>
                             </div>
                             <div lt-name="kitGroupItems" data-bind="class.hidden:hasSelectedItem"></div>
                         </div>
                         
-                        <div id="kitItemTemplate">
-                            <div data-bind="text:ItemName" event-bind="click:onKitItemClick(VM)"></div>
+                        <div id="kitItemTemplate" class="lt-template kitItemContainer stackLeft">
+                            <div class="kitItemSelectButton faButton" event-bind="click:onKitItemClick(VM)">
+                                <i class="far fa-circle"></i>
+                                <i class="fas fa-circle"></i>
+                            </div>
+                            <div data-bind="text:Shortcut"></div>
                         </div>
 
                     </div>
-                    <div id="packingControlPanel">
-                        <button id="butPackOrder">Zabaleno</button>
+                    <div id="packingControlPanel" class="stackRight">
+                        
+                        
+                        <div id="butMarkPacked" event-bind="mousedown:onPackButtonMouseDown(this); mouseup:onPackButtonMouseUp(this); mouseout:onPackButtonMouseUp(this)">
+                            <div id="progressContainer">
+                                <div id="progressBar"></div>
+                            </div>
+                            <div id="packingText">Zabaleno</div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -86,7 +102,7 @@
 
     lt.element("packingUi")
         .withModel("app.ordersPacking.vm")
-        .attach(function (orderSearchPanel, orderViewPanel, tbSearch, orderOverviewPanel, lblCustomerName, itemsList, itemTemplate, kitGroupTemplate, kitItemTemplate) {
+        .attach(function (orderSearchPanel, orderViewPanel, tbSearch, orderOverviewPanel, lblCustomerName, itemsList, itemTemplate, kitGroupTemplate, kitItemTemplate, progressBar) {
 
             var self = this;
 
@@ -167,6 +183,33 @@
                 app.ordersPacking.vm.undoKitItemSelection(model.SelectedItem.Id);
 
                 console.log(model);
+            };
+
+            var markPacked = function() {
+                alert("packed!");
+            };
+
+            var timer = null;
+            
+            self.onPackButtonMouseDown = function (button) {
+
+                try {
+                    app.ordersPacking.vm.validateCurrentOrder();
+                } catch (e) {
+                    alert(e.message);
+                    return;
+                }
+
+
+                timer = setTimeout(markPacked, 3000);
+                progressBar.style.transition = "width 3s";
+                progressBar.style.width = "100%";
+            };
+
+            self.onPackButtonMouseUp = function (button) {
+                clearTimeout(timer);
+                progressBar.style.transition = "width 0.2s";
+                progressBar.style.width = "0%";
             };
 
             document.onkeydown = function (evt) {

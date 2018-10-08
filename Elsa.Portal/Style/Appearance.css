@@ -247,3 +247,7 @@ div.searchPanel {
 .hidden {
     display: none !important;
 }
+
+.lt-template {
+    display: none;
+}

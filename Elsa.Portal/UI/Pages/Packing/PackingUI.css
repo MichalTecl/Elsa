@@ -40,3 +40,214 @@
 .highlightQuantity {
     color: orange;
 }
+
+
+#orderOverviewPanel {
+    font-size:1.3em;    
+    border-bottom:1px solid #cccccc;
+    padding-bottom:10px;
+}
+
+#orderOverviewPanel .faButton {
+    margin-right:10px;
+}
+
+#orderOverviewPanel #lblOrderNumber {
+    font-weight:600;    
+    margin-left:10px;
+}
+
+
+#orderOverviewPanel #lblCustomerName {
+    margin-left:20px;
+}
+
+#orderOverviewPanel #lblPrice {
+    margin-left:20px;
+}
+
+#orderOverviewPanel #lblSourceErp {
+    margin-left:auto;
+    color:#bbbbbb;
+}
+
+#orderNotesPanel {
+    margin-top:0px;
+}
+
+.noteContainer {
+    margin-top:16px;
+}
+
+.noteTitle {
+    font-weight:bold;
+    margin-bottom:2px;
+}
+
+.noteBody {
+    font-size:0.9em;
+}
+
+#orderItemsContainer {
+    border:1px solid #cccccc;
+    border-radius:2px;
+    margin-top:10px;
+}
+
+#orderViewPanel {
+    width:100%;
+}
+
+.pckOrderItemContainer {
+    margin-left:4px;
+    margin-top:8px;
+    font-size:1.2em;
+}
+
+.pckOrderItemContainer .itemQty {
+    font-weight:bold;    
+}
+
+.pckOrderItemContainer .multiply {
+    margin-right:5px; 
+}
+
+.kitGroupsList {
+    margin-left:20px;
+    margin-bottom:20px;
+    border-left:1px solid #ddddee;
+    border-bottom:1px solid #ddddee;
+    border-bottom-left-radius: 15px;
+    margin-right:14px;
+    padding:10px;
+    padding-bottom:4px;
+    font-size:0.9em;
+    text-align:left;
+}
+
+.kitGroupsList .selectionGroupName {
+    color:#8888ff;
+}
+
+.hasSelectedItem .selectionGroupName:after {
+    content:":";
+    margin-right:4px;
+}
+
+
+.kitGroupContainer.needsSelection {
+    margin-top:5px;
+    margin-bottom:5px;
+}
+
+.kitItemSelectButton > .fas {
+    display:none;    
+}
+.kitItemSelectButton:hover > .far {
+    display:none;    
+}
+.kitItemSelectButton:hover > .fas {
+    display:block;    
+}
+
+.kitItemSelectButton {
+    padding-left:14px;
+    padding-right:4px;
+    display:none;
+}
+
+.kitGroupContainer {
+    width:unset;    
+}
+
+.kitGroupContainer .kitItemContainer{
+    margin-left:6px;
+    display:inline-block;
+    opacity:0.6;
+    font-size:0.75em;    
+    padding-right:3px;
+}
+
+.kitGroupContainer:hover .kitItemContainer {
+    margin-top:4px;
+    margin-left:0;   
+    display:flex; 
+    opacity:1;
+    font-size:inherit;
+}
+
+.kitGroupContainer:hover .kitItemSelectButton {
+    display:block;    
+}
+
+div.kitSelectedItemContainer > i.faButton {
+    align-self:center;
+    margin-left:4px;
+    font-size:0.65em;
+    display:none;
+}
+
+div.kitSelectedItemContainer:hover > i.faButton {
+    display:inline-block;    
+}
+
+.kitItemIndexMarker {    
+    display:inline-block;
+    background-color: #BEB7DF;        
+    border-radius:15%;
+    width:30px;
+    text-align:center;
+    color:#eeeeee;
+    margin-left:-15px;
+    margin-top:10px;
+    font-weight:bold;
+    font-size:80%;
+}
+
+#packingControlPanel{
+    padding-top:10px;
+    padding-bottom:20px;
+}
+
+#butMarkPacked {
+    border:1px solid #afafaf;
+    border-radius:3px;
+    background-image: linear-gradient(to bottom, #e4e4e4, #f7f7f7);
+    display:block;
+    width:120px;
+    text-align:center;
+    padding-bottom:10px;
+    font-weight:bold;
+    color:#406040;
+    cursor:pointer;
+
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+
+#butMarkPacked:active {
+    background-image: linear-gradient(to bottom, #f7f7f7, #e4e4e4);
+}
+
+#progressContainer {
+    background-color:black;
+    height:4px;
+    width:90%;
+    margin:5px;
+    opacity:0.1;
+    transition:opacity 1s;
+}
+
+#progressBar {
+    height:100%;
+    background-color:greenyellow;
+    width:0%;    
+}
+
+#butMarkPacked:active #progressContainer {
+    opacity:1;
+}

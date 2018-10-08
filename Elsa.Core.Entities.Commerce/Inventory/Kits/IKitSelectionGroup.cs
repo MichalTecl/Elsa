@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 using Robowire.RobOrm.Core;
+using Robowire.RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Core.Entities.Commerce.Inventory.Kits
 {
@@ -20,6 +21,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Kits
 
         [JsonIgnore]
         IKitDefinition KitDefinition { get; }
+
+        [NVarchar(126, true)]
+        string Name { get; set; }
 
         IEnumerable<IKitSelectionGroupItem> Items { get; }
     }

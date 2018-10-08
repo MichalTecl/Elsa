@@ -10,23 +10,57 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         
     };
 
+    self.validateCurrentOrder = function() {
+        
+        if (!self.currentOrder) {
+            throw new Error("Neni vybrana objednavka");
+        }
+
+        for (var i = 0; i < self.currentOrder.Items.length; i++) {
+            var orderItem = self.currentOrder.Items[i];
+
+            if (!orderItem.KitItems) {
+                continue;
+            }
+
+            for (var j = 0; j < orderItem.KitItems.length; j++) {
+                var kitGroup = orderItem.KitItems[j];
+
+                if ((!kitGroup.hasSelectedItem) || (!kitGroup.SelectedItem)) {
+                    throw new Error("Není kompletní sada '" + orderItem.ProductName + "'!");
+                }
+            }
+        }
+    };
+
     var adjustServerOrderItemObject = function(orderItem) {
         orderItem.highlightQuantity = orderItem.Quantity !== "1";
         orderItem.isKit = (!!orderItem.KitItems) && (orderItem.KitItems.length > 0);
 
         if (orderItem.isKit) {
-            
+
+            var lastKitIndex = -1;
+            if (orderItem.KitItems.length > 0) {
+                lastKitIndex = orderItem.KitItems[orderItem.KitItems.length - 1].KitItemIndex;
+            }
+
             for (var i = 0; i < orderItem.KitItems.length; i++) {
                 var kitItem = orderItem.KitItems[i];
                 kitItem.uid = kitItem.GroupId + ":" + kitItem.KitItemIndex;
 
                 kitItem.hasSelectedItem = (!!kitItem.SelectedItem);
 
+                kitItem.isKitItemIndexHead = (kitItem.KitItemIndex !== lastKitIndex);
+                lastKitIndex = kitItem.KitItemIndex;
+                kitItem.kitItemIndexText = (lastKitIndex + 1) + ".";
+
                 for (var j = 0; j < kitItem.GroupItems.length; j++) {
                     kitItem.GroupItems[j].refData = {
                         orderItemId: orderItem.ItemId,
                         kitItemIndex: kitItem.KitItemIndex
                     };
+
+                    kitItem.GroupItems[j].Shortcut = kitItem.GroupItems[j].Shortcut || kitItem.GroupItems[j].ItemName;
                 }
             }   
         }
