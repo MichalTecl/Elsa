@@ -13,7 +13,7 @@ app.scheduledJobs.ViewModel = app.scheduledJobs.ViewModel || function() {
     };
 
     var update = function() {
-        lt.api("/scheduledJobs/getStatus").get(receive);
+        lt.api("/scheduledJobs/getStatus").silent().get(receive);
     };
     
     update();

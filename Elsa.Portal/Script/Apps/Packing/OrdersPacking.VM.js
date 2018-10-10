@@ -6,6 +6,8 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     self.currentOrder = null;
 
+    self.currentQuery = "";
+
     var adjustServerKitItemObject = function(kitItem) {
         
     };
@@ -84,6 +86,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         lt.api("/ordersPacking/findOrder").query({ "number": qry }).get(function(order) {
             adjustServerOrderObject(order);
             self.currentOrder = order;
+            self.currentQuery = qry;
         });
 
     };
@@ -123,6 +126,21 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
                 }
             }
         }
+    };
+
+    self.packOrder = function() {
+
+        self.validateCurrentOrder();
+
+        var ordid = self.currentOrder.OrderId;
+
+        self.currentOrder = null;
+        lt.notify();
+
+        lt.api("/ordersPacking/packOrder").query({ "orderId": ordid }).get(function() {
+            self.currentQuery = "";
+        });
+
     };
 };
 

@@ -8,6 +8,7 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
     var noJson = false;
     var throughDisabled = false;
     var httpMethod = "GET";
+    var silent = false;
 
     var responseHandler = function (resp) {
         console.log("No response handler. Request=" + url + " response:" + resp);
@@ -17,7 +18,7 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
     var errorHandler = function (err) { lanta.Extensions.defaultErrorHandler(new Error(err)); };
 
     var call = function (method, handler) {
-
+        
         httpMethod = method || httpMethod;
         responseHandler = handler || responseHandler;
 
@@ -47,6 +48,15 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
             }
 
             if (xmlHttp.status !== 200) {
+                if (!silent) {
+                    lt.api.usageManager.notifyOperationEnd();
+                }
+
+                if (xmlHttp.status === 0) {
+                    errorHandler("Nepodařilo se spojit se serverem, opakujte akci později...");
+                    return;
+                }
+
                 errorHandler(xmlHttp.status + ": " + xmlHttp.responseText);
                 return;
             }
@@ -60,8 +70,14 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
                 }
             }
 
-            responseHandler(parsedResponse);
-            lt.notify();
+            try {
+                responseHandler(parsedResponse);
+                lt.notify();
+            } finally {
+                if (!silent) {
+                    lt.api.usageManager.notifyOperationEnd();
+                }
+            }
         };
 
         try {
@@ -72,8 +88,15 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
 
             xmlHttp.open(httpMethod, url, true);
             xmlHttp.setRequestHeader('Content-type', '*/*; charset=utf-8');
+
+            if (!silent) {
+                lt.api.usageManager.notifyOperationStart();
+            }
             xmlHttp.send(bodyJson);
         } catch (error) {
+            if (!silent) {
+                lt.api.usageManager.notifyOperationEnd();
+            }
             console.error(error);
             errorHandler(error.message);
         }
@@ -147,6 +170,11 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
     this.call = function() {
         call();
     };
+
+    this.silent = function() {
+        silent = true;
+        return self;
+    };
 };
 
 lanta.ApiCallBuilder.isEnabled = lanta.ApiCallBuilder.isEnabled || true;
@@ -170,3 +198,46 @@ lt.api.enable = lt.api.enable = function () {
         postponedCall.call();
     }
 };
+
+
+lt.api.UsageManager = lt.api.UsageManager || function() {
+
+    var self = this;
+
+    var pendingOpsCounter = 0; 
+    var handlers = [];
+
+    var notifyHandlers = function(busy) {
+      for (var i = 0; i < handlers.length; i++) {
+          var h = handlers[i];
+          h(busy);
+      }  
+    };
+
+    self.notifyOperationStart = function() {
+        pendingOpsCounter++;
+
+        if (pendingOpsCounter === 1) {
+            notifyHandlers(true);
+        }
+    };
+
+    self.notifyOperationEnd = function() {
+        pendingOpsCounter--;
+        if (pendingOpsCounter === 0) {
+            notifyHandlers(false);
+        }
+
+        if (pendingOpsCounter < 0) {
+            pendingOpsCounter = 0;
+        }
+    };
+
+    self.subscribeBusyHandler = function(handler) {
+        handlers.push(handler);
+        handler(pendingOpsCounter > 0);
+    };
+};
+
+lt.api.usageManager = lt.api.usageManager || new lt.api.UsageManager();
+

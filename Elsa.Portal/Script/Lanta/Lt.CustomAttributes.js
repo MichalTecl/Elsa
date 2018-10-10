@@ -62,6 +62,14 @@ lanta.CustomAttributes.Watcher = lanta.CustomAttributes.Watcher || function() {
         }
     };
 
+    var visitAll = function() {
+        var allElements = document.body.getElementsByTagName("*");
+            for (var i = 0; i < allElements.length; i++) {
+                var e = allElements[i];
+                visitElement(e);
+            }
+    };
+
     var watch = function () {
 
         if ((!document) || (!document.body)) {
@@ -69,12 +77,10 @@ lanta.CustomAttributes.Watcher = lanta.CustomAttributes.Watcher || function() {
             return;
         }
 
+        document.addEventListener('DOMContentLoaded', function () { visitAll(); }, false);
+
         if (!initialized) {
-            var allElements = document.body.getElementsByTagName("*");
-            for (var i = 0; i < allElements.length; i++) {
-                var e = allElements[i];
-                visitElement(e);
-            }
+            visitAll();
         }
 
         initialized = true;

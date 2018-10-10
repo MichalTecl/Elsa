@@ -105,6 +105,30 @@ namespace Elsa.App.OrdersPacking
             return MapOrder(order);
         }
 
+        public void PackOrder(long orderId)
+        {
+            var order = m_orderRepository.GetOrder(orderId);
+            if (order == null)
+            {
+                throw new InvalidOperationException("Objednavka nenalezena");
+            }
+
+            var mapped = MapOrder(order);
+
+            foreach (var item in mapped.Items)
+            {
+                foreach (var kit in item.KitItems)
+                {
+                    if (kit.GroupItems.Any() && kit.SelectedItem == null)
+                    {
+                        throw new InvalidOperationException($"Objednavka nemuze byt dokoncena - ve skupine '{kit.GroupName}' neni vybrana polozka");
+                    }
+                }
+            }
+
+            m_ordersFacade.SetOrderSent(orderId);
+        }
+
         private PackingOrderModel MapOrder(IPurchaseOrder entity)
         {
             var orderModel = new PackingOrderModel

@@ -9,15 +9,15 @@ app.orders.ViewModel = app.orders.ViewModel || function() {
     this.readyToPackCount = null;
 
     var update = function() {
-        lt.api("/commerceOverviews/GetOrdersOverview").get(function (orders) {
+        lt.api("/commerceOverviews/GetOrdersOverview").silent().get(function (orders) {
             self.ordersOverview = orders;
         });
 
-        lt.api("/commerceOverviews/GetMissingPaymentsCount").get(function(missingPayment) {
+        lt.api("/commerceOverviews/GetMissingPaymentsCount").silent().get(function (missingPayment) {
             self.missingPaymentsOverview = missingPayment;
         });
 
-        lt.api("/commerceOverviews/GetReadyToPackCount").get(function(readyToPack) {
+        lt.api("/commerceOverviews/GetReadyToPackCount").silent().get(function (readyToPack) {
             self.readyToPackCount = readyToPack;
         });
     };

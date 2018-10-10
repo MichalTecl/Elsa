@@ -28,7 +28,11 @@ namespace Elsa.Integration.Erp.Flox
 
         private readonly WebFormsClient m_client = new WebFormsClient();
 
-        public FloxClient(FloxClientConfig config, FloxDataMapper mapper, ILog log, IOrderStatusMappingRepository statusMappingRepository)
+        public FloxClient(
+            FloxClientConfig config,
+            FloxDataMapper mapper,
+            ILog log,
+            IOrderStatusMappingRepository statusMappingRepository)
         {
             m_config = config;
             Mapper = mapper;
@@ -68,12 +72,13 @@ namespace Elsa.Integration.Erp.Flox
         {
             EnsureSession();
 
-            var result = m_client.Post(ActionUrl("/erp/orders/main/changeStatus"))
-                   .Field("arf", m_csrfToken)
-                   .Field("order_id", orderId)
-                   .Field("status", status)
-                   .Field("statusmail", /*statusmail ? "on" :*/ string.Empty)
-                   .Call<DefaultResponse>();
+            var result =
+                m_client.Post(ActionUrl("/erp/orders/main/changeStatus"))
+                    .Field("arf", m_csrfToken)
+                    .Field("order_id", orderId)
+                    .Field("status", status)
+                    .Field("statusmail", /*statusmail ? "on" :*/ string.Empty)
+                    .Call<DefaultResponse>();
 
             if (!result.Success)
             {
@@ -100,9 +105,10 @@ namespace Elsa.Integration.Erp.Flox
 
             var fields = new Dictionary<string, string> { ["downloadToken"] = dlToken, ["order_num"] = orderNumber };
 
-            var post = m_client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
-                        .Field("dataSubset", "a:0:{}")
-                        .Field("data", string.Empty);
+            var post =
+                m_client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
+                    .Field("dataSubset", "a:0:{}")
+                    .Field("data", string.Empty);
 
             CreateMassFilter(fields, post);
 
@@ -118,6 +124,64 @@ namespace Elsa.Integration.Erp.Flox
             }
 
             return ordersModel.Orders.Orders.FirstOrDefault(o => o.OrderNumber == orderNumber);
+        }
+
+        public void MakeOrderSent(IPurchaseOrder po)
+        {
+            m_log.Info($"Zacinam nastavovat objednavku {po.OrderNumber} jako zaplacenou");
+
+            if (!m_config.EnableWriteOperations)
+            {
+                m_log.Error($"!!! Flox - MarkOrderPaid({po.OrderNumber}) - neaktivni operace");
+                return;
+            }
+            
+            try
+            {
+                GenerateInvoice(po.OrderNumber);
+                SendInvoiceToCustomer(po.ErpOrderId);
+                ChangeOrderStatus(po.ErpOrderId, FloxOrderStatuses.Completed);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Selhal pokus o zpracovani objednavky {po.OrderNumber}. Objednavku je treba dokoncit ve Floxu. Chyba: {ex.Message}", ex);
+            }
+        }
+
+        private void GenerateInvoice(string orderNum)
+        {
+            EnsureSession();
+            
+            var timeStamp = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+            var url = ActionUrl($"/erp/orders/invoices/finalize/{orderNum}?_dc={timeStamp}");
+            m_log.Info($"Incializuji generovani faktury ve Floxu: {url}");
+
+            var result = m_client.Get<DefaultResponse>(url);
+            if (!result.Success)
+            {
+                m_log.Error($"Generovani faktury selhalo. Request={url}, Response={result.OriginalMessage}");
+                throw new Exception(result.OriginalMessage);
+            }
+
+            m_log.Info($"Generovani fatktury OK OrderNum={orderNum}");
+        }
+
+        public void SendInvoiceToCustomer(string orderId)
+        {
+            EnsureSession();
+
+            var timeStamp = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+            var url = ActionUrl($"/erp/orders/invoices/sendEmail/{orderId}?_dc={timeStamp}");
+            m_log.Info($"Posilam pozadavek na odeslani e-mailu klientovi: {url}");
+
+            var result = m_client.Get<DefaultResponse>(url);
+            if (!result.Success)
+            {
+                m_log.Error($"Pozadavek na odeslani emailu klientovi selhal. Request={url}, Response={result.OriginalMessage}");
+                throw new Exception(result.OriginalMessage);
+            }
+
+            m_log.Info($"Odesilani emailu OK OrderId={orderId}");
         }
 
         private void Login()

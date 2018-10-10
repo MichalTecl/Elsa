@@ -112,6 +112,7 @@
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
     <Content Include="Script\Apps\Packing\OrdersPacking.VM.js" />
+    <Content Include="UI\Controls\Common\BusyOverlay.html" />
     <Content Include="UI\Controls\Common\MaterialList\MaterialListView.html" />
     <Content Include="UI\Controls\Common\MaterialList\MaterialListVm.js" />
     <Content Include="UI\Controls\Common\PickItemDialog.html" />

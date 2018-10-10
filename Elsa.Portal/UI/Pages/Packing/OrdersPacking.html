@@ -18,7 +18,7 @@
             <div id="packingUiMainCont">
                 <div id="orderSearchPanel">
                     <div id="tbSearchContainer">
-                        <input id="tbSearch" event-bind="keydown:onSearchKeyDown(event, this.value)"/>
+                        <input id="tbSearch" event-bind="keydown:onSearchKeyDown(event, this.value)" data-bind="value:currentQuery"/>
                     </div>
                 </div>
                 <div id="orderViewPanel">
@@ -186,7 +186,11 @@
             };
 
             var markPacked = function() {
-                alert("packed!");
+                try {
+                    app.ordersPacking.vm.packOrder();
+                } catch (e) {
+                    alert(e.Message);
+                } 
             };
 
             var timer = null;
@@ -234,6 +238,6 @@
 <script src="/Script/Apps/Packing/OrdersPacking.VM.js"></script>
 <link href="PackingUI.css" rel="stylesheet" />
     
-
+    <div replace-by="/UI/Controls/Common/BusyOverlay.html"></div>
 </body>
 </html>

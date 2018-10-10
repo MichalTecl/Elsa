@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Web.Routing;
 
 using Elsa.Common.Logging;
@@ -47,6 +48,8 @@ namespace Elsa.Common
             Func<object> defaultInvocation,
             Action<object> defaultResultWrite)
         {
+            Thread.Sleep(700);
+
             if (WebSession.User == null)
             {
                 if (!Attribute.IsDefined(method, typeof(AllowAnonymousAttribute)))

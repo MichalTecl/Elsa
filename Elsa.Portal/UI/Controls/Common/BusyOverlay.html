@@ -1,0 +1,27 @@
+﻿<div id="busyOverlay" class="hiddenOverlay"></div>
+
+<script>
+    lt.element("busyOverlay").attach(function() {
+
+        var trySetup = function() {
+            
+            if (!lt.api || !lt.api.usageManager) {
+                setTimeout(trySetup, 50);
+                return;
+            }
+
+            lt.api.usageManager.subscribeBusyHandler(function(isBusy) {
+
+                var ovrly = document.getElementById("busyOverlay");
+
+                if (isBusy) {
+                    ovrly.setAttribute("class", "shownOverlay");
+                } else {
+                    ovrly.setAttribute("class", "hiddenOverlay");
+                }
+            });
+        };
+
+        trySetup();
+    });
+</script>

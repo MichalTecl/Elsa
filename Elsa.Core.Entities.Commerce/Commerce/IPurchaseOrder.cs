@@ -108,5 +108,10 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         [NotFk]
         [NVarchar(255, false)]
         string ErpOrderId { get; set; }
+
+        int? PackingUserId { get; set; }
+        IUser PackingUser { get; }
+
+        DateTime? PackingDt { get; set; }
     }
 }

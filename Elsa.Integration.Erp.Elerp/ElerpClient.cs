@@ -54,6 +54,19 @@ namespace Elsa.Integration.Erp.Elerp
             return GetAllOrders().FirstOrDefault(o => o.OrderNumber == orderNumber);
         }
 
+        public void MakeOrderSent(IPurchaseOrder po)
+        {
+            var o = LoadOrder(po.OrderNumber) as ElerpOrderModel;
+            if (o == null)
+            {
+                throw new InvalidOperationException($"Elerp doesn't have order with number '{po.OrderNumber}'");
+            }
+
+            o.ErpStatus = OrderStatus.Sent.Id.ToString();
+
+            SaveOrder(o);
+        }
+
         private IEnumerable<ElerpOrderModel> GetAllOrders()
         {
             foreach (var filePath in Directory.GetFiles(m_config.DataDir))

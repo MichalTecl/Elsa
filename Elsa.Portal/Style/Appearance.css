@@ -251,3 +251,25 @@ div.searchPanel {
 .lt-template {
     display: none;
 }
+
+#busyOverlay {
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  right:0;
+  background-color:black;
+  cursor: wait;
+}
+
+.shownOverlay {
+    transition: opacity 500ms ease-out 600ms;
+    visibility: visible;
+    opacity: 0.2; 
+}
+
+.hiddenOverlay {
+    transition: opacity 20ms ease-in 0;
+    visibility: hidden;
+    opacity: 0;
+}

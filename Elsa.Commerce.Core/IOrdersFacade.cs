@@ -9,6 +9,8 @@ namespace Elsa.Commerce.Core
     {
         IPurchaseOrder SetOrderPaid(long orderId, long? paymentId);
 
+        IPurchaseOrder SetOrderSent(long orderId);
+
         IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth);
     }
 }

@@ -86,5 +86,10 @@ namespace Elsa.Integration.Erp.Fler
             var detail = m_fler.LoadOrderDetail(orderNumber);
             return new FlerErpOrder(detail, Erp.Id);
         }
+
+        public void MakeOrderSent(IPurchaseOrder po)
+        {
+            throw new NotImplementedException("Fler zatim nepodporuje odesilani zasilek :(");
+        }
     }
 }

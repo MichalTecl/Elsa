@@ -23,5 +23,7 @@ namespace Elsa.Commerce.Core
         void MarkOrderPaid(IPurchaseOrder po);
 
         IErpOrderModel LoadOrder(string orderNumber);
+
+        void MakeOrderSent(IPurchaseOrder po);
     }
 }
