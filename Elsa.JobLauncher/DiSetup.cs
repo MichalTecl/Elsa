@@ -12,6 +12,7 @@ using Elsa.Jobs.GeocodeAddresses;
 using Elsa.Jobs.PaymentPairing;
 using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
+using Elsa.Jobs.SyncErpCustomers;
 
 using Robowire;
 
@@ -41,6 +42,7 @@ namespace Elsa.JobLauncher
             container.Setup(s => s.ScanAssembly(typeof(OsmGeoResponse).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(LoadGeo).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(ElerpClient).Assembly));
+            container.Setup(s => s.ScanAssembly(typeof(CustomersSyncJob).Assembly));
             return container;
         }
     }

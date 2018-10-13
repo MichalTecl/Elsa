@@ -48,6 +48,8 @@
     <Compile Include="FloxClientConfig.cs" />
     <Compile Include="FloxDataMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocol\CustomerModel\ErpPersonModel.cs" />
+    <Compile Include="Protocol\CustomerModel\PersonsXmlModel.cs" />
     <Compile Include="Protocol\DefaultResponse.cs" />
     <Compile Include="Protocol\FloxOrderStatuses.cs" />
     <Compile Include="Protocol\OrderModel\ExportDocument.cs" />

@@ -120,7 +120,7 @@ lanta.CustomAttributes.Watcher = lanta.CustomAttributes.Watcher || function() {
         }
     };
 
-    
+    setInterval(visitAll, 500);
 };
 lanta.CustomAttributes.Watcher.instance = lanta.CustomAttributes.Watcher.instance ||
     new lanta.CustomAttributes.Watcher();

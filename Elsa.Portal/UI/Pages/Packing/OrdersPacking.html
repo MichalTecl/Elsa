@@ -20,6 +20,18 @@
                     <div id="tbSearchContainer">
                         <input id="tbSearch" event-bind="keydown:onSearchKeyDown(event, this.value)" data-bind="value:currentQuery"/>
                     </div>
+                    <div id="ordersList">
+                        <p>Načítám objednávky...</p>
+                        <div id="orderTemplate" lt-name="holder" event-bind="click:onPreviewOrderClick($holder)">
+                            <div class="previewOrderTitle" data-bind="text:CustomerName"></div>
+                            <div class="previewOrderItemsList" lt-name="itemsList">
+                                <div lt-name="itemTemplate" class="previewItemContainer">
+                                    <i class="previewItemQuantity" data-bind="text:Quantity"></i>
+                                    <i class="previewItemName" data-bind="text:Name"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div id="orderViewPanel">
                     <div id="orderOverviewPanel" class="stackLeft">
@@ -27,6 +39,9 @@
 
                         <i id="lblOrderNumber" data-bind="text:currentOrder.OrderNumber"></i>
                         <a id="lblCustomerName" data-bind="text:currentOrder.CustomerName; title:currentOrder.CustomerEmail"></a>
+                        
+                        <div fill-by="/UI/Controls/Common/CustomerView/Customer.html" data-bind="customerName:currentOrder.CustomerName; customerEmail:currentOrder.CustomerEmail"></div>
+
                         <i id="lblPrice" data-bind="text:currentOrder.Price"></i>
 
                         <i id="lblSourceErp" data-bind="text:currentOrder.ErpName"></i>
@@ -102,7 +117,7 @@
 
     lt.element("packingUi")
         .withModel("app.ordersPacking.vm")
-        .attach(function (orderSearchPanel, orderViewPanel, tbSearch, orderOverviewPanel, lblCustomerName, itemsList, itemTemplate, kitGroupTemplate, kitItemTemplate, progressBar) {
+        .attach(function (orderSearchPanel, orderViewPanel, tbSearch, orderOverviewPanel, lblCustomerName, itemsList, itemTemplate, kitGroupTemplate, kitItemTemplate, progressBar, ordersList, orderTemplate) {
 
             var self = this;
 
@@ -229,8 +244,23 @@
                 }
             };
 
-            
-            
+            var orderItemController = function(itemsList, itemTemplate) {
+                this.bind(function(Items) {
+                    lt.generate(itemsList, itemTemplate, Items);
+                });
+
+            };
+
+            this.bind(function(ordersToPack) {
+                lt.generate(ordersList, orderTemplate, ordersToPack, function(o) { return o.OrderId; }, orderItemController);
+            });
+
+            this.onPreviewOrderClick = function(item) {
+                var model = lt.getViewModel(item);
+                tbSearch.value = model.OrderNumber;
+                app.ordersPacking.vm.searchOrder(model.OrderNumber);
+            };
+
         });
             
     </script>

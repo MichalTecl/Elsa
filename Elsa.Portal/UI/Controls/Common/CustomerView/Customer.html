@@ -1,0 +1,89 @@
+﻿<div id="customerViewBox{%GENERATE%}" class="stackLeft">
+    <div lt-name="lblCustomerName" event-bind="mouseover:onCustomerMouseOver(); click:onCustomerMouseOver()"></div>
+    
+    <img lt-name="iconLoading" class="customerPropsIcon" src="/UI/Controls/Common/CustomerView/ajax-loader.gif" />
+
+    <i lt-name="iconAnonymousUser" class="fas fa-question customerPropsIcon" title="Neregistrovaný zákazník"></i>
+    <i lt-name="iconRegisteredCustomer" class="far fa-id-badge customerPropsIcon" title="Registrovaný zákazník"></i>
+    <i lt-name="iconDistributor" class="fas fa-store-alt customerPropsIcon" title="Velkoodběratel"></i>
+    <i lt-name="iconNewsletter" class="fas fa-mail-bulk customerPropsIcon" title="Odebírá newsletter"></i>
+
+</div>
+
+<script>
+    lt.element("customerViewBox{%GENERATE%}").attach(function (lblCustomerName, iconLoading, iconRegisteredCustomer, iconAnonymousUser, iconDistributor, iconNewsletter) {
+
+        if (!document.getElementById("customerViewPanel")) {
+            if (!window.customerViewPanelRequested) {
+                window.customerViewPanelRequested = true;
+                var dHolder = document.createElement("div");
+                dHolder.setAttribute("replace-by", "/UI/Controls/Common/CustomerView/CustomerviewPanel.html");
+                document.body.appendChild(dHolder);
+            }
+        }
+
+
+        var _customerEmail = null;
+        var _vm = null;
+
+        var loadCustomer = function (vm) {
+
+            iconLoading.style.display = 'block';
+            iconRegisteredCustomer.style.display = 'none';
+            iconAnonymousUser.style.display = 'none';
+            iconDistributor.style.display = 'none';
+            iconNewsletter.style.display = 'none';
+
+            vm = vm || _vm;
+            if (!vm) {
+                return;
+            }
+            _vm = vm;
+
+            if (!_customerEmail || !_vm) {
+                return;
+            }
+
+            _vm.getCustomer(_customerEmail, function(customerData) {
+
+                iconLoading.style.display = 'none';
+                if (customerData.IsDistributor) {
+                    iconDistributor.style.display = 'block';
+                }
+
+                if (customerData.IsNewsletterSubscriber) {
+                    iconNewsletter.style.display = 'block';
+                }
+
+                if (customerData.IsRegistered || customerData.IsDistributor) {
+                    iconRegisteredCustomer.style.display = 'block';
+                    iconAnonymousUser.style.display = 'none';
+                } else {
+                    iconRegisteredCustomer.style.display = 'none';
+                    iconAnonymousUser.style.display = 'block';
+                }
+            });
+        };
+
+        this.bind(loadCustomer).vmToGlobal("app.customers.vm");
+
+        this.attribute(function(customerName) {
+            lblCustomerName.innerHTML = customerName;
+        });
+
+        this.attribute(function(customerEmail) {
+            _customerEmail = customerEmail;
+            loadCustomer();
+        });
+
+        this.onCustomerMouseOver = function() {
+            if (!_customerEmail || !_vm) {
+                return;
+            }
+
+            _vm.selectCustomer(_customerEmail);
+
+        };
+    });
+</script>
+<link href="/UI/Controls/Common/CustomerView/CustomerViewStyle.css" rel="stylesheet" />

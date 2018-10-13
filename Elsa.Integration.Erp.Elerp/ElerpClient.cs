@@ -67,6 +67,11 @@ namespace Elsa.Integration.Erp.Elerp
             SaveOrder(o);
         }
 
+        public IEnumerable<IErpCustomerModel> LoadCustomers()
+        {
+            yield break;
+        }
+
         private IEnumerable<ElerpOrderModel> GetAllOrders()
         {
             foreach (var filePath in Directory.GetFiles(m_config.DataDir))

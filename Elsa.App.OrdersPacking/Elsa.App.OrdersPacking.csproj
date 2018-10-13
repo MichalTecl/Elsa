@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Model\PackingOrderItemModel.cs" />
     <Compile Include="Model\PackingOrderModel.cs" />
+    <Compile Include="Model\LightOrderInfo.cs" />
     <Compile Include="PackingController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

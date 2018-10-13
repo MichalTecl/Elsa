@@ -48,8 +48,6 @@ namespace Elsa.Common
             Func<object> defaultInvocation,
             Action<object> defaultResultWrite)
         {
-            Thread.Sleep(700);
-
             if (WebSession.User == null)
             {
                 if (!Attribute.IsDefined(method, typeof(AllowAnonymousAttribute)))

@@ -1,5 +1,6 @@
 ﻿~/Script/Lanta/Util.js
 ~/Script/Lanta/FuncUtil.js
+~/Script/Lanta/AttributeBinding.js
 ~/Script/Lanta/CoreOps.js
 ~/Script/Lanta/BindingCore.js
 ~/Script/Lanta/ItemGeneration.js

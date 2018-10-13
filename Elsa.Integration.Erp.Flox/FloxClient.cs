@@ -10,6 +10,7 @@ using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.Erp.Flox.Protocol;
+using Elsa.Integration.Erp.Flox.Protocol.CustomerModel;
 using Elsa.Integration.Erp.Flox.Protocol.OrderModel;
 
 namespace Elsa.Integration.Erp.Flox
@@ -146,6 +147,47 @@ namespace Elsa.Integration.Erp.Flox
             {
                 throw new Exception($"Selhal pokus o zpracovani objednavky {po.OrderNumber}. Objednavku je treba dokoncit ve Floxu. Chyba: {ex.Message}", ex);
             }
+        }
+
+        public IEnumerable<IErpCustomerModel> LoadCustomers()
+        {
+            EnsureSession();
+
+            var url = ActionUrl("/erp/impexp/export/index/persons/xml");
+
+            var dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+            var exportString =
+                m_client.Post(url)
+                    .Field(
+                        "dataSubset",
+                        "a:9:{s:10:\"xcol_email\";s:2:\"on\";s:9:\"xcol_name\";s:2:\"on\";s:12:\"xcol_surname\";s:2:\"on\";s:11:\"xcol_active\";s:2:\"on\";s:15:\"xcol_newsletter\";s:2:\"on\";s:17:\"xcol_address_name\";s:2:\"on\";s:20:\"xcol_address_surname\";s:2:\"on\";s:18:\"xcol_address_phone\";s:2:\"on\";s:11:\"xcol_groups\";s:2:\"on\";}")
+                    .Field("data", string.Empty)
+                    .Field("massFilter", string.Empty)
+                    .Field("downloadToken", dlToken)
+                    .Call();
+            
+            var result = new List<IErpCustomerModel>();
+
+            var parsed = PersonsDoc.Parse(exportString);
+            result.AddRange(parsed.Select(i => new ErpPersonModel(i)));
+
+            dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+            exportString =
+                m_client.Post(ActionUrl("/erp/impexp/export/index/companies/xml"))
+                    .Field(
+                        "dataSubset",
+                        "a:4:{s:9:\"xcol_name\";s:2:\"on\";s:10:\"xcol_email\";s:2:\"on\";s:18:\"xcol_address_phone\";s:2:\"on\";s:11:\"xcol_groups\";s:2:\"on\";}")
+                    .Field("data", string.Empty)
+                    .Field("massFilter", string.Empty)
+                    .Field("downloadToken", dlToken)
+                    .Call();
+
+            exportString = exportString.Replace("<companies>", "<persons>").Replace("</companies>", "</persons>");
+
+            parsed = PersonsDoc.Parse(exportString);
+            result.AddRange(parsed.Select(i => new ErpPersonModel(i)));
+
+            return result;
         }
 
         private void GenerateInvoice(string orderNum)

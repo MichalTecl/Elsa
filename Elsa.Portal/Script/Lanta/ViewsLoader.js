@@ -1,5 +1,6 @@
 ﻿var lanta = lanta || {};
 lanta.ViewLoading = lanta.ViewLoading || {};
+lanta.ViewLoading.cache = lanta.ViewLoading.cache || {};
 lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
     function (div, sourceUrl) {
 
@@ -27,6 +28,14 @@ lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
 lanta.ViewLoading.loader = function (target, value, attribute, callback) {
 
     lt.api(value).useCache().ignoreDisabledApi().noJson().get(function (html) {
+        
+        if (html.indexOf("{%GENERATE%}") > -1) {
+            var dynamicValue = new Date().getUTCMilliseconds() + "_" + Math.random();
+
+            while (html.indexOf("{%GENERATE%}") > -1) {
+                html = html.replace("{%GENERATE%}", dynamicValue);
+            }
+        }
 
         if (attribute === "fill-by") {
             target.innerHTML = html;

@@ -1,6 +1,7 @@
 ﻿
 using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
+using Elsa.App.Crm;
 using Elsa.App.OrdersPacking;
 using Elsa.App.Shipment;
 using Elsa.Apps.Inventory;
@@ -21,6 +22,7 @@ using Elsa.Jobs.ImportOrders;
 using Elsa.Jobs.PaymentPairing;
 using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
+using Elsa.Jobs.SyncErpCustomers;
 
 namespace Elsa.Portal
 {
@@ -53,6 +55,8 @@ namespace Elsa.Portal
                         s.ScanAssembly(typeof(ShipmentController).Assembly);
                         s.ScanAssembly(typeof(PackingController).Assembly);
                         s.ScanAssembly(typeof(ElerpClient).Assembly);
+                        s.ScanAssembly(typeof(CustomersSyncJob).Assembly);
+                        s.ScanAssembly(typeof(CustomersController).Assembly);
                     });
         }
     }

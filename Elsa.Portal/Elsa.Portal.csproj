@@ -107,12 +107,18 @@
     <None Include="Bundles\Lanta" />
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
+    <Content Include="Script\Apps\Crm\Customers.VM.js" />
     <Content Include="Script\Apps\Inventory\VirtualProducts\VirtualProductsVM.js" />
     <Content Include="Script\Apps\Jobs\ScheduledJobs.VM.js" />
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
     <Content Include="Script\Apps\Packing\OrdersPacking.VM.js" />
+    <Content Include="Script\Lanta\AttributeBinding.js" />
     <Content Include="UI\Controls\Common\BusyOverlay.html" />
+    <Content Include="UI\Controls\Common\CustomerView\ajax-loader.gif" />
+    <Content Include="UI\Controls\Common\CustomerView\Customer.html" />
+    <Content Include="UI\Controls\Common\CustomerView\CustomerViewPanel.html" />
+    <Content Include="UI\Controls\Common\CustomerView\CustomerViewStyle.css" />
     <Content Include="UI\Controls\Common\MaterialList\MaterialListView.html" />
     <Content Include="UI\Controls\Common\MaterialList\MaterialListVm.js" />
     <Content Include="UI\Controls\Common\PickItemDialog.html" />
@@ -205,6 +211,10 @@
       <Project>{92898b3b-012f-43f0-9044-55d6de1a4afb}</Project>
       <Name>Elsa.App.Commerce</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.Crm\Elsa.App.Crm.csproj">
+      <Project>{00851E14-33BE-4F64-91D1-E27FA48422BD}</Project>
+      <Name>Elsa.App.Crm</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.OrdersPacking\Elsa.App.OrdersPacking.csproj">
       <Project>{87D88B8D-17B5-4FB4-B7BD-AAA2D2FFB4A1}</Project>
       <Name>Elsa.App.OrdersPacking</Name>
@@ -284,6 +294,10 @@
     <ProjectReference Include="..\Elsa.Jobs.SetPaidStatus\Elsa.Jobs.SetPaidStatus.csproj">
       <Project>{2F341FE9-F108-4109-BBB4-E7115B0987A5}</Project>
       <Name>Elsa.Jobs.SetPaidStatus</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.SyncErpCustomers\Elsa.Jobs.SyncErpCustomers.csproj">
+      <Project>{EE3BF5CE-F5DD-4D3B-B696-12C5A1EF1AF4}</Project>
+      <Name>Elsa.Jobs.SyncErpCustomers</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{A9148D58-0F0E-43E7-8A11-A9F9BB04333C}</Project>

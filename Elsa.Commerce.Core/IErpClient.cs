@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Crm;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.Erp.Flox;
 
@@ -25,5 +26,7 @@ namespace Elsa.Commerce.Core
         IErpOrderModel LoadOrder(string orderNumber);
 
         void MakeOrderSent(IPurchaseOrder po);
+
+        IEnumerable<IErpCustomerModel> LoadCustomers();
     }
 }

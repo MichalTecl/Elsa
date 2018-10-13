@@ -22,6 +22,11 @@ namespace Elsa.Commerce.Core
             return orderStatusId == ReadyToPack.Id;
         }
 
+        public static bool IsUnsuccessfullyClosed(int orderStatusId)
+        {
+            return orderStatusId > Sent.Id;
+        }
+        
         private sealed class Status : IOrderStatus
         {
             private readonly int m_id;

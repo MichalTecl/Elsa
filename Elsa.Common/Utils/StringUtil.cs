@@ -62,7 +62,7 @@ namespace Elsa.Common.Utils
 
             char lChar = '#';
 
-            foreach (var s in inp)
+            foreach (var s in inp.Where(i => !string.IsNullOrWhiteSpace(i)))
             {
                 foreach (var chr in s.Trim().ToLowerInvariant())
                 {

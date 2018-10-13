@@ -44,6 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crm\ICustomerRepository.cs" />
+    <Compile Include="Crm\Model\CustomerOverview.cs" />
+    <Compile Include="Crm\Model\ICommonCustomerInfo.cs" />
     <Compile Include="ErpDataMapperBase.cs" />
     <Compile Include="ICurrencyRepository.cs" />
     <Compile Include="IErpClient.cs" />
@@ -64,11 +67,15 @@
     <Compile Include="IPurchaseOrderRepository.cs" />
     <Compile Include="IUnitRepository.cs" />
     <Compile Include="IKitProductRepository.cs" />
+    <Compile Include="IUserRepository.cs" />
+    <Compile Include="Model\IErpCustomerModel.cs" />
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
     <Compile Include="Model\KitItemsCollection.cs" />
+    <Compile Include="Repositories\CustomerRepository.cs" />
     <Compile Include="Repositories\ErpRepository.cs" />
     <Compile Include="Repositories\KitProductRepository.cs" />
     <Compile Include="Repositories\UnitRepository.cs" />
+    <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Repositories\VirtualProductRepository.cs" />
     <Compile Include="Shipment\IShipmentProvider.cs" />
     <Compile Include="Units\IUnitConversionHelper.cs" />

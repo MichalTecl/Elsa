@@ -1,4 +1,5 @@
-﻿using Elsa.Commerce.Core.Impl;
+﻿using Elsa.Commerce.Core.Crm;
+using Elsa.Commerce.Core.Impl;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -28,6 +29,8 @@ namespace Elsa.Commerce.Core
             setup.For<IVirtualProductFacade>().Use<VirtualProductFacade>();
             setup.For<IMaterialFacade>().Use<MaterialFacade>();
             setup.For<IKitProductRepository>().Use<KitProductRepository>();
+            setup.For<ICustomerRepository>().Use<CustomerRepository>();
+            setup.For<IUserRepository>().Use<UserRepository>();
         }
     }
 }

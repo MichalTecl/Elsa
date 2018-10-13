@@ -96,11 +96,16 @@ lanta.CoreOps.attachController = lanta.CoreOps.attachController || function (ele
 
         element["lt_element_controllers"] = element["lt_element_controllers"] || [];
         element["lt_element_controllers"].push(controllerFunction);
-
+        
         element.bind = function(handler) {
             var builder = new lanta.BindingCore.BindingBuilder(this, handler);
             builder.bind();
             return builder;
+        };
+
+        element.attribute = function (handler) {
+            this["lt_attribute_bindings"] = element["lt_attribute_bindings"] || [];
+            this["lt_attribute_bindings"].push(new lanta.AttributeBinding(this, handler));
         };
 
         element.bind.bind(element);

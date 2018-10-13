@@ -1,6 +1,16 @@
 ﻿var lanta = lanta || {};
 lanta.BindingCore = lanta.BindingCore || {};
 
+lanta.BindingCore.subscribeNotificationsCallback = lanta.BindingCore.subscribeNotificationsCallback ||
+    function(owner, callback) {
+        
+        if (!owner.ltNotificationListeners) {
+            owner.ltNotificationListeners = [];
+        }
+
+        owner.ltNotificationListeners.push(callback);
+    };
+
 lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager || function() {
 
     var self = this;
@@ -21,6 +31,14 @@ lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager ||
 
             if (!!current.element.notifyModelChange) {
                 current.element.notifyModelChange(current.notificationName);
+            }
+
+            if (!!current.element.ltNotificationListeners) {
+                var ary = current.element.ltNotificationListeners;
+                for (var x = 0; x < ary.length; x++) {
+                    var callback = ary[x];
+                    callback(current.notificationName);
+                }
             }
 
             var children = current.element.children || current.element.childNodes;

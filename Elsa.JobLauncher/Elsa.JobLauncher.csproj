@@ -129,6 +129,10 @@
       <Project>{2F341FE9-F108-4109-BBB4-E7115B0987A5}</Project>
       <Name>Elsa.Jobs.SetPaidStatus</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.SyncErpCustomers\Elsa.Jobs.SyncErpCustomers.csproj">
+      <Project>{EE3BF5CE-F5DD-4D3B-B696-12C5A1EF1AF4}</Project>
+      <Name>Elsa.Jobs.SyncErpCustomers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{a9148d58-0f0e-43e7-8a11-a9f9bb04333c}</Project>
       <Name>Elsa.Users</Name>

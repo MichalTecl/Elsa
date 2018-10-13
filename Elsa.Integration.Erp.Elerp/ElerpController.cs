@@ -19,11 +19,11 @@ namespace Elsa.Integration.Erp.Elerp
         private readonly ElerpClient m_elerp;
         private readonly IErpClientFactory m_erpClientFactory;
 
-        public ElerpController(IWebSession webSession, ILog log, ElerpClient elerp, IErpClientFactory erpClientFactory)
+        public ElerpController(IWebSession webSession, ILog log, IErpClientFactory erpClientFactory)
             : base(webSession, log)
         {
-            m_elerp = elerp;
             m_erpClientFactory = erpClientFactory;
+            m_elerp = (ElerpClient)m_erpClientFactory.GetAllErpClients().First(i => i.Erp.Description.ToLower().Contains("elerp"));
         }
 
         public void CopyFromFlox(string orderNumber)

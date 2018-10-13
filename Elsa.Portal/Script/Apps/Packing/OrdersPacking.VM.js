@@ -5,8 +5,8 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     var self = this;
 
     self.currentOrder = null;
-
     self.currentQuery = "";
+    self.ordersToPack = null;
 
     var adjustServerKitItemObject = function(kitItem) {
         
@@ -87,6 +87,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             adjustServerOrderObject(order);
             self.currentOrder = order;
             self.currentQuery = qry;
+            setTimeout(loadOrdersToPack, 500);
         });
 
     };
@@ -139,9 +140,28 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
         lt.api("/ordersPacking/packOrder").query({ "orderId": ordid }).get(function() {
             self.currentQuery = "";
+
+            if (self.ordersToPack) {
+                for (var i = 0; i < self.ordersToPack.length; i++) {
+                    if (self.ordersToPack[i].OrderId === ordid) {
+                        self.ordersToPack.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+
+            setTimeout(loadOrdersToPack, 100);
         });
 
     };
+
+    var loadOrdersToPack = function() {
+        lt.api("/ordersPacking/getOrdersToPack").silent().get(function(toPack) {
+            self.ordersToPack = toPack;
+        });
+    };
+
+    setTimeout(loadOrdersToPack, 0);
 };
 
 app.ordersPacking.vm = app.ordersPacking.vm || new app.ordersPacking.ViewModel();

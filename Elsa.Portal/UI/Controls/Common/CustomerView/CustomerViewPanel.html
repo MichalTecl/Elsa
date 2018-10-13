@@ -1,0 +1,43 @@
+﻿<div id="customerViewPanel">
+    <div id="customerItems">
+        <div id="customerItemTemplate" class="customerItemDate stackLeft">
+            <span class="customerItemDt" data-bind="text:DisplayTime"></span>
+            <div class="orderItemTemplate" data-bind="class!.hidden:isOrder">
+                <div class="orderTitle" data-bind="text:Item.OrderNumber; class.canceledOrder:Item.IsCanceled; class.completeOrder:Item.IsComplete"></div>
+                <div class="orderPrice" data-bind="text:Item.Total"></div>
+            </div>
+            <p class="messageItemTemplate" data-bind="class!.hidden:isMessage;class.customerMessage:Item.IsLeftByCustomer">
+                <span class="messageAuthor" data-bind="text:Item.Author"></span>
+                <span class="messageBody" data-bind="text:Item.Body"></span>
+            </p>
+        </div>
+    </div>
+
+</div>
+<script src="/Script/Apps/Crm/Customers.VM.js"></script>
+<script>    
+    lt.element("customerViewPanel").withModel("app.customers.vm").attach(function(customerItems, customerItemTemplate) {
+
+        var self = this;
+
+        this.bind(function(selectedCustomer) {
+            
+            if (!!selectedCustomer) {
+                self.style.display = 'block';
+            } else {
+                self.style.display = 'none';
+                return;
+            }
+
+            for (var i = 0; i < selectedCustomer.Items.length; i++) {
+                var item = selectedCustomer.Items[i];
+                item.isOrder = (item.ItemType === "order");
+                item.isMessage = (item.ItemType === "message");
+            }
+
+            lt.generate(customerItems, customerItemTemplate, selectedCustomer.Items);
+
+        }).selectedCustomerCanBeNull();
+
+    });
+</script>

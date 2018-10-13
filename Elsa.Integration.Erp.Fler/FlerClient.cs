@@ -91,5 +91,10 @@ namespace Elsa.Integration.Erp.Fler
         {
             throw new NotImplementedException("Fler zatim nepodporuje odesilani zasilek :(");
         }
+
+        public IEnumerable<IErpCustomerModel> LoadCustomers()
+        {
+            yield break;
+        }
     }
 }

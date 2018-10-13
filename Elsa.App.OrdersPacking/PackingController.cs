@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.App.OrdersPacking.Model;
@@ -104,7 +105,7 @@ namespace Elsa.App.OrdersPacking
 
             return MapOrder(order);
         }
-
+        
         public void PackOrder(long orderId)
         {
             var order = m_orderRepository.GetOrder(orderId);
@@ -127,6 +128,11 @@ namespace Elsa.App.OrdersPacking
             }
 
             m_ordersFacade.SetOrderSent(orderId);
+        }
+
+        public IEnumerable<LightOrderInfo> GetOrdersToPack()
+        {
+            return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30)).Select(i => new LightOrderInfo(i));
         }
 
         private PackingOrderModel MapOrder(IPurchaseOrder entity)
@@ -159,5 +165,7 @@ namespace Elsa.App.OrdersPacking
 
             return orderModel;
         }
+
+
     }
 }
