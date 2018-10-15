@@ -11,6 +11,6 @@ namespace Elsa.Commerce.Core
 
         IPurchaseOrder SetOrderSent(long orderId);
 
-        IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth);
+        IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, bool skipErp = false);
     }
 }

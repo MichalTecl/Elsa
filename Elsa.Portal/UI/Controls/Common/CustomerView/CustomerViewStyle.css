@@ -1,4 +1,9 @@
-﻿i.customerPropsIcon {
+﻿.customerViewBox {
+    cursor: pointer;
+}
+
+
+i.customerPropsIcon {
     display:none;
     font-size:70%;
     margin-left:3px;
@@ -12,18 +17,108 @@ img.customerPropsIcon {
 
 #customerViewPanel {
     position: absolute;
-    min-width: 200px;
-    height: 200px;
-    top: 300px;
+    width: 400px;
+    min-height: 100px;
+    top: 300px;    
+    left:100px;
     z-index: 9999;
     background-color: white;
-    border-radius:10px;
+    border-radius:4px;
     border: 1px solid rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
     -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
     -webkit-background-clip: padding-box;
     -moz-background-clip: padding-box;
     background-clip: padding-box;
-
+    background-color:#ffffff;
 }
+
+#customerViewPanel {    
+    padding:8px;
+    font-size:0.9em;
+}
+
+.customerItemDate {
+    margin-top:2px;
+}
+
+#customerViewPanel .customerDialogHead {
+    display:flex;
+    margin-bottom:14px;   
+}
+
+
+#customerViewPanel .customerDialogHead .customerMail {
+    color:#9999ff;
+}
+
+#customerViewPanel .customerDialogHead > .totalSpent {
+    margin-left:auto;
+    color:#888888;
+    font-weight:bold;
+}
+
+#customerViewPanel .customerItemDt {
+    color:#777799;
+    font-weight:bold;
+}
+
+#customerViewPanel .orderItemTemplate {
+    display:flex;
+    width:100%;
+    padding-bottom:4px;
+}
+
+#customerViewPanel .orderItemTemplate .orderTitle{
+    margin-left:10px;    
+}
+
+.orderTitle.completeOrder {
+    color:green;
+}
+
+.orderTitle.canceledOrder {
+    opacity:0.6;
+}
+
+#customerViewPanel .orderItemTemplate .orderPrice {
+    margin-left:auto;
+    color:#888888;        
+}
+
+.messageItemTemplate {
+    
+    border-radius:6px;    
+    padding:4px;
+    padding-left:6px;
+    padding-right:6px;
+    margin-left:4px;
+    margin-top:8px;
+    background-color:#999910;
+    max-height: 50px;
+    overflow-y:hidden;
+}
+
+.messageItemTemplate:hover {
+    max-height:unset;
+}
+
+.messageItemTemplate.customerMessage {
+    background-color:#1099;
+}
+
+.messageItemTemplate .messageAuthor {
+    font-weight:bold;
+}
+
+.messageItemTemplate .messageAuthor:after {
+    content:":";
+}
+
+.omittedItemsContainer {
+    margin-top:10px;
+    color:#444444;
+    font-style:oblique;
+}
+

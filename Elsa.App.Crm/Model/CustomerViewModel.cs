@@ -23,12 +23,18 @@ namespace Elsa.App.Crm.Model
             TotalSpent = $"{StringUtil.FormatDecimal(src.TotalSpent)} {src.Currency}";
 
             var items = new List<CustomerRelatedItem>();
-
-            foreach (var order in src.Orders)
+            
+            if (src.Orders.Count > 10)
             {
-                items.AddRange(CreateOrderItem(src, order, project));
+                OmittedOrders = src.Orders.Count - 10;
             }
 
+            for (var i = 0; i < Math.Min(src.Orders.Count, 10); i++)
+            {
+                var order = src.Orders[i];
+                items.AddRange(CreateOrderItem(src, order, project));
+            }
+            
             foreach (var msg in src.Messages)
             {
                 var author = userRepository.GetUserNick(msg.AuthorId);
@@ -56,6 +62,8 @@ namespace Elsa.App.Crm.Model
         public bool IsDistributor { get; }
 
         public string TotalSpent { get; }
+
+        public int? OmittedOrders { get; }
 
         public List<CustomerRelatedItem> Items { get; private set; }
 

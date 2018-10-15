@@ -115,9 +115,20 @@ namespace Elsa.Commerce.Core.Impl
             }
         }
 
-        public IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth)
+        public IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, bool skipErp = false)
         {
             m_log.Info($"Nacitam zaplacene objednavky od {historyDepth}");
+
+            if (skipErp)
+            {
+                foreach (var rpo in m_orderRepository.GetOrdersByStatus(OrderStatus.ReadyToPack))
+                {
+                    yield return rpo;
+                }
+
+                yield break;
+            }
+
 
             var erps = m_clientFactory.GetAllErpClients().ToList();
 

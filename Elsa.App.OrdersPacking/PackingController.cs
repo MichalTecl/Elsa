@@ -132,7 +132,7 @@ namespace Elsa.App.OrdersPacking
 
         public IEnumerable<LightOrderInfo> GetOrdersToPack()
         {
-            return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30)).Select(i => new LightOrderInfo(i));
+            return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), true).Select(i => new LightOrderInfo(i));
         }
 
         private PackingOrderModel MapOrder(IPurchaseOrder entity)

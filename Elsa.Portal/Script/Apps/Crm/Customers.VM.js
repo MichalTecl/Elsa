@@ -6,11 +6,14 @@ app.customers.ViewModel = app.customers.ViewModel || function() {
     var cache = {};
     var selectedCustomerEmail = null;
 
+    self.customerDialogPosition = {x:0,y:0};
     self.selectedCustomer = null;
 
     var receiveCustomerData = function(data) {
         data.entryLifetime = new Date().getTime() + cacheLifetime;
         cache[data.Email] = data;
+
+        data.hasOmittedOrders = (!!data.OmittedOrders) && (data.OmittedOrders > 0);
     };
 
     var getCustomerData = function(email) {
@@ -19,7 +22,7 @@ app.customers.ViewModel = app.customers.ViewModel || function() {
 
     self.getCustomer = function(email, callback) {
         var cached = cache[email];
-        if ((!!cached) && ((new Date().getTime() - cached.entryLifetime) < cacheLifetime)) {
+        if ((!!cached) && (new Date().getTime() < cached.entryLifetime)) {
             callback(cached);
             return;
         }
@@ -31,9 +34,11 @@ app.customers.ViewModel = app.customers.ViewModel || function() {
         });
     };
 
-    self.selectCustomer = function(email) {
+    self.selectCustomer = function (email, dialogX, dialogY) {
+        self.customerDialogPosition = { x: dialogX, y: dialogY };
         self.getCustomer(email, function(data) {
             self.selectedCustomer = data;
+            lt.notify();
         });
     };
 };

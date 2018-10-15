@@ -103,7 +103,11 @@ lanta.BindingCore.setViewModel = lanta.BindingCore.setViewModel || function(elem
 lanta.BindingCore.ComparerResult = lanta.BindingCore.ComparerResult || { FORBIDDEN:2, CHANGED:1, UNCHANGED:0 };
 
 lanta.BindingCore.defaultRelativeSourceFactory = lanta.BindingCore.defaultRelativeSourceFactory || function(owner, expression) {
-    return owner["lt_view_model"];
+    //return owner["lt_view_model"];
+    // EXPERIMENT:
+
+    return lt.getViewModel(owner);
+
 };
 
 lanta.BindingCore.defaultExpressionEvaluator = lanta.BindingCore.defaultExpressionEvaluator || function(owner, expression, relativeSourceFactory) {

@@ -78,7 +78,7 @@ namespace Elsa.Commerce.Core.Repositories
                 m_database.SelectFrom<IPurchaseOrder>()
                     .Join(o => o.Currency)
                     .Where(o => o.CustomerEmail == email && o.ProjectId == m_session.Project.Id)
-                    .Execute())
+                    .Execute().OrderByDescending(o => o.PurchaseDate))
             {
                 if (string.IsNullOrWhiteSpace(model.Currency))
                 {

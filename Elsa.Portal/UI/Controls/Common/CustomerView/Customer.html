@@ -1,5 +1,5 @@
-﻿<div id="customerViewBox{%GENERATE%}" class="stackLeft">
-    <div lt-name="lblCustomerName" event-bind="mouseover:onCustomerMouseOver(); click:onCustomerMouseOver()"></div>
+﻿<div id="customerViewBox{%GENERATE%}" class="stackLeft customerViewBox">
+    <div lt-name="lblCustomerName" event-bind="click:onCustomerMouseOver(event)"></div>
     
     <img lt-name="iconLoading" class="customerPropsIcon" src="/UI/Controls/Common/CustomerView/ajax-loader.gif" />
 
@@ -76,12 +76,12 @@
             loadCustomer();
         });
 
-        this.onCustomerMouseOver = function() {
+        this.onCustomerMouseOver = function(event) {
             if (!_customerEmail || !_vm) {
                 return;
             }
 
-            _vm.selectCustomer(_customerEmail);
+            _vm.selectCustomer(_customerEmail, event.pageX, event.pageY + lblCustomerName.offsetHeight);
 
         };
     });
