@@ -81,6 +81,7 @@ img.customerPropsIcon {
 
 .orderTitle.canceledOrder {
     opacity:0.6;
+    text-decoration:line-through;
 }
 
 #customerViewPanel .orderItemTemplate .orderPrice {
