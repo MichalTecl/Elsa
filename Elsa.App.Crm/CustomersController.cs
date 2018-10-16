@@ -38,5 +38,10 @@ namespace Elsa.App.Crm
             return new CustomerViewModel(customer, WebSession.Project, m_userRepository);
         }
 
+        public IEnumerable<CustomerViewModel> GetCustomers(List<string> emails)
+        {
+            return m_customerRepository.GetOverviews(emails).Select(o => new CustomerViewModel(o, WebSession.Project, m_userRepository));
+        }
+
     }
 }

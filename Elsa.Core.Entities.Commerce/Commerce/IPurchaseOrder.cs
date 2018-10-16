@@ -113,5 +113,8 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         IUser PackingUser { get; }
 
         DateTime? PackingDt { get; set; }
+
+        [NVarchar(1000, true)]
+        string DiscountsText { get; set; }
     }
 }

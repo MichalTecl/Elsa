@@ -222,6 +222,24 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
 
         public IEnumerable<IErpOrderItemModel> LineItems => OrderItems.Items;
 
+        public string DiscountsText
+        {
+            get
+            {
+                var elements = PriceElements.Items.Where(p => p.TypeErpName.Equals("discount")).Select(p => p.Title).ToList();
+                if (!elements.Any())
+                {
+                    return null;
+                }
+
+                return string.Join(" ", elements);
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         [JsonIgnore]
         public string OrderHash
         {

@@ -111,6 +111,7 @@ namespace Elsa.Commerce.Core
             target.BuyDate = ParseDt(source.BuyDate, source, null, nameof(source.BuyDate));
             target.DueDate = ParseDt(source.BuyDate, source, null, nameof(source.BuyDate));
             target.IsPayOnDelivery = source.IsPayOnDelivery;
+            target.DiscountsText = source.DiscountsText;
         }
 
         protected abstract bool HasDeliveryAddress(IErpOrderModel source);

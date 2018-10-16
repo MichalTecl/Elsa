@@ -86,6 +86,8 @@ namespace Elsa.Commerce.Core.Model
 
         IEnumerable<IErpOrderItemModel> LineItems { get; }
 
+        string DiscountsText { get; set; }
+
         string OrderHash { get; }
 
         void SetDebugNumber(string nnum);

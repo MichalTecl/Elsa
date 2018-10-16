@@ -56,86 +56,106 @@ namespace Elsa.Commerce.Core.Repositories
 
         public CustomerOverview GetOverview(string email)
         {
-            var entity = GetCustomerEntity(email);
-            if (entity == null)
-            {
-                return null;
-            }
-
-            var model = new CustomerOverview
-                            {
-                                Email = entity.Email,
-                                CustomerId = entity.Id,
-                                Name = entity.Name,
-                                IsDistributor = entity.IsDistributor,
-                                IsNewsletterSubscriber = entity.NewsletterSubscriber,
-                                IsRegistered = entity.IsRegistered,
-                                Nick = entity.Nick
-                            };
-
-            foreach (
-                var orderEntity in
-                m_database.SelectFrom<IPurchaseOrder>()
-                    .Join(o => o.Currency)
-                    .Where(o => o.CustomerEmail == email && o.ProjectId == m_session.Project.Id)
-                    .Execute().OrderByDescending(o => o.PurchaseDate))
-            {
-                if (string.IsNullOrWhiteSpace(model.Currency))
-                {
-                    model.Currency = orderEntity.Currency?.Symbol;
-                }
-                
-                model.Orders.Add(new CustomerOrderOverview()
-                                     {
-                                         PurchaseOrderId = orderEntity.Id,
-                                         Dt = orderEntity.PurchaseDate,
-                                         IsCanceled = OrderStatus.IsUnsuccessfullyClosed(orderEntity.OrderStatusId),
-                                         IsComplete = orderEntity.OrderStatusId == OrderStatus.Sent.Id || orderEntity.OrderStatusId == OrderStatus.Packed.Id,
-                                         CustomerMessage = orderEntity.CustomerNote,
-                                         InternalMessage = orderEntity.InternalNote,
-                                         OrderNumber = orderEntity.OrderNumber,
-                                         Total = orderEntity.PriceWithVat
-                                     });
-            }
-
-            model.Messages.AddRange(entity.Notes);
-            model.TotalSpent = model.Orders.Where(o => o.IsComplete).Sum(m => m.Total);
-            
-            return model;
+            return GetOverviews(new[] { email }).FirstOrDefault();
         }
 
-        private ICustomer GetCustomerEntity(string email)
+        public IEnumerable<CustomerOverview> GetOverviews(IEnumerable<string> emails)
         {
-            ICustomer entity = null;
+            var entities = GetCustomerEntities(emails);
 
+
+            var orders =
+                m_database.SelectFrom<IPurchaseOrder>()
+                    .Join(o => o.Currency)
+                    .Where(o => o.ProjectId == m_session.Project.Id)
+                    .Where(o => o.CustomerEmail.InCsv(entities.Select(e => e.Email)))
+                    .Execute()
+                    .ToList();
+
+            foreach (var entity in entities)
+            {
+                var model = new CustomerOverview
+                                {
+                                    Email = entity.Email,
+                                    CustomerId = entity.Id,
+                                    Name = entity.Name,
+                                    IsDistributor = entity.IsDistributor,
+                                    IsNewsletterSubscriber = entity.NewsletterSubscriber,
+                                    IsRegistered = entity.IsRegistered,
+                                    Nick = entity.Nick
+                                };
+
+                foreach (var orderEntity in orders.Where(o => o.CustomerEmail.Equals(entity.Email, StringComparison.InvariantCultureIgnoreCase)).OrderByDescending(o => o.PurchaseDate))
+                {
+                    if (string.IsNullOrWhiteSpace(model.Currency))
+                    {
+                        model.Currency = orderEntity.Currency?.Symbol;
+                    }
+
+                    model.Orders.Add(
+                        new CustomerOrderOverview()
+                            {
+                                PurchaseOrderId = orderEntity.Id,
+                                Dt = orderEntity.PurchaseDate,
+                                IsCanceled = OrderStatus.IsUnsuccessfullyClosed(orderEntity.OrderStatusId),
+                                IsComplete =
+                                    orderEntity.OrderStatusId == OrderStatus.Sent.Id
+                                    || orderEntity.OrderStatusId == OrderStatus.Packed.Id,
+                                CustomerMessage = orderEntity.CustomerNote,
+                                InternalMessage = orderEntity.InternalNote,
+                                OrderNumber = orderEntity.OrderNumber,
+                                Total = orderEntity.PriceWithVat
+                            });
+                }
+
+                model.Messages.AddRange(entity.Notes);
+                model.TotalSpent = model.Orders.Where(o => o.IsComplete).Sum(m => m.Total);
+
+                yield return model;
+            }
+        }
+
+        private IEnumerable<ICustomer> GetCustomerEntities(IEnumerable<string> emails)
+        {
             using (var tx = m_database.OpenTransaction())
             {
-                for (var i = 0; i < 2; i++)
+                var entities = 
+                    m_database.SelectFrom<ICustomer>()
+                        .Join(c => c.Notes)
+                        .Where(c => c.ProjectId == m_session.Project.Id && c.Email.InCsv(emails))
+                        .Execute().ToList();
+
+
+                var unknowns =
+                    emails.Where(
+                            source =>
+                                    !entities.Any(e => e.Email.Equals(source, StringComparison.InvariantCultureIgnoreCase)))
+                        .ToList();
+
+                foreach (var unknown in unknowns)
                 {
-                    entity =
+                    m_database.Sql()
+                        .Call("syncShadowCustomers")
+                        .WithParam("@projectId", m_session.Project.Id)
+                        .WithParam("@email", unknown)
+                        .NonQuery();
+
+                    var entity =
                         m_database.SelectFrom<ICustomer>()
                             .Join(c => c.Notes)
-                            .Where(c => c.ProjectId == m_session.Project.Id && c.Email == email)
+                            .Where(c => c.ProjectId == m_session.Project.Id && c.Email == unknown)
                             .Execute()
                             .FirstOrDefault();
 
-                    if (entity == null)
+                    if (entity != null)
                     {
-                        m_database.Sql()
-                            .Call("syncShadowCustomers")
-                            .WithParam("@projectId", m_session.Project.Id)
-                            .WithParam("@email", email)
-                            .NonQuery();
-                    }
-                    else
-                    {
-                        break;
+                        entities.Add(entity);
                     }
                 }
 
                 tx.Commit();
 
-                return entity;
+                return entities;
             }
         }
 

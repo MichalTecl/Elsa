@@ -24,6 +24,8 @@ namespace Elsa.App.OrdersPacking.Model
 
         public string CustomerNote { get; set; }
 
+        public string DiscountsText { get; set; }
+
         public List<PackingOrderItemModel> Items { get; } = new List<PackingOrderItemModel>();
     }
 }

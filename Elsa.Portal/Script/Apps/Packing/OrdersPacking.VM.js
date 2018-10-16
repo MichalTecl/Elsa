@@ -71,6 +71,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     var adjustServerOrderObject = function (order) {
         order.hasCustomerNote = (!!order.CustomerNote) && (order.CustomerNote.length > 0);
         order.hasInternalNote = (!!order.InternalNote) && (order.InternalNote.length > 0);
+        order.hasDiscount = (!!order.DiscountsText) && (order.DiscountsText) && (order.DiscountsText.length > 0);
 
         for (var i = 0; i < order.Items.length; i++) {
             adjustServerOrderItemObject(order.Items[i]);
@@ -155,10 +156,12 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     };
 
-    var loadOrdersToPack = function() {
-        lt.api("/ordersPacking/getOrdersToPack").silent().get(function(toPack) {
+    var loadOrdersToPack = function () {
+        self.ordersToPack = [];
+        lt.notify();
+        /*lt.api("/ordersPacking/getOrdersToPack").silent().get(function(toPack) {
             self.ordersToPack = toPack;
-        });
+        });*/
     };
 
     setTimeout(loadOrdersToPack, 0);

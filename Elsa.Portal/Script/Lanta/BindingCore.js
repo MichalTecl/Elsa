@@ -52,7 +52,35 @@ lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager ||
         timer = null;
     };
 
-    var enqueue = function(owner, name) {
+    var thresholdUp = 1000;
+    var thresholdDn = 0;
+
+    var enqueue = function (owner, name) {
+        
+        if (queue.length > thresholdUp) {
+            console.log("Upper threshold reached - " + queue.length);
+            thresholdUp = thresholdUp * 2;
+            thresholdDn = thresholdUp / 2;
+        }
+
+        if (queue.length < thresholdDn) {
+            console.log("Bottom threshold reached - " + queue.length);
+            thresholdUp = thresholdUp / 2;
+            thresholdDn = thresholdUp / 2;
+
+            if (thresholdUp < 1000) {
+                thresholdUp = 1000;
+            }
+        }
+
+        if (queue.length > 100 && (!!owner)) {
+            for (var i = 0; i < queue.length; i++) {
+                if (queue[i].element === owner) {
+                    return;
+                }
+            }
+        }
+
         queue.push({ element: owner, notificationName: name });
 
         if (queue.length === 1) {
@@ -63,7 +91,7 @@ lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager ||
             }
 
             timer = window.setInterval(tick, 50);
-        }
+        } 
     };
 
     self.enqueueNotification = function (name) {

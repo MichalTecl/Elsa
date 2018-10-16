@@ -18,5 +18,7 @@ namespace Elsa.Commerce.Core.Crm
         void PutComment(int customerId, string body);
 
         CustomerOverview GetOverview(string email);
+
+        IEnumerable<CustomerOverview> GetOverviews(IEnumerable<string> emails);
     }
 }

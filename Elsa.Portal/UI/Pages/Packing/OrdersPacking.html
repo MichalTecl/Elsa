@@ -38,15 +38,18 @@
                         <i class="far fa-caret-square-left faButton" event-bind="click:onPackingCancel"></i>
 
                         <i id="lblOrderNumber" data-bind="text:currentOrder.OrderNumber"></i>
-                        <a id="lblCustomerName" data-bind="text:currentOrder.CustomerName; title:currentOrder.CustomerEmail"></a>
                         
-                        <div fill-by="/UI/Controls/Common/CustomerView/Customer.html" data-bind="customerName:currentOrder.CustomerName; customerEmail:currentOrder.CustomerEmail"></div>
+                        <div id="lblCustomer" fill-by="/UI/Controls/Common/CustomerView/Customer.html" data-bind="customerName:currentOrder.CustomerName; customerEmail:currentOrder.CustomerEmail"></div>
 
                         <i id="lblPrice" data-bind="text:currentOrder.Price"></i>
 
                         <i id="lblSourceErp" data-bind="text:currentOrder.ErpName"></i>
                     </div>
                     <div id="orderNotesPanel">
+                        <div class="orderDiscountsPanel" data-bind="class!.hidden:currentOrder.hasDiscount">
+                            <div class="discountTitle">Sleva:</div>
+                            <div class="discountText" data-bind="text:currentOrder.DiscountsText"></div>
+                        </div>
                         <div id="customerNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.hasCustomerNote">
                             <div id="customerNoteTitle" class="noteTitle">Vzkaz od zákazníka</div>
                             <p id="customerNoteBody" class="noteBody" data-bind="text:currentOrder.CustomerNote"></p>
@@ -117,7 +120,7 @@
 
     lt.element("packingUi")
         .withModel("app.ordersPacking.vm")
-        .attach(function (orderSearchPanel, orderViewPanel, tbSearch, orderOverviewPanel, lblCustomerName, itemsList, itemTemplate, kitGroupTemplate, kitItemTemplate, progressBar, ordersList, orderTemplate) {
+        .attach(function (orderSearchPanel, orderViewPanel, tbSearch, orderOverviewPanel, itemsList, itemTemplate, kitGroupTemplate, kitItemTemplate, progressBar, ordersList, orderTemplate) {
 
             var self = this;
 
@@ -165,9 +168,7 @@
                 } else {
                     orderSearchPanel.style.display = 'none';
                     orderViewPanel.style.display = 'flex';
-                    //lt.setViewModel(orderOverviewPanel, currentOrder);
-                    lblCustomerName.setAttribute("href", "mailto:" + currentOrder.CustomerEmail);
-
+                    
                     lt.generate(itemsList,
                         itemTemplate,
                         currentOrder.Items,

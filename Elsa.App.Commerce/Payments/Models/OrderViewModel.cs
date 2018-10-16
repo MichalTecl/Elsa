@@ -14,6 +14,7 @@ namespace Elsa.App.Commerce.Payments.Models
             CustomerName = $"{source.InvoiceAddress.FirstName} {source.InvoiceAddress.LastName}";
             Price = $"{((double)source.PriceWithVat)} {source.Currency.Symbol}";
             CustomerCompany = StringUtil.Nvl(source.InvoiceAddress.CompanyName, source.DeliveryAddress?.CompanyName);
+            CustomerEmail = source.CustomerEmail;
             Message = source.CustomerNote;
         }
 
@@ -24,6 +25,8 @@ namespace Elsa.App.Commerce.Payments.Models
         public string CustomerName { get; set; }
         public string Price { get; set; }
         public string CustomerCompany { get; set; }
+
+        public string CustomerEmail { get; set; }
 
         public string Message { get; set; }
     }

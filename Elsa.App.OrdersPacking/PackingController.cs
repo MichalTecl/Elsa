@@ -146,6 +146,7 @@ namespace Elsa.App.OrdersPacking
                                      CustomerNote = entity.CustomerNote,
                                      InternalNote = entity.InternalNote,
                                      ErpName = entity.Erp?.Description,
+                                     DiscountsText = entity.DiscountsText,
                                      Price = $"{StringUtil.FormatDecimal(entity.PriceWithVat)} {entity.Currency.Symbol}"
                                  };
 

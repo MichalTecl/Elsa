@@ -26,7 +26,8 @@
                         <td class="divTableCell" data-bind="text:Order.OrderDate"></td>
                         <td class="divTableCell" data-bind="text:Order.Source"></td>
                         <td class="divTableCell" data-bind="text:Order.VariableSymbol; class.warnCell:symbolNotMatch"></td>
-                        <td class="divTableCell" data-bind="text:Order.CustomerName"></td>
+                        <td class="divTableCell" data-bind="customerName:Order.CustomerName; customerEmail:Order.CustomerEmail" fill-by="/UI/Controls/Common/CustomerView/Customer.html">
+                        </td>
                         <td class="divTableCell" data-bind="text:Order.Price; class.warnCell:priceNotMatch"></td>
                         <td class="divTableCell"></td>
                     </tr>

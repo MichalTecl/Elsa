@@ -1,5 +1,5 @@
 ﻿<div id="customerViewPanel">
-    <div id="content">
+    <div id="content" >
         <div class="customerDialogHead">
             <a class="customerMail" data-bind="text:Email;href:mailto"></a>
             <div class="totalSpent">
@@ -30,19 +30,33 @@
 <script>    
     lt.element("customerViewPanel").withModel("app.customers.vm.selectedCustomer").attach(function(customerItems, customerItemTemplate, content) {
 
+        console.log("CustomerViewPanel instantiated");
+
         var self = this;
 
+        var windowClickEvent = function() {
+
+            if (app && app.customers && app.customers.vm && app.customers.vm.selectedCustomer) {
+                app.customers.vm.cancelCustomerSelection();
+            }
+        };
+
         this.bind(function(selectedCustomer) {
-            
+        
+            console.log("selectedCustomer change received");
+
             if (!!selectedCustomer) {
                 self.style.display = 'block';
                 selectedCustomer.mailto = 'mailto:' + selectedCustomer.Email;
                 
                 var position = app.customers.vm.customerDialogPosition;
-                self.style.top = position.y + "px";
+                //self.style.top = position.y + "px";
+
+                window.addEventListener("click", windowClickEvent);
 
             } else {
                 self.style.display = 'none';
+                window.removeEventListener("click", windowClickEvent);
                 return;
             }
 
@@ -55,6 +69,6 @@
             lt.generate(customerItems, customerItemTemplate, selectedCustomer.Items);
 
         }).selectedCustomerCanBeNull().selectedCustomerToGlobal("app.customers.vm.selectedCustomer");
-
+        
     });
 </script>

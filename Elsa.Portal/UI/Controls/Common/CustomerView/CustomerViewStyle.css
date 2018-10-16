@@ -16,12 +16,13 @@ img.customerPropsIcon {
 }
 
 #customerViewPanel {
-    position: absolute;
     width: 400px;
     min-height: 100px;
-    top: 300px;    
-    left:100px;
     z-index: 9999;
+    position:fixed;    
+    left:50%;
+    margin-left:-200px;
+    top: 10%;    
     background-color: white;
     border-radius:4px;
     border: 1px solid rgba(0, 0, 0, 0.3);
@@ -98,10 +99,12 @@ img.customerPropsIcon {
     background-color:#999910;
     max-height: 50px;
     overflow-y:hidden;
-}
+    transition: max-height 0.5s ease-in-out;
+
+ }
 
 .messageItemTemplate:hover {
-    max-height:unset;
+    max-height:1000px;
 }
 
 .messageItemTemplate.customerMessage {

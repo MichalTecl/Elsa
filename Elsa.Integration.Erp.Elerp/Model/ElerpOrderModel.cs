@@ -143,6 +143,8 @@ namespace Elsa.Integration.Erp.Elerp.Model
         [JsonIgnore]
         public IEnumerable<IErpOrderItemModel> LineItems => Items;
 
+        public string DiscountsText { get; set; }
+
         [JsonIgnore]
         public DateTime Dt
         {

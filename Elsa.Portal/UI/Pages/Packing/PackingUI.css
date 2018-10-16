@@ -58,8 +58,9 @@
 }
 
 
-#orderOverviewPanel #lblCustomerName {
+#orderOverviewPanel #lblCustomer {
     margin-left:20px;
+    color:#343434;
 }
 
 #orderOverviewPanel #lblPrice {
@@ -87,6 +88,20 @@
 .noteBody {
     font-size:0.9em;
 }
+
+.orderDiscountsPanel {
+    margin-top:16px; 
+    display:flex;   
+}
+
+.discountTitle {
+    font-weight:bold;
+}
+
+.discountText{    
+    margin-left:4px;
+}
+
 
 #orderItemsContainer {
     border:1px solid #cccccc;

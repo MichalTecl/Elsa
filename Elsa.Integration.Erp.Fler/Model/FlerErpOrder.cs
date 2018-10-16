@@ -123,7 +123,9 @@ namespace Elsa.Integration.Erp.Fler.Model
         }
 
         public IEnumerable<IErpOrderItemModel> LineItems => m_items;
-        
+
+        public string DiscountsText { get; set; }
+
         [JsonIgnore]
         public string OrderHash
         {
