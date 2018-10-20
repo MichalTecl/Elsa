@@ -8,6 +8,10 @@ lanta.Extensions.defaultErrorHandler = lanta.Extensions.defaultErrorHandler || f
     alert(error.message || error);
 };
 
+window.onbeforeunload = function() {
+    lanta.Extensions.defaultErrorHandler = function(e) {};
+};
+
 lanta.CoreOps.defaultCustomArgumentFactory = function (element, argumentName) {
     throw new Error("Cannot find element by \"" + argumentName + "\" inside of " + element);
 };

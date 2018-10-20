@@ -49,7 +49,7 @@
   <ItemGroup>
     <Compile Include="Automation\IJobSchedule.cs" />
     <Compile Include="Automation\IScheduledJob.cs" />
-    <Compile Include="Commerce\IDirectSaleChannel.cs" />
+    <Compile Include="Commerce\IDirectSaleEvent.cs" />
     <Compile Include="Commerce\IOrderItem.cs" />
     <Compile Include="Commerce\IOrderStatus.cs" />
     <Compile Include="Commerce\IProduct.cs" />
@@ -79,7 +79,10 @@
     <Compile Include="Inventory\IMaterial.cs" />
     <Compile Include="Inventory\IMaterialComposition.cs" />
     <Compile Include="Inventory\IMaterialCompositionBase.cs" />
+    <Compile Include="Inventory\IMaterialStockEvent.cs" />
     <Compile Include="Inventory\IMaterialUnit.cs" />
+    <Compile Include="Inventory\IStockEventBase.cs" />
+    <Compile Include="Inventory\IStockLevelSnapshot.cs" />
     <Compile Include="Inventory\IUnitConversion.cs" />
     <Compile Include="Inventory\IVirtualProduct.cs" />
     <Compile Include="Inventory\IVirtualProductMaterial.cs" />

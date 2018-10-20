@@ -17,14 +17,30 @@ lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager ||
     var queue = [];
     var timer = null;
 
+    var tickTimeout = 30;
+
     var tick = function() {
 
+        var timeoutProlonged = false;
+
+        if (queue.length > 500) {
+            tickTimeout = 100;
+            timeoutProlonged = true;
+        } else {
+            tickTimeout = 30;
+        }
+        
         var startTime = new Date();
 
         while (queue.length > 0) {
             
-            if ((new Date() - startTime) > 30) {
-                return;
+            if ((new Date() - startTime) > tickTimeout) {
+                if (!timeoutProlonged) {
+                    tickTimeout = 100;
+                    timeoutProlonged = true;
+                } else {
+                    return;
+                }
             }
 
             var current = queue.shift();
@@ -95,6 +111,9 @@ lanta.BindingCore.NotificationManager = lanta.BindingCore.NotificationManager ||
     };
 
     self.enqueueNotification = function (name) {
+        if (queue.length > 0) {
+            queue.splice(0, queue.length);
+        }
         enqueue(window.document, name);
     };
 

@@ -108,6 +108,8 @@
     <Compile Include="VirtualProducts\Model\IExtendedMaterialModel.cs" />
     <Compile Include="VirtualProducts\Model\MaterialEntry.cs" />
     <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
+    <Compile Include="Warehouse\Impl\WarehouseRepository.cs" />
+    <Compile Include="Warehouse\IWarehouseRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\" />

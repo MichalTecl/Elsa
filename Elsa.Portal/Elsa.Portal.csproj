@@ -109,11 +109,14 @@
     <Content Include="Home.html" />
     <Content Include="Script\Apps\Crm\Customers.VM.js" />
     <Content Include="Script\Apps\Inventory\VirtualProducts\VirtualProductsVM.js" />
+    <Content Include="Script\Apps\Inventory\WarehouseActions\WarehouseActions.VM.js" />
     <Content Include="Script\Apps\Jobs\ScheduledJobs.VM.js" />
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
     <Content Include="Script\Apps\Packing\OrdersPacking.VM.js" />
     <Content Include="Script\Lanta\AttributeBinding.js" />
+    <Content Include="UI\Controls\Common\Autosuggest.css" />
+    <Content Include="UI\Controls\Common\AutoSuggest.js" />
     <Content Include="UI\Controls\Common\BusyOverlay.html" />
     <Content Include="UI\Controls\Common\CustomerView\ajax-loader.gif" />
     <Content Include="UI\Controls\Common\CustomerView\Customer.html" />
@@ -127,8 +130,10 @@
     <Content Include="UI\Controls\Inventory\MaterialsEditor.html" />
     <Content Include="UI\Controls\Inventory\TaggingEditor.html" />
     <Content Include="UI\Controls\Inventory\VirtualProducts.html" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\FillWarehouse.html" />
     <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />
     <Content Include="UI\Pages\Inventory\VpEditorStyle.css" />
+    <Content Include="UI\Pages\Inventory\WhEvents.html" />
     <Content Include="UI\Pages\Packing\OrdersPacking.html" />
     <Content Include="UI\Pages\Packing\PackingUI.css" />
     <Content Include="UI\Pages\PaymentPairing.html" />
@@ -169,6 +174,7 @@
     <Content Include="UI\Widgets\Orders\OrdersOverviewWidget.html" />
     <Content Include="UI\Widgets\User\UserWidget.html" />
     <Content Include="UI\Widgets\User\UserWidget.js" />
+    <Content Include="UI\Widgets\Warehouse\WarehouseWidget.html" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

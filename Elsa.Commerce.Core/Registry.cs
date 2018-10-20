@@ -3,6 +3,8 @@ using Elsa.Commerce.Core.Impl;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
+using Elsa.Commerce.Core.Warehouse;
+using Elsa.Commerce.Core.Warehouse.Impl;
 
 using Robowire;
 
@@ -31,6 +33,7 @@ namespace Elsa.Commerce.Core
             setup.For<IKitProductRepository>().Use<KitProductRepository>();
             setup.For<ICustomerRepository>().Use<CustomerRepository>();
             setup.For<IUserRepository>().Use<UserRepository>();
+            setup.For<IWarehouseRepository>().Use<WarehouseRepository>();
         }
     }
 }

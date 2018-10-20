@@ -210,6 +210,11 @@ namespace Elsa.Apps.Inventory
             return saved;
         }
 
+        public IEnumerable<string> GetAllMaterialNames()
+        {
+            return m_materialRepository.GetAllMaterials().Select(m => m.Name);
+        }
+
         public void DeleteMaterial(int id)
         {
             m_materialRepository.DeleteMaterial(id);

@@ -50,8 +50,10 @@
     <Compile Include="Model\MaterialInfo.cs" />
     <Compile Include="Model\VirtualProductEditRequestModel.cs" />
     <Compile Include="Model\VirtualProductViewModel.cs" />
+    <Compile Include="Model\WarehouseFillRequest.cs" />
     <Compile Include="VirtualProductsController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WarehouseActionsController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.Common.Expressions\Robowire.Common.Expressions.csproj">
