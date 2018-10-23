@@ -72,6 +72,11 @@ namespace Elsa.Integration.Erp.Elerp
             yield break;
         }
 
+        public string GetPackingReferenceNumber(IPurchaseOrder po)
+        {
+            return po.VarSymbol;
+        }
+
         private IEnumerable<ElerpOrderModel> GetAllOrders()
         {
             foreach (var filePath in Directory.GetFiles(m_config.DataDir))

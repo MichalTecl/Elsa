@@ -10,6 +10,7 @@ using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
+using Elsa.Core.Entities.Commerce.Inventory;
 
 using Robowire.RoboApi;
 
@@ -31,7 +32,7 @@ namespace Elsa.Apps.Inventory
             m_warehouseRepository = warehouseRepository;
         }
 
-        public void SaveWarehouseFillEvent(WarehouseFillRequest request)
+        public MaterialStockEventViewModel SaveWarehouseFillEvent(WarehouseFillRequest request)
         {
             var unit = m_unitRepository.GetUnitBySymbol(request.UnitName);
             if (unit == null)
@@ -45,7 +46,18 @@ namespace Elsa.Apps.Inventory
                 throw new InvalidOperationException($"Neznamy material '{request.MaterialName}'");
             }
 
-            m_warehouseRepository.AddMaterialStockEvent(material.Adaptee, request.Amount, unit, request.Note);
+            var entity = m_warehouseRepository.AddMaterialStockEvent(material.Adaptee, request.Amount, unit, request.Note);
+            return new MaterialStockEventViewModel(entity);
+        }
+
+        public IEnumerable<MaterialStockEventViewModel> GetMaterialStockEvents(long? lastSeenTime)
+        {
+            return m_warehouseRepository.GetStockEvents(lastSeenTime).Select(m => new MaterialStockEventViewModel(m));
+        }
+
+        public IEnumerable<StockSnapshotViewModel> GetManualSnapshots()
+        {
+            return m_warehouseRepository.GetManualSnapshots(null).Select(s => new StockSnapshotViewModel(s));
         }
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Shipment;
 using Elsa.Common.Communication;
 using Elsa.Common.Logging;
@@ -17,6 +18,8 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
     public class ZasilkovnaClient : IShipmentProvider
     {
         private readonly WebFormsClient m_formsClient = new WebFormsClient();
+
+        private readonly IErpClientFactory m_erpClientFactory;
 
         public static readonly string[] ZasilkovnaColIndex = new[] {  "Vyhrazeno",
                                                                         "Číslo objednávky",
@@ -44,10 +47,11 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
         private readonly ILog m_log;
         private readonly ZasilkovnaClientConfig m_config;
 
-        public ZasilkovnaClient(ILog log, ZasilkovnaClientConfig config)
+        public ZasilkovnaClient(ILog log, ZasilkovnaClientConfig config, IErpClientFactory erpClientFactory)
         {
             m_log = log;
             m_config = config;
+            m_erpClientFactory = erpClientFactory;
         }
 
         public byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders)
@@ -95,8 +99,16 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             pobockaId = GetBranches().GetPobockaId(shipmentTitle);
                         }
 
+                        if (order.ErpId == null)
+                        {
+                            throw new InvalidOperationException("Unexpected order without Erp");
+                        }
+
+                        var erpClient = m_erpClientFactory.GetErpClient(order.ErpId.Value);
+                        var trackingNumber = erpClient.GetPackingReferenceNumber(order);
+
                         generator.CellOpt(null) //1
-                            .CellMan(order.PreInvoiceId) //2
+                            .CellMan(trackingNumber) //2
                             .CellMan(order.DeliveryAddress?.FirstName, order.InvoiceAddress?.FirstName) //3
                             .CellMan(order.DeliveryAddress?.LastName, order.InvoiceAddress?.LastName) //4
                             .CellOpt(

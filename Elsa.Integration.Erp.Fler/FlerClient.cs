@@ -96,5 +96,10 @@ namespace Elsa.Integration.Erp.Fler
         {
             yield break;
         }
+
+        public string GetPackingReferenceNumber(IPurchaseOrder po)
+        {
+            return po.VarSymbol;
+        }
     }
 }

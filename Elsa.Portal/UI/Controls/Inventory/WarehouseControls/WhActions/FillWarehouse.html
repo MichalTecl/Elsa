@@ -14,10 +14,21 @@
     <div class="stackRight">
         <button event-bind="click:onSaveClick"></button>
     </div>
+    
+    <div id="eventsHistory">
+        <div id="eventTemplate">
+            <div class="eventDt" data-bind="text:Dt"></div>
+            <div class="eventAuthor" data-bind="text:Author"></div>
+            <div class="eventContent" data-bind="text:Content"></div>
+            <div class="eventNote" data-bind="text:Note"></div>
+        </div>
+    </div>
+    
+    <button id="butLoadOlder" style="display:none" event-bind="click:onLoadOlderClick">Starší</button>
 </div>
 
 <script>
-    lt.element("fillWh").attach(function(materialName, volume, unit, description, autosug) {
+    lt.element("fillWh").withModel("app.warehouseActions.vm").attach(function(materialName, volume, unit, description, autosug, eventsHistory, eventTemplate, butLoadOlder) {
         
         app.ui.autosuggest(autosug, app.warehouseActions.vm.searchMaterialNames);
 
@@ -40,6 +51,18 @@
                 unit.value,
                 description.value,
                 resetForm);
+        };
+
+        this.bind(function(materialStockEvents) {
+            lt.generate(eventsHistory, eventTemplate, materialStockEvents, function (e) { return e.Id; });
+
+            if (materialStockEvents && materialStockEvents.length > 0) {
+                butLoadOlder.style.display = 'block';
+            }
+        });
+
+        this.onLoadOlderClick = function() {
+            app.warehouseActions.vm.loadMaterialStockEvents();
         };
     });
 </script>

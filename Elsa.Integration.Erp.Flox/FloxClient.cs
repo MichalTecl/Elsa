@@ -190,6 +190,11 @@ namespace Elsa.Integration.Erp.Flox
             return result;
         }
 
+        public string GetPackingReferenceNumber(IPurchaseOrder po)
+        {
+            return po.VarSymbol;
+        }
+
         private void GenerateInvoice(string orderNum)
         {
             EnsureSession();
@@ -204,7 +209,7 @@ namespace Elsa.Integration.Erp.Flox
                 m_log.Error($"Generovani faktury selhalo. Request={url}, Response={result.OriginalMessage}");
                 throw new Exception(result.OriginalMessage);
             }
-
+            
             m_log.Info($"Generovani fatktury OK OrderNum={orderNum}");
         }
 

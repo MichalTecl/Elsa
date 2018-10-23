@@ -21,14 +21,16 @@ namespace Elsa.App.OrdersPacking
         private readonly IShipmentProvider m_shipmentProvider;
         private readonly IOrdersFacade m_ordersFacade;
         private readonly IKitProductRepository m_kitProductRepository;
+        private readonly IErpClientFactory m_erpClientFactory;
         
-        public PackingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IShipmentProvider shipmentProvider, IOrdersFacade ordersFacade, IKitProductRepository kitProductRepository)
+        public PackingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IShipmentProvider shipmentProvider, IOrdersFacade ordersFacade, IKitProductRepository kitProductRepository, IErpClientFactory erpClientFactory)
             : base(webSession, log)
         {
             m_orderRepository = orderRepository;
             m_shipmentProvider = shipmentProvider;
             m_ordersFacade = ordersFacade;
             m_kitProductRepository = kitProductRepository;
+            m_erpClientFactory = erpClientFactory;
         }
 
         public PackingOrderModel FindOrder(string number)
@@ -47,10 +49,10 @@ namespace Elsa.App.OrdersPacking
                     DateTime.Now.AddDays(-30),
                     DateTime.Now.AddDays(1)).ToList();
 
-            var filtered = paid.Where(o => (o.PreInvoiceId?.EndsWith(number) ?? false) || (o.PreInvoiceId?.EndsWith(number) ?? false)).ToList();
+            var filtered = paid.Where(o => GetTrackingNumber(o).EndsWith(number)).ToList();
             if (filtered.Count > 1)
             {
-                throw new Exception("Objednávku nelze jednoznačně určit, použijte celé číslo objednávky nebo trasovací číslo Zásilkovny");
+                throw new Exception("Objednávku nelze jednoznačně určit, použijte celé číslo nebo trasovací číslo Zásilkovny");
             }
 
             if (filtered.Count == 0)
@@ -167,6 +169,17 @@ namespace Elsa.App.OrdersPacking
             return orderModel;
         }
 
+        private string GetTrackingNumber(IPurchaseOrder order)
+        {
+            if (order.ErpId == null)
+            {
+                throw new InvalidOperationException($"Neocekavany stav objednavky '{order.OrderNumber}' - objednavka nema prirazeny ERP system");
+            }
+
+            var erpClient = m_erpClientFactory.GetErpClient(order.ErpId.Value);
+
+            return erpClient.GetPackingReferenceNumber(order);
+        }
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -132,6 +133,11 @@ namespace Elsa.Common.Utils
             }
 
             return inp;
+        }
+
+        public static string FormatDateTime(DateTime dt)
+        {
+            return dt.ToString("dd.MM.yy HH:mm");
         }
     }
 }
