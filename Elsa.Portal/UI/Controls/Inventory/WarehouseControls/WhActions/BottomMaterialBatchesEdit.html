@@ -37,13 +37,13 @@
                     <div class="editCell">
                         <div class="caption">Materiál</div>
                         <div class="inputGroup">
-                            <div class="autocomplete">
+                            <div class="autocomplete" lt-name="materialAutocompleteContainer">
                                 <input lt-name="material" data-bind="value:MaterialName"/>
                             </div>
 
                             <input lt-name="amount" data-bind="value:Volume"/>
 
-                            <div class="autocomplete">
+                            <div class="autocomplete" lt-name="materialUnitAutocompleteContainer">
                                 <input lt-name="unit" data-bind="value:UnitName"/>
                             </div>
                         </div>
@@ -81,10 +81,25 @@
 </div>
 <script>
     lt.element("batchesEdit").withModel("app.warehouseActions.vm").attach(function(batchesList, batchTemplate) {
+        
+        var batchItemController = function (materialAutocompleteContainer, materialUnitAutocompleteContainer, material) {
+            
+            var setupAutosuggest = function() {
+                app.ui.autosuggest(materialAutocompleteContainer, app.warehouseActions.vm.searchMaterialNames);
+                app.ui.autosuggest(materialUnitAutocompleteContainer,
+                    app.warehouseActions.vm.searchMaterialUnits,
+                    function() {
+                        return material.value;
+                    });
+            };
+
+            setTimeout(setupAutosuggest, 0);
+        };
+
 
         this.bind(function(bottomMaterialBatches) {
 
-            lt.generate(batchesList, batchTemplate, bottomMaterialBatches, function(b) { return b.Id; });
+            lt.generate(batchesList, batchTemplate, bottomMaterialBatches, function(b) { return b.Id; }, batchItemController);
 
         });
 
@@ -100,8 +115,33 @@
             app.warehouseActions.vm.createBottomMaterialBatch();
         };
 
+        var isEmpty = function(s) {
+            return (!s || s.length < 1);
+        };
+
         this.saveEdit = function(model, batchNr, material, amount, unit, dt, price) {
-            ;
+            batchNr = batchNr || "";
+
+            if (isEmpty(material)) {
+                throw new Error("Název materiálu nesmí být prázdný");
+            }
+
+            if (isEmpty(amount)) {
+                throw new Error("Množství nesmí být prázdné");
+            }
+
+            if (isEmpty(unit)) {
+                throw new Error("Měrná jednotka musí být vyplněna");
+            }
+
+            model.BatchNumber = batchNr;
+            model.MaterialName = material;
+            model.Volume = parseFloat(amount);
+            model.UnitName = unit;
+            model.DisplayDt = dt;
+            model.Price = parseFloat(price);
+
+            app.warehouseActions.vm.saveBottomMaterialBatch(model);
         };
     });
 </script>

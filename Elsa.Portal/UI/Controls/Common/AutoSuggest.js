@@ -1,6 +1,6 @@
 ﻿var app = app || {};
 app.ui = app.ui || {};
-app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource) {
+app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, argumentFactory) {
 
     if (!window["autosuggestStlyeLoaded"]) {
         window["autosuggestStyleLoaded"] = true;
@@ -37,7 +37,12 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource) {
         this.parentNode.appendChild(a);
         /*for each item in the array...*/
 
-        itemsSource(val,
+        var argument = null;
+        if (argumentFactory) {
+            argument = argumentFactory();
+        }
+
+        itemsSource(val, 
             function(arr) {
                 for (i = 0; i < arr.length; i++) {
                     /*check if the item starts with the same letters as the text field value:*/
@@ -61,7 +66,7 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource) {
                         a.appendChild(b);
                     }
                 }
-            });
+            }, argument);
     });
 
 

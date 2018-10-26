@@ -11,6 +11,7 @@ using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 
 using Robowire.RoboApi;
@@ -56,6 +57,34 @@ namespace Elsa.Apps.Inventory
             while ((to - from).TotalDays < 365);
 
             return batches;
+        }
+
+        public MaterialBatchViewModel SaveBottomMaterialBatch(MaterialBatchViewModel model)
+        {
+            var material = m_materialRepository.GetMaterialByName(model.MaterialName);
+            if (material == null)
+            {
+                throw new InvalidOperationException($"Neznámý název materiálu '{model.MaterialName}'");
+            }
+
+            var unit = m_unitRepository.GetUnitBySymbol(model.UnitName);
+            if (unit == null)
+            {
+                throw new InvalidOperationException($"Neznámý název měrné jednotky '{model.UnitName}'");
+            }
+
+            var received = "AUTO".Equals(model.DisplayDt, StringComparison.InvariantCultureIgnoreCase) ? DateTime.Now : StringUtil.ParseDateTime(model.DisplayDt);
+
+            var result = m_batchRepository.SaveMaterialBatch(
+                model.Id,
+                material.Adaptee,
+                model.Volume,
+                unit,
+                model.BatchNumber,
+                received,
+                model.Price);
+
+            return new MaterialBatchViewModel(result.Batch);
         }
     }
 }

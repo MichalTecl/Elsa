@@ -18,13 +18,15 @@ namespace Elsa.Commerce.Core.Units
         private readonly IDatabase m_database;
         private readonly IPerProjectDbCache m_cache;
         private readonly IServiceLocator m_serviceLocator;
+        private readonly IUnitRepository m_unitRepository;
 
-        public UnitConversionHelper(IPerProjectDbCache cache, IServiceLocator serviceLocator, IDatabase database, ISession session)
+        public UnitConversionHelper(IPerProjectDbCache cache, IServiceLocator serviceLocator, IDatabase database, ISession session, IUnitRepository unitRepository)
         {
             m_cache = cache;
             m_serviceLocator = serviceLocator;
             m_database = database;
             m_session = session;
+            m_unitRepository = unitRepository;
         }
 
         public decimal ConvertAmount(int sourceUnitId, int targetUnitId, decimal sourceAmount)
@@ -49,6 +51,27 @@ namespace Elsa.Commerce.Core.Units
             return unitId1 == unitId2
                 || (   GetAllConversions().Any(c => c.SourceUnitId == unitId1 && c.TargetUnitId == unitId2)
                     && GetAllConversions().Any(c => c.SourceUnitId == unitId2 && c.TargetUnitId == unitId1));
+        }
+
+        public IEnumerable<IMaterialUnit> GetCompatibleUnits(int sourceUnitId)
+        {
+            return m_cache.ReadThrough($"compatibleUnits_{sourceUnitId}",
+                () =>
+                    {
+                        var result = new List<IMaterialUnit>();
+                        foreach (var conversion in m_unitRepository.GetAllUnits())
+                        {
+                            if (AreCompatible(sourceUnitId, conversion.Id))
+                            {
+                                if (result.All(i => i.Id != conversion.Id))
+                                {
+                                    result.Add(conversion);
+                                }
+                            }
+                        }
+
+                        return result;
+                    });
         }
 
         private ConvertorInstance GetConvertor(int sourceUnit, int targetUnit)

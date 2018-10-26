@@ -6,6 +6,8 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
     var allMaterialNames = null;
 
+    var materialUnits = null;
+
     var materialCallbacks = [];
 
     self.canLoadOlderBottomMaterialBatches = false;
@@ -61,11 +63,29 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
         materialCallbacks.push(callback);
     };
-    
+
+    self.searchMaterialUnits = function(query, callback, materialName) {
+        callback(materialUnits[materialName] || []);
+    };
+
+    self.saveBottomMaterialBatch = function(model) {
+        lt.api("/warehouseActions/saveBottomMaterialBatch").body(model).post(function(entity) {
+            receiveBottomMaterialBatch(entity);
+            sortBottomMaterialBatches();
+        });
+    };
+
     var loadMaterialNames = function() {
-        lt.api("/virtualProducts/getAllMaterialNames")
-            .get(function(names) {
-                allMaterialNames = names;
+        lt.api("/virtualProducts/GetAllMaterialsWithCompatibleUnits")
+            .get(function (units) {
+                materialUnits = units;
+                allMaterialNames = [];
+
+                for (var materialName in units) {
+                    if (units.hasOwnProperty(materialName)) {
+                        allMaterialNames.push(materialName);
+                    }
+                }
 
                 while (materialCallbacks.length > 0) {
                     var callback = materialCallbacks.shift();

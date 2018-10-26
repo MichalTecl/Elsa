@@ -5,6 +5,7 @@ using System.Text;
 
 using Elsa.Apps.Inventory.Model;
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
@@ -30,8 +31,9 @@ namespace Elsa.Apps.Inventory
         private readonly IMaterialRepository m_materialRepository;
         private readonly IVirtualProductFacade m_virtualProductFacade;
         private readonly IMaterialFacade m_materialFacade;
+        private readonly IUnitConversionHelper m_conversionHelper;
 
-        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade)
+        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade, IUnitConversionHelper conversionHelper)
             : base(webSession, log)
         {
             m_virtualProductRepository = virtualProductRepository;
@@ -40,6 +42,7 @@ namespace Elsa.Apps.Inventory
             m_materialRepository = materialRepository;
             m_virtualProductFacade = virtualProductFacade;
             m_materialFacade = materialFacade;
+            m_conversionHelper = conversionHelper;
         }
 
         public IEnumerable<VirtualProductViewModel> GetVirtualProducts(string searchQuery)
@@ -213,6 +216,20 @@ namespace Elsa.Apps.Inventory
         public IEnumerable<string> GetAllMaterialNames()
         {
             return m_materialRepository.GetAllMaterials().Select(m => m.Name);
+        }
+
+        public Dictionary<string, List<string>> GetAllMaterialsWithCompatibleUnits()
+        {
+            var materials = m_materialRepository.GetAllMaterials().ToList();
+
+            var result = new Dictionary<string, List<string>>(materials.Count);
+            foreach (var m in materials)
+            {
+                var lst = m_conversionHelper.GetCompatibleUnits(m.Adaptee.NominalUnitId).Select(u => u.Symbol).ToList();
+                result[m.Name] = lst;
+            }
+
+            return result;
         }
 
         public void DeleteMaterial(int id)

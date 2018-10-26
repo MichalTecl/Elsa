@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 namespace Elsa.Commerce.Core.Warehouse
@@ -17,5 +18,14 @@ namespace Elsa.Commerce.Core.Warehouse
             DateTime to,
             bool excludeCompositions,
             int? materialId);
+
+        MaterialBatchComponent SaveMaterialBatch(
+            int id,
+            IMaterial material,
+            decimal amount,
+            IMaterialUnit unit,
+            string batchNr,
+            DateTime receiveDt,
+            decimal price);
     }
 }

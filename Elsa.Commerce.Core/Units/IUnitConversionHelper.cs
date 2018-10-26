@@ -1,4 +1,6 @@
-﻿using Elsa.Common;
+﻿using System.Collections.Generic;
+
+using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
 
 namespace Elsa.Commerce.Core.Units
@@ -8,5 +10,7 @@ namespace Elsa.Commerce.Core.Units
         IMaterialUnit GetPrefferedUnit(IMaterialUnit a, IMaterialUnit b);
 
         bool AreCompatible(int unitId1, int unitId2);
+
+        IEnumerable<IMaterialUnit> GetCompatibleUnits(int sourceUnitId);
     }
 }
