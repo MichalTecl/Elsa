@@ -108,8 +108,9 @@
     <Compile Include="VirtualProducts\Model\IExtendedMaterialModel.cs" />
     <Compile Include="VirtualProducts\Model\MaterialEntry.cs" />
     <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
-    <Compile Include="Warehouse\Impl\WarehouseRepository.cs" />
-    <Compile Include="Warehouse\IWarehouseRepository.cs" />
+    <Compile Include="Warehouse\IMaterialBatchRepository.cs" />
+    <Compile Include="Warehouse\Impl\MaterialBatchRepository.cs" />
+    <Compile Include="Warehouse\MaterialBatchComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Configuration\" />

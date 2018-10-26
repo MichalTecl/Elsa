@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -27,6 +28,16 @@ namespace Elsa.Common.Caching
         {
             CacheEntry dummy;
             s_cache.TryRemove(key, out dummy);
+        }
+
+        public IEnumerable<string> GetAllKeys()
+        {
+            return s_cache.Keys;
+        }
+
+        public void Clear()
+        {
+            s_cache.Clear();
         }
 
         private sealed class CacheEntry

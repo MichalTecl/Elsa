@@ -30,7 +30,7 @@ namespace Elsa.Apps.Inventory
         private readonly IMaterialRepository m_materialRepository;
         private readonly IVirtualProductFacade m_virtualProductFacade;
         private readonly IMaterialFacade m_materialFacade;
-        
+
         public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade)
             : base(webSession, log)
         {
@@ -58,7 +58,7 @@ namespace Elsa.Apps.Inventory
                         continue;
                     }
                 }
-                
+
                 yield return MapVirtualProductToVm(prod);
             }
         }
@@ -89,7 +89,7 @@ namespace Elsa.Apps.Inventory
 
             var queryParts =
                 searchQuery.Split(' ').Select(i => StringUtil.NormalizeSearchText(10, new[] { i })).ToArray();
-            
+
             return allMappables.Where(i => queryParts.All(keyword => i.SearchText.Contains(keyword))).OrderBy(i => i.ViewText);
         }
 
@@ -255,7 +255,7 @@ namespace Elsa.Apps.Inventory
                         var vpvm = new VirtualProductViewModel(virtualProduct);
 
                         var virtualProductComponents = m_materialRepository.GetMaterialsByVirtualProductId(vpvm.VirtualProductId).ToList();
-                        
+
                         var materialsSb = new StringBuilder();
 
                         foreach (var materialComponent in virtualProductComponents)
@@ -271,7 +271,7 @@ namespace Elsa.Apps.Inventory
 
             return result;
         }
-        
+
         private string GetMappablesCacheKey()
         {
             return string.Format(c_mappablesCacheKey, WebSession.Project.Id);

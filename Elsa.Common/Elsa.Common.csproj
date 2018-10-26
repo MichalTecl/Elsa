@@ -78,6 +78,9 @@
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="PasswordHashHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserRightsDefinitionAttribute.cs" />
+    <Compile Include="UserRightsInfrastructure\UserRightDefinitionCollector.cs" />
+    <Compile Include="UserRightsInfrastructure\UserRightInfo.cs" />
     <Compile Include="Utils\CsvGenerator.cs" />
     <Compile Include="Utils\DateUtil.cs" />
     <Compile Include="Utils\StringUtil.cs" />

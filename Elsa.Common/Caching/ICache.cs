@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Elsa.Common.Caching
 {
@@ -7,5 +8,9 @@ namespace Elsa.Common.Caching
         T ReadThrough<T>(string key, TimeSpan timeout, Func<T> factory);
 
         void Remove(string key);
+
+        IEnumerable<string> GetAllKeys();
+
+        void Clear();
     }
 }

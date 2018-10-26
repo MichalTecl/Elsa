@@ -75,14 +75,13 @@
     <Compile Include="Integration\IErp.cs" />
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IPaymentSource.cs" />
+    <Compile Include="Inventory\Batches\IMaterialBatchComposition.cs" />
     <Compile Include="Inventory\IMappedToOrderItem.cs" />
     <Compile Include="Inventory\IMaterial.cs" />
+    <Compile Include="Inventory\Batches\IMaterialBatch.cs" />
     <Compile Include="Inventory\IMaterialComposition.cs" />
     <Compile Include="Inventory\IMaterialCompositionBase.cs" />
-    <Compile Include="Inventory\IMaterialStockEvent.cs" />
     <Compile Include="Inventory\IMaterialUnit.cs" />
-    <Compile Include="Inventory\IStockEventBase.cs" />
-    <Compile Include="Inventory\IStockLevelSnapshot.cs" />
     <Compile Include="Inventory\IUnitConversion.cs" />
     <Compile Include="Inventory\IVirtualProduct.cs" />
     <Compile Include="Inventory\IVirtualProductMaterial.cs" />

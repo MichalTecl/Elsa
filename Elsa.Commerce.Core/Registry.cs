@@ -33,7 +33,7 @@ namespace Elsa.Commerce.Core
             setup.For<IKitProductRepository>().Use<KitProductRepository>();
             setup.For<ICustomerRepository>().Use<CustomerRepository>();
             setup.For<IUserRepository>().Use<UserRepository>();
-            setup.For<IWarehouseRepository>().Use<WarehouseRepository>();
+            setup.For<IMaterialBatchRepository>().Use<MaterialBatchRepository>();
         }
     }
 }

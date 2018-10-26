@@ -1,0 +1,107 @@
+﻿<div id="batchesEdit">
+    
+    <button event-bind="click:createNewBatch" class="addBatchBut"><i class="fas fa-plus"></i></button>
+
+    <div id="batchesList">
+
+        <div id="batchTemplate">
+            <div class="batchViewPanel" data-bind="class.hidden:editMode">
+                <div class="batchViewRow stackLeft">
+                    <div class="batchDt" data-bind="text:DisplayDt"></div>
+                    <div class="batchMaterial" data-bind="text:MaterialName"></div>
+                    <div class="batchNumber" data-bind="text:BatchNumber"></div>
+                </div>
+                <div class="batchActions">
+                    <i class="fas fa-edit faButton" event-bind="click:editBatch(Id)"></i>
+                </div>
+                <div class="batchViewDetail">
+                    <div class="batchAuthor" data-bind="text:AuthorName"></div>
+                    <div class="batchVolume" data-bind="text:Volume"></div>
+                    <div class="batchUnit" data-bind="text:UnitName"></div>
+                    <div class="batchPrice" data-bind="text:Price"></div>
+                    <div class="batchCurrency">CZK</div>
+                </div>
+            </div>
+            <div class="batchEditPanel" data-bind="class!.hidden:editMode">
+                <div class="batchEditUi">
+
+                    <!-- Batch Nr -->
+                    <div class="editCell">
+                        <div class="caption">Číslo šarže</div>
+                        <div class="inputGroup">
+                            <input lt-name="batchNr" data-bind="value:BatchNumber"/>
+                        </div>
+                    </div>
+
+                    <!-- Material Amount Unit -->
+                    <div class="editCell">
+                        <div class="caption">Materiál</div>
+                        <div class="inputGroup">
+                            <div class="autocomplete">
+                                <input lt-name="material" data-bind="value:MaterialName"/>
+                            </div>
+
+                            <input lt-name="amount" data-bind="value:Volume"/>
+
+                            <div class="autocomplete">
+                                <input lt-name="unit" data-bind="value:UnitName"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="editCell" data-bind="class.hidden:hideDate">
+                        <div class="caption">Datum</div>
+                        <div class="inputGroup">
+                            <input lt-name="dt" data-bind="value:DisplayDt"/>
+                        </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="editCell">
+                        <div class="caption">Cena</div>
+                        <div class="inputGroup">
+                            <input lt-name="price" data-bind="value:Price"/>
+                            <div >CZK</div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="batchesEditButtons">
+                    <i class="far fa-trash-alt faButton"></i>
+                    <button event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value)"><i class="fas fa-check"></i></button>
+                    <button event-bind="click:cancelBatchEdit"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+<script>
+    lt.element("batchesEdit").withModel("app.warehouseActions.vm").attach(function(batchesList, batchTemplate) {
+
+        this.bind(function(bottomMaterialBatches) {
+
+            lt.generate(batchesList, batchTemplate, bottomMaterialBatches, function(b) { return b.Id; });
+
+        });
+
+        this.editBatch = function(batchId) {
+            app.warehouseActions.vm.setBottomMaterialBatchEditMode(batchId);
+        };
+
+        this.cancelBatchEdit = function() {
+            app.warehouseActions.vm.setBottomMaterialBatchEditMode(null);
+        };
+
+        this.createNewBatch = function() {
+            app.warehouseActions.vm.createBottomMaterialBatch();
+        };
+
+        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price) {
+            ;
+        };
+    });
+</script>

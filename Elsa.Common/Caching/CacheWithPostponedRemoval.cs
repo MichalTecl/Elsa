@@ -24,6 +24,16 @@ namespace Elsa.Common.Caching
             m_keysToRemove.Add(key);
         }
 
+        public IEnumerable<string> GetAllKeys()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Clear()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Dispose()
         {
             foreach (var rek in m_keysToRemove)
