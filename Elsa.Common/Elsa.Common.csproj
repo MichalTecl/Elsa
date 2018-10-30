@@ -54,6 +54,7 @@
     <Compile Include="Caching\IPerProjectDbCache.cs" />
     <Compile Include="Caching\PerProjectDbCache.cs" />
     <Compile Include="CommonRegistry.cs" />
+    <Compile Include="CommonRights.cs" />
     <Compile Include="Communication\WebFormsClient.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -71,6 +72,7 @@
     <Compile Include="FileResult.cs" />
     <Compile Include="ICustomResult.cs" />
     <Compile Include="ISession.cs" />
+    <Compile Include="IStartupJob.cs" />
     <Compile Include="IUnitConvertor.cs" />
     <Compile Include="IWebSession.cs" />
     <Compile Include="Logging\AsyncLogger.cs" />
@@ -79,6 +81,8 @@
     <Compile Include="PasswordHashHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserRightsDefinitionAttribute.cs" />
+    <Compile Include="UserRightsInfrastructure\SyncUserRightsJob.cs" />
+    <Compile Include="UserRightsInfrastructure\UserRight.cs" />
     <Compile Include="UserRightsInfrastructure\UserRightDefinitionCollector.cs" />
     <Compile Include="UserRightsInfrastructure\UserRightInfo.cs" />
     <Compile Include="Utils\CsvGenerator.cs" />

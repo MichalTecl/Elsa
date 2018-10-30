@@ -4,6 +4,7 @@ using System.Web.Routing;
 
 using Elsa.App.Profile;
 using Elsa.Common;
+using Elsa.Common.Logging;
 using Elsa.Users;
 
 using Robowire;
@@ -25,15 +26,47 @@ namespace Elsa.Portal
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional });
 
             Setup.SetupContainer(m_container);
-            
+
             var installer = new RoboApiInstaller();
-            installer.Install(ControllerBuilder.Current, m_container,
+            installer.Install(
+                ControllerBuilder.Current,
+                m_container,
                 (context, locator) =>
                     {
                         var session = locator.Get<IWebSession>();
                         session.Initialize(context);
                     },
-                typeof(ElsaControllerBase).Assembly, typeof(ProfileController).Assembly, typeof(UserController).Assembly);
+                typeof(ElsaControllerBase).Assembly,
+                typeof(ProfileController).Assembly,
+                typeof(UserController).Assembly);
+
+            using (var startupJobsLocator = m_container.GetLocator())
+            {
+                var jobs = startupJobsLocator.GetCollection<IStartupJob>();
+                var logger = startupJobsLocator.Get<ILog>();
+
+                logger.Info("Starting startup jobs");
+                foreach (var job in jobs)
+                {
+                    try
+                    {
+                        logger.Info($"Starting job {job.GetType().Name}");
+
+                        job.Execute();
+
+                        logger.Info($"Job {job.GetType().Name} complete");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error($"StartupJob {job.GetType().Name} failed", ex);
+                        if (job.IsExceptionFatal)
+                        {
+                            throw;
+                        }
+                    }
+                }
+                logger.Info("Startup jobs done");
+            }
         }
 
         protected void Session_Start(object sender, EventArgs e)

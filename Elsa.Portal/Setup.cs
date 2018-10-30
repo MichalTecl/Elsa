@@ -11,6 +11,7 @@ using Elsa.Users;
 
 using Robowire;
 using Elsa.Commerce.Core;
+using Elsa.Common.UserRightsInfrastructure;
 using Elsa.Integration.Erp.Elerp;
 using Elsa.Integration.Erp.Fler;
 using Elsa.Integration.Erp.Flox;
@@ -34,6 +35,8 @@ namespace Elsa.Portal
 
             container.Setup(s => s.For<IWebSession>().Use<UserWebSession>());
             container.Setup(s => s.For<ISession>().Import.FromFactory(l => l.Get<IWebSession>()));
+            container.Setup(s => s.Collect<IStartupJob>());
+            container.Setup(s => s.For<SyncUserRightsJob>().Use<SyncUserRightsJob>());
             container.Setup(
                 s =>
                     {

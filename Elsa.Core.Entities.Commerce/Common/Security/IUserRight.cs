@@ -8,14 +8,13 @@ namespace Elsa.Core.Entities.Commerce.Common.Security
     {
         int Id { get; }
 
-        int? ProjectId { get; set; }
-
-        IProject Project { get; }
-
         [NVarchar(255, false)]
         string Symbol { get; set; }
 
         [NVarchar(-1, false)]
         string Description { get; set; }
+
+        [NVarchar(1024, false)]
+        string FullPath { get; set; }
     }
 }
