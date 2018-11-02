@@ -15,7 +15,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         IEnumerable<MaterialComponent> GetMaterialsByVirtualProductId(int virtualProductId);
 
-        IEnumerable<IExtendedMaterialModel> GetAllMaterials();
+        IEnumerable<IExtendedMaterialModel> GetAllMaterials(int? inventoryId);
 
         void DetachMaterial(int virtualProductId, int materialId);
 
@@ -34,6 +34,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             int amountUnit);
 
         void DeleteMaterial(int id);
+
+        IEnumerable<IMaterialInventory> GetMaterialInventories();
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }

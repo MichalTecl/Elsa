@@ -81,6 +81,7 @@
     <Compile Include="Inventory\Batches\IMaterialBatch.cs" />
     <Compile Include="Inventory\IMaterialComposition.cs" />
     <Compile Include="Inventory\IMaterialCompositionBase.cs" />
+    <Compile Include="Inventory\IMaterialInventory.cs" />
     <Compile Include="Inventory\IMaterialUnit.cs" />
     <Compile Include="Inventory\IUnitConversion.cs" />
     <Compile Include="Inventory\IVirtualProduct.cs" />

@@ -25,5 +25,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         [ForeignKey(nameof(IVirtualProductMaterial.ComponentId))]
         IEnumerable<IVirtualProductMaterial> VirtualProductMaterials { get; }
+
+        int InventoryId { get; set; }
+        IMaterialInventory Inventory { get; }
     }
 }

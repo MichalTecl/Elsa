@@ -8,12 +8,12 @@
         </div>
         <div class="virtualProductsListContainer" >
             <button event-bind="click:createNewVp" class="addVirtualProductBut"><i class="fas fa-plus"></i></button>
-            <div id="vpsList">
+            <div id="vpsList"  class="listContainer">
 
-                <div lt-name="vpItemTemplate" class="vpsContainer">
-                    <div data-bind="class.hidden:editMode" class="virtualProductItemView">
-                        <i class="fas fa-edit faButton"  event-bind="click:editVp(VirtualProductId)"></i>
+                <div lt-name="vpItemTemplate" class="vpsContainer lt-template">
+                    <div data-bind="class.hidden:editMode" class="virtualProductItemView showButtonsOnHover simpleListItem">
                         <div data-bind="text:Name" class="vpsTitle"></div>
+                        <i class="fas fa-edit faButton" event-bind="click:editVp(VirtualProductId)"></i>
                     </div>
                     <div data-bind="class!.hidden:editMode" class="virtualProductEditItem">
                         <i class="fas fa-hashtag"></i>

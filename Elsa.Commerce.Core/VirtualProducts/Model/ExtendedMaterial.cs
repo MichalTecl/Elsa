@@ -20,6 +20,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             Name = adaptee.Name;
             BatchUnit = NominalUnit = adaptee.NominalUnit;
             BatchAmount = NominalAmount = adaptee.NominalAmount;
+            InventoryId = adaptee.InventoryId;
+            InventoryName = adaptee.Inventory?.Name;
         }
 
         public int Id { get; }
@@ -86,6 +88,10 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                 f.Print(target, depthLevelTrim);
             }
         }
+
+        public int InventoryId { get; }
+
+        public string InventoryName { get; }
 
         public void AddComponent(decimal amount, IMaterialUnit unit, IExtendedMaterialModel material)
         {

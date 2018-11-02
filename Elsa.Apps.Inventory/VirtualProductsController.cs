@@ -13,6 +13,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Integration;
+using Elsa.Core.Entities.Commerce.Inventory;
 
 using Newtonsoft.Json;
 
@@ -145,9 +146,9 @@ namespace Elsa.Apps.Inventory
             return GetMappableItems(activeSearchQuery);
         }
 
-        public IEnumerable<MaterialInfo> GetAllMaterials()
+        public IEnumerable<MaterialInfo> GetAllMaterials(int? inventoryId)
         {
-            return m_materialRepository.GetAllMaterials().Select(m => new MaterialInfo(m));
+            return m_materialRepository.GetAllMaterials(inventoryId).Select(m => new MaterialInfo(m));
         }
 
         public VirtualProductViewModel GetVirtualProductById(int id)
@@ -181,9 +182,9 @@ namespace Elsa.Apps.Inventory
             m_materialRepository.CleanCache();
         }
 
-        public IEnumerable<IExtendedMaterialModel> SearchMaterials(string query)
+        public IEnumerable<IExtendedMaterialModel> SearchMaterials(string query, int? inventoryId)
         {
-            var allMats = m_materialRepository.GetAllMaterials();
+            var allMats = m_materialRepository.GetAllMaterials(inventoryId);
 
             var normQuery = StringUtil.NormalizeSearchText(99, query);
 
@@ -215,12 +216,17 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<string> GetAllMaterialNames()
         {
-            return m_materialRepository.GetAllMaterials().Select(m => m.Name);
+            return m_materialRepository.GetAllMaterials(null).Select(m => m.Name);
+        }
+
+        public IEnumerable<IMaterialInventory> GetMaterialInventories()
+        {
+            return m_materialRepository.GetMaterialInventories();
         }
 
         public Dictionary<string, List<string>> GetAllMaterialsWithCompatibleUnits()
         {
-            var materials = m_materialRepository.GetAllMaterials().ToList();
+            var materials = m_materialRepository.GetAllMaterials(null).ToList();
 
             var result = new Dictionary<string, List<string>>(materials.Count);
             foreach (var m in materials)

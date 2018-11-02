@@ -30,14 +30,27 @@ app.ui.TabControl = app.ui.TabControl || function(holder) {
         
         var src = tab.getAttribute("content-src");
 
-        lt.fillBy(contentPanel, src);
+        if (src) {
+            lt.fillBy(contentPanel, src);
+        }
+
+        var callback = tab["lt-onActivated"];
+        if (callback) {
+            callback(tab["lt-data-model"]);
+        }
     };
 
-    this.addTab = function(name, url) {
+    this.addTab = function(name, url, data, onActivated) {
 
         var tabDiv = document.createElement("div");
         tabDiv.setAttribute("class", "tabControlTabHead");
-        tabDiv.setAttribute("content-src", url);
+
+        if (url) {
+            tabDiv.setAttribute("content-src", url);
+        }
+
+        tabDiv["lt-data-model"] = data;
+        tabDiv["lt-onActivated"] = onActivated;
         headersContainer.appendChild(tabDiv);
 
         tabDiv.addEventListener("click", activateTab);

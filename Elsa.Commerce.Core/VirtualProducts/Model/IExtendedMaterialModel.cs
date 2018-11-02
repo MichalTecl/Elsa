@@ -29,5 +29,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         IEnumerable<CompositionViewModel> Flatten();
 
         void Print(StringBuilder target, string depthLevelTrim);
+
+        int InventoryId { get; }
+
+        string InventoryName { get; }
     }
 }

@@ -52,7 +52,6 @@
 
 .virtualProductItemView{
     display:flex;
-    margin-top:10px;    
 }
 
 .addVirtualProductBut {
@@ -192,4 +191,38 @@ div.containsTitleContainer > input {
 
 div.containsTitleContainer > input {
    width:100px;
+}
+
+.addMaterialProductBut {
+    margin-top:8px;
+    margin-bottom:10px;
+}
+
+
+
+.showButtonsOnHover {
+    display:flex;
+}
+
+.showButtonsOnHover > .faButton {
+    display:none;
+}
+
+.showButtonsOnHover:hover > .faButton {
+    display:block;
+    margin-left:5px;     
+}
+
+.simpleListItem {
+    padding-top:4px;
+    padding-bottom:4px;    
+}
+
+.simpleListItem:hover {
+    background-color:#efefff;
+}
+
+.listContainer {
+    margin-top:8px;
+    border-top:1px solid #eeeeef;
 }

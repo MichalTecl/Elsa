@@ -9,6 +9,11 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
     self.selectedVirtualProducts = [];
     self.selectedMaterials = [];
+
+    self.currentMaterialInventory = null;
+
+    var materialInventories = null;
+    var matInventoriesCallbacks = [];
     
     var adjustServerMaterial = function(mat) {
 
@@ -216,8 +221,14 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         });
     };
 
-    self.searchMaterials = function(query) {
-        lt.api("/virtualProducts/searchMaterials").body(query).post(receiveMaterials);
+    self.searchMaterials = function (query) {
+
+        var inventoryId = null;
+        if (self.currentMaterialInventory) {
+            inventoryId = self.currentMaterialInventory.Id;
+        }
+
+        lt.api("/virtualProducts/searchMaterials").body(query).query({ "inventoryId":inventoryId }).post(receiveMaterials);
     };
 
     self.cancelMaterialEdit = function(doNotNotify) {
@@ -290,9 +301,52 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
     };
 
+    self.getMaterialInventories = function(callback) {
+        if (!!materialInventories) {
+            callback(materialInventories);
+            return;
+        }
+
+        matInventoriesCallbacks.push(callback);
+    };
+
+    self.loadMaterialInventories = function() {
+        lt.api("/virtualProducts/getMaterialInventories").get(function(inventories) {
+            materialInventories = inventories;
+
+            while (matInventoriesCallbacks.length > 0) {
+                var callback = matInventoriesCallbacks.shift();
+                callback(materialInventories);
+            }
+        });
+    };
 
     setTimeout(self.searchMaterials, 500);
     setTimeout(self.loadVirtualProducts, 100);
+    setTimeout(self.loadMaterialInventories, 200);
+
+    self.setCurrentMaterialInventory = function(inventoryId) {
+        if (self.currentMaterialInventory && self.currentMaterialInventory.Id === inventoryId) {
+            return;
+        }
+
+        self.getMaterialInventories(function(inventories) {
+            self.currentMaterialInventory = null;
+            for (var i = 0; i < inventories.length; i++) {
+                if (inventories[i].Id === inventoryId) {
+                    self.currentMaterialInventory = inventories[i];
+                    break;
+                }
+            }
+
+            if (!self.currentMaterialInventory) {
+                throw new Error("Unknown MaterialInventory.Id");
+            }
+
+            self.searchMaterials();
+        });
+
+    };
 };
 
 app.virtualProductsEditor.vm = app.virtualProductsEditor.vm || new app.virtualProductsEditor.ViewModel();

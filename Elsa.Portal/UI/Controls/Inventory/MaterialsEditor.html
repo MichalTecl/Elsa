@@ -1,6 +1,6 @@
 ﻿<div class="panel w4" id="materialsEditorPanel">
     <div class="panelContent" id="matsUi">
-        <div id="matsSearch">
+        <div id="matsSearch" style="display:none">
             <div class="searchPanel" style="width:100%">
                 <input type="text" id="tbMatsQuery" />
                 <button event-bind="click:search($tbMatsQuery.value)" class="fa fa-search"></button>
@@ -8,12 +8,12 @@
         </div>
         <div class="materialsListContainer">
             <button event-bind="click:createNewMaterial" class="addMaterialProductBut"><i class="fas fa-plus"></i></button>
-            <div id="materialsList">
+            <div id="materialsList" class="listContainer">
 
-                <div lt-name="materialItemTemplate" class="materialItemContainer">
-                    <div data-bind="class.hidden:editMode" class="materialItemView">
-                        <i class="fas fa-edit faButton" event-bind="click:editMaterial(Id)"></i>
+                <div lt-name="materialItemTemplate" class="materialItemContainer lt-template">
+                    <div data-bind="class.hidden:editMode" class="materialItemView showButtonsOnHover simpleListItem">
                         <div data-bind="text:Name" class="materialTitle"></div>
+                        <i class="fas fa-edit faButton" event-bind="click:editMaterial(Id)"></i>
                     </div>
                     <div data-bind="class!.hidden:editMode" class="materialEditItem">
                         <i class="fas fa-cube"></i>
@@ -90,7 +90,7 @@
             lt.notify(this);
         };
 
-        this.deleteMaterial = function (model) {
+        this.deleteMaterial = function(model) {
             var cfm = confirm("Opravdu vymazat '" + model.Name + "'?");
             if (!cfm) {
                 return;
@@ -98,6 +98,5 @@
 
             app.virtualProductsEditor.vm.deleteMaterial(model.Id);
         };
-       
     });
 </script>
