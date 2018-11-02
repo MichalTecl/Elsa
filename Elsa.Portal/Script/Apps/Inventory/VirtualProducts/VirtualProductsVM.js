@@ -39,6 +39,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
 
         self.selectedMaterials = mats;
+        
     };
 
     var receiveSingleMaterial = function(mat) {
@@ -188,7 +189,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
 
         if (!found) {
-            var newVp = { editMode: true, materials:[] };
+            var newVp = { editMode: true, materials: [] };
             self.selectedVirtualProducts.unshift(newVp);
         }
 
@@ -267,7 +268,13 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
 
         if (!found) {
-            self.selectedMaterials.unshift({ editMode: true, materials: [] });
+
+            var newMat = { editMode: true, materials: [] };
+            if (self.currentMaterialInventory.AllowedUnit) {
+                newMat.nominalAmountText = "1" + self.currentMaterialInventory.AllowedUnit.Symbol;
+            }
+
+            self.selectedMaterials.unshift(newMat);
         }
 
         lt.notify();
@@ -278,6 +285,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             MaterialId: model.Id,
             MaterialName: model.Name,
             NominalAmountText: model.nominalAmountText,
+            MaterialInventoryId: self.currentMaterialInventory.Id,
             Materials: []
         };
 
@@ -286,6 +294,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
 
         lt.api("/virtualProducts/saveMaterial").body(request).post(receiveSingleMaterial);
+        
     };
 
     self.deleteMaterial = function(id) {
@@ -329,6 +338,9 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         if (self.currentMaterialInventory && self.currentMaterialInventory.Id === inventoryId) {
             return;
         }
+
+        self.selectedMaterials = [];
+        lt.notify();
 
         self.getMaterialInventories(function(inventories) {
             self.currentMaterialInventory = null;

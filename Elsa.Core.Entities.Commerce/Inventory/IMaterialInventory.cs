@@ -18,5 +18,12 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         [NVarchar(255, false)]
         string Name { get; set; }
+
+        bool IsManufactured { get; set; }
+
+        bool CanBeConnectedToTag { get; set; }
+
+        int? AllowedUnitId { get; set; }
+        IMaterialUnit AllowedUnit { get; }
     }
 }

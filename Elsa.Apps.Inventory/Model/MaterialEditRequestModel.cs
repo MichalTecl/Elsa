@@ -11,6 +11,8 @@ namespace Elsa.Apps.Inventory.Model
 
         public string NominalAmountText { get; set; }
 
+        public int MaterialInventoryId { get; set; }
+
         public List<VirtualProductEditRequestModel.VpMaterialEditRequestModel> Materials { get; set; }
     }
 }

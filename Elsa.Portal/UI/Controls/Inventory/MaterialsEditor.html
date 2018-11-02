@@ -21,7 +21,9 @@
 
                         <div class="materialEditContainer">
                             <div class="containsTitleContainer containsTitle">
-                                <i>Pro výrobu&nbsp;</i><input required="required" data-bind="value:nominalAmountText" event-bind="change:onNominalAmountTextChanged(VM, this.value)"/><i>&nbsp;je třeba:</i>
+                                <i lt-name="lblNominalLeft"></i>
+                                <input required="required" data-bind="value:nominalAmountText" lt-name="tbNominalAmount" event-bind="change:onNominalAmountTextChanged(VM, this.value)"/>
+                                <i lt-name="lblNominalRight"></i>
                             </div>
                             <div class="materialEditor" lt-name="materialEditPlaceholder"></div>
                         </div>
@@ -45,8 +47,30 @@
 <script>
     lt.element("materialsEditorPanel").withModel("app.virtualProductsEditor.vm").attach(function (materialsList, materialItemTemplate) {
 
-        var materialItemController = function (materialEditPlaceholder) {
+        var materialItemController = function (materialEditPlaceholder, tbNominalAmount, lblNominalLeft, lblNominalRight) {
             app.ui.MaterialList.renderTo(materialEditPlaceholder);
+
+            this.bind(function(currentMaterialInventory) {
+                
+                    if (currentMaterialInventory && currentMaterialInventory.AllowedUnit) {
+                        tbNominalAmount.setAttribute("readonly", "readonly");
+                    } else {
+                        tbNominalAmount.removeAttribute("readonly");
+                    }
+
+                    if (currentMaterialInventory && (!currentMaterialInventory.IsManufactured)) {
+                        materialEditPlaceholder.style.display = 'none';
+                        lblNominalLeft.innerHTML = "Manipulační&nbsp;množství:";
+                        lblNominalRight.innerHTML = "";
+                    } else {
+                        materialEditPlaceholder.style.display = 'block';
+                        lblNominalLeft.innerHTML = "Pro výrobu&nbsp;";
+                        lblNominalRight.innerHTML = "&nbsp;je třeba:";
+                    }
+
+                })
+                .currentMaterialInventoryRelativeToGlobal("app.virtualProductsEditor.vm")
+                .currentMaterialInventoryCanBeNull();
         };
 
         this.bind(function (selectedMaterials) {

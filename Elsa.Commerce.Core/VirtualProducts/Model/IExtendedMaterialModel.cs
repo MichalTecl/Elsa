@@ -33,5 +33,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         int InventoryId { get; }
 
         string InventoryName { get; }
+
+        bool IsManufactured { get; }
+
+        bool CanBeConnectedToTag { get; }
     }
 }

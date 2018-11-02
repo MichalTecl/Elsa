@@ -33,6 +33,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             int? materialId,
             string name,
             string nominalAmountText,
+            int materialInventoryId,
             IEnumerable<string> components)
         {
             name = name.Trim();
@@ -53,7 +54,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     materialId,
                     name,
                     nominalAmountEntry.Amount,
-                    nominalUnit.Id);
+                    nominalUnit.Id,
+                    materialInventoryId);
 
                 var toDelete =
                     material.Components.Where(

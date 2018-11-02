@@ -21,7 +21,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             BatchUnit = NominalUnit = adaptee.NominalUnit;
             BatchAmount = NominalAmount = adaptee.NominalAmount;
             InventoryId = adaptee.InventoryId;
-            InventoryName = adaptee.Inventory?.Name;
+            InventoryName = adaptee.Inventory.Name;
+            IsManufactured = adaptee.Inventory.IsManufactured;
+            CanBeConnectedToTag = adaptee.Inventory.CanBeConnectedToTag;
         }
 
         public int Id { get; }
@@ -92,6 +94,10 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public int InventoryId { get; }
 
         public string InventoryName { get; }
+
+        public bool IsManufactured { get; }
+
+        public bool CanBeConnectedToTag { get; }
 
         public void AddComponent(decimal amount, IMaterialUnit unit, IExtendedMaterialModel material)
         {

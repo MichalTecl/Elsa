@@ -178,7 +178,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_cache.Remove(VirtualProductCompositionsCacheKey);
         }
 
-        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId)
+        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId, int materialInventoryId)
         {
             IMaterial material;
             if (materialId != null)
@@ -227,10 +227,17 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 material = m_database.New<IMaterial>();
             }
 
+            var inventory = GetMaterialInventories().FirstOrDefault(i => i.Id == materialInventoryId);
+            if (inventory == null)
+            {
+                throw new InvalidOperationException("Invalid reference to inventory");
+            }
+
             material.Name = name;
             material.NominalUnitId = nominalUnitId;
             material.NominalAmount = nominalAmount;
             material.ProjectId = m_session.Project.Id;
+            material.InventoryId = inventory.Id;
 
             m_database.Save(material);
 
@@ -331,6 +338,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 TimeSpan.FromHours(1),
                 () =>
                     m_database.SelectFrom<IMaterialInventory>()
+                        .Join(i => i.AllowedUnit)
                         .Where(i => i.ProjectId == m_session.Project.Id)
                         .Execute());
         }

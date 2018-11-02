@@ -226,3 +226,7 @@ div.containsTitleContainer > input {
     margin-top:8px;
     border-top:1px solid #eeeeef;
 }
+
+body, html {
+    background-color: white !important;
+}
