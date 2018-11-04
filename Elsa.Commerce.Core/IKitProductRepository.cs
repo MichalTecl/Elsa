@@ -13,5 +13,7 @@ namespace Elsa.Commerce.Core
         IEnumerable<KitItemsCollection> GetKitForOrderItem(IPurchaseOrder order, IOrderItem item);
 
         IEnumerable<KitItemsCollection> SetKitItemSelection(IPurchaseOrder order, IOrderItem item, int kitItemId, int kitItemIndex);
+
+        bool IsKit(IPurchaseOrder order, IOrderItem item);
     }
 }

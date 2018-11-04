@@ -126,5 +126,10 @@ namespace Elsa.Commerce.Core.Repositories
 
             return GetKitForOrderItem(order, item);
         }
+
+        public bool IsKit(IPurchaseOrder order, IOrderItem item)
+        {
+            return GetAllKitDefinitions().FirstOrDefault(k => k.IsMatch(order, item)) != null;
+        }
     }
 }

@@ -39,5 +39,15 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         [ForeignKey(nameof(IMaterialBatchComposition.CompositionId))]
         IEnumerable<IMaterialBatchComposition> Components { get; }
+
+        DateTime? CloseDt { get; set; } 
+
+        DateTime? LockDt { get; set; }
+
+        int? LockUserId { get; set; }
+        IUser LockUser { get; }
+
+        [NVarchar(1024, true)]
+        string LockReason { get; set; }
     }
 }

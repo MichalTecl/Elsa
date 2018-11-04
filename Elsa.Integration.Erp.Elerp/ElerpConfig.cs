@@ -12,9 +12,9 @@ namespace Elsa.Integration.Erp.Elerp
     {
         public int MaxQueryDays { get; } = 1000;
 
-        public DateTime HistoryStart { get; } = new DateTime(2017,01,01);
+        public DateTime HistoryStart { get; } = new DateTime(2018,09,01);
 
-        public int OrderSyncHistoryDays { get; } = 1000;
+        public int OrderSyncHistoryDays { get; } = 30;
 
         public string DataDir { get; set; } = "c:\\Elerp";
     }

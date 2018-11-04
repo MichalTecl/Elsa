@@ -5,6 +5,8 @@ using System.Linq;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
+using Elsa.Common.Caching;
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
@@ -18,13 +20,17 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly ISession m_session;
         private readonly IUnitConversionHelper m_conversionHelper;
         private readonly IMaterialRepository m_materialRepository;
-
-        public MaterialBatchRepository(IDatabase database, ISession session, IUnitConversionHelper conversionHelper, IMaterialRepository materialRepository)
+        private readonly IVirtualProductRepository m_virtualProductRepository;
+        private readonly ICache m_cache;
+        
+        public MaterialBatchRepository(IDatabase database, ISession session, IUnitConversionHelper conversionHelper, IMaterialRepository materialRepository, IVirtualProductRepository virtualProductRepository, ICache cache)
         {
             m_database = database;
             m_session = session;
             m_conversionHelper = conversionHelper;
             m_materialRepository = materialRepository;
+            m_virtualProductRepository = virtualProductRepository;
+            m_cache = cache;
         }
 
         public MaterialBatchComponent GetBatchById(int id)
@@ -136,6 +142,20 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
 
             return result;
+        }
+
+        public IEnumerable<IMaterialStockEvent> GetBatchEvents(int materialBatchId)
+        {
+            var key = $"stockEvents_for_batch_{materialBatchId}";
+
+            return m_cache.ReadThrough(
+                key,
+                TimeSpan.FromHours(1),
+                () =>
+                    m_database.SelectFrom<IMaterialStockEvent>()
+                        .Where(m => m.ProjectId == m_session.Project.Id)
+                        .Where(m => m.BatchId == materialBatchId)
+                        .Execute());
         }
 
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()

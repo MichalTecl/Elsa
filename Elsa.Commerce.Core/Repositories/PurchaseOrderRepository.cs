@@ -5,6 +5,7 @@ using System.Linq;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 using Robowire.RobOrm.Core;
 
@@ -218,6 +219,66 @@ namespace Elsa.Commerce.Core.Repositories
                     .Where(i => i.KitParentId == parentItemId)
                     .Where(i => i.KitParent.PurchaseOrder.ProjectId == m_session.Project.Id)
                     .Execute();
+        }
+
+        public IEnumerable<IPurchaseOrder> GetOrdersByMaterialBatch(int batchId)
+        {
+            var batchOrderItems =
+                m_database.SelectFrom<IOrderItemMaterialBatch>()
+                    .Join(b => b.OrderItem)
+                    .Join(b => b.OrderItem.PurchaseOrder)
+                    .Where(b => b.OrderItem.PurchaseOrder.ProjectId == m_session.Project.Id)
+                    .Where(b => b.MaterialBatchId == batchId)
+                    .Transform(b => b.OrderItem.PurchaseOrderId ?? -1);
+            
+            var qry =
+                m_database.SelectFrom<IPurchaseOrder>()
+                    .Join(p => p.Items)
+                    .Join(p => p.Items.Each().AssignedBatches)
+                    .Join(p => p.Items.Each().AssignedBatches.Each().MaterialBatch)
+                    .Where(p => p.Id.InSubquery(batchOrderItems))
+                    .Execute();
+
+            return qry;
+        }
+
+        public void UpdateOrderItemBatch(IOrderItem orderItem, int batchId, decimal quantity)
+        {
+            if (quantity > orderItem.Quantity)
+            {
+                throw new InvalidOperationException($"Ze šarže nemůže být odebráno množství větší, než je množství objednané položky");
+            }
+
+            using (var tx = m_database.OpenTransaction())
+            {
+                var existingAssignments =
+                    m_database.SelectFrom<IOrderItemMaterialBatch>()
+                        .Where(a => a.OrderItemId == orderItem.Id)
+                        .Execute()
+                        .ToList();
+
+                var assignmentsToRemove = existingAssignments.Where(a => a.MaterialBatchId == batchId);
+                m_database.DeleteAll(assignmentsToRemove);
+
+                var alreadyAllocatedAmount =
+                    existingAssignments.Where(a => a.MaterialBatchId != batchId).Sum(a => a.Quantity);
+
+                if ((alreadyAllocatedAmount + quantity) > orderItem.Quantity)
+                {
+                    throw new InvalidOperationException($"Položka již má přiřazené šarže. Výsledné přiřazení by překračovalo celkové množství položky.");
+                }
+
+                var assignment = m_database.New<IOrderItemMaterialBatch>();
+                assignment.MaterialBatchId = batchId;
+                assignment.OrderItemId = orderItem.Id;
+                assignment.Quantity = quantity;
+                assignment.AssignmentDt = DateTime.Now;
+                assignment.UserId = m_session.User.Id;
+
+                m_database.Save(assignment);
+
+                tx.Commit();
+            }
         }
 
         private IQueryBuilder<IPurchaseOrder> BuildOrdersQuery()

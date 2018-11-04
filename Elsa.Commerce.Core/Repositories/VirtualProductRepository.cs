@@ -56,8 +56,8 @@ namespace Elsa.Commerce.Core.Repositories
                 }
 
                 var newMapping = m_database.New<IVirtualProductOrderItemMapping>();
-                newMapping.ErpId = erpId;
-                newMapping.ErpProductId = erpProductId;
+                //newMapping.ErpId = erpId;
+                //newMapping.ErpProductId = erpProductId;
                 newMapping.ItemName = placedName;
                 newMapping.VirtualProductId = virtualProductId;
                 newMapping.ProjectId = m_session.Project.Id;
@@ -268,6 +268,7 @@ namespace Elsa.Commerce.Core.Repositories
             string erpProductId,
             string placedName)
         {
+            /*
             if ((mapping.ErpId ?? -1) != (erpId ?? -1))
             {
                 return false;
@@ -277,6 +278,7 @@ namespace Elsa.Commerce.Core.Repositories
             {
                 return false;
             }
+            */
 
             if (!string.IsNullOrWhiteSpace(mapping.ItemName) && mapping.ItemName != placedName)
             {

@@ -22,7 +22,7 @@ namespace Elsa.Commerce.Core.Model
 
         public IEnumerable<IKitSelectionGroupItem> GroupItems { get; }
 
-        public IOrderItem SelectedItem { get; }
+        public virtual IOrderItem SelectedItem { get; }
 
         public string GroupName { get; }
     }

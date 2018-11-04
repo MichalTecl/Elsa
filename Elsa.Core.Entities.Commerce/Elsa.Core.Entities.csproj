@@ -76,6 +76,9 @@
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IPaymentSource.cs" />
     <Compile Include="Inventory\Batches\IMaterialBatchComposition.cs" />
+    <Compile Include="Inventory\Batches\IMaterialStockEvent.cs" />
+    <Compile Include="Inventory\Batches\IOrderItemMaterialBatch.cs" />
+    <Compile Include="Inventory\Batches\IPackingPreferredBatch.cs" />
     <Compile Include="Inventory\IMappedToOrderItem.cs" />
     <Compile Include="Inventory\IMaterial.cs" />
     <Compile Include="Inventory\Batches\IMaterialBatch.cs" />

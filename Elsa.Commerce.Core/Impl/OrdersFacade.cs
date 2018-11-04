@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
@@ -18,8 +20,16 @@ namespace Elsa.Commerce.Core.Impl
         private readonly ISession m_session;
         private readonly IPaymentRepository m_paymentRepository;
         private readonly ILog m_log;
+        private readonly IMaterialBatchFacade m_batchFacade;
 
-        public OrdersFacade(IPurchaseOrderRepository orderRepository, IDatabase database, IErpClientFactory clientFactory, ISession session, IPaymentRepository paymentRepository, ILog log)
+        public OrdersFacade(
+            IPurchaseOrderRepository orderRepository,
+            IDatabase database,
+            IErpClientFactory clientFactory,
+            ISession session,
+            IPaymentRepository paymentRepository,
+            ILog log,
+            IMaterialBatchFacade batchFacade)
         {
             m_orderRepository = orderRepository;
             m_database = database;
@@ -27,6 +37,7 @@ namespace Elsa.Commerce.Core.Impl
             m_session = session;
             m_paymentRepository = paymentRepository;
             m_log = log;
+            m_batchFacade = batchFacade;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
@@ -76,7 +87,7 @@ namespace Elsa.Commerce.Core.Impl
             return order;
         }
 
-        public IPurchaseOrder SetOrderSent(long orderId)
+        public IPurchaseOrder SetOrderSent(long orderId, List<OrderItemBatchAssignmentModel> batchAssignments)
         {
             var order = m_orderRepository.GetOrder(orderId);
             if (order == null)
@@ -88,6 +99,26 @@ namespace Elsa.Commerce.Core.Impl
             {
                 order.PackingDt = DateTime.Now;
                 order.PackingUserId = m_session.User.Id;
+
+                foreach (var item in order.Items)
+                {
+                    var assignments = batchAssignments?.Where(a => a.OrderItemId == item.Id).ToList();
+                    if (assignments == null || assignments.Count == 0)
+                    {
+                        throw new InvalidOperationException($"Batch assignment missing - OrderItemId = {item.Id}");
+                    }
+
+                    var sum = assignments.Sum(a => a.AssignedQuantity);
+                    if (Math.Abs(sum - item.Quantity) > 0.0001m)
+                    {
+                        throw new InvalidOperationException($"Invalid assignment quantity - OrderItemId={item.Id}, diff={Math.Abs(sum - item.Quantity)}");
+                    }
+
+                    foreach (var assignment in assignments)
+                    {
+                        m_batchFacade.AssignOrderItemToBatch(assignment.MaterialBatchId, order, item, assignment.AssignedQuantity);
+                    }
+                }
 
                 if (order.ErpId == null)
                 {

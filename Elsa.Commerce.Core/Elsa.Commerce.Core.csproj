@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\PackingPreferredBatchesConfig.cs" />
     <Compile Include="Crm\ICustomerRepository.cs" />
     <Compile Include="Crm\Model\CustomerOverview.cs" />
     <Compile Include="Crm\Model\ICommonCustomerInfo.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="IOrderStatusMappingRepository.cs" />
     <Compile Include="IOrderStatusRepository.cs" />
     <Compile Include="IOrderStatusTranslator.cs" />
+    <Compile Include="IPackingPreferredBatchRepository.cs" />
     <Compile Include="IPaymentRepository.cs" />
     <Compile Include="IProductRepository.cs" />
     <Compile Include="IPurchaseOrderRepository.cs" />
@@ -71,13 +73,17 @@
     <Compile Include="Model\IErpCustomerModel.cs" />
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
     <Compile Include="Model\KitItemsCollection.cs" />
+    <Compile Include="Model\MaterialAmountModel.cs" />
+    <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
     <Compile Include="Repositories\CustomerRepository.cs" />
     <Compile Include="Repositories\ErpRepository.cs" />
     <Compile Include="Repositories\KitProductRepository.cs" />
+    <Compile Include="Repositories\PreferredBatchRepository.cs" />
     <Compile Include="Repositories\UnitRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Repositories\VirtualProductRepository.cs" />
     <Compile Include="Shipment\IShipmentProvider.cs" />
+    <Compile Include="Units\AmountProcessor.cs" />
     <Compile Include="Units\IUnitConversionHelper.cs" />
     <Compile Include="Units\UnitConversionHelper.cs" />
     <Compile Include="VirtualProducts\IMaterialFacade.cs" />
@@ -108,13 +114,13 @@
     <Compile Include="VirtualProducts\Model\IExtendedMaterialModel.cs" />
     <Compile Include="VirtualProducts\Model\MaterialEntry.cs" />
     <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
+    <Compile Include="Warehouse\IMaterialBatchFacade.cs" />
     <Compile Include="Warehouse\IMaterialBatchRepository.cs" />
+    <Compile Include="Warehouse\Impl\MaterialBatchFacade.cs" />
     <Compile Include="Warehouse\Impl\MaterialBatchRepository.cs" />
     <Compile Include="Warehouse\MaterialBatchComponent.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Configuration\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
       <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>

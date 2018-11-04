@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
+
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
 
@@ -41,5 +43,8 @@ namespace Elsa.Core.Entities.Commerce.Commerce
 
         int? DirectSaleEventId { get; set; }
         IDirectSaleEvent DirectSaleEvent { get; }
+
+        [ForeignKey(nameof(IOrderItemMaterialBatch.OrderItemId))]
+        IEnumerable<IOrderItemMaterialBatch> AssignedBatches { get; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Commerce;
 
 namespace Elsa.Commerce.Core
@@ -9,7 +10,7 @@ namespace Elsa.Commerce.Core
     {
         IPurchaseOrder SetOrderPaid(long orderId, long? paymentId);
 
-        IPurchaseOrder SetOrderSent(long orderId);
+        IPurchaseOrder SetOrderSent(long orderId, List<OrderItemBatchAssignmentModel> batchAssignments);
 
         IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, bool skipErp = false);
     }

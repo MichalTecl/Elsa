@@ -31,5 +31,9 @@ namespace Elsa.Commerce.Core
         int GetMissingPaymentsCount(int businessDaysTolerance);
 
         IEnumerable<IOrderItem> GetChildItemsByParentItemId(long parentItemId);
+
+        IEnumerable<IPurchaseOrder> GetOrdersByMaterialBatch(int batchId);
+
+        void UpdateOrderItemBatch(IOrderItem orderItem, int batchId, decimal quantity);
     }
 }

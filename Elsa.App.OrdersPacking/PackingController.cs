@@ -4,13 +4,16 @@ using System.Linq;
 
 using Elsa.App.OrdersPacking.Model;
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Shipment;
+using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 
 using Robowire.RoboApi;
+using Robowire.RobOrm.Core;
 
 namespace Elsa.App.OrdersPacking
 {
@@ -22,8 +25,10 @@ namespace Elsa.App.OrdersPacking
         private readonly IOrdersFacade m_ordersFacade;
         private readonly IKitProductRepository m_kitProductRepository;
         private readonly IErpClientFactory m_erpClientFactory;
+        private readonly IMaterialBatchFacade m_batchFacade;
+        private readonly IDatabase m_database; 
         
-        public PackingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IShipmentProvider shipmentProvider, IOrdersFacade ordersFacade, IKitProductRepository kitProductRepository, IErpClientFactory erpClientFactory)
+        public PackingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IShipmentProvider shipmentProvider, IOrdersFacade ordersFacade, IKitProductRepository kitProductRepository, IErpClientFactory erpClientFactory, IMaterialBatchFacade batchFacade, IDatabase database)
             : base(webSession, log)
         {
             m_orderRepository = orderRepository;
@@ -31,6 +36,8 @@ namespace Elsa.App.OrdersPacking
             m_ordersFacade = ordersFacade;
             m_kitProductRepository = kitProductRepository;
             m_erpClientFactory = erpClientFactory;
+            m_batchFacade = batchFacade;
+            m_database = database;
         }
 
         public PackingOrderModel FindOrder(string number)
@@ -91,45 +98,58 @@ namespace Elsa.App.OrdersPacking
 
         public PackingOrderModel SelectKitItem(long orderId, long orderItemId, int kitItemId, int kitItemIndex)
         {
-            var order = m_orderRepository.GetOrder(orderId);
-            if (order == null)
+            using (var tx = m_database.OpenTransaction())
             {
-                throw new InvalidOperationException("Objednavka nenalezena");
+                var order = m_orderRepository.GetOrder(orderId);
+                if (order == null)
+                {
+                    throw new InvalidOperationException("Objednavka nenalezena");
+                }
+
+                var item = order.Items.FirstOrDefault(i => i.Id == orderItemId);
+                if (item == null)
+                {
+                    throw new InvalidOperationException("Polozka objednavky nenalezena");
+                }
+
+                m_kitProductRepository.SetKitItemSelection(order, item, kitItemId, kitItemIndex);
+
+                var result = MapOrder(order);
+
+                tx.Commit();
+
+                return result;
             }
-
-            var item = order.Items.FirstOrDefault(i => i.Id == orderItemId);
-            if (item == null)
-            {
-                throw new InvalidOperationException("Polozka objednavky nenalezena");
-            }
-
-            m_kitProductRepository.SetKitItemSelection(order, item, kitItemId, kitItemIndex);
-
-            return MapOrder(order);
         }
         
-        public void PackOrder(long orderId)
+        public void PackOrder(long orderId, List<OrderItemBatchAssignmentModel> batchAssignment)
         {
-            var order = m_orderRepository.GetOrder(orderId);
-            if (order == null)
+            using (var tx = m_database.OpenTransaction())
             {
-                throw new InvalidOperationException("Objednavka nenalezena");
-            }
-
-            var mapped = MapOrder(order);
-
-            foreach (var item in mapped.Items)
-            {
-                foreach (var kit in item.KitItems)
+                var order = m_orderRepository.GetOrder(orderId);
+                if (order == null)
                 {
-                    if (kit.GroupItems.Any() && kit.SelectedItem == null)
+                    throw new InvalidOperationException("Objednavka nenalezena");
+                }
+
+                var mapped = MapOrder(order);
+
+                foreach (var item in mapped.Items)
+                {
+                    foreach (var kit in item.KitItems)
                     {
-                        throw new InvalidOperationException($"Objednavka nemuze byt dokoncena - ve skupine '{kit.GroupName}' neni vybrana polozka");
+                        if (kit.GroupItems.Any() && kit.SelectedItem == null)
+                        {
+                            throw new InvalidOperationException(
+                                      $"Objednavka nemuze byt dokoncena - ve skupine '{kit.GroupName}' neni vybrana polozka");
+                        }
                     }
                 }
-            }
 
-            m_ordersFacade.SetOrderSent(orderId);
+                m_ordersFacade.SetOrderSent(orderId, batchAssignment);
+
+                tx.Commit();
+            }
         }
 
         public IEnumerable<LightOrderInfo> GetOrdersToPack()
@@ -139,6 +159,8 @@ namespace Elsa.App.OrdersPacking
 
         private PackingOrderModel MapOrder(IPurchaseOrder entity)
         {
+            var batchAssignments = m_batchFacade.CreateBatchesAssignmentProposal(entity).ToList();
+
             var orderModel = new PackingOrderModel
                                  {
                                      OrderId = entity.Id,
@@ -161,7 +183,30 @@ namespace Elsa.App.OrdersPacking
                                    Quantity = StringUtil.FormatDecimal(sourceItem.Quantity)
                                };
 
-                item.KitItems.AddRange(m_kitProductRepository.GetKitForOrderItem(entity, sourceItem));
+                var kitItems = new List<KitItemsCollectionModel>();
+
+                foreach (var sourceKitItem in m_kitProductRepository.GetKitForOrderItem(entity, sourceItem))
+                {
+                    var model = new KitItemsCollectionModel(sourceKitItem);
+                    if (sourceKitItem.SelectedItem != null)
+                    {
+                        var selitem = new PackingOrderItemModel
+                        {
+                            ProductName = sourceKitItem.SelectedItem.PlacedName,
+                            ItemId = sourceKitItem.SelectedItem.Id,
+                            Quantity = StringUtil.FormatDecimal(sourceKitItem.SelectedItem.Quantity)
+                        };
+                        selitem.BatchAssignment.AddRange(batchAssignments.Where(a => a.OrderItemId == sourceKitItem.SelectedItem.Id));
+                        model.SelectedItemModel = selitem;
+                    }
+                    
+                    kitItems.Add(model);
+                }
+
+                //var kitItems = m_kitProductRepository.GetKitForOrderItem(entity, sourceItem).Select().ToList();
+                
+                item.KitItems.AddRange(kitItems);
+                item.BatchAssignment.AddRange(batchAssignments.Where(a => a.OrderItemId == sourceItem.Id));
 
                 orderModel.Items.Add(item);
             }

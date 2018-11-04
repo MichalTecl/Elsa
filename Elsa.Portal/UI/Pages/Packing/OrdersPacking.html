@@ -62,34 +62,35 @@
                     <div id="orderItemsContainer">
                         
                         <div id="itemsList">
-                            
                             <div id="itemTemplate" class="pckOrderItemContainer lt-template">
                                 <div class="stackLeft">
                                     <div class="itemQty" data-bind="text:Quantity; class.highlightQuantity:highlightQuantity"></div>
                                     <div class="multiply" data-bind="class.highlightQuantity:highlightQuantity">x</div>
                                     <div class="itemTitle" data-bind="text:ProductName"> </div>
+                                    <div lt-name="rootItemBatchSelector">
+                                    </div>
                                 </div>
-                                
+
                                 <div lt-name="kitGroupsList" class="kitGroupsList" data-bind="class!.hidden:isKit">
-                                    
+
                                 </div>
 
                             </div>
 
                         </div>
-                        
+
                         <div id="kitGroupTemplate" class="kitGroupContainer lt-template" data-bind="class.hasSelectedItem:hasSelectedItem; class!.needsSelection:hasSelectedItem">
                             <div class="kitItemIndexMarker" data-bind="class!.hidden:isKitItemIndexHead; text:kitItemIndexText"></div>
                             <div class="stackLeft">
                                 <div class="selectionGroupName" data-bind="text:GroupName"></div>
                                 <div class="kitSelectedItemContainer stackLeft" data-bind="class!.hidden:hasSelectedItem">
-                                    <div class="kitSelectedItem" data-bind="text:SelectedItem.PlacedName"></div>
+                                    <div class="kitSelectedItem" data-bind="text:SelectedItem.ProductName"></div>
                                     <i class="fas fa-circle-notch faButton" event-bind="click:onKitItemSelectionCancel(VM)"></i>
                                 </div>
                             </div>
                             <div lt-name="kitGroupItems" data-bind="class.hidden:hasSelectedItem"></div>
                         </div>
-                        
+
                         <div id="kitItemTemplate" class="lt-template kitItemContainer stackLeft">
                             <div class="kitItemSelectButton faButton" event-bind="click:onKitItemClick(VM)">
                                 <i class="far fa-circle"></i>
@@ -116,7 +117,16 @@
         </div>
     </div>
     
-    <script>
+<script>
+
+    var batchSelectorController = function(batchAssignmentList, batchItemTemplate) {
+        
+        this.bind(function(BatchAssignment) {
+
+            lt.generate(batchAssignmentList, batchItemTemplate, BatchAssignment);
+
+        });
+    };
 
     lt.element("packingUi")
         .withModel("app.ordersPacking.vm")
@@ -148,7 +158,7 @@
                 });
             };
 
-            var itemController = function(kitGroupsList) {
+            var itemController = function(kitGroupsList, rootItemBatchSelector) {
 
                 this.bind(function(KitItems) {
                     lt.generate(kitGroupsList,
@@ -157,7 +167,10 @@
                         function(k) { return k.uid; },
                         kitGroupController);
                 });
-                
+
+                lt.fillBy(rootItemBatchSelector, "/UI/Pages/Packing/Partial/BatchSelectorTemplate.html", function() {
+                    lt.element(rootItemBatchSelector).attach(batchSelectorController);
+                });
             };
 
             this.bind(function(currentOrder) {
@@ -175,7 +188,7 @@
                         function(i) { return i.ItemId; },
                         itemController);
                 }
-                }).currentOrderCanBeNull();
+            }).currentOrderCanBeNull();
 
             this.onSearchKeyDown = function(event, value) {
 
@@ -196,7 +209,7 @@
             };
 
             self.onKitItemSelectionCancel = function(model) {
-                app.ordersPacking.vm.undoKitItemSelection(model.SelectedItem.Id);
+                app.ordersPacking.vm.undoKitItemSelection(model.SelectedItem.ItemId);
 
                 console.log(model);
             };
@@ -263,8 +276,8 @@
             };
 
         });
-            
-    </script>
+
+</script>
     
 <script src="/Script/Apps/Packing/OrdersPacking.VM.js"></script>
 <link href="PackingUI.css" rel="stylesheet" />

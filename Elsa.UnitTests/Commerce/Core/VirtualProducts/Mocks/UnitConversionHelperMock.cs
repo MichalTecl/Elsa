@@ -30,5 +30,10 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
         {
             return unitId1 == unitId2;
         }
+
+        public IEnumerable<IMaterialUnit> GetCompatibleUnits(int sourceUnitId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

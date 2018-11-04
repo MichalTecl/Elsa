@@ -48,6 +48,10 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
 
         public IEnumerable<IVirtualProductMaterial> VirtualProductMaterials { get; }
 
+        public int InventoryId { get; set; }
+
+        public IMaterialInventory Inventory { get; }
+
         public void AddComposition(IMaterial material, decimal amount)
         {
             m_composition.Add(new CompositionMock(this, material, amount));

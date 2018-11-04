@@ -121,7 +121,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             for (var j = 0; j < orderItem.KitItems.length; j++) {
                 var kitItem = orderItem.KitItems[j];
 
-                if ((!!kitItem.SelectedItem) && (kitItem.SelectedItem.Id === selectedItemId)) {
+                if ((!!kitItem.SelectedItem) && (kitItem.SelectedItem.ItemId === selectedItemId)) {
                     kitItem.hasSelectedItem = false;
                     lt.notify();
                     return;

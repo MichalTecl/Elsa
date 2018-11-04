@@ -13,5 +13,7 @@ namespace Elsa.App.OrdersPacking.Model
         public string Quantity { get; set; }
 
         public List<KitItemsCollection> KitItems { get; } = new List<KitItemsCollection>();
+
+        public List<OrderItemBatchAssignmentModel> BatchAssignment { get; } = new List<OrderItemBatchAssignmentModel>();
     }
 }

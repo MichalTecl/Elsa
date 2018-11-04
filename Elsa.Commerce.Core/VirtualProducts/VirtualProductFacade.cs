@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
+using Elsa.Common;
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 
 using Robowire.RobOrm.Core;
@@ -78,6 +81,25 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
                 return vp;
             }
+        }
+
+        public MaterialAmountModel GetOrderItemMaterialForSingleUnit(IPurchaseOrder order, IOrderItem item)
+        {
+            var tags = m_virtualProductRepository.GetVirtualProductsByOrderItem(order, item);
+
+            var materialTags = tags.Where(t => t.Materials.Any()).ToList();
+            if (materialTags.Count != 1)
+            {
+                throw new InvalidOperationException($"Prodejní položka '{item.PlacedName}' je spojena s {materialTags.Count} materiálů, požadovaný počet je 1");
+            }
+
+            var material = materialTags.Single().Materials.ToList();
+            if (material.Count != 1)
+            {
+                throw new InvalidOperationException($"Prodejní položka '{item.PlacedName}' je tagem '{materialTags[0].Name}' spojena s {material.Count} materiálů, požadovaný počet je 1");
+            }
+
+            return new MaterialAmountModel(material[0].ComponentId, new Amount(material[0].Amount, material[0].Unit));
         }
 
         private IEnumerable<MaterialComponent> ProcessMaterialEntries(string[] materialEntries)

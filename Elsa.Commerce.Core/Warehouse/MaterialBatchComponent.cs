@@ -14,6 +14,11 @@ namespace Elsa.Commerce.Core.Warehouse
         public MaterialBatchComponent(IMaterialBatch batch)
         {
             Batch = batch;
+            IsLocked = batch.LockDt != null && batch.LockDt <= DateTime.Now;
+            IsClosed = batch.CloseDt != null && batch.CloseDt <= DateTime.Now;
+
+            ComponentUnit = batch.Unit;
+            ComponentAmount = batch.Volume;
         }
 
         public decimal ComponentAmount { get; set; }
@@ -21,6 +26,10 @@ namespace Elsa.Commerce.Core.Warehouse
         public IMaterialUnit ComponentUnit { get; set; }
 
         public IMaterialBatch Batch { get; }
+
+        public bool IsLocked { get; }
+
+        public bool IsClosed { get; }
 
         public List<MaterialBatchComponent> Components { get; } = new List<MaterialBatchComponent>();
     }

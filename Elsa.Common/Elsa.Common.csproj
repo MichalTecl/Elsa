@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="AllowAnonymousAttribute.cs" />
     <Compile Include="AllowWithDefaultPassword.cs" />
+    <Compile Include="Amount.cs" />
     <Compile Include="Caching\Cache.cs" />
     <Compile Include="Caching\CacheWithPostponedRemoval.cs" />
     <Compile Include="Caching\ICache.cs" />
