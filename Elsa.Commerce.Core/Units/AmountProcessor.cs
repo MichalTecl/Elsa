@@ -26,7 +26,12 @@ namespace Elsa.Commerce.Core.Units
         {
             return Calculate(a, b, (x, y) => x + y);
         }
-        
+
+        public Amount Min(Amount a, Amount b)
+        {
+            return Calculate(a, b, Math.Min);
+        }
+
         private Amount Calculate(Amount a, Amount b, Func<decimal, decimal, decimal> numericOp)
         {
             if (a.Unit.Id == b.Unit.Id)

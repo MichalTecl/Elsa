@@ -11,5 +11,7 @@ namespace Elsa.Commerce.Core
         void SetBatchPreferrence(int batchId);
 
         void NotifyPreferrenceActivity(int preferrenceId);
+
+        void InvalidatePreferrence(int preferrenceId);
     }
 }

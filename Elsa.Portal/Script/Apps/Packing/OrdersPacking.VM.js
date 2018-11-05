@@ -156,6 +156,20 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     };
 
+    self.setBatch = function(assignmentModel, query) {
+        var request = {
+            OrderId: self.currentOrder.OrderId,
+            OrderItemId: assignmentModel.OrderItemId,
+            OriginalBatchId: assignmentModel.MaterialBatchId,
+            NewBatchSearchQuery: query
+        };
+
+        lt.api("/ordersPacking/SetItemBatchAllocation").body(request).post(function(order) {
+            adjustServerOrderObject(order);
+            self.currentOrder = order;
+        });
+    };
+
     var loadOrdersToPack = function () {
         self.ordersToPack = [];
         lt.notify();

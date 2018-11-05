@@ -13,5 +13,7 @@ namespace Elsa.Commerce.Core
         IPurchaseOrder SetOrderSent(long orderId, List<OrderItemBatchAssignmentModel> batchAssignments);
 
         IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, bool skipErp = false);
+
+        IEnumerable<IOrderItem> GetAllConcreteOrderItems(IPurchaseOrder order);
     }
 }

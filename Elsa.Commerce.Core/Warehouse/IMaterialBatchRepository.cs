@@ -18,7 +18,9 @@ namespace Elsa.Commerce.Core.Warehouse
             DateTime from,
             DateTime to,
             bool excludeCompositions,
-            int? materialId);
+            int? materialId,
+            bool includeLocked = false,
+            bool includeClosed = false);
 
         MaterialBatchComponent SaveMaterialBatch(
             int id,

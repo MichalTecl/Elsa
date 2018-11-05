@@ -95,6 +95,17 @@ namespace Elsa.Commerce.Core.Repositories
             m_database.Save(pref);
         }
 
+        public void InvalidatePreferrence(int preferrenceId)
+        {
+            var preferrence = GetPreferredBatches().FirstOrDefault(p => p.Id == preferrenceId);
+            if (preferrence != null)
+            {
+                m_database.Delete(preferrence);
+            }
+
+            m_cache.Remove(GetPreferredBatchesCacheKey());
+        }
+
         private string GetPreferredBatchesCacheKey()
         {
             return $"prf_pck_bchs_usr_{m_session.User.Id}";

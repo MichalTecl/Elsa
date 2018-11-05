@@ -13,12 +13,21 @@ namespace Elsa.Common
     {
         public Amount(decimal value, IMaterialUnit unit)
         {
+            if (unit == null)
+            {
+                throw new ArgumentNullException(nameof(unit));
+            }
+
             Value = value;
             Unit = unit;
         }
 
         public decimal Value { get; }
         public IMaterialUnit Unit { get; }
+
+        public bool IsZero => Math.Abs(Value) < 0.00001m;
+
+        public bool IsNotPositive => Value < 0 || IsZero;
 
         /*
         public override bool Equals(object obj)

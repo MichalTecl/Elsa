@@ -21,6 +21,7 @@ namespace Elsa.Commerce.Core.Impl
         private readonly IPaymentRepository m_paymentRepository;
         private readonly ILog m_log;
         private readonly IMaterialBatchFacade m_batchFacade;
+        private readonly IKitProductRepository m_kitProductRepository;
 
         public OrdersFacade(
             IPurchaseOrderRepository orderRepository,
@@ -29,7 +30,7 @@ namespace Elsa.Commerce.Core.Impl
             ISession session,
             IPaymentRepository paymentRepository,
             ILog log,
-            IMaterialBatchFacade batchFacade)
+            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository)
         {
             m_orderRepository = orderRepository;
             m_database = database;
@@ -38,6 +39,7 @@ namespace Elsa.Commerce.Core.Impl
             m_paymentRepository = paymentRepository;
             m_log = log;
             m_batchFacade = batchFacade;
+            m_kitProductRepository = kitProductRepository;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
@@ -116,7 +118,7 @@ namespace Elsa.Commerce.Core.Impl
 
                     foreach (var assignment in assignments)
                     {
-                        m_batchFacade.AssignOrderItemToBatch(assignment.MaterialBatchId, order, item, assignment.AssignedQuantity);
+                        m_batchFacade.AssignOrderItemToBatch(assignment.MaterialBatchId, order, item.Id, assignment.AssignedQuantity);
                     }
                 }
 
@@ -185,6 +187,25 @@ namespace Elsa.Commerce.Core.Impl
             }
 
             m_log.Info("Hotovo");
+        }
+
+        public IEnumerable<IOrderItem> GetAllConcreteOrderItems(IPurchaseOrder order)
+        {
+            foreach (var item in order.Items)
+            {
+                var kitItems = m_kitProductRepository.GetKitForOrderItem(order, item).ToList();
+
+                if (!kitItems.Any())
+                {
+                    yield return item;
+                    continue;
+                }
+
+                foreach (var kitItem in kitItems.Where(k => k.SelectedItem != null))
+                {
+                    yield return kitItem.SelectedItem;
+                }
+            }
         }
 
         private IPurchaseOrder PerformErpActionSafe(

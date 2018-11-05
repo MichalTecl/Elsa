@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\BatchAllocationChangeRequest.cs" />
     <Compile Include="Model\KitItemsCollectionModel.cs" />
     <Compile Include="Model\PackingOrderItemModel.cs" />
     <Compile Include="Model\PackingOrderModel.cs" />

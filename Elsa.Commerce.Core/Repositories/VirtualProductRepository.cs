@@ -257,6 +257,7 @@ namespace Elsa.Commerce.Core.Repositories
                 m_database.SelectFrom<IVirtualProductOrderItemMapping>()
                     .Join(m => m.VirtualProduct)
                     .Join(m => m.VirtualProduct.Materials)
+                    .Join(m => m.VirtualProduct.Materials.Each().Unit)
                     .Where(m => m.ProjectId == m_session.Project.Id)
                     .Where(m => m.VirtualProduct.ProjectId == m_session.Project.Id)
                     .Execute();

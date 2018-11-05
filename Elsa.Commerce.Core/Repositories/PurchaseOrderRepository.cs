@@ -257,8 +257,10 @@ namespace Elsa.Commerce.Core.Repositories
                         .Execute()
                         .ToList();
 
+                /*
                 var assignmentsToRemove = existingAssignments.Where(a => a.MaterialBatchId == batchId);
                 m_database.DeleteAll(assignmentsToRemove);
+                */
 
                 var alreadyAllocatedAmount =
                     existingAssignments.Where(a => a.MaterialBatchId != batchId).Sum(a => a.Quantity);
@@ -293,6 +295,9 @@ namespace Elsa.Commerce.Core.Repositories
                     .Join(o => o.Items)
                     .Join(o => o.OrderStatus)
                     .Join(o => o.Items.Each().Product)
+                    .Join(o => o.Items.Each().AssignedBatches)
+                    .Join(o => o.Items.Each().AssignedBatches.Each().MaterialBatch)
+                    .Join(o => o.Items.Each().AssignedBatches.Each())
                     .Join(o => o.Payment)
                     .Where(o => o.ProjectId == m_session.Project.Id);
         }

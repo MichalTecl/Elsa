@@ -14,8 +14,6 @@ namespace Elsa.Commerce.Core.Model
 
         public decimal AssignedQuantity { get; set; }
 
-        public int? SourcePrefferenceId { get; set; }
-
         public string BatchNumber { get; set; }
     }
 }

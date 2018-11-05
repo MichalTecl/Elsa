@@ -11,7 +11,11 @@ using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Common.Security;
+using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
+
+using Newtonsoft.Json;
 
 using Robowire.RobOrm.Core;
 
@@ -51,8 +55,14 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_kitProductRepository = kitProductRepository;
         }
 
-        public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, IOrderItem orderItem, decimal assignmentQuantity)
+        public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity)
         {
+            var orderItem = GetAllOrderItems(order).FirstOrDefault(i => i.Id == orderItemId);
+            if (orderItem == null)
+            {
+                throw new InvalidOperationException("Invalid OrderItemId");
+            }
+
             var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, orderItem);
             
             var batch = m_batchRepository.GetBatchById(batchId);
@@ -115,71 +125,167 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     });
         }
 
-        public IEnumerable<OrderItemBatchAssignmentModel> CreateBatchesAssignmentProposal(IPurchaseOrder order)
+        public IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference = null)
         {
-            var items = new List<IOrderItem>(order.Items.Count() * 2);
+            return TryResolveBatchAssignmentsPrivate(order, orderItemBatchPreference, false).ToList();
+        }
 
-            foreach (var orderItem in order.Items)
+        public IMaterialBatch FindBatchBySearchQuery(int materialId, string query)
+        {
+            var batches = m_batchRepository.GetMaterialBatches(
+                DateTime.Now.AddDays(-365),
+                DateTime.Now.AddDays(365),
+                false,
+                materialId);
+
+            var found = batches.Where(b => b.Batch.BatchNumber.EndsWith(query)).ToList();
+
+            if (found.Count == 1)
             {
-                var kitItems = m_kitProductRepository.GetKitForOrderItem(order, orderItem).ToList();
-
-                if (!kitItems.Any())
-                {
-                    items.Add(orderItem);
-                    continue;
-                }
-
-                foreach (var kitItem in kitItems)
-                {
-                    if (kitItem.SelectedItem != null)
-                    {
-                        items.Add(kitItem.SelectedItem);
-                    }
-                }
+                return found[0].Batch;
             }
 
-            var result = new List<OrderItemBatchAssignmentModel>(items.Count * 2);
-
-            var preferrences = m_batchPreferrenceRepository.GetPreferredBatches().ToList();
-            
-            foreach (var orderItem in items)
+            if (found.Count > 1)
             {
-                var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, orderItem);
-                var preferrence = preferrences.FirstOrDefault(p => p.MaterialId == material.MaterialId);
-                if (preferrence == null)
-                {
-                    result.Add(new OrderItemBatchAssignmentModel()
-                                   {
-                                       OrderItemId = orderItem.Id,
-                                       AssignedQuantity = orderItem.Quantity,
-                                       MaterialBatchId = -1
-                                   });
-                    continue;
-                }
+                throw new InvalidOperationException("Více než jedna šarže odpovídá zadanému číslu, použijte prosím celé číslo šarže");
+            }
 
-                var tookByPreferrence = Math.Min(orderItem.Quantity,  GetAvailableAmount(preferrence.BatchId).Value);
-                
-                result.Add(new OrderItemBatchAssignmentModel()
-                {
-                    OrderItemId = orderItem.Id,
-                    AssignedQuantity = tookByPreferrence,
-                    MaterialBatchId = preferrence.BatchId,
-                    SourcePrefferenceId = preferrence.Id,
-                    BatchNumber = m_batchRepository.GetBatchById(preferrence.BatchId)?.Batch.BatchNumber
-                });
+            throw new InvalidOperationException("Šarže nebyla nalezena");
+        }
 
-                if (tookByPreferrence < orderItem.Quantity)
+        public bool AlignOrderBatches(long purchaseOrderId)
+        {
+            var result = false;
+
+            var preferrences = new Dictionary<int, Tuple<int, DateTime>>();
+
+            using (var tx = m_database.OpenTransaction())
+            {
+                var order = m_orderRepository.GetOrder(purchaseOrderId);
+                var allItems = GetAllOrderItems(order);
+
+                foreach (var item in allItems)
                 {
-                    result.Add(new OrderItemBatchAssignmentModel()
+                    var assignments = item.AssignedBatches.ToList();
+                    if (assignments.Count < 2)
                     {
-                        OrderItemId = orderItem.Id,
-                        AssignedQuantity = orderItem.Quantity - tookByPreferrence,
-                        MaterialBatchId = -1
-                    });
+                        if (assignments.Count == 1)
+                        {
+                            Tuple<int, DateTime> preference;
+                            if ((!preferrences.TryGetValue(assignments[0].MaterialBatch.MaterialId, out preference)) || (preference.Item2 < assignments[0].AssignmentDt))
+                            {
+                                preferrences[assignments[0].MaterialBatch.MaterialId] = new Tuple<int, DateTime>(assignments[0].MaterialBatchId, assignments[0].AssignmentDt);
+                            }
+                        }
+                        continue;
+                    }
+
+                    result = AlignAssignments(assignments) | result;
                 }
+
+                tx.Commit();
             }
 
             return result;
+        }
+
+        private bool AlignAssignments(List<IOrderItemMaterialBatch> assignments)
+        {
+            var result = false;
+
+            var all = new Dictionary<int, List<IOrderItemMaterialBatch>>(assignments.Count);
+
+            foreach (var asig in assignments)
+            {
+                List<IOrderItemMaterialBatch> thisGroup;
+                if (!all.TryGetValue(asig.MaterialBatchId, out thisGroup))
+                {
+                    thisGroup = new List<IOrderItemMaterialBatch>();
+                    all.Add(asig.MaterialBatchId, thisGroup);
+                }
+
+                thisGroup.Add(asig);
+            }
+
+            while (all.Count > 0)
+            {
+                var k = all.Keys.First();
+                var group = all[k];
+                all.Remove(k);
+
+                if (group.Count < 2)
+                {
+                    continue;
+                }
+
+                result = true;
+
+                var sumAsig = group.OrderBy(i => i.AssignmentDt).Last();
+                sumAsig.Quantity = group.Sum(g => g.Quantity);
+
+                foreach (var toDel in group.Where(i => i.Id != sumAsig.Id))
+                {
+                    m_database.Delete(toDel);
+                }
+
+                m_database.Save(sumAsig);
+            }
+
+            return result;
+        }
+
+        public void ChangeOrderItemBatchAssignment(
+            IPurchaseOrder order,
+            long orderItemId,
+            int batchId,
+            decimal? requestNewAmount)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var item = GetAllOrderItems(order).FirstOrDefault(i => i.Id == orderItemId);
+                if (item == null)
+                {
+                    throw new InvalidOperationException("Invalid item id");
+                }
+
+                var oldAssignment = item.AssignedBatches.FirstOrDefault(b => b.MaterialBatchId == batchId);
+                if (oldAssignment == null)
+                {
+                    throw new InvalidOperationException("Invalid batch id");
+                }
+
+                try
+                {
+                    if (requestNewAmount == null || requestNewAmount == 0m)
+                    {
+                        m_database.Delete(oldAssignment);
+                        tx.Commit();
+                        return;
+                    }
+
+                    if (requestNewAmount.Value > oldAssignment.Quantity)
+                    {
+                        m_database.Delete(oldAssignment);
+
+                        InvalidateBatchCache(batchId);
+                        TryResolveBatchAssignments(
+                            order,
+                            new Tuple<long, int, decimal>(orderItemId, batchId, requestNewAmount.Value));
+
+                        tx.Commit();
+                        return;
+                    }
+
+                    oldAssignment.Quantity = requestNewAmount.Value;
+                    m_database.Save(oldAssignment);
+
+                    tx.Commit();
+                }
+                finally
+                {
+                    InvalidateBatchCache(batchId);
+                }
+            }
         }
 
         private Amount GetAvailableAmount(MaterialBatchComponent batch)
@@ -232,6 +338,142 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private void InvalidateBatchCache(int batchId)
         {
             m_cache.Remove(GetBatchAmountCacheKey(batchId));
+        }
+
+        private List<IOrderItem> GetAllOrderItems(IPurchaseOrder order)
+        {
+            var items = new List<IOrderItem>(order.Items.Count() * 2);
+
+            foreach (var orderItem in order.Items)
+            {
+                var kitItems = m_kitProductRepository.GetKitForOrderItem(order, orderItem).ToList();
+
+                if (!kitItems.Any())
+                {
+                    items.Add(orderItem);
+                    continue;
+                }
+
+                foreach (var kitItem in kitItems)
+                {
+                    if (kitItem.SelectedItem != null)
+                    {
+                        items.Add(kitItem.SelectedItem);
+                    }
+                }
+            }
+            return items;
+        }
+
+        private IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignmentsPrivate(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference, bool doNotRetry)
+        {
+            var items = GetAllOrderItems(order);
+
+            var result = new List<OrderItemBatchAssignmentModel>(items.Count * 2);
+
+            var preferrences = m_batchPreferrenceRepository.GetPreferredBatches().ToList();
+
+            foreach (var orderItem in items)
+            {
+                var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, orderItem);
+
+                var adHocPreferrence = orderItemBatchPreference;
+                if (adHocPreferrence?.Item1 != orderItem.Id)
+                {
+                    adHocPreferrence = null;
+                }
+
+                var amountToAllocate = new Amount(orderItem.Quantity, material.Amount.Unit);
+
+                //1. already assigned batches:
+                foreach (var assignment in orderItem.AssignedBatches)
+                {
+                    var assignedAmount = new Amount(assignment.Quantity, material.Amount.Unit);
+                    amountToAllocate = m_amountProcessor.Subtract(amountToAllocate, assignedAmount);
+
+                    result.Add(new OrderItemBatchAssignmentModel()
+                    {
+                        AssignedQuantity = assignment.Quantity,
+                        MaterialBatchId = assignment.MaterialBatchId,
+                        BatchNumber = m_batchRepository.GetBatchById(assignment.MaterialBatchId)?.Batch?.BatchNumber,
+                        OrderItemId = orderItem.Id,
+                    });
+                }
+
+                if (amountToAllocate.IsZero)
+                {
+                    // We already allocated the whole quantity
+                    continue;
+                }
+
+                //2. assignment by preferrence
+                var preferrence = preferrences.FirstOrDefault(p => p.MaterialId == material.MaterialId);
+
+                if (preferrence != null || adHocPreferrence != null)
+                {
+                    var preferredBatch = adHocPreferrence?.Item2 ?? preferrence.BatchId;
+
+                    var availableBatchAmount = GetAvailableAmount(preferredBatch);
+                    if (availableBatchAmount.Value > 0m)
+                    {
+                        var allocateByPreferrence = m_amountProcessor.Min(amountToAllocate, availableBatchAmount);
+
+                        if (adHocPreferrence != null)
+                        {
+                            allocateByPreferrence =
+                                m_amountProcessor.Min(
+                                    new Amount(adHocPreferrence.Item3, material.Amount.Unit),
+                                    allocateByPreferrence);
+                        }
+
+                        amountToAllocate = m_amountProcessor.Subtract(amountToAllocate, allocateByPreferrence);
+
+                        result.Add(new OrderItemBatchAssignmentModel()
+                        {
+                            AssignedQuantity = allocateByPreferrence.Value,
+                            MaterialBatchId = preferredBatch,
+                            BatchNumber = m_batchRepository.GetBatchById(preferredBatch)?.Batch?.BatchNumber,
+                            OrderItemId = orderItem.Id
+                        });
+
+                        AssignOrderItemToBatch(preferredBatch, order, orderItem.Id, allocateByPreferrence.Value);
+                    }
+
+                    if (availableBatchAmount.IsNotPositive && preferrence != null)
+                    {
+                        preferrences.Remove(preferrence);
+                        m_batchPreferrenceRepository.InvalidatePreferrence(preferrence.Id);
+                    }
+                }
+
+                if (amountToAllocate.IsZero)
+                {
+                    // We already allocated the whole quantity
+                    continue;
+                }
+
+                // 3. unable to allocate the whole amount
+                result.Add(new OrderItemBatchAssignmentModel()
+                {
+                    AssignedQuantity = amountToAllocate.Value,
+                    MaterialBatchId = -1,
+                    OrderItemId = orderItem.Id
+                });
+            }
+
+            if (AlignOrderBatches(order.Id))
+            {
+                if (doNotRetry)
+                {
+                    m_log.Error("Second attempt to AlignOrderBatches failed");
+                }
+                else
+                {
+                    return TryResolveBatchAssignmentsPrivate(m_orderRepository.GetOrder(order.Id), orderItemBatchPreference, true).ToList();
+                }
+            }
+
+            return result;
         }
     }
 }

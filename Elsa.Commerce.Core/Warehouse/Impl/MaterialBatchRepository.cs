@@ -59,16 +59,34 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return model;
         }
 
-        public IEnumerable<MaterialBatchComponent> GetMaterialBatches(DateTime from, DateTime to, bool excludeCompositions, int? materialId)
+        public IEnumerable<MaterialBatchComponent> GetMaterialBatches(
+            DateTime from,
+            DateTime to,
+            bool excludeCompositions,
+            int? materialId,
+            bool includeLocked = false,
+            bool includeClosed = false)
         {
             var query = GetBatchQuery().Where(b => b.Created >= from && b.Created <= to);
+            
             if (materialId != null)
             {
                 query = query.Where(b => b.MaterialId == materialId.Value);
             }
 
-            var entities =
-                query.Execute().Where(b => (!excludeCompositions) || (!b.Components.Any())).Select(MapToModel);
+            if (!includeLocked)
+            {
+                query = query.Where(b => b.LockDt == null);
+            }
+
+            if (!includeClosed)
+            {
+                query = query.Where(b => b.CloseDt == null);
+            }
+
+            var entities = query.Execute()
+                .Where(b => (!excludeCompositions) || (!b.Components.Any()))
+                .Select(MapToModel);
 
             return entities;
         }

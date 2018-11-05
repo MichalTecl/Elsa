@@ -6,6 +6,7 @@ using Elsa.App.OrdersPacking.Model;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Shipment;
+using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
@@ -26,9 +27,20 @@ namespace Elsa.App.OrdersPacking
         private readonly IKitProductRepository m_kitProductRepository;
         private readonly IErpClientFactory m_erpClientFactory;
         private readonly IMaterialBatchFacade m_batchFacade;
-        private readonly IDatabase m_database; 
-        
-        public PackingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IShipmentProvider shipmentProvider, IOrdersFacade ordersFacade, IKitProductRepository kitProductRepository, IErpClientFactory erpClientFactory, IMaterialBatchFacade batchFacade, IDatabase database)
+        private readonly IVirtualProductFacade m_virtualProductFacade;
+        private readonly IDatabase m_database;
+
+        public PackingController(
+            IWebSession webSession,
+            ILog log,
+            IPurchaseOrderRepository orderRepository,
+            IShipmentProvider shipmentProvider,
+            IOrdersFacade ordersFacade,
+            IKitProductRepository kitProductRepository,
+            IErpClientFactory erpClientFactory,
+            IMaterialBatchFacade batchFacade,
+            IDatabase database,
+            IVirtualProductFacade virtualProductFacade)
             : base(webSession, log)
         {
             m_orderRepository = orderRepository;
@@ -38,6 +50,7 @@ namespace Elsa.App.OrdersPacking
             m_erpClientFactory = erpClientFactory;
             m_batchFacade = batchFacade;
             m_database = database;
+            m_virtualProductFacade = virtualProductFacade;
         }
 
         public PackingOrderModel FindOrder(string number)
@@ -152,14 +165,64 @@ namespace Elsa.App.OrdersPacking
             }
         }
 
+        public PackingOrderModel SetItemBatchAllocation(BatchAllocationChangeRequest request)
+        {
+            PackingOrderModel result;
+            using (var tx = m_database.OpenTransaction())
+            {
+                var order = m_orderRepository.GetOrder(request.OrderId);
+                if (order == null)
+                {
+                    throw new InvalidOperationException("Objednávka nebyla v systému nalezena");
+                }
+
+                if (request.OriginalBatchId != null && request.OriginalBatchId > 0)
+                {
+                    m_batchFacade.ChangeOrderItemBatchAssignment(
+                        order,
+                        request.OrderItemId,
+                        request.OriginalBatchId.Value,
+                        request.NewAmount);
+
+                    order = m_orderRepository.GetOrder(order.Id);
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.NewBatchSearchQuery))
+                {
+                    var item =
+                        m_ordersFacade.GetAllConcreteOrderItems(order).FirstOrDefault(i => i.Id == request.OrderItemId);
+                    if (item == null)
+                    {
+                        throw new InvalidOperationException("Invalid object reference");
+                    }
+
+                    var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, item);
+                    var batch = m_batchFacade.FindBatchBySearchQuery(material.MaterialId, request.NewBatchSearchQuery);
+
+
+                    result = MapOrder(
+                        order,
+                        new Tuple<long, int, decimal>(item.Id, batch.Id, request.NewAmount ?? item.Quantity));
+                }
+                else
+                {
+                    result = MapOrder(order);
+                }
+
+                tx.Commit();
+
+                return result;
+            }
+        }
+
         public IEnumerable<LightOrderInfo> GetOrdersToPack()
         {
             return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), true).Select(i => new LightOrderInfo(i));
         }
 
-        private PackingOrderModel MapOrder(IPurchaseOrder entity)
+        private PackingOrderModel MapOrder(IPurchaseOrder entity, Tuple<long, int, decimal> orderItemBatchPreference = null)
         {
-            var batchAssignments = m_batchFacade.CreateBatchesAssignmentProposal(entity).ToList();
+            var batchAssignments = m_batchFacade.TryResolveBatchAssignments(entity, orderItemBatchPreference).ToList();
 
             var orderModel = new PackingOrderModel
                                  {
@@ -202,8 +265,6 @@ namespace Elsa.App.OrdersPacking
                     
                     kitItems.Add(model);
                 }
-
-                //var kitItems = m_kitProductRepository.GetKitForOrderItem(entity, sourceItem).Select().ToList();
                 
                 item.KitItems.AddRange(kitItems);
                 item.BatchAssignment.AddRange(batchAssignments.Where(a => a.OrderItemId == sourceItem.Id));
