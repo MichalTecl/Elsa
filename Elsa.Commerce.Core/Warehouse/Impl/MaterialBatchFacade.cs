@@ -364,11 +364,19 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     continue;
                 }
 
+                foreach (var child in orderItem.KitChildren)
+                {
+                    items.Add(child);
+                }
+
                 foreach (var kitItem in kitItems)
                 {
                     if (kitItem.SelectedItem != null)
                     {
-                        items.Add(kitItem.SelectedItem);
+                        if (items.All(i => i.Id != kitItem.SelectedItem.Id))
+                        {
+                            items.Add(kitItem.SelectedItem);
+                        }
                     }
                 }
             }

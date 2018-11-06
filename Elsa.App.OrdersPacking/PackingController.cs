@@ -92,7 +92,6 @@ namespace Elsa.App.OrdersPacking
 
                     paid = m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30)).ToList();
 
-
                     order = paid.FirstOrDefault(o => o.PreInvoiceId == orderNumber || o.OrderNumber == orderNumber);
                     if (order == null)
                     {
@@ -243,7 +242,8 @@ namespace Elsa.App.OrdersPacking
                                {
                                    ProductName = sourceItem.PlacedName,
                                    ItemId = sourceItem.Id,
-                                   Quantity = StringUtil.FormatDecimal(sourceItem.Quantity)
+                                   Quantity = StringUtil.FormatDecimal(sourceItem.Quantity),
+                                   NumericQuantity = sourceItem.Quantity
                                };
 
                 var kitItems = new List<KitItemsCollectionModel>();
@@ -257,9 +257,10 @@ namespace Elsa.App.OrdersPacking
                         {
                             ProductName = sourceKitItem.SelectedItem.PlacedName,
                             ItemId = sourceKitItem.SelectedItem.Id,
-                            Quantity = StringUtil.FormatDecimal(sourceKitItem.SelectedItem.Quantity)
+                            Quantity = StringUtil.FormatDecimal(sourceKitItem.SelectedItem.Quantity),
+                            NumericQuantity = sourceKitItem.SelectedItem.Quantity
                         };
-                        selitem.BatchAssignment.AddRange(batchAssignments.Where(a => a.OrderItemId == sourceKitItem.SelectedItem.Id));
+                        SetupBatchAssignment(selitem, batchAssignments.Where(a => a.OrderItemId == sourceKitItem.SelectedItem.Id));
                         model.SelectedItemModel = selitem;
                     }
                     
@@ -267,12 +268,26 @@ namespace Elsa.App.OrdersPacking
                 }
                 
                 item.KitItems.AddRange(kitItems);
-                item.BatchAssignment.AddRange(batchAssignments.Where(a => a.OrderItemId == sourceItem.Id));
-
+                SetupBatchAssignment(item, batchAssignments.Where(a => a.OrderItemId == sourceItem.Id));
                 orderModel.Items.Add(item);
             }
 
             return orderModel;
+        }
+
+        private void SetupBatchAssignment(
+            PackingOrderItemModel item,
+            IEnumerable<OrderItemBatchAssignmentModel> assignments)
+        {
+            var models = assignments.Select(a => new BatchAssignmentViewModel(a)).ToList();
+
+            foreach (var model in models)
+            {
+                model.CanSplit = item.NumericQuantity > 1m;
+                model.IsSplit = models.Count > 1;
+            }
+
+            item.BatchAssignment.AddRange(models);
         }
 
         private string GetTrackingNumber(IPurchaseOrder order)

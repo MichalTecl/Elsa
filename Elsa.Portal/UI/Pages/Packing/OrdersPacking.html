@@ -85,6 +85,8 @@
                                 <div class="selectionGroupName" data-bind="text:GroupName"></div>
                                 <div class="kitSelectedItemContainer stackLeft" data-bind="class!.hidden:hasSelectedItem">
                                     <div class="kitSelectedItem" data-bind="text:SelectedItem.ProductName"></div>
+                                    <div lt-name="rootItemBatchSelector">
+                                    </div>
                                     <i class="fas fa-circle-notch faButton" event-bind="click:onKitItemSelectionCancel(VM)"></i>
                                 </div>
                             </div>
@@ -121,6 +123,8 @@
 
     var batchSelectorController = function(batchAssignmentList, batchItemTemplate) {
         
+        var self = this;
+
         this.bind(function(BatchAssignment) {
 
             lt.generate(batchAssignmentList, batchItemTemplate, BatchAssignment);
@@ -144,26 +148,38 @@
                 this.setAttribute("readonly", "readonly");
 
                 onBatchNumberEntered(this["eli-assignmentModel"], value, this["eli-orderItemId"], this["eli-allocatedQty"]);
+                
+
+
+                self.undoChange(this["eli-tbBatchSearch"], this["eli-lblBatchNumber"]);
             }
         };
 
-        this.onChangeBatchClick = function (sourceElement, model) {
-
-            if (!sourceElement.getAttribute("readonly")) {
+        this.onChangeBatchClick = function (tbBatchSearch, lblBatchNumber, model) {
+           
+            if (tbBatchSearch.style.display === 'block') {
                 return;
             }
 
-            sourceElement.value = '';
-            sourceElement["eli-orderItemId"] = model.OrderItemId;
-            sourceElement["eli-allocatedQty"] = model.AssignedQuantity;
-            sourceElement["eli-assignmentModel"] = model;
-            sourceElement.addEventListener("keydown", batchNumberEntryEventListener);
-            sourceElement.removeAttribute("readonly");
-            setTimeout(function() { sourceElement.focus(); }, 0);
+            tbBatchSearch.style.display = 'block';
+            lblBatchNumber.style.display = 'none';
+            
+            tbBatchSearch["eli-assignmentModel"] = model;
+            tbBatchSearch["eli-tbBatchSearch"] = tbBatchSearch;
+            tbBatchSearch["eli-lblBatchNumber"] = lblBatchNumber;
+            tbBatchSearch.addEventListener("keydown", batchNumberEntryEventListener);
+            
+            setTimeout(function() { tbBatchSearch.focus(); }, 0);
         };
 
         this.decreaseAmount = function(model) {
             app.ordersPacking.vm.decreaseAmount(model);
+        };
+
+        this.undoChange = function (tbBatchSearch, lblBatchNumber) {
+            tbBatchSearch.addEventListener("keydown", batchNumberEntryEventListener);
+            tbBatchSearch.style.display = 'none';
+            lblBatchNumber.style.display = 'block';
         };
     };
 
@@ -191,9 +207,20 @@
 
             };
 
-            var kitGroupController = function(kitGroupItems) {
+            var kitGroupController = function(kitGroupItems, rootItemBatchSelector) {
                 this.bind(function(GroupItems) {
-                    lt.generate(kitGroupItems, kitItemTemplate, GroupItems, function(i) { return i.Id; });
+                        lt.generate(kitGroupItems, kitItemTemplate, GroupItems, function(i) { return i.Id; });
+                });
+
+                this.bind(function(SelectedItem) {
+                    if (!!SelectedItem) {
+                        lt.fillBy(rootItemBatchSelector,
+                            "/UI/Pages/Packing/Partial/BatchSelectorTemplate.html",
+                            function() {
+                                lt.element(rootItemBatchSelector).attach(batchSelectorController);
+                                lt.setViewModel(rootItemBatchSelector, SelectedItem);
+                            });
+                    }
                 });
             };
 

@@ -298,6 +298,9 @@ namespace Elsa.Commerce.Core.Repositories
                     .Join(o => o.Items.Each().AssignedBatches)
                     .Join(o => o.Items.Each().AssignedBatches.Each().MaterialBatch)
                     .Join(o => o.Items.Each().AssignedBatches.Each())
+                    .Join(o => o.Items.Each().KitChildren)
+                    .Join(o => o.Items.Each().KitChildren.Each().AssignedBatches)
+                    .Join(o => o.Items.Each().KitChildren.Each().AssignedBatches.Each().MaterialBatch)
                     .Join(o => o.Payment)
                     .Where(o => o.ProjectId == m_session.Project.Id);
         }

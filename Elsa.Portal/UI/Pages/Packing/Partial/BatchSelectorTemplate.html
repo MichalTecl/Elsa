@@ -1,9 +1,21 @@
 ﻿<div>
     <div lt-name="batchAssignmentList">
-        <div lt-name="batchItemTemplate" class="stackLeft">
-            <input type="number" step="1" data-bind="value:AssignedQuantity" />
-            <input type="text" data-bind="value:BatchNumber" event-bind="click:onChangeBatchClick(this, VM)" readonly="readonly" />
-            <button event-bind="click:decreaseAmount(VM)">-</button>
+        <div lt-name="batchItemTemplate" class="stackLeft batchItemTemplate">
+            
+            <div data-bind="text:AssignedQuantity; class!.hidden:IsSplit" class="batchAssignmentAmount" ></div>
+            
+            <div lt-name="lblBatchNumber" event-bind="click:onChangeBatchClick($tbBatchSearch, $lblBatchNumber, VM);">
+                <div data-bind="text:BatchNumber"
+                     class="batchAssignmentBatchNr">
+                </div>
+                <i class="fas fa-question-circle" lt-name="icoEmpty" data-bind="class!.hidden:IsEmpty"></i>
+            </div>
+            
+            <input type="text" lt-name="tbBatchSearch" class="batchAssignmentBatchNr" event-bind="blur:undoChange($tbBatchSearch, $lblBatchNumber, $icoEmpty)" style="display:none" />
+            
+            <span data-bind="class!.hidden:CanSplit">
+                <i class="fas fa-minus faButton" lt-name="butDecrease" event-bind="click:decreaseAmount(VM)" ></i>
+            </span>
         </div>
     </div>
 </div>
