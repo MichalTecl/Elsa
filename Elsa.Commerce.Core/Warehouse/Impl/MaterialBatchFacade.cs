@@ -183,6 +183,14 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     result = AlignAssignments(assignments) | result;
                 }
 
+                foreach (var pref in preferrences.Values)
+                {
+                    if (GetAvailableAmount(pref.Item1).IsPositive)
+                    {
+                        m_batchPreferrenceRepository.SetBatchPreferrence(pref.Item1);
+                    }
+                }
+
                 tx.Commit();
             }
 
@@ -253,6 +261,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 {
                     throw new InvalidOperationException("Invalid batch id");
                 }
+
+                m_batchPreferrenceRepository.RemoveBatchFromPreferrence(batchId);
 
                 try
                 {

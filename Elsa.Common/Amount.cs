@@ -29,6 +29,8 @@ namespace Elsa.Common
 
         public bool IsNotPositive => Value < 0 || IsZero;
 
+        public bool IsPositive => (!IsZero) && Value > 0; 
+
         /*
         public override bool Equals(object obj)
         {

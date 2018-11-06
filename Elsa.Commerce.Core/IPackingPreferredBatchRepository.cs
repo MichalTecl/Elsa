@@ -13,5 +13,7 @@ namespace Elsa.Commerce.Core
         void NotifyPreferrenceActivity(int preferrenceId);
 
         void InvalidatePreferrence(int preferrenceId);
+
+        void RemoveBatchFromPreferrence(int batchId);
     }
 }

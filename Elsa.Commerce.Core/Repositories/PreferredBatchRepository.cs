@@ -106,6 +106,15 @@ namespace Elsa.Commerce.Core.Repositories
             m_cache.Remove(GetPreferredBatchesCacheKey());
         }
 
+        public void RemoveBatchFromPreferrence(int batchId)
+        {
+            var preferrence = GetPreferredBatches().FirstOrDefault(p => p.BatchId == batchId);
+            if (preferrence != null)
+            {
+                InvalidatePreferrence(preferrence.Id);
+            }
+        }
+
         private string GetPreferredBatchesCacheKey()
         {
             return $"prf_pck_bchs_usr_{m_session.User.Id}";

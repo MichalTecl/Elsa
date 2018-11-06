@@ -3,6 +3,7 @@
         <div lt-name="batchItemTemplate" class="stackLeft">
             <input type="number" step="1" data-bind="value:AssignedQuantity" />
             <input type="text" data-bind="value:BatchNumber" event-bind="click:onChangeBatchClick(this, VM)" readonly="readonly" />
+            <button event-bind="click:decreaseAmount(VM)">-</button>
         </div>
     </div>
 </div>

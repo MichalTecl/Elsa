@@ -161,6 +161,10 @@
             sourceElement.removeAttribute("readonly");
             setTimeout(function() { sourceElement.focus(); }, 0);
         };
+
+        this.decreaseAmount = function(model) {
+            app.ordersPacking.vm.decreaseAmount(model);
+        };
     };
 
     lt.element("packingUi")
