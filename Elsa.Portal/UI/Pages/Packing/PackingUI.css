@@ -305,3 +305,50 @@ div.kitSelectedItemContainer:hover > i.faButton {
     overflow-x:hidden;
     white-space:nowrap; 
 }
+
+
+
+.batchItemTemplate {
+    margin-left:15px;
+    font-size:0.8em;   
+    /*opacity:0.8; */
+    color:#557055;
+    border-bottom: 1px dotted #aaaaaa;
+}
+
+div:last-child.batchItemTemplate {
+    border-bottom: none;
+}
+
+
+.batchItemTemplate:hover {
+    opacity:1;
+}
+
+.batchItemTemplate .fa-minus {
+    display:none;
+    margin-left:4px;
+}
+
+.batchItemTemplate:hover .fa-minus {
+    display:block;
+}
+
+.batchAssignmentAmount {
+    margin-right:3px;
+    border-right: 1px dotted #aaaaaa;    
+    padding-right:3px;
+    font-weight:bold;
+}
+
+.batchItemTemplate .fa-question-circle {
+    color:red;        
+}
+
+.batchAssignmentUi {
+    min-height:100%;
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+
