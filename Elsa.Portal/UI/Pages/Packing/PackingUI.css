@@ -206,6 +206,13 @@ div.kitSelectedItemContainer:hover > i.faButton {
     display:inline-block;    
 }
 
+.highlightErrors .kitItemContainer * {
+    font-size:2em;
+    color:red;
+    opacity:1;
+}
+
+
 .kitItemIndexMarker {    
     display:inline-block;
     background-color: #BEB7DF;        
@@ -241,7 +248,11 @@ div.kitSelectedItemContainer:hover > i.faButton {
      -khtml-user-select: none; /* Konqueror HTML */
        -moz-user-select: none; /* Firefox */
         -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */            
+}
+
+#butMarkPacked * {
+    pointer-events: none;
 }
 
 #butMarkPacked:active {
@@ -320,6 +331,9 @@ div:last-child.batchItemTemplate {
     border-bottom: none;
 }
 
+.batchAssignmentBatchNr {
+    cursor:pointer;
+}
 
 .batchItemTemplate:hover {
     opacity:1;
@@ -338,11 +352,12 @@ div:last-child.batchItemTemplate {
     margin-right:3px;
     border-right: 1px dotted #aaaaaa;    
     padding-right:3px;
-    font-weight:bold;
+    font-weight:bold;    
 }
 
 .batchItemTemplate .fa-question-circle {
     color:red;        
+    cursor:pointer;
 }
 
 .batchAssignmentUi {
@@ -352,3 +367,6 @@ div:last-child.batchItemTemplate {
     align-items: center; 
 }
 
+.highlightErrors .batchItemTemplate .fa-question-circle {
+    font-size:2em;
+}

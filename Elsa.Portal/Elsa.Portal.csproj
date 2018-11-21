@@ -290,6 +290,10 @@
       <Project>{DAC5B9D4-F7A0-49C5-A4BD-45AFE0E7C6C1}</Project>
       <Name>Elsa.Jobs.ImportOrders</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.LoadCurrencyRates\Elsa.Jobs.LoadCurrencyRates.csproj">
+      <Project>{68C066E6-C31A-454C-845F-F2BF1693F76D}</Project>
+      <Name>Elsa.Jobs.LoadCurrencyRates</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.PaymentPairing\Elsa.Jobs.PaymentPairing.csproj">
       <Project>{A4F5C43F-09C2-4DF4-BBE1-4FA96D17271F}</Project>
       <Name>Elsa.Jobs.PaymentPairing</Name>

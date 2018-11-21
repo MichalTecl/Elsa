@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
@@ -47,7 +46,7 @@ namespace Elsa.Commerce.Core.Impl
             var order = m_orderRepository.GetOrder(orderId);
             if (order == null)
             {
-                throw new InvalidOperationException($"Order not found");
+                throw new InvalidOperationException("Order not found");
             }
 
             if (paymentId != null)
@@ -89,12 +88,12 @@ namespace Elsa.Commerce.Core.Impl
             return order;
         }
 
-        public IPurchaseOrder SetOrderSent(long orderId, List<OrderItemBatchAssignmentModel> batchAssignments)
+        public IPurchaseOrder SetOrderSent(long orderId)
         {
             var order = m_orderRepository.GetOrder(orderId);
             if (order == null)
             {
-                throw new InvalidOperationException($"Order not found");
+                throw new InvalidOperationException("Order not found");
             }
 
             using (var tx = m_database.OpenTransaction())
@@ -104,13 +103,13 @@ namespace Elsa.Commerce.Core.Impl
 
                 foreach (var item in order.Items)
                 {
-                    var assignments = batchAssignments?.Where(a => a.OrderItemId == item.Id).ToList();
-                    if (assignments == null || assignments.Count == 0)
+                    var assignments = item.AssignedBatches.ToList();
+                    if (assignments.Count == 0)
                     {
                         throw new InvalidOperationException($"Batch assignment missing - OrderItemId = {item.Id}");
                     }
 
-                    var sum = assignments.Sum(a => a.AssignedQuantity);
+                    var sum = assignments.Sum(a => a.Quantity);
                     if (Math.Abs(sum - item.Quantity) > 0.0001m)
                     {
                         throw new InvalidOperationException($"Invalid assignment quantity - OrderItemId={item.Id}, diff={Math.Abs(sum - item.Quantity)}");
@@ -118,7 +117,7 @@ namespace Elsa.Commerce.Core.Impl
 
                     foreach (var assignment in assignments)
                     {
-                        m_batchFacade.AssignOrderItemToBatch(assignment.MaterialBatchId, order, item.Id, assignment.AssignedQuantity);
+                        m_batchFacade.AssignOrderItemToBatch(assignment.MaterialBatchId, order, item.Id, assignment.Quantity);
                     }
                 }
 

@@ -105,7 +105,8 @@
                     <div id="packingControlPanel" class="stackRight">
                         
                         
-                        <div id="butMarkPacked" event-bind="mousedown:onPackButtonMouseDown(this); mouseup:onPackButtonMouseUp(this); mouseout:onPackButtonMouseUp(this)">
+                        <div id="butMarkPacked" 
+                             event-bind="mousedown:onPackButtonMouseDown(this); mouseup:onPackButtonMouseUp(this); mouseout:onPackButtonMouseUp(this); blur:onPackButtonMouseUp(this); mouseenter:onPackButtonHover(this); hover:onPackButtonHover(this)">
                             <div id="progressContainer">
                                 <div id="progressBar"></div>
                             </div>
@@ -144,12 +145,8 @@
                     alert("Zadejte nejméně tři poslední číslice z čísla šarže");
                     return;
                 }
-
-                this.setAttribute("readonly", "readonly");
-
-                onBatchNumberEntered(this["eli-assignmentModel"], value, this["eli-orderItemId"], this["eli-allocatedQty"]);
                 
-
+                onBatchNumberEntered(this["eli-assignmentModel"], value, this["eli-orderItemId"], this["eli-allocatedQty"]);
 
                 self.undoChange(this["eli-tbBatchSearch"], this["eli-lblBatchNumber"]);
             }
@@ -179,6 +176,7 @@
         this.undoChange = function (tbBatchSearch, lblBatchNumber) {
             tbBatchSearch.addEventListener("keydown", batchNumberEntryEventListener);
             tbBatchSearch.style.display = 'none';
+            tbBatchSearch.value = '';
             lblBatchNumber.style.display = 'block';
         };
     };
@@ -255,7 +253,7 @@
                         itemController);
                 }
             }).currentOrderCanBeNull();
-
+            
             this.onSearchKeyDown = function(event, value) {
 
                 if (event.key !== "Enter") {
@@ -309,7 +307,12 @@
                 clearTimeout(timer);
                 progressBar.style.transition = "width 0.2s";
                 progressBar.style.width = "0%";
+                itemsList.setAttribute("class", "");
             };
+
+            self.onPackButtonHover = function(button) {
+                itemsList.setAttribute("class", "highlightErrors");
+            }
 
             document.onkeydown = function (evt) {
                 evt = evt || window.event;

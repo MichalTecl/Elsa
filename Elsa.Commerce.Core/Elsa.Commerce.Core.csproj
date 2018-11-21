@@ -75,6 +75,11 @@
     <Compile Include="Model\KitItemsCollection.cs" />
     <Compile Include="Model\MaterialAmountModel.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
+    <Compile Include="Production\IProductionFacade.cs" />
+    <Compile Include="Production\Model\ProductionBatchComponentModel.cs" />
+    <Compile Include="Production\Model\ProductionBatchModel.cs" />
+    <Compile Include="Production\Model\SubBatchAssignmentModel.cs" />
+    <Compile Include="Production\ProductionFacade.cs" />
     <Compile Include="Repositories\CustomerRepository.cs" />
     <Compile Include="Repositories\ErpRepository.cs" />
     <Compile Include="Repositories\KitProductRepository.cs" />
@@ -120,7 +125,9 @@
     <Compile Include="Warehouse\Impl\MaterialBatchRepository.cs" />
     <Compile Include="Warehouse\MaterialBatchComponent.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="CurrencyRates\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
       <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>

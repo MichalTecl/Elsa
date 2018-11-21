@@ -65,7 +65,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             bool excludeCompositions,
             int? materialId,
             bool includeLocked = false,
-            bool includeClosed = false)
+            bool includeClosed = false,
+            bool includeUnavailable = false)
         {
             var query = GetBatchQuery().Where(b => b.Created >= from && b.Created <= to);
             
@@ -84,6 +85,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 query = query.Where(b => b.CloseDt == null);
             }
 
+            if (!includeUnavailable)
+            {
+                query = query.Where(b => b.IsAvailable == true);
+            }
+
             var entities = query.Execute()
                 .Where(b => (!excludeCompositions) || (!b.Components.Any()))
                 .Select(MapToModel);
@@ -91,7 +97,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return entities;
         }
 
-        public MaterialBatchComponent SaveMaterialBatch(
+        public MaterialBatchComponent SaveBottomLevelMaterialBatch(
             int id,
             IMaterial material,
             decimal amount,
@@ -147,6 +153,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 entity.UnitId = unit.Id;
                 entity.Price = price;
                 entity.Note = string.Empty;
+                entity.IsAvailable = true;
+
                 m_database.Save(entity);
 
                 result = GetBatchById(entity.Id);
@@ -176,6 +184,86 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                         .Execute());
         }
 
+        public IEnumerable<IMaterialBatchComposition> GetCompositionsByComponentBatchId(int componentBatchId)
+        {
+            return
+                m_database.SelectFrom<IMaterialBatchComposition>()
+                    .Join(c => c.Unit)
+                    .Where(c => c.ComponentId == componentBatchId)
+                    .Execute();
+        }
+
+        public void UpdateBatchAvailability(int batchId, bool isAvailable)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var batch =
+                    m_database.SelectFrom<IMaterialBatch>()
+                        .Where(
+                            b => b.Id == batchId && b.IsAvailable != isAvailable && b.ProjectId == m_session.Project.Id)
+                        .Execute()
+                        .FirstOrDefault();
+
+                if (batch != null)
+                {
+                    batch.IsAvailable = isAvailable;
+                    m_database.Save(batch);
+                }
+
+                tx.Commit();
+            }
+        }
+
+        public MaterialBatchComponent CreateProductionBatch(int materialId, string batchNumber, decimal amount, IMaterialUnit unit)
+        {
+            if (string.IsNullOrWhiteSpace(batchNumber))
+            {
+                throw new InvalidOperationException("Musí být číslo šarže");
+            }
+
+            if (unit == null)
+            {
+                throw new InvalidOperationException("Musí být vybrána měrná jednotka");
+            }
+            
+            var material = m_materialRepository.GetMaterialById(materialId);
+            if (material == null)
+            {
+                throw new InvalidOperationException("Invalid entity reference");
+            }
+
+            if (!m_conversionHelper.AreCompatible(material.Adaptee.NominalUnitId, unit.Id))
+            {
+                throw new InvalidOperationException($"Požadovaná měrná jednotka \"{unit.Symbol}\" není platná pro materiál \"{material.Name}\" protože není převoditelná na nominální jednotku materiálu \"{material.NominalUnit.Symbol}\" ");
+            }
+
+            var alreadyExisting = GetMaterialBatches(
+                DateTime.Now.AddYears(-100),
+                DateTime.Now.AddYears(100),
+                false,
+                materialId,
+                true,
+                true,
+                true);
+            if (alreadyExisting.Any())
+            {
+                throw new InvalidOperationException($"Již existuje šarže {batchNumber} materiálu {material.Name}");
+            }
+
+            var entity = m_database.New<IMaterialBatch>();
+            entity.BatchNumber = batchNumber;
+            entity.UnitId = unit.Id;
+            entity.AuthorId = m_session.User.Id;
+            entity.Created = DateTime.Now;
+            entity.ProjectId = m_session.Project.Id;
+            entity.MaterialId = material.Id;
+            entity.Volume = amount;
+            
+            m_database.Save(entity);
+
+            return GetBatchById(entity.Id);
+        }
+
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()
         {
             return
@@ -185,6 +273,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     .Join(b => b.Unit)
                     .Join(b => b.Components)
                     .Join(b => b.Components.Each().Unit)
+                    .Join(b => b.Components.Each().Component)
+                    .Join(b => b.Components.Each().Component.Unit)
                     .Where(b => b.ProjectId == m_session.Project.Id);
         }
     }

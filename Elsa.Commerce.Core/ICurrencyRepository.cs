@@ -1,4 +1,8 @@
-﻿using Elsa.Core.Entities.Commerce.Common;
+﻿using System;
+using System.Collections.Generic;
+
+using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Core.CurrencyConversions;
 
 namespace Elsa.Commerce.Core
 {
@@ -7,5 +11,19 @@ namespace Elsa.Commerce.Core
         ICurrency GetCurrency(string symbol);
 
         void SaveCurrency(ICurrency currency);
+
+        IEnumerable<ICurrency> GetAllCurrencies();
+
+        IEnumerable<ICurrencyRate> GetActualCurrencyRates();
+
+        ICurrencyRate GetCurrencyRate(ICurrency sourceCurrency, ICurrency targetCurrency, DateTime? forDate = null);
+
+        void SetCurrencyRate(
+            ICurrency sourceCurrency,
+            ICurrency targetCurrency,
+            decimal rate,
+            DateTime validFrom,
+            string sourceLink);
+
     }
 }

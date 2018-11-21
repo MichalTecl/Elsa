@@ -134,7 +134,7 @@ namespace Elsa.App.OrdersPacking
             }
         }
         
-        public void PackOrder(long orderId, List<OrderItemBatchAssignmentModel> batchAssignment)
+        public void PackOrder(long orderId)
         {
             using (var tx = m_database.OpenTransaction())
             {
@@ -156,9 +156,11 @@ namespace Elsa.App.OrdersPacking
                                       $"Objednavka nemuze byt dokoncena - ve skupine '{kit.GroupName}' neni vybrana polozka");
                         }
                     }
-                }
 
-                m_ordersFacade.SetOrderSent(orderId, batchAssignment);
+                    ValidateItemBatches(item);
+                }
+                
+                m_ordersFacade.SetOrderSent(orderId);
 
                 tx.Commit();
             }
@@ -302,5 +304,31 @@ namespace Elsa.App.OrdersPacking
             return erpClient.GetPackingReferenceNumber(order);
         }
 
+        private void ValidateItemBatches(PackingOrderItemModel item)
+        {
+            if (item.KitItems.Any())
+            {
+                foreach (var kitItem in item.KitItems.Where(i => i.SelectedItemModel != null))
+                {
+                    ValidateItemBatches(kitItem.SelectedItemModel);
+                }
+
+                return;
+            }
+
+            ValidateItemBatches(item.ProductName, item.NumericQuantity, item.BatchAssignment);
+        }
+
+        private void ValidateItemBatches(
+            string productName,
+            decimal itemQuantity,
+            IEnumerable<BatchAssignmentViewModel> assignments)
+        {
+            var allocatonSum = assignments.Where(i => i.MaterialBatchId > 0).Sum(i => i.AssignedQuantity);
+            if (Math.Abs(allocatonSum - itemQuantity) > 0.00001m)
+            {
+                throw new InvalidOperationException($"Neplatné přiřazení šarže k položce '{productName}'. Rozdíl požadované a skutečné hodnoty je {allocatonSum - itemQuantity}");
+            }
+        }
     }
 }

@@ -298,6 +298,65 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
+        public void AssignComponent(int parentBatchId, int componentBatchId, Amount amountToAssign)
+        {
+            try
+            {
+                using (var tx = m_database.OpenTransaction())
+                {
+                    var existingComposition =
+                        m_database.SelectFrom<IMaterialBatchComposition>()
+                            .Where(c => c.ComponentId == componentBatchId && c.CompositionId == parentBatchId)
+                            .Execute()
+                            .FirstOrDefault();
+
+                    if (existingComposition != null)
+                    {
+                        throw new InvalidOperationException("Redundant composition attempt");
+                    }
+
+
+                    var composition = m_database.New<IMaterialBatchComposition>();
+                    composition.CompositionId = parentBatchId;
+                    composition.ComponentId = componentBatchId;
+                    composition.Volume = amountToAssign.Value;
+                    composition.UnitId = amountToAssign.Unit.Id;
+
+                    m_database.Save(composition);
+
+                    tx.Commit();
+                }
+            }
+            finally
+            {
+                InvalidateBatchCache(parentBatchId);
+                InvalidateBatchCache(componentBatchId);
+            }
+        }
+
+        public void UnassignComponent(int parentBatchId, int componentBatchId)
+        {
+            try
+            {
+                using (var tx = m_database.OpenTransaction())
+                {
+                    var compositions =
+                        m_database.SelectFrom<IMaterialBatchComposition>()
+                            .Where(c => c.ComponentId == componentBatchId && c.CompositionId == parentBatchId)
+                            .Execute();
+
+                    m_database.DeleteAll(compositions);
+
+                    tx.Commit();
+                }
+            }
+            finally
+            {
+                InvalidateBatchCache(parentBatchId);
+                InvalidateBatchCache(componentBatchId);
+            }
+        }
+
         private Amount GetAvailableAmount(MaterialBatchComponent batch)
         {
             return m_cache.ReadThrough(
@@ -329,11 +388,18 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                                     batchAmount = m_amountProcessor.Subtract(batchAmount, itemAmount);
                                 }
                             }
+                        }
 
-                            foreach (var evt in m_batchRepository.GetBatchEvents(batch.Batch.Id))
-                            {
-                                batchAmount = m_amountProcessor.Add(batchAmount, new Amount(evt.Delta, evt.Unit));
-                            }
+                        foreach (var evt in m_batchRepository.GetBatchEvents(batch.Batch.Id))
+                        {
+                            batchAmount = m_amountProcessor.Add(batchAmount, new Amount(evt.Delta, evt.Unit));
+                        }
+
+                        foreach(var composition in m_batchRepository.GetCompositionsByComponentBatchId(batch.Batch.Id))
+                        {
+                            batchAmount = m_amountProcessor.Subtract(
+                                batchAmount,
+                                new Amount(composition.Volume, composition.Unit));
                         }
 
                         return batchAmount;

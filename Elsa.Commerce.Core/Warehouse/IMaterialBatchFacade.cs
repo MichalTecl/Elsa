@@ -21,5 +21,9 @@ namespace Elsa.Commerce.Core.Warehouse
         bool AlignOrderBatches(long purchaseOrderId);
 
         void ChangeOrderItemBatchAssignment(IPurchaseOrder order, long orderItemId, int batchId, decimal? requestNewAmount);
+
+        void AssignComponent(int parentBatchId, int componentBatchId, Amount amountToAssign);
+
+        void UnassignComponent(int parentBatchId, int componentBatchId);
     }
 }

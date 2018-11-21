@@ -9,6 +9,7 @@ using Elsa.Integration.PaymentSystems.Common;
 using Elsa.Integration.PaymentSystems.Fio;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.GeocodeAddresses;
+using Elsa.Jobs.LoadCurrencyRates;
 using Elsa.Jobs.PaymentPairing;
 using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
@@ -43,6 +44,7 @@ namespace Elsa.JobLauncher
             container.Setup(s => s.ScanAssembly(typeof(LoadGeo).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(ElerpClient).Assembly));
             container.Setup(s => s.ScanAssembly(typeof(CustomersSyncJob).Assembly));
+            container.Setup(s => s.ScanAssembly(typeof(ImportRatesJob).Assembly));
             return container;
         }
     }

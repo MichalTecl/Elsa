@@ -37,8 +37,13 @@ namespace Elsa.Commerce.Core.VirtualProducts
             int materialInventoryId,
             IEnumerable<string> components)
         {
-            name = name.Trim();
+            name = name?.Trim();
 
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new InvalidOperationException("Materiál musí mít název");
+            }
+            
             if (string.IsNullOrWhiteSpace(nominalAmountText))
             {
                 throw new ArgumentException("Materiál musí mít vlastní množství a jednotku");

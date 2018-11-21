@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Core.CurrencyConversions;
 
 using Robowire.RobOrm.Core;
 
@@ -14,51 +16,106 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly IDatabase m_database;
         private readonly ISession m_session;
 
-        private readonly List<ICurrency> m_index = new List<ICurrency>();
+        private readonly IPerProjectDbCache m_cache;
 
-        public CurrencyRepository(IDatabase database, ISession session)
+        public CurrencyRepository(IDatabase database, ISession session, IPerProjectDbCache cache)
         {
             m_database = database;
             m_session = session;
+            m_cache = cache;
         }
 
         public ICurrency GetCurrency(string symbol)
         {
-            var currency = m_index.FirstOrDefault(c => c.Symbol == symbol && c.ProjectId == m_session.Project.Id);
-            if (currency == null)
-            {
-                currency =
-                    m_database.SelectFrom<ICurrency>()
-                        .Where(c => c.ProjectId == m_session.Project.Id && c.Symbol == symbol)
-                        .Execute()
-                        .FirstOrDefault();
-
-                m_index.Add(currency);
-            }
-
-            return currency;
+            return
+                GetAllCurrencies()
+                    .FirstOrDefault(c => c.Symbol.Equals(symbol, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public void SaveCurrency(ICurrency currency)
         {
-            var cachedCurrency = m_index.FirstOrDefault(c => c.Symbol == currency.Symbol && c.ProjectId == m_session.Project.Id);
-            if (cachedCurrency != null && currency.Id > 0 && cachedCurrency.Id == currency.Id
-                && cachedCurrency.Symbol == currency.Symbol)
+            try
             {
-                return;
+                currency.ProjectId = m_session.Project.Id;
+
+                m_database.Save(currency);
+            }
+            finally
+            {
+                m_cache.Remove("currencies");
+            }
+        }
+
+        public IEnumerable<ICurrency> GetAllCurrencies()
+        {
+            return m_cache.ReadThrough("currencies", db => db.SelectFrom<ICurrency>());
+        }
+
+        public IEnumerable<ICurrencyRate> GetActualCurrencyRates()
+        {
+            return m_cache.ReadThrough("currates", db => db.SelectFrom<ICurrencyRate>().Join(r => r.SourceCurrency).Join(r => r.TargetCurrency).Where(i => i.ValidTo == null));
+        }
+
+        public ICurrencyRate GetCurrencyRate(ICurrency sourceCurrency, ICurrency targetCurrency, DateTime? forDate = null)
+        {
+            if (forDate == null)
+            {
+                return
+                    GetActualCurrencyRates()
+                        .FirstOrDefault(
+                            r => r.SourceCurrencyId == sourceCurrency.Id && r.TargetCurrencyId == targetCurrency.Id);
             }
 
+            return
+                m_database.SelectFrom<ICurrencyRate>()
+                    .Where(r => r.ProjectId == m_session.Project.Id)
+                    .Where(c => c.SourceCurrencyId == sourceCurrency.Id && c.TargetCurrencyId == targetCurrency.Id)
+                    .Where(r => r.ValidFrom <= forDate.Value && r.ValidTo >= forDate.Value)
+                    .Execute()
+                    .FirstOrDefault();
+        }
 
-            m_index.Clear();
-
-            if (currency.Id > 0 && currency.ProjectId != m_session.Project.Id)
+        public void SetCurrencyRate(
+            ICurrency sourceCurrency,
+            ICurrency targetCurrency,
+            decimal rate,
+            DateTime validFrom,
+            string sourceLink)
+        {
+            try
             {
-                throw new InvalidOperationException("Project assignment mischmatch");
+                using (var tx = m_database.OpenTransaction())
+                {
+                    var oldRate = GetCurrencyRate(sourceCurrency, targetCurrency);
+
+                    if (oldRate != null && oldRate.ValidFrom >= validFrom)
+                    {
+                        tx.Commit();
+                        return;
+                    }
+
+                    if (oldRate != null)
+                    {
+                        oldRate.ValidTo = validFrom;
+                    }
+
+                    var actualRate = m_database.New<ICurrencyRate>();
+                    actualRate.SourceCurrencyId = sourceCurrency.Id;
+                    actualRate.TargetCurrencyId = targetCurrency.Id;
+                    actualRate.ValidFrom = validFrom;
+                    actualRate.Rate = rate;
+                    actualRate.SourceLink = sourceLink;
+                    actualRate.ProjectId = m_session.Project.Id;
+                    
+                    m_database.Save(actualRate);
+
+                    tx.Commit();
+                }
             }
-
-            currency.ProjectId = m_session.Project.Id;
-
-            m_database.Save(currency);
+            finally
+            {
+                m_cache.Remove("currates");
+            }
         }
     }
 }

@@ -7,9 +7,24 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     self.currentOrder = null;
     self.currentQuery = "";
     self.ordersToPack = null;
-
+    
     var adjustServerKitItemObject = function(kitItem) {
         
+    };
+
+    var validateBatchAssignment = function(orderItem) {
+        var asig = orderItem.BatchAssignment;
+        if ((!asig) || (asig.length === 0)) {
+            throw new Error("Chybí šarže u '" + orderItem.ProductName + "'");
+        }
+
+        for (var i = 0; i < asig.length; i++) {
+            var a = asig[i];
+
+            if ((!a.BatchNumber) || (!a.MaterialBatchId) || (a.BatchNumber.trim().length === 0)) {
+                throw new Error("Chybí šarže u '" + orderItem.ProductName +"'");
+            }
+        }
     };
 
     self.validateCurrentOrder = function() {
@@ -21,18 +36,21 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         for (var i = 0; i < self.currentOrder.Items.length; i++) {
             var orderItem = self.currentOrder.Items[i];
 
-            if (!orderItem.KitItems) {
-                continue;
-            }
+            if (orderItem.KitItems && orderItem.KitItems.length > 0) {
+                for (var j = 0; j < orderItem.KitItems.length; j++) {
+                    var kitGroup = orderItem.KitItems[j];
 
-            for (var j = 0; j < orderItem.KitItems.length; j++) {
-                var kitGroup = orderItem.KitItems[j];
-
-                if ((!kitGroup.hasSelectedItem) || (!kitGroup.SelectedItem)) {
-                    throw new Error("Není kompletní sada '" + orderItem.ProductName + "'!");
+                    if ((!kitGroup.hasSelectedItem) || (!kitGroup.SelectedItem)) {
+                        throw new Error("Není kompletní sada '" + orderItem.ProductName + "'!");
+                    } else {
+                        validateBatchAssignment(kitGroup.SelectedItem);
+                    }
                 }
+            } else {
+                validateBatchAssignment(orderItem);
             }
         }
+        
     };
 
     var adjustServerOrderItemObject = function(orderItem) {

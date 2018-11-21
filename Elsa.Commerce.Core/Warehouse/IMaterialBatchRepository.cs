@@ -13,16 +13,17 @@ namespace Elsa.Commerce.Core.Warehouse
     public interface IMaterialBatchRepository
     {
         MaterialBatchComponent GetBatchById(int id);
-
+        
         IEnumerable<MaterialBatchComponent> GetMaterialBatches(
             DateTime from,
             DateTime to,
             bool excludeCompositions,
             int? materialId,
             bool includeLocked = false,
-            bool includeClosed = false);
+            bool includeClosed = false,
+            bool includedUnavailable = false);
 
-        MaterialBatchComponent SaveMaterialBatch(
+        MaterialBatchComponent SaveBottomLevelMaterialBatch(
             int id,
             IMaterial material,
             decimal amount,
@@ -32,5 +33,11 @@ namespace Elsa.Commerce.Core.Warehouse
             decimal price);
 
         IEnumerable<IMaterialStockEvent> GetBatchEvents(int materialBatchId);
+
+        IEnumerable<IMaterialBatchComposition> GetCompositionsByComponentBatchId(int componentBatchId);
+
+        void UpdateBatchAvailability(int batchId, bool isAvailable);
+
+        MaterialBatchComponent CreateProductionBatch(int materialId, string batchNumber, decimal amount, IMaterialUnit unit);
     }
 }

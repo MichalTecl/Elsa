@@ -49,5 +49,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         [NVarchar(1024, true)]
         string LockReason { get; set; }
+
+        bool IsAvailable { get; set; }
+
+        DateTime? Produced { get; set; }
     }
 }

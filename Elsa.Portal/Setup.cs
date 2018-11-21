@@ -20,6 +20,7 @@ using Elsa.Integration.PaymentSystems.Fio;
 using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.ImportOrders;
+using Elsa.Jobs.LoadCurrencyRates;
 using Elsa.Jobs.PaymentPairing;
 using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
@@ -60,6 +61,7 @@ namespace Elsa.Portal
                         s.ScanAssembly(typeof(ElerpClient).Assembly);
                         s.ScanAssembly(typeof(CustomersSyncJob).Assembly);
                         s.ScanAssembly(typeof(CustomersController).Assembly);
+                        s.ScanAssembly(typeof(ImportRatesJob).Assembly);
                     });
         }
     }

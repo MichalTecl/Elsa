@@ -67,6 +67,8 @@
     <Compile Include="Common\Security\IUserSession.cs" />
     <Compile Include="Common\Security\IUserUserRight.cs" />
     <Compile Include="ConnectionStringProvider.cs" />
+    <Compile Include="Core\CurrencyConversions\ICurrencyRate.cs" />
+    <Compile Include="Core\CurrencyConversions\IMoneyConversion.cs" />
     <Compile Include="Core\IProjectRelatedEntity.cs" />
     <Compile Include="Crm\ICustomer.cs" />
     <Compile Include="Crm\ICustomerRelatedNote.cs" />

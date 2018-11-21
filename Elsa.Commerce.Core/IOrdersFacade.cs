@@ -10,7 +10,7 @@ namespace Elsa.Commerce.Core
     {
         IPurchaseOrder SetOrderPaid(long orderId, long? paymentId);
 
-        IPurchaseOrder SetOrderSent(long orderId, List<OrderItemBatchAssignmentModel> batchAssignments);
+        IPurchaseOrder SetOrderSent(long orderId);
 
         IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, bool skipErp = false);
 
