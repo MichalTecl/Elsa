@@ -21,11 +21,24 @@
                 <button event-bind="click:saveHeadChanges">ok</button>
             </div>
         </div>
+        
+        <div id="prodBatchComponentsContainer">
+            <div id="componentsList">
+                <div id="componentListItemTemplate" class="lt-template">
+                    <div class="stackLeft">
+                        <div data-bind="text:RequiredAmount"></div>
+                        <div data-bind="text:RequiredAmountUnitSymbol"></div>
+                        <div data-bind="text:MaterialName"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 </div>
 
 <script>
-    lt.element("batchEdit").withModel("app.production.vm.editBatch").attach(function (materialSelectorContainer, unitSelectorContainer, tbMaterial, tbAmount, tbUnit, tbBatchNr, batchHeadChangesButtonsContainer) {
+    lt.element("batchEdit").withModel("app.production.vm.editBatch").attach(function (materialSelectorContainer, unitSelectorContainer, tbMaterial, tbAmount, tbUnit, tbBatchNr, batchHeadChangesButtonsContainer, componentsList, componentListItemTemplate, prodBatchComponentsContainer) {
         
         app.ui.autosuggest(materialSelectorContainer, app.warehouseActions.vm.searchMaterialNames);
         app.ui.autosuggest(unitSelectorContainer,
@@ -47,8 +60,10 @@
 
             if (isHeadEdit) {
                 batchHeadChangesButtonsContainer.style.display = 'flex';
+                prodBatchComponentsContainer.style.display = 'none';
             } else {
                 batchHeadChangesButtonsContainer.style.display = 'none';
+                prodBatchComponentsContainer.style.display = 'block';
             }
         });
 
@@ -69,6 +84,12 @@
         this.saveHeadChanges = function() {
             app.production.vm.setBatchHead(tbMaterial.value, tbBatchNr.value, tbAmount.value, tbUnit.value);
         };
+
+        this.bind(function(Components) {
+
+            lt.generate(componentsList, componentListItemTemplate, Components, function(c) { return c.MaterialId; });
+
+        });
 
     });
 
