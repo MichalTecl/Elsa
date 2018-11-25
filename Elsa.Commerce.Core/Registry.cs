@@ -1,5 +1,6 @@
 ﻿using Elsa.Commerce.Core.Crm;
 using Elsa.Commerce.Core.Impl;
+using Elsa.Commerce.Core.Production;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -37,6 +38,7 @@ namespace Elsa.Commerce.Core
             setup.For<IMaterialBatchFacade>().Use<MaterialBatchFacade>();
             setup.For<AmountProcessor>().Use<AmountProcessor>();
             setup.For<IPackingPreferredBatchRepository>().Use<PreferredBatchRepository>();
+            setup.For<IProductionFacade>().Use<ProductionFacade>();
         }
     }
 }

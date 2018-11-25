@@ -1,0 +1,75 @@
+﻿<div id="batchEdit" class="productionBatchEdit">
+    <div id="main">
+        <div id="prodBatchHead">
+
+            <div id="materialSelectorContainer" class="autocomplete">
+                <label for="tbMaterial">Materiál</label>
+                <input id="tbMaterial" type="text" data-bind="value:MaterialName" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged"/>
+            </div>
+            <div id="amountContainer">
+                <label for="tbAmount">Množství</label>
+                <input type="number" step="0.01" id="tbAmount" data-bind="value:ProducedAmount" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged"/>
+            </div>
+            <div class="autocomplete" id="unitSelectorContainer">
+                <input id="tbUnit" data-bind="value:ProducedAmountUnitSymbol" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged"/>
+            </div>
+            <div id="batchNrContainer">
+                <label for="tbBatchNr">Číslo šarže</label>
+                <input id="tbBatchNr" data-bind="value:BatchNumber" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged"/>
+            </div>
+            <div id="batchHeadChangesButtonsContainer" class="stackLeft">
+                <button event-bind="click:saveHeadChanges">ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("batchEdit").withModel("app.production.vm.editBatch").attach(function (materialSelectorContainer, unitSelectorContainer, tbMaterial, tbAmount, tbUnit, tbBatchNr, batchHeadChangesButtonsContainer) {
+        
+        app.ui.autosuggest(materialSelectorContainer, app.warehouseActions.vm.searchMaterialNames);
+        app.ui.autosuggest(unitSelectorContainer,
+            app.warehouseActions.vm.searchMaterialUnits,
+            function () {
+                return tbMaterial.value;
+            });
+
+        var valField = function(field) {
+            
+            if (field.value === null || field.value.length < 1) {
+                return false;
+            }
+
+            return true;
+        }
+
+        this.bind(function(isHeadEdit) {
+
+            if (isHeadEdit) {
+                batchHeadChangesButtonsContainer.style.display = 'flex';
+            } else {
+                batchHeadChangesButtonsContainer.style.display = 'none';
+            }
+        });
+
+        this.onHeadChanged = function() {
+
+            app.production.vm.checkHeadChanged(tbMaterial.value, tbAmount.value, tbUnit.value, tbBatchNr.value);
+
+            if ((!valField(tbMaterial)) ||
+                (!valField(tbAmount)) ||
+                (!valField(tbUnit)) ||
+                (!valField(tbBatchNr))) {
+                return;
+            }
+
+            
+        };
+
+        this.saveHeadChanges = function() {
+            app.production.vm.setBatchHead(tbMaterial.value, tbBatchNr.value, tbAmount.value, tbUnit.value);
+        };
+
+    });
+
+</script>

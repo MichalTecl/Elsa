@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Production.Model;
 using Elsa.Commerce.Core.Units;
@@ -11,6 +9,7 @@ using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Inventory;
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 using Robowire.RobOrm.Core;
 
@@ -25,6 +24,7 @@ namespace Elsa.Commerce.Core.Production
         private readonly AmountProcessor m_amountProcessor;
         private readonly IMaterialBatchFacade m_batchFacade;
         private readonly ILog m_log;
+        private readonly IUnitRepository m_unitRepository;
 
         public ProductionFacade(
             IDatabase database,
@@ -33,7 +33,7 @@ namespace Elsa.Commerce.Core.Production
             IUnitConversionHelper unitConversion, 
             AmountProcessor amountProcessor, 
             ILog log, 
-            IMaterialBatchFacade batchFacade)
+            IMaterialBatchFacade batchFacade, IUnitRepository unitRepository)
         {
             m_database = database;
             m_batchRepository = batchRepository;
@@ -42,6 +42,7 @@ namespace Elsa.Commerce.Core.Production
             m_amountProcessor = amountProcessor;
             m_log = log;
             m_batchFacade = batchFacade;
+            m_unitRepository = unitRepository;
         }
 
         public ProductionBatchModel GetProductionBatch(int batchId)
@@ -50,6 +51,7 @@ namespace Elsa.Commerce.Core.Production
         }
 
         public ProductionBatchModel CreateOrUpdateProductionBatch(
+            int? batchId,
             int materialId,
             string batchNumber,
             decimal amount,
@@ -57,33 +59,38 @@ namespace Elsa.Commerce.Core.Production
         {
             using (var tx = m_database.OpenTransaction())
             {
-                var batchEntity =
-                    m_batchRepository.GetMaterialBatches(
-                        DateTime.Now.AddYears(-1),
-                        DateTime.Now.AddYears(1),
-                        false,
-                        materialId,
-                        true,
-                        false,
-                        true).FirstOrDefault()
-                    ?? m_batchRepository.CreateProductionBatch(materialId, batchNumber, amount, unit);
-
-
+                MaterialBatchComponent batchEntity;
+                if (batchId == null)
+                {
+                    batchEntity = m_batchRepository.CreateProductionBatch(materialId, batchNumber, amount, unit);
+                }
+                else
+                {
+                    batchEntity = m_batchRepository.GetBatchById(batchId.Value);
+                    if (batchEntity == null)
+                    {
+                        throw new InvalidOperationException("Invalid batch reference");
+                    }
+                }
+                
                 batchEntity.Batch.BatchNumber = batchNumber;
+                batchEntity.Batch.Note = string.Empty;
 
                 if (batchEntity.Components.Any())
                 {
                     if (Math.Abs(amount - batchEntity.ComponentAmount) > 0m || batchEntity.ComponentUnit.Id != unit.Id)
                     {
-                        throw new InvalidOperationException(
-                                  $"Nelze změnit množství či jednotku šarže, která má přiřazeny materiály");
+                        throw new InvalidOperationException("Nelze změnit množství či jednotku šarže, která má přiřazeny materiály");
                     }
                 }
-                else
+
+                if (!m_unitConversion.AreCompatible(batchEntity.Batch.UnitId, unit.Id))
                 {
-                    batchEntity.Batch.UnitId = unit.Id;
-                    batchEntity.Batch.Volume = amount;
+                    throw new InvalidOperationException($"Pro materiál \"{batchEntity.Batch.Material.Name}\" nelze použít jednotku \"{unit.Symbol}\" ");
                 }
+
+                batchEntity.Batch.UnitId = unit.Id;
+                batchEntity.Batch.Volume = amount;
 
                 m_database.Save(batchEntity.Batch);
 
@@ -165,6 +172,26 @@ namespace Elsa.Commerce.Core.Production
             }
         }
 
+        public IEnumerable<IMaterialBatch> LoadProductionBatches(long? fromDt, int pageSize)
+        {
+            var query =
+                m_database.SelectFrom<IMaterialBatch>()
+                    .Join(b => b.Material)
+                    .Join(b => b.Unit)
+                    .Join(b => b.Author)
+                    .OrderByDesc(b => b.Created)
+                    .Take(pageSize);
+
+            if (fromDt != null)
+            {
+                var d = new DateTime(fromDt.Value);
+
+                query = query.Where(b => b.Created < d);
+            }
+
+            return query.Execute();
+        }
+
         private ProductionBatchModel LoadAndValidateBatchModel(int productionBatchId)
         {
             var complete = true;
@@ -244,8 +271,6 @@ namespace Elsa.Commerce.Core.Production
 
                 if (amountToResolve.IsNegative)
                 {
-                    complete = false;
-
                     m_log.Error($"PROBLEM - productionBatchId={productionBatchId}, topMaterial={topMaterial.Name}, requiredComponent.MaterialId={requiredComponent.Material.Name}, amountToResolve={amountToResolve}");
                     if (!subbatches.Any())
                     {

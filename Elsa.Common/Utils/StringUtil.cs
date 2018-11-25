@@ -144,5 +144,12 @@ namespace Elsa.Common.Utils
         {
             return DateTime.ParseExact(modelDisplayDt, "dd.MM.yy HH:mm", CultureInfo.CurrentCulture);
         }
+
+        public static float GetReadability(decimal number)
+        {
+            var strNumber = FormatDecimal(number);
+
+            return 1f / ((float)strNumber.Length);
+        }
     }
 }

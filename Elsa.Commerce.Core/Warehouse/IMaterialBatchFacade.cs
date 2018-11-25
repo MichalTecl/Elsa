@@ -25,5 +25,6 @@ namespace Elsa.Commerce.Core.Warehouse
         void AssignComponent(int parentBatchId, int componentBatchId, Amount amountToAssign);
 
         void UnassignComponent(int parentBatchId, int componentBatchId);
+
     }
 }

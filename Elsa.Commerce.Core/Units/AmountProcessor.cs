@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Common;
+using Elsa.Common.Utils;
 
 namespace Elsa.Commerce.Core.Units
 {
@@ -30,6 +31,30 @@ namespace Elsa.Commerce.Core.Units
         public Amount Min(Amount a, Amount b)
         {
             return Calculate(a, b, Math.Min);
+        }
+
+        public Amount ConvertToSuitableUnit(Amount source)
+        {
+            if (source.Unit == null)
+            {
+                return source;
+            }
+            
+            var availableUnits = m_conversionHelper.GetCompatibleUnits(source.Unit.Id);
+            if (!availableUnits.Any())
+            {
+                return source;
+            }
+
+            var bestUnit = source.Unit;
+            var readability = StringUtil.GetReadability(source.Value);
+
+            foreach (var availableUnit in availableUnits)
+            {
+                //var converted = m_conversionHelper.ConvertAmount(source.Unit.Id, availableUnit.Id, )
+            }
+
+            throw new NotImplementedException();
         }
 
         private Amount Calculate(Amount a, Amount b, Func<decimal, decimal, decimal> numericOp)

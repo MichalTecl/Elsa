@@ -1,0 +1,34 @@
+﻿<script src="/Script/Apps/Production/ProductionVM.js"></script>
+<div id="prodBatchesUi">
+    <button id="butPlus" event-bind="click:onNewBatchClick"></button>
+    <div id="batchEditor" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProdBatchEdit.html"></div>
+    <div id="batchesListing" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionBatchesList.html"></div>
+</div>
+
+<script>
+    lt.element("prodBatchesUi")
+      .withModel("app.production.vm")
+      .attach(function(batchEditor, batchesListing, butPlus) {
+
+            this.bind(function(editBatch) {
+                
+                if (!editBatch) {
+                    butPlus.style.display = 'block';
+                    batchesListing.style.display = 'block';
+                    batchEditor.style.display = 'none';
+                } else {
+                    butPlus.style.display = 'none';
+                    batchesListing.style.display = 'none';
+                    batchEditor.style.display = 'block';
+                }
+
+            }).editBatchCanBeNull();
+
+
+            this.onNewBatchClick = function() {
+                app.production.vm.newBatch();
+            };
+
+        });
+</script>
+

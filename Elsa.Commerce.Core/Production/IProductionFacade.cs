@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Production.Model;
 using Elsa.Core.Entities.Commerce.Inventory;
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 namespace Elsa.Commerce.Core.Production
 {
@@ -14,6 +15,7 @@ namespace Elsa.Commerce.Core.Production
         ProductionBatchModel GetProductionBatch(int batchId);
 
         ProductionBatchModel CreateOrUpdateProductionBatch(
+            int? batchId,
             int materialId,
             string batchNumber,
             decimal amount,
@@ -26,5 +28,7 @@ namespace Elsa.Commerce.Core.Production
             string usedAmountUnitSymbol);
 
         ProductionBatchModel RemoveComponentSourceBatch(int productionBatchId, int sourceBatchId);
+
+        IEnumerable<IMaterialBatch> LoadProductionBatches(long? fromDt, int pageSize);
     }
 }

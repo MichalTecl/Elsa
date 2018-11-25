@@ -44,6 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\BatchSetupRequest.cs" />
+    <Compile Include="Model\ProducedBatchModel.cs" />
     <Compile Include="ProductionController.cs" />
     <Compile Include="Model\MappableItemViewModel.cs" />
     <Compile Include="Model\MaterialBatchViewModel.cs" />

@@ -244,8 +244,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 materialId,
                 true,
                 true,
-                true);
-            if (alreadyExisting.Any())
+                true).FirstOrDefault(m => m.Batch.BatchNumber.Equals(batchNumber, StringComparison.InvariantCultureIgnoreCase));
+            if (alreadyExisting != null)
             {
                 throw new InvalidOperationException($"Již existuje šarže {batchNumber} materiálu {material.Name}");
             }
@@ -258,7 +258,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             entity.ProjectId = m_session.Project.Id;
             entity.MaterialId = material.Id;
             entity.Volume = amount;
-            
+            entity.Note = string.Empty;
+
             m_database.Save(entity);
 
             return GetBatchById(entity.Id);
