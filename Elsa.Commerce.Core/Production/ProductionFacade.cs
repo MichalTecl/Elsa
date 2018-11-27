@@ -154,6 +154,12 @@ namespace Elsa.Commerce.Core.Production
             decimal usedAmount,
             string usedAmountUnitSymbol)
         {
+            var unit = m_unitRepository.GetUnitBySymbol(usedAmountUnitSymbol);
+            if (unit == null)
+            {
+                throw new InvalidOperationException($"Neznámá měrná jednotka \"{usedAmountUnitSymbol}\"");
+            }
+
             using (var tx = m_database.OpenTransaction())
             {
                 var sourceBatch = m_batchRepository.GetBatchById(sourceBatchId);
@@ -179,6 +185,11 @@ namespace Elsa.Commerce.Core.Production
                     throw new InvalidOperationException($"Složení {batch.MaterialName} neobsahuje {sourceBatch.Batch.Material.Name}");
                 }
 
+                if (!m_unitConversion.AreCompatible(sourceBatch.Batch.UnitId, unit.Id))
+                {
+                    throw new InvalidOperationException($"Nelze použít měrnou jednotku \"{usedAmountUnitSymbol}\" pro material {sourceBatch.Batch.Material.Name}");
+                }
+
                 var batchPlaceholder = targetComponent.Assignments.SingleOrDefault(a => a.UsedBatchId == null);
                 if (batchPlaceholder == null)
                 {
@@ -192,9 +203,14 @@ namespace Elsa.Commerce.Core.Production
                     throw new InvalidOperationException($"Šarže {sourceBatch.Batch.BatchNumber} je již plně spotřebována");
                 }
 
-                var amountToAllocate = m_amountProcessor.Min(
-                    batchAvailableAmount,
-                    new Amount(batchPlaceholder.UsedAmount, m_unitRepository.GetUnitBySymbol(batchPlaceholder.UsedAmountUnitSymbol)));
+                var amountToAllocate =
+                    m_amountProcessor.Min(
+                        m_amountProcessor.Min(
+                            batchAvailableAmount,
+                            new Amount(
+                                batchPlaceholder.UsedAmount,
+                                m_unitRepository.GetUnitBySymbol(batchPlaceholder.UsedAmountUnitSymbol))),
+                        new Amount(usedAmount, unit));
 
                 m_batchFacade.AssignComponent(batch.BatchId, sourceBatch.Batch.Id, amountToAllocate);
 
