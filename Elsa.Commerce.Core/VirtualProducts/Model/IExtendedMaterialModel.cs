@@ -37,5 +37,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         bool IsManufactured { get; }
 
         bool CanBeConnectedToTag { get; }
+
+        bool AutomaticBatches { get; }
     }
 }

@@ -26,5 +26,6 @@ namespace Elsa.Commerce.Core.Warehouse
 
         void UnassignComponent(int parentBatchId, int componentBatchId);
 
+        IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount);
     }
 }

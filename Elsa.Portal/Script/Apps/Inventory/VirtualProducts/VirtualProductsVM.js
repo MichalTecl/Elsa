@@ -286,6 +286,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             MaterialName: model.Name,
             NominalAmountText: model.nominalAmountText,
             MaterialInventoryId: self.currentMaterialInventory.Id,
+            AutomaticBatches: model.AutomaticBatches,
             Materials: []
         };
 

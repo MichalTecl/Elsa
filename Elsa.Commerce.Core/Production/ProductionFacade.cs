@@ -59,6 +59,12 @@ namespace Elsa.Commerce.Core.Production
         {
             using (var tx = m_database.OpenTransaction())
             {
+                var topMaterial = m_materialRepository.GetMaterialById(materialId);
+                if (topMaterial == null)
+                {
+                    throw new InvalidOperationException("Invalid Material entity reference");
+                }
+
                 MaterialBatchComponent batchEntity;
                 if (batchId == null)
                 {
@@ -70,6 +76,21 @@ namespace Elsa.Commerce.Core.Production
                     if (batchEntity == null)
                     {
                         throw new InvalidOperationException("Invalid batch reference");
+                    }
+
+                    if (batchEntity.Batch.MaterialId != materialId)
+                    {
+                        foreach (var component in batchEntity.Batch.Components)
+                        {
+                            m_batchFacade.UnassignComponent(batchEntity.Batch.Id, component.ComponentId);
+                        }
+
+                        batchEntity.Batch.MaterialId = materialId;
+                        batchEntity.Batch.UnitId = topMaterial.Adaptee.NominalUnitId;
+
+                        m_database.Save(batchEntity.Batch);
+
+                        batchEntity = m_batchRepository.GetBatchById(batchId.Value);
                     }
                 }
                 
@@ -84,11 +105,11 @@ namespace Elsa.Commerce.Core.Production
                     }
                 }
 
-                if (!m_unitConversion.AreCompatible(batchEntity.Batch.UnitId, unit.Id))
+                if (!m_unitConversion.AreCompatible(topMaterial.Adaptee.NominalUnitId, unit.Id))
                 {
-                    throw new InvalidOperationException($"Pro materiál \"{batchEntity.Batch.Material.Name}\" nelze použít jednotku \"{unit.Symbol}\" ");
+                    throw new InvalidOperationException($"Pro materiál \"{topMaterial.Name}\" nelze použít jednotku \"{unit.Symbol}\" ");
                 }
-
+                
                 batchEntity.Batch.UnitId = unit.Id;
                 batchEntity.Batch.Volume = amount;
 
@@ -96,6 +117,31 @@ namespace Elsa.Commerce.Core.Production
 
                 var result = LoadAndValidateBatchModel(batchEntity.Batch.Id);
 
+                var autoassigned = false;
+                foreach (var componentToBeAutoresolved in result.Components.Where(c => c.Assignments.All(a => a.UsedBatchId == null)))
+                {
+                    var material = m_materialRepository.GetMaterialById(componentToBeAutoresolved.MaterialId);
+                    if (!material.AutomaticBatches)
+                    {
+                        continue;
+                    }
+
+                    var resolutions = m_batchFacade.AutoResolve(
+                        componentToBeAutoresolved.MaterialId,
+                        new Amount(componentToBeAutoresolved.RequiredAmount, m_unitRepository.GetUnitBySymbol(componentToBeAutoresolved.RequiredAmountUnitSymbol)));
+
+                    foreach (var resolution in resolutions)
+                    {
+                        autoassigned = true;
+                        m_batchFacade.AssignComponent(result.BatchId, resolution.Item1.Id, resolution.Item2);
+                    }
+                }
+
+                if (autoassigned)
+                {
+                    result = LoadAndValidateBatchModel(batchEntity.Batch.Id);
+                }
+                
                 tx.Commit();
 
                 return result;
@@ -148,7 +194,7 @@ namespace Elsa.Commerce.Core.Production
 
                 var amountToAllocate = m_amountProcessor.Min(
                     batchAvailableAmount,
-                    new Amount(batchAvailableAmount.Value, batchAvailableAmount.Unit));
+                    new Amount(batchPlaceholder.UsedAmount, m_unitRepository.GetUnitBySymbol(batchPlaceholder.UsedAmountUnitSymbol)));
 
                 m_batchFacade.AssignComponent(batch.BatchId, sourceBatch.Batch.Id, amountToAllocate);
 
@@ -272,12 +318,13 @@ namespace Elsa.Commerce.Core.Production
                 if (amountToResolve.IsNegative)
                 {
                     m_log.Error($"PROBLEM - productionBatchId={productionBatchId}, topMaterial={topMaterial.Name}, requiredComponent.MaterialId={requiredComponent.Material.Name}, amountToResolve={amountToResolve}");
-                    if (!subbatches.Any())
-                    {
+                    //if (!subbatches.Any())
+                   // {
                         m_log.Error("FATAL - we have no batches assigned, but remaining amount is already < 0");
                         throw new InvalidOperationException("Došlo k fatální chybě, kontaktujte podporu");
-                    }
-                    return RemoveComponentSourceBatch(topBatch.Id, subbatches.Last().Id);
+                   // }
+
+                    //return RemoveComponentSourceBatch(topBatch.Id, subbatches.Last().Id);
                 }
                 else if (amountToResolve.IsPositive)
                 {
@@ -297,7 +344,7 @@ namespace Elsa.Commerce.Core.Production
             {
                 m_batchRepository.UpdateBatchAvailability(topBatch.Id, complete);
             }
-
+            
             return model;
         }
     }

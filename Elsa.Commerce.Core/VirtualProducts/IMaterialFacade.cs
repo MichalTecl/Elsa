@@ -12,6 +12,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             string name,
             string nominalAmountText,
             int materialInventoryId,
+            bool automaticBatches,
             IEnumerable<string> components);
     }
 }

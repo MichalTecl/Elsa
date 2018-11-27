@@ -178,7 +178,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_cache.Remove(VirtualProductCompositionsCacheKey);
         }
 
-        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId, int materialInventoryId)
+        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId, int materialInventoryId, bool automaticBatches)
         {
             IMaterial material;
             if (materialId != null)
@@ -189,8 +189,11 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     throw new InvalidOperationException($"Invalid material Id {materialId}");
                 }
 
-                if (material.Name == name && material.NominalAmount == nominalAmount
-                && material.NominalUnitId == nominalUnitId)
+                if (material.Name == name 
+                    && material.NominalAmount == nominalAmount
+                    && material.NominalUnitId == nominalUnitId 
+                    && material.InventoryId == materialInventoryId
+                    && material.AutomaticBatches == automaticBatches)
                 {
                     return GetAllMaterials(null).Single(m => m.Id == materialId);
                 }
@@ -238,6 +241,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             material.NominalAmount = nominalAmount;
             material.ProjectId = m_session.Project.Id;
             material.InventoryId = inventory.Id;
+            material.AutomaticBatches = automaticBatches;
 
             m_database.Save(material);
 

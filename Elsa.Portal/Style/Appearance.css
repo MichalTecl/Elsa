@@ -1,4 +1,4 @@
-﻿input {
+﻿input:not([type]), input[type="text"], input[type="password"], input[type="number"]  {
     height: 2.14285714em;
     line-height: 1.4285714285714;
     padding: 4px 5px;
@@ -274,3 +274,12 @@ div.searchPanel {
     opacity: 0;
 }
 
+.disabled {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+.disabled * {
+    pointer-events: none;
+    opacity: 0.4;
+}

@@ -74,6 +74,13 @@ namespace Elsa.Commerce.Core.Units
                     });
         }
 
+        public Amount ConvertAmount(Amount sourceAmount, int targetUnitId)
+        {
+            var convertedValue = ConvertAmount(sourceAmount.Unit.Id, targetUnitId, sourceAmount.Value);
+
+            return new Amount(convertedValue, m_unitRepository.GetUnit(targetUnitId));
+        }
+
         private ConvertorInstance GetConvertor(int sourceUnit, int targetUnit)
         {
             return m_cache.ReadThrough(

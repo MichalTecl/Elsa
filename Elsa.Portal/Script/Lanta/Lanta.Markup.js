@@ -182,7 +182,7 @@ lanta.Markup.bindExpression = lanta.Markup.bindExpression || function(owner, ele
 		var param = lanta.BindingCore.createParameter(from);
 
 	    var marker = lanta.Markup.getElementMarker(element);
-	    var fn = new Function(["_value"], " var target = lanta.Markup.getChildByMarker(this, '" + marker + "'); lanta.Markup.setValue(target, '" + to + "', _value);\r\n//# sourceURL="+to+"_"+from+".js");
+	    var fn = new Function(["_value"], " var target = lanta.Markup.getChildByMarker(this, '" + marker + "'); if (!!target) { lanta.Markup.setValue(target, '" + to + "', _value); }\r\n//# sourceURL="+to+"_"+from+".js");
 
 	    lanta.BindingCore.bind(owner, fn, [param]);
 	}

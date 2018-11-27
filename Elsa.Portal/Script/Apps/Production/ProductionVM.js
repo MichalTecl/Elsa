@@ -4,12 +4,74 @@ app.production.ViewModel = app.production.ViewModel || function() {
 
     var self = this;
     var oldestBatchDt = null;
-
+    
     self.producedBatches = [];
 
     self.editBatch = null;
 
-    var receiveBatch = function(batch) {};
+    var receiveBatch = function(batch) {
+
+        var assignmentIndex = 0;
+
+        if (batch.Components) {
+            for (var i = 0; i < batch.Components.length; i++) {
+                var assignments = batch.Components[i].Assignments;
+
+                if (assignments) {
+                    for (var j = 0; j < assignments.length; j++) {
+                        assignments[j].assignmentIndex = assignmentIndex;
+                        assignments[j].isDirty = false;
+                        assignments[j].isDisabled = false;
+                        assignments[j].parentMaterialId = batch.Components[i].MaterialId;
+                        assignmentIndex++;
+                    }
+                }
+            }
+        }
+
+    };
+
+    var getAssignment = function(index) {
+        var batch = self.editBatch;
+        if (!batch || !batch.Components) {
+            return null;
+        }
+        
+        for (var i = 0; i < batch.Components.length; i++) {
+            var assignments = batch.Components[i].Assignments;
+
+            if (assignments) {
+                for (var j = 0; j < assignments.length; j++) {
+                    if (assignments[j].assignmentIndex === index) {
+                        return assignments[j];
+                    }
+                }
+            }
+        }
+
+        return null;
+    };
+
+    self.getAssignmentByIndex = function(index) {
+        return getAssignment(index);
+    };
+
+    var crawlAssignments = function(callback) {
+        var batch = self.editBatch;
+        if (!batch || !batch.Components) {
+            return null;
+        }
+
+        for (var i = 0; i < batch.Components.length; i++) {
+            var assignments = batch.Components[i].Assignments;
+
+            if (assignments) {
+                for (var j = 0; j < assignments.length; j++) {
+                    callback(assignments[j]);
+                }
+            }
+        }
+    };
 
     self.openBatch = function(batchId) {
         lt.api("/production/getProductionBatch").query({ "batchId": batchId }).get(function(batch) {
@@ -66,6 +128,7 @@ app.production.ViewModel = app.production.ViewModel || function() {
         };
 
         lt.api("/production/createBatch").body(request).post(function(batch) {
+            receiveBatch(batch);
             self.editBatch = batch;
         });
     };
@@ -83,6 +146,51 @@ app.production.ViewModel = app.production.ViewModel || function() {
             }
 
         });
+    };
+
+    self.checkAssignmentChanged = function(assignmentIndex, amount, unit, batchNr) {
+        var assignment = getAssignment(assignmentIndex);
+        if (!assignment) {
+            return;
+        }
+
+        var newStatus = ((assignment.UsedBatchNumber || "") !== (batchNr || "") ||
+            parseFloat(assignment.UsedAmount) !== parseFloat(amount) ||
+            (assignment.UsedAmountUnitSymbol || "") !== (unit || ""));
+
+        var newIsValid = (parseFloat(amount || "0") > 0 && (unit || "").length > 0 && (batchNr || "").length > 0);
+
+        if (newStatus === assignment.isDirty && newIsValid === assignment.isValid) {
+            return;
+        }
+        
+        assignment.isDirty = newStatus;
+        assignment.isValid = newIsValid;
+
+        crawlAssignments(function(a) {
+            a.isDisabled = a.assignmentIndex !== assignmentIndex && newStatus;
+        });
+        
+        lt.notify();
+    };
+
+    self.commitAssignmentChange = function(assignmentIndex, amount, unit, batchNr) {
+
+        var assignment = getAssignment(assignmentIndex);
+        if (!assignment) { return; }
+        
+        lt.api("/production/addComponentSourceBatch")
+            .query({
+                "productionBatchId": self.editBatch.BatchId,
+                "materialId": assignment.parentMaterialId,
+                "sourceBatchNumber": batchNr,
+                "usedAmount": amount,
+                "usedAmountUnitSymbol": unit
+            })
+            .get(function(b) {
+                receiveBatch(b);
+                self.editBatch = b;
+            });
     };
 
     self.loadBatches();

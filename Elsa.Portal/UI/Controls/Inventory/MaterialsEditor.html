@@ -26,6 +26,9 @@
                                 <i lt-name="lblNominalRight"></i>
                             </div>
                             <div class="materialEditor" lt-name="materialEditPlaceholder"></div>
+                            <div class="materialEditFlags stackLeft">
+                                <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onAutomaticBatchesCheckedChanged(VM, this.checked)" /><label>Automaticky spravovat šarže</label>
+                            </div>
                         </div>
 
                         <div class="itemEditFoot">
@@ -100,7 +103,6 @@
 
         this.save = function (model) {
             console.log(model);
-
             app.virtualProductsEditor.vm.saveMaterial(model);
         };
 
@@ -111,6 +113,11 @@
 
         this.onNominalAmountTextChanged = function(model, newNomAm) {
             model.nominalAmountText = newNomAm;
+            lt.notify(this);
+        };
+
+        this.onAutomaticBatchesCheckedChanged = function(model, checked) {
+            model.AutomaticBatches = checked;
             lt.notify(this);
         };
 

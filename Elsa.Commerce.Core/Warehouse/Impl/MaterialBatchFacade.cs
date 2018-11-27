@@ -33,6 +33,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IDatabase m_database;
         private readonly IPackingPreferredBatchRepository m_batchPreferrenceRepository;
         private readonly IKitProductRepository m_kitProductRepository;
+        private readonly IUnitConversionHelper m_conversionHelper;
 
         public MaterialBatchFacade(
             ILog log,
@@ -42,7 +43,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             AmountProcessor amountProcessor,
             ICache cache,
             IDatabase database, 
-            IPackingPreferredBatchRepository batchPreferrenceRepository, IKitProductRepository kitProductRepository)
+            IPackingPreferredBatchRepository batchPreferrenceRepository, IKitProductRepository kitProductRepository, IUnitConversionHelper conversionHelper)
         {
             m_log = log;
             m_virtualProductFacade = virtualProductFacade;
@@ -53,6 +54,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_database = database;
             m_batchPreferrenceRepository = batchPreferrenceRepository;
             m_kitProductRepository = kitProductRepository;
+            m_conversionHelper = conversionHelper;
         }
 
         public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity)
@@ -354,6 +356,35 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 InvalidateBatchCache(parentBatchId);
                 InvalidateBatchCache(componentBatchId);
+            }
+        }
+
+        public IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount)
+        {
+            var batches =
+                m_batchRepository.GetMaterialBatches(
+                    DateTime.Now.AddYears(-1),
+                    DateTime.Now.AddYears(1),
+                    false,
+                    materialId,
+                    false,
+                    false,
+                    false).OrderBy(b => b.Batch.Created);
+
+            foreach (var batch in batches)
+            {
+                if (!requiredAmount.IsPositive)
+                {
+                    yield break;
+                }
+
+                var batchAvailableAmount = GetAvailableAmount(batch.Batch.Id);
+
+                var amountToAllocate = m_amountProcessor.Min(requiredAmount, batchAvailableAmount);
+
+                yield return new Tuple<IMaterialBatch, Amount>(batch.Batch, amountToAllocate);
+
+                requiredAmount = m_amountProcessor.Subtract(requiredAmount, amountToAllocate);
             }
         }
 

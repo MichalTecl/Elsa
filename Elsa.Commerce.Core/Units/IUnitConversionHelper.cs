@@ -12,5 +12,7 @@ namespace Elsa.Commerce.Core.Units
         bool AreCompatible(int unitId1, int unitId2);
 
         IEnumerable<IMaterialUnit> GetCompatibleUnits(int sourceUnitId);
+        
+        Amount ConvertAmount(Amount sourceAmount, int targetUnitId);
     }
 }

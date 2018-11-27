@@ -28,5 +28,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         int InventoryId { get; set; }
         IMaterialInventory Inventory { get; }
+
+        bool AutomaticBatches { get; set; }
     }
 }

@@ -230,3 +230,17 @@ div.containsTitleContainer > input {
 body, html {
     background-color: white !important;
 }
+
+.materialEditFlags {
+    margin-top:5px;
+    padding-top:5px;    
+    padding-bottom:5px;    
+    padding-left:8px;
+    border-top:1px solid #eee;
+    border-bottom:1px solid #eee;
+}
+
+.materialEditFlags label {
+    font-size:0.8em;
+    margin-top:0.2em;        
+}

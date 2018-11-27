@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Units;
+using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
 
 namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
@@ -32,6 +33,11 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
         }
 
         public IEnumerable<IMaterialUnit> GetCompatibleUnits(int sourceUnitId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Amount ConvertAmount(Amount sourceAmount, int targetUnitId)
         {
             throw new NotImplementedException();
         }

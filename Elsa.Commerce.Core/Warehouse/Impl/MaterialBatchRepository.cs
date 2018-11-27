@@ -138,6 +138,23 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     entity = m_database.New<IMaterialBatch>();
                     entity.AuthorId = m_session.User.Id;
                     entity.ProjectId = m_session.Project.Id;
+
+                    var materialId = material.Id;
+
+                    var existingBatchNr =
+                        m_database.SelectFrom<IMaterialBatch>()
+                            .Where(
+                                b =>
+                                    b.ProjectId == m_session.Project.Id && b.MaterialId == materialId
+                                    && b.BatchNumber == batchNr)
+                            .Execute()
+                            .FirstOrDefault();
+
+                    if (existingBatchNr != null)
+                    {
+                        throw new InvalidOperationException($"Již existuje šarže se zadaným číslem");
+                    }
+
                 }
 
                 if (!m_conversionHelper.AreCompatible(material.NominalUnitId, unit.Id))
@@ -154,7 +171,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 entity.Price = price;
                 entity.Note = string.Empty;
                 entity.IsAvailable = true;
-
+                
                 m_database.Save(entity);
 
                 result = GetBatchById(entity.Id);

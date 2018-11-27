@@ -13,6 +13,8 @@ namespace Elsa.Apps.Inventory.Model
 
         public int MaterialInventoryId { get; set; }
 
+        public bool AutomaticBatches { get; set; }
+
         public List<VirtualProductEditRequestModel.VpMaterialEditRequestModel> Materials { get; set; }
     }
 }

@@ -26,9 +26,28 @@
             <div id="componentsList">
                 <div id="componentListItemTemplate" class="lt-template">
                     <div class="stackLeft">
-                        <div data-bind="text:RequiredAmount"></div>
-                        <div data-bind="text:RequiredAmountUnitSymbol"></div>
-                        <div data-bind="text:MaterialName"></div>
+                        <div class="stackLeft">
+                            <div data-bind="text:RequiredAmount"></div>
+                            <div data-bind="text:RequiredAmountUnitSymbol"></div>
+                            <div data-bind="text:MaterialName"></div>
+                        </div>
+                        <div lt-name="assignedBatchesList">
+                            <div lt-name="assignedBatchItemTemplate" class="lt-template">
+                                <div lt-name="assignedBatchView" class="stackLeft" data-bind="class.disabled:isDisabled">
+                                    <input lt-name="tbAsgAmount" data-bind="value:UsedAmount" type="number" step="0.01" event-bind="change:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value);keyup:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)" />
+                                    <input lt-name="tbAsgUnit" data-bind="value:UsedAmountUnitSymbol" event-bind="change:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value); keyup:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)" />
+                                    <input lt-name="tbAsgBatch" data-bind="value:UsedBatchNumber" event-bind="change:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value); keyup:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)" />
+                                    <i class="fas fa-minus faButton" event-bind="click:onRemoveBatchAssignmentClick(VM)"></i>
+                                    
+                                    <div class="assignmentButtons stackLeft" data-bind="class!.hidden:isDirty">
+                                        <i class="fas fa-undo faButton" event-bind="click:undoAssignmentChanges(assignmentIndex, $tbAsgAmount, $tbAsgUnit, $tbAsgBatch)"></i>
+                                        <i class="far fa-check-circle faButton" data-bind="class!.hidden:isValid" event-bind="click:saveAssignmentChanges(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -39,7 +58,9 @@
 
 <script>
     lt.element("batchEdit").withModel("app.production.vm.editBatch").attach(function (materialSelectorContainer, unitSelectorContainer, tbMaterial, tbAmount, tbUnit, tbBatchNr, batchHeadChangesButtonsContainer, componentsList, componentListItemTemplate, prodBatchComponentsContainer) {
-        
+
+        var self = this;
+
         app.ui.autosuggest(materialSelectorContainer, app.warehouseActions.vm.searchMaterialNames);
         app.ui.autosuggest(unitSelectorContainer,
             app.warehouseActions.vm.searchMaterialUnits,
@@ -85,12 +106,47 @@
             app.production.vm.setBatchHead(tbMaterial.value, tbBatchNr.value, tbAmount.value, tbUnit.value);
         };
 
+
+        var componentController = function(assignedBatchesList, assignedBatchItemTemplate) {
+            
+            this.bind(function (Assignments) {
+                lt.generate(assignedBatchesList, assignedBatchItemTemplate, Assignments, function (a) { return a.AssignmentUid; });
+            });
+
+            this.onRemoveBatchAssignmentClick = function(model) {
+                console.log(model);
+                ;
+            };
+        };
+
+
         this.bind(function(Components) {
-
-            lt.generate(componentsList, componentListItemTemplate, Components, function(c) { return c.MaterialId; });
-
+            lt.generate(componentsList, componentListItemTemplate, Components, function(c) { return c.MaterialId; }, componentController);
         });
 
+        this.onAssignmentChanged = function (assignmentIndex, amount, unit, batchNr) {
+            app.production.vm.checkAssignmentChanged(assignmentIndex, amount, unit, batchNr);
+        };
+
+        this.undoAssignmentChanges = function(assignmentIndex, tbAsgAmount, tbAsgUnit, tbAsgBatch) {
+            var originalData = app.production.vm.getAssignmentByIndex(assignmentIndex);
+            if (!originalData) {
+                return;
+            }
+
+            tbAsgAmount.value = originalData.UsedAmount;
+            tbAsgUnit.value = originalData.UsedAmountUnitSymbol;
+            tbAsgBatch.value = originalData.UsedBatchNumber;
+
+            self.onAssignmentChanged(assignmentIndex,
+                originalData.UsedAmount,
+                originalData.UsedAmountUnitSymbol,
+                originalData.UsedBatchNumber);
+        };
+
+        this.saveAssignmentChanges = function (assignmentIndex, amount, unit, batch) {
+            app.production.vm.commitAssignmentChange(assignmentIndex, amount, unit, batch);
+        };
     });
 
 </script>

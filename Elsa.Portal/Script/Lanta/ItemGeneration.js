@@ -26,6 +26,10 @@ lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
         var placeTo = function(container, element, position) {
 
             var children = container.children || container.childNodes;
+            
+            if (children.length > position && children[position] === element) {
+                return;
+            }
 
             if (position >= children.length - 1) {
                 container.appendChild(element);

@@ -24,6 +24,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             InventoryName = adaptee.Inventory.Name;
             IsManufactured = adaptee.Inventory.IsManufactured;
             CanBeConnectedToTag = adaptee.Inventory.CanBeConnectedToTag;
+            AutomaticBatches = adaptee.AutomaticBatches;
         }
 
         public int Id { get; }
@@ -98,6 +99,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool IsManufactured { get; }
 
         public bool CanBeConnectedToTag { get; }
+
+        public bool AutomaticBatches { get; }
 
         public void AddComponent(decimal amount, IMaterialUnit unit, IExtendedMaterialModel material)
         {

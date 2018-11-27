@@ -15,5 +15,7 @@ namespace Elsa.Commerce.Core.Production.Model
         public decimal UsedAmount { get; set; }
 
         public string UsedAmountUnitSymbol { get; set; }
+
+        public string AssignmentUid { get; } = Guid.NewGuid().ToString();
     }
 }
