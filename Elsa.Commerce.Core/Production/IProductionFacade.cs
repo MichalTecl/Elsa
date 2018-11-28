@@ -21,7 +21,8 @@ namespace Elsa.Commerce.Core.Production
             decimal amount,
             IMaterialUnit unit);
 
-        ProductionBatchModel AddComponentSourceBatch(
+        ProductionBatchModel SetComponentSourceBatch(
+            int? materialBatchCompositionId,
             int productionBatchId,
             int sourceBatchId,
             decimal usedAmount,

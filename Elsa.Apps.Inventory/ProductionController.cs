@@ -69,6 +69,7 @@ namespace Elsa.Apps.Inventory
         }
 
         public ProductionBatchModel AddComponentSourceBatch(
+            int? materialBatchCompositionId,
             int productionBatchId,
             int materialId,
             string sourceBatchNumber,
@@ -81,7 +82,8 @@ namespace Elsa.Apps.Inventory
                 throw new InvalidOperationException("Šarže nenalezena");
             }
 
-            return m_productionFacade.AddComponentSourceBatch(
+            return m_productionFacade.SetComponentSourceBatch(
+                materialBatchCompositionId,
                 productionBatchId,
                 batch.Id,
                 usedAmount,

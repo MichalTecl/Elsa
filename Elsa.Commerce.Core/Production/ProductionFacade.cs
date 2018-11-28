@@ -148,59 +148,93 @@ namespace Elsa.Commerce.Core.Production
             }
         }
 
-        public ProductionBatchModel AddComponentSourceBatch(
+        public ProductionBatchModel SetComponentSourceBatch(
+            int? materialBatchCompositionId,
             int productionBatchId,
             int sourceBatchId,
             decimal usedAmount,
             string usedAmountUnitSymbol)
         {
-            var unit = m_unitRepository.GetUnitBySymbol(usedAmountUnitSymbol);
-            if (unit == null)
-            {
-                throw new InvalidOperationException($"Neznámá měrná jednotka \"{usedAmountUnitSymbol}\"");
-            }
-
             using (var tx = m_database.OpenTransaction())
             {
-                var sourceBatch = m_batchRepository.GetBatchById(sourceBatchId);
-                if (sourceBatch == null)
+                if (materialBatchCompositionId != null)
+                {
+                    var composition =
+                        m_database.SelectFrom<IMaterialBatchComposition>()
+                            .Where(
+                                c => c.CompositionId == productionBatchId && c.Id == materialBatchCompositionId.Value)
+                            .Execute()
+                            .FirstOrDefault();
+
+                    if (composition != null)
+                    {
+                        m_batchFacade.UnassignComponent(productionBatchId, composition.ComponentId);
+                    }
+                }
+
+                var unit = m_unitRepository.GetUnitBySymbol(usedAmountUnitSymbol);
+                if (unit == null)
+                {
+                    throw new InvalidOperationException($"Neznámá měrná jednotka \"{usedAmountUnitSymbol}\"");
+                }
+
+                var childBatch = m_batchRepository.GetBatchById(sourceBatchId);
+                if (childBatch == null || childBatch.IsClosed || childBatch.IsLocked || !childBatch.Batch.IsAvailable)
                 {
                     throw new InvalidOperationException("Požadovaná šarže nedostupná");
                 }
 
-                if (sourceBatch.IsClosed || sourceBatch.IsLocked || !sourceBatch.Batch.IsAvailable)
+                ProductionBatchModel parentBatch;
+                ProductionBatchComponentModel targetComponent;
+                while (true)
                 {
-                    throw new InvalidOperationException($"Šarže {sourceBatch.Batch.BatchNumber} je uzavřená, zamčená nebo není dokončená");
+                    parentBatch = LoadAndValidateBatchModel(productionBatchId);
+                    if (parentBatch == null)
+                    {
+                        throw new InvalidOperationException("Šarže nedostupná");
+                    }
+
+                    targetComponent = parentBatch.Components.FirstOrDefault(c => c.MaterialId == childBatch.Batch.MaterialId);
+                    if (targetComponent == null)
+                    {
+                        throw new InvalidOperationException(
+                                  $"Složení {parentBatch.MaterialName} neobsahuje {childBatch.Batch.Material.Name}");
+                    }
+
+                    var concurrentAssignment = targetComponent.Assignments.FirstOrDefault(a => a.UsedBatchId != null && a.UsedBatchId == childBatch.Batch.Id);
+                    if (concurrentAssignment != null)
+                    {
+                        m_batchFacade.UnassignComponent(productionBatchId, concurrentAssignment.UsedBatchId.Value);
+
+                        var inProcUnit =
+                            m_unitConversion.ConvertAmount(
+                                m_unitRepository.GetUnitBySymbol(concurrentAssignment.UsedAmountUnitSymbol).Id,
+                                unit.Id,
+                                concurrentAssignment.UsedAmount);
+
+                        usedAmount += inProcUnit;
+                        continue;
+                    }
+
+                    break;
                 }
 
-                var batch = LoadAndValidateBatchModel(productionBatchId);
-                if (batch == null)
+                if (!m_unitConversion.AreCompatible(childBatch.Batch.UnitId, unit.Id))
                 {
-                    throw new InvalidOperationException("Šarže nedostupná");
-                }
-
-                var targetComponent = batch.Components.FirstOrDefault(c => c.MaterialId == sourceBatch.Batch.MaterialId);
-                if (targetComponent == null)
-                {
-                    throw new InvalidOperationException($"Složení {batch.MaterialName} neobsahuje {sourceBatch.Batch.Material.Name}");
-                }
-
-                if (!m_unitConversion.AreCompatible(sourceBatch.Batch.UnitId, unit.Id))
-                {
-                    throw new InvalidOperationException($"Nelze použít měrnou jednotku \"{usedAmountUnitSymbol}\" pro material {sourceBatch.Batch.Material.Name}");
+                    throw new InvalidOperationException($"Nelze použít měrnou jednotku \"{usedAmountUnitSymbol}\" pro material {childBatch.Batch.Material.Name}");
                 }
 
                 var batchPlaceholder = targetComponent.Assignments.SingleOrDefault(a => a.UsedBatchId == null);
                 if (batchPlaceholder == null)
                 {
-                    throw new InvalidOperationException($"Potřebné množství materiálu \"{sourceBatch.Batch.Material.Name}\" již bylo přiřazeno");
+                    throw new InvalidOperationException($"Potřebné množství materiálu \"{childBatch.Batch.Material.Name}\" již bylo přiřazeno");
                 }
 
                 var batchAvailableAmount = m_batchFacade.GetAvailableAmount(sourceBatchId);
 
                 if (!batchAvailableAmount.IsPositive)
                 {
-                    throw new InvalidOperationException($"Šarže {sourceBatch.Batch.BatchNumber} je již plně spotřebována");
+                    throw new InvalidOperationException($"Šarže {childBatch.Batch.BatchNumber} je již plně spotřebována");
                 }
 
                 var amountToAllocate =
@@ -212,9 +246,10 @@ namespace Elsa.Commerce.Core.Production
                                 m_unitRepository.GetUnitBySymbol(batchPlaceholder.UsedAmountUnitSymbol))),
                         new Amount(usedAmount, unit));
 
-                m_batchFacade.AssignComponent(batch.BatchId, sourceBatch.Batch.Id, amountToAllocate);
+                m_batchFacade.AssignComponent(parentBatch.BatchId, childBatch.Batch.Id, amountToAllocate);
 
                 var result = LoadAndValidateBatchModel(productionBatchId);
+
                 tx.Commit();
 
                 return result;
@@ -325,7 +360,8 @@ namespace Elsa.Commerce.Core.Production
                                                 UsedAmount = appliedAmount.Value,
                                                 UsedAmountUnitSymbol = appliedAmount.Unit.Symbol,
                                                 UsedBatchNumber = subBatch.Component.BatchNumber,
-                                                UsedBatchId = subBatch.Component.Id
+                                                UsedBatchId = subBatch.Component.Id,
+                                                MaterialBatchCompositionId = subBatch.Id
                                             };
 
                     componentModel.Assignments.Add(subBatchModel);

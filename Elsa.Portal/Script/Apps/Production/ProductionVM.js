@@ -181,6 +181,7 @@ app.production.ViewModel = app.production.ViewModel || function() {
         
         lt.api("/production/addComponentSourceBatch")
             .query({
+                "materialBatchCompositionId": assignment.MaterialBatchCompositionId,
                 "productionBatchId": self.editBatch.BatchId,
                 "materialId": assignment.parentMaterialId,
                 "sourceBatchNumber": batchNr,

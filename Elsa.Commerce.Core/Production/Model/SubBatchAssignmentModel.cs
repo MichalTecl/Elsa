@@ -17,5 +17,7 @@ namespace Elsa.Commerce.Core.Production.Model
         public string UsedAmountUnitSymbol { get; set; }
 
         public string AssignmentUid { get; } = Guid.NewGuid().ToString();
+        
+        public int? MaterialBatchCompositionId { get; set; }
     }
 }
