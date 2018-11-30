@@ -388,6 +388,38 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
+        public void SetBatchLock(int batchId, bool lockValue, string note)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+
+                var batch = m_batchRepository.GetBatchById(batchId)?.Batch;
+                if (batch == null)
+                {
+                    throw new InvalidOperationException("Pozadovana sarze neni dostupna");
+                }
+
+                var isLocked = batch.LockDt != null;
+                if (isLocked == lockValue)
+                {
+                    tx.Commit();
+                    return;
+                }
+
+                if ((!batch.IsAvailable) && (!lockValue))
+                {
+                    throw new InvalidOperationException("Nelze odemknout nekompletní šarži");
+                }
+
+                batch.LockDt = DateTime.Now;
+                batch.LockReason = note ?? string.Empty;
+
+                m_database.Save(batch);
+
+                tx.Commit();
+            }
+        }
+
         private Amount GetAvailableAmount(MaterialBatchComponent batch)
         {
             return m_cache.ReadThrough(

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
-using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 using Robowire.RobOrm.Core;
 
@@ -104,7 +103,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
                         if (componentMaterial.Id == material.Id)
                         {
-                            throw new ArgumentException($"Materiál nesmí mít ve složení sám sebe");
+                            throw new ArgumentException("Materiál nesmí mít ve složení sám sebe");
                         }
 
                         if (!matNames.Add(componentEntry.MaterialName))
@@ -126,6 +125,62 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 tx.Commit();
                 m_virtualProductRepository.CleanCache();
                 return m_materialRepository.GetMaterialById(material.Id);
+            }
+        }
+
+        public MaterialSetupInfo GetMaterialInfo(string materialName)
+        {
+            var material = m_materialRepository.GetMaterialByName(materialName);
+            if (material == null)
+            {
+                return null;
+            }
+
+            return MapMaterialInfo(material);
+        }
+
+        private MaterialSetupInfo MapMaterialInfo(IExtendedMaterialModel material)
+        {
+            var model = new MaterialSetupInfo
+                        {
+                            MaterialId = material.Id,
+                            PreferredUnitSymbol = material.Adaptee.NominalUnit.Symbol,
+                            IsManufactured = material.IsManufactured,
+                            MaterialName = material.Name
+                        };
+
+            if (material.AutomaticBatches)
+            {
+                var baseName = $"{StringUtil.ConvertToBaseText(material.Name, '_', '_')}_{DateTime.Now:yyyyMMdd}";
+                var versionedName = baseName;
+
+                for (var i = 1;; i++)
+                {
+                    var e =
+                        m_database.SelectFrom<IMaterialBatch>()
+                            .Where(b => b.BatchNumber == versionedName)
+                            .Take(1)
+                            .Execute()
+                            .FirstOrDefault();
+                    if (e == null)
+                    {
+                        break;
+                    }
+
+                    versionedName = $"{baseName}.{i}";
+                }
+
+                model.AutoBatchNr = versionedName;
+            }
+
+            return model;
+        }
+
+        public IEnumerable<MaterialSetupInfo> GetAllMaterialInfo()
+        {
+            foreach (var material in m_materialRepository.GetAllMaterials(null))
+            {
+                yield return MapMaterialInfo(material);
             }
         }
 

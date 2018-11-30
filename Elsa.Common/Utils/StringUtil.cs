@@ -25,9 +25,7 @@ namespace Elsa.Common.Utils
                                                                                     { 'ů', 'u' },
                                                                                     { 'w', 'v' },
                                                                                     { 'y', 'i' },
-                                                                                    { '0', 'o' },
-                                                                                    { 'l', '1' },
-                                                                                    { 'q', 'g' }
+                                                                                    { '0', 'o' }
                                                                             };
 
         private const string c_validChars = "abcdefghijklmnopqrstuvxz123456789";
@@ -150,6 +148,52 @@ namespace Elsa.Common.Utils
             var strNumber = FormatDecimal(number);
 
             return 1f / ((float)strNumber.Length);
+        }
+
+        public static string ReplaceNationalChars(string inp)
+        {
+            foreach (var r in s_replacements)
+            {
+                inp = inp.Replace(r.Key, r.Value);
+            }
+            
+            return inp;
+        }
+
+        public static string ConvertToBaseText(string inp, char whitespaceReplacement, char invalidCharReplacement)
+        {
+            inp = inp.ToLowerInvariant();
+
+            var sb = new StringBuilder();
+            var lastChar = '*';
+
+            foreach (var chr in inp.ToCharArray())
+            {
+                char replChr;
+                if (!s_replacements.TryGetValue(chr, out replChr))
+                {
+                    replChr = chr;
+                    
+                    if (char.IsWhiteSpace(replChr))
+                    {
+                        replChr = whitespaceReplacement;
+                    }
+
+                    if (!c_validChars.Contains(replChr))
+                    {
+                        replChr = invalidCharReplacement;
+                    }
+                }
+
+                if (lastChar == replChr)
+                {
+                    continue;
+                }
+                lastChar = replChr;
+                sb.Append(replChr);
+            }
+
+            return sb.ToString();
         }
     }
 }

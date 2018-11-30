@@ -326,7 +326,8 @@ namespace Elsa.Commerce.Core.Production
                                 ProducedAmount = topBatch.Volume,
                                 ProducedAmountUnitSymbol = topBatch.Unit.Symbol,
                                 MaterialId = topMaterial.Id,
-                                MaterialName = topMaterial.Name
+                                MaterialName = topMaterial.Name,
+                                IsLocked = topBatch.LockDt != null
                             };
 
             if (string.IsNullOrWhiteSpace(model.BatchNumber))

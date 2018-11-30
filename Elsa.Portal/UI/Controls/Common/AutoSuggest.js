@@ -59,8 +59,14 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
                             function(e) {
                                 /*insert the value for the autocomplete text field:*/
                                 inp.value = this.getElementsByTagName("input")[0].value;
-                                /*close the list of autocompleted values,
-                                (or any other open lists of autocompleted values:*/
+                                if ("createEvent" in document) {
+                                    var evt = document.createEvent("HTMLEvents");
+                                    evt.initEvent("change", false, true);
+                                    inp.dispatchEvent(evt);
+                                } else {
+                                    inp.fireEvent("onchange");
+                                }
+
                                 closeAllLists();
                             });
                         a.appendChild(b);

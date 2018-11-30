@@ -113,5 +113,19 @@ namespace Elsa.Apps.Inventory
                         };
             }
         }
+
+        public ProductionBatchModel LockBatch(int batchId)
+        {
+            m_batchFacade.SetBatchLock(batchId, true, $"Locked from UI by {WebSession.User.EMail} {DateTime.Now}");
+
+            return GetProductionBatch(batchId);
+        }
+
+        public ProductionBatchModel UnlockBatch(int batchId)
+        {
+            m_batchFacade.SetBatchLock(batchId, false, null);
+
+            return GetProductionBatch(batchId);
+        }
     }
 }

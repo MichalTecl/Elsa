@@ -108,6 +108,7 @@
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
     <Content Include="Script\Apps\Crm\Customers.VM.js" />
+    <Content Include="Script\Apps\Inventory\Material\MaterialHelper.js" />
     <Content Include="Script\Apps\Inventory\VirtualProducts\VirtualProductsVM.js" />
     <Content Include="Script\Apps\Inventory\WarehouseActions\WarehouseActions.VM.js" />
     <Content Include="Script\Apps\Jobs\ScheduledJobs.VM.js" />

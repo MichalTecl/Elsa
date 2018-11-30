@@ -14,5 +14,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
             int materialInventoryId,
             bool automaticBatches,
             IEnumerable<string> components);
+
+        MaterialSetupInfo GetMaterialInfo(string materialName);
+
+        IEnumerable<MaterialSetupInfo> GetAllMaterialInfo();
     }
 }

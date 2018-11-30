@@ -14,12 +14,22 @@
     <script src="/UI/Controls/Common/MaterialList/MaterialListVm.js"></script>
 </head>
 <body>
+    <script src="/Script/Apps/Inventory/Material/MaterialHelper.js"></script>
     <script src="/Script/Apps/Inventory/WarehouseActions/WarehouseActions.VM.js"></script>
     <script src="../../Controls/Common/AutoSuggest.js"></script>
     <div replace-by="/UI/Widgets/User/UserWidget.html"></div>
+    
+    <div class="panel w4" id="backPanel" style="display: none">
+        <i class="fas fa-chevron-left faButton" onclick="cancelProdBatchEdit()"></i>
+    </div>
+    
+<script>
+    function cancelProdBatchEdit() {
+        app.production.vm.cancelEdit();
+    }
+</script>
 
-
-    <div class="panel w4" id="mainTab">
+<div class="panel w4" id="mainTab">
 
     </div>
 

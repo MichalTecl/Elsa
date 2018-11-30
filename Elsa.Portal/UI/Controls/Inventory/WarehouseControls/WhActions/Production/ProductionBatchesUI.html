@@ -16,10 +16,16 @@
                     butPlus.style.display = 'block';
                     batchesListing.style.display = 'block';
                     batchEditor.style.display = 'none';
+                    document.querySelector("#mainTab > div.tabPanelHeadersContainer").style.display = 'flex';
+                    document.getElementById("userPanel").style.display = 'block';
+                    document.getElementById("backPanel").style.display = 'none';
                 } else {
                     butPlus.style.display = 'none';
                     batchesListing.style.display = 'none';
                     batchEditor.style.display = 'block';
+                    document.querySelector("#mainTab > div.tabPanelHeadersContainer").style.display = 'none';
+                    document.getElementById("userPanel").style.display = 'none';
+                    document.getElementById("backPanel").style.display = 'block';
                 }
 
             }).editBatchCanBeNull();

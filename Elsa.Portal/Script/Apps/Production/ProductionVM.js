@@ -11,6 +11,8 @@ app.production.ViewModel = app.production.ViewModel || function() {
 
     var receiveBatch = function(batch) {
 
+        var firstEmptyFound = false;
+
         var assignmentIndex = 0;
 
         if (batch.Components) {
@@ -23,6 +25,12 @@ app.production.ViewModel = app.production.ViewModel || function() {
                         assignments[j].isDirty = false;
                         assignments[j].isDisabled = false;
                         assignments[j].parentMaterialId = batch.Components[i].MaterialId;
+
+                        if ((!assignments[j].UsedBatchId) && (!firstEmptyFound)) {
+                            assignments[j].toBeResolved = true;
+                            firstEmptyFound = true;
+                        }
+
                         assignmentIndex++;
                     }
                 }
@@ -91,7 +99,7 @@ app.production.ViewModel = app.production.ViewModel || function() {
     };
 
     self.cancelEdit = function() {
-        self.editedBatch = null;
+        self.editBatch = null;
         lt.notify();
     };
 
@@ -194,7 +202,36 @@ app.production.ViewModel = app.production.ViewModel || function() {
             });
     };
 
+    self.toggleLock = function() {
+        var method = "lockBatch";
+
+        if (self.editBatch.IsLocked) {
+            method = "unlockBatch";
+        }
+
+        lt.api("/production/" + method).query({ "batchId": self.editBatch.BatchId }).get(function(b) {
+            receiveBatch(b);
+            self.editBatch = b;
+        });
+    };
+
     self.loadBatches();
+    this.removeAssignment = function(assignmentIndex) {
+        var assignment = getAssignment(assignmentIndex);
+        if (!assignment) {
+            return;
+        }
+
+        if (!assignment.UsedBatchId) {
+            return;
+        }
+
+        lt.api("/production/removeComponentSourceBatch").query({ "productionBatchId": self.editBatch.BatchId, "sourceBatchId": assignment.UsedBatchId }).get(function (b) {
+            receiveBatch(b);
+            self.editBatch = b;
+        });
+
+    };
 };
 
 app.production.vm = app.production.vm || new app.production.ViewModel();

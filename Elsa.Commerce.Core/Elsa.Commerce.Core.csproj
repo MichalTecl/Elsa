@@ -118,6 +118,7 @@
     <Compile Include="VirtualProducts\Model\ExtendedMaterial.cs" />
     <Compile Include="VirtualProducts\Model\IExtendedMaterialModel.cs" />
     <Compile Include="VirtualProducts\Model\MaterialEntry.cs" />
+    <Compile Include="VirtualProducts\Model\MaterialSetupInfo.cs" />
     <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
     <Compile Include="Warehouse\BatchStatus.cs" />
     <Compile Include="Warehouse\IMaterialBatchFacade.cs" />
