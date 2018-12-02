@@ -77,7 +77,7 @@
 
                 </div>
                 <div class="batchesEditButtons formActions">
-                    <i class="far fa-trash-alt faButton"></i>
+                    <i class="far fa-trash-alt faButton" event-bind="click:deleteBatch(VM)"></i>
                     <button class="butCancel" event-bind="click:cancelBatchEdit"></button>
                     <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value)"></button>
                     
@@ -175,6 +175,15 @@
 
         this.loadOlderBatches = function() {
             app.warehouseActions.vm.loadBottomMaterialBatches();
+        };
+
+        this.deleteBatch = function(model) {
+            if (!model.Id) {
+                app.warehouseActions.vm.setBottomMaterialBatchEditMode(null);
+                return;
+            }
+
+            app.warehouseActions.vm.deleteBatch(model.Id);
         };
     });
 </script>

@@ -35,7 +35,9 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
     };
 
     var sortBottomMaterialBatches = function() {
-        self.bottomMaterialBatches.sort(function (a, b) { return b.SortDt < a.SortDt; });
+        self.bottomMaterialBatches.sort(function(a, b) {
+             return b.SortDt - a.SortDt;
+        });
         self.setBottomMaterialBatchEditMode();
     };
 
@@ -70,6 +72,7 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
     self.saveBottomMaterialBatch = function(model) {
         lt.api("/warehouseActions/saveBottomMaterialBatch").body(model).post(function(entity) {
+            self.setBottomMaterialBatchEditMode(null);
             receiveBottomMaterialBatch(entity);
             sortBottomMaterialBatches();
         });
@@ -121,6 +124,21 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
                 self.canLoadOlderBottomMaterialBatches = (self.bottomMaterialBatches.length > originalCount);
             });
+    };
+
+    self.deleteBatch = function(batchId) {
+
+        lt.api("/warehouseActions/deleteMaterialBatch").query({ "batchId": batchId }).get(function() {
+            
+            for (var i = self.bottomMaterialBatches.length - 1; i >= 0; i--) {
+                if (self.bottomMaterialBatches[i].Id === batchId) {
+                    self.bottomMaterialBatches.splice(i, 1);
+                    continue;
+                }
+            }
+
+        });
+
     };
 
     setTimeout(loadMaterialNames, 0);

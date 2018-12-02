@@ -24,14 +24,15 @@ namespace Elsa.Apps.Inventory
         private readonly IMaterialRepository m_materialRepository;
         private readonly IUnitRepository m_unitRepository;
         private readonly IMaterialBatchRepository m_batchRepository;
-        
+        private readonly IMaterialBatchFacade m_batchFacade;
 
-        public WarehouseActionsController(IWebSession webSession, ILog log, IMaterialRepository materialRepository, IUnitRepository unitRepository, IMaterialBatchRepository batchRepository)
+        public WarehouseActionsController(IWebSession webSession, ILog log, IMaterialRepository materialRepository, IUnitRepository unitRepository, IMaterialBatchRepository batchRepository, IMaterialBatchFacade batchFacade)
             : base(webSession, log)
         {
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
             m_batchRepository = batchRepository;
+            m_batchFacade = batchFacade;
         }
 
         public IEnumerable<MaterialBatchViewModel> GetBottomMaterialBatches(long? before)
@@ -86,6 +87,11 @@ namespace Elsa.Apps.Inventory
                 model.InvoiceNumber);
 
             return new MaterialBatchViewModel(result.Batch);
+        }
+
+        public void DeleteMaterialBatch(int batchId)
+        {
+            m_batchFacade.DeleteBatch(batchId);
         }
     }
 }

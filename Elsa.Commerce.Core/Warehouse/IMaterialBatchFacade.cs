@@ -29,5 +29,7 @@ namespace Elsa.Commerce.Core.Warehouse
         IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount);
 
         void SetBatchLock(int batchId, bool lockValue, string note);
+
+        void DeleteBatch(int batchId);
     }
 }

@@ -223,23 +223,16 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IEnumerable<IPurchaseOrder> GetOrdersByMaterialBatch(int batchId)
         {
-            var batchOrderItems =
-                m_database.SelectFrom<IOrderItemMaterialBatch>()
-                    .Join(b => b.OrderItem)
-                    .Join(b => b.OrderItem.PurchaseOrder)
-                    .Where(b => b.OrderItem.PurchaseOrder.ProjectId == m_session.Project.Id)
-                    .Where(b => b.MaterialBatchId == batchId)
-                    .Transform(b => b.OrderItem.PurchaseOrderId ?? -1);
-            
-            var qry =
-                m_database.SelectFrom<IPurchaseOrder>()
-                    .Join(p => p.Items)
-                    .Join(p => p.Items.Each().AssignedBatches)
-                    .Join(p => p.Items.Each().AssignedBatches.Each().MaterialBatch)
-                    .Where(p => p.Id.InSubquery(batchOrderItems))
+            return m_database.SelectFrom<IPurchaseOrder>()
+                    .Join(po => po.Items)
+                    .Join(po => po.Items.Each().AssignedBatches.Each().MaterialBatch)
+                    .Join(po => po.Items.Each().KitChildren.Each().AssignedBatches.Each().MaterialBatch)
+                    .Where(po => po.ProjectId == m_session.Project.Id)
+                    .Where(
+                        po =>
+                            (po.Items.Each().AssignedBatches.Each().MaterialBatchId == batchId)
+                            || (po.Items.Each().KitChildren.Each().AssignedBatches.Each().MaterialBatchId == batchId))
                     .Execute();
-
-            return qry;
         }
 
         public void UpdateOrderItemBatch(IOrderItem orderItem, int batchId, decimal quantity)

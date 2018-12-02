@@ -420,6 +420,38 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
+        public void DeleteBatch(int batchId)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var batch = m_batchRepository.GetBatchById(batchId);
+                if (batch == null)
+                {
+                    throw new InvalidOperationException("šarže neexistuje");
+                }
+
+                var relatedOrder = m_orderRepository.GetOrdersByMaterialBatch(batchId).FirstOrDefault(o => !OrderStatus.IsUnsuccessfullyClosed(o.OrderStatusId));
+                if (relatedOrder != null)
+                {
+                    throw new InvalidOperationException($"Není možné smazat šarži, protože byla již použita v objednávce {relatedOrder.OrderNumber}");
+                }
+
+                var dependeingBatch = m_batchRepository.GetCompositionsByComponentBatchId(batchId).FirstOrDefault();
+                if (dependeingBatch != null)
+                {
+                    var dependingBatchEntity = m_batchRepository.GetBatchById(dependeingBatch.CompositionId);
+                    throw new InvalidOperationException($"Není možné smazat šarži, protože je již součástí šarže {dependingBatchEntity.Batch.BatchNumber}");
+                }
+
+                var toDel = m_database.SelectFrom<IMaterialBatchComposition>().Where(c => c.CompositionId == batchId).Execute();
+
+                m_database.DeleteAll(toDel);
+                m_database.Delete(batch.Batch);
+
+                tx.Commit();
+            }
+        }
+
         private Amount GetAvailableAmount(MaterialBatchComponent batch)
         {
             return m_cache.ReadThrough(
@@ -443,7 +475,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                                 continue;
                             }
                             
-                            foreach (var item in order.Items)
+                            foreach (var item in GetAllItems(order))
                             {
                                 foreach (var assignment in item.AssignedBatches.Where(a => a.MaterialBatchId == batch.Batch.Id))
                                 {
@@ -621,6 +653,22 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
 
             return result;
+        }
+
+        private IEnumerable<IOrderItem> GetAllItems(IPurchaseOrder order)
+        {
+            foreach (var i in order.Items)
+            {
+                yield return i;
+
+                if (i.KitChildren != null)
+                {
+                    foreach (var c in i.KitChildren)
+                    {
+                        yield return c;
+                    }
+                }
+            }
         }
     }
 }
