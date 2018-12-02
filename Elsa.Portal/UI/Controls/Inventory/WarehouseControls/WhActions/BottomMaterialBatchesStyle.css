@@ -1,0 +1,89 @@
+﻿/* List */
+.batchViewRow {
+   margin-left:10px;
+}
+
+.batchViewRow > div {
+    
+    border-right:1px solid #ccc;
+    padding:4px;
+
+}
+
+.batchViewRow > div:last-child {
+    border-right:1px solid transparent;
+}
+
+.batchViewRow > .batchDt {
+    min-width:110px;
+}
+
+.batchViewRow > .batchNumber {
+    font-weight: bold;
+    min-width:200px;
+}
+
+.batchViewRow > .batchMaterial {
+    border-right: none;
+}
+
+.batchViewRow > .batchActions {
+    display:none;
+}
+
+.batchViewRow:hover > .batchActions {
+    display:block;
+}
+
+.batchViewRow > .mergeRight {
+    border-right:none;
+    padding-right:0;
+}
+
+.batchViewRow > .noSpace {
+    padding-left:0;
+}
+
+/* add button */
+
+#batchesEdit {
+    padding-top:10px;
+}
+
+#batchesEdit > button.addBatchBut {
+    margin-left:12px;
+    margin-bottom:10px;
+}
+
+
+.batchEditPanel {
+    
+    margin-left:20px;
+    margin-top:10px;
+    max-width:600px;
+    min-width:400px;
+    width:50%;    
+}
+
+.tbBatchNr {
+    max-width:100% !important;
+    width:100% !important;
+}
+
+.currencyLbl {
+    margin-top:auto;
+    margin-bottm:auto;
+    margin-left:4px;
+    color:#666;
+}
+
+#loadOlderBatches {
+    margin-left:10px;
+    margin-top:10px;
+    font-size:0.8em;
+    opacity:0.8;
+}
+
+#loadOlderBatches:hover {
+    opacity:1;
+}

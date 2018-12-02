@@ -6,7 +6,6 @@ using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Caching;
-using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
@@ -87,7 +86,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             if (!includeUnavailable)
             {
-                query = query.Where(b => b.IsAvailable == true);
+                query = query.Where(b => b.IsAvailable);
             }
 
             var entities = query.Execute()
@@ -97,14 +96,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return entities;
         }
 
-        public MaterialBatchComponent SaveBottomLevelMaterialBatch(
-            int id,
-            IMaterial material,
-            decimal amount,
-            IMaterialUnit unit,
-            string batchNr,
-            DateTime receiveDt,
-            decimal price)
+        public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr)
         {
             if (material.ProjectId != m_session.Project.Id || unit.ProjectId != m_session.Project.Id)
             {
@@ -120,7 +112,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             MaterialBatchComponent result;
             using (var tx = m_database.OpenTransaction())
             {
-                IMaterialBatch entity = null;
+                IMaterialBatch entity;
                 if (id > 0)
                 {
                     entity =
@@ -152,7 +144,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                     if (existingBatchNr != null)
                     {
-                        throw new InvalidOperationException($"Již existuje šarže se zadaným číslem");
+                        throw new InvalidOperationException("Již existuje šarže se zadaným číslem");
                     }
 
                 }
@@ -171,6 +163,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 entity.Price = price;
                 entity.Note = string.Empty;
                 entity.IsAvailable = true;
+                entity.InvoiceNr = invoiceNr;
                 
                 m_database.Save(entity);
 

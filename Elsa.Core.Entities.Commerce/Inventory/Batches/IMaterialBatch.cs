@@ -53,5 +53,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         bool IsAvailable { get; set; }
 
         DateTime? Produced { get; set; }
+
+        [NVarchar(100, true)]
+        string InvoiceNr { get; set; }
     }
 }

@@ -8,77 +8,89 @@
             <div class="batchViewPanel" data-bind="class.hidden:editMode">
                 <div class="batchViewRow stackLeft">
                     <div class="batchDt" data-bind="text:DisplayDt"></div>
-                    <div class="batchMaterial" data-bind="text:MaterialName"></div>
                     <div class="batchNumber" data-bind="text:BatchNumber"></div>
+                    <div class="batchVolume mergeRight" data-bind="text:Volume"></div>
+                    <div class="batchUnit noSpace mergeRight" data-bind="text:UnitName"></div>
+                    <div class="batchMaterial" data-bind="text:MaterialName"></div>
+                    <div class="batchActions">
+                        <i class="fas fa-edit faButton" event-bind="click:editBatch(Id)"></i>
+                    </div>
                 </div>
-                <div class="batchActions">
-                    <i class="fas fa-edit faButton" event-bind="click:editBatch(Id)"></i>
-                </div>
-                <div class="batchViewDetail">
-                    <div class="batchAuthor" data-bind="text:AuthorName"></div>
-                    <div class="batchVolume" data-bind="text:Volume"></div>
-                    <div class="batchUnit" data-bind="text:UnitName"></div>
-                    <div class="batchPrice" data-bind="text:Price"></div>
-                    <div class="batchCurrency">CZK</div>
-                </div>
+                
             </div>
-            <div class="batchEditPanel" data-bind="class!.hidden:editMode">
+            <div class="batchEditPanel form" data-bind="class!.hidden:editMode">
                 <div class="batchEditUi">
-
-                    <!-- Batch Nr -->
-                    <div class="editCell">
-                        <div class="caption">Číslo šarže</div>
+                    
+                    <!-- Material -->
+                    <div class="formRow">
+                        <label>Materiál</label>
                         <div class="inputGroup">
-                            <input lt-name="batchNr" data-bind="value:BatchNumber"/>
+                            <div class="autocomplete" lt-name="materialAutocompleteContainer">
+                                <input lt-name="material" required="required" data-bind="value:MaterialName" event-bind="change:onMaterialChanged(this, $unit, $batchNr, $amount); " />
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Material Amount Unit -->
-                    <div class="editCell">
-                        <div class="caption">Materiál</div>
+                    <!-- Batch Nr -->
+                    <div class="formRow">
+                        <label>Číslo šarže</label>
                         <div class="inputGroup">
-                            <div class="autocomplete" lt-name="materialAutocompleteContainer">
-                                <input lt-name="material" data-bind="value:MaterialName"/>
-                            </div>
-
-                            <input lt-name="amount" data-bind="value:Volume"/>
-
+                            <input lt-name="batchNr" class="tbBatchNr" required="required" data-bind="value:BatchNumber"/>
+                        </div>
+                    </div>
+                    
+                    <div class="amountContainer formRow">
+                        <label>Množství</label>
+                        
+                        <div class="stackLeft">
+                            <input lt-name="amount" class="hasUnit" type="number" required="required" data-bind="value:Volume" />
                             <div class="autocomplete" lt-name="materialUnitAutocompleteContainer">
-                                <input lt-name="unit" data-bind="value:UnitName"/>
+                                <input lt-name="unit" required="required" class="unitInput" data-bind="value:UnitName" />
                             </div>
                         </div>
                     </div>
 
                     <!-- Date -->
-                    <div class="editCell" data-bind="class.hidden:hideDate">
-                        <div class="caption">Datum</div>
+                    <div class="formRow" data-bind="class.hidden:hideDate">
+                        <label>Datum</label>
                         <div class="inputGroup">
                             <input lt-name="dt" data-bind="value:DisplayDt"/>
                         </div>
                     </div>
+                    
+                    <!-- Invoice -->
+                    <div class="formRow">
+                        <label>Číslo faktury</label>
+                        <div class="inputGroup">
+                            <input lt-name="invoiceNr" data-bind="value:InvoiceNumber" />
+                        </div>
+                    </div>
 
                     <!-- Price -->
-                    <div class="editCell">
-                        <div class="caption">Cena</div>
-                        <div class="inputGroup">
-                            <input lt-name="price" data-bind="value:Price"/>
-                            <div >CZK</div>
+                    <div class="formRow">
+                        <label>Cena</label>
+                        <div class="inputGroup stackLeft">
+                            <input lt-name="price" type="number" required="required" data-bind="value:Price"/>
+                            <div class="currencyLbl">CZK</div>
                         </div>
                     </div>
 
                 </div>
-                <div class="batchesEditButtons">
+                <div class="batchesEditButtons formActions">
                     <i class="far fa-trash-alt faButton"></i>
-                    <button event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value)"><i class="fas fa-check"></i></button>
-                    <button event-bind="click:cancelBatchEdit"><i class="fas fa-times"></i></button>
+                    <button class="butCancel" event-bind="click:cancelBatchEdit"></button>
+                    <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value)"></button>
+                    
                 </div>
             </div>
         </div>
 
     </div>
 
-
+    <button event-bind="click:loadOlderBatches" id="loadOlderBatches" data-bind="class!.hidden:canLoadOlderBottomMaterialBatches">Starší</button>
 </div>
+
+
 <script>
     lt.element("batchesEdit").withModel("app.warehouseActions.vm").attach(function(batchesList, batchTemplate) {
         
@@ -94,6 +106,12 @@
             };
 
             setTimeout(setupAutosuggest, 0);
+
+            this.bind(function(editMode) {
+                if (editMode) {
+                    setTimeout(function() { material.focus(); }, 0);
+                }
+            });
         };
 
 
@@ -119,7 +137,7 @@
             return (!s || s.length < 1);
         };
 
-        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price) {
+        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price, invoiceNr) {
             batchNr = batchNr || "";
 
             if (isEmpty(material)) {
@@ -140,8 +158,24 @@
             model.UnitName = unit;
             model.DisplayDt = dt;
             model.Price = parseFloat(price);
+            model.InvoiceNumber = invoiceNr;
 
             app.warehouseActions.vm.saveBottomMaterialBatch(model);
         };
+
+        this.onMaterialChanged = function(tbMaterial, tbUnit, tbBatchNr, tbAmount) {
+            app.materialHelper.autofill(tbMaterial, tbUnit, tbBatchNr, function() {
+                if ((tbBatchNr.value || "").length === 0) {
+                    setTimeout(function() { tbBatchNr.focus(); });
+                } else {
+                    setTimeout(function () { tbAmount.focus(); });
+                }
+            });
+        };
+
+        this.loadOlderBatches = function() {
+            app.warehouseActions.vm.loadBottomMaterialBatches();
+        };
     });
 </script>
+<link href="/UI/Controls/Inventory/WarehouseControls/WhActions/BottomMaterialBatchesStyle.css" rel="stylesheet" />

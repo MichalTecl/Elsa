@@ -118,7 +118,7 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
                 if (queryString.length > 0) {
                     queryString = queryString + "&";
                 }
-                queryString = queryString + escape(key) + "=" + escape(value.toString());
+                queryString = queryString + encodeURIComponent(key) + "=" + encodeURIComponent(value.toString());
             }
         }
 

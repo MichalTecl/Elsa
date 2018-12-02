@@ -22,6 +22,7 @@ namespace Elsa.Apps.Inventory.Model
             DisplayDt = StringUtil.FormatDateTime(batch.Created);
             SortDt = batch.Created.Ticks;
             Price = batch.Price;
+            InvoiceNumber = batch.InvoiceNr;
         }
 
         public MaterialBatchViewModel() { }
@@ -43,5 +44,7 @@ namespace Elsa.Apps.Inventory.Model
         public long SortDt { get; }
 
         public decimal Price { get; set; }
+
+        public string InvoiceNumber { get; set; }
     }
 }

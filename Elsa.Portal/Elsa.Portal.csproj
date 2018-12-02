@@ -133,6 +133,7 @@
     <Content Include="UI\Controls\Inventory\TaggingEditor.html" />
     <Content Include="UI\Controls\Inventory\VirtualProducts.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesEdit.html" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesStyle.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProdBatchEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesList.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesUI.html" />

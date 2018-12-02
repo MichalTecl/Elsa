@@ -56,7 +56,7 @@ namespace Elsa.Apps.Inventory
             }
             while ((to - from).TotalDays < 365);
 
-            return batches;
+            return batches.OrderByDescending(b => b.SortDt);
         }
 
         public MaterialBatchViewModel SaveBottomMaterialBatch(MaterialBatchViewModel model)
@@ -82,7 +82,8 @@ namespace Elsa.Apps.Inventory
                 unit,
                 model.BatchNumber,
                 received,
-                model.Price);
+                model.Price,
+                model.InvoiceNumber);
 
             return new MaterialBatchViewModel(result.Batch);
         }

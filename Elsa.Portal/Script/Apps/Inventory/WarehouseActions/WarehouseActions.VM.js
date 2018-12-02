@@ -35,7 +35,7 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
     };
 
     var sortBottomMaterialBatches = function() {
-        self.bottomMaterialBatches.sort(function (a, b) { return b.SortDt > a.SortDt; });
+        self.bottomMaterialBatches.sort(function (a, b) { return b.SortDt < a.SortDt; });
         self.setBottomMaterialBatchEditMode();
     };
 
@@ -109,14 +109,17 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
         lt.api("/warehouseActions/getBottomMaterialBatches")
             .query({ "before": oldestBottomMaterialBatchTime })
-            .get(function(batches) {
-                self.canLoadOlderBottomMaterialBatches = (batches && batches.length > 0);
+            .get(function (batches) {
+
+                var originalCount = self.bottomMaterialBatches.length;
 
                 for (var i = 0; i < batches.length; i++) {
                     receiveBottomMaterialBatch(batches[i]);
                 }
 
                 sortBottomMaterialBatches();
+
+                self.canLoadOlderBottomMaterialBatches = (self.bottomMaterialBatches.length > originalCount);
             });
     };
 

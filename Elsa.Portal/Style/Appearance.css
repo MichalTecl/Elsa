@@ -13,6 +13,22 @@
     background-color: rgb(250, 255, 189) !important;
 }
 
+input[type="number"].hasUnit {
+    margin-right:0;
+    border-bottom-right-radius:0;
+    border-top-right-radius:0;
+    border-right:1px dotted #ccc;
+    width: 170px;
+}
+
+input.unitInput {
+  margin-left:0;
+  border-left:none;
+  border-top-left-radius:0;
+  border-bottom-left-radius:0;
+  max-width:80px;
+}
+
 button {
     box-sizing: border-box;
     background: #f5f5f5;
@@ -282,4 +298,74 @@ div.searchPanel {
 .disabled * {
     pointer-events: none;
     opacity: 0.4;
+}
+
+.formRow {
+  margin-bottom:12px;
+}
+
+.form {
+    border:1px solid #eee;
+    padding:10px;
+    margin-bottom:10px;
+    border-radius:2px;
+    
+}
+
+.form:hover {
+  -webkit-box-shadow: 9px 7px 19px -6px rgba(0,0,0,0.75);
+    -moz-box-shadow: 9px 7px 19px -6px rgba(0,0,0,0.75);
+    box-shadow: 9px 7px 19px -6px rgba(0,0,0,0.75);
+}
+
+.form .autocomplete {
+    width: 100%;
+}
+
+.butCancel {
+    font-weight: 900;
+    font-family: "Font Awesome 5 Free";
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+    width:50px;
+    margin-left:5px;
+}
+
+.butCancel:before{
+  content: "\f00d";
+}
+
+.butSubmit {
+    font-weight: 900;
+    font-family: "Font Awesome 5 Free";
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+    width:50px;
+    margin-left:5px;
+}
+
+.butSubmit:before{
+  content: "\f00c";
+}
+
+.formActions {
+  border-top:1px solid #eee;
+  padding-top:5px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+.formActions > .faButton {
+  margin-right:auto;
 }

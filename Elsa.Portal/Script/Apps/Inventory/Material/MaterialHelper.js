@@ -33,6 +33,9 @@ app.MaterialHelper = app.MaterialHelper || function() {
     };
 
     self.autofill = function(tbMaterial, tbUnit, tbBatch, onComplete) {
+
+        onComplete = onComplete || function() {};
+
         if ((!tbMaterial) || (!tbMaterial.value)) {
             onComplete();
             return;
@@ -63,7 +66,7 @@ app.MaterialHelper = app.MaterialHelper || function() {
             return;
         }
 
-        lt.api("/material/GetMaterialInfo").query({ "materialName": materialName }).get(function(m) {
+        lt.api("/material/GetMaterialInfo").query({ "materialName": tbMaterial.value }).get(function(m) {
             namedIndex[m.MaterialName] = m;
             receive(m);
         });
