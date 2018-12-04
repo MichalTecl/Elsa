@@ -120,6 +120,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     .Join(m => m.Composition.Each().Unit)
                     .Join(m => m.VirtualProductMaterials)
                     .Join(m => m.Inventory)
+                    .Join(m => m.Steps.Each().Components.Each().Material)
+                    .Join(m => m.Steps.Each().Components.Each().Unit)
                     .Where(m => m.ProjectId == m_session.Project.Id)
                     .Execute();
         }
@@ -178,7 +180,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_cache.Remove(VirtualProductCompositionsCacheKey);
         }
 
-        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId, int materialInventoryId, bool automaticBatches)
+        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId, int materialInventoryId, bool automaticBatches, bool requiresPrice, bool requiresInvoice)
         {
             IMaterial material;
             if (materialId != null)
@@ -193,7 +195,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     && material.NominalAmount == nominalAmount
                     && material.NominalUnitId == nominalUnitId 
                     && material.InventoryId == materialInventoryId
-                    && material.AutomaticBatches == automaticBatches)
+                    && material.AutomaticBatches == automaticBatches
+                    && material.RequiresPrice == requiresPrice
+                    && material.RequiresInvoiceNr == requiresInvoice)
                 {
                     return GetAllMaterials(null).Single(m => m.Id == materialId);
                 }
@@ -242,6 +246,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             material.ProjectId = m_session.Project.Id;
             material.InventoryId = inventory.Id;
             material.AutomaticBatches = automaticBatches;
+            material.RequiresPrice = requiresPrice;
+            material.RequiresInvoiceNr = requiresInvoice;
 
             m_database.Save(material);
 

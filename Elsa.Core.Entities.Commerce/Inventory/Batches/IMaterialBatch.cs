@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -56,5 +57,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         [NVarchar(100, true)]
         string InvoiceNr { get; set; }
+
+        [ForeignKey(nameof(IBatchProductionStep.BatchId))]
+        IEnumerable<IBatchProductionStep> PerformedSteps { get; }
     }
 }

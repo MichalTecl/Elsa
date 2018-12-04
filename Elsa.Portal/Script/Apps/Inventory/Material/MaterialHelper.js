@@ -37,13 +37,13 @@ app.MaterialHelper = app.MaterialHelper || function() {
         onComplete = onComplete || function() {};
 
         if ((!tbMaterial) || (!tbMaterial.value)) {
-            onComplete();
+            onComplete(null);
             return;
         }
 
         var indexed = namedIndex[tbMaterial.value];
         if (!indexed) {
-            onComplete();
+            onComplete(null);
             return;
         }
 
@@ -58,7 +58,7 @@ app.MaterialHelper = app.MaterialHelper || function() {
                 raiseChanged(tbBatch);
             }
 
-            onComplete();
+            onComplete(info);
         };
 
         if ((!tbBatch) || (!indexed.AutoBatchNr)) {

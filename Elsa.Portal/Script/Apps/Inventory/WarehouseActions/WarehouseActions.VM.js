@@ -36,7 +36,9 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
     var sortBottomMaterialBatches = function() {
         self.bottomMaterialBatches.sort(function(a, b) {
-             return b.SortDt - a.SortDt;
+            return b.SortDt -
+
+                a.SortDt;
         });
         self.setBottomMaterialBatchEditMode();
     };

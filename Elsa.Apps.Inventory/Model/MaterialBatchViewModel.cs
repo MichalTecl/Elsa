@@ -43,7 +43,7 @@ namespace Elsa.Apps.Inventory.Model
 
         public long SortDt { get; }
 
-        public decimal Price { get; set; }
+        public decimal? Price { get; set; }
 
         public string InvoiceNumber { get; set; }
     }

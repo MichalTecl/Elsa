@@ -95,6 +95,10 @@
     <Compile Include="Inventory\Kits\IKitDefinition.cs" />
     <Compile Include="Inventory\Kits\IKitSelectionGroup.cs" />
     <Compile Include="Inventory\Kits\IKitSelectionGroupItem.cs" />
+    <Compile Include="Inventory\ProductionSteps\IBatchProductionStep.cs" />
+    <Compile Include="Inventory\ProductionSteps\IBatchProuctionStepSourceBatch.cs" />
+    <Compile Include="Inventory\ProductionSteps\IMaterialProductionStep.cs" />
+    <Compile Include="Inventory\ProductionSteps\IMaterialProductionStepMaterial.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

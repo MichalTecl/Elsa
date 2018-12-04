@@ -3,6 +3,7 @@ using System.Text;
 
 using Elsa.Commerce.Core.Units;
 using Elsa.Core.Entities.Commerce.Inventory;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {
@@ -24,6 +25,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         IEnumerable<MaterialComponent> Components { get; }
 
+        IEnumerable<MaterialProductionStepModel> ProductionSteps { get; } 
         IExtendedMaterialModel CreateBatch(decimal batchAmount, IMaterialUnit preferredBatchUnit, IUnitConversionHelper conversions);
 
         IEnumerable<CompositionViewModel> Flatten();
@@ -39,5 +41,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         bool CanBeConnectedToTag { get; }
 
         bool AutomaticBatches { get; }
+
+        bool RequiresPrice { get; }
+
+        bool RequiresInvoice { get; }
     }
 }

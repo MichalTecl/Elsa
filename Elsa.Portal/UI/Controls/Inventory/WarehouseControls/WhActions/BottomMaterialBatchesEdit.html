@@ -26,7 +26,7 @@
                         <label>Materiál</label>
                         <div class="inputGroup">
                             <div class="autocomplete" lt-name="materialAutocompleteContainer">
-                                <input lt-name="material" required="required" data-bind="value:MaterialName" event-bind="change:onMaterialChanged(this, $unit, $batchNr, $amount); " />
+                                <input lt-name="material" required="required" data-bind="value:MaterialName" event-bind="change:onMaterialChanged(this, $unit, $batchNr, $amount, $priceCell, $invoiceCell); " />
                             </div>
                         </div>
                     </div>
@@ -59,7 +59,7 @@
                     </div>
                     
                     <!-- Invoice -->
-                    <div class="formRow">
+                    <div class="formRow" lt-name="invoiceCell">
                         <label>Číslo faktury</label>
                         <div class="inputGroup">
                             <input lt-name="invoiceNr" data-bind="value:InvoiceNumber" />
@@ -67,7 +67,7 @@
                     </div>
 
                     <!-- Price -->
-                    <div class="formRow">
+                    <div class="formRow" lt-name="priceCell">
                         <label>Cena</label>
                         <div class="inputGroup stackLeft">
                             <input lt-name="price" type="number" required="required" data-bind="value:Price"/>
@@ -163,12 +163,26 @@
             app.warehouseActions.vm.saveBottomMaterialBatch(model);
         };
 
-        this.onMaterialChanged = function(tbMaterial, tbUnit, tbBatchNr, tbAmount) {
-            app.materialHelper.autofill(tbMaterial, tbUnit, tbBatchNr, function() {
+        this.onMaterialChanged = function(tbMaterial, tbUnit, tbBatchNr, tbAmount, priceInputBlock, invoiceInputBlock) {
+            app.materialHelper.autofill(tbMaterial, tbUnit, tbBatchNr, function(info) {
                 if ((tbBatchNr.value || "").length === 0) {
-                    setTimeout(function() { tbBatchNr.focus(); });
+                    setTimeout(function () { tbBatchNr.focus(); });
                 } else {
                     setTimeout(function () { tbAmount.focus(); });
+                }
+
+                priceInputBlock.style.display = 'block';
+                invoiceInputBlock.style.display = 'block';
+
+                if (info) {
+                    
+                    if (!info.RequiresPrice) {
+                        priceInputBlock.style.display = 'none';
+                    }
+
+                    if (!info.RequiresInvoice) {
+                        invoiceInputBlock.style.display = 'none';
+                    }
                 }
             });
         };

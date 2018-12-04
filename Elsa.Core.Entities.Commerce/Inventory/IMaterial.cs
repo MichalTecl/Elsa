@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Core;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -30,5 +31,11 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         IMaterialInventory Inventory { get; }
 
         bool AutomaticBatches { get; set; }
+
+        bool? RequiresInvoiceNr { get; set; }
+
+        bool? RequiresPrice { get; set; }
+        
+        IEnumerable<IMaterialProductionStep> Steps { get; }
     }
 }

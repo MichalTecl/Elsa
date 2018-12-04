@@ -17,5 +17,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool IsManufactured { get; set; }
 
         public string MaterialName { get; set; }
+
+        public bool RequiresPrice { get; set; }
+
+        public bool RequiresInvoice { get; set; }
     }
 }

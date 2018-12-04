@@ -35,6 +35,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             string nominalAmountText,
             int materialInventoryId,
             bool automaticBatches,
+            bool requiresPrice,
+            bool requiresIncvoice, 
             IEnumerable<string> components)
         {
             name = name?.Trim();
@@ -62,7 +64,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     nominalAmountEntry.Amount,
                     nominalUnit.Id,
                     materialInventoryId,
-                    automaticBatches);
+                    automaticBatches,
+                    requiresPrice,
+                    requiresIncvoice);
 
                 var toDelete =
                     material.Components.Where(
@@ -146,12 +150,14 @@ namespace Elsa.Commerce.Core.VirtualProducts
                             MaterialId = material.Id,
                             PreferredUnitSymbol = material.Adaptee.NominalUnit.Symbol,
                             IsManufactured = material.IsManufactured,
-                            MaterialName = material.Name
+                            MaterialName = material.Name,
+                            RequiresInvoice = material.RequiresInvoice,
+                            RequiresPrice = material.RequiresInvoice
                         };
 
             if (material.AutomaticBatches)
             {
-                var baseName = $"{StringUtil.ConvertToBaseText(material.Name, '_', '_')}_{DateTime.Now:yyyyMMdd}";
+                var baseName = $"{StringUtil.ConvertToBaseText(material.Name, '_', '_', 3)}_{DateTime.Now:yyyyMMdd}";
                 var versionedName = baseName;
 
                 for (var i = 1;; i++)

@@ -2,7 +2,7 @@
     
     <div lt-name="theList">
         
-        <div lt-name="materialEntryItemTemplate">
+        <div lt-name="materialEntryItemTemplate" class="lt-template">
             <div>
                 <input data-bind="value:displayText" required="required" lt-name="tbMaterialEntry" class="materialEntryInput" event-bind="keyup:onMaterialTextChange(VM, this.value); mouseup:onMaterialTextChange(VM, this.value); changed:onMaterialTextChange(VM, this.value);focus:onInputFocus;blur:onInputBlur;keydown:onSuggestionKeyDown(event)"/>
                 <i class="fas fa-minus faButton" lt-name="butMinus" event-bind="click:deleteMaterial(VM)"></i>

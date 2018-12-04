@@ -5,25 +5,28 @@
             <i class="lblLock"  data-bind="class!.hidden:IsLocked">Odemknout šarži</i>
             <i class="lblUnlock" data-bind="class.hidden:IsLocked">Zamknout šarži</i>
         </div>
-        <div id="prodBatchHead">
+        <div id="prodBatchHead" class="form">
 
-            <div id="materialSelectorContainer" class="autocomplete">
+            <div id="materialSelectorContainer" class="autocomplete formRow">
                 <label for="tbMaterial">Materiál</label>
                 <input id="tbMaterial" type="text" data-bind="value:MaterialName" required="required" event-bind="change:onHeadChanged(this); keyup:onHeadChanged(this)"/>
             </div>
-            <div id="amountContainer">
+            <div id="amountContainer" class="formRow">
                 <label for="tbAmount">Množství</label>
-                <input type="number" step="0.01" id="tbAmount" data-bind="value:ProducedAmount" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged"/>
+                <div class="stackLeft">
+                    <input class="hasUnit" type="number" step="0.01" id="tbAmount" data-bind="value:ProducedAmount" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged" />
+                    <div class="autocomplete unitInput" id="unitSelectorContainer">
+                        <input id="tbUnit" data-bind="value:ProducedAmountUnitSymbol" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged" />
+                    </div>
+                </div>
             </div>
-            <div class="autocomplete" id="unitSelectorContainer">
-                <input id="tbUnit" data-bind="value:ProducedAmountUnitSymbol" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged"/>
-            </div>
-            <div id="batchNrContainer">
+            
+            <div id="batchNrContainer" class="formRow">
                 <label for="tbBatchNr">Číslo šarže</label>
                 <input id="tbBatchNr" data-bind="value:BatchNumber" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged"/>
             </div>
-            <div id="batchHeadChangesButtonsContainer" class="stackLeft">
-                <button event-bind="click:saveHeadChanges">ok</button>
+            <div id="batchHeadChangesButtonsContainer" class="formActions">
+                <button class="butSubmit" event-bind="click:saveHeadChanges"></button>
             </div>
         </div>
 
@@ -39,8 +42,8 @@
                         <div lt-name="assignedBatchesList">
                             <div lt-name="assignedBatchItemTemplate" class="lt-template">
                                 <div lt-name="assignedBatchView" class="stackLeft" data-bind="class.disabled:isDisabled" event-bind="keydown:onAssignmentKeyDown(VM, event, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)">
-                                    <input lt-name="tbAsgAmount" data-bind="value:UsedAmount" type="number" step="0.01" event-bind="change:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value);keyup:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)"/>
-                                    <input lt-name="tbAsgUnit" data-bind="value:UsedAmountUnitSymbol" event-bind="change:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value); keyup:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)"/>
+                                    <input class="hasUnit" lt-name="tbAsgAmount" data-bind="value:UsedAmount" type="number" step="0.01" event-bind="change:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value);keyup:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)"/>
+                                    <input class="unitInput" lt-name="tbAsgUnit" data-bind="value:UsedAmountUnitSymbol" event-bind="change:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value); keyup:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)"/>
                                     <input lt-name="tbAsgBatch" data-bind="value:UsedBatchNumber" event-bind="change:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value); keyup:onAssignmentChanged(assignmentIndex, $tbAsgAmount.value, $tbAsgUnit.value, $tbAsgBatch.value)"/>
                                     <i class="fas fa-minus faButton" event-bind="click:onRemoveBatchAssignmentClick(VM)"></i>
 

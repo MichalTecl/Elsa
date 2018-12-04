@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 using Elsa.Commerce.Core.Units;
 using Elsa.Core.Entities.Commerce.Inventory;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Newtonsoft.Json;
 
@@ -25,6 +27,41 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             IsManufactured = adaptee.Inventory.IsManufactured;
             CanBeConnectedToTag = adaptee.Inventory.CanBeConnectedToTag;
             AutomaticBatches = adaptee.AutomaticBatches;
+            RequiresInvoice = adaptee.RequiresInvoiceNr ?? false;
+            RequiresPrice = adaptee.RequiresPrice ?? false;
+
+            var stepsAssorted = adaptee.Steps.Select(s => new MaterialProductionStepModel(s)).ToList();
+            List<MaterialProductionStepModel> stepsSorted = null;
+
+            if (stepsAssorted.Count < 2)
+            {
+                stepsSorted = stepsAssorted;
+            }
+            else
+            {
+                stepsSorted = new List<MaterialProductionStepModel>(stepsAssorted.Count);
+
+                int? nextReference = null;
+                while (stepsAssorted.Any())
+                {
+                    var currentStep = stepsAssorted.FirstOrDefault(i => i.PreviousStepId == nextReference);
+                    if (currentStep == null)
+                    {
+                        if (stepsAssorted.Any())
+                        {
+                            throw new InvalidOperationException($"Inconsistent production steps sequnece found. MaterialId={adaptee.Id}");
+                        }
+
+                        break;
+                    }
+
+                    nextReference = currentStep.Id;
+                    stepsAssorted.Remove(currentStep);
+                    stepsSorted.Add(currentStep);
+                }
+            }
+
+            ProductionSteps = stepsSorted;
         }
 
         public int Id { get; }
@@ -43,6 +80,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public IMaterial Adaptee { get; }
         
         public IEnumerable<MaterialComponent> Components => m_components;
+
+        public IEnumerable<MaterialProductionStepModel> ProductionSteps { get; }
 
         public IExtendedMaterialModel CreateBatch(decimal batchAmount, IMaterialUnit preferredBatchUnit, IUnitConversionHelper conversions)
         {
@@ -101,6 +140,10 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool CanBeConnectedToTag { get; }
 
         public bool AutomaticBatches { get; }
+
+        public bool RequiresPrice { get; }
+
+        public bool RequiresInvoice { get; }
 
         public void AddComponent(decimal amount, IMaterialUnit unit, IExtendedMaterialModel material)
         {

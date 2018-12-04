@@ -209,6 +209,8 @@ namespace Elsa.Apps.Inventory
                 request.NominalAmountText,
                 request.MaterialInventoryId,
                 request.AutomaticBatches,
+                request.RequiresPrice,
+                request.RequiresInvoice,
                 request.Materials.Select(s => s.DisplayText));
 
             m_cache.Remove(GetMappablesCacheKey());

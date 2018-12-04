@@ -379,6 +379,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 }
 
                 var batchAvailableAmount = GetAvailableAmount(batch.Batch.Id);
+                if (!batchAvailableAmount.IsPositive)
+                {
+                    continue;
+                }
 
                 var amountToAllocate = m_amountProcessor.Min(requiredAmount, batchAvailableAmount);
 

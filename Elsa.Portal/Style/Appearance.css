@@ -304,6 +304,11 @@ div.searchPanel {
   margin-bottom:12px;
 }
 
+.formRow label {
+    display: block;
+    text-align: left;
+}
+
 .form {
     border:1px solid #eee;
     padding:10px;

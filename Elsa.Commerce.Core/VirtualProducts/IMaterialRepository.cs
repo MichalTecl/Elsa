@@ -21,7 +21,15 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         void AddOrUpdateComponent(int vpId, int materialId, decimal requestComponentAmount, int unitId);
 
-        IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId, int materialInventoryId, bool automaticBatches);
+        IExtendedMaterialModel UpsertMaterial(
+            int? materialId,
+            string name,
+            decimal nominalAmount,
+            int nominalUnitId,
+            int materialInventoryId,
+            bool automaticBatches,
+            bool requiresPrice,
+            bool requiresInvoice);
         
         void CleanCache();
 

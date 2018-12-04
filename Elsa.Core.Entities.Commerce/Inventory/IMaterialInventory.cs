@@ -21,6 +21,10 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         bool IsManufactured { get; set; }
 
+        bool? RequireInvoicesDefault { get; set; }
+
+        bool? RequirePriceDefault { get; set; } 
+
         bool CanBeConnectedToTag { get; set; }
 
         int? AllowedUnitId { get; set; }

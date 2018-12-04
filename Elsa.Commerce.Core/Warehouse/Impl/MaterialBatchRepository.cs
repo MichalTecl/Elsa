@@ -155,6 +155,16 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                               $"Nelze použít jednotku '{unit.Symbol}' pro materiál '{material.Name}' protože není převoditelná na nominální jednotku materiálu '{material.NominalUnit}'");
                 }
 
+                if (material.RequiresPrice == true && Math.Abs(price) < 0.000001m)
+                {
+                    throw new InvalidOperationException("Cena je povinný údaj");
+                }
+
+                if (material.RequiresInvoiceNr == true && string.IsNullOrWhiteSpace(invoiceNr))
+                {
+                    throw new InvalidOperationException("Číslo faktury je povinný údaj");
+                }
+
                 entity.BatchNumber = batchNr;
                 entity.Created = receiveDt;
                 entity.MaterialId = material.Id;

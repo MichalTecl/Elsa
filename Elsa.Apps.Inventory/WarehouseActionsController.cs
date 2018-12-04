@@ -83,7 +83,7 @@ namespace Elsa.Apps.Inventory
                 unit,
                 model.BatchNumber,
                 received,
-                model.Price,
+                model.Price ?? 0m,
                 model.InvoiceNumber);
 
             return new MaterialBatchViewModel(result.Batch);

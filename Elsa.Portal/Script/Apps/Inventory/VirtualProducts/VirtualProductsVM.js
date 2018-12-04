@@ -29,6 +29,23 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
         mat.materials = materials;
 
+        for (var stepIndex = 0; stepIndex < mat.ProductionSteps.length; stepIndex++) {
+            var step = mat.ProductionSteps[stepIndex];
+            var stepMats = [];
+
+            for (var matIndex = 0; matIndex < step.Components.length; matIndex++) {
+                var componentMaterial = step.Components[matIndex];
+
+                stepMats.push({
+                    Name: componentMaterial.MaterialName,
+                    Amount: componentMaterial.Amount,
+                    UnitSymbol: componentMaterial.Unit
+                });
+            }
+
+            step.materials = stepMats;
+        }
+
         mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;
     };
 
@@ -269,7 +286,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
         if (!found) {
 
-            var newMat = { editMode: true, materials: [] };
+            var newMat = { editMode: true, materials: [], RequiresPrice: self.currentMaterialInventory.RequirePriceDefault || false, RequiresInvoice: self.currentMaterialInventory.RequireInvoicesDefault };
             if (self.currentMaterialInventory.AllowedUnit) {
                 newMat.nominalAmountText = "1" + self.currentMaterialInventory.AllowedUnit.Symbol;
             }
@@ -287,6 +304,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             NominalAmountText: model.nominalAmountText,
             MaterialInventoryId: self.currentMaterialInventory.Id,
             AutomaticBatches: model.AutomaticBatches,
+            RequiresPrice: model.RequiresPrice,
+            RequiresInvoice: model.RequiresInvoice,
             Materials: []
         };
 

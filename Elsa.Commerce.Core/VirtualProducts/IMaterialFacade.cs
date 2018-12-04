@@ -13,6 +13,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             string nominalAmountText,
             int materialInventoryId,
             bool automaticBatches,
+            bool requiresPrice,
+            bool requiresInvoice,
             IEnumerable<string> components);
 
         MaterialSetupInfo GetMaterialInfo(string materialName);

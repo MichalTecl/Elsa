@@ -8,7 +8,7 @@ namespace Elsa.Common.Utils
 {
     public static class StringUtil
     {
-        private static readonly Dictionary<char, char> s_replacements = new Dictionary<char, char>()
+        private static readonly Dictionary<char, char> s_searchStringReplacements = new Dictionary<char, char>()
                                                                             {
                                                                                     { 'á', 'a' },
                                                                                     { 'č', 'c' },
@@ -28,7 +28,28 @@ namespace Elsa.Common.Utils
                                                                                     { '0', 'o' }
                                                                             };
 
-        private const string c_validChars = "abcdefghijklmnopqrstuvxz123456789";
+        private static readonly Dictionary<char, char> s_seoStringReplacements = new Dictionary<char, char>()
+                                                                                     {
+                                                                                             { 'á', 'a' },
+                                                                                             { 'č', 'c' },
+                                                                                             { 'ď', 'd' },
+                                                                                             { 'ě', 'e' },
+                                                                                             { 'é', 'e' },
+                                                                                             { 'í', 'i' },
+                                                                                             { 'ň', 'n' },
+                                                                                             { 'ó', 'o' },
+                                                                                             { 'ř', 'r' },
+                                                                                             { 'š', 's' },
+                                                                                             { 'ť', 't' },
+                                                                                             { 'ú', 'u' },
+                                                                                             { 'ů', 'u' }
+                                                                                     };
+                                                                                    
+
+
+
+        private const string c_searchStringValidChars = "abcdefghijklmnopqrstuvxz123456789";
+        private const string c_seoValidChars = "abcdefghijklmnopqrstuvwxyz1234567890";
 
         public static string RemoveNumericChars(string inp)
         {
@@ -66,12 +87,12 @@ namespace Elsa.Common.Utils
                 foreach (var chr in s.Trim().ToLowerInvariant())
                 {
                     char nChar;
-                    if (!s_replacements.TryGetValue(chr, out nChar))
+                    if (!s_searchStringReplacements.TryGetValue(chr, out nChar))
                     {
                         nChar = chr;
                     }
 
-                    if (!c_validChars.Contains(nChar) || ((nChar == lChar && !char.IsDigit(nChar))))
+                    if (!c_searchStringValidChars.Contains(nChar) || ((nChar == lChar && !char.IsDigit(nChar))))
                     {
                         continue;
                     }
@@ -152,7 +173,7 @@ namespace Elsa.Common.Utils
 
         public static string ReplaceNationalChars(string inp)
         {
-            foreach (var r in s_replacements)
+            foreach (var r in s_seoStringReplacements)
             {
                 inp = inp.Replace(r.Key, r.Value);
             }
@@ -160,17 +181,18 @@ namespace Elsa.Common.Utils
             return inp;
         }
 
-        public static string ConvertToBaseText(string inp, char whitespaceReplacement, char invalidCharReplacement)
+        public static string ConvertToBaseText(string inp, char whitespaceReplacement, char invalidCharReplacement, int wordLenLimit = 1000)
         {
             inp = inp.ToLowerInvariant();
-
+            
             var sb = new StringBuilder();
             var lastChar = '*';
 
+            var currentWordLength = 0;
             foreach (var chr in inp.ToCharArray())
             {
                 char replChr;
-                if (!s_replacements.TryGetValue(chr, out replChr))
+                if (!s_seoStringReplacements.TryGetValue(chr, out replChr))
                 {
                     replChr = chr;
                     
@@ -179,7 +201,7 @@ namespace Elsa.Common.Utils
                         replChr = whitespaceReplacement;
                     }
 
-                    if (!c_validChars.Contains(replChr))
+                    if (!c_seoValidChars.Contains(replChr))
                     {
                         replChr = invalidCharReplacement;
                     }
@@ -190,7 +212,17 @@ namespace Elsa.Common.Utils
                     continue;
                 }
                 lastChar = replChr;
-                sb.Append(replChr);
+
+                if (replChr == whitespaceReplacement)
+                {
+                    currentWordLength = 0;
+                }
+
+                if (currentWordLength <= wordLenLimit)
+                {
+                    sb.Append(replChr);
+                    currentWordLength++;
+                }
             }
 
             return sb.ToString();

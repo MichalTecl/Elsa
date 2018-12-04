@@ -26,8 +26,42 @@
                                 <i lt-name="lblNominalRight"></i>
                             </div>
                             <div class="materialEditor" lt-name="materialEditPlaceholder"></div>
-                            <div class="materialEditFlags stackLeft">
-                                <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onAutomaticBatchesCheckedChanged(VM, this.checked)" /><label>Automaticky spravovat šarže</label>
+                            <div class="productionStepsSection">
+                                <div class="stepsLabel">Kroky výroby</div>
+                                <div lt-name="stepsList">
+                                    <div lt-name="stepItemTemplate" class="stepItemTemplate lt-template">
+                                        <div class="stackLeft prodStepTitlePanel">
+                                            <input lt-name="tbStepName" class="tbStepName" data-bind="value:StepName" />
+                                            <i class="fas fa-minus"></i>
+                                        </div>
+                                        <div class="stackLeft materialFlagEdit">
+                                            <input type="checkbox" data-bind="checked:RequiresPrice"/><label>Cena</label>
+                                            <input type="checkbox" data-bind="checked:RequiresSpentTime" /><label>Čas</label>
+                                            <input type="checkbox" data-bind="checked:RequiresWorkerReference" /><label>Pracovník</label>
+                                        </div>
+                                        <div class="workStepMaterialSection">
+                                            <div lt-name="stepMaterialList" class="stepMaterialList">
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <i class="fas fa-plus faButton addStepButton"></i>
+                            </div>
+                            <div class="materialEditFlags">
+                                <div class="materialFlagEdit stackLeft">
+                                    <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked)" />
+                                    <label>Automaticky spravovat šarže</label>
+                                </div>
+                                <div class="materialFlagEdit stackLeft">
+                                    <input type="checkbox" lt-name="cbInvoice" data-bind="checked:RequiresInvoice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked)" />
+                                    <label>Sledovat čísla faktur</label>
+                                </div>
+                                <div class="materialFlagEdit stackLeft">
+                                    <input type="checkbox" lt-name="cbPrice" data-bind="checked:RequiresPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked)" />
+                                    <label>Sledovat nákupní cenu</label>
+                                </div>
                             </div>
                         </div>
 
@@ -50,7 +84,11 @@
 <script>
     lt.element("materialsEditorPanel").withModel("app.virtualProductsEditor.vm").attach(function (materialsList, materialItemTemplate) {
 
-        var materialItemController = function (materialEditPlaceholder, tbNominalAmount, lblNominalLeft, lblNominalRight) {
+        var productionStepController = function(stepMaterialList) {
+            app.ui.MaterialList.renderTo(stepMaterialList);
+        };
+
+        var materialItemController = function (materialEditPlaceholder, tbNominalAmount, lblNominalLeft, lblNominalRight, stepsList, stepItemTemplate) {
             app.ui.MaterialList.renderTo(materialEditPlaceholder);
 
             this.bind(function(currentMaterialInventory) {
@@ -70,10 +108,17 @@
                         lblNominalLeft.innerHTML = "Pro výrobu&nbsp;";
                         lblNominalRight.innerHTML = "&nbsp;je třeba:";
                     }
-
                 })
                 .currentMaterialInventoryRelativeToGlobal("app.virtualProductsEditor.vm")
                 .currentMaterialInventoryCanBeNull();
+
+            this.bind(function(ProductionSteps) {
+                lt.generate(stepsList,
+                    stepItemTemplate,
+                    ProductionSteps,
+                    function(s) { return s.Id; },
+                    productionStepController);
+            });
         };
 
         this.bind(function (selectedMaterials) {
@@ -116,8 +161,10 @@
             lt.notify(this);
         };
 
-        this.onAutomaticBatchesCheckedChanged = function(model, checked) {
-            model.AutomaticBatches = checked;
+        this.onFlagChanged = function(model, autoBatches, invoices, price) {
+            model.AutomaticBatches = autoBatches;
+            model.RequiresInvoice = invoices;
+            model.RequiresPrice = price;
             lt.notify(this);
         };
 

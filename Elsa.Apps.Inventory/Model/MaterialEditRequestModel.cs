@@ -15,6 +15,10 @@ namespace Elsa.Apps.Inventory.Model
 
         public bool AutomaticBatches { get; set; }
 
+        public bool RequiresInvoice { get; set; }
+
+        public bool RequiresPrice { get; set; }
+
         public List<VirtualProductEditRequestModel.VpMaterialEditRequestModel> Materials { get; set; }
     }
 }
