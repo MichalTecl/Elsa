@@ -35,9 +35,9 @@
                                             <i class="fas fa-minus"></i>
                                         </div>
                                         <div class="stackLeft materialFlagEdit">
-                                            <input type="checkbox" data-bind="checked:RequiresPrice"/><label>Cena</label>
-                                            <input type="checkbox" data-bind="checked:RequiresSpentTime" /><label>Čas</label>
-                                            <input type="checkbox" data-bind="checked:RequiresWorkerReference" /><label>Pracovník</label>
+                                            <input type="checkbox" lt-name="cbPrice" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresPrice"/><label>Cena</label>
+                                            <input type="checkbox" lt-name="cbTime" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresSpentTime" /><label>Čas</label>
+                                            <input type="checkbox" lt-name="cbWorker" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresWorkerReference" /><label>Pracovník</label>
                                         </div>
                                         <div class="workStepMaterialSection">
                                             <div lt-name="stepMaterialList" class="stepMaterialList">
@@ -165,6 +165,13 @@
             model.AutomaticBatches = autoBatches;
             model.RequiresInvoice = invoices;
             model.RequiresPrice = price;
+            lt.notify(this);
+        };
+
+        this.onProdStepFlagChanged = function(model, price, time, worker) {
+            model.RequiresPrice = price;
+            model.RequiresSpentTime = time;
+            model.RequiresWorkerReference = worker;
             lt.notify(this);
         };
 

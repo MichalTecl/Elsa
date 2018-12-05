@@ -17,6 +17,10 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool requiresInvoice,
             IEnumerable<string> components);
 
+        IExtendedMaterialModel ProcessProductionStepsEditRequest(
+            IExtendedMaterialModel owner,
+            IEnumerable<ProductionStepRequestModel> request);
+        
         MaterialSetupInfo GetMaterialInfo(string materialName);
 
         IEnumerable<MaterialSetupInfo> GetAllMaterialInfo();

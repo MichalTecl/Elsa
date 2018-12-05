@@ -29,5 +29,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory.ProductionSteps
 
         [ForeignKey(nameof(IMaterialProductionStepMaterial.StepId))]
         IEnumerable<IMaterialProductionStepMaterial> Components { get; }
+
+        DateTime? DeleteDateTime { get; set; }
     }
 }

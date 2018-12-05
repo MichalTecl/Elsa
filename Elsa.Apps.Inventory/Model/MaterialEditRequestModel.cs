@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+using Elsa.Commerce.Core.VirtualProducts.Model;
 
 namespace Elsa.Apps.Inventory.Model
 {
@@ -20,5 +21,7 @@ namespace Elsa.Apps.Inventory.Model
         public bool RequiresPrice { get; set; }
 
         public List<VirtualProductEditRequestModel.VpMaterialEditRequestModel> Materials { get; set; }
+
+        public List<ProductionStepRequestModel> ProductionSteps { get; set; }
     }
 }

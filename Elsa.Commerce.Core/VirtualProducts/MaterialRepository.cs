@@ -7,6 +7,7 @@ using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Inventory;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 
@@ -351,6 +352,47 @@ namespace Elsa.Commerce.Core.VirtualProducts
                         .Join(i => i.AllowedUnit)
                         .Where(i => i.ProjectId == m_session.Project.Id)
                         .Execute());
+        }
+
+        public void DeleteMaterialProductionStep(int materialId, int productionStepId)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var matr = GetMaterialById(materialId);
+                var step = matr.ProductionSteps.FirstOrDefault(i => i.Id == productionStepId)?.Adaptee;
+                if (step == null)
+                {
+                    tx.Commit();
+                    return;
+                }
+
+                var resolution =
+                    m_database.SelectFrom<IBatchProductionStep>()
+                        .Where(s => s.StepId == productionStepId)
+                        .Take(1)
+                        .Execute()
+                        .FirstOrDefault();
+
+                if (resolution != null)
+                {
+                    step.DeleteDateTime = DateTime.Now;
+                    m_database.Save(step);
+                    CleanCache();
+                    tx.Commit();
+                    return;
+                }
+
+                foreach (var component in step.Components)
+                {
+                    m_database.Delete(component);
+                }
+
+                m_database.Delete(step);
+
+                CleanCache();
+
+                tx.Commit();
+            }
         }
 
         public IMaterialRepositoryWithPostponedCache GetWithPostponedCache()

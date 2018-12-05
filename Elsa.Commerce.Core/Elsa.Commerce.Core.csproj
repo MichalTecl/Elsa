@@ -121,6 +121,8 @@
     <Compile Include="VirtualProducts\Model\MaterialProductionStepMaterialModel.cs" />
     <Compile Include="VirtualProducts\Model\MaterialProductionStepModel.cs" />
     <Compile Include="VirtualProducts\Model\MaterialSetupInfo.cs" />
+    <Compile Include="VirtualProducts\Model\ProductionStepMaterialRequestModel.cs" />
+    <Compile Include="VirtualProducts\Model\ProductionStepRequestModel.cs" />
     <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
     <Compile Include="Warehouse\BatchStatus.cs" />
     <Compile Include="Warehouse\IMaterialBatchFacade.cs" />

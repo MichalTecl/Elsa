@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
+using Newtonsoft.Json;
+
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {
     public class MaterialProductionStepModel
     {
         public MaterialProductionStepModel(IMaterialProductionStep entity)
         {
+            Adaptee = entity;
             Id = entity.Id;
             PreviousStepId = entity.PreviousStepId;
             StepName = entity.Name;
@@ -21,6 +24,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
             Components = entity.Components.Select(c => new MaterialProductionStepMaterialModel(c)).ToList();
         }
+
+        [JsonIgnore]
+        public IMaterialProductionStep Adaptee { get; }
 
         public int Id { get; }
 

@@ -306,12 +306,32 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             AutomaticBatches: model.AutomaticBatches,
             RequiresPrice: model.RequiresPrice,
             RequiresInvoice: model.RequiresInvoice,
-            Materials: []
+            Materials: [],
+            ProductionSteps: []
         };
 
         for (var i = 0; i < model.materials.length; i++) {
             request.Materials.push({ DisplayText: model.materials[i].displayText });
         }
+
+        for (var j = 0; j < model.ProductionSteps.length; j++) {
+            var step = model.ProductionSteps[j];
+
+            var stepModel = {};
+            request.ProductionSteps.push(stepModel);
+            stepModel.StepOrder = j;
+            stepModel.StepId = step.Id;
+            stepModel.StepName = step.StepName;
+            stepModel.Price = step.RequiresPrice;
+            stepModel.Time = step.RequiresSpentTime;
+            stepModel.Worker = step.RequiresWorkerReference;
+            stepModel.Materials = [];
+
+            for (var k = 0; k < step.materials.length; k++) {
+                stepModel.Materials.push({ "DisplayText": step.materials[k].displayText });
+            }
+        }
+
 
         lt.api("/virtualProducts/saveMaterial").body(request).post(receiveSingleMaterial);
         

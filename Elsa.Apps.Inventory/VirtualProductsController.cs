@@ -18,6 +18,7 @@ using Elsa.Core.Entities.Commerce.Inventory;
 using Newtonsoft.Json;
 
 using Robowire.RoboApi;
+using Robowire.RobOrm.Core;
 
 namespace Elsa.Apps.Inventory
 {
@@ -33,8 +34,9 @@ namespace Elsa.Apps.Inventory
         private readonly IVirtualProductFacade m_virtualProductFacade;
         private readonly IMaterialFacade m_materialFacade;
         private readonly IUnitConversionHelper m_conversionHelper;
+        private readonly IDatabase m_database;
 
-        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade, IUnitConversionHelper conversionHelper)
+        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade, IUnitConversionHelper conversionHelper, IDatabase database)
             : base(webSession, log)
         {
             m_virtualProductRepository = virtualProductRepository;
@@ -44,6 +46,7 @@ namespace Elsa.Apps.Inventory
             m_virtualProductFacade = virtualProductFacade;
             m_materialFacade = materialFacade;
             m_conversionHelper = conversionHelper;
+            m_database = database;
         }
 
         public IEnumerable<VirtualProductViewModel> GetVirtualProducts(string searchQuery)
@@ -203,19 +206,31 @@ namespace Elsa.Apps.Inventory
 
         public IExtendedMaterialModel SaveMaterial(MaterialEditRequestModel request)
         {
-            var saved = m_materialFacade.ProcessMaterialEditRequest(
-                request.MaterialId,
-                request.MaterialName,
-                request.NominalAmountText,
-                request.MaterialInventoryId,
-                request.AutomaticBatches,
-                request.RequiresPrice,
-                request.RequiresInvoice,
-                request.Materials.Select(s => s.DisplayText));
+            using (var tx = m_database.OpenTransaction())
+            {
+                var saved = m_materialFacade.ProcessMaterialEditRequest(
+                    request.MaterialId,
+                    request.MaterialName,
+                    request.NominalAmountText,
+                    request.MaterialInventoryId,
+                    request.AutomaticBatches,
+                    request.RequiresPrice,
+                    request.RequiresInvoice,
+                    request.Materials.Select(s => s.DisplayText));
 
-            m_cache.Remove(GetMappablesCacheKey());
+                
 
-            return saved;
+                if (saved.ProductionSteps.Any() || request.ProductionSteps.Any())
+                {
+                    saved = m_materialFacade.ProcessProductionStepsEditRequest(saved, request.ProductionSteps);
+                }
+
+                m_cache.Remove(GetMappablesCacheKey());
+
+                tx.Commit();
+
+                return saved;
+            }
         }
 
         public IEnumerable<string> GetAllMaterialNames()

@@ -44,6 +44,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
         void DeleteMaterial(int id);
 
         IEnumerable<IMaterialInventory> GetMaterialInventories();
+
+        void DeleteMaterialProductionStep(int materialId, int productionStepId);
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }
