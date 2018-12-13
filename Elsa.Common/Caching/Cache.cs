@@ -20,7 +20,9 @@ namespace Elsa.Common.Caching
 
                 return ReadThrough(key, timeout, factory);
             }
-
+            
+            //entry.Prolong(timeout);
+            
             return (T)entry.Value;
         }
 
@@ -42,13 +44,18 @@ namespace Elsa.Common.Caching
 
         private sealed class CacheEntry
         {
-            public readonly DateTime ValidTo;
+            public DateTime ValidTo { get; private set; }
             public readonly object Value;
 
             public CacheEntry(DateTime validTo, object value)
             {
                 ValidTo = validTo;
                 Value = value;
+            }
+
+            public void Prolong(TimeSpan add)
+            {
+                ValidTo = ValidTo.Add(add);
             }
         }
 

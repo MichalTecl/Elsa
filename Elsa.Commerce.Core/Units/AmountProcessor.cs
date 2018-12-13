@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Common;
 using Elsa.Common.Utils;
@@ -33,6 +31,18 @@ namespace Elsa.Commerce.Core.Units
             return Calculate(a, b, Math.Min);
         }
 
+        public Amount Sum(IEnumerable<Amount> a)
+        {
+            Amount result = null;
+
+            foreach (var item in a)
+            {
+                result = Add(result, item);
+            }
+
+            return result;
+        }
+
         public Amount ConvertToSuitableUnit(Amount source)
         {
             if (source.Unit == null)
@@ -40,7 +50,7 @@ namespace Elsa.Commerce.Core.Units
                 return source;
             }
             
-            var availableUnits = m_conversionHelper.GetCompatibleUnits(source.Unit.Id);
+            var availableUnits = m_conversionHelper.GetCompatibleUnits(source.Unit.Id).ToList();
             if (!availableUnits.Any())
             {
                 return source;
@@ -59,6 +69,21 @@ namespace Elsa.Commerce.Core.Units
 
         private Amount Calculate(Amount a, Amount b, Func<decimal, decimal, decimal> numericOp)
         {
+            if (a == null && b == null)
+            {
+                return null;
+            }
+
+            if (a == null)
+            {
+                a = new Amount(0, b.Unit);
+            }
+
+            if (b == null)
+            {
+                b = new Amount(0, a.Unit);
+            }
+
             if (a.Unit.Id == b.Unit.Id)
             {
                 return new Amount(numericOp(a.Value, b.Value), a.Unit);

@@ -74,6 +74,7 @@
     <Compile Include="Crm\ICustomerRelatedNote.cs" />
     <Compile Include="ElsaDbInstaller.cs" />
     <Compile Include="Extensions\MappedToOrderItemExtensions.cs" />
+    <Compile Include="Extensions\ProductionStepExtensions.cs" />
     <Compile Include="Integration\IErp.cs" />
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IPaymentSource.cs" />

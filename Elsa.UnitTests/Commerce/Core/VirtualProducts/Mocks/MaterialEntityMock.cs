@@ -8,6 +8,7 @@ using Castle.Components.DictionaryAdapter;
 
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
 {
@@ -51,6 +52,14 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
         public int InventoryId { get; set; }
 
         public IMaterialInventory Inventory { get; }
+
+        public bool AutomaticBatches { get; set; }
+
+        public bool? RequiresInvoiceNr { get; set; }
+
+        public bool? RequiresPrice { get; set; }
+
+        public IEnumerable<IMaterialProductionStep> Steps { get; }
 
         public void AddComposition(IMaterial material, decimal amount)
         {

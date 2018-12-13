@@ -49,6 +49,7 @@
     <Compile Include="AllowWithDefaultPassword.cs" />
     <Compile Include="Amount.cs" />
     <Compile Include="Caching\Cache.cs" />
+    <Compile Include="Caching\CacheFake.cs" />
     <Compile Include="Caching\CacheWithPostponedRemoval.cs" />
     <Compile Include="Caching\ICache.cs" />
     <Compile Include="Caching\ICanPostponeCacheRemovals.cs" />

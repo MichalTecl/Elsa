@@ -124,6 +124,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     .Join(m => m.Steps.Each().Components.Each().Material)
                     .Join(m => m.Steps.Each().Components.Each().Unit)
                     .Where(m => m.ProjectId == m_session.Project.Id)
+                    .Where(m => m.Steps.Each().DeleteDateTime == null)
                     .Execute();
         }
 

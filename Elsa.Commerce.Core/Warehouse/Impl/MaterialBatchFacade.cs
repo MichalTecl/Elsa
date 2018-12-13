@@ -34,6 +34,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IPackingPreferredBatchRepository m_batchPreferrenceRepository;
         private readonly IKitProductRepository m_kitProductRepository;
         private readonly IUnitConversionHelper m_conversionHelper;
+        private readonly IBatchStatusManager m_batchStatusManager;
 
         public MaterialBatchFacade(
             ILog log,
@@ -43,7 +44,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             AmountProcessor amountProcessor,
             ICache cache,
             IDatabase database, 
-            IPackingPreferredBatchRepository batchPreferrenceRepository, IKitProductRepository kitProductRepository, IUnitConversionHelper conversionHelper)
+            IPackingPreferredBatchRepository batchPreferrenceRepository, IKitProductRepository kitProductRepository, IUnitConversionHelper conversionHelper, IBatchStatusManager batchStatusManager)
         {
             m_log = log;
             m_virtualProductFacade = virtualProductFacade;
@@ -55,6 +56,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_batchPreferrenceRepository = batchPreferrenceRepository;
             m_kitProductRepository = kitProductRepository;
             m_conversionHelper = conversionHelper;
+            m_batchStatusManager = batchStatusManager;
         }
 
         public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity)
@@ -114,17 +116,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return m_cache.ReadThrough(
                 GetBatchAmountCacheKey(batchId),
                 TimeSpan.FromMinutes(10),
-                () =>
-                    {
-
-                        var batch = m_batchRepository.GetBatchById(batchId);
-                        if (batch == null)
-                        {
-                            throw new InvalidOperationException("Invalid batch reference");
-                        }
-
-                        return GetAvailableAmount(batch);
-                    });
+                () => m_batchStatusManager.GetStatus(batchId).CurrentAvailableAmount);
         }
 
         public IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference = null)
@@ -263,7 +255,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 {
                     throw new InvalidOperationException("Invalid batch id");
                 }
-
+                
                 m_batchPreferrenceRepository.RemoveBatchFromPreferrence(batchId);
 
                 try
@@ -333,6 +325,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 InvalidateBatchCache(parentBatchId);
                 InvalidateBatchCache(componentBatchId);
+
+                m_batchStatusManager.OnBatchChanged(parentBatchId);
+                m_batchStatusManager.OnBatchChanged(componentBatchId);
             }
         }
 
@@ -455,56 +450,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 tx.Commit();
             }
         }
-
-        private Amount GetAvailableAmount(MaterialBatchComponent batch)
-        {
-            return m_cache.ReadThrough(
-                GetBatchAmountCacheKey(batch.Batch.Id),
-                TimeSpan.FromMinutes(10),
-                () =>
-                    {
-                        if (batch.IsClosed || batch.IsLocked)
-                        {
-                            return new Amount(decimal.Zero, batch.ComponentUnit);
-                        }
-
-                        var batchAmount = new Amount(batch.ComponentAmount, batch.ComponentUnit);
-
-                        var orders = m_orderRepository.GetOrdersByMaterialBatch(batch.Batch.Id);
-
-                        foreach (var order in orders)
-                        {
-                            if (OrderStatus.IsUnsuccessfullyClosed(order.OrderStatusId))
-                            {
-                                continue;
-                            }
-                            
-                            foreach (var item in GetAllItems(order))
-                            {
-                                foreach (var assignment in item.AssignedBatches.Where(a => a.MaterialBatchId == batch.Batch.Id))
-                                {
-                                    var itemAmount = new Amount(assignment.Quantity, batch.ComponentUnit);
-                                    batchAmount = m_amountProcessor.Subtract(batchAmount, itemAmount);
-                                }
-                            }
-                        }
-
-                        foreach (var evt in m_batchRepository.GetBatchEvents(batch.Batch.Id))
-                        {
-                            batchAmount = m_amountProcessor.Add(batchAmount, new Amount(evt.Delta, evt.Unit));
-                        }
-
-                        foreach(var composition in m_batchRepository.GetCompositionsByComponentBatchId(batch.Batch.Id))
-                        {
-                            batchAmount = m_amountProcessor.Subtract(
-                                batchAmount,
-                                new Amount(composition.Volume, composition.Unit));
-                        }
-
-                        return batchAmount;
-                    });
-        }
-
+        
         private string GetBatchAmountCacheKey(int batchId)
         {
             return $"btchamnt_{batchId}";

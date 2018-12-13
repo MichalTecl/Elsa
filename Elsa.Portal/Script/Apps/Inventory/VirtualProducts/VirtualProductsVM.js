@@ -31,6 +31,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
         for (var stepIndex = 0; stepIndex < mat.ProductionSteps.length; stepIndex++) {
             var step = mat.ProductionSteps[stepIndex];
+            
             var stepMats = [];
 
             for (var matIndex = 0; matIndex < step.Components.length; matIndex++) {
@@ -398,6 +399,25 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             self.searchMaterials();
         });
 
+    };
+
+    self.deleteProductionStep = function(model) {
+        for (var matIndex = 0; matIndex < self.selectedMaterials.length; matIndex++) {
+            var material = self.selectedMaterials[matIndex];
+
+            if (!material.editMode) {
+                continue;
+            }
+
+            for (var stepIndex = 0; stepIndex < material.ProductionSteps.length; stepIndex++) {
+                var step = material.ProductionSteps[stepIndex];
+                if (step === model) {
+                    material.ProductionSteps.splice(stepIndex, 1);
+                    lt.notify();
+                    return;
+                }
+            }
+        }
     };
 };
 

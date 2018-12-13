@@ -74,6 +74,7 @@
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
     <Compile Include="Model\KitItemsCollection.cs" />
     <Compile Include="Model\MaterialAmountModel.cs" />
+    <Compile Include="Model\IMaterialBatchStatus.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
     <Compile Include="Production\IProductionFacade.cs" />
     <Compile Include="Production\Model\ProductionBatchComponentModel.cs" />
@@ -125,8 +126,10 @@
     <Compile Include="VirtualProducts\Model\ProductionStepRequestModel.cs" />
     <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
     <Compile Include="Warehouse\BatchStatus.cs" />
+    <Compile Include="Warehouse\IBatchStatusManager.cs" />
     <Compile Include="Warehouse\IMaterialBatchFacade.cs" />
     <Compile Include="Warehouse\IMaterialBatchRepository.cs" />
+    <Compile Include="Warehouse\Impl\BatchStatusManager.cs" />
     <Compile Include="Warehouse\Impl\MaterialBatchFacade.cs" />
     <Compile Include="Warehouse\Impl\MaterialBatchRepository.cs" />
     <Compile Include="Warehouse\MaterialBatchComponent.cs" />

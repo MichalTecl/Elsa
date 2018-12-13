@@ -31,8 +31,8 @@
                                 <div lt-name="stepsList">
                                     <div lt-name="stepItemTemplate" class="stepItemTemplate lt-template">
                                         <div class="stackLeft prodStepTitlePanel">
-                                            <input lt-name="tbStepName" class="tbStepName" data-bind="value:StepName" />
-                                            <i class="fas fa-minus"></i>
+                                            <input lt-name="tbStepName" event-bind="change:onProdStepNameChanged(VM, this.value)" class="tbStepName" data-bind="value:StepName" />
+                                            <i class="fas fa-minus faButton" event-bind="click:onProductionStepRemoveClick(VM)"></i>
                                         </div>
                                         <div class="stackLeft materialFlagEdit">
                                             <input type="checkbox" lt-name="cbPrice" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresPrice"/><label>Cena</label>
@@ -47,7 +47,7 @@
                                     </div>
 
                                 </div>
-                                <i class="fas fa-plus faButton addStepButton"></i>
+                                <i class="fas fa-plus faButton addStepButton" event-bind="click:addProductionStep(VM)"></i>
                             </div>
                             <div class="materialEditFlags">
                                 <div class="materialFlagEdit stackLeft">
@@ -175,6 +175,11 @@
             lt.notify(this);
         };
 
+        this.onProdStepNameChanged = function(model, name) {
+            model.StepName = name;
+            lt.notify(this);
+        };
+
         this.deleteMaterial = function(model) {
             var cfm = confirm("Opravdu vymazat '" + model.Name + "'?");
             if (!cfm) {
@@ -182,6 +187,18 @@
             }
 
             app.virtualProductsEditor.vm.deleteMaterial(model.Id);
+        };
+
+        this.addProductionStep = function (model) {
+
+            var stepModel = { Components:[], RequiresPrice: true, RequiresSpentTime: true, RequiresWorkerReference: true, materials:[] };
+            model.ProductionSteps.push(stepModel);
+            lt.notify();
+        };
+
+        this.onProductionStepRemoveClick = function(model) {
+            console.log(model);
+            app.virtualProductsEditor.vm.deleteProductionStep(model);
         };
     });
 </script>
