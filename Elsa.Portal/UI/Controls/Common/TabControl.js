@@ -4,6 +4,8 @@ app.ui.TabControl = app.ui.TabControl || function(holder) {
 
     var self = this;
 
+    self.autoselect = true;
+
     var tabs = [];
 
     var headersContainer = document.createElement("div");
@@ -59,8 +61,8 @@ app.ui.TabControl = app.ui.TabControl || function(holder) {
         titleDiv.setAttribute("class", "tabControlHeadTitle");
         titleDiv.innerHTML = name;
         tabDiv.appendChild(titleDiv);
-
-        if (headersContainer.children.length === 1) {
+        
+        if (self.autoselect && headersContainer.children.length === 1) {
             activateTab.call(headersContainer.children[0]);
         }
     };

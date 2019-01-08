@@ -1,1 +1,28 @@
-﻿<div>STEPS!</div>
+﻿<script src="/Script/Apps/Inventory/WarehouseActions/ProductionSteps.VM.js"></script>
+
+<div id="productionStepsMainUi">
+    <div id="materialsTree" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionStepsPartial/MaterialsTreeView.html"></div>
+    
+    <div id="selectedStepUi">
+        selected step
+    </div>
+
+</div>
+<script>
+    lt.element("productionStepsMainUi").withModel("app.productionSteps.vm").attach(function(materialsTree, selectedStepUi) {
+
+        this.bind(function(selectedStep) {
+            
+            if (selectedStep === null) {
+                materialsTree.style.display = 'block';
+                selectedStepUi.style.display = 'none';
+            } else {
+                materialsTree.style.display = 'none';
+                selectedStepUi.style.display = 'block';
+            }
+
+
+        }).selectedStepCanBeNull();
+
+    });
+</script>

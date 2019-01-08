@@ -1,0 +1,59 @@
+﻿<div id="materialsTreeViewCont">
+    <div id="matTree">
+        <div lt-name="materialTreeItemTemplate" class="lt-template materialTreeItemTemplate">
+            <div class="stackLeft">
+                <i class="fas fa-caret-right faButton" event-bind="click:toggleView" lt-name="butExpand"></i>
+                <i class="fas fa-caret-down faButton"  event-bind="click:toggleView" lt-name="butCollapse"></i>
+                <div data-bind="text:MaterialName"></div>
+            </div>
+            <div lt-name="steps">
+                
+                <div lt-name="stepTreeItemTemplate" class="stepTreeNode lt-template">
+                    <div data-bind="text:Name" class="stepTreeNodeName" event-bind="click:selectStep(VM)"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    lt.element("materialsTreeViewCont").withModel("app.productionSteps.vm").attach(function(matTree, materialTreeItemTemplate) {
+
+        var treeItemController = function (butExpand, butCollapse, steps, stepTreeItemTemplate) {
+            var self = this;
+            self.expanded = true;
+            this.toggleView = function() {
+                
+                if (self.expanded) {
+                    butCollapse.style.display = 'none';
+                    butExpand.style.display = 'inline-block';
+                    steps.style.display = 'none';
+                    self.expanded = false;
+                } else {
+                    butCollapse.style.display = 'inline-block';
+                    butExpand.style.display = 'none';
+                    steps.style.display = 'block';
+                    self.expanded = true;
+                }
+            }
+
+            this.toggleView();
+
+            this.bind(function(Steps) {
+                lt.generate(steps, stepTreeItemTemplate, Steps, function(s) { return s.MaterialProductionStepId; });
+            });
+        }
+
+        this.bind(function (allMaterials) {
+            lt.generate(matTree,
+                materialTreeItemTemplate,
+                allMaterials,
+                function(m) { return m.MaterialId; },
+                treeItemController);
+        });
+
+        this.selectStep = function(stepModel) {
+            app.productionSteps.vm.selectStep(stepModel.MaterialProductionStepId);
+        };
+    });
+</script>
