@@ -23,6 +23,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
         private string MaterialsCacheKey => $"AllMaterialsBy_ProjectId={m_session.Project.Id}";
         private string VirtualProductCompositionsCacheKey => $"AllVPCompositionsBy_ProjectID={m_session.Project.Id}";
 
+        private string MaterialStepsCacheKey => $"AllMaterialProdStepsBy_ProjectID={m_session.Project.Id}";
+
         public MaterialRepository(IDatabase database, ISession session, ICache cache, IUnitConversionHelper conversionHelper)
         {
             m_database = database;
@@ -262,6 +264,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
         {
             m_cache.Remove(VirtualProductCompositionsCacheKey);
             m_cache.Remove(MaterialsCacheKey);
+            m_cache.Remove(MaterialStepsCacheKey);
         }
 
         public void DetachMaterialComponent(int compositionMaterialId, int componentMaterialId)
@@ -340,6 +343,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 m_database.Delete(material);
 
                 tx.Commit();
+
+                CleanCache();
             }
         }
 
@@ -396,11 +401,29 @@ namespace Elsa.Commerce.Core.VirtualProducts
             }
         }
 
+        public IEnumerable<IMaterialProductionStep> GetMaterialProductionSteps(int materialId)
+        {
+            return GetMaterialProductionSteps().Where(s => s.MaterialId == materialId);
+        }
+
+        public IEnumerable<IMaterialProductionStep> GetMaterialProductionSteps()
+        {
+            return m_cache.ReadThrough(MaterialStepsCacheKey,
+                TimeSpan.FromMinutes(100),
+                () =>
+                    m_database.SelectFrom<IMaterialProductionStep>()
+                        .Join(m => m.Material)
+                        .Join(m => m.Components.Each().Material)
+                        .Join(m => m.Components.Each().Unit)
+                        .Where(m => m.Material.ProjectId == m_session.Project.Id)
+                        .Execute());
+        }
+
         public IMaterialRepositoryWithPostponedCache GetWithPostponedCache()
         {
             return new MaterialRepositoryWithPostponedCache(m_database, m_session, new CacheWithPostponedRemoval(m_cache), m_conversionHelper);
         }
-
+        
         private sealed class MaterialRepositoryWithPostponedCache : MaterialRepository, IMaterialRepositoryWithPostponedCache
         {
             private readonly CacheWithPostponedRemoval m_ppCache;

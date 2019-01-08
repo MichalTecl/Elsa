@@ -354,7 +354,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
-        public IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount)
+        public IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount, bool unresolvedAsNullBatch = false)
         {
             var batches =
                 m_batchRepository.GetMaterialBatches(
@@ -384,6 +384,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 yield return new Tuple<IMaterialBatch, Amount>(batch.Batch, amountToAllocate);
 
                 requiredAmount = m_amountProcessor.Subtract(requiredAmount, amountToAllocate);
+            }
+
+            if (requiredAmount.IsPositive && unresolvedAsNullBatch)
+            {
+                yield return new Tuple<IMaterialBatch, Amount>(null, requiredAmount);
             }
         }
 

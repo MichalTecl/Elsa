@@ -10,10 +10,12 @@ namespace Elsa.Commerce.Core.Units
     public class AmountProcessor
     {
         private readonly IUnitConversionHelper m_conversionHelper;
+        private readonly IUnitRepository m_unitRepository;
 
-        public AmountProcessor(IUnitConversionHelper conversionHelper)
+        public AmountProcessor(IUnitConversionHelper conversionHelper, IUnitRepository unitRepository)
         {
             m_conversionHelper = conversionHelper;
+            m_unitRepository = unitRepository;
         }
 
         public Amount Subtract(Amount a, Amount b)
@@ -29,6 +31,16 @@ namespace Elsa.Commerce.Core.Units
         public Amount Min(Amount a, Amount b)
         {
             return Calculate(a, b, Math.Min);
+        }
+
+        public Amount Divide(Amount a, Amount b)
+        {
+            return Calculate(a, b, (c, d) => c/d);
+        }
+
+        public Amount Multiply(Amount a, Amount b)
+        {
+            return Calculate(a, b, (c, d) => c*d);
         }
 
         public Amount Sum(IEnumerable<Amount> a)
@@ -97,6 +109,17 @@ namespace Elsa.Commerce.Core.Units
             var result = numericOp(convertedA, convertedB);
 
             return new Amount(result, targetUnit);
+        }
+
+        public Amount ToAmount(decimal amount, string unitSymbol)
+        {
+            return new Amount(amount, m_unitRepository.GetUnitBySymbol(unitSymbol));
+        }
+
+        public Amount LinearScale(Amount x1, Amount y1, Amount x2)
+        {
+            var factor = Divide(y1, x1);
+            return Multiply(x2, factor);
         }
     }
 }

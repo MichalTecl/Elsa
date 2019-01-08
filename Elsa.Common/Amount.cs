@@ -5,12 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
 
 namespace Elsa.Common
 {
     public class Amount
     {
+        public Amount(IVolumeAndUnit vu) : this(vu.Volume, vu.Unit) { }
+
+        public Amount(IAmountAndUnit au) : this(au.Amount, au.Unit) { }
+
         public Amount(decimal value, IMaterialUnit unit)
         {
             if (unit == null)
@@ -49,6 +54,11 @@ namespace Elsa.Common
         public override string ToString()
         {
             return $"{StringUtil.FormatDecimal(Value)} {Unit.Symbol}";
+        }
+
+        public Amount Clone()
+        {
+            return new Amount(Value, Unit);
         }
     }
 }

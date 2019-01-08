@@ -14,6 +14,7 @@ using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
+using Robowire;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse.Impl
@@ -26,17 +27,21 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         private readonly ICache m_cache = new CacheFake();
         private readonly IPurchaseOrderRepository m_orderRepository;
-        private readonly IOrdersFacade m_ordersFacade;
         private readonly AmountProcessor m_amountProcessor;
         private readonly IDatabase m_database;
+        private readonly IServiceLocator m_serviceLocator;
 
-        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, IOrdersFacade ordersFacade, AmountProcessor amountProcessor, IDatabase database)
+        private IOrdersFacade m_injectedOrdersFacade;
+
+        private IOrdersFacade OrdersFacade => m_injectedOrdersFacade ?? (m_injectedOrdersFacade = m_serviceLocator.Get<IOrdersFacade>());
+
+        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator)
         {
             m_batchRepository = batchRepository;
             m_orderRepository = orderRepository;
-            m_ordersFacade = ordersFacade;
             m_amountProcessor = amountProcessor;
             m_database = database;
+            m_serviceLocator = serviceLocator;
         }
 
         public IMaterialBatchStatus GetStatus(int batchId)
@@ -188,7 +193,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                                 continue;
                             }
 
-                            foreach (var item in m_ordersFacade.GetAllConcreteOrderItems(order))
+                            foreach (var item in OrdersFacade.GetAllConcreteOrderItems(order))
                             {
                                 foreach (var assignment in
                                     item.AssignedBatches.Where(a => a.MaterialBatchId == batchId))

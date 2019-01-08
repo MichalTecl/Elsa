@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Production.Model;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
@@ -25,6 +28,7 @@ namespace Elsa.Commerce.Core.Production
         private readonly IMaterialBatchFacade m_batchFacade;
         private readonly ILog m_log;
         private readonly IUnitRepository m_unitRepository;
+        private readonly ISession m_session;
 
         public ProductionFacade(
             IDatabase database,
@@ -33,7 +37,7 @@ namespace Elsa.Commerce.Core.Production
             IUnitConversionHelper unitConversion, 
             AmountProcessor amountProcessor, 
             ILog log, 
-            IMaterialBatchFacade batchFacade, IUnitRepository unitRepository)
+            IMaterialBatchFacade batchFacade, IUnitRepository unitRepository, ISession session)
         {
             m_database = database;
             m_batchRepository = batchRepository;
@@ -43,6 +47,7 @@ namespace Elsa.Commerce.Core.Production
             m_log = log;
             m_batchFacade = batchFacade;
             m_unitRepository = unitRepository;
+            m_session = session;
         }
 
         public ProductionBatchModel GetProductionBatch(int batchId)
@@ -276,6 +281,7 @@ namespace Elsa.Commerce.Core.Production
                     .Join(b => b.Material)
                     .Join(b => b.Unit)
                     .Join(b => b.Author)
+                    .Where(b => b.ProjectId == m_session.Project.Id)
                     .OrderByDesc(b => b.Created)
                     .Take(pageSize);
 
@@ -287,6 +293,238 @@ namespace Elsa.Commerce.Core.Production
             }
 
             return query.Execute();
+        }
+
+        public IEnumerable<IMaterialBatch> FindBatchesWithUnresolvedProductionSteps(string query)
+        {
+            var select = GetBatchesWithUnresolvedProductionStepsQuery();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                select = select.Where(m => m.Material.AutomaticBatches);
+            }
+            else
+            {
+                select = select.Where(m => m.BatchNumber.Like($"%{query}"));
+            }
+
+            return select.Execute();
+        }
+
+        private IQueryBuilder<IMaterialBatch> GetBatchesWithUnresolvedProductionStepsQuery()
+        {
+            var select = m_database.SelectFrom<IMaterialBatch>()
+                .Join(m => m.Material.Steps)
+                .Join(m => m.Unit)
+                .Join(m => m.Author)
+                .Where(m => m.Material.Steps.Each() != null)
+                .Where(m => m.ProjectId == m_session.Project.Id)
+                .Where(m => !(m.AllStepsDone ?? false))
+                .OrderByDesc(m => m.Created);
+
+            return select;
+        }
+
+        public IEnumerable<ProductionStepViewModel> GetStepsToProceed(int? materialBatchId, int materialId, bool skipComponents = false)
+        {
+            var batchesQuery = GetBatchesWithUnresolvedProductionStepsQuery();
+
+            batchesQuery = batchesQuery.Where(b => b.MaterialId == materialId);
+
+            if (materialBatchId != null)
+            {
+                batchesQuery = batchesQuery.Where(b => b.Id == materialBatchId.Value);
+            }
+
+            var batches = batchesQuery.Execute().ToList();
+
+            var result = new List<ProductionStepViewModel>();
+
+            if (!batches.Any())
+            {
+                return result;
+            }
+
+            foreach (var batch in batches)
+            {
+                var requiredSteps = m_materialRepository.GetMaterialProductionSteps(batch.MaterialId).Ordered().ToList();
+                if (requiredSteps.Count == 0)
+                {
+                    continue;
+                }
+
+                var maxStepRemainingAmount = new Amount(batch);
+
+                foreach (var requiredStep in requiredSteps)
+                {
+                    // if some previous step is not resolved, we cannot offer this one
+                    if (!maxStepRemainingAmount.IsPositive)
+                    {
+                        break;
+                    }
+
+                    // let's calculate how much was already done
+                    var amountResolvedForThisStep = new Amount(0, batch.Unit);
+                    foreach (var passedStep in batch.PerformedSteps.Where(s => s.StepId == requiredStep.Id))
+                    {
+                        amountResolvedForThisStep = m_amountProcessor.Add(amountResolvedForThisStep,
+                            new Amount(passedStep.ProducedAmount, batch.Unit));
+                    }
+
+                    // MIN(BATCH_VOLUME, PREVIOUS_STEPS_VOLUME) - ALREADY_DONE is max volume we can request for this particular step
+                    var remainingAmountForThisStep = m_amountProcessor.Subtract(maxStepRemainingAmount, amountResolvedForThisStep);
+                    if (!remainingAmountForThisStep.IsPositive)
+                    {
+                        // If we cannot produce more
+                        continue;
+                    }
+
+                    var model = new ProductionStepViewModel()
+                    {
+                        MaterialProductionStepId = requiredStep.Id,
+                        Quantity = remainingAmountForThisStep.Value,
+                        MaxQuantity = remainingAmountForThisStep.Value,
+                        StepName = requiredStep.Name,
+                        RequiresPrice = requiredStep.RequiresPrice,
+                        RequiresTime = requiredStep.RequiresSpentTime,
+                        RequiresWorkerReference = requiredStep.RequiresWorkerReference,
+                        MaterialName = batch.Material.Name,
+                        BatchNumber = batch.BatchNumber,
+                        UnitSymbol = batch.Unit.Symbol,
+                        IsAutoBatch = batch.Material.AutomaticBatches,
+                        BatchMaterial = batch.Material,
+                        MaterialStep = requiredStep,
+                        Unit = batch.Unit
+                    };
+
+                    model.BatchIds.Add(batch.Id);
+
+                    // next steps could be max what was already done in this step
+                    maxStepRemainingAmount = m_amountProcessor.Min(maxStepRemainingAmount, remainingAmountForThisStep);
+
+                    result.Add(model);
+                }
+            }
+
+            result = ProductionStepViewModel.JoinAutomaticMaterials(result).ToList();
+
+            if (!skipComponents)
+            {
+                foreach (var sumStep in result)
+                {
+                    PopulateWithMaterials(sumStep);
+                }
+            }
+
+            return result;
+        }
+
+        public ProductionStepViewModel UpdateProductionStep(ProductionStepViewModel model)
+        {
+            var materialId = m_materialRepository.GetMaterialByName(model.MaterialName)?.Id ?? -1;
+            if (materialId < 1)
+            {
+                throw new InvalidOperationException($"Neznamy material \"{model.MaterialName}\"");
+            }
+
+            int? batchId = null;
+            if (model.BatchIds?.Count == 1)
+            {
+                batchId = model.BatchIds.Single();
+            }
+
+            var sourceSteps = GetStepsToProceed(batchId, materialId, true);
+            var sourceStep = sourceSteps.FirstOrDefault(srs => srs.IsSameStep(model));
+
+            if (sourceStep == null)
+            {
+                throw new InvalidOperationException("Invalid request");
+            }
+
+            if (model.Quantity > sourceStep.Quantity)
+            {
+                throw new InvalidOperationException($"Nedovolene mnozstvi {model.Quantity}. Maximum = {sourceStep.Quantity}");
+            }
+
+            sourceStep.Quantity = model.Quantity;
+            sourceStep.Materials.Clear();
+            sourceStep.Materials.AddRange(model.Materials);
+
+            PopulateWithMaterials(sourceStep);
+
+            return sourceStep;
+        }
+
+        public void SaveProductionStep(ProductionStepViewModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void PopulateWithMaterials(ProductionStepViewModel model)
+        {
+            var nominalMaterialAmount = new Amount(model.BatchMaterial.NominalAmount, model.BatchMaterial.NominalUnit);
+
+            foreach (var component in model.MaterialStep.Components)
+            {
+                //for 1kg of material we need 500g of this composition => For 10kg batch it's 5kg of composition
+                var stepAmount = m_amountProcessor.LinearScale(nominalMaterialAmount,
+                    new Amount(component),
+                    new Amount(model.Quantity, model.Unit));
+
+                // BatchNumber, Amount
+                var allocations = new List<Tuple<string, Amount>>();
+
+                var alreadyAssigned = model.Materials.Where(m => (!string.IsNullOrWhiteSpace(m.BatchNumber)) && (m.MaterialId == component.MaterialId)).ToList();
+                foreach (var alas in alreadyAssigned)
+                {
+                    model.Materials.Remove(alas);
+                }
+
+                if (model.BatchMaterial.AutomaticBatches)
+                {
+                    allocations.AddRange(m_batchFacade.AutoResolve(component.MaterialId, stepAmount, true).Select(alo => new Tuple<string, Amount>(alo.Item1?.BatchNumber, alo.Item2)));
+                }
+                else
+                {
+                    var amountToAssign = stepAmount.Clone();
+                    foreach (var alas in alreadyAssigned)
+                    {
+                        var assignedByThisBatch = m_amountProcessor.Min(amountToAssign,
+                            new Amount(alas.Amount, m_unitRepository.GetUnitBySymbol(alas.UnitSymbol)));
+
+                        allocations.Add(new Tuple<string, Amount>(alas.BatchNumber, assignedByThisBatch));
+
+                        amountToAssign = m_amountProcessor.Subtract(amountToAssign, assignedByThisBatch);
+
+                        if (!amountToAssign.IsPositive)
+                        {
+                            break;
+                        }
+                    }
+
+                    if (amountToAssign.IsPositive)
+                    {
+                        allocations.Add(new Tuple<string, Amount>(null, amountToAssign));
+                    }
+                }
+
+                foreach (var aloc in allocations)
+                {
+                    var resModel = new MaterialBatchResolutionModel
+                    {
+                        MaterialId = component.MaterialId,
+                        MaterialName = component.Material.Name,
+                        Amount = aloc.Item2.Value,
+                        UnitSymbol = stepAmount.Unit.Symbol,
+                        BatchNumber = aloc.Item1
+                    };
+
+                    model.Materials.Add(resModel);
+                }
+            }
+
+            model.Materials.Sort(new GenericComparer<MaterialBatchResolutionModel>((a,b) => string.Compare(a.MaterialName, b.MaterialName, StringComparison.Ordinal)));
+            model.IsValid = !model.Materials.Any(s => string.IsNullOrWhiteSpace(s.BatchNumber));
         }
 
         private ProductionBatchModel LoadAndValidateBatchModel(int productionBatchId)

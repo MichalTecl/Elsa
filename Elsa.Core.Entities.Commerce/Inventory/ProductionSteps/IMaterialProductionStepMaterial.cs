@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Core.Entities.Commerce.Common;
+
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Core.Entities.Commerce.Inventory.ProductionSteps
 {
     [Entity]
-    public interface IMaterialProductionStepMaterial
+    public interface IMaterialProductionStepMaterial : IAmountAndUnit
     {
         int Id { get; }
 
@@ -18,10 +20,5 @@ namespace Elsa.Core.Entities.Commerce.Inventory.ProductionSteps
 
         int MaterialId { get; set; }
         IMaterial Material { get; }
-
-        int UnitId { get; set; }
-        IMaterialUnit Unit { get; }
-
-        decimal Amount { get; set; }
     }
 }

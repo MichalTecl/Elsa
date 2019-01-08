@@ -55,8 +55,10 @@
     <Compile Include="Commerce\IProduct.cs" />
     <Compile Include="Commerce\IPurchaseOrder.cs" />
     <Compile Include="Common\IAddress.cs" />
+    <Compile Include="Common\IAmountAndUnit.cs" />
     <Compile Include="Common\IBaseCalendar.cs" />
     <Compile Include="Common\ICurrency.cs" />
+    <Compile Include="Common\IVolumeAndUnit.cs" />
     <Compile Include="Common\Logging\ISysLog.cs" />
     <Compile Include="Common\IPayment.cs" />
     <Compile Include="Common\ISysConfig.cs" />

@@ -77,7 +77,7 @@ namespace Elsa.Apps.Inventory
             var received = "AUTO".Equals(model.DisplayDt, StringComparison.InvariantCultureIgnoreCase) ? DateTime.Now : StringUtil.ParseDateTime(model.DisplayDt);
 
             var result = m_batchRepository.SaveBottomLevelMaterialBatch(
-                model.Id,
+                model.Id ?? 0,
                 material.Adaptee,
                 model.Volume,
                 unit,

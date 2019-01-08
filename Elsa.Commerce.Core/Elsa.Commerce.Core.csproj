@@ -75,7 +75,9 @@
     <Compile Include="Model\KitItemsCollection.cs" />
     <Compile Include="Model\MaterialAmountModel.cs" />
     <Compile Include="Model\IMaterialBatchStatus.cs" />
+    <Compile Include="Model\MaterialBatchResolutionModel.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
+    <Compile Include="Model\ProductionStepViewModel.cs" />
     <Compile Include="Production\IProductionFacade.cs" />
     <Compile Include="Production\Model\ProductionBatchComponentModel.cs" />
     <Compile Include="Production\Model\ProductionBatchModel.cs" />
