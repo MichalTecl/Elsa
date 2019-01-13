@@ -124,6 +124,48 @@ if (lanta.Markup.attributeSetters.length === 0) {
 	    return true;
 	});
 
+    //itemsSource
+    lanta.Markup.attributeSetters.push(function(target, propertyName, value) {
+        if (propertyName.toLowerCase() !== "itemssource") {
+            return false;
+        }
+
+        var template = null;
+
+        if (!(template = target["__ltItemTemplate"])) {
+
+            var templates = target.querySelectorAll(".lt-template");
+            if (templates.length === 0) {
+                target.innerHTML = "NO TEMPLATE";
+                return true;
+            }
+
+            if (templates.length > 1) {
+                target.innerHTML = "REDUNDANT TEMPLATE DEFINITION";
+                return true;
+            }
+
+            template = templates[0];
+
+            target["__ltItemTemplate"] = template;
+        }
+
+        var keySelector = null;
+        if (!(keySelector = target["__ltItemKeySelector"])) {
+            var keyPropertyName = target.getAttribute("data-key");
+            if (!keyPropertyName) {
+                target.innerHTML = "ATTRIBUTE DATA-KEY NOT FOUND";
+                return true;
+            }
+
+            keySelector = new Function("__itemVm", "return __itemVm['" + keyPropertyName + "']");
+            target["__ltItemKeySelector"] = keySelector;
+        }
+
+        lt.generate(target, template, value, keySelector);
+        return true;
+    });
+
 
 };
 

@@ -11,6 +11,7 @@ namespace Elsa.Commerce.Core.Model
     public class ProductionStepViewModel
     {
         public HashSet<int> BatchIds { get; set; } = new HashSet<int>();
+        public int MaterialId { get; set; }
         public int MaterialProductionStepId { get; set; }
         public string StepName { get; set; }
 
@@ -44,12 +45,13 @@ namespace Elsa.Commerce.Core.Model
         public IMaterialProductionStep MaterialStep { get; set; }
 
         public bool IsValid { get; set; }
+        public bool NeedsBatchNumber { get; set; }
 
         public static IEnumerable<ProductionStepViewModel> JoinAutomaticMaterials(List<ProductionStepViewModel> source)
         {
             var result = new List<ProductionStepViewModel>(source.Count);
             ProductionStepViewModel lastStep = null;
-            foreach (var step in result.OrderBy(r => r.MaterialProductionStepId))
+            foreach (var step in source.OrderBy(r => r.MaterialProductionStepId))
             {
                 if (lastStep?.MaterialProductionStepId == step.MaterialProductionStepId && step.IsAutoBatch)
                 {
@@ -66,7 +68,7 @@ namespace Elsa.Commerce.Core.Model
 
         public bool IsSameStep(ProductionStepViewModel other)
         {
-            if (MaterialName != other.MaterialName || MaterialProductionStepId != other.MaterialProductionStepId)
+            if (MaterialId != other.MaterialId || MaterialProductionStepId != other.MaterialProductionStepId)
             {
                 return false;
             }

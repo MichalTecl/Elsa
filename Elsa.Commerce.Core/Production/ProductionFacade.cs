@@ -6,6 +6,7 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Production.Model;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
+using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
@@ -317,7 +318,8 @@ namespace Elsa.Commerce.Core.Production
                 .Join(m => m.Material.Steps)
                 .Join(m => m.Unit)
                 .Join(m => m.Author)
-                .Where(m => m.Material.Steps.Each() != null)
+                .Join(m => m.Material.NominalUnit)
+                .Where(m => m.Material.Steps.Each().Id != null)
                 .Where(m => m.ProjectId == m_session.Project.Id)
                 .Where(m => !(m.AllStepsDone ?? false))
                 .OrderByDesc(m => m.Created);
@@ -389,6 +391,7 @@ namespace Elsa.Commerce.Core.Production
                         RequiresTime = requiredStep.RequiresSpentTime,
                         RequiresWorkerReference = requiredStep.RequiresWorkerReference,
                         MaterialName = batch.Material.Name,
+                        MaterialId = batch.MaterialId,
                         BatchNumber = batch.BatchNumber,
                         UnitSymbol = batch.Unit.Symbol,
                         IsAutoBatch = batch.Material.AutomaticBatches,
@@ -421,10 +424,37 @@ namespace Elsa.Commerce.Core.Production
 
         public ProductionStepViewModel UpdateProductionStep(ProductionStepViewModel model)
         {
-            var materialId = m_materialRepository.GetMaterialByName(model.MaterialName)?.Id ?? -1;
-            if (materialId < 1)
+            IExtendedMaterialModel material = null;
+            if (model.MaterialId > 0)
+            {
+                material = m_materialRepository.GetMaterialById(model.MaterialId);
+            }
+            else if (!string.IsNullOrWhiteSpace(model.MaterialName))
+            {
+                material = m_materialRepository.GetMaterialByName(model.MaterialName);
+            }
+
+            var materialId = material?.Id ?? -1;
+            if (materialId < 1 || material == null)
             {
                 throw new InvalidOperationException($"Neznamy material \"{model.MaterialName}\"");
+            }
+
+            model.IsAutoBatch = material.AutomaticBatches;
+            model.MaterialId = material.Id;
+            model.MaterialName = material.Name;
+            model.BatchMaterial = material.Adaptee;
+            
+            if (!model.BatchIds.Any() && (!material.AutomaticBatches))
+            {
+                if (string.IsNullOrWhiteSpace(model.BatchNumber))
+                {
+                    model.NeedsBatchNumber = true;
+                }
+                else
+                {
+                    ResolveBatch(model);
+                }
             }
 
             int? batchId = null;
@@ -433,13 +463,26 @@ namespace Elsa.Commerce.Core.Production
                 batchId = model.BatchIds.Single();
             }
 
-            var sourceSteps = GetStepsToProceed(batchId, materialId, true);
+            var sourceSteps = GetStepsToProceed(batchId, materialId, true).ToList();
             var sourceStep = sourceSteps.FirstOrDefault(srs => srs.IsSameStep(model));
 
-            if (sourceStep == null)
+            if (sourceStep == null && model.NeedsBatchNumber)
             {
-                throw new InvalidOperationException("Invalid request");
-            }
+                if (model.NeedsBatchNumber)
+                {
+                    var templateStep = sourceSteps.FirstOrDefault(i => i.MaterialProductionStepId == model.MaterialProductionStepId);
+                    if (templateStep != null)
+                    {
+                        model.StepName = templateStep.StepName;
+                    }
+
+                    return model;
+                }
+                else
+                {
+                    throw new InvalidOperationException("Invalid request");
+                }
+            } 
 
             if (model.Quantity > sourceStep.Quantity)
             {
@@ -453,6 +496,17 @@ namespace Elsa.Commerce.Core.Production
             PopulateWithMaterials(sourceStep);
 
             return sourceStep;
+        }
+
+        private void ResolveBatch(ProductionStepViewModel model)
+        {
+            var batch = m_batchFacade.FindBatchBySearchQuery(model.MaterialId, model.BatchNumber);
+            if (batch == null)
+            {
+                throw new InvalidOperationException($"Nenalezena sarze \"{model.BatchNumber}\"");
+            }
+
+            model.BatchIds.Add(batch.Id);
         }
 
         public void SaveProductionStep(ProductionStepViewModel model)

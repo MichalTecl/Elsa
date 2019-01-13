@@ -1,0 +1,61 @@
+﻿<div id="prodStepEditUi">
+    <div id="prStepHead">
+        <div class="stepMaterial" data-bind="text:MaterialName"></div>
+        <div class="stepName" data-bind="text:StepName"></div>
+    </div>
+    <div id="stepBatch" data-bind="class.hidden:IsAutoBatch">
+        <div id="stepBatchVw"  >
+            <label >Číslo šarže</label>
+            <div data-bind="class!.hidden:NeedsBatchNumber" class="stackLeft">
+                <input id="tbBatchNr" />
+                <i class="fas fa-check faButton" event-bind="click:onBatchEnterClick($tbBatchNr.value)"></i>
+            </div>
+            <div id="staticBatchView" data-bind="text:BatchNumber; class.hidden:NeedsBatchNumber">?</div>
+            <div data-bind="class.hidden:NeedsBatchNumber">
+                <div id="stepQtyPanel">
+                    <label>Zpracované množství</label>
+                    <div class="stackLeft">
+                        <input type="number" id="tbAmount" data-bind="value:Quantity; max:MaxQuantity" min="0" event-bind="change:updateStepQty($tbAmount.value)"/>
+                        <div data-bind="text:UnitSymbol" ></div>
+                    </div>
+                </div>
+                
+                <div id="stepMaterialsPanel" ><!--data-bind="class!.hidden:hasComponents"-->
+                    <div>Použitý materiál</div>
+                    <div data-bind="itemsSource:Materials" data-key="itemKey">
+                        <div class="lt-template stepMaterialItem">
+                            <div class="stackLeft">
+                                <div data-bind="text:MaterialName" class="stepMaterialName"></div>
+                                <input type="number" data-bind="value:Amount" class="stepMaterialAmount" />
+                                <div data-bind="text:UnitSymbol" class="stepMaterialUnit"></div>
+                                <input data-bind="value:BatchNumber" class="stepMaterialBatch"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <button class="butCancel" event-bind="click:onCancelStepClick"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("prodStepEditUi").withModel("app.productionSteps.vm.selectedStep").attach(function() {
+
+        this.onBatchEnterClick = function(batchNr) {
+            app.productionSteps.vm.setBatchNumber(batchNr);
+        };
+
+        this.onCancelStepClick = function() {
+            app.productionSteps.vm.cancelStepEdit();
+        };
+
+        this.updateStepQty = function(strQty) {
+            var value = parseFloat(strQty);
+            app.productionSteps.vm.updateQuantity(value);
+        };
+    });
+
+</script>

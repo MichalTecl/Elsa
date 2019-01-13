@@ -140,6 +140,7 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesUI.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionSteps.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\MaterialsTreeView.html" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\ProductionStepEdit.html" />
     <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />
     <Content Include="UI\Pages\Inventory\VpEditorStyle.css" />
     <Content Include="UI\Pages\Inventory\WhEvents.html" />
