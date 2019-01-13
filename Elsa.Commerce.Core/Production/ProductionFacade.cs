@@ -14,6 +14,7 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 
@@ -495,6 +496,25 @@ namespace Elsa.Commerce.Core.Production
 
             PopulateWithMaterials(sourceStep);
 
+            sourceStep.Worker = model.Worker;
+            sourceStep.Hours = model.Hours;
+            sourceStep.Price = model.Price;
+
+            if (sourceStep.RequiresPrice && (!((sourceStep.Price ?? 0) > 0)))
+            {
+                sourceStep.IsValid = false;
+            }
+
+            if (sourceStep.RequiresTime && (!((sourceStep.Hours ?? 0) > 0)))
+            {
+                sourceStep.IsValid = false;
+            }
+
+            if (sourceStep.RequiresWorkerReference && string.IsNullOrWhiteSpace(sourceStep.Worker?.Trim()))
+            {
+                sourceStep.IsValid = false;
+            }
+
             return sourceStep;
         }
 
@@ -511,11 +531,122 @@ namespace Elsa.Commerce.Core.Production
 
         public void SaveProductionStep(ProductionStepViewModel model)
         {
-            throw new NotImplementedException();
+            using (var tx = m_database.OpenTransaction())
+            {
+                var step = UpdateProductionStep(model);
+                if (!step.IsValid)
+                {
+                    throw new InvalidOperationException("Nektere povinne hodnoty nejsou vyplneny");
+                }
+
+                var material = m_materialRepository.GetMaterialById(model.MaterialId);
+                if (material == null)
+                {
+                    throw new InvalidOperationException("Chybna reference materialu");
+                }
+
+                var totalProducedAmount = new Amount(model.Quantity, m_unitRepository.GetUnitBySymbol(model.UnitSymbol));
+            
+                foreach (var targetBatchId in model.BatchIds)
+                {
+                    var targetStep =
+                        GetStepsToProceed(targetBatchId, model.MaterialId, false)
+                            .FirstOrDefault(s => s.MaterialProductionStepId == model.MaterialProductionStepId);
+                    
+                    if(targetStep == null) { throw new InvalidOperationException("Krok nenalezen");}
+                    if (model.Quantity > targetStep.MaxQuantity) { throw new InvalidOperationException("Neni mozne zpracovat zadane mnozstvi");}
+
+                    var amountInThisBatch = m_amountProcessor.Min(totalProducedAmount,
+                        new Amount(targetStep.Quantity, targetStep.Unit));
+                    
+                    var stepEntity = m_database.New<IBatchProductionStep>();
+                    stepEntity.BatchId = targetBatchId;
+                    stepEntity.ConfirmDt = DateTime.Now;
+                    stepEntity.Price = model.Price;
+                    stepEntity.ProducedAmount = amountInThisBatch.Value;
+                    stepEntity.SpentHours = model.Hours;
+                    stepEntity.StepId = targetStep.MaterialProductionStepId;
+                    stepEntity.ConfirmUserId = m_session.User.Id;
+                    stepEntity.ProducedAmount = amountInThisBatch.Value;
+                    
+                    m_database.Save(stepEntity);
+
+                    var materials = step.ReleaseMaterialForAmount(amountInThisBatch.Value).ToList();
+
+                    foreach (var matEntry in materials)
+                    {
+                        var entryAmount = new Amount(matEntry.Amount, m_unitRepository.GetUnitBySymbol(matEntry.UnitSymbol));
+                        var componentEntity = m_database.New<IBatchProuctionStepSourceBatch>();
+                        componentEntity.StepId = stepEntity.Id;
+                        componentEntity.UnitId = entryAmount.Unit.Id;
+
+                        var batch = m_batchFacade.FindBatchBySearchQuery(matEntry.MaterialId, matEntry.BatchNumber);
+                        var availableBatchAmount = m_batchFacade.GetAvailableAmount(batch.Id);
+
+                        if (m_amountProcessor.GreaterThan(entryAmount, availableBatchAmount))
+                        {
+                            throw new InvalidOperationException($"Vstupní šarže \"{batch.BatchNumber}\" neobsahuje potřebné množství materiálu \"{matEntry.MaterialName}\"");
+                        }
+
+                        componentEntity.UsedAmount = matEntry.Amount;
+                        componentEntity.SourceBatchId = batch.Id;
+
+                        m_database.Save(componentEntity);
+                        m_batchFacade.ReleaseBatchAmountCache(batch);
+                    }
+
+                    m_batchFacade.ReleaseBatchAmountCache(m_batchRepository.GetBatchById(targetBatchId).Batch);
+                }
+
+                tx.Commit();
+            }
         }
 
         private void PopulateWithMaterials(ProductionStepViewModel model)
         {
+            if (model.Quantity <= 0)
+            {
+                model.IsValid = false;
+                return;
+            }
+
+            var batchIndex = new List<IMaterialBatch>();
+
+            var currentMats = model.Materials.Where(m => !string.IsNullOrWhiteSpace(m.BatchNumber?.Trim()) && !m.AutomaticBatches).ToList();
+            model.Materials.Clear();
+
+            foreach (var i in currentMats)
+            {
+                var batch = m_batchFacade.FindBatchBySearchQuery(i.MaterialId, i.BatchNumber);
+                i.BatchNumber = batch.BatchNumber;
+                batchIndex.Add(batch);
+            }
+            
+            foreach (var materialId in currentMats.Select(m => m.MaterialId).Distinct())
+            {
+                foreach (var batchNr in currentMats.Where(m => m.MaterialId == materialId).Select(m => m.BatchNumber).Distinct())
+                {
+                    var fragments =
+                        currentMats.Where(f => f.MaterialId == materialId && f.BatchNumber == batchNr).ToList();
+
+                    if (!fragments.Any())
+                    {
+                        continue;
+                    }
+
+                    model.Materials.Add(new MaterialBatchResolutionModel
+                    {
+                        UnitSymbol = fragments[0].UnitSymbol,
+                        BatchNumber = fragments[0].BatchNumber,
+                        MaterialId = fragments[0].MaterialId,
+                        MaterialName = fragments[0].MaterialName,
+                        Amount = fragments.Sum(f => f.Amount)
+                    });
+                }
+            }
+
+            
+           
             var nominalMaterialAmount = new Amount(model.BatchMaterial.NominalAmount, model.BatchMaterial.NominalUnit);
 
             foreach (var component in model.MaterialStep.Components)
@@ -534,17 +665,32 @@ namespace Elsa.Commerce.Core.Production
                     model.Materials.Remove(alas);
                 }
 
-                if (model.BatchMaterial.AutomaticBatches)
+                if (component.Material.AutomaticBatches)
                 {
-                    allocations.AddRange(m_batchFacade.AutoResolve(component.MaterialId, stepAmount, true).Select(alo => new Tuple<string, Amount>(alo.Item1?.BatchNumber, alo.Item2)));
+                    var resolutions = m_batchFacade.AutoResolve(component.MaterialId, stepAmount, true).ToList();
+                    allocations.AddRange(resolutions.Select(alo => new Tuple<string, Amount>(alo.Item1?.BatchNumber, alo.Item2)));
                 }
                 else
                 {
                     var amountToAssign = stepAmount.Clone();
                     foreach (var alas in alreadyAssigned)
                     {
-                        var assignedByThisBatch = m_amountProcessor.Min(amountToAssign,
-                            new Amount(alas.Amount, m_unitRepository.GetUnitBySymbol(alas.UnitSymbol)));
+                        var assignedByThisBatch = m_amountProcessor.Min(amountToAssign, new Amount(alas.Amount, m_unitRepository.GetUnitBySymbol(alas.UnitSymbol)));
+
+                        if (!string.IsNullOrWhiteSpace(alas.BatchNumber))
+                        {
+                            var batchObject =
+                                batchIndex.FirstOrDefault(
+                                    b => b.MaterialId == alas.MaterialId && b.BatchNumber == alas.BatchNumber);
+                            if (batchObject == null)
+                            {
+                                throw new InvalidOperationException("Fatal");
+                            }
+                            alas.BatchNumber = batchObject.BatchNumber;
+
+                            assignedByThisBatch = m_amountProcessor.Min(assignedByThisBatch, m_batchFacade.GetAvailableAmount(batchObject.Id));
+                            alas.Amount = assignedByThisBatch.Value;
+                        }
 
                         allocations.Add(new Tuple<string, Amount>(alas.BatchNumber, assignedByThisBatch));
 
@@ -570,7 +716,8 @@ namespace Elsa.Commerce.Core.Production
                         MaterialName = component.Material.Name,
                         Amount = aloc.Item2.Value,
                         UnitSymbol = stepAmount.Unit.Symbol,
-                        BatchNumber = aloc.Item1
+                        BatchNumber = aloc.Item1,
+                        AutomaticBatches = component.Material.AutomaticBatches
                     };
 
                     model.Materials.Add(resModel);
@@ -694,3 +841,4 @@ namespace Elsa.Commerce.Core.Production
         }
     }
 }
+

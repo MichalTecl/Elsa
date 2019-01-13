@@ -141,10 +141,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             if (found.Count > 1)
             {
-                throw new InvalidOperationException("Více než jedna šarže odpovídá zadanému číslu, použijte prosím celé číslo šarže");
+                throw new InvalidOperationException($"Více než jedna šarže odpovídá zadanému číslu \"{query}\" , použijte prosím celé číslo šarže");
             }
 
-            throw new InvalidOperationException("Šarže nebyla nalezena");
+            throw new InvalidOperationException($"Šarže \"{query}\" nebyla nalezena");
         }
 
         public bool AlignOrderBatches(long purchaseOrderId)
@@ -455,7 +455,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 tx.Commit();
             }
         }
-        
+
+        public void ReleaseBatchAmountCache(IMaterialBatch batch)
+        {
+            InvalidateBatchCache(batch.Id);
+        }
+
         private string GetBatchAmountCacheKey(int batchId)
         {
             return $"btchamnt_{batchId}";

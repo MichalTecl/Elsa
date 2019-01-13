@@ -76,9 +76,9 @@ namespace Elsa.Apps.Inventory
             return m_productionFacade.UpdateProductionStep(model);
         }
 
-        public IEnumerable<ProductionStepViewModel> SaveProductionStep(ProductionStepViewModel model)
+        public void SaveProductionStep(ProductionStepViewModel model)
         {
-            throw new NotImplementedException();
+            m_productionFacade.SaveProductionStep(model);
         }
 
 

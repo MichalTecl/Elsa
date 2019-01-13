@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Elsa.Commerce.Core.Model
+﻿namespace Elsa.Commerce.Core.Model
 {
     public class MaterialBatchResolutionModel
     {
@@ -17,5 +11,19 @@ namespace Elsa.Commerce.Core.Model
         public decimal Amount { get; set; }
 
         public string BatchNumber { get; set; }
+        public bool AutomaticBatches { get; set; }
+
+        public MaterialBatchResolutionModel Clone()
+        {
+            return new MaterialBatchResolutionModel
+            {
+                MaterialId = MaterialId,
+                MaterialName = MaterialName,
+                UnitSymbol = UnitSymbol,
+                Amount = Amount,
+                BatchNumber = BatchNumber,
+                AutomaticBatches = AutomaticBatches
+            };
+        }
     }
 }

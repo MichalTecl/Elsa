@@ -363,6 +363,8 @@ div.searchPanel {
   content: "\f00c";
 }
 
+
+
 .formActions {
   border-top:1px solid #eee;
   padding-top:5px;
@@ -373,4 +375,9 @@ div.searchPanel {
 
 .formActions > .faButton {
   margin-right:auto;
+}
+
+input.readonly {
+    pointer-events:none;
+    background-color: transparent !important;
 }

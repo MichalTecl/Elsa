@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
+using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
@@ -91,6 +93,70 @@ namespace Elsa.Commerce.Core.Model
             }
 
             Quantity = Quantity + step.Quantity;
+        }
+
+        public IEnumerable<MaterialBatchResolutionModel> ReleaseMaterialForAmount(decimal amount)
+        {
+            if (amount > Quantity)
+            {
+                throw new InvalidOperationException("Invalid operation");
+            }
+
+            if (Math.Abs(Quantity - amount) < 0.00001m)
+            {
+                foreach (var m in Materials)
+                {
+                    yield return m;
+                }
+
+                Materials.Clear();
+                Quantity = 0;
+
+                yield break;
+            }
+
+            var factor = amount / Quantity;
+
+            var allMaterialIds = Materials.Select(m => m.MaterialId).Distinct().ToList();
+
+            foreach (var materialId in allMaterialIds)
+            {
+                var allRecordsForThisMaterial = Materials.Where(m => m.MaterialId == materialId).ToList();
+
+                var requiredAmount = allRecordsForThisMaterial.Sum(m => m.Amount) * factor;
+
+                while (requiredAmount > 0)
+                {
+                    var entryToUse = allRecordsForThisMaterial.FirstOrDefault(r => r.Amount <= requiredAmount) ??
+                                     allRecordsForThisMaterial.FirstOrDefault();
+                    if (entryToUse == null)
+                    {
+                        throw new InvalidOperationException("nejak jsem se nedopocital :(");
+                    }
+
+                    Materials.Remove(entryToUse);
+
+                    var availableAmountForThisEntry = Math.Min(requiredAmount, entryToUse.Amount);
+
+                    allRecordsForThisMaterial.Remove(entryToUse);
+                    Materials.Remove(entryToUse);
+
+                    var toReturn = entryToUse.Clone();
+                    toReturn.Amount = availableAmountForThisEntry;
+                    yield return toReturn;
+
+                    var remaining = entryToUse.Amount - availableAmountForThisEntry;
+                    if (Math.Abs(remaining) > 0.00001m)
+                    {
+                        var toStay = entryToUse.Clone();
+                        toStay.Amount = entryToUse.Amount - availableAmountForThisEntry;
+                        Materials.Add(toStay);
+                        allRecordsForThisMaterial.Add(toStay);
+                    }
+
+                    requiredAmount -= toReturn.Amount;
+                }
+            }
         }
     }
 }

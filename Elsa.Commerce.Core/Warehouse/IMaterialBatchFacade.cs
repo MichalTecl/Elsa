@@ -31,5 +31,6 @@ namespace Elsa.Commerce.Core.Warehouse
         void SetBatchLock(int batchId, bool lockValue, string note);
 
         void DeleteBatch(int batchId);
+        void ReleaseBatchAmountCache(IMaterialBatch batch);
     }
 }

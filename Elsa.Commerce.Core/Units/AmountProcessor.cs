@@ -121,5 +121,11 @@ namespace Elsa.Commerce.Core.Units
             var factor = Divide(y1, x1);
             return Multiply(x2, factor);
         }
+
+        public bool GreaterThan(Amount a, Amount b)
+        {
+            var sub = Subtract(a, b);
+            return sub.IsPositive;
+        }
     }
 }

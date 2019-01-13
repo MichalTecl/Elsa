@@ -20,6 +20,7 @@ app.productionSteps.ViewModel = app.productionSteps.ViewModel || function() {
         for (var i = 0; i < model.Materials.length; i++) {
             var entry = model.Materials[i];
             entry.itemKey = entry.MaterialId + "_" + (entry.BatchNumber || "?");
+            entry.cannotResolve = entry.AutomaticBatches && ((entry.BatchNumber || "").trim().length < 1);
         }
         
         self.selectedStep = model;
@@ -66,6 +67,44 @@ app.productionSteps.ViewModel = app.productionSteps.ViewModel || function() {
     self.updateQuantity = function(qty) {
         self.selectedStep.Quantity = qty;
         validateStep();
+    };
+
+    self.updateComponent = function(itemKey, batchNr, amount) {
+        
+        for (var i = 0; i < self.selectedStep.Materials.length; i++) {
+            var mat = self.selectedStep.Materials[i];
+
+            if (mat.itemKey !== itemKey) {
+                continue;
+            }
+
+            mat.BatchNumber = batchNr;
+            mat.Amount = amount;
+            break;
+        }
+
+        lt.notify();
+
+        validateStep();
+    };
+
+    self.updateAdditionalFields = function(worker, time, price) {
+
+        self.selectedStep.Worker = worker;
+        self.selectedStep.Price = price;
+        self.selectedStep.Hours = time;
+
+        lt.notify();
+
+        validateStep();
+    };
+
+    self.doStepValidation = validateStep;
+
+    self.saveStep = function() {
+        lt.api("/productionSteps/saveProductionStep").body(self.selectedStep).post(function() {
+            self.cancelStepEdit();
+        });
     };
 
     setTimeout(loadAllMaterials, 0);

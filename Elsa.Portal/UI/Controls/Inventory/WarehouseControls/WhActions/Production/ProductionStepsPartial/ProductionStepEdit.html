@@ -7,8 +7,7 @@
         <div id="stepBatchVw"  >
             <label >Číslo šarže</label>
             <div data-bind="class!.hidden:NeedsBatchNumber" class="stackLeft">
-                <input id="tbBatchNr" />
-                <i class="fas fa-check faButton" event-bind="click:onBatchEnterClick($tbBatchNr.value)"></i>
+                <input id="tbBatchNr" event-bind="change:onBatchEnterClick($tbBatchNr.value)" />
             </div>
             <div id="staticBatchView" data-bind="text:BatchNumber; class.hidden:NeedsBatchNumber">?</div>
             <div data-bind="class.hidden:NeedsBatchNumber">
@@ -26,17 +25,37 @@
                         <div class="lt-template stepMaterialItem">
                             <div class="stackLeft">
                                 <div data-bind="text:MaterialName" class="stepMaterialName"></div>
-                                <input type="number" data-bind="value:Amount" class="stepMaterialAmount" />
+                                <input type="number" event-bind="change:updateComponent(VM, $tbBatch.value, $tbAmount.value)" lt-name="tbAmount" data-bind="value:Amount; class.readonly:AutomaticBatches" class="stepMaterialAmount" />
                                 <div data-bind="text:UnitSymbol" class="stepMaterialUnit"></div>
-                                <input data-bind="value:BatchNumber" class="stepMaterialBatch"/>
+                                <input lt-name="tbBatch" event-bind="change:updateComponent(VM, $tbBatch.value, $tbAmount.value)" data-bind="value:BatchNumber; class.hidden:AutomaticBatches" class="stepMaterialBatch" />
+                                <div class="unresolvableAutomaticBatch stackLeft" data-bind="class!.hidden:cannotResolve">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <div>Není k dispzici dostatek materiálu ve skladu</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <div id="stepWorkerPanel" data-bind="class!.hidden:RequiresWorkerReference">
+                    <label>Pracovník</label>
+                    <input id="tbWorker" data-bind="value:Worker" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)" />
+                </div>
+                <div id="stepTimePanel" data-bind="class!.hidden:RequiresTime">
+                    <label>Počet hodin</label>
+                    <input id="tbTime" data-bind="value:Hours" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)" />
+                </div>
+                <div id="stepPricePanel" data-bind="class!.hidden:RequiresPrice">
+                    <label>Cena</label>
+                    <input id="tbPrice" data-bind="value:Price" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)"/> 
+                </div>
             </div>
             
-            
-            <button class="butCancel" event-bind="click:onCancelStepClick"></button>
+            <div>
+                <button class="butSync" data-bind="class.hidden:IsValid" event-bind="click:validateStep"><i class="fas fa-sync"></i></button>
+                <button class="butSubmit" data-bind="class!.hidden:IsValid" event-bind="click:saveStep"></button>
+                <button class="butCancel" event-bind="click:onCancelStepClick"></button>
+            </div>
         </div>
     </div>
 </div>
@@ -55,6 +74,29 @@
         this.updateStepQty = function(strQty) {
             var value = parseFloat(strQty);
             app.productionSteps.vm.updateQuantity(value);
+        };
+
+        this.updateComponent = function(model, batchNr, amount) {
+            var numAmount = parseFloat(amount);
+
+            app.productionSteps.vm.updateComponent(model.itemKey, batchNr, numAmount);
+        };
+
+        this.onAdditionalFieldsUpdate = function(worker, time, price) {
+
+            var numTime = parseFloat(time);
+            var numPrice = parseFloat(price);
+
+            app.productionSteps.vm.updateAdditionalFields(worker, time, price);
+
+        };
+
+        this.validateStep = function() {
+            app.productionSteps.vm.doStepValidation();
+        };
+
+        this.saveStep = function() {
+            app.productionSteps.vm.saveStep();
         };
     });
 
