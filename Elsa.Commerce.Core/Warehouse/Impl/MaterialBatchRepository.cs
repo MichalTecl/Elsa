@@ -285,6 +285,14 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return GetBatchById(entity.Id);
         }
 
+        public void MarkBatchAllProductionStepsDone(int batchId)
+        {
+            var batch = GetBatchById(batchId);
+            batch.Batch.AllStepsDone = true;
+
+            m_database.Save(batch.Batch);
+        }
+
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()
         {
             return

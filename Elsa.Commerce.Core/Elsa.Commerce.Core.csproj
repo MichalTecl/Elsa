@@ -70,6 +70,9 @@
     <Compile Include="IUnitRepository.cs" />
     <Compile Include="IKitProductRepository.cs" />
     <Compile Include="IUserRepository.cs" />
+    <Compile Include="Model\BatchReporting\BatchReportEntry.cs" />
+    <Compile Include="Model\BatchReporting\BatchReportModel.cs" />
+    <Compile Include="Model\BatchReporting\BatchReportQuery.cs" />
     <Compile Include="Model\IErpCustomerModel.cs" />
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
     <Compile Include="Model\KitItemsCollection.cs" />
@@ -127,6 +130,8 @@
     <Compile Include="VirtualProducts\Model\ProductionStepMaterialRequestModel.cs" />
     <Compile Include="VirtualProducts\Model\ProductionStepRequestModel.cs" />
     <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
+    <Compile Include="Warehouse\BatchReporting\BatchReportingFacade.cs" />
+    <Compile Include="Warehouse\BatchReporting\IBatchReportingFacade.cs" />
     <Compile Include="Warehouse\BatchStatus.cs" />
     <Compile Include="Warehouse\IBatchStatusManager.cs" />
     <Compile Include="Warehouse\IMaterialBatchFacade.cs" />

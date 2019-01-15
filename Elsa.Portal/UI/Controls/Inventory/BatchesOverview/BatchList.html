@@ -1,0 +1,34 @@
+﻿<div id="batchList">
+    <div lt-name="theList" data-bind="itemsSource:batches" data-key="BatchId">
+        <!--{"BatchId":101,"InventoryName":"Výrobky","BatchNumber":"1952001","MaterialName":"Krém Antipupínek 30ml","MaterialId":33,"BatchVolume":"100 ks",
+        "AvailableAmount":"0 ks","CreateDt":"08.01.19 20:04","IsClosed":false,"IsLocked":false,"IsAvailable":false,"AllStepsDone":false,"NumberOfComponents":0,
+        "NumberOfCompositions":0,"NumberOfRequiredSteps":1,"NumberOfOrders":0}-->
+
+        <div class="lt-template bovRow">
+            <div class="bovRowData">
+                <div data-bind="text:BatchNumber"></div>
+                <div data-bind="text:MaterialName"></div>
+                <div data-bind="text:AvailableAmount"></div>
+                <div data-bind="text:BatchVolume"></div>
+                <div data-bind="text:CreateDt"></div>
+            </div>
+            <div class="bovRowDetail">
+                
+            </div>
+
+        </div>
+
+    </div>
+
+    <button lt-name="btnMore" data-bind="class!.hidden:canLoadMore" event-bind="click:loadMore">Načíst více</button>
+</div>
+<script src="/Script/Apps/Inventory/BatchOverview/BatchesOverviewVM.js"></script>
+<script>
+    lt.element("batchList").withModel("app.batchesOverview.vm").attach(function(btnMore) {
+
+        this.loadMore = function() {
+            app.batchesOverview.vm.load();
+        };
+
+    });
+</script>

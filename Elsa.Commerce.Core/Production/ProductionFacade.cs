@@ -595,10 +595,22 @@ namespace Elsa.Commerce.Core.Production
                         m_batchFacade.ReleaseBatchAmountCache(batch);
                     }
 
-                    m_batchFacade.ReleaseBatchAmountCache(m_batchRepository.GetBatchById(targetBatchId).Batch);
+                    var targetBatch = m_batchRepository.GetBatchById(targetBatchId).Batch;
+
+                    m_batchFacade.ReleaseBatchAmountCache(targetBatch);
+                    
+                    TryMarkBatchStepsComplete(targetBatch);
                 }
 
                 tx.Commit();
+            }
+        }
+
+        private void TryMarkBatchStepsComplete(IMaterialBatch batch)
+        {
+            if (!GetStepsToProceed(batch.Id, batch.MaterialId, true).Any())
+            {
+                m_batchRepository.MarkBatchAllProductionStepsDone(batch.Id);
             }
         }
 

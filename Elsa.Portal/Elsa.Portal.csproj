@@ -108,6 +108,7 @@
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
     <Content Include="Script\Apps\Crm\Customers.VM.js" />
+    <Content Include="Script\Apps\Inventory\BatchOverview\BatchesOverviewVM.js" />
     <Content Include="Script\Apps\Inventory\Material\MaterialHelper.js" />
     <Content Include="Script\Apps\Inventory\VirtualProducts\VirtualProductsVM.js" />
     <Content Include="Script\Apps\Inventory\WarehouseActions\ProductionSteps.VM.js" />
@@ -130,6 +131,9 @@
     <Content Include="UI\Controls\Common\PickItemDialog.html" />
     <Content Include="UI\Controls\Common\PickItemDialog.js" />
     <Content Include="UI\Controls\Common\TabControl.js" />
+    <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.html" />
+    <Content Include="UI\Controls\Inventory\BatchesOverview\BatchSearchPanel.html" />
+    <Content Include="UI\Controls\Inventory\BatchesOverview\BatchSearchUI.html" />
     <Content Include="UI\Controls\Inventory\MaterialsEditor.html" />
     <Content Include="UI\Controls\Inventory\TaggingEditor.html" />
     <Content Include="UI\Controls\Inventory\VirtualProducts.html" />

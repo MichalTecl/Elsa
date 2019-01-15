@@ -40,5 +40,6 @@ namespace Elsa.Commerce.Core.Warehouse
         void UpdateBatchAvailability(int batchId, bool isAvailable);
 
         MaterialBatchComponent CreateProductionBatch(int materialId, string batchNumber, decimal amount, IMaterialUnit unit);
+        void MarkBatchAllProductionStepsDone(int batchId);
     }
 }

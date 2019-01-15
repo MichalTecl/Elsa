@@ -5,6 +5,7 @@ using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
+using Elsa.Commerce.Core.Warehouse.BatchReporting;
 using Elsa.Commerce.Core.Warehouse.Impl;
 
 using Robowire;
@@ -40,6 +41,7 @@ namespace Elsa.Commerce.Core
             setup.For<IPackingPreferredBatchRepository>().Use<PreferredBatchRepository>();
             setup.For<IProductionFacade>().Use<ProductionFacade>();
             setup.For<IBatchStatusManager>().Use<BatchStatusManager>();
+            setup.For<IBatchReportingFacade>().Use<BatchReportingFacade>();
         }
     }
 }
