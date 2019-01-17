@@ -6,7 +6,9 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
     {
         public BatchReportQuery Query { get; set; }
 
-        public List<BatchReportEntry> Report { get; set; } = new List<BatchReportEntry>();
+        public bool IsUpdate { get; set; }
+
+        public List<BatchReportEntryBase> Report { get; set; } = new List<BatchReportEntryBase>();
         public bool CanLoadMore { get; set; }
     }
 }

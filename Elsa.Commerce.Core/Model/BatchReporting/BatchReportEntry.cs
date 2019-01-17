@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Elsa.Commerce.Core.Model.BatchReporting
 {
-    public class BatchReportEntry
+    public class BatchReportEntry : BatchReportEntryBase
     {
-        public int BatchId { get; set; }
         public string InventoryName { get; set; }
         public string BatchNumber { get; set; }
         public string MaterialName { get; set; }
@@ -24,5 +23,9 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int NumberOfCompositions { get; set; }
         public int NumberOfRequiredSteps { get; set; }
         public int NumberOfOrders { get; set; }
+
+        public BatchReportEntry(int batchId) : base(batchId)
+        {
+        }
     }
 }

@@ -6,6 +6,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
     {
         public int PageNumber { get; set; }
 
+        public int? BatchId { get; set; }
+
         public int? MaterialId { get; set; }
 
         public int? InventoryTypeId { get; set; }
@@ -21,5 +23,15 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public bool? ClosedBatches { get; set; }
 
         public bool? LockedBatches { get; set; }
+
+        public bool ProducedOnly { get; set; }
+
+        public bool PurchasedOnly { get; set; }
+
+        public int? ComponentId { get; set; }
+
+        public int? CompositionId { get; set; }
+
+        public bool LoadSteps { get; set; }
     }
 }

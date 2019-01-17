@@ -53,6 +53,9 @@ lanta.ViewLoading.loader = function (target, value, attribute, callback) {
             lanta.ViewLoading.makeScriptsLive(xdiv, value);
 
             var parent = target.parentElement;
+            if (parent == null) {
+                return;
+            }
 
             var els = [];
             for (var nid = 0; nid < xdiv.childNodes.length; nid++) {

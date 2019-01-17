@@ -3,23 +3,7 @@ app.batchesOverview = app.batchesOverview || {};
 app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
 
     var self = this;
-
-    const defaultQuery = { PageNumber: 0 };
-
-    self.batches = [];
-
-    self.currentQuery = {};
-
-    self.canLoadMore = true;
-
-    self.clear = function() {
-        self.batches = [];
-        self.currentQuery = JSON.parse(JSON.stringify(defaultQuery));
-        //self.canLoadMore = false;
-
-        lt.notify();
-    };
-
+    
     var copyProps = function(from, into) {
         for (var prop in from) {
             if (from.hasOwnProperty(prop)) {
@@ -27,40 +11,68 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
             }
         }
     };
-
-    var receiveReport = function (report) {
-
+    
+    var receiveReport = function (report, session) {
+        
         report.Query.PageNumber++;
 
         if (!report.IsUpdate) {
-            self.currentQuery = report.Query;
-            self.canLoadMore = report.CanLoadMore;
+            session.query = report.Query;
+            session.canLoadMore = report.CanLoadMore;
         }
 
         for (var i = 0; i < report.Report.length; i++) {
-            var receivedBatch = report.Report[i];
 
+            var toExtend = null;
+
+            var receivedBatch = report.Report[i];
+            
             var found = false;
-            for (var j = 0; j < self.batches.length; j++) {
-                if (self.batches[j].BatchId === receivedBatch.BatchId) {
+            
+            for (var j = 0; j < session.list.length; j++) {
+                
+                if (session.list[j].BatchId === receivedBatch.BatchId) {
                     found = true;
-                    copyProps(receivedBatch, self.batches[i]);
+                    copyProps(receivedBatch, session.list[i]);
+                    toExtend = session.list[i];
                     break;
                 }
             }
-
+            
             if (!found) {
-                self.batches.push(receivedBatch);
+                session.list.push(receivedBatch);
+                toExtend = receivedBatch;
+            }
+
+            if (!!toExtend) {
+                toExtend.itemKey = toExtend.BatchId.toString() + ":" + (toExtend.ParentId || "").toString();
+
+                toExtend.hasComponents = toExtend.hasComponents || toExtend.NumberOfComponents > 0;
+                toExtend.hasCompositions = toExtend.hasCompositions || toExtend.NumberOfCompositions > 0;
+                toExtend.hasOrders = toExtend.hasOrders || toExtend.NumberOfOrders > 0;
+                toExtend.hasSteps = toExtend.hasSteps || toExtend.NumberOfRequiredSteps > 0;
             }
         }
     };
 
-    self.load = function() {
-
-        lt.api("/batchReporting/get").body(self.currentQuery).post(receiveReport);
+    self.load = function (session, callback) {
+        
+        lt.api("/batchReporting/get")
+            .body(session.query)
+            .post(function(report) {
+                receiveReport(report, session);
+                callback(session);
+            });
     };
 
-    self.clear();
+    self.loadSingleBatch = function(batchModel, query) {
+        query.BatchId = batchModel.BatchId;
+
+        var fakeSession = { "list": [], "query": query };
+        fakeSession.list.push(batchModel);
+
+        self.load(fakeSession, function() {});
+    };
 };
 
 app.batchesOverview.vm = app.batchesOverview.vm || new app.batchesOverview.ViewModel();

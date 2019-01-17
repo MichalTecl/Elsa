@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Model.BatchReporting;
+using Elsa.Commerce.Core.Production;
+using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Utils;
 
@@ -20,20 +19,38 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private readonly ISession m_session;
         private readonly IDatabase m_database;
         private readonly IMaterialBatchFacade m_batchFacade;
+        private readonly IMaterialBatchRepository m_batchRepository;
+        private readonly IMaterialRepository m_materialRepository;
+        private readonly IProductionFacade m_productionFacade;
 
-        public BatchReportingFacade(ISession session, IDatabase database, IMaterialBatchFacade batchFacade)
+        public BatchReportingFacade(ISession session, IDatabase database, IMaterialBatchFacade batchFacade, IMaterialBatchRepository batchRepository, IMaterialRepository materialRepository, IProductionFacade productionFacade)
         {
             m_session = session;
             m_database = database;
             m_batchFacade = batchFacade;
+            m_batchRepository = batchRepository;
+            m_materialRepository = materialRepository;
+            m_productionFacade = productionFacade;
         }
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
         {
+            if (query.LoadSteps)
+            {
+                return LoadSteps(query.BatchId ?? -1);
+            }
+
+
+
+
+            var pageSize = query.BatchId == null ? c_pageSize : 1;
+            var pageNumber = query.BatchId == null ? query.PageNumber : 0;
+
             var sql = m_database.Sql().Call("LoadBatchesReport")
                 .WithParam("@projectId", m_session.Project.Id)
-                .WithParam("@pageSize", c_pageSize)
-                .WithParam("@pageNumber", query.PageNumber)
+                .WithParam("@pageSize", pageSize)
+                .WithParam("@pageNumber", pageNumber)
+                .WithParam("@batchId", query.BatchId)
                 .WithParam("@materialId", query.MaterialId)
                 .WithParam("@orderNumber", query.OrderNumber)
                 .WithParam("@batchNumber", query.BatchNumberQuery?.Replace("*", "%"))
@@ -41,13 +58,17 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 .WithParam("@dtTo", query.To)
                 .WithParam("@closed", query.ClosedBatches)
                 .WithParam("@locked", query.LockedBatches)
-                .WithParam("@inventoryTypeId", query.InventoryTypeId);
+                .WithParam("@inventoryTypeId", query.InventoryTypeId)
+                .WithParam("@onlyProduced", query.ProducedOnly)
+                .WithParam("@onlyBought", query.PurchasedOnly)
+                .WithParam("@compositionId", query.CompositionId)
+                .WithParam("@componentId", query.ComponentId);
 
             var result = new BatchReportModel { Query = query };
             result.Report.AddRange(sql.MapRows(MapEntry));
             result.CanLoadMore = (result.Report.Count == c_pageSize);
 
-            foreach (var b in result.Report)
+            foreach (var b in result.Report.OfType<BatchReportEntry>())
             {
                 if (b.IsClosed)
                 {
@@ -61,6 +82,29 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             }
 
             return result;
+        }
+
+        private BatchReportModel LoadSteps(int queryBatchId)
+        {
+            var batch = m_batchRepository.GetBatchById(queryBatchId);
+            if (batch == null)
+            {
+                throw new InvalidOperationException("not found");
+            }
+
+            var requiredSteps = m_materialRepository.GetMaterialProductionSteps(batch.Batch.MaterialId).ToList();
+
+            if (!requiredSteps.Any())
+            {
+                throw new InvalidOperationException("invalid request");
+            }
+
+            var performedSteps = batch.Batch.PerformedSteps.ToList();
+            foreach (var requiredStep in requiredSteps)
+            {
+
+            }
+            
         }
 
         private BatchReportEntry MapEntry(DbDataReader row)
@@ -86,9 +130,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             #endregion
 
 
-            var entry = new BatchReportEntry
+            var entry = new BatchReportEntry(row.GetInt32(batchId))
             {
-                BatchId = row.GetInt32(batchId),
                 InventoryName = row.GetString(inventoryName),
                 BatchNumber = row.GetString(batchNumber),
                 MaterialName = row.GetString(materialName),
