@@ -293,6 +293,21 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_database.Save(batch.Batch);
         }
 
+        public string GetBatchNumberById(int batchId)
+        {
+            return m_cache.ReadThrough($"batchNrById_{m_session.Project.Id}_{batchId}",
+                TimeSpan.FromHours(24),
+                () =>
+                {
+                    return
+                        m_database.SelectFrom<IMaterialBatch>()
+                            .Where(b => b.Id == batchId && b.ProjectId == m_session.Project.Id)
+                            .Take(1)
+                            .Execute()
+                            .FirstOrDefault()?.BatchNumber;
+                });
+        }
+
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()
         {
             return
@@ -304,6 +319,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     .Join(b => b.Components.Each().Unit)
                     .Join(b => b.Components.Each().Component)
                     .Join(b => b.Components.Each().Component.Unit)
+                    .Join(b => b.PerformedSteps)
+                    .Join(b => b.PerformedSteps.Each().ConfirmUser)
+                    .Join(b => b.PerformedSteps.Each().Worker)
+                    .Join(b => b.PerformedSteps.Each().SourceBatches)
                     .Where(b => b.ProjectId == m_session.Project.Id);
         }
     }

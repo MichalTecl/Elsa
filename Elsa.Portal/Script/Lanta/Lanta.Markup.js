@@ -134,7 +134,16 @@ if (lanta.Markup.attributeSetters.length === 0) {
 
         if (!(template = target["__ltItemTemplate"])) {
 
-            var templates = target.querySelectorAll(".lt-template");
+            var templates = []; // target.querySelectorAll(".lt-template");
+
+            for (var i = 0; i < target.children.length; i++) {
+                var child = target.children[i];
+                var childClass = child.getAttribute("class");
+                if (childClass.indexOf("lt-template") > -1) {
+                    templates.push(child);
+                }
+            }
+
             if (templates.length === 0) {
                 target.innerHTML = "NO TEMPLATE";
                 return true;

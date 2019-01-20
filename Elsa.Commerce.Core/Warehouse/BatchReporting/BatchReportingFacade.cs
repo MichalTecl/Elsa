@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 
 using Elsa.Commerce.Core.Model.BatchReporting;
 using Elsa.Commerce.Core.Production;
+using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Extensions;
 
 using Robowire.RobOrm.Core;
 
@@ -22,8 +25,17 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private readonly IMaterialBatchRepository m_batchRepository;
         private readonly IMaterialRepository m_materialRepository;
         private readonly IProductionFacade m_productionFacade;
+        private readonly AmountProcessor m_amountProcessor;
+        private readonly IUnitRepository m_unitRepository;
 
-        public BatchReportingFacade(ISession session, IDatabase database, IMaterialBatchFacade batchFacade, IMaterialBatchRepository batchRepository, IMaterialRepository materialRepository, IProductionFacade productionFacade)
+        public BatchReportingFacade(ISession session,
+            IDatabase database,
+            IMaterialBatchFacade batchFacade,
+            IMaterialBatchRepository batchRepository,
+            IMaterialRepository materialRepository,
+            IProductionFacade productionFacade,
+            AmountProcessor amountProcessor,
+            IUnitRepository unitRepository)
         {
             m_session = session;
             m_database = database;
@@ -31,6 +43,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             m_batchRepository = batchRepository;
             m_materialRepository = materialRepository;
             m_productionFacade = productionFacade;
+            m_amountProcessor = amountProcessor;
+            m_unitRepository = unitRepository;
         }
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
@@ -92,19 +106,85 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 throw new InvalidOperationException("not found");
             }
 
-            var requiredSteps = m_materialRepository.GetMaterialProductionSteps(batch.Batch.MaterialId).ToList();
+            var requiredSteps = m_materialRepository.GetMaterialProductionSteps(batch.Batch.MaterialId).Ordered().ToList();
 
             if (!requiredSteps.Any())
             {
                 throw new InvalidOperationException("invalid request");
             }
 
+            var entry = new BatchProductionStepReportEntry(queryBatchId);
+
             var performedSteps = batch.Batch.PerformedSteps.ToList();
             foreach (var requiredStep in requiredSteps)
             {
+                var stepModel = new BatchProductionStepReportEntry.ProductionStepModel();
+                stepModel.MaterialStepId = requiredStep.Id;
+                stepModel.StepName = requiredStep.Name;
 
+                entry.Steps.Add(stepModel);
+
+                var done =
+                    performedSteps.Where(s => (s.BatchId == queryBatchId) && (s.StepId == requiredStep.Id)).ToList();
+
+                var producedAmount = new Amount(0, batch.ComponentUnit);
+                foreach (var doneStep in done)
+                {
+                    var doneStepAmount = new Amount(doneStep.ProducedAmount, batch.ComponentUnit);
+                    producedAmount = m_amountProcessor.Add(producedAmount, doneStepAmount);
+
+                    var doneModel = new BatchProductionStepReportEntry.PerformedStepModel()
+                    {
+                        Amount = doneStepAmount.ToString(),
+                        ConfirmDt = StringUtil.FormatDateTime(doneStep.ConfirmDt),
+                        ConfirmUser = doneStep.ConfirmUser.EMail,
+                        Price = StringUtil.FormatDecimal(doneStep.Price ?? 0m),
+                        SpentHours = StringUtil.FormatDecimal(doneStep.SpentHours ?? 0m),
+                        StepId = doneStep.Id,
+                        Worker = doneStep.Worker?.EMail,
+                    };
+
+                    stepModel.PerformedSteps.Add(doneModel);
+
+                    foreach (var component in doneStep.SourceBatches)
+                    {
+                        var sourceBatch = m_batchRepository.GetBatchById(component.SourceBatchId);
+                        var material = m_materialRepository.GetMaterialById(sourceBatch.Batch.MaterialId);
+                        var componentModel = new BatchProductionStepReportEntry.PerfomedStepComponent()
+                        {
+                            MaterialName = material.Name,
+                            Amount = new Amount(component.UsedAmount, m_unitRepository.GetUnit(component.UnitId)).ToString(),
+                            BatchNumber = m_batchRepository.GetBatchNumberById(component.SourceBatchId),
+                            StepBatchId = component.Id
+                        };
+
+                        doneModel.Components.Add(componentModel);
+                    }
+
+                    doneModel.Components.Sort(
+                        new GenericComparer<BatchProductionStepReportEntry.PerfomedStepComponent>(
+                            (a, b) => string.Compare(a.MaterialName, b.MaterialName, StringComparison.Ordinal)));
+                }
+
+                var perc = producedAmount.IsNotPositive
+                    ? decimal.Zero
+                    : m_amountProcessor.Divide(producedAmount, new Amount(batch.ComponentAmount, batch.ComponentUnit))
+                        .Value;
+
+                perc = perc*100m;
+
+                stepModel.DonePercent = $"{StringUtil.FormatDecimal(Math.Round(perc, 0))}%";
             }
             
+            var report = new BatchReportModel()
+            {
+                CanLoadMore = false,
+                IsUpdate = true
+            };
+
+            report.Report.Add(entry);
+
+            return report;
         }
 
         private BatchReportEntry MapEntry(DbDataReader row)

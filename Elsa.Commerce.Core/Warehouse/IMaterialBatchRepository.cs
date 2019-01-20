@@ -41,5 +41,7 @@ namespace Elsa.Commerce.Core.Warehouse
 
         MaterialBatchComponent CreateProductionBatch(int materialId, string batchNumber, decimal amount, IMaterialUnit unit);
         void MarkBatchAllProductionStepsDone(int batchId);
+
+        string GetBatchNumberById(int batchId);
     }
 }

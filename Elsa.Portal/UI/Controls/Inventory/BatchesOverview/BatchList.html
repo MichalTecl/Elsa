@@ -27,9 +27,38 @@
                     <div lt-name="compostListPlaceholder"></div>
                 </div>
                 
-                <div class="bovLazyPanel" style="margin-left: 10px">
-                    <div data-bind="class!.hidden:hasSteps"class="actionLink" data-queryProperty="LoadSteps" lt-name="butLoadSteps" event-bind="click:update(VM, $butLoadSteps)" >Výrobní kroky</div>
+                <div class="bovLazyPanel" style="margin-left: 10px" data-bind="class!.hidden:hasSteps">
+                    <div class="actionLink" data-queryProperty="LoadSteps" lt-name="butLoadSteps" event-bind="click:update(VM, $butLoadSteps)" >Výrobní kroky</div>
+                    <div class="lstProductionStepsContainer">
+                        <div data-bind="itemsSource:Steps" data-key="MaterialStepId">
+                            <div class="bovProdStepItem lt-template">
+                                <div class="stackLeft bovStepRow">
+                                    <div class="bovStepName" data-bind="text:StepName"></div>
+                                    <div class="bovStepPercent" data-bind="text:DonePercent"></div>
+                                    <div class="bovPerformedStepsPanel" data-bind="itemssource:PerformedSteps" data-key="StepId">
+                                        <div class="bovPerStepItem lt-template">
+                                            <div class="bovPerStepRow">
+                                                <div class="bovPerStepDt" data-bind="text:ConfirmDt"></div>
+                                                <div class="bovPerStepAmount" data-bind="text:Amount"></div>
+                                                <div class="bovPerStepWorker" data-bind="text:Worker"></div>
+                                                <div class="bovPerStepTime" data-bind="text:SpentHours"></div>
+                                                <div class="bovPerStepPrice" data-bind="text:Price"></div>
+                                                <div class="bovPerStepConfirmUser" data-bind="text:ConfirmUser"></div>
+                                            </div>
+                                            <div class="bovPerStepComponentsList" data-bind="itemssource:Components" data-key="StepBatchId">
+                                                <div class="lt-template bovPerStepComponentItem">
+                                                    <div class="bovPerStepCoAmount" data-bind="text:Amount"></div>
+                                                    <div class="bovPerStepCoMaterial" data-bind="text:MaterialName"></div>
+                                                    <div class="bovPerStepCoBatch" data-bind="text:BatchNumber"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
+                    </div>
                 </div>
 
             </div>

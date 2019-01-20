@@ -13,8 +13,10 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
     };
     
     var receiveReport = function (report, session) {
-        
-        report.Query.PageNumber++;
+
+        if (!!report.Query && !!report.Query.PageNumber) {
+            report.Query.PageNumber++;
+        }
 
         if (!report.IsUpdate) {
             session.query = report.Query;
