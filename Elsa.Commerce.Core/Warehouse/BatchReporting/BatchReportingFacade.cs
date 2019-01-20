@@ -53,10 +53,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             {
                 return LoadSteps(query.BatchId ?? -1);
             }
-
-
-
-
+            
             var pageSize = query.BatchId == null ? c_pageSize : 1;
             var pageNumber = query.BatchId == null ? query.PageNumber : 0;
 
@@ -95,7 +92,80 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 }
             }
 
+            if (query.CompositionId != null)
+            {
+                PopulateComponentAmounts(query.CompositionId.Value, result.Report);
+                result.CustomField1Name = "Použito";
+            }
+            else if (query.ComponentId != null)
+            {
+                PopulateCompositionAmounts(query.ComponentId.Value, result.Report);
+                result.CustomField1Name = "Použito";
+            }
+
             return result;
+        }
+
+        private void PopulateCompositionAmounts(int componentBatchId, List<BatchReportEntryBase> report)
+        {
+            var thisBatch = m_batchRepository.GetBatchById(componentBatchId);
+            if (thisBatch == null)
+            {
+                throw new InvalidOperationException("Invalid entity reference");
+            }
+            
+            var zeroAmount = new Amount(0, thisBatch.ComponentUnit);
+
+            foreach (var row in report.OfType<BatchReportEntry>())
+            {
+                var amount = zeroAmount.Clone();
+
+                var componentBatch = m_batchRepository.GetBatchById(row.BatchId);
+                foreach (var component in componentBatch.Components.Where(c => c.Batch.Id == componentBatchId))
+                {
+                    amount = m_amountProcessor.Add(amount,
+                        new Amount(component.ComponentAmount, component.ComponentUnit));
+                }
+
+                if (row.NumberOfRequiredSteps > 0)
+                {
+                    foreach (var stp in componentBatch.Batch.PerformedSteps.SelectMany(s => s.SourceBatches).Where(s => s.SourceBatchId == componentBatchId))
+                    {
+                        amount = m_amountProcessor.Add(amount, m_amountProcessor.ToAmount(stp.UsedAmount, stp.UnitId));
+                    }
+                }
+
+                row.CustomField1 = amount.ToString();
+            }
+        }
+
+        private void PopulateComponentAmounts(int compositionId, List<BatchReportEntryBase> resultReport)
+        {
+            var composition = m_batchRepository.GetBatchById(compositionId);
+            
+            foreach (var row in resultReport.OfType<BatchReportEntry>())
+            {
+                var componentBatchId = row.BatchId;
+                var amount = new Amount(0, m_materialRepository.GetMaterialById(row.MaterialId).NominalUnit);
+                
+                var components = composition.Components.Where(c => componentBatchId == c.Batch.Id);
+
+                foreach (var component in components)
+                {
+                    amount = m_amountProcessor.Add(amount, new Amount(component.ComponentAmount, component.ComponentUnit));
+                }
+
+                foreach (var steps in composition.Batch.PerformedSteps)
+                {
+                    foreach (var stepComponent in steps.SourceBatches.Where(sb => sb.SourceBatchId == componentBatchId))
+                    {
+                        amount = m_amountProcessor.Add(amount,
+                            new Amount(stepComponent.UsedAmount, m_unitRepository.GetUnit(stepComponent.UnitId)));
+                    }
+                }
+
+                row.CustomField1 = amount.ToString();
+            }
         }
 
         private BatchReportModel LoadSteps(int queryBatchId)

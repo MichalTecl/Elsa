@@ -8,6 +8,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 {
     public class BatchReportEntry : BatchReportEntryBase
     {
+        public string CustomField1 { get; set; }
         public string InventoryName { get; set; }
         public string BatchNumber { get; set; }
         public string MaterialName { get; set; }

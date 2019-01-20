@@ -363,8 +363,6 @@ div.searchPanel {
   content: "\f00c";
 }
 
-
-
 .formActions {
   border-top:1px solid #eee;
   padding-top:5px;
@@ -380,4 +378,48 @@ div.searchPanel {
 input.readonly {
     pointer-events:none;
     background-color: transparent !important;
+}
+
+
+/* GRIDS */
+.gridRow {
+    display:flex;
+    margin-left:4px;
+}
+
+
+.gridHead > div {
+    font-weight:bold;
+    background-color:#fafaff;
+    padding-top:4px;
+    padding-bottom:4px;
+    margin-top:6px;    
+}
+
+.gridRow > div {
+    font-size:0.97em;
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-left:4px;
+    border-left:1px solid #eee;
+    border-top:1px solid #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; // This is where the magic happens    
+}
+
+.gridRow > div:last-child {
+    border-right:1px solid #eee;
+}
+
+.cell1 {
+    width: 20px;
+}
+
+.cell5 {
+    width:100px;
+}
+
+.cell10{
+    width:200px;
 }

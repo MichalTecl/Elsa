@@ -131,6 +131,7 @@
     <Content Include="UI\Controls\Common\PickItemDialog.html" />
     <Content Include="UI\Controls\Common\PickItemDialog.js" />
     <Content Include="UI\Controls\Common\TabControl.js" />
+    <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.css" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.html" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchSearchUI.html" />
     <Content Include="UI\Controls\Inventory\MaterialsEditor.html" />

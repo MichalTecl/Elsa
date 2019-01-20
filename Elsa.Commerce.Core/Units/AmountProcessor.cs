@@ -116,6 +116,11 @@ namespace Elsa.Commerce.Core.Units
             return new Amount(amount, m_unitRepository.GetUnitBySymbol(unitSymbol));
         }
 
+        public Amount ToAmount(decimal amount, int unitId)
+        {
+            return new Amount(amount, m_unitRepository.GetUnit(unitId));
+        }
+
         public Amount LinearScale(Amount x1, Amount y1, Amount x2)
         {
             var factor = Divide(y1, x1);

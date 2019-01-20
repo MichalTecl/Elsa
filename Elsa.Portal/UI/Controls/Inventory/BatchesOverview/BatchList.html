@@ -1,55 +1,136 @@
 ﻿<div id="batchList_{%GENERATE%}">
+    <div class="gridRow gridHead">
+        <div class="cell1"></div>
+        <div lt-name="lblCustomField1" style="display:none" class="cell5"></div>
+        <div class="cell10">Číslo šarže</div>
+        <div class="cell10">Materiál</div>
+        <div class="cell5">Dostupné</div>
+        <div class="cell5">Celkem</div>
+        <div class="cell10">Vytvořeno</div>
+    </div>
     <div lt-name="theList">
         <!--{"BatchId":101,"InventoryName":"Výrobky","BatchNumber":"1952001","MaterialName":"Krém Antipupínek 30ml","MaterialId":33,"BatchVolume":"100 ks",
         "AvailableAmount":"0 ks","CreateDt":"08.01.19 20:04","IsClosed":false,"IsLocked":false,"IsAvailable":false,"AllStepsDone":false,"NumberOfComponents":0,
         "NumberOfCompositions":0,"NumberOfRequiredSteps":1,"NumberOfOrders":0}-->
 
-        <div class="lt-template bovRow" lt-name="batchReviewItemTemplate">
-            <div class="bovRowData stackLeft">
-                <div data-bind="text:BatchNumber"></div>
-                <div data-bind="text:MaterialName"></div>
-                <div data-bind="text:AvailableAmount"></div>
-                <div data-bind="text:BatchVolume"></div>
-                <div data-bind="text:CreateDt"></div>
+        <div class="lt-template bovRow" lt-name="batchReviewItemTemplate" data-bind="class.expanded:expanded">
+
+            <div class="bovRowData gridRow">
+                <div class="cell1">
+                    <div data-bind="class!.hidden:canExpand">
+                        <i data-bind="class.hidden:expanded" class="far fa-plus-square faButton" event-bind="click:toggleExpansion(VM)"></i>
+                        <i data-bind="class!.hidden:expanded" class="far fa-minus-square faButton" event-bind="click:toggleExpansion(VM)"></i>
+                    </div>
+                </div>
+                <div data-bind="text:CustomField1; class!.hidden:showCustomField1" class="cell5"></div>
+                <div data-bind="text:BatchNumber" class="bovBatchNumber cell10"></div>
+                <div data-bind="text:MaterialName" class="bovBatchMaterial cell10"></div>
+                <div data-bind="text:AvailableAmount" class="bovBatchAmount cell5"></div>
+                <div data-bind="text:BatchVolume" class="bovBatchAmount cell5"></div>
+                <div data-bind="text:CreateDt" class="bovBatchDt cell10"></div>
             </div>
             <div class="bovRowDetail">
-                <div class="bovLazyPanel" style="margin-left: 10px">
-                    <div data-bind="class!.hidden:hasComponents" class="actionLink" data-queryProperty="CompositionId" lt-name="butLoadComponents" event-bind="click:loadSubs(BatchId, $componentsListPlaceholder, $butLoadComponents)">
-                        <span>Skládá se z&nbsp;</span><span data-bind="text:NumberOfComponents"></span><span>&nbsp;šarží</span>
+                <div class="bovLazyPanel bovBatchComponents">
+                    <div data-bind="class!.hidden:hasComponents"
+                         data-queryProperty="CompositionId"
+                         data-expandedFlag="componentsExpanded"
+                         data-loadedFlag="componentsLoaded"
+                         lt-name="butLoadComponents"
+                         event-bind="click:toggleSub(VM, $componentsListPlaceholder, $butLoadComponents)">
+                        <div class="bovLazPanelController">
+                            <div class="subExpander">
+                                <i data-bind="class.hidden:componentsExpanded" class="far fa-plus-square faButton" ></i>
+                                <i data-bind="class!.hidden:componentsExpanded" class="far fa-minus-square faButton" ></i>
+                            </div>
+                            <span>Složení (</span><span data-bind="text:NumberOfComponents"></span><span>)</span>
+                        </div>
                     </div>
-                    <div lt-name="componentsListPlaceholder"></div>
+                    <div data-bind="class!.hidden:componentsExpanded">
+                        <div lt-name="componentsListPlaceholder"></div>
+                    </div>
                 </div>
                 
-                <div class="bovLazyPanel" style="margin-left: 10px">
-                    <div data-bind="class!.hidden:hasCompositions" class="actionLink" data-queryProperty="ComponentId" lt-name="butLoadCompositions" event-bind="click:loadSubs(BatchId, $compostListPlaceholder, $butLoadCompositions)">
-                        <span>Je použita v&nbsp;</span><span data-bind="text:NumberOfCompositions"></span><span>&nbsp;šarží</span>
+                <div class="bovLazyPanel bovBatchCompos">
+                    <div data-bind="class!.hidden:hasCompositions"
+                         data-queryProperty="ComponentId"
+                         data-expandedFlag="composExpanded"
+                         data-loadedFlag="composLoaded"
+                         lt-name="butLoadCompos"
+                         event-bind="click:toggleSub(VM, $composListPlaceholder, $butLoadCompos)">
+                        <div class="bovLazPanelController">
+                            <div class="subExpander">
+                                <i data-bind="class.hidden:composExpanded" class="far fa-plus-square faButton"></i>
+                                <i data-bind="class!.hidden:composExpanded" class="far fa-minus-square faButton"></i>
+                            </div>
+                            <span>Spotřeba ve výrobě (</span><span data-bind="text:NumberOfCompositions"></span><span>)</span>
+                        </div>
                     </div>
-                    <div lt-name="compostListPlaceholder"></div>
+                    <div data-bind="class!.hidden:composExpanded">
+                        <div lt-name="composListPlaceholder"></div>
+                    </div>
                 </div>
                 
-                <div class="bovLazyPanel" style="margin-left: 10px" data-bind="class!.hidden:hasSteps">
-                    <div class="actionLink" data-queryProperty="LoadSteps" lt-name="butLoadSteps" event-bind="click:update(VM, $butLoadSteps)" >Výrobní kroky</div>
-                    <div class="lstProductionStepsContainer">
-                        <div data-bind="itemsSource:Steps" data-key="MaterialStepId">
-                            <div class="bovProdStepItem lt-template">
-                                <div class="stackLeft bovStepRow">
-                                    <div class="bovStepName" data-bind="text:StepName"></div>
-                                    <div class="bovStepPercent" data-bind="text:DonePercent"></div>
-                                    <div class="bovPerformedStepsPanel" data-bind="itemssource:PerformedSteps" data-key="StepId">
-                                        <div class="bovPerStepItem lt-template">
-                                            <div class="bovPerStepRow">
-                                                <div class="bovPerStepDt" data-bind="text:ConfirmDt"></div>
-                                                <div class="bovPerStepAmount" data-bind="text:Amount"></div>
-                                                <div class="bovPerStepWorker" data-bind="text:Worker"></div>
-                                                <div class="bovPerStepTime" data-bind="text:SpentHours"></div>
-                                                <div class="bovPerStepPrice" data-bind="text:Price"></div>
-                                                <div class="bovPerStepConfirmUser" data-bind="text:ConfirmUser"></div>
+                <div class="bovLazyPanel bovBatchSteps">
+                    <div data-bind="class!.hidden:hasSteps"
+                         data-queryProperty="LoadSteps"
+                         data-expandedFlag="stepsExpanded"
+                         data-loadedFlag="stepsLoaded"
+                         lt-name="butLoadSteps"
+                         event-bind="click:toggleSub(VM, null, $butLoadSteps)">
+                        <div class="bovLazPanelController">
+                            <div class="subExpander">
+                                <i data-bind="class.hidden:stepsExpanded" class="far fa-plus-square faButton"></i>
+                                <i data-bind="class!.hidden:stepsExpanded" class="far fa-minus-square faButton"></i>
+                            </div>
+                            <span>Výrobní kroky (</span><span data-bind="text:NumberOfRequiredSteps"></span><span>)</span>
+                        </div>
+                    </div>
+                    <div data-bind="class!.hidden:stepsExpanded">
+                        <div class="lstProductionStepsContainer">
+                            <div class="gridRow gridHead">
+                                <div class="cell1"></div>
+                                <div class="cell10">Krok</div>
+                                <div class="cell10">Dokončeno</div>
+                            </div>
+                            <div data-bind="itemsSource:Steps" data-key="MaterialStepId">
+                                <div class="bovProdStepItem lt-template">
+                                    <div class="bovStepRow">
+                                        <div class="gridRow">
+                                            <div class="cell1">
+                                                <i class="far fa-plus-square faButton" event-bind="click:toggleView(this, $pnlPerformed)"></i>
                                             </div>
-                                            <div class="bovPerStepComponentsList" data-bind="itemssource:Components" data-key="StepBatchId">
-                                                <div class="lt-template bovPerStepComponentItem">
-                                                    <div class="bovPerStepCoAmount" data-bind="text:Amount"></div>
-                                                    <div class="bovPerStepCoMaterial" data-bind="text:MaterialName"></div>
-                                                    <div class="bovPerStepCoBatch" data-bind="text:BatchNumber"></div>
+                                            <div class="bovStepName cell10" data-bind="text:StepName"></div>
+                                            <div class="bovStepPercent cell10" data-bind="text:DonePercent"></div>
+                                        </div>
+                                        
+                                        <div lt-name="pnlPerformed" class="pnlPerformed" style="display:none">
+                                            <div class="gridRow gridHead">
+                                                <div class="cell10">Provedeno</div>
+                                                <div class="cell5">Množství</div>
+                                                <div class="cell5">Pracovník</div>
+                                                <div class="cell5">Hodiny</div>
+                                                <div class="cell5">Cena</div>
+                                                <div class="cell5">Převzal</div>
+                                            </div>
+                                            <div class="bovPerformedStepsPanel" data-bind="itemssource:PerformedSteps" data-key="StepId">
+                                                <div class="bovPerStepItem lt-template">
+                                                    <div class="bovPerStepRow gridRow">
+                                                        <div class="bovPerStepDt cell10" data-bind="text:ConfirmDt"></div>
+                                                        <div class="bovPerStepAmount cell5" data-bind="text:Amount"></div>
+                                                        <div class="bovPerStepWorker cell5" data-bind="text:Worker"></div>
+                                                        <div class="bovPerStepTime cell5" data-bind="text:SpentHours"></div>
+                                                        <div class="bovPerStepPrice cell5" data-bind="text:Price"></div>
+                                                        <div class="bovPerStepConfirmUser cell5" data-bind="text:ConfirmUser"></div>
+                                                    </div>
+                                                    <!--
+            <div class="bovPerStepComponentsList" data-bind="itemssource:Components" data-key="StepBatchId">
+                <div class="lt-template bovPerStepComponentItem">
+                    <div class="bovPerStepCoAmount" data-bind="text:Amount"></div>
+                    <div class="bovPerStepCoMaterial" data-bind="text:MaterialName"></div>
+                    <div class="bovPerStepCoBatch" data-bind="text:BatchNumber"></div>
+                </div>
+            </div>
+            -->
                                                 </div>
                                             </div>
                                         </div>
@@ -57,21 +138,17 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
     <button lt-name="btnMore" event-bind="click:loadMore">Načíst více</button>
 </div>
 <script src="/Script/Apps/Inventory/BatchOverview/BatchesOverviewVM.js"></script>
 <script>
-    lt.element("batchList_{%GENERATE%}").attach(function (theList, batchReviewItemTemplate, btnMore) {
+    lt.element("batchList_{%GENERATE%}").attach(function (theList, batchReviewItemTemplate, btnMore, lblCustomField1) {
         
         var self = this;
 
@@ -92,6 +169,11 @@
                 btnMore.style.display = 'block';
             } else {
                 btnMore.style.display = 'none';
+            }
+
+            if (session.showCustomField1) {
+                lblCustomField1.innerHTML = session.customField1Name;
+                lblCustomField1.style.display = 'block';
             }
         };
 
@@ -123,25 +205,55 @@
             });
         };
         
-        self.loadSubs = function (bid, placeholder, caller) {
+        self.toggleSub = function(model, list, caller) {
+            var expandedFlag = caller.getAttribute("data-expandedFlag");
+            model[expandedFlag] = !model[expandedFlag];
+
+            var loadedFlag = caller.getAttribute("data-loadedFlag");
+
+            if (!!model[loadedFlag]) {
+                lt.notify(self);
+                return;
+            }
+
+            model[loadedFlag] = true;
 
             var property = caller.getAttribute("data-queryProperty");
 
-            var qry = { };
-            qry[property] = bid;
+            var qry = {};
+            qry[property] = model.BatchId;
 
-            setQueryToPlaceholder(placeholder, qry);
+            if (!!list) {
+                setQueryToPlaceholder(list, qry);
+            }
+            else {
+                qry.BatchId = model.BatchId;
+                qry[property] = true;
+                app.batchesOverview.vm.loadSingleBatch(model, qry);
+            }
         };
 
         self.update = function(batchModel, caller) {
-            var property = caller.getAttribute("data-queryProperty");
+           
+        };
 
-            var qry = {"BatchId": batchModel.BatchId};
-            qry[property] = true;
+        self.toggleExpansion = function(model) {
+            model.expanded = !model.expanded;
+            lt.notify(self);
+        };
 
-            app.batchesOverview.vm.loadSingleBatch(batchModel, qry);
+        self.toggleView = function(button, panel) {
+            if (panel.style.display == "none") {
+                panel.style.display = 'block';
+                button.setAttribute("class", "far fa-minus-square faButton");
+            } else {
+                panel.style.display = 'none';
+                button.setAttribute("class", "far fa-plus-square faButton");
+            }
         };
         
         updateView();
     });
 </script>
+
+<link href="/UI/Controls/Inventory/BatchesOverview/BatchList.css" rel="stylesheet" />

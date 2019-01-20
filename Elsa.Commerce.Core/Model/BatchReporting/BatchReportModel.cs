@@ -10,5 +10,6 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 
         public List<BatchReportEntryBase> Report { get; set; } = new List<BatchReportEntryBase>();
         public bool CanLoadMore { get; set; }
+        public string CustomField1Name{ get; set; }
     }
 }

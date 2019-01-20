@@ -14,13 +14,18 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
     
     var receiveReport = function (report, session) {
 
-        if (!!report.Query && !!report.Query.PageNumber) {
-            report.Query.PageNumber++;
+        if (!!report.Query) {
+            report.Query.PageNumber = (report.Query.PageNumber || 0) +1;
         }
 
         if (!report.IsUpdate) {
             session.query = report.Query;
             session.canLoadMore = report.CanLoadMore;
+        }
+
+        session.showCustomField1 = session.showCustomField1 || (report.CustomField1Name != null && report.CustomField1Name.length > 0);
+        if (session.showCustomField1 && (report.CustomField1Name != null && report.CustomField1Name.length > 0)) {
+            session.customField1Name = report.CustomField1Name;
         }
 
         for (var i = 0; i < report.Report.length; i++) {
@@ -53,6 +58,17 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.hasCompositions = toExtend.hasCompositions || toExtend.NumberOfCompositions > 0;
                 toExtend.hasOrders = toExtend.hasOrders || toExtend.NumberOfOrders > 0;
                 toExtend.hasSteps = toExtend.hasSteps || toExtend.NumberOfRequiredSteps > 0;
+                toExtend.expanded = toExtend.expanded || false;
+
+                toExtend.componentsExpanded = toExtend.componentsExpanded || false;
+                toExtend.composExpanded = toExtend.composExpanded || false;
+                toExtend.stepsExpanded = toExtend.stepsExpanded || false;
+                toExtend.showCustomField1 = toExtend.showCustomField1 || session.showCustomField1 || false;
+
+                toExtend.canExpand = toExtend.hasComponents ||
+                    toExtend.hasCompositions ||
+                    toExtend.hasOrders ||
+                    toExtend.hasSteps;
             }
         }
     };

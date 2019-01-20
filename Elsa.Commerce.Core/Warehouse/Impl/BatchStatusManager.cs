@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Units;
+using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Commerce;
@@ -30,18 +31,20 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly AmountProcessor m_amountProcessor;
         private readonly IDatabase m_database;
         private readonly IServiceLocator m_serviceLocator;
+        private readonly IMaterialRepository m_materialRepository;
 
         private IOrdersFacade m_injectedOrdersFacade;
 
         private IOrdersFacade OrdersFacade => m_injectedOrdersFacade ?? (m_injectedOrdersFacade = m_serviceLocator.Get<IOrdersFacade>());
 
-        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator)
+        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator, IMaterialRepository materialRepository)
         {
             m_batchRepository = batchRepository;
             m_orderRepository = orderRepository;
             m_amountProcessor = amountProcessor;
             m_database = database;
             m_serviceLocator = serviceLocator;
+            m_materialRepository = materialRepository;
         }
 
         public IMaterialBatchStatus GetStatus(int batchId)
@@ -232,7 +235,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 throw new InvalidOperationException("Invalid batch reference");
             }
 
-            model.RequiredSteps.AddRange(batch.Batch.Material.Steps);
+            var materialSteps = m_materialRepository.GetMaterialProductionSteps(batch.Batch.MaterialId);
+
+            model.RequiredSteps.AddRange(materialSteps);
         }
 
         #region Invalidations

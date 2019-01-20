@@ -1,0 +1,46 @@
+﻿.bovRow > .gridHead {
+    display: none;
+}
+
+.bovRow > .bovRowDetail {
+    display:none;
+}
+
+.bovRow.expanded > .gridHead {
+    display: flex;
+}
+
+.bovRow.expanded > .bovRowDetail {
+    display:block;
+}
+
+.bovRow.expanded {
+    margin-bottom:30px;
+}
+
+.bovRowDetail {
+    margin-left:40px;
+}
+
+.bovLazPanelController {
+    display:flex;
+}
+
+.bovLazPanelController > .subExpander {
+    margin-right:8px;
+    
+}
+
+.bovLazPanelController {
+    font-size:0.94em;
+    font-weight:bold;
+    color:#005;
+}
+
+.pnlPerformed {
+    margin-left:25px;
+}
+
+.lstProductionStepsContainer {
+    margin-left: 25px;
+}
