@@ -7,6 +7,8 @@
         <div class="cell5">Dostupné</div>
         <div class="cell5">Celkem</div>
         <div class="cell10">Vytvořeno</div>
+        <div class="cell5">Cena</div>
+        <div class="cell10">Faktura</div>
     </div>
     <div lt-name="theList">
         <!--{"BatchId":101,"InventoryName":"Výrobky","BatchNumber":"1952001","MaterialName":"Krém Antipupínek 30ml","MaterialId":33,"BatchVolume":"100 ks",
@@ -28,6 +30,8 @@
                 <div data-bind="text:AvailableAmount" class="bovBatchAmount cell5"></div>
                 <div data-bind="text:BatchVolume" class="bovBatchAmount cell5"></div>
                 <div data-bind="text:CreateDt" class="bovBatchDt cell10"></div>
+                <div data-bind="text:Price" class="cell5"></div>
+                <div data-bind="text:InvoiceNumber" class="cell10"></div>
             </div>
             <div class="bovRowDetail">
                 <div class="bovLazyPanel bovBatchComponents">
@@ -73,6 +77,7 @@
                 <div class="bovLazyPanel bovBatchSteps">
                     <div data-bind="class!.hidden:hasSteps"
                          data-queryProperty="LoadSteps"
+                         data-queryPropertyValue="true"
                          data-expandedFlag="stepsExpanded"
                          data-loadedFlag="stepsLoaded"
                          lt-name="butLoadSteps"
@@ -85,6 +90,7 @@
                             <span>Výrobní kroky (</span><span data-bind="text:NumberOfRequiredSteps"></span><span>)</span>
                         </div>
                     </div>
+
                     <div data-bind="class!.hidden:stepsExpanded">
                         <div class="lstProductionStepsContainer">
                             <div class="gridRow gridHead">
@@ -122,24 +128,61 @@
                                                         <div class="bovPerStepPrice cell5" data-bind="text:Price"></div>
                                                         <div class="bovPerStepConfirmUser cell5" data-bind="text:ConfirmUser"></div>
                                                     </div>
-                                                    <!--
-            <div class="bovPerStepComponentsList" data-bind="itemssource:Components" data-key="StepBatchId">
-                <div class="lt-template bovPerStepComponentItem">
-                    <div class="bovPerStepCoAmount" data-bind="text:Amount"></div>
-                    <div class="bovPerStepCoMaterial" data-bind="text:MaterialName"></div>
-                    <div class="bovPerStepCoBatch" data-bind="text:BatchNumber"></div>
-                </div>
-            </div>
-            -->
                                                 </div>
                                             </div>
                                         </div>
+                                    
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+     
+                
+                <div class="bovLazyPanel bovOrders">
+                    <div data-bind="class!.hidden:hasOrders"
+                         data-queryProperty="LoadOrdersPage"
+                         data-queryPropertyValue="0"
+                         data-expandedFlag="ordersExpanded"
+                         data-loadedFlag="ordersLoaded"
+                         lt-name="butLoadOrders"
+                         event-bind="click:toggleSub(VM, null, $butLoadOrders)">
+                        <div class="bovLazPanelController">
+                            <div class="subExpander">
+                                <i data-bind="class.hidden:ordersExpanded" class="far fa-plus-square faButton"></i>
+                                <i data-bind="class!.hidden:ordersExpanded" class="far fa-minus-square faButton"></i>
+                            </div>
+                            <span>Spotřeba e-shop (</span><span data-bind="text:NumberOfOrders"></span><span>)</span>
+                        </div>
+                    </div>
+                    <div class="bovOrders" data-bind="class!.hidden:ordersExpanded">
+                        <div class="bovOrdersHead gridRow gridHead">
+                            <div class="cell1"></div>
+                            <div class="cell10">Číslo</div>
+                            <div class="cell10">Zákazník</div>
+                            <div class="cell10">Datum</div>
+                            <div class="cell10">Stav</div>
+                        </div>
+                        <div data-bind="itemsSource:Orders" data-key="OrderId">
+                            <div class="lt-template">
+                                <div class="bovOrderRow gridRow">
+                                    <div class="cell1">
+                                        <i data-bind="class.hidden:ordersExpanded" class="far fa-plus-square faButton" event-bind="click:expandOrders(VM, $orderBatchesPlaceHolder)"></i>
+                                        <i data-bind="class!.hidden:ordersExpanded" class="far fa-minus-square faButton" event-bind="click:collapseOrders(VM)"></i>
+                                    </div>
+                                    <div class="cell10" data-bind="text:OrderNumber"></div>
+                                    <div class="cell10" data-bind="text:Customer"></div>
+                                    <div class="cell10" data-bind="text:PurchaseDate"></div>
+                                    <div class="cell10" data-bind="text:Status"></div>
+                                </div>
+                                <div lt-name="orderBatchesPlaceHolder"></div>
+                            </div>
+                        </div>
+                        <button data-bind="class!.hidden:CanLoadMoreOrders" event-bind="click:loadMoreOrders(VM)">Více</button>
+                    </div>
+                </div>
+            
             </div>
         </div>
     </div>
@@ -221,14 +264,27 @@
             var property = caller.getAttribute("data-queryProperty");
 
             var qry = {};
-            qry[property] = model.BatchId;
+            var strValue = caller.getAttribute("data-queryPropertyValue");
+            if (strValue == null) {
+                qry[property] = model.BatchId;
+            } else {
+
+                qry[property] = strValue;
+
+                if (strValue === "true") {
+                    qry[property] = true;
+                }
+                var numValue = parseInt(strValue, 10);
+                if (!isNaN(numValue)) {
+                    qry[property] = numValue;
+                }
+            }
 
             if (!!list) {
                 setQueryToPlaceholder(list, qry);
             }
             else {
                 qry.BatchId = model.BatchId;
-                qry[property] = true;
                 app.batchesOverview.vm.loadSingleBatch(model, qry);
             }
         };
@@ -243,13 +299,18 @@
         };
 
         self.toggleView = function(button, panel) {
-            if (panel.style.display == "none") {
+            if (panel.style.display === "none") {
                 panel.style.display = 'block';
                 button.setAttribute("class", "far fa-minus-square faButton");
             } else {
                 panel.style.display = 'none';
                 button.setAttribute("class", "far fa-plus-square faButton");
             }
+        };
+
+        self.loadMoreOrders = function (model) {
+            var qry = { "BatchId": model.BatchId, "LoadOrdersPage": model.NextOrdersPage };
+            app.batchesOverview.vm.loadSingleBatch(model, qry);
         };
         
         updateView();

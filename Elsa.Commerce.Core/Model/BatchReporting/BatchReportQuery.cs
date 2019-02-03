@@ -33,5 +33,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int? CompositionId { get; set; }
 
         public bool LoadSteps { get; set; }
+
+        public int? LoadOrdersPage { get; set; }
     }
 }

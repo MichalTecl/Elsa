@@ -15,5 +15,7 @@ namespace Elsa.Commerce.Core
         IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, bool skipErp = false);
 
         IEnumerable<IOrderItem> GetAllConcreteOrderItems(IPurchaseOrder order);
+
+        IEnumerable<IPurchaseOrder> GetOrdersByUsedBatch(int batchId, int pageSize, int pageNumber);
     }
 }

@@ -207,6 +207,24 @@ namespace Elsa.Commerce.Core.Impl
             }
         }
 
+        public IEnumerable<IPurchaseOrder> GetOrdersByUsedBatch(int batchId, int pageSize, int pageNumber)
+        {
+            return m_database.SelectFrom<IPurchaseOrder>()
+                .Join(o => o.Items)
+                .Join(o => o.Items.Each().KitChildren)
+                .Join(o => o.Items.Each().AssignedBatches)
+                .Join(o => o.Items.Each().KitChildren.Each().AssignedBatches)
+                .Where(o => o.ProjectId == m_session.Project.Id)
+                .Where(
+                    o =>
+                        (o.Items.Each().AssignedBatches.Each().MaterialBatchId == batchId) ||
+                        (o.Items.Each().KitChildren.Each().AssignedBatches.Each().MaterialBatchId == batchId))
+                .OrderBy(o => o.OrderNumber)
+                .Skip(pageSize*pageNumber)
+                .Take(pageSize)
+                .Execute();
+        }
+
         private IPurchaseOrder PerformErpActionSafe(
             IPurchaseOrder order,
             Action<IErpClient, IPurchaseOrder> erpAction,

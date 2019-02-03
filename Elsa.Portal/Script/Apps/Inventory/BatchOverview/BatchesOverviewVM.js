@@ -7,6 +7,18 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
     var copyProps = function(from, into) {
         for (var prop in from) {
             if (from.hasOwnProperty(prop)) {
+
+                if (Array.isArray(from[prop]) && prop === "Orders") {
+
+                    into.Orders = into.Orders || [];
+
+                    for (var i = 0; i < from.Orders.length; i++) {
+                        into.Orders.push(from.Orders[i]);
+                    }
+
+                    continue;
+                }
+
                 into[prop] = from[prop];
             }
         }
@@ -63,12 +75,15 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.componentsExpanded = toExtend.componentsExpanded || false;
                 toExtend.composExpanded = toExtend.composExpanded || false;
                 toExtend.stepsExpanded = toExtend.stepsExpanded || false;
-                toExtend.showCustomField1 = toExtend.showCustomField1 || session.showCustomField1 || false;
+                toExtend.ordersExpanded = toExtend.ordersExpanded || false;
 
+                toExtend.showCustomField1 = toExtend.showCustomField1 || session.showCustomField1 || false;
+                
                 toExtend.canExpand = toExtend.hasComponents ||
                     toExtend.hasCompositions ||
                     toExtend.hasOrders ||
                     toExtend.hasSteps;
+
             }
         }
     };

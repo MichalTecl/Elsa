@@ -27,6 +27,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private readonly IProductionFacade m_productionFacade;
         private readonly AmountProcessor m_amountProcessor;
         private readonly IUnitRepository m_unitRepository;
+        private readonly IOrdersFacade m_ordersFacade;
+        private readonly IOrderStatusRepository m_orderStatusRepository;
 
         public BatchReportingFacade(ISession session,
             IDatabase database,
@@ -35,7 +37,9 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             IMaterialRepository materialRepository,
             IProductionFacade productionFacade,
             AmountProcessor amountProcessor,
-            IUnitRepository unitRepository)
+            IUnitRepository unitRepository,
+            IOrdersFacade ordersFacade,
+            IOrderStatusRepository orderStatusRepository)
         {
             m_session = session;
             m_database = database;
@@ -45,6 +49,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             m_productionFacade = productionFacade;
             m_amountProcessor = amountProcessor;
             m_unitRepository = unitRepository;
+            m_ordersFacade = ordersFacade;
+            m_orderStatusRepository = orderStatusRepository;
         }
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
@@ -52,6 +58,10 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             if (query.LoadSteps)
             {
                 return LoadSteps(query.BatchId ?? -1);
+            }
+            else if (query.LoadOrdersPage != null)
+            {
+                return LoadOrders(query.BatchId ?? -1, query.LoadOrdersPage.Value);
             }
             
             var pageSize = query.BatchId == null ? c_pageSize : 1;
@@ -102,6 +112,34 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 PopulateCompositionAmounts(query.ComponentId.Value, result.Report);
                 result.CustomField1Name = "Použito";
             }
+            
+            return result;
+        }
+
+        private BatchReportModel LoadOrders(int queryBatchId, int ordersPageNumber)
+        {
+            var orders = m_ordersFacade.GetOrdersByUsedBatch(queryBatchId, c_pageSize, ordersPageNumber).ToList();
+
+            var entry = new BatchOrdersReportEntry(queryBatchId)
+            {
+                CanLoadMoreOrders = orders.Count == c_pageSize,
+                NextOrdersPage = ordersPageNumber + 1
+            };
+
+            foreach (var entity in orders)
+            {
+                entry.Orders.Add(new BatchOrderModel
+                {
+                    OrderId = entity.Id,
+                    Customer = entity.CustomerEmail,
+                    OrderNumber = entity.OrderNumber,
+                    PurchaseDate = StringUtil.FormatDateTime(entity.PurchaseDate),
+                    Status = m_orderStatusRepository.Translate(entity.OrderStatusId)
+                });
+            }
+
+            var result = new BatchReportModel();
+            result.Report.Add(entry);
 
             return result;
         }
@@ -277,6 +315,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             const int numberOfCompositions = 14;
             const int numberOfRequiredSteps = 15;
             const int numberOfOrders = 16;
+            const int price = 17;
+            const int invoiceNr = 18;
             #endregion
 
 
@@ -295,7 +335,9 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 NumberOfComponents = row.GetInt32(numberOfComponents),
                 NumberOfCompositions = row.GetInt32(numberOfCompositions),
                 NumberOfRequiredSteps = row.GetInt32(numberOfRequiredSteps),
-                NumberOfOrders = row.GetInt32(numberOfOrders)
+                NumberOfOrders = row.GetInt32(numberOfOrders),
+                Price = row.IsDBNull(price) ? string.Empty : $"{StringUtil.FormatDecimal(row.GetDecimal(price))} CZK",
+                InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : row.GetString(invoiceNr)
             };
             
             return entry;

@@ -24,6 +24,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int NumberOfCompositions { get; set; }
         public int NumberOfRequiredSteps { get; set; }
         public int NumberOfOrders { get; set; }
+        public string Price { get; set; }
+        public string InvoiceNumber { get; set; }
 
         public BatchReportEntry(int batchId) : base(batchId)
         {

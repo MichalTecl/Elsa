@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Commerce;
 
@@ -14,6 +15,21 @@ namespace Elsa.Commerce.Core
         public static readonly IOrderStatus Returned = new Status(6, "Returned");
         public static readonly IOrderStatus Canceled = new Status(7, "Canceled");
         public static readonly IOrderStatus Failed = new Status(8, "Failed");
+
+        public static IEnumerable<IOrderStatus> All
+        {
+            get
+            {
+                yield return New;
+                yield return PendingPayment;
+                yield return ReadyToPack;
+                yield return Packed;
+                yield return Sent;
+                yield return Returned;
+                yield return Canceled;
+                yield return Failed;
+            }
+        }
 
         public static bool IsPaid(int orderStatusId)
         {

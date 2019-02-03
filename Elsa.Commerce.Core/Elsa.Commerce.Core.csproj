@@ -70,6 +70,8 @@
     <Compile Include="IUnitRepository.cs" />
     <Compile Include="IKitProductRepository.cs" />
     <Compile Include="IUserRepository.cs" />
+    <Compile Include="Model\BatchReporting\BatchOrderModel.cs" />
+    <Compile Include="Model\BatchReporting\BatchOrdersReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchProductionStepReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchReportEntryBase.cs" />
