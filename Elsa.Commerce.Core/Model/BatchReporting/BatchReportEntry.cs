@@ -9,6 +9,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
     public class BatchReportEntry : BatchReportEntryBase
     {
         public string CustomField1 { get; set; }
+        public string CustomField2 { get; set; }
+        public string CustomField3 { get; set; }
         public string InventoryName { get; set; }
         public string BatchNumber { get; set; }
         public string MaterialName { get; set; }
@@ -26,7 +28,6 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int NumberOfOrders { get; set; }
         public string Price { get; set; }
         public string InvoiceNumber { get; set; }
-
         public BatchReportEntry(int batchId) : base(batchId)
         {
         }

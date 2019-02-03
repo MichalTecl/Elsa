@@ -86,6 +86,11 @@ lanta.CoreOps.seekClosestElement = lanta.CoreOps.seekClosestElement || function 
     for (; !!refElement; refElement = refElement.parentElement) {
         var result = lanta.CoreOps.seekElement(refElement, name, true);
         if (!!result) {
+
+            if (result.length != null) {
+                return result[0];
+            }
+
             return result;
         }
     }

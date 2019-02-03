@@ -35,5 +35,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public bool LoadSteps { get; set; }
 
         public int? LoadOrdersPage { get; set; }
+
+        public long? RelativeToOrderId { get; set; }
     }
 }

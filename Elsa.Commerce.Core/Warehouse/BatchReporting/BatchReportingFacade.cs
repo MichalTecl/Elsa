@@ -9,6 +9,7 @@ using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
 
 using Robowire.RobOrm.Core;
@@ -29,6 +30,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private readonly IUnitRepository m_unitRepository;
         private readonly IOrdersFacade m_ordersFacade;
         private readonly IOrderStatusRepository m_orderStatusRepository;
+        private readonly IPurchaseOrderRepository m_orderRepository;
+        private readonly IUserRepository m_userRepository;
 
         public BatchReportingFacade(ISession session,
             IDatabase database,
@@ -39,7 +42,9 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             AmountProcessor amountProcessor,
             IUnitRepository unitRepository,
             IOrdersFacade ordersFacade,
-            IOrderStatusRepository orderStatusRepository)
+            IOrderStatusRepository orderStatusRepository, 
+            IPurchaseOrderRepository orderRepository, 
+            IUserRepository userRepository)
         {
             m_session = session;
             m_database = database;
@@ -51,6 +56,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             m_unitRepository = unitRepository;
             m_ordersFacade = ordersFacade;
             m_orderStatusRepository = orderStatusRepository;
+            m_orderRepository = orderRepository;
+            m_userRepository = userRepository;
         }
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
@@ -66,6 +73,21 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             
             var pageSize = query.BatchId == null ? c_pageSize : 1;
             var pageNumber = query.BatchId == null ? query.PageNumber : 0;
+
+            IPurchaseOrder order = null;
+
+            if (query.RelativeToOrderId != null)
+            {
+                order = m_orderRepository.GetOrder(query.RelativeToOrderId.Value);
+
+                if (order == null)
+                {
+                    throw new InvalidOperationException("Invalid entity reference");
+                }
+
+                pageSize = 1000;
+                pageNumber = 0;
+            }
 
             var sql = m_database.Sql().Call("LoadBatchesReport")
                 .WithParam("@projectId", m_session.Project.Id)
@@ -83,7 +105,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 .WithParam("@onlyProduced", query.ProducedOnly)
                 .WithParam("@onlyBought", query.PurchasedOnly)
                 .WithParam("@compositionId", query.CompositionId)
-                .WithParam("@componentId", query.ComponentId);
+                .WithParam("@componentId", query.ComponentId)
+                .WithParam("@orderId", query.RelativeToOrderId);
 
             var result = new BatchReportModel { Query = query };
             result.Report.AddRange(sql.MapRows(MapEntry));
@@ -112,7 +135,74 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 PopulateCompositionAmounts(query.ComponentId.Value, result.Report);
                 result.CustomField1Name = "Použito";
             }
+            else if (query.RelativeToOrderId != null)
+            {
+                result.Report = PopulateRelativeToOrder(order, result.Report);
+                result.CustomField1Name = "Množství";
+                result.CustomField3Name = "Položka";
+                result.CustomField2Name = "Balil";
+
+            }
             
+            return result;
+        }
+
+        private List<BatchReportEntryBase> PopulateRelativeToOrder(IPurchaseOrder order, List<BatchReportEntryBase> batches)
+        {
+            var concreteItems = m_ordersFacade.GetAllConcreteOrderItems(order).ToList();
+            var result = new List<BatchReportEntryBase>(concreteItems.Count * 2);
+
+            foreach (var orderItem in concreteItems)
+            {
+                var itemName = orderItem.KitParent?.PlacedName ?? orderItem.PlacedName;
+
+                var assignedBatches = orderItem.AssignedBatches.ToList();
+                if (!assignedBatches.Any())
+                {
+                    assignedBatches.Add(null);
+                }
+
+                foreach (var assignment in assignedBatches)
+                {
+                    var sourceRecord = batches.OfType<BatchReportEntry>().FirstOrDefault(b => b.BatchId == assignment?.MaterialBatchId);
+
+                    var user = assignment == null ? string.Empty : m_userRepository.GetUserNick(assignment.UserId);
+
+                    var reportRow = new BatchReportEntry(assignment?.MaterialBatchId ?? -1)
+                    {
+                        CustomField1 = StringUtil.FormatDecimal(assignment?.Quantity ?? orderItem.Quantity),
+                        CustomField2 = user,
+                        CustomField3 = itemName,
+                        InventoryName = sourceRecord?.InventoryName,
+                        BatchNumber = sourceRecord?.BatchNumber ?? string.Empty,
+                        MaterialName = sourceRecord?.MaterialName ?? string.Empty,
+                        MaterialId = sourceRecord?.MaterialId ?? -1,
+                        BatchVolume = sourceRecord?.BatchVolume ?? string.Empty,
+                        AvailableAmount = sourceRecord?.AvailableAmount ?? string.Empty,
+                        CreateDt = sourceRecord?.CreateDt ?? string.Empty,
+                        IsClosed = sourceRecord?.IsClosed ?? false,
+                        IsLocked = sourceRecord?.IsLocked ?? false,
+                        IsAvailable = sourceRecord?.IsAvailable ?? false,
+                        AllStepsDone = sourceRecord?.AllStepsDone ?? false,
+                        NumberOfComponents = sourceRecord?.NumberOfComponents ?? 0,
+                        NumberOfCompositions = sourceRecord?.NumberOfCompositions ?? 0,
+                        NumberOfRequiredSteps = sourceRecord?.NumberOfRequiredSteps ?? 0,
+                        NumberOfOrders = sourceRecord?.NumberOfOrders ?? 0,
+                        Price = sourceRecord?.Price ?? string.Empty,
+                        InvoiceNumber = sourceRecord?.InvoiceNumber ?? string.Empty
+                    };
+
+                    result.Add(reportRow);
+                }
+            }
+
+            result.Sort(
+                new GenericComparer<BatchReportEntryBase>(
+                    (a, b) =>
+                        string.Compare((a as BatchReportEntry)?.CustomField2,
+                            (b as BatchReportEntry)?.CustomField2,
+                            StringComparison.Ordinal)));
+
             return result;
         }
 
@@ -226,9 +316,11 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             var performedSteps = batch.Batch.PerformedSteps.ToList();
             foreach (var requiredStep in requiredSteps)
             {
-                var stepModel = new BatchProductionStepReportEntry.ProductionStepModel();
-                stepModel.MaterialStepId = requiredStep.Id;
-                stepModel.StepName = requiredStep.Name;
+                var stepModel = new BatchProductionStepReportEntry.ProductionStepModel
+                {
+                    MaterialStepId = requiredStep.Id,
+                    StepName = requiredStep.Name
+                };
 
                 entry.Steps.Add(stepModel);
 

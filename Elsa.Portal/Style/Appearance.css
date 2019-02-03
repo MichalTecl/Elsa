@@ -405,7 +405,23 @@ input.readonly {
     border-top:1px solid #eee;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; // This is where the magic happens    
+    text-overflow: ellipsis;  
+}
+
+.gridRow:hover > div{
+  background-color:#FFfafa;
+}
+
+.gridRow > div:hover {
+  background-color:white;  
+  text-overflow:unset;
+  display:inline-block;
+  width:auto;
+  -webkit-box-shadow: 5px 5px 15px 5px rgba(0,0,0,0.58); 
+   box-shadow: 5px 5px 15px 5px rgba(0,0,0,0.58);
+  z-index:9999;  
+  transition:0.3s all;
+  transition-delay:0.3s;
 }
 
 .gridRow > div:last-child {
@@ -413,13 +429,33 @@ input.readonly {
 }
 
 .cell1 {
+    min-width:20px;    
     width: 20px;
 }
 
 .cell5 {
+    min-width:100px;
     width:100px;
 }
 
 .cell10{
+    min-width:200px;
     width:200px;
+}
+
+.cell1:hover {
+  width:20px;
+  -webkit-box-shadow: none !important;
+   box-shadow:none !important;
+   background-color:transparent !important;
+}
+
+.gridHead:hover > div {
+    font-weight:bold;
+    background-color:#fafaff !important;
+    padding-top:4px;
+    padding-bottom:4px;
+    margin-top:6px;    
+    -webkit-box-shadow: none !important;
+   box-shadow:none !important;   
 }

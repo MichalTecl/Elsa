@@ -14,5 +14,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public bool CanLoadMoreOrders { get; set; }
 
         public int NextOrdersPage { get; set; }
+
+        public bool BatchesExpanded { get; set; } = false;
     }
 }

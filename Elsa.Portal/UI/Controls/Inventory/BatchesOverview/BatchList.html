@@ -2,6 +2,8 @@
     <div class="gridRow gridHead">
         <div class="cell1"></div>
         <div lt-name="lblCustomField1" style="display:none" class="cell5"></div>
+        <div lt-name="lblCustomField2" style="display:none" class="cell5"></div>
+        <div lt-name="lblCustomField3" style="display:none" class="cell10"></div>
         <div class="cell10">Číslo šarže</div>
         <div class="cell10">Materiál</div>
         <div class="cell5">Dostupné</div>
@@ -25,6 +27,8 @@
                     </div>
                 </div>
                 <div data-bind="text:CustomField1; class!.hidden:showCustomField1" class="cell5"></div>
+                <div data-bind="text:CustomField2; class!.hidden:showCustomField2" class="cell5"></div>
+                <div data-bind="text:CustomField3; class!.hidden:showCustomField3" class="cell10"></div>
                 <div data-bind="text:BatchNumber" class="bovBatchNumber cell10"></div>
                 <div data-bind="text:MaterialName" class="bovBatchMaterial cell10"></div>
                 <div data-bind="text:AvailableAmount" class="bovBatchAmount cell5"></div>
@@ -168,15 +172,15 @@
                             <div class="lt-template">
                                 <div class="bovOrderRow gridRow">
                                     <div class="cell1">
-                                        <i data-bind="class.hidden:ordersExpanded" class="far fa-plus-square faButton" event-bind="click:expandOrders(VM, $orderBatchesPlaceHolder)"></i>
-                                        <i data-bind="class!.hidden:ordersExpanded" class="far fa-minus-square faButton" event-bind="click:collapseOrders(VM)"></i>
+                                        <i data-bind="class.hidden:BatchesExpanded" class="far fa-plus-square faButton" event-bind="click:toggleOrderBatches(VM, $orderBatchesPlaceHolder)"></i>
+                                        <i data-bind="class!.hidden:BatchesExpanded" class="far fa-minus-square faButton" event-bind="click:toggleOrderBatches(VM)"></i>
                                     </div>
                                     <div class="cell10" data-bind="text:OrderNumber"></div>
                                     <div class="cell10" data-bind="text:Customer"></div>
                                     <div class="cell10" data-bind="text:PurchaseDate"></div>
                                     <div class="cell10" data-bind="text:Status"></div>
                                 </div>
-                                <div lt-name="orderBatchesPlaceHolder"></div>
+                                <div lt-name="orderBatchesPlaceHolder" data-bind="class!.hidden:BatchesExpanded"></div>
                             </div>
                         </div>
                         <button data-bind="class!.hidden:CanLoadMoreOrders" event-bind="click:loadMoreOrders(VM)">Více</button>
@@ -191,7 +195,7 @@
 </div>
 <script src="/Script/Apps/Inventory/BatchOverview/BatchesOverviewVM.js"></script>
 <script>
-    lt.element("batchList_{%GENERATE%}").attach(function (theList, batchReviewItemTemplate, btnMore, lblCustomField1) {
+    lt.element("batchList_{%GENERATE%}").attach(function (theList, batchReviewItemTemplate, btnMore, lblCustomField1, lblCustomField2, lblCustomField3) {
         
         var self = this;
 
@@ -217,6 +221,16 @@
             if (session.showCustomField1) {
                 lblCustomField1.innerHTML = session.customField1Name;
                 lblCustomField1.style.display = 'block';
+            }
+
+            if (session.showCustomField2) {
+                lblCustomField2.innerHTML = session.customField2Name;
+                lblCustomField2.style.display = 'block';
+            }
+
+            if (session.showCustomField3) {
+                lblCustomField3.innerHTML = session.customField3Name;
+                lblCustomField3.style.display = 'block';
             }
         };
 
@@ -311,6 +325,29 @@
         self.loadMoreOrders = function (model) {
             var qry = { "BatchId": model.BatchId, "LoadOrdersPage": model.NextOrdersPage };
             app.batchesOverview.vm.loadSingleBatch(model, qry);
+        };
+
+        self.toggleOrderBatches = function(orderModel, batchListPlaceholder) {
+            
+            if (batchListPlaceholder == null || (!!orderModel.BatchesExpanded)) {
+                orderModel.BatchesExpanded = false;
+                lt.notify(self);
+                return;
+            }
+
+            orderModel.BatchesExpanded = true;
+            
+            if (batchListPlaceholder["__batchListLoaded"]) {
+                lt.notify(self);
+                return;
+            }
+
+            batchListPlaceholder["__batchListLoaded"] = true;
+
+            lt.fillBy(batchListPlaceholder, "/UI/Controls/Inventory/BatchesOverview/BatchList.html", function(blst) {
+                blst.children[0].setQuery({ "RelativeToOrderId": orderModel.OrderId });
+            });
+
         };
         
         updateView();

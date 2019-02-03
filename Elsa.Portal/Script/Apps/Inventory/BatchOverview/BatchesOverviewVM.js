@@ -40,6 +40,15 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
             session.customField1Name = report.CustomField1Name;
         }
 
+        session.showCustomField2 = session.showCustomField2 || (report.CustomField2Name != null && report.CustomField2Name.length > 0);
+        if (session.showCustomField2 && (report.CustomField2Name != null && report.CustomField2Name.length > 0)) {
+            session.customField2Name = report.CustomField2Name;
+        }
+
+        session.showCustomField3 = session.showCustomField3 || (report.CustomField3Name != null && report.CustomField3Name.length > 0);
+        if (session.showCustomField3 && (report.CustomField3Name != null && report.CustomField3Name.length > 0)) {
+            session.customField3Name = report.CustomField3Name;
+        }
         for (var i = 0; i < report.Report.length; i++) {
 
             var toExtend = null;
@@ -52,8 +61,8 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 
                 if (session.list[j].BatchId === receivedBatch.BatchId) {
                     found = true;
-                    copyProps(receivedBatch, session.list[i]);
-                    toExtend = session.list[i];
+                    copyProps(receivedBatch, session.list[j]);
+                    toExtend = session.list[j];
                     break;
                 }
             }
@@ -78,6 +87,8 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.ordersExpanded = toExtend.ordersExpanded || false;
 
                 toExtend.showCustomField1 = toExtend.showCustomField1 || session.showCustomField1 || false;
+                toExtend.showCustomField2 = toExtend.showCustomField2 || session.showCustomField2 || false;
+                toExtend.showCustomField3 = toExtend.showCustomField3 || session.showCustomField3 || false;
                 
                 toExtend.canExpand = toExtend.hasComponents ||
                     toExtend.hasCompositions ||
