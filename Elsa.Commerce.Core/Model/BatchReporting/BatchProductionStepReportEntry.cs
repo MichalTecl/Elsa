@@ -26,6 +26,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
             public string DonePercent { get; set; }
 
             public List<PerformedStepModel> PerformedSteps { get; } = new List<PerformedStepModel>();
+
+            public int BatchId { get; set; }
         }
 
         public class PerformedStepModel

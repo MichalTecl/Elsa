@@ -15,8 +15,8 @@ app.ui.TabControl = app.ui.TabControl || function(holder) {
     var contentPanel = document.createElement("div");
     contentPanel.setAttribute("class", "tabPanelContentPanel");
     holder.appendChild(contentPanel);
-    
-    var activateTab = function() {
+
+    var activateTab = function(onLoadCallback) {
 
         var tab = this;
 
@@ -33,7 +33,7 @@ app.ui.TabControl = app.ui.TabControl || function(holder) {
         var src = tab.getAttribute("content-src");
 
         if (src) {
-            lt.fillBy(contentPanel, src);
+            lt.fillBy(contentPanel, src, onLoadCallback);
         }
 
         var callback = tab["lt-onActivated"];
@@ -42,7 +42,7 @@ app.ui.TabControl = app.ui.TabControl || function(holder) {
         }
     };
 
-    this.addTab = function(name, url, data, onActivated) {
+    this.addTab = function(name, url, data, onActivated, id) {
 
         var tabDiv = document.createElement("div");
         tabDiv.setAttribute("class", "tabControlTabHead");
@@ -53,9 +53,10 @@ app.ui.TabControl = app.ui.TabControl || function(holder) {
 
         tabDiv["lt-data-model"] = data;
         tabDiv["lt-onActivated"] = onActivated;
+        tabDiv["lt-tab-id"] = id;
         headersContainer.appendChild(tabDiv);
 
-        tabDiv.addEventListener("click", activateTab);
+        tabDiv.addEventListener("click", function() { activateTab.call(this, null); });
 
         var titleDiv = document.createElement("div");
         titleDiv.setAttribute("class", "tabControlHeadTitle");
@@ -63,8 +64,25 @@ app.ui.TabControl = app.ui.TabControl || function(holder) {
         tabDiv.appendChild(titleDiv);
         
         if (self.autoselect && headersContainer.children.length === 1) {
-            activateTab.call(headersContainer.children[0]);
+            activateTab.call(headersContainer.children[0], null);
         }
     };
 
+    self.selectTab = function(tabId, callback) {
+        var targetTab = null;
+
+        for (var i = 0; i < headersContainer.children.length; i++) {
+            var child = headersContainer.children[i];
+            if (child["lt-tab-id"] === tabId) {
+                targetTab = child;
+                break;
+            }
+        }
+
+        if (targetTab == null) {
+            throw new Error("Invalid tab id");
+        }
+
+        activateTab.call(targetTab, callback);
+    };
 };

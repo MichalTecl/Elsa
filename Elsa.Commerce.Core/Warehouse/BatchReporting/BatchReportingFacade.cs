@@ -332,7 +332,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 var stepModel = new BatchProductionStepReportEntry.ProductionStepModel
                 {
                     MaterialStepId = requiredStep.Id,
-                    StepName = requiredStep.Name
+                    StepName = requiredStep.Name,
+                    BatchId = batch.Batch.Id
                 };
 
                 entry.Steps.Add(stepModel);

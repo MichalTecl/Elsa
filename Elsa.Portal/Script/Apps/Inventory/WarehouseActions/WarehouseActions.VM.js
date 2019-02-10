@@ -16,22 +16,22 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
     var receiveBottomMaterialBatch = function(entity) {
 
-        var isNew = true;
-        for (var i = 0; i < self.bottomMaterialBatches.length; i++) {
-            if (self.bottomMaterialBatches[i].Id === entity.Id) {
-                self.bottomMaterialBatches[i] = entity;
-                isNew = false;
-                break;
-            }
-        }
+        //var isNew = true;
+        //for (var i = 0; i < self.bottomMaterialBatches.length; i++) {
+        //    if (self.bottomMaterialBatches[i].Id === entity.Id) {
+        //        self.bottomMaterialBatches[i] = entity;
+        //        isNew = false;
+        //        break;
+        //    }
+        //}
 
-        if (oldestBottomMaterialBatchTime === null || entity.SortDt < oldestBottomMaterialBatchTime) {
-            oldestBottomMaterialBatchTime = entity.SortDt;
-        }
+        //if (oldestBottomMaterialBatchTime === null || entity.SortDt < oldestBottomMaterialBatchTime) {
+        //    oldestBottomMaterialBatchTime = entity.SortDt;
+        //}
 
-        if (isNew) {
-            self.bottomMaterialBatches.push(entity);
-        }
+        //if (isNew) {
+        //    self.bottomMaterialBatches.push(entity);
+        //}
     };
 
     var sortBottomMaterialBatches = function() {
@@ -72,11 +72,14 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
         callback(materialUnits[materialName] || []);
     };
 
-    self.saveBottomMaterialBatch = function(model) {
+    self.saveBottomMaterialBatch = function(model, callback) {
         lt.api("/warehouseActions/saveBottomMaterialBatch").body(model).post(function(entity) {
             self.setBottomMaterialBatchEditMode(null);
             receiveBottomMaterialBatch(entity);
             sortBottomMaterialBatches();
+            if (callback) {
+                callback();
+            }
         });
     };
 
@@ -112,20 +115,20 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
     self.loadBottomMaterialBatches = function() {
 
-        lt.api("/warehouseActions/getBottomMaterialBatches")
-            .query({ "before": oldestBottomMaterialBatchTime })
-            .get(function (batches) {
+        //lt.api("/warehouseActions/getBottomMaterialBatches")
+        //    .query({ "before": oldestBottomMaterialBatchTime })
+        //    .get(function (batches) {
 
-                var originalCount = self.bottomMaterialBatches.length;
+        //        var originalCount = self.bottomMaterialBatches.length;
 
-                for (var i = 0; i < batches.length; i++) {
-                    receiveBottomMaterialBatch(batches[i]);
-                }
+        //        for (var i = 0; i < batches.length; i++) {
+        //            receiveBottomMaterialBatch(batches[i]);
+        //        }
 
-                sortBottomMaterialBatches();
+        //        sortBottomMaterialBatches();
 
-                self.canLoadOlderBottomMaterialBatches = (self.bottomMaterialBatches.length > originalCount);
-            });
+        //        self.canLoadOlderBottomMaterialBatches = (self.bottomMaterialBatches.length > originalCount);
+        //    });
     };
 
     self.deleteBatch = function(batchId) {

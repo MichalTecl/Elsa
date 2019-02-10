@@ -106,6 +106,7 @@
                                 <div class="cell1"></div>
                                 <div class="cell10">Krok</div>
                                 <div class="cell10">Dokončeno</div>
+                                <div class="cell1"></div>
                             </div>
                             <div data-bind="itemsSource:Steps" data-key="MaterialStepId">
                                 <div class="bovProdStepItem lt-template">
@@ -116,6 +117,9 @@
                                             </div>
                                             <div class="bovStepName cell10" data-bind="text:StepName"></div>
                                             <div class="bovStepPercent cell10" data-bind="text:DonePercent"></div>
+                                            <div class="cell1">
+                                                <i class="fas fa-plus-circle faButton" event-bind="click:resolveStep(VM)"></i>
+                                            </div>
                                         </div>
                                         
                                         <div lt-name="pnlPerformed" class="pnlPerformed" style="display:none">
@@ -392,6 +396,10 @@
             app.batchesOverview.vm.deleteProductionStep(stepModel.StepId, function () {
                 self.refreshBatchView(1);
             });
+        };
+
+        self.resolveStep = function(stepModel) {
+            app.urlBus.set("fillstep", { "batchId": stepModel.BatchId, "stepId": stepModel.MaterialStepId });
         };
         
         updateView();

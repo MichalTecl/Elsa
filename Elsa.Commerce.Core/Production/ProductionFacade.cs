@@ -320,6 +320,7 @@ namespace Elsa.Commerce.Core.Production
                 .Join(m => m.Unit)
                 .Join(m => m.Author)
                 .Join(m => m.Material.NominalUnit)
+                .Join(m => m.PerformedSteps)
                 .Where(m => m.Material.Steps.Each().Id != null)
                 .Where(m => m.ProjectId == m_session.Project.Id)
                 .Where(m => !(m.AllStepsDone ?? false))
@@ -433,6 +434,11 @@ namespace Elsa.Commerce.Core.Production
             else if (!string.IsNullOrWhiteSpace(model.MaterialName))
             {
                 material = m_materialRepository.GetMaterialByName(model.MaterialName);
+            }
+            else if (model.BatchIds?.Count == 1)
+            {
+                var batch = m_batchRepository.GetBatchById(model.BatchIds.Single());
+                material = m_materialRepository.GetMaterialById(batch.Batch.MaterialId);
             }
 
             var materialId = material?.Id ?? -1;

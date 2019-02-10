@@ -108,6 +108,15 @@ app.productionSteps.ViewModel = app.productionSteps.ViewModel || function() {
     };
 
     setTimeout(loadAllMaterials, 0);
+
+    app.urlBus.watch("fillstep", function (model) {
+        self.selectedStep = self.selectedStep || {};
+        self.selectedStep.BatchIds = [model.batchId];
+        self.selectedStep.MaterialProductionStepId = model.stepId;
+        validateStep();
+
+        return true;
+    });
 };
 
 app.productionSteps.vm = app.productionSteps.vm || new app.productionSteps.ViewModel();

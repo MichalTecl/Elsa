@@ -45,12 +45,18 @@
 
     <script>
         var tab = new app.ui.TabControl(document.getElementById("mainTab"));
-        tab.addTab("Šarže", "/UI/Controls/Inventory/BatchesOverview/BatchSearchUI.html");
-        tab.addTab("Naskladnění", "/UI/Controls/Inventory/WarehouseControls/WhActions/BottomMaterialBatchesEdit.html");
-        tab.addTab("Výroba", "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionBatchesUI.html");
-        tab.addTab("Výrobní kroky", "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionSteps.html");
-        tab.addTab("Odpisy", "/UI/Controls/Inventory/MaterialsEditor.html");
-        tab.addTab("Přímý prodej", "/UI/Controls/Inventory/MaterialsEditor.html");
+        tab.addTab("Šarže", "/UI/Controls/Inventory/BatchesOverview/BatchSearchUI.html", null, null, "batchSearch");
+        tab.addTab("Naskladnění", "/UI/Controls/Inventory/WarehouseControls/WhActions/BottomMaterialBatchesEdit.html", null, null, "batchPurchase");
+        tab.addTab("Výroba", "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionBatchesUI.html", null, null, "batchProduction");
+        tab.addTab("Výrobní kroky", "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionSteps.html", null, null, "prodSteps");
+        tab.addTab("Odpisy", "/UI/Controls/Inventory/MaterialsEditor.html", null, null, "discards");
+        tab.addTab("Přímý prodej", "/UI/Controls/Inventory/MaterialsEditor.html", null, null, "directSales");
+
+        app.urlBus.watch("fillstep", function() {
+            tab.selectTab("prodSteps");
+        });
+        
+
     </script>
 
     <script src="/Script/Apps/Inventory/VirtualProducts/VirtualProductsVM.js"></script>

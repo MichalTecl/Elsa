@@ -77,7 +77,6 @@
 
                 </div>
                 <div class="batchesEditButtons formActions">
-                    <i class="far fa-trash-alt faButton" event-bind="click:deleteBatch(VM)"></i>
                     <button class="butCancel" event-bind="click:cancelBatchEdit"></button>
                     <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value)"></button>
                     
@@ -87,12 +86,15 @@
 
     </div>
 
-    <button event-bind="click:loadOlderBatches" id="loadOlderBatches" data-bind="class!.hidden:canLoadOlderBottomMaterialBatches">Starší</button>
+    <div lt-name="batchList">
+        
+    </div>
+    
 </div>
 
 
 <script>
-    lt.element("batchesEdit").withModel("app.warehouseActions.vm").attach(function(batchesList, batchTemplate) {
+    lt.element("batchesEdit").withModel("app.warehouseActions.vm").attach(function(batchesList, batchTemplate, batchList) {
         
         var batchItemController = function (materialAutocompleteContainer, materialUnitAutocompleteContainer, material) {
             
@@ -160,7 +162,9 @@
             model.Price = parseFloat(price);
             model.InvoiceNumber = invoiceNr;
 
-            app.warehouseActions.vm.saveBottomMaterialBatch(model);
+            app.warehouseActions.vm.saveBottomMaterialBatch(model, function() {
+                batchList.children[0].refreshBatchView();
+            });
         };
 
         this.onMaterialChanged = function(tbMaterial, tbUnit, tbBatchNr, tbAmount, priceInputBlock, invoiceInputBlock) {
@@ -199,6 +203,10 @@
 
             app.warehouseActions.vm.deleteBatch(model.Id);
         };
+
+        lt.fillBy(batchList, "/UI/Controls/Inventory/BatchesOverview/BatchList.html", function(blst) {
+            blst.children[0].setQuery({ "PurchasedOnly": true });
+        });
     });
 </script>
 <link href="/UI/Controls/Inventory/WarehouseControls/WhActions/BottomMaterialBatchesStyle.css" rel="stylesheet" />
