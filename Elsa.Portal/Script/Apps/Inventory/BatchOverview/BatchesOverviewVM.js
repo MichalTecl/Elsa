@@ -109,6 +109,10 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
             });
     };
 
+    self.deleteBatch = function(batchId, callback) {
+        lt.api("/")
+    };
+
     self.loadSingleBatch = function(batchModel, query) {
         query.BatchId = batchModel.BatchId;
 

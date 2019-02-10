@@ -29,7 +29,7 @@ namespace Elsa.Commerce.Core.Impl
         {
             var erp =
                 m_database.SelectFrom<IErp>()
-                    .Where(i => i.ProjectId == m_session.Project.Id && i.Id == erpId)
+                    .Where(i => (i.ProjectId == m_session.Project.Id) && (i.Id == erpId))
                     .Execute()
                     .FirstOrDefault();
 

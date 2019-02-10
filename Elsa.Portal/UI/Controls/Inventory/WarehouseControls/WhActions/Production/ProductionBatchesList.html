@@ -1,3 +1,8 @@
-﻿<div>
-    prod batches list
-</div>
+﻿<div id="prodBatchesListPlaceholder"></div>
+<script>
+    lt.element("prodBatchesListPlaceholder").attach(function() {
+        lt.fillBy(this, "/UI/Controls/Inventory/BatchesOverview/BatchList.html", function(bl) {
+            bl.children[0].setQuery({ "ProducedOnly": true });
+        });
+    });
+</script>

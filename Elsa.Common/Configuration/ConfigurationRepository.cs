@@ -82,8 +82,8 @@ namespace Elsa.Common.Configuration
             var future = DateTime.Now.AddDays(100);
 
             return m_allConfig ?? (m_allConfig = m_database.SelectFrom<ISysConfig>()
-                      .Where(i => i.ValidFrom < now
-                         && (i.ValidTo ?? future) > now)
+                      .Where(i => (i.ValidFrom < now)
+                         && ((i.ValidTo ?? future) > now))
                          .Execute().ToList());
         }
         
@@ -97,13 +97,13 @@ namespace Elsa.Common.Configuration
                 switch(scope)
                 {
                     case ConfigEntryScope.User:
-                        entry = allEntries.FirstOrDefault(i => i.ProjectId == projectId && i.UserId == userId);
+                        entry = allEntries.FirstOrDefault(i => (i.ProjectId == projectId) && (i.UserId == userId));
                         break;
                     case ConfigEntryScope.Project:
-                        entry = allEntries.FirstOrDefault(i => i.UserId == null && i.ProjectId == projectId);
+                        entry = allEntries.FirstOrDefault(i => (i.UserId == null) && (i.ProjectId == projectId));
                         break;
                     case ConfigEntryScope.Global:
-                        entry = allEntries.FirstOrDefault(i => i.ProjectId == null && i.UserId == null);
+                        entry = allEntries.FirstOrDefault(i => (i.ProjectId == null) && (i.UserId == null));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

@@ -13,17 +13,17 @@ namespace Elsa.Core.Entities.Commerce.Extensions
     {
         public static bool IsMatch(this IMappedToOrderItem mapped, int? erpId, string erpProductId, string placedName)
         {
-            if (mapped.ErpId != null && mapped.ErpId != erpId)
+            if ((mapped.ErpId != null) && (mapped.ErpId != erpId))
             {
                 return false;
             }
 
-            if ((!string.IsNullOrWhiteSpace(mapped.ErpProductId)) && mapped.ErpProductId != erpProductId)
+            if ((!string.IsNullOrWhiteSpace(mapped.ErpProductId)) && (mapped.ErpProductId != erpProductId))
             {
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(mapped.ItemName) && mapped.ItemName != placedName)
+            if (!string.IsNullOrWhiteSpace(mapped.ItemName) && (mapped.ItemName != placedName))
             {
                 return false;
             }

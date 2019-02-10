@@ -24,7 +24,7 @@ namespace Elsa.Common
         {
             var widgetsQuery = m_database.SelectFrom<IAppWidget>().OrderBy(w => w.ViewOrder);
 
-            if (WebSession?.User == null || WebSession.User.UsesDefaultPassword)
+            if ((WebSession?.User == null) || WebSession.User.UsesDefaultPassword)
             {
                 widgetsQuery.Where(w => w.IsAnonymous);
             }

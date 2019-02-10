@@ -16,7 +16,7 @@ namespace Elsa.Commerce.Core.Impl
         public string Translate(int statusId)
         {
             statusId--;
-            if (statusId < 0 || statusId >= s_translations.Length)
+            if ((statusId < 0) || (statusId >= s_translations.Length))
             {
                 throw new InvalidOperationException("Invalid OrderStatus Id");
             }

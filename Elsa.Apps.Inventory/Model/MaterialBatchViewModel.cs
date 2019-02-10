@@ -61,7 +61,7 @@ namespace Elsa.Apps.Inventory.Model
             
             foreach (var batch in source.OrderBy(i => i.MaterialId))
             {
-                if (batch.AutomaticBatches && targetList.LastOrDefault()?.MaterialId == batch.MaterialId)
+                if (batch.AutomaticBatches && (targetList.LastOrDefault()?.MaterialId == batch.MaterialId))
                 {
                     var joined = targetList.Last();
                     joined.BatchNumber = null;

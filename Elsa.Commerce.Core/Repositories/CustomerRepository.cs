@@ -99,8 +99,8 @@ namespace Elsa.Commerce.Core.Repositories
                                 Dt = orderEntity.PurchaseDate,
                                 IsCanceled = OrderStatus.IsUnsuccessfullyClosed(orderEntity.OrderStatusId),
                                 IsComplete =
-                                    orderEntity.OrderStatusId == OrderStatus.Sent.Id
-                                    || orderEntity.OrderStatusId == OrderStatus.Packed.Id,
+                                    (orderEntity.OrderStatusId == OrderStatus.Sent.Id)
+                                    || (orderEntity.OrderStatusId == OrderStatus.Packed.Id),
                                 CustomerMessage = orderEntity.CustomerNote,
                                 InternalMessage = orderEntity.InternalNote,
                                 OrderNumber = orderEntity.OrderNumber,
@@ -122,7 +122,7 @@ namespace Elsa.Commerce.Core.Repositories
                 var entities = 
                     m_database.SelectFrom<ICustomer>()
                         .Join(c => c.Notes)
-                        .Where(c => c.ProjectId == m_session.Project.Id && c.Email.InCsv(emails))
+                        .Where(c => (c.ProjectId == m_session.Project.Id) && c.Email.InCsv(emails))
                         .Execute().ToList();
 
 
@@ -143,7 +143,7 @@ namespace Elsa.Commerce.Core.Repositories
                     var entity =
                         m_database.SelectFrom<ICustomer>()
                             .Join(c => c.Notes)
-                            .Where(c => c.ProjectId == m_session.Project.Id && c.Email == unknown)
+                            .Where(c => (c.ProjectId == m_session.Project.Id) && (c.Email == unknown))
                             .Execute()
                             .FirstOrDefault();
 
@@ -181,7 +181,7 @@ namespace Elsa.Commerce.Core.Repositories
                 changed = true;
             }
 
-            if (trg.Phone != src.Phone && !string.IsNullOrWhiteSpace(src.Phone))
+            if ((trg.Phone != src.Phone) && !string.IsNullOrWhiteSpace(src.Phone))
             {
                 trg.Phone = src.Phone;
                 changed = true;
@@ -193,13 +193,13 @@ namespace Elsa.Commerce.Core.Repositories
                 changed = true;
             }
 
-            if (trg.LastActivationDt == null && src.IsActive)
+            if ((trg.LastActivationDt == null) && src.IsActive)
             {
                 trg.LastActivationDt = DateTime.Now;
                 changed = true;
             }
 
-            if (trg.LastDeactivationDt == null && trg.LastActivationDt != null && (!src.IsActive))
+            if ((trg.LastDeactivationDt == null) && (trg.LastActivationDt != null) && (!src.IsActive))
             {
                 trg.LastDeactivationDt = DateTime.Now;
                 changed = true;
@@ -260,7 +260,7 @@ namespace Elsa.Commerce.Core.Repositories
                 var nick = string.Empty;
                 var slen = Math.Min(1, parts.Length - 1);
 
-                while (nick.Trim().Length < 3 && slen <= parts.Length)
+                while ((nick.Trim().Length < 3) && (slen <= parts.Length))
                 {
                     nick = string.Join(" ", parts.Take(slen));
                     slen++;

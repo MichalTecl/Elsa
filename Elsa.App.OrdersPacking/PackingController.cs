@@ -85,14 +85,14 @@ namespace Elsa.App.OrdersPacking
                     throw new Exception("Objednávka nebyla nalezena");
                 }
                 
-                var order = paid.FirstOrDefault(o => o.PreInvoiceId == orderNumber || o.OrderNumber == orderNumber);
+                var order = paid.FirstOrDefault(o => (o.PreInvoiceId == orderNumber) || (o.OrderNumber == orderNumber));
                 if (order == null)
                 {
                     Log.Info("Aplikace nemá načtenu tuto zásilku, je třeba aktualizovat seznam zásilek z Floxu...");
 
                     paid = m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30)).ToList();
 
-                    order = paid.FirstOrDefault(o => o.PreInvoiceId == orderNumber || o.OrderNumber == orderNumber);
+                    order = paid.FirstOrDefault(o => (o.PreInvoiceId == orderNumber) || (o.OrderNumber == orderNumber));
                     if (order == null)
                     {
                         Log.Error("Nenalezeno");
@@ -150,7 +150,7 @@ namespace Elsa.App.OrdersPacking
                 {
                     foreach (var kit in item.KitItems)
                     {
-                        if (kit.GroupItems.Any() && kit.SelectedItem == null)
+                        if (kit.GroupItems.Any() && (kit.SelectedItem == null))
                         {
                             throw new InvalidOperationException(
                                       $"Objednavka nemuze byt dokoncena - ve skupine '{kit.GroupName}' neni vybrana polozka");
@@ -177,7 +177,7 @@ namespace Elsa.App.OrdersPacking
                     throw new InvalidOperationException("Objednávka nebyla v systému nalezena");
                 }
 
-                if (request.OriginalBatchId != null && request.OriginalBatchId > 0)
+                if ((request.OriginalBatchId != null) && (request.OriginalBatchId > 0))
                 {
                     m_batchFacade.ChangeOrderItemBatchAssignment(
                         order,

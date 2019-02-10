@@ -39,7 +39,7 @@ namespace Elsa.Common.UserRightsInfrastructure
                     dbRight = m_database.New<IUserRight>();
                     dbRight.Symbol = codeRight.Name;
                 }
-                else if (dbRight.FullPath == codeRight.FullName && dbRight.Description == codeRight.Description)
+                else if ((dbRight.FullPath == codeRight.FullName) && (dbRight.Description == codeRight.Description))
                 {
                     continue;
                 }

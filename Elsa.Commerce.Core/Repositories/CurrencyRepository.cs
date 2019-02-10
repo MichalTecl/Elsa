@@ -63,14 +63,14 @@ namespace Elsa.Commerce.Core.Repositories
                 return
                     GetActualCurrencyRates()
                         .FirstOrDefault(
-                            r => r.SourceCurrencyId == sourceCurrency.Id && r.TargetCurrencyId == targetCurrency.Id);
+                            r => (r.SourceCurrencyId == sourceCurrency.Id) && (r.TargetCurrencyId == targetCurrency.Id));
             }
 
             return
                 m_database.SelectFrom<ICurrencyRate>()
                     .Where(r => r.ProjectId == m_session.Project.Id)
-                    .Where(c => c.SourceCurrencyId == sourceCurrency.Id && c.TargetCurrencyId == targetCurrency.Id)
-                    .Where(r => r.ValidFrom <= forDate.Value && r.ValidTo >= forDate.Value)
+                    .Where(c => (c.SourceCurrencyId == sourceCurrency.Id) && (c.TargetCurrencyId == targetCurrency.Id))
+                    .Where(r => (r.ValidFrom <= forDate.Value) && (r.ValidTo >= forDate.Value))
                     .Execute()
                     .FirstOrDefault();
         }
@@ -88,7 +88,7 @@ namespace Elsa.Commerce.Core.Repositories
                 {
                     var oldRate = GetCurrencyRate(sourceCurrency, targetCurrency);
 
-                    if (oldRate != null && oldRate.ValidFrom >= validFrom)
+                    if ((oldRate != null) && (oldRate.ValidFrom >= validFrom))
                     {
                         tx.Commit();
                         return;

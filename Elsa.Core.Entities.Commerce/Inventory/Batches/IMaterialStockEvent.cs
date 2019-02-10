@@ -1,6 +1,8 @@
-﻿using Elsa.Core.Entities.Commerce.Core;
+﻿using Elsa.Core.Entities.Commerce.Common.Security;
+using Elsa.Core.Entities.Commerce.Core;
 
 using Robowire.RobOrm.Core;
+using Robowire.RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 {
@@ -16,5 +18,14 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         IMaterialUnit Unit { get; }
 
         decimal Delta { get; set; }
+        
+        int TypeId { get; set; }
+        IStockEventType Type { get; }
+
+        [NVarchar(0, false)]
+        string Note { get; set; }
+
+        int UserId { get; set; }
+        IUser User { get; }
     }
 }

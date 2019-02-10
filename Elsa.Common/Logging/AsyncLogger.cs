@@ -41,7 +41,7 @@ namespace Elsa.Common.Logging
                     var entries = new List<ISysLog>(1000);
                     
                     ISysLog entry;
-                    while (s_queue.TryTake(out entry) && entries.Count < 1000)
+                    while (s_queue.TryTake(out entry) && (entries.Count < 1000))
                     {
                         entries.Add(entry);
                     }

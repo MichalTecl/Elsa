@@ -11,6 +11,7 @@
         <div class="cell10">Vytvořeno</div>
         <div class="cell5">Cena</div>
         <div class="cell10">Faktura</div>
+        <div class="cell1"></div>
     </div>
     <div lt-name="theList">
         <!--{"BatchId":101,"InventoryName":"Výrobky","BatchNumber":"1952001","MaterialName":"Krém Antipupínek 30ml","MaterialId":33,"BatchVolume":"100 ks",
@@ -36,6 +37,10 @@
                 <div data-bind="text:CreateDt" class="bovBatchDt cell10"></div>
                 <div data-bind="text:Price" class="cell5"></div>
                 <div data-bind="text:InvoiceNumber" class="cell10"></div>
+                <div class="cell1">
+                    <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt faButton" event-bind="click:deleteBatch(VM)"></i>
+                    <i class="far fa-trash-alt" style="opacity: 0.2; cursor:no-drop" data-bind="class.hidden:CanDelete;title:NoDelReason" ></i>
+                </div>
             </div>
             <div class="bovRowDetail">
                 <div class="bovLazyPanel bovBatchComponents">
@@ -348,6 +353,19 @@
                 blst.children[0].setQuery({ "RelativeToOrderId": orderModel.OrderId });
             });
 
+        };
+
+        self.refreshBatchView = function () {
+        };
+
+        self.deleteBatch = function (model) {
+            if (!confirm("Smazat " + model.BatchNumber + "?")) {
+                return;
+            }
+
+            app.batchesOverview.vm.deleteBatch(model.BatchId, function () {
+                self.refreshBatchView();
+            });
         };
         
         updateView();

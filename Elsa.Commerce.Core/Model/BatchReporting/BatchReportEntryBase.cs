@@ -16,5 +16,9 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int BatchId { get; }
 
         public int? ParentId { get; set; }
+
+        public bool CanDelete { get; set; }
+
+        public string NoDelReason { get; set; }
     }
 }

@@ -117,7 +117,7 @@ namespace Elsa.Users
                             .Join(s => s.User)
                             .Join(s => s.Project)
                             //.Take(1)
-                            .Where(s => s.PublicId == sid && s.EndDt == null)
+                            .Where(s => (s.PublicId == sid) && (s.EndDt == null))
                             .Execute()
                             .FirstOrDefault();
 

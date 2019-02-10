@@ -25,13 +25,13 @@ namespace Elsa.Commerce.Core.Repositories
         public void PreloadCache(DateTime from, DateTime to)
         {
             m_cache.Clear();
-            m_cache.AddRange(GetPaymentsQuery().Where(p => p.PaymentDt >= from && p.PaymentDt <= to).Execute());
+            m_cache.AddRange(GetPaymentsQuery().Where(p => (p.PaymentDt >= @from) && (p.PaymentDt <= to)).Execute());
         }
 
         public IPayment GetPayment(int paymentSourceId, string transactionId)
         {
             var payment = m_cache.FirstOrDefault(p => p.TransactionId == transactionId)
-                       ?? GetPaymentsQuery().Where(p => p.PaymentSourceId == paymentSourceId && p.TransactionId == transactionId).Execute().FirstOrDefault();
+                       ?? GetPaymentsQuery().Where(p => (p.PaymentSourceId == paymentSourceId) && (p.TransactionId == transactionId)).Execute().FirstOrDefault();
 
             return payment;
         }
@@ -91,7 +91,7 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IEnumerable<IPayment> GetPayments(DateTime min, DateTime max)
         {
-            return GetPaymentsQuery().Where(p => p.PaymentDt >= min && p.PaymentDt <= max).Execute();
+            return GetPaymentsQuery().Where(p => (p.PaymentDt >= min) && (p.PaymentDt <= max)).Execute();
         }
 
         public IPayment GetPayment(long id)

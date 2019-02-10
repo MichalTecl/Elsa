@@ -123,6 +123,9 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     var available = m_batchFacade.GetAvailableAmount(b.BatchId);
                     b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
                 }
+
+                b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
+                b.CanDelete = string.IsNullOrWhiteSpace(b.NoDelReason);
             }
 
             if (query.CompositionId != null)

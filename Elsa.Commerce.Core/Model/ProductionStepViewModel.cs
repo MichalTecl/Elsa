@@ -55,7 +55,7 @@ namespace Elsa.Commerce.Core.Model
             ProductionStepViewModel lastStep = null;
             foreach (var step in source.OrderBy(r => r.MaterialProductionStepId))
             {
-                if (lastStep?.MaterialProductionStepId == step.MaterialProductionStepId && step.IsAutoBatch)
+                if ((lastStep?.MaterialProductionStepId == step.MaterialProductionStepId) && step.IsAutoBatch)
                 {
                     lastStep.JoinWith(step);
                     continue;
@@ -70,7 +70,7 @@ namespace Elsa.Commerce.Core.Model
 
         public bool IsSameStep(ProductionStepViewModel other)
         {
-            if (MaterialId != other.MaterialId || MaterialProductionStepId != other.MaterialProductionStepId)
+            if ((MaterialId != other.MaterialId) || (MaterialProductionStepId != other.MaterialProductionStepId))
             {
                 return false;
             }

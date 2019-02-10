@@ -15,7 +15,7 @@ namespace Elsa.Common.UserRightsInfrastructure
                 UserRightInfo existing;
                 if (s_rights.TryGetValue(ur.Name, out existing))
                 {
-                    if (ur.DeclaringType != existing.DeclaringType || ur.FullName != existing.FullName)
+                    if ((ur.DeclaringType != existing.DeclaringType) || (ur.FullName != existing.FullName))
                     {
                         throw new InvalidOperationException($"There is duplicate UserRight name '{ur.Name}'");
                     }

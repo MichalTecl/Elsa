@@ -138,7 +138,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 m_database.SelectFrom<IVirtualProductMaterial>()
                     .Join(vpm => vpm.VirtualProduct)
                     .Join(vpm => vpm.Component)
-                    .Where(vpm => vpm.VirtualProduct.ProjectId == prid && vpm.Component.ProjectId == prid)
+                    .Where(vpm => (vpm.VirtualProduct.ProjectId == prid) && (vpm.Component.ProjectId == prid))
                     .Where(vpm => vpm.VirtualProductId == virtualProductId)
                     .Where(vpm => vpm.ComponentId == materialId)
                     .Execute()
@@ -156,15 +156,15 @@ namespace Elsa.Commerce.Core.VirtualProducts
         public void AddOrUpdateComponent(int vpId, int materialId, decimal requestComponentAmount, int unitId)
         {
             
-            var existing = GetAllCompositions().FirstOrDefault(c => c.VirtualProductId == vpId && c.ComponentId == materialId);
+            var existing = GetAllCompositions().FirstOrDefault(c => (c.VirtualProductId == vpId) && (c.ComponentId == materialId));
             if (existing == null)
             {
                 existing = m_database.New<IVirtualProductMaterial>(v => v.VirtualProductId = vpId);
             }
             else
             {
-                if (existing.ComponentId == materialId && existing.UnitId == unitId
-                    && existing.Amount == requestComponentAmount)
+                if ((existing.ComponentId == materialId) && (existing.UnitId == unitId)
+                    && (existing.Amount == requestComponentAmount))
                 {
                     return;
                 }
@@ -195,13 +195,13 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     throw new InvalidOperationException($"Invalid material Id {materialId}");
                 }
 
-                if (material.Name == name 
-                    && material.NominalAmount == nominalAmount
-                    && material.NominalUnitId == nominalUnitId 
-                    && material.InventoryId == materialInventoryId
-                    && material.AutomaticBatches == automaticBatches
-                    && material.RequiresPrice == requiresPrice
-                    && material.RequiresInvoiceNr == requiresInvoice)
+                if ((material.Name == name) 
+                    && (material.NominalAmount == nominalAmount)
+                    && (material.NominalUnitId == nominalUnitId) 
+                    && (material.InventoryId == materialInventoryId)
+                    && (material.AutomaticBatches == automaticBatches)
+                    && (material.RequiresPrice == requiresPrice)
+                    && (material.RequiresInvoiceNr == requiresInvoice))
                 {
                     return GetAllMaterials(null).Single(m => m.Id == materialId);
                 }
@@ -273,7 +273,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 m_database.SelectFrom<IMaterialComposition>()
                     .Join(c => c.Composition)
                     .Where(m => m.Composition.ProjectId == m_session.Project.Id)
-                    .Where(c => c.CompositionId == compositionMaterialId && c.ComponentId == componentMaterialId)
+                    .Where(c => (c.CompositionId == compositionMaterialId) && (c.ComponentId == componentMaterialId))
                     .Execute()
                     .FirstOrDefault();
 
@@ -291,13 +291,13 @@ namespace Elsa.Commerce.Core.VirtualProducts
             var composition = m_database.SelectFrom<IMaterialComposition>()
                             .Join(c => c.Composition)
                             .Where(m => m.Composition.ProjectId == m_session.Project.Id)
-                            .Where(c => c.CompositionId == compositionMaterialId && c.ComponentId == componentMaterialId)
+                            .Where(c => (c.CompositionId == compositionMaterialId) && (c.ComponentId == componentMaterialId))
                             .Execute()
                             .FirstOrDefault();
 
             if (composition != null)
             {
-                if (composition.UnitId == amountUnit && composition.Amount == componentAmount)
+                if ((composition.UnitId == amountUnit) && (composition.Amount == componentAmount))
                 {
                     return;
                 }
@@ -335,7 +335,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 var toVp = m_database.SelectFrom<IVirtualProductMaterial>().Where(t => t.ComponentId == id).Execute();
                 var conns =
                     m_database.SelectFrom<IMaterialComposition>()
-                        .Where(c => c.CompositionId == id || c.ComponentId == id)
+                        .Where(c => (c.CompositionId == id) || (c.ComponentId == id))
                         .Execute();
 
                 m_database.DeleteAll(toVp);

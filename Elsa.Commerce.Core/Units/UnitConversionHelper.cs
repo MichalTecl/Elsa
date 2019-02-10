@@ -48,9 +48,9 @@ namespace Elsa.Commerce.Core.Units
 
         public bool AreCompatible(int unitId1, int unitId2)
         {
-            return unitId1 == unitId2
-                || (   GetAllConversions().Any(c => c.SourceUnitId == unitId1 && c.TargetUnitId == unitId2)
-                    && GetAllConversions().Any(c => c.SourceUnitId == unitId2 && c.TargetUnitId == unitId1));
+            return (unitId1 == unitId2)
+                || (   GetAllConversions().Any(c => (c.SourceUnitId == unitId1) && (c.TargetUnitId == unitId2))
+                    && GetAllConversions().Any(c => (c.SourceUnitId == unitId2) && (c.TargetUnitId == unitId1)));
         }
 
         public IEnumerable<IMaterialUnit> GetCompatibleUnits(int sourceUnitId)
@@ -89,7 +89,7 @@ namespace Elsa.Commerce.Core.Units
                     {
                         var conversion =
                             GetAllConversions()
-                                .FirstOrDefault(c => c.SourceUnitId == sourceUnit && c.TargetUnitId == targetUnit);
+                                .FirstOrDefault(c => (c.SourceUnitId == sourceUnit) && (c.TargetUnitId == targetUnit));
                         if (conversion == null)
                         {
                             throw new InvalidOperationException($"No unit conversion defined from {sourceUnit} to {targetUnit}");
@@ -122,8 +122,8 @@ namespace Elsa.Commerce.Core.Units
                             if (
                                 result.Any(
                                     r =>
-                                        r.SourceUnitId == pureItem.TargetUnitId
-                                        && r.TargetUnitId == pureItem.SourceUnitId))
+                                        (r.SourceUnitId == pureItem.TargetUnitId)
+                                        && (r.TargetUnitId == pureItem.SourceUnitId)))
                             {
                                 continue;
                             }

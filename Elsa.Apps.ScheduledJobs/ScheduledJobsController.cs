@@ -97,7 +97,7 @@ namespace Elsa.Apps.ScheduledJobs
                 return false;
             }
 
-            return sche.LastStartDt.Value < DateTime.Now && sche.LastEndDt == null;
+            return (sche.LastStartDt.Value < DateTime.Now) && (sche.LastEndDt == null);
         }
 
     }

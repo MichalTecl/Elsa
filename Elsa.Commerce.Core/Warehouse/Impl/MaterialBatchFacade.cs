@@ -113,10 +113,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         
         public Amount GetAvailableAmount(int batchId)
         {
-            return m_cache.ReadThrough(
-                GetBatchAmountCacheKey(batchId),
-                TimeSpan.FromMinutes(10),
-                () => m_batchStatusManager.GetStatus(batchId).CurrentAvailableAmount);
+            return GetBatchStatus(batchId).CurrentAvailableAmount;
         }
 
         public IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference = null)
@@ -447,10 +444,17 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     throw new InvalidOperationException($"Není možné smazat šarži, protože je již součástí šarže {dependingBatchEntity.Batch.BatchNumber}");
                 }
 
-                var toDel = m_database.SelectFrom<IMaterialBatchComposition>().Where(c => c.CompositionId == batchId).Execute();
-
+                var toDel = m_database.SelectFrom<IMaterialBatchComposition>().Where(c => c.CompositionId == batchId).Execute().ToList();
+                
                 m_database.DeleteAll(toDel);
                 m_database.Delete(batch.Batch);
+
+                foreach (var compo in toDel)
+                {
+                    InvalidateBatchCache(compo.ComponentId);
+                }
+
+                InvalidateBatchCache(batchId);
 
                 tx.Commit();
             }
@@ -459,6 +463,44 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         public void ReleaseBatchAmountCache(IMaterialBatch batch)
         {
             InvalidateBatchCache(batch.Id);
+        }
+
+        public IEnumerable<string> GetDeletionBlockReasons(int batchId)
+        {
+            var batch = m_batchRepository.GetBatchById(batchId);
+            if (batch == null)
+            {
+                throw new InvalidOperationException("Invalid entity reference");
+            }
+
+            var status = GetBatchStatus(batchId);
+
+            if (status.UsedInOrderItems.Any())
+            {
+                yield return "Již bylo prodáno zboží z této šarže";
+            }
+
+            if (status.UsedInCompositions.Any() || status.UsedInSteps.Any())
+            {
+                yield return "Šarže je použita ve složení jiné šarže";
+            }
+
+            foreach (var evt in status.Events.Select(e => e.Type.Name).Distinct())
+            {
+                yield return $"Byla provedena akce typu \"{evt}\"";
+            }
+
+            if (status.ResolvedSteps.Any())
+            {
+                yield return $"Byly proveden výrobní kroky";
+            }
+        }
+
+        private IMaterialBatchStatus GetBatchStatus(int batchId)
+        {
+            return m_cache.ReadThrough(GetBatchAmountCacheKey(batchId),
+                TimeSpan.FromMinutes(10),
+                () => m_batchStatusManager.GetStatus(batchId));
         }
 
         private string GetBatchAmountCacheKey(int batchId)

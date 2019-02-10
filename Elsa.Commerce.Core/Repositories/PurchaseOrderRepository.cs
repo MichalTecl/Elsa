@@ -108,7 +108,7 @@ namespace Elsa.Commerce.Core.Repositories
         public IPurchaseOrder TryLoadOrderByOrderNumber(string orderNumber)
         {
             var cachedOrder =
-                m_cache.FirstOrDefault(i => i.ProjectId == m_session.Project.Id && i.OrderNumber == orderNumber);
+                m_cache.FirstOrDefault(i => (i.ProjectId == m_session.Project.Id) && (i.OrderNumber == orderNumber));
             if (cachedOrder != null)
             {
                 return cachedOrder;
@@ -126,7 +126,7 @@ namespace Elsa.Commerce.Core.Repositories
         {
             m_cache.Clear();
             
-            m_cache.AddRange(BuildOrdersQuery().Where(o => o.PurchaseDate >= from && o.PurchaseDate <= to).Execute());
+            m_cache.AddRange(BuildOrdersQuery().Where(o => (o.PurchaseDate >= @from) && (o.PurchaseDate <= to)).Execute());
         }
 
         public IEnumerable<OrdersOverviewModel> GetOrdersOverview(DateTime from, DateTime to)

@@ -29,7 +29,7 @@ namespace Elsa.App.Commerce.Payments.Models
         private static string GetSymbols(params string[] symbol)
         {
             var symbols =
-                symbol.Where(s => !string.IsNullOrWhiteSpace(s) && s != "NEMA_VS" && !IsOnlyZeroes(s))
+                symbol.Where(s => !string.IsNullOrWhiteSpace(s) && (s != "NEMA_VS") && !IsOnlyZeroes(s))
                     .Select(s => s.Trim().ToLowerInvariant())
                     .Distinct();
 

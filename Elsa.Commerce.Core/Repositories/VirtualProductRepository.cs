@@ -49,7 +49,7 @@ namespace Elsa.Commerce.Core.Repositories
             {
                 var allMappings = GetAllMappings();
 
-                if (allMappings.Any(m => m.VirtualProductId == virtualProductId 
+                if (allMappings.Any(m => (m.VirtualProductId == virtualProductId) 
                                       && IsMatch(m, erpId, erpProductId, placedName)))
                 {
                     return;
@@ -102,7 +102,7 @@ namespace Elsa.Commerce.Core.Repositories
 
                 var mappingToDelete =
                     allMappings.FirstOrDefault(
-                        m => m.VirtualProductId == virtualProductId && IsMatch(m, erpId, erpProductId, placedName));
+                        m => (m.VirtualProductId == virtualProductId) && IsMatch(m, erpId, erpProductId, placedName));
 
                 if (mappingToDelete == null)
                 {
@@ -281,7 +281,7 @@ namespace Elsa.Commerce.Core.Repositories
             }
             */
 
-            if (!string.IsNullOrWhiteSpace(mapping.ItemName) && mapping.ItemName != placedName)
+            if (!string.IsNullOrWhiteSpace(mapping.ItemName) && (mapping.ItemName != placedName))
             {
                 return false;
             }

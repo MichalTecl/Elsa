@@ -57,7 +57,7 @@ namespace Elsa.Commerce.Core.Repositories
                         IOrderItem selectedItem = null;
                         foreach (var selectionItem in selection.Items)
                         {
-                            selectedItem = selectedChildItems.FirstOrDefault(i => selectionItem.IsMatch(null, i) && i.KitItemIndex == kitItemIndex);
+                            selectedItem = selectedChildItems.FirstOrDefault(i => selectionItem.IsMatch(null, i) && (i.KitItemIndex == kitItemIndex));
                             if (selectedItem != null)
                             {
                                 selectedChildItems.Remove(selectedItem);

@@ -92,7 +92,7 @@ namespace Elsa.Common.Utils
                         nChar = chr;
                     }
 
-                    if (!c_searchStringValidChars.Contains(nChar) || ((nChar == lChar && !char.IsDigit(nChar))))
+                    if (!c_searchStringValidChars.Contains(nChar) || (((nChar == lChar) && !char.IsDigit(nChar))))
                     {
                         continue;
                     }

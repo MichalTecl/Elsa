@@ -106,7 +106,7 @@ namespace Elsa.Commerce.Core.Production
 
                 if (batchEntity.Components.Any())
                 {
-                    if (Math.Abs(amount - batchEntity.ComponentAmount) > 0m || batchEntity.ComponentUnit.Id != unit.Id)
+                    if ((Math.Abs(amount - batchEntity.ComponentAmount) > 0m) || (batchEntity.ComponentUnit.Id != unit.Id))
                     {
                         throw new InvalidOperationException("Nelze změnit množství či jednotku šarže, která má přiřazeny materiály");
                     }
@@ -169,7 +169,7 @@ namespace Elsa.Commerce.Core.Production
                     var composition =
                         m_database.SelectFrom<IMaterialBatchComposition>()
                             .Where(
-                                c => c.CompositionId == productionBatchId && c.Id == materialBatchCompositionId.Value)
+                                c => (c.CompositionId == productionBatchId) && (c.Id == materialBatchCompositionId.Value))
                             .Execute()
                             .FirstOrDefault();
 
@@ -186,7 +186,7 @@ namespace Elsa.Commerce.Core.Production
                 }
 
                 var childBatch = m_batchRepository.GetBatchById(sourceBatchId);
-                if (childBatch == null || childBatch.IsClosed || childBatch.IsLocked || !childBatch.Batch.IsAvailable)
+                if ((childBatch == null) || childBatch.IsClosed || childBatch.IsLocked || !childBatch.Batch.IsAvailable)
                 {
                     throw new InvalidOperationException("Požadovaná šarže nedostupná");
                 }
@@ -208,7 +208,7 @@ namespace Elsa.Commerce.Core.Production
                                   $"Složení {parentBatch.MaterialName} neobsahuje {childBatch.Batch.Material.Name}");
                     }
 
-                    var concurrentAssignment = targetComponent.Assignments.FirstOrDefault(a => a.UsedBatchId != null && a.UsedBatchId == childBatch.Batch.Id);
+                    var concurrentAssignment = targetComponent.Assignments.FirstOrDefault(a => (a.UsedBatchId != null) && (a.UsedBatchId == childBatch.Batch.Id));
                     if (concurrentAssignment != null)
                     {
                         m_batchFacade.UnassignComponent(productionBatchId, concurrentAssignment.UsedBatchId.Value);
@@ -436,7 +436,7 @@ namespace Elsa.Commerce.Core.Production
             }
 
             var materialId = material?.Id ?? -1;
-            if (materialId < 1 || material == null)
+            if ((materialId < 1) || (material == null))
             {
                 throw new InvalidOperationException($"Neznamy material \"{model.MaterialName}\"");
             }
@@ -467,7 +467,7 @@ namespace Elsa.Commerce.Core.Production
             var sourceSteps = GetStepsToProceed(batchId, materialId, true).ToList();
             var sourceStep = sourceSteps.FirstOrDefault(srs => srs.IsSameStep(model));
 
-            if (sourceStep == null && model.NeedsBatchNumber)
+            if ((sourceStep == null) && model.NeedsBatchNumber)
             {
                 if (model.NeedsBatchNumber)
                 {
@@ -639,7 +639,7 @@ namespace Elsa.Commerce.Core.Production
                 foreach (var batchNr in currentMats.Where(m => m.MaterialId == materialId).Select(m => m.BatchNumber).Distinct())
                 {
                     var fragments =
-                        currentMats.Where(f => f.MaterialId == materialId && f.BatchNumber == batchNr).ToList();
+                        currentMats.Where(f => (f.MaterialId == materialId) && (f.BatchNumber == batchNr)).ToList();
 
                     if (!fragments.Any())
                     {
@@ -693,7 +693,7 @@ namespace Elsa.Commerce.Core.Production
                         {
                             var batchObject =
                                 batchIndex.FirstOrDefault(
-                                    b => b.MaterialId == alas.MaterialId && b.BatchNumber == alas.BatchNumber);
+                                    b => (b.MaterialId == alas.MaterialId) && (b.BatchNumber == alas.BatchNumber));
                             if (batchObject == null)
                             {
                                 throw new InvalidOperationException("Fatal");

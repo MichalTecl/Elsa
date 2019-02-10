@@ -71,7 +71,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             var steps = new List<Func<Amount, Amount>>();
 
-            steps.Add((a) => (batch.IsAvailable && batch.CloseDt == null) ? new Amount(batch.Volume, batch.Unit) : null);
+            steps.Add((a) => (batch.IsAvailable && (batch.CloseDt == null)) ? new Amount(batch.Volume, batch.Unit) : null);
 
             // Resolved production steps
             steps.Add(
@@ -130,7 +130,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 amount = step(amount);
 
-                if (amount == null || amount.IsNotPositive)
+                if ((amount == null) || amount.IsNotPositive)
                 {
                     return new Amount(0, batch.Unit);
                 }

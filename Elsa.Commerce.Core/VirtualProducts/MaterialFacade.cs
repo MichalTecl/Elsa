@@ -185,9 +185,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
                                 .Join(s => s.Material)
                                 .Where(
                                     s =>
-                                        s.Id == requestedStep.StepId.Value
-                                        && s.Material.ProjectId == m_session.Project.Id
-                                        && s.MaterialId == owner.Id)
+                                        (s.Id == requestedStep.StepId.Value)
+                                        && (s.Material.ProjectId == m_session.Project.Id)
+                                        && (s.MaterialId == owner.Id))
                                 .Take(1)
                                 .Execute()
                                 .FirstOrDefault();

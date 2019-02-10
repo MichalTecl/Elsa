@@ -81,7 +81,7 @@ namespace Elsa.Commerce.Core.Units
 
         private Amount Calculate(Amount a, Amount b, Func<decimal, decimal, decimal> numericOp)
         {
-            if (a == null && b == null)
+            if ((a == null) && (b == null))
             {
                 return null;
             }
