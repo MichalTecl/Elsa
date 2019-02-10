@@ -44,6 +44,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 
             public string Amount { get; set; }
 
+            public bool CanDelete { get; set; }
+
             public List<PerfomedStepComponent> Components { get; } = new List<PerfomedStepComponent>();
         }
 

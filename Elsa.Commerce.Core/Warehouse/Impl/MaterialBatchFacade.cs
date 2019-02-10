@@ -496,7 +496,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
-        private IMaterialBatchStatus GetBatchStatus(int batchId)
+        public IMaterialBatchStatus GetBatchStatus(int batchId)
         {
             return m_cache.ReadThrough(GetBatchAmountCacheKey(batchId),
                 TimeSpan.FromMinutes(10),

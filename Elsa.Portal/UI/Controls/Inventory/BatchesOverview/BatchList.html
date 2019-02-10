@@ -126,6 +126,7 @@
                                                 <div class="cell5">Hodiny</div>
                                                 <div class="cell5">Cena</div>
                                                 <div class="cell5">Převzal</div>
+                                                <div class="cell1"></div>
                                             </div>
                                             <div class="bovPerformedStepsPanel" data-bind="itemssource:PerformedSteps" data-key="StepId">
                                                 <div class="bovPerStepItem lt-template">
@@ -136,11 +137,14 @@
                                                         <div class="bovPerStepTime cell5" data-bind="text:SpentHours"></div>
                                                         <div class="bovPerStepPrice cell5" data-bind="text:Price"></div>
                                                         <div class="bovPerStepConfirmUser cell5" data-bind="text:ConfirmUser"></div>
+                                                        <div class="cell1">
+                                                            <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt faButton" event-bind="click:deleteProductionStep(VM)"></i>
+                                                            <i class="far fa-trash-alt" style="opacity: 0.2; cursor:no-drop" data-bind="class.hidden:CanDelete" title="Již bylo použito množství vyprodukované tímto krokem, nebo následují další kroky"></i>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    
                                     </div>
                                 </div>
                             </div>
@@ -355,7 +359,19 @@
 
         };
 
-        self.refreshBatchView = function () {
+        self.refreshBatchView = function (depth) {
+            
+            var parent = self;
+            while ((parent != null) && ((parent = parent.parentElement) != null)) {
+                if (parent["refreshBatchView"]) {
+                    parent.refreshBatchView(depth - 1);
+                    return;
+                }
+            } 
+            
+            var session = getSession();
+            session.query.PageNumber = 0;
+            self.setQuery(JSON.parse(JSON.stringify(session.query)));
         };
 
         self.deleteBatch = function (model) {
@@ -364,7 +380,17 @@
             }
 
             app.batchesOverview.vm.deleteBatch(model.BatchId, function () {
-                self.refreshBatchView();
+                self.refreshBatchView(1);
+            });
+        };
+
+        self.deleteProductionStep = function(stepModel) {
+            if (!confirm("Smazat výrobní krok?")) {
+                return;
+            }
+
+            app.batchesOverview.vm.deleteProductionStep(stepModel.StepId, function () {
+                self.refreshBatchView(1);
             });
         };
         

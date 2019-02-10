@@ -14,6 +14,8 @@ namespace Elsa.Commerce.Core.Warehouse
 
         Amount GetAvailableAmount(int batchId);
 
+        IMaterialBatchStatus GetBatchStatus(int batchId);
+
         IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference = null);
 
         IMaterialBatch FindBatchBySearchQuery(int materialId, string query);

@@ -77,6 +77,7 @@
     <Compile Include="Model\BatchReporting\BatchReportEntryBase.cs" />
     <Compile Include="Model\BatchReporting\BatchReportModel.cs" />
     <Compile Include="Model\BatchReporting\BatchReportQuery.cs" />
+    <Compile Include="Model\BatchReporting\DeletedBatchReportEntry.cs" />
     <Compile Include="Model\IErpCustomerModel.cs" />
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
     <Compile Include="Model\KitItemsCollection.cs" />

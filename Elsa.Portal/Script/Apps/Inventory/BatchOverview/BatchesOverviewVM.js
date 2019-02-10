@@ -54,6 +54,16 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
             var toExtend = null;
 
             var receivedBatch = report.Report[i];
+
+            if (receivedBatch.IsDeleted) {
+                for (var x = session.list.length - 1; x >= 0; x--) {
+                    if (session.list[x].BatchId === receivedBatch.BatchId) {
+                        session.list.splice(x, 1);
+                    }
+                }
+
+                return;
+            }
             
             var found = false;
             
@@ -99,10 +109,10 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
         }
     };
 
-    self.load = function (session, callback) {
+    self.load = function (session, callback, query) {
         
         lt.api("/batchReporting/get")
-            .body(session.query)
+            .body(query || session.query)
             .post(function(report) {
                 receiveReport(report, session);
                 callback(session);
@@ -110,16 +120,23 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
     };
 
     self.deleteBatch = function(batchId, callback) {
-        lt.api("/")
+        lt.api("/materialBatches/deleteBatch").query({ "id": batchId }).get(callback);
     };
 
-    self.loadSingleBatch = function(batchModel, query) {
+    self.deleteProductionStep = function(stepId, callback) {
+        lt.api("/production/deleteProductionStep").query({ "stepId": stepId }).get(callback);
+    };
+
+    self.loadSingleBatch = function (batchModel, query, callback) {
+        query = query || {};
+        callback = callback || function () { };
+
         query.BatchId = batchModel.BatchId;
 
         var fakeSession = { "list": [], "query": query };
         fakeSession.list.push(batchModel);
 
-        self.load(fakeSession, function() {});
+        self.load(fakeSession, callback);
     };
 };
 

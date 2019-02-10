@@ -127,5 +127,10 @@ namespace Elsa.Apps.Inventory
 
             return GetProductionBatch(batchId);
         }
+
+        public void DeleteProductionStep(int stepId)
+        {
+            m_productionFacade.DeleteProductionStep(stepId);
+        }
     }
 }

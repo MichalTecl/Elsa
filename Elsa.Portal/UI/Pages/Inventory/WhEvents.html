@@ -26,6 +26,16 @@
 <script>
     function cancelProdBatchEdit() {
         app.production.vm.cancelEdit();
+
+        var allChildren = document.getElementsByTagName("div");
+
+        for (var i = 0; i < allChildren.length; i++) {
+            var blist = allChildren[i];
+            if (blist.refreshBatchView) {
+                blist.refreshBatchView(1); 
+            }
+        }
+
     }
 </script>
 

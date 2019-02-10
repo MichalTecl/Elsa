@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchReporting;
 using Elsa.Commerce.Core.Production;
 using Elsa.Commerce.Core.Units;
@@ -11,6 +12,7 @@ using Elsa.Common;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 using Robowire.RobOrm.Core;
 
@@ -126,6 +128,12 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                 b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
                 b.CanDelete = string.IsNullOrWhiteSpace(b.NoDelReason);
+            }
+
+            if ((query.BatchId != null) && (result.Report.Count == 0))
+            {
+                result.Report.Add(new DeletedBatchReportEntry(query.BatchId.Value));
+                return result;
             }
 
             if (query.CompositionId != null)
@@ -307,6 +315,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 throw new InvalidOperationException("not found");
             }
 
+            var batchStatus = m_batchFacade.GetBatchStatus(queryBatchId);
+
             var requiredSteps = m_materialRepository.GetMaterialProductionSteps(batch.Batch.MaterialId).Ordered().ToList();
 
             if (!requiredSteps.Any())
@@ -345,6 +355,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                         SpentHours = StringUtil.FormatDecimal(doneStep.SpentHours ?? 0m),
                         StepId = doneStep.Id,
                         Worker = doneStep.Worker?.EMail,
+                        CanDelete =  m_productionFacade.CheckProductionStepCanBeDeleted(batchStatus, doneStep.Id, batch.Batch)
                     };
 
                     stepModel.PerformedSteps.Add(doneModel);
@@ -389,7 +400,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
             return report;
         }
-
+        
         private BatchReportEntry MapEntry(DbDataReader row)
         {
             #region Column ordinals

@@ -606,6 +606,104 @@ namespace Elsa.Commerce.Core.Production
             }
         }
 
+        public bool CheckProductionStepCanBeDeleted(IMaterialBatchStatus batchStatus, int stepToDelete, IMaterialBatch batch)
+        {
+            if (batchStatus.CalculateAvailableAmount(m_amountProcessor, stepToDelete).IsNegative)
+            {
+                return false;
+            }
+
+            var requiredSteps = batchStatus.RequiredSteps.Ordered().Reverse().Select(s => s.Id).ToList();
+
+            if (requiredSteps.Count < 2)
+            {
+                //There is only this required step, so npot any other step(s) could be underflowed by deletion of this step
+                return true;
+            }
+
+            var followingStepAmount = new Amount(0m, batch.Unit);
+
+            var testedStepFound = false;
+            foreach (var requiredStep in requiredSteps)
+            {
+                var resolvedAmount = new Amount(0m, followingStepAmount.Unit);
+
+                foreach (var performedStep in batchStatus.ResolvedSteps.Where(s => s.StepId == requiredStep))
+                {
+                    if (performedStep.Id == stepToDelete)
+                    {
+                        testedStepFound = true;
+                    }
+                    else
+                    {
+                        resolvedAmount = m_amountProcessor.Add(resolvedAmount, new Amount(performedStep.ProducedAmount, resolvedAmount.Unit));
+                    }
+                }
+
+                if (m_amountProcessor.GreaterThan(followingStepAmount, resolvedAmount))
+                {
+                    return false;
+                }
+
+                if (testedStepFound)
+                {
+                    return true;
+                }
+
+                followingStepAmount = resolvedAmount;
+
+            }
+
+            return true;
+        }
+
+        public void DeleteProductionStep(int productionStepId)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+
+                var step =
+                    m_database.SelectFrom<IBatchProductionStep>()
+                        .Join(s => s.Batch)
+                        .Join(s => s.SourceBatches)
+                        .Join(s => s.SourceBatches.Each().SourceBatch)
+                        .Where(s => s.Id == productionStepId)
+                        .Execute()
+                        .ToList()
+                        .FirstOrDefault();
+
+                if ((step == null) || (step.Batch?.ProjectId != m_session.Project.Id))
+                {
+                    throw new InvalidOperationException("Invalid entity reference");
+                }
+
+                var batch = m_batchRepository.GetBatchById(step.BatchId);
+                var batchStatus = m_batchFacade.GetBatchStatus(step.BatchId);
+
+                if ((batch == null) || (batchStatus == null))
+                {
+                    throw new InvalidOperationException("Invalid entity reference");
+                }
+
+                if (!CheckProductionStepCanBeDeleted(batchStatus, productionStepId, batch.Batch))
+                {
+                    throw new InvalidOperationException("Operation not allowed");
+                }
+
+                m_batchFacade.ReleaseBatchAmountCache(batch.Batch);
+
+                foreach (var sourceBatch in step.SourceBatches)
+                {
+                    m_database.Delete(sourceBatch);
+                    m_batchFacade.ReleaseBatchAmountCache(sourceBatch.SourceBatch);
+                }
+
+                m_database.Delete(step);
+
+                tx.Commit();
+            }
+        }
+
         private void TryMarkBatchStepsComplete(IMaterialBatch batch)
         {
             if (!GetStepsToProceed(batch.Id, batch.MaterialId, true).Any())

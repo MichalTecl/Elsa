@@ -41,5 +41,9 @@ namespace Elsa.Commerce.Core.Production
         ProductionStepViewModel UpdateProductionStep(ProductionStepViewModel model);
 
         void SaveProductionStep(ProductionStepViewModel model);
+
+        bool CheckProductionStepCanBeDeleted(IMaterialBatchStatus batchStatus, int stepToDelete, IMaterialBatch batch);
+
+        void DeleteProductionStep(int productionStepId);
     }
 }
