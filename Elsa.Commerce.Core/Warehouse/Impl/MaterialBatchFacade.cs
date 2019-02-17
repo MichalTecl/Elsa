@@ -502,12 +502,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 yield return "Byly proveden výrobní kroky";
             }
         }
-
-        public IEnumerable<MaterialLevelModel> GetMaterialLevels()
+        
+        public IEnumerable<MaterialLevelModel> GetMaterialLevels(bool includeUnwatched = false)
         {
-            var thresholds = m_materialThresholdRepository.GetAllThresholds();
+            var materialIds = includeUnwatched ? m_materialRepository.GetAllMaterials(null).Select(m => m.Id) : m_materialThresholdRepository.GetAllThresholds().Select(t => t.MaterialId);
 
-            foreach (var materialId in thresholds.Select(t => t.MaterialId))
+            foreach (var materialId in materialIds)
             {
                 yield return GetMaterialLevel(materialId);
             }
@@ -553,7 +553,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                         MinValue = amountUnitThreshold.Value,
                         PercentLevel = GetPercentLevel(amountUnitThreshold.Value * 10m, amount.Value),
                         UnitId = amount.Unit.Id,
-                        Unit = amount.Unit.Symbol
+                        Unit = amount.Unit.Symbol,
+                        HasThreshold = threshold.Id > 0
                     };
                 });
         }

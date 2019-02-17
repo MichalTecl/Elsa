@@ -21,5 +21,17 @@
 <script>
     lt.element("whWidget").attach(function (icoLowMaterial) {
 
+        this.bind(function(currentWarning) {
+                
+                if (currentWarning == null) {
+                    icoLowMaterial.style.display = 'none';
+                } else {
+                    icoLowMaterial.style.display = 'inline-block';
+                    icoLowMaterial.setAttribute("title", currentWarning);
+                }
+            })
+            .currentWarningCanBeNull()
+            .currentWarningRelativeToGlobal("app.MaterialLevels.vm");
     });
 </script>
+<script src="/Script/Apps/Inventory/Material/MaterialLevels.VM.js"></script>

@@ -21,8 +21,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IMaterialRepository m_materialRepository;
         private readonly IVirtualProductRepository m_virtualProductRepository;
         private readonly ICache m_cache;
+        private readonly Lazy<IMaterialBatchFacade> m_materialBatchFacade;
         
-        public MaterialBatchRepository(IDatabase database, ISession session, IUnitConversionHelper conversionHelper, IMaterialRepository materialRepository, IVirtualProductRepository virtualProductRepository, ICache cache)
+        public MaterialBatchRepository(IDatabase database, ISession session, IUnitConversionHelper conversionHelper, IMaterialRepository materialRepository, IVirtualProductRepository virtualProductRepository, ICache cache, Lazy<IMaterialBatchFacade> materialBatchFacade)
         {
             m_database = database;
             m_session = session;
@@ -30,6 +31,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_materialRepository = materialRepository;
             m_virtualProductRepository = virtualProductRepository;
             m_cache = cache;
+            m_materialBatchFacade = materialBatchFacade;
         }
 
         public MaterialBatchComponent GetBatchById(int id)
@@ -67,7 +69,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             bool includeClosed = false,
             bool includeUnavailable = false)
         {
-            var query = GetBatchQuery().Where(b => b.Created >= from && b.Created <= to);
+            var query = GetBatchQuery().Where(b => (b.Created >= from) && (b.Created <= to));
             
             if (materialId != null)
             {
@@ -98,7 +100,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr)
         {
-            if (material.ProjectId != m_session.Project.Id || unit.ProjectId != m_session.Project.Id)
+            if ((material.ProjectId != m_session.Project.Id) || (unit.ProjectId != m_session.Project.Id))
             {
                 throw new InvalidOperationException("Illegal entity reference");
             }
@@ -117,7 +119,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 {
                     entity =
                         GetBatchQuery()
-                            .Where(b => b.Id == id && b.ProjectId == m_session.Project.Id)
+                            .Where(b => (b.Id == id) && (b.ProjectId == m_session.Project.Id))
                             .Execute()
                             .FirstOrDefault();
                     if (entity == null)
@@ -137,8 +139,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                         m_database.SelectFrom<IMaterialBatch>()
                             .Where(
                                 b =>
-                                    b.ProjectId == m_session.Project.Id && b.MaterialId == materialId
-                                    && b.BatchNumber == batchNr)
+                                    (b.ProjectId == m_session.Project.Id) && (b.MaterialId == materialId)
+                                    && (b.BatchNumber == batchNr))
                             .Execute()
                             .FirstOrDefault();
 
@@ -155,12 +157,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                               $"Nelze použít jednotku '{unit.Symbol}' pro materiál '{material.Name}' protože není převoditelná na nominální jednotku materiálu '{material.NominalUnit}'");
                 }
 
-                if (material.RequiresPrice == true && Math.Abs(price) < 0.000001m)
+                if ((material.RequiresPrice == true) && (Math.Abs(price) < 0.000001m))
                 {
                     throw new InvalidOperationException("Cena je povinný údaj");
                 }
 
-                if (material.RequiresInvoiceNr == true && string.IsNullOrWhiteSpace(invoiceNr))
+                if ((material.RequiresInvoiceNr == true) && string.IsNullOrWhiteSpace(invoiceNr))
                 {
                     throw new InvalidOperationException("Číslo faktury je povinný údaj");
                 }
@@ -183,6 +185,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 {
                     throw new InvalidOperationException($"Materiál '{material.Name}' nelze naskladnit, protože se skládá z jiných materiálů. Použijte prosím funkci Výroba");
                 }
+
+                m_materialBatchFacade.Value.ReleaseBatchAmountCache(result.Batch);
 
                 tx.Commit();
             }
@@ -220,7 +224,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 var batch =
                     m_database.SelectFrom<IMaterialBatch>()
                         .Where(
-                            b => b.Id == batchId && b.IsAvailable != isAvailable && b.ProjectId == m_session.Project.Id)
+                            b => (b.Id == batchId) && (b.IsAvailable != isAvailable) && (b.ProjectId == m_session.Project.Id))
                         .Execute()
                         .FirstOrDefault();
 
@@ -301,7 +305,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 {
                     return
                         m_database.SelectFrom<IMaterialBatch>()
-                            .Where(b => b.Id == batchId && b.ProjectId == m_session.Project.Id)
+                            .Where(b => (b.Id == batchId) && (b.ProjectId == m_session.Project.Id))
                             .Take(1)
                             .Execute()
                             .FirstOrDefault()?.BatchNumber;

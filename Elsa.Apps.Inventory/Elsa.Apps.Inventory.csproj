@@ -47,6 +47,7 @@
     <Compile Include="BatchReportingController.cs" />
     <Compile Include="MaterialBatchesController.cs" />
     <Compile Include="MaterialController.cs" />
+    <Compile Include="MaterialLevelController.cs" />
     <Compile Include="Model\BatchSetupRequest.cs" />
     <Compile Include="Model\MaterialWithStepsViewModel.cs" />
     <Compile Include="Model\ProducedBatchModel.cs" />

@@ -37,7 +37,7 @@ namespace Elsa.Commerce.Core.Warehouse
 
         IEnumerable<string> GetDeletionBlockReasons(int batchId);
 
-        IEnumerable<MaterialLevelModel> GetMaterialLevels();
+        IEnumerable<MaterialLevelModel> GetMaterialLevels(bool includeUnwatched = false);
 
         MaterialLevelModel GetMaterialLevel(int materialId);
 

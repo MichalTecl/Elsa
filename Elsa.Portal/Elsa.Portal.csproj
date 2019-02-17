@@ -110,6 +110,7 @@
     <Content Include="Script\Apps\Crm\Customers.VM.js" />
     <Content Include="Script\Apps\Inventory\BatchOverview\BatchesOverviewVM.js" />
     <Content Include="Script\Apps\Inventory\Material\MaterialHelper.js" />
+    <Content Include="Script\Apps\Inventory\Material\MaterialLevels.VM.js" />
     <Content Include="Script\Apps\Inventory\VirtualProducts\VirtualProductsVM.js" />
     <Content Include="Script\Apps\Inventory\WarehouseActions\ProductionSteps.VM.js" />
     <Content Include="Script\Apps\Inventory\WarehouseActions\WarehouseActions.VM.js" />
@@ -146,6 +147,8 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionSteps.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\MaterialsTreeView.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\ProductionStepEdit.html" />
+    <Content Include="UI\Pages\Inventory\MaterialLevels.css" />
+    <Content Include="UI\Pages\Inventory\MaterialLevels.html" />
     <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />
     <Content Include="UI\Pages\Inventory\VpEditorStyle.css" />
     <Content Include="UI\Pages\Inventory\WhEvents.html" />

@@ -5,6 +5,9 @@ app.MaterialHelper = app.MaterialHelper || function() {
 
     var namedIndex = {};
 
+    var callbacks = {};
+    var loaded = false;
+
     var loadMaterials = function() {
 
         lt.api("/material/GetAllMaterialInfo").get(function(info) {
@@ -12,7 +15,17 @@ app.MaterialHelper = app.MaterialHelper || function() {
                 var entity = info[i];
 
                 namedIndex[entity.MaterialName] = entity;
+
+                var cbks = callbacks[entity.MaterialName];
+                if (cbks != null) {
+                    for (let ci = 0; ci < cbks.length; ci++) {
+                        var fn = cbks[ci];
+                        fn(entity);
+                    }
+                }
             }
+
+            loaded = true;
         });
     };
 
@@ -30,6 +43,20 @@ app.MaterialHelper = app.MaterialHelper || function() {
 
     self.getMaterialInfoByName = function(name) {
         return namedIndex[name];
+    };
+
+    self.waitMaterialInfoByName = function(name, callback) {
+        if (self.getMaterialInfoByName(name) != null) {
+            callback(self.getMaterialInfoByName(name));
+            return;
+        }
+
+        if (loaded) {
+            callback(null);
+            return;
+        }
+
+        (callbacks[name] = callbacks[name] || []).push(callback);
     };
 
     self.autofill = function(tbMaterial, tbUnit, tbBatch, onComplete) {

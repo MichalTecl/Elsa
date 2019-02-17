@@ -60,6 +60,25 @@
 
         lt.replaceBy(resultsPlaceholder, "/UI/Controls/Inventory/BatchesOverview/BatchList.html", function(lst) {
             self.list = lst;
+            
+            app.ui.autosuggest(materialAutocompleteContainer, app.warehouseActions.vm.searchMaterialNames);
+
+            app.urlBus.watch("findBatches",
+                function (qry) {
+                    tbMaterial.value = qry.materialName;
+
+                    var invokeSearch = function() {
+                        if ((!self.list) || (!self.list.setQuery) || (!app) || (!app.batchesOverview) || (!app.batchesOverview.vm)) 
+                        {
+                            setTimeout(invokeSearch, 100);
+                            return;
+                        }
+                        self.doSearch();
+                    };
+
+                    invokeSearch();
+                   
+            });
         });
         
         var emptyToNull = function (input) {
@@ -96,15 +115,15 @@
 
             var materialName = emptyToNull(tbMaterial);
             if (materialName != null) {
-                var matInfo = app.materialHelper.getMaterialInfoByName(materialName);
-                if (matInfo != null) {
-                    q.MaterialId = matInfo.MaterialId;
-                }
+                app.materialHelper.waitMaterialInfoByName(materialName, function(matInfo) {
+                    if (matInfo != null) {
+                        q.MaterialId = matInfo.MaterialId;
+                    }
+                    self.list.setQuery(q);
+                });
+            } else {
+                self.list.setQuery(q);
             }
-
-            self.list.setQuery(q);
         };
-        
-        app.ui.autosuggest(materialAutocompleteContainer, app.warehouseActions.vm.searchMaterialNames);
     });
 </script>

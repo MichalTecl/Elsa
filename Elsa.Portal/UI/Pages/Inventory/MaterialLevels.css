@@ -1,0 +1,7 @@
+﻿.materialLevelRow {
+    
+}
+
+.materialLevelRow.isWarning {
+    background-color: rgba(204, 169, 44, 0.6);
+}

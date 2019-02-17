@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ELSA</title>
+    <meta charset="utf-8" />
+    <script src="/Bundles/Bundle.ashx?bundle=Lanta"></script>
+    <script src="/Script/Apps/User/UserVM.js"></script>
+    
+    
+</head>
+<body>
+    <div replace-by="/UI/Widgets/User/UserWidget.html"></div>
+
+    <div class="panel w4" >
+        <div class="panelHead">
+            <div class="panelTitle">Stavy zásob</div>
+        </div>
+        <div id="levelsUi" class="panelContent">
+            <div class="gridRow gridHead">
+                <div class="cell1"></div>
+                <div class="cell10">Materiál</div>
+                <div class="cell5">Dostupné</div>
+                <div class="cell5">Minimální</div>
+            </div>
+            <div id="list" data-key="MaterialId" data-bind="itemsSource:levels;class.isWarning:isWarning">
+                <div class="lt-template">
+                    <div class="materialLevelRow" >
+                        <div class="gridRow">
+                            <div class="cell1">
+                                <i class="fas fa-exclamation-triangle" style="color:red" data-bind="class!.hidden:isWarning"></i>
+                            </div>
+                            <div class="cell10">
+                                <a class="matName" data-bind="text:MaterialName;href:batchesLink"></a>
+                            </div>
+                            <div class="cell5 matVolume" data-bind="text:actualValue"></div>
+                            <div class="cell5" data-bind="text:minValue"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        lt.element("levelsUi").withModel("app.MaterialLevels.vm").attach(function(list) {});
+    </script>
+
+
+    <div replace-by="/UI/Controls/Common/BusyOverlay.html"></div>
+    
+    <link href="/Style/Appearance.css" rel="stylesheet" />
+    <link href="/Style/Layout.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <script src="/Script/Apps/Inventory/Material/MaterialLevels.VM.js"></script>
+    <script>
+        app.MaterialLevels.vm.loadLevels();
+    </script>
+    <link href="MaterialLevels.css" rel="stylesheet" />
+</body>
+</html>
