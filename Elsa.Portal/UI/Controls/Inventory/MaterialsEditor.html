@@ -62,7 +62,20 @@
                                     <input type="checkbox" lt-name="cbPrice" data-bind="checked:RequiresPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked)" />
                                     <label>Sledovat nákupní cenu</label>
                                 </div>
+                                
+                                <!-- threshold-->
+                                <div class="materialFlagEdit thresholdContainer">
+                                    <div class="stackLeft">
+                                        <input type="checkbox" lt-name="cbHasThreshold" data-bind="checked:HasThreshold" event-bind="change:onThresholdChanged(VM, $cbHasThreshold.checked, $tbThreshold.value)"/>
+                                        <label>Varovat při minimálním množství</label>
+                                    </div>
+                                    <input data-bind="value:ThresholdText;class!.hidden:HasThreshold" lt-name="tbThreshold" event-bind="change:onThresholdChanged(VM, $cbHasThreshold.checked, $tbThreshold.value)" />
+                                </div>
+
                             </div>
+                            
+                            
+
                         </div>
 
                         <div class="itemEditFoot">
@@ -199,6 +212,14 @@
         this.onProductionStepRemoveClick = function(model) {
             console.log(model);
             app.virtualProductsEditor.vm.deleteProductionStep(model);
+        };
+
+        this.onThresholdChanged = function(model, hasThreshold, thresholdText) {
+
+            model.HasThreshold = hasThreshold;
+            model.ThresholdText = thresholdText;
+            
+            lt.notify();
         };
     });
 </script>

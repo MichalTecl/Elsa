@@ -308,7 +308,9 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             RequiresPrice: model.RequiresPrice,
             RequiresInvoice: model.RequiresInvoice,
             Materials: [],
-            ProductionSteps: []
+            ProductionSteps: [],
+            HasThreshold: model.HasThreshold,
+            ThresholdText: model.ThresholdText
         };
 
         for (var i = 0; i < model.materials.length; i++) {

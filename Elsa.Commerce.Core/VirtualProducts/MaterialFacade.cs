@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
+using Elsa.Commerce.Core.Warehouse.Thresholds;
 using Elsa.Common;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
@@ -22,8 +23,15 @@ namespace Elsa.Commerce.Core.VirtualProducts
         private readonly IUnitConversionHelper m_conversionHelper;
         private readonly IVirtualProductRepository m_virtualProductRepository;
         private readonly ISession m_session;
+        private readonly IMaterialThresholdRepository m_materialThresholdRepository;
 
-        public MaterialFacade(IDatabase database, IMaterialRepository materialRepository, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper, IVirtualProductRepository virtualProductRepository, ISession session)
+        public MaterialFacade(IDatabase database,
+            IMaterialRepository materialRepository,
+            IUnitRepository unitRepository,
+            IUnitConversionHelper conversionHelper,
+            IVirtualProductRepository virtualProductRepository,
+            ISession session,
+            IMaterialThresholdRepository materialThresholdRepository)
         {
             m_database = database;
             m_materialRepository = materialRepository;
@@ -31,6 +39,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_conversionHelper = conversionHelper;
             m_virtualProductRepository = virtualProductRepository;
             m_session = session;
+            m_materialThresholdRepository = materialThresholdRepository;
         }
 
         public IExtendedMaterialModel ProcessMaterialEditRequest(
@@ -41,7 +50,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool automaticBatches,
             bool requiresPrice,
             bool requiresIncvoice, 
-            IEnumerable<string> components)
+            IEnumerable<string> components,
+            string thresholdText)
         {
             name = name?.Trim();
 
@@ -127,11 +137,37 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
                         materialRepository.SetMaterialComponent(material.Id, componentMaterial.Id, componentEntry.Amount, componentUnit.Id);
                     }
+                }
 
+                if (thresholdText == null)
+                {
+                    m_materialThresholdRepository.DeleteThreshold(material.Id);
+                }
+                else
+                {
+                    try
+                    {
+                        var thresholdEntry = MaterialEntry.Parse(thresholdText, true);
+
+                        var thresholdUnit = m_unitRepository.GetUnitBySymbol(thresholdEntry.UnitName);
+                        if (thresholdUnit == null)
+                        {
+                            throw new InvalidOperationException($"Neznámý symbol jednotky \"{thresholdEntry.UnitName}\"");
+                        }
+
+                        m_materialThresholdRepository.SaveThreshold(material.Id,
+                            thresholdEntry.Amount,
+                            thresholdUnit.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Nelze nastavit sledování minimálního množství - {ex.Message}", ex);
+                    }
                 }
 
                 tx.Commit();
                 m_virtualProductRepository.CleanCache();
+                m_materialRepository.CleanCache();
                 return m_materialRepository.GetMaterialById(material.Id);
             }
         }

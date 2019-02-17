@@ -84,6 +84,7 @@
     <Compile Include="Model\MaterialAmountModel.cs" />
     <Compile Include="Model\IMaterialBatchStatus.cs" />
     <Compile Include="Model\MaterialBatchResolutionModel.cs" />
+    <Compile Include="Model\MaterialLevelModel.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
     <Compile Include="Model\ProductionStepViewModel.cs" />
     <Compile Include="Production\IProductionFacade.cs" />
@@ -145,6 +146,8 @@
     <Compile Include="Warehouse\Impl\MaterialBatchFacade.cs" />
     <Compile Include="Warehouse\Impl\MaterialBatchRepository.cs" />
     <Compile Include="Warehouse\MaterialBatchComponent.cs" />
+    <Compile Include="Warehouse\Thresholds\IMaterialThresholdRepository.cs" />
+    <Compile Include="Warehouse\Thresholds\MaterialThresholdRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="CurrencyRates\" />

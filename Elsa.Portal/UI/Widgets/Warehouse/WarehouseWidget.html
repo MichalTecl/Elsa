@@ -5,14 +5,21 @@
     </div>
 
     <div class="panelContent" id="ordersOvwPanel" style="">
-        <a href="/UI/Pages/Inventory/WhEvents.html">Akce skladu</a>
-        <a href="/UI/Pages/Inventory/VirtualProductsEditor.html">Konfigurace</a>
+        <div> <a href="/UI/Pages/Inventory/WhEvents.html">Akce skladu</a></div>
+        <div><a href="/UI/Pages/Inventory/VirtualProductsEditor.html">Konfigurace</a></div>
+
+        <div>
+            <div class="stackLeft">
+                <i class="fas fa-exclamation-triangle lowMaterialLevelExcl" lt-name="icoLowMaterial"></i>
+                <a href="/UI/Pages/Inventory/MaterialLevels.html">Přehled zásob</a>
+            </div>
+        </div>
 
     </div>
 
 </div>
 <script>
-    lt.element("whWidget").attach(function () {
+    lt.element("whWidget").attach(function (icoLowMaterial) {
 
     });
 </script>

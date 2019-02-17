@@ -61,6 +61,8 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
 
         public IEnumerable<IMaterialProductionStep> Steps { get; }
 
+        public IMaterialThreshold Threshold { get; }
+
         public void AddComposition(IMaterial material, decimal amount)
         {
             m_composition.Add(new CompositionMock(this, material, amount));

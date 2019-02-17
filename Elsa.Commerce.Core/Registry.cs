@@ -7,6 +7,7 @@ using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Commerce.Core.Warehouse.BatchReporting;
 using Elsa.Commerce.Core.Warehouse.Impl;
+using Elsa.Commerce.Core.Warehouse.Thresholds;
 
 using Robowire;
 
@@ -42,6 +43,7 @@ namespace Elsa.Commerce.Core
             setup.For<IProductionFacade>().Use<ProductionFacade>();
             setup.For<IBatchStatusManager>().Use<BatchStatusManager>();
             setup.For<IBatchReportingFacade>().Use<BatchReportingFacade>();
+            setup.For<IMaterialThresholdRepository>().Use<MaterialThresholdRepository>();
         }
     }
 }

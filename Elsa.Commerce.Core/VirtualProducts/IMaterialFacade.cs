@@ -15,7 +15,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool automaticBatches,
             bool requiresPrice,
             bool requiresInvoice,
-            IEnumerable<string> components);
+            IEnumerable<string> components,
+            string thresholdText);
 
         IExtendedMaterialModel ProcessProductionStepsEditRequest(
             IExtendedMaterialModel owner,

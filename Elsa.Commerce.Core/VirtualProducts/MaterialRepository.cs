@@ -122,6 +122,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     .Join(m => m.Composition)
                     .Join(m => m.Composition.Each().Unit)
                     .Join(m => m.VirtualProductMaterials)
+                    .Join(m => m.Thresholds)
+                    .Join(m => m.Thresholds.Each().Unit)
                     .Join(m => m.Inventory)
                     .Join(m => m.Steps.Each().Components.Each().Material)
                     .Join(m => m.Steps.Each().Components.Each().Unit)

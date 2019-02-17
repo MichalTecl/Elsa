@@ -36,5 +36,11 @@ namespace Elsa.Commerce.Core.Warehouse
         void ReleaseBatchAmountCache(IMaterialBatch batch);
 
         IEnumerable<string> GetDeletionBlockReasons(int batchId);
+
+        IEnumerable<MaterialLevelModel> GetMaterialLevels();
+
+        MaterialLevelModel GetMaterialLevel(int materialId);
+
+        int GetMaterialIdByBatchId(int batchId);
     }
 }

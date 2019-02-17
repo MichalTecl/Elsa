@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using Elsa.Commerce.Core.Units;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
@@ -29,6 +30,13 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             AutomaticBatches = adaptee.AutomaticBatches;
             RequiresInvoice = adaptee.RequiresInvoiceNr ?? false;
             RequiresPrice = adaptee.RequiresPrice ?? false;
+
+            var threshold = adaptee.Thresholds?.FirstOrDefault();
+            if (threshold != null)
+            {
+                HasThreshold = true;
+                ThresholdText = $"{StringUtil.FormatDecimal(threshold.ThresholdQuantity)} {threshold.Unit.Symbol}";
+            }
 
             var stepsAssorted = adaptee.Steps.Select(s => new MaterialProductionStepModel(s)).ToList();
             List<MaterialProductionStepModel> stepsSorted = null;
@@ -80,6 +88,10 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public IMaterial Adaptee { get; }
         
         public IEnumerable<MaterialComponent> Components => m_components;
+
+        public bool HasThreshold { get; set; }
+
+        public string ThresholdText { get; set; }
 
         public IEnumerable<MaterialProductionStepModel> ProductionSteps { get; }
 

@@ -8,6 +8,7 @@ using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
+using Elsa.Commerce.Core.Warehouse.Thresholds;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Logging;
@@ -35,8 +36,9 @@ namespace Elsa.Apps.Inventory
         private readonly IMaterialFacade m_materialFacade;
         private readonly IUnitConversionHelper m_conversionHelper;
         private readonly IDatabase m_database;
+        private readonly IMaterialThresholdRepository m_materialThresholdRepository;
 
-        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade, IUnitConversionHelper conversionHelper, IDatabase database)
+        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade, IUnitConversionHelper conversionHelper, IDatabase database, IMaterialThresholdRepository materialThresholdRepository)
             : base(webSession, log)
         {
             m_virtualProductRepository = virtualProductRepository;
@@ -47,6 +49,7 @@ namespace Elsa.Apps.Inventory
             m_materialFacade = materialFacade;
             m_conversionHelper = conversionHelper;
             m_database = database;
+            m_materialThresholdRepository = materialThresholdRepository;
         }
 
         public IEnumerable<VirtualProductViewModel> GetVirtualProducts(string searchQuery)
@@ -201,11 +204,20 @@ namespace Elsa.Apps.Inventory
 
         public IExtendedMaterialModel GetMaterialById(int id)
         {
-            return m_materialRepository.GetMaterialById(id);
+            var material = m_materialRepository.GetMaterialById(id);
+
+            if (material == null)
+            {
+                return null;
+            }
+            
+            return material;
         }
 
         public IExtendedMaterialModel SaveMaterial(MaterialEditRequestModel request)
         {
+            var thresholdText = request.HasThreshold ? (request.ThresholdText ?? string.Empty) : null;
+
             using (var tx = m_database.OpenTransaction())
             {
                 var saved = m_materialFacade.ProcessMaterialEditRequest(
@@ -216,10 +228,9 @@ namespace Elsa.Apps.Inventory
                     request.AutomaticBatches,
                     request.RequiresPrice,
                     request.RequiresInvoice,
-                    request.Materials.Select(s => s.DisplayText));
-
+                    request.Materials.Select(s => s.DisplayText),
+                    thresholdText);
                 
-
                 if (saved.ProductionSteps.Any() || request.ProductionSteps.Any())
                 {
                     saved = m_materialFacade.ProcessProductionStepsEditRequest(saved, request.ProductionSteps);

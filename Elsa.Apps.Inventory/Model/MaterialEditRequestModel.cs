@@ -20,6 +20,9 @@ namespace Elsa.Apps.Inventory.Model
 
         public bool RequiresPrice { get; set; }
 
+        public bool HasThreshold { get; set; }
+        public string ThresholdText { get; set; }
+
         public List<VirtualProductEditRequestModel.VpMaterialEditRequestModel> Materials { get; set; }
 
         public List<ProductionStepRequestModel> ProductionSteps { get; set; }
