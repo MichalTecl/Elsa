@@ -256,7 +256,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             public Amount CurrentAvailableAmount { get; set; }
 
-            public Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId)
+            public Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId, bool pretendAllStepsDone = false)
             {
                 var steps = new List<Func<Amount, Amount>>();
 
@@ -266,6 +266,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 steps.Add(
                     mainBatchAmount =>
                     {
+                        if (pretendAllStepsDone)
+                        {
+                            return new Amount(m_batch.Volume, m_batch.Unit);
+                        }
+
                         foreach (var requiredStep in RequiredSteps.Ordered().Reverse())
                         {
                             var resolvedSteps = ResolvedSteps.Where(s => (s.Id != filteredStepId) && (s.StepId == requiredStep.Id)).Distinct().ToList();

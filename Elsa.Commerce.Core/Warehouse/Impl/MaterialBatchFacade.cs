@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
@@ -36,6 +37,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IMaterialThresholdRepository m_materialThresholdRepository;
         private readonly IMaterialRepository m_materialRepository;
         private readonly IUnitRepository m_unitRepository;
+        private readonly IStockEventRepository m_stockEventRepository;
 
         public MaterialBatchFacade(
             ILog log,
@@ -51,7 +53,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             IBatchStatusManager batchStatusManager,
             IMaterialThresholdRepository materialThresholdRepository,
             IMaterialRepository materialRepository,
-            IUnitRepository unitRepository)
+            IUnitRepository unitRepository,
+            IStockEventRepository stockEventRepository)
         {
             m_log = log;
             m_virtualProductFacade = virtualProductFacade;
@@ -67,6 +70,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_materialThresholdRepository = materialThresholdRepository;
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
+            m_stockEventRepository = stockEventRepository;
         }
 
         public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity)
@@ -594,6 +598,48 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     .Where(b => b.Id == batchId)
                     .Execute()
                     .FirstOrDefault()?.MaterialId ?? -1);
+        }
+
+        public BatchEventAmountSuggestions GetEventAmountSuggestions(int eventTypeId, int batchId)
+        {
+            var eventType = m_stockEventRepository.GetAllEventTypes().FirstOrDefault(e => e.Id == eventTypeId);
+            if (eventType == null)
+            {
+                return null;
+            }
+
+            var batch = m_batchRepository.GetBatchById(batchId);
+            if (batch == null)
+            {
+                return null;
+            }
+
+            var status = GetBatchStatus(batch.Batch.Id);
+
+            var available = GetAvailableAmount(batchId);
+            var availableIgnoringSteps = eventType.CanTargetUnfinishedBatch ? status.CalculateAvailableAmount(m_amountProcessor, -1, true) : null;
+
+            var maximum = availableIgnoringSteps ?? available;
+
+            var suggestion = new BatchEventAmountSuggestions(batchId, eventTypeId, maximum.Value, batch.ComponentUnit.IntegerOnly);
+
+            if (batch.ComponentUnit.IntegerOnly)
+            {
+                suggestion.AddSuggestion(new Amount(1, batch.ComponentUnit));
+                suggestion.AddSuggestion(new Amount(5, batch.ComponentUnit));
+                suggestion.AddSuggestion(new Amount(10, batch.ComponentUnit));
+                suggestion.AddSuggestion(new Amount(100, batch.ComponentUnit));
+            }
+            
+            suggestion.AddSuggestion(available);
+
+            if (eventType.CanTargetUnfinishedBatch)
+            {
+                suggestion.AddSuggestion(availableIgnoringSteps);
+                suggestion.AddSuggestion(m_amountProcessor.Subtract(availableIgnoringSteps, available));
+            }
+
+            return suggestion;
         }
 
         public IMaterialBatchStatus GetBatchStatus(int batchId)

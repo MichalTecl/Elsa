@@ -70,6 +70,7 @@
     <Compile Include="IUnitRepository.cs" />
     <Compile Include="IKitProductRepository.cs" />
     <Compile Include="IUserRepository.cs" />
+    <Compile Include="Model\BatchEventAmountSuggestions.cs" />
     <Compile Include="Model\BatchReporting\BatchOrderModel.cs" />
     <Compile Include="Model\BatchReporting\BatchOrdersReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchProductionStepReportEntry.cs" />
@@ -100,6 +101,8 @@
     <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Repositories\VirtualProductRepository.cs" />
     <Compile Include="Shipment\IShipmentProvider.cs" />
+    <Compile Include="StockEvents\IStockEventRepository.cs" />
+    <Compile Include="StockEvents\StockEventRepository.cs" />
     <Compile Include="Units\AmountProcessor.cs" />
     <Compile Include="Units\IUnitConversionHelper.cs" />
     <Compile Include="Units\UnitConversionHelper.cs" />

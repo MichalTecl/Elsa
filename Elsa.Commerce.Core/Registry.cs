@@ -2,6 +2,7 @@
 using Elsa.Commerce.Core.Impl;
 using Elsa.Commerce.Core.Production;
 using Elsa.Commerce.Core.Repositories;
+using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
@@ -44,6 +45,7 @@ namespace Elsa.Commerce.Core
             setup.For<IBatchStatusManager>().Use<BatchStatusManager>();
             setup.For<IBatchReportingFacade>().Use<BatchReportingFacade>();
             setup.For<IMaterialThresholdRepository>().Use<MaterialThresholdRepository>();
+            setup.For<IStockEventRepository>().Use<StockEventRepository>();
         }
     }
 }

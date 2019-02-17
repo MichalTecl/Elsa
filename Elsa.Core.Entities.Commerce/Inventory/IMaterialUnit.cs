@@ -12,5 +12,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         [NVarchar(10, false)]
         string Symbol { get; set; }
+
+        bool IntegerOnly { get; set; }
     }
 }

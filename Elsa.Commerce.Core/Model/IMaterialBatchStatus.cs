@@ -24,6 +24,6 @@ namespace Elsa.Commerce.Core.Model
         
         Amount CurrentAvailableAmount { get; }
 
-        Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId);
+        Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId, bool pretendAllStepsDone = false);
     }
 }

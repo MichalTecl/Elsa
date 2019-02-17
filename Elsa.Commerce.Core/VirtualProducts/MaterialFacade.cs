@@ -324,7 +324,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                             IsManufactured = material.IsManufactured,
                             MaterialName = material.Name,
                             RequiresInvoice = material.RequiresInvoice,
-                            RequiresPrice = material.RequiresInvoice
+                            RequiresPrice = material.RequiresInvoice,
+                            AutomaticBatches = material.AutomaticBatches
                         };
 
             if (material.AutomaticBatches)

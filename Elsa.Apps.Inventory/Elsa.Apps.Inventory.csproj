@@ -61,6 +61,7 @@
     <Compile Include="Model\VirtualProductViewModel.cs" />
     <Compile Include="ProductionStepsController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StockEventsController.cs" />
     <Compile Include="VirtualProductsController.cs" />
     <Compile Include="WarehouseActionsController.cs" />
   </ItemGroup>

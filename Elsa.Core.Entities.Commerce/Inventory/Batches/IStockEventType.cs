@@ -27,5 +27,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         bool CanBePlus { get; set; }
 
         bool RequiresNote { get; set; }
+
+        bool CanTargetUnfinishedBatch { get; set; }
     }
 }

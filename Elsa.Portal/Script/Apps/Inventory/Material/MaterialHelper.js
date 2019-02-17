@@ -4,6 +4,7 @@ app.MaterialHelper = app.MaterialHelper || function() {
     var self = this;
 
     var namedIndex = {};
+    var idIndex = {};
 
     var callbacks = {};
     var loaded = false;
@@ -15,6 +16,7 @@ app.MaterialHelper = app.MaterialHelper || function() {
                 var entity = info[i];
 
                 namedIndex[entity.MaterialName] = entity;
+                idIndex[entity.MaterialId] = entity;
 
                 var cbks = callbacks[entity.MaterialName];
                 if (cbks != null) {
@@ -57,6 +59,14 @@ app.MaterialHelper = app.MaterialHelper || function() {
         }
 
         (callbacks[name] = callbacks[name] || []).push(callback);
+    };
+
+    self.getMaterialInfoById = function(materialId) {
+        if (materialId == null) {
+            return null;
+        }
+
+        return idIndex[materialId];
     };
 
     self.autofill = function(tbMaterial, tbUnit, tbBatch, onComplete) {

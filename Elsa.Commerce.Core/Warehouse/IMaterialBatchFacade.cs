@@ -42,5 +42,7 @@ namespace Elsa.Commerce.Core.Warehouse
         MaterialLevelModel GetMaterialLevel(int materialId);
 
         int GetMaterialIdByBatchId(int batchId);
+
+        BatchEventAmountSuggestions GetEventAmountSuggestions(int eventTypeId, int batchId);
     }
 }

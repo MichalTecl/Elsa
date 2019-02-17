@@ -21,5 +21,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool RequiresPrice { get; set; }
 
         public bool RequiresInvoice { get; set; }
+
+        public bool AutomaticBatches { get; set; }
     }
 }

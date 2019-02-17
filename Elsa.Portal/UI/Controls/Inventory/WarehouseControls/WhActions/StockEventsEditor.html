@@ -1,0 +1,80 @@
+﻿<script src="/Script/Apps/Inventory/WarehouseActions/StockEvents.VM.js"></script>
+<div id="stockEventsEditor">
+    <div lt-name="tab">
+    </div>
+    <div class="evtPanel">
+        <div class="formRow">
+            <label for="tbMaterialName">Materiál</label>
+            <div class="autocomplete" lt-name="materialAutocompleteContainer">
+                <input id="tbMaterialName" event-bind="change:onMaterialChanged($tbMaterialName.value)" />
+            </div>
+        </div>
+        
+        <div class="formRow" data-bind="class!.hidden:batchRequired">
+            <label for="tbBatchNr">Šarže</label>
+            <input type="text" id="tbBatchNr" data-bind="value:currentBatchNumber" event-bind="change:onBatchChanged($tbBatchNr.value)"/>
+        </div>
+        
+        <div class="formRow">
+            <label for="tbAmount">Množství</label>
+            <div class="stackLeft">
+                <input id="tbAmount" type="number" step="0.0001" />
+                <div data-bind="text:materialUnit"></div>
+            </div>
+            <div class="suggestList stackLeft" data-key="AmountName" data-bind="itemsSource:suggestedAmounts">
+                <a class="lt-template" data-bind="text:AmountName" event-bind="click:setAmount(Amount, $tbAmount)" ></a>
+            </div>
+        </div>
+        
+        <div class="formRow" data-bind="class!.hidden:currentEventType.RequiresNote">
+            <label for="tbNote">Důvod</label>
+            <textarea id="tbNote"></textarea>
+        </div>
+
+    </div>
+</div>
+<script>
+    lt.element("stockEventsEditor").withModel("app.StockEvents.vm").attach(function(tab, tbMaterialName, materialAutocompleteContainer) {
+
+        const eventTypesTab = new app.ui.TabControl(tab);
+
+        var switchEventType = function(etypeModel) {
+            app.StockEvents.vm.changeCurrentEventType(etypeModel.Id);
+        };
+
+        this.bind(function(eventTypes) {
+
+            for (let i = 0; i < eventTypes.length; i++) {
+                var etype = eventTypes[i];
+                eventTypesTab.addTab(etype.TabTitle, null, etype, switchEventType, etype.Id);
+            }            
+        });
+
+        this.bind(function (currentEventType) {
+
+            tbMaterialName.value = "";
+            
+            eventTypesTab.selectTab(currentEventType.Id);
+        });
+
+        this.onMaterialChanged = function(materialName) {
+            const mat = app.materialHelper.getMaterialInfoByName(materialName);
+            let mid = null;
+            if (!!mat) {
+                mid = mat.MaterialId;
+            }
+            app.StockEvents.vm.setMaterialId(mid);
+        };
+
+        this.onBatchChanged = function(qry) {
+            app.StockEvents.vm.findBatch(qry);
+        };
+
+        this.setAmount = function(amount, textBox) {
+            textBox.value = amount;
+        };
+
+        app.ui.autosuggest(materialAutocompleteContainer, app.warehouseActions.vm.searchMaterialNames);
+
+    });
+</script>
