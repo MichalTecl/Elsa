@@ -59,5 +59,21 @@ namespace Elsa.Common.Caching
             key = $"key_{key}_by_projectId={m_session.Project.Id}";
             m_cache.Remove(key);
         }
+
+        public void Save<T>(T entity) where T : class, IProjectRelatedEntity
+        {
+            entity.ProjectId = m_session.Project.Id;
+            m_database.Save(entity);
+        }
+
+        public T New<T>() where T : class
+        {
+            return m_database.New<T>();
+        }
+
+        public ITransaction OpenTransaction()
+        {
+            return m_database.OpenTransaction();
+        }
     }
 }

@@ -21,13 +21,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         [NVarchar(64, false)]
         string TabTitle { get; set; }
-
-        bool CanBeMinus { get; set; }
-
-        bool CanBePlus { get; set; }
+        
+        bool IsSubtracting { get; set; }
 
         bool RequiresNote { get; set; }
-
-        bool CanTargetUnfinishedBatch { get; set; }
     }
 }

@@ -30,6 +30,11 @@
             <label for="tbNote">Důvod</label>
             <textarea id="tbNote"></textarea>
         </div>
+        
+        <div class="formActions">
+            <button class="butCancel" event-bind="click:cancel"></button>
+            <button class="butSubmit" event-bind="click:save($tbMaterialName.value, $tbBatchNr.value, $tbAmount.value, $tbNote.value)"></button>
+        </div>
 
     </div>
 </div>
@@ -76,5 +81,33 @@
 
         app.ui.autosuggest(materialAutocompleteContainer, app.warehouseActions.vm.searchMaterialNames);
 
+        this.cancel = function () {
+            tbMaterialName.value = "";
+            app.StockEvents.vm.cancelEdit();
+        };
+
+        this.save = function(materialName, batchNumber, strAmount, note) {
+            var material = app.materialHelper.getMaterialInfoByName(materialName);
+            if (material == null) {
+                throw new Error("Neplatný název materiálu");
+            }
+
+            if ((!material.AutomaticBatches) && ((batchNumber || "").trim().length < 1)) {
+                throw new Error("Šarže musí být zadána");
+            }
+
+            if (app.StockEvents.vm.currentEventType.RequiresNote && ((note || "").trim().length < 5)) {
+                throw new Error("Důvod musí mít alespoň pět znaků");
+            }
+
+            var numAmount = parseFloat(strAmount);
+            if (isNaN(numAmount) || numAmount <= 0) {
+                throw new Error("Množství musí být kladné číslo");
+            }
+
+            app.StockEvents.vm.save(material.MaterialId, batchNumber, numAmount, note, function() {
+                self.cancel();
+            });
+        };
     });
 </script>

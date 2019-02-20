@@ -8,8 +8,8 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
 	this.materialUnit = null;
 	this.batchRequired = false;
 	this.currentBatchNumber = "";
-    this.suggestedAmounts = [];
-
+	this.suggestedAmounts = [];
+    
     var materialId = null;
 
     var loadEventTypes = function() {
@@ -23,6 +23,16 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
 
     setTimeout(loadEventTypes, 0);
 
+    this.cancelEdit = function() {
+    	self.materialUnit = "";
+    	self.batchRequired = false;
+    	self.currentBatchNumber = "";
+    	self.suggestedAmounts = [];
+    	materialId = null;
+
+    	lt.notify();
+    };
+
     this.changeCurrentEventType = function(typeId) {
         if (self.eventTypes == null) {
             return;
@@ -31,17 +41,11 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
         for (let i = 0; i < self.eventTypes.length; i++) {
         	var etype = self.eventTypes[i];
         	if (etype.Id === typeId) {
-	            self.materialUnit = "";
-	            self.batchRequired = false;
-	            self.currentEventType = etype;
-	            self.currentBatchNumber = "";
-	            self.suggestedAmounts = [];
-	            materialId = null;
+        		self.currentEventType = etype;
+	            self.cancelEdit();
             	break;
             }
         }
-
-        lt.notify();
     };
 
     this.setMaterialId = function(id) {
@@ -73,6 +77,18 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
                     });
             }
         });
+    };
+
+    this.save = function(matId, batchNumber, quantity, reason, successCallback) {
+        lt.api("/stockEvents/saveEvent")
+            .query({
+                "eventTypeId": self.currentEventType.Id,
+                "materialId": matId,
+                "batchNumber": batchNumber,
+                "quantity": quantity,
+                "reason": reason
+            })
+            .get(successCallback);
     };
 };
 

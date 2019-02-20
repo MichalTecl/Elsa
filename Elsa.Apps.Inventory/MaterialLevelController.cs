@@ -8,6 +8,7 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 
 using Robowire.RoboApi;
 
@@ -35,7 +36,7 @@ namespace Elsa.Apps.Inventory
 
             foreach (var lowMaterial in m_batchFacade.GetMaterialLevels().OrderBy(m => m.PercentLevel).Where(l => l.ActualValue < l.MinValue))
             {
-                sb.AppendLine($"{lowMaterial.ActualValue}{lowMaterial.Unit} {lowMaterial.MaterialName}");
+                sb.AppendLine($"{StringUtil.FormatDecimal(lowMaterial.ActualValue)} {lowMaterial.Unit} {lowMaterial.MaterialName}");
             }
 
             if (sb.Length == 0)

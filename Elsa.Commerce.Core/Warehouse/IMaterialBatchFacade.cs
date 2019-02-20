@@ -28,7 +28,7 @@ namespace Elsa.Commerce.Core.Warehouse
 
         void UnassignComponent(int parentBatchId, int componentBatchId);
 
-        IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount, bool unresolvedAsNullBatch = false);
+        IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount, bool unresolvedAsNullBatch = false, int? batchId = null);
 
         void SetBatchLock(int batchId, bool lockValue, string note);
 

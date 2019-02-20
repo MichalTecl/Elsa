@@ -45,6 +45,22 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return MapToModel(entity);
         }
 
+        public MaterialBatchComponent GetBatchByNumber(int materialId, string batchNumber)
+        {
+            var batch =
+                GetBatchQuery()
+                    .Where(b => b.MaterialId == materialId && b.BatchNumber == batchNumber)
+                    .Execute()
+                    .FirstOrDefault();
+
+            if (batch == null)
+            {
+                return null;
+            }
+
+            return MapToModel(batch);
+        }
+
         private MaterialBatchComponent MapToModel(IMaterialBatch entity)
         {
             var model = new MaterialBatchComponent(entity);
@@ -310,6 +326,20 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                             .Execute()
                             .FirstOrDefault()?.BatchNumber;
                 });
+        }
+
+        public int? GetBatchIdByNumber(int materialId, string batchNumber)
+        {
+            return m_cache.ReadThrough($"batchIdByNr_{materialId}_{batchNumber}",
+                TimeSpan.FromHours(24),
+                () =>
+                    m_database.SelectFrom<IMaterialBatch>()
+                        .Where(b => b.ProjectId == m_session.Project.Id)
+                        .Where(b => b.BatchNumber == batchNumber)
+                        .Where(b => b.MaterialId == materialId)
+                        .Take(1)
+                        .Execute()
+                        .FirstOrDefault()?.Id);
         }
 
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()

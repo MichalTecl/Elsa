@@ -90,6 +90,7 @@
     <Compile Include="Utils\CsvGenerator.cs" />
     <Compile Include="Utils\DateUtil.cs" />
     <Compile Include="Utils\GenericComparer.cs" />
+    <Compile Include="Utils\ObjectExtensions.cs" />
     <Compile Include="Utils\StringUtil.cs" />
     <Compile Include="WidgetsController.cs" />
   </ItemGroup>

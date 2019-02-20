@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
@@ -32,12 +33,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IDatabase m_database;
         private readonly IServiceLocator m_serviceLocator;
         private readonly IMaterialRepository m_materialRepository;
+        private readonly IStockEventRepository m_eventRepository;
 
         private IOrdersFacade m_injectedOrdersFacade;
 
         private IOrdersFacade OrdersFacade => m_injectedOrdersFacade ?? (m_injectedOrdersFacade = m_serviceLocator.Get<IOrdersFacade>());
 
-        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator, IMaterialRepository materialRepository)
+        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator, IMaterialRepository materialRepository, IStockEventRepository eventRepository)
         {
             m_batchRepository = batchRepository;
             m_orderRepository = orderRepository;
@@ -45,6 +47,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_database = database;
             m_serviceLocator = serviceLocator;
             m_materialRepository = materialRepository;
+            m_eventRepository = eventRepository;
         }
 
         public IMaterialBatchStatus GetStatus(int batchId)
@@ -148,14 +151,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private void PopulateEvents(int batchId, BatchStatus model)
         {
             var events = m_cache.ReadThrough(GetEventsCacheKey(batchId), s_cacheTimeout,
-                () =>
-                    {
-                        return
-                            m_database.SelectFrom<IMaterialStockEvent>()
-                                .Join(e => e.Unit)
-                                .Where(e => e.BatchId == batchId)
-                                .Execute();
-                    });
+                () => m_eventRepository.GetBatchEvents(batchId));
 
             model.Events.AddRange(events);
         }
@@ -256,7 +252,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             public Amount CurrentAvailableAmount { get; set; }
 
-            public Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId, bool pretendAllStepsDone = false)
+            public Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId)
             {
                 var steps = new List<Func<Amount, Amount>>();
 
@@ -266,11 +262,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 steps.Add(
                     mainBatchAmount =>
                     {
-                        if (pretendAllStepsDone)
-                        {
-                            return new Amount(m_batch.Volume, m_batch.Unit);
-                        }
-
                         foreach (var requiredStep in RequiredSteps.Ordered().Reverse())
                         {
                             var resolvedSteps = ResolvedSteps.Where(s => (s.Id != filteredStepId) && (s.StepId == requiredStep.Id)).Distinct().ToList();
@@ -292,7 +283,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 //Events
                 steps.Add(mainBatchAmount =>
                 {
-                    var eventsSum = amountProcessor.Sum(Events.Select(e => new Amount(e.Delta, e.Unit)));
+                    var eventsSum = amountProcessor.Sum(Events.Select(e => new Amount(e.Type.IsSubtracting ? -1m * e.Delta : e.Delta, e.Unit)));
                     return amountProcessor.Add(mainBatchAmount, eventsSum);
                 });
 

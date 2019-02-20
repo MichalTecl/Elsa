@@ -11,6 +11,7 @@ using Elsa.Commerce.Core.Warehouse.Thresholds;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
@@ -365,14 +366,28 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
-        public IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount, bool unresolvedAsNullBatch = false)
+        public IEnumerable<Tuple<IMaterialBatch, Amount>> AutoResolve(int materialId, Amount requiredAmount, bool unresolvedAsNullBatch = false, int? batchId = null)
         {
-            var batches =
-                m_batchRepository.GetMaterialBatches(
+            var batches = new List<MaterialBatchComponent>();
+
+            if (batchId == null)
+            {
+                batches.AddRange(m_batchRepository.GetMaterialBatches(
                     DateTime.Now.AddYears(-1),
                     DateTime.Now.AddYears(1),
                     false,
-                    materialId).OrderBy(b => b.Batch.Created);
+                    materialId).OrderBy(b => b.Batch.Created));
+            }
+            else
+            {
+                var batch = m_batchRepository.GetBatchById(batchId.Value).Ensure();
+                if (batch.Batch.MaterialId != materialId)
+                {
+                    throw new InvalidOperationException("Invalid entity reference");
+                }
+
+                batches.Add(batch);
+            }
 
             foreach (var batch in batches)
             {
@@ -617,11 +632,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             var status = GetBatchStatus(batch.Batch.Id);
 
             var available = GetAvailableAmount(batchId);
-            var availableIgnoringSteps = eventType.CanTargetUnfinishedBatch ? status.CalculateAvailableAmount(m_amountProcessor, -1, true) : null;
-
-            var maximum = availableIgnoringSteps ?? available;
-
-            var suggestion = new BatchEventAmountSuggestions(batchId, eventTypeId, maximum.Value, batch.ComponentUnit.IntegerOnly);
+            
+            var suggestion = new BatchEventAmountSuggestions(batchId, eventTypeId, available.Value, batch.ComponentUnit.IntegerOnly);
 
             if (batch.ComponentUnit.IntegerOnly)
             {
@@ -632,13 +644,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
             
             suggestion.AddSuggestion(available);
-
-            if (eventType.CanTargetUnfinishedBatch)
-            {
-                suggestion.AddSuggestion(availableIgnoringSteps);
-                suggestion.AddSuggestion(m_amountProcessor.Subtract(availableIgnoringSteps, available));
-            }
-
+            
             return suggestion;
         }
 

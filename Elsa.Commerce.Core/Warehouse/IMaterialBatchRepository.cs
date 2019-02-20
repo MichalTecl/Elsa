@@ -13,6 +13,8 @@ namespace Elsa.Commerce.Core.Warehouse
     public interface IMaterialBatchRepository
     {
         MaterialBatchComponent GetBatchById(int id);
+
+        MaterialBatchComponent GetBatchByNumber(int materialId, string batchNumber);
         
         IEnumerable<MaterialBatchComponent> GetMaterialBatches(
             DateTime from,
@@ -43,5 +45,7 @@ namespace Elsa.Commerce.Core.Warehouse
         void MarkBatchAllProductionStepsDone(int batchId);
 
         string GetBatchNumberById(int batchId);
+
+        int? GetBatchIdByNumber(int materialId, string batchNumber);
     }
 }

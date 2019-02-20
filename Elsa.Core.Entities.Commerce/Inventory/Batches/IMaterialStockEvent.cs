@@ -27,5 +27,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         int UserId { get; set; }
         IUser User { get; }
+
+        [NVarchar(32, false)]
+        string EventGroupingKey { get; set; }
     }
 }

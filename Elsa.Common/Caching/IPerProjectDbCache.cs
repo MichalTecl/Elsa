@@ -18,5 +18,11 @@ namespace Elsa.Common.Caching
         T ReadThrough<T>(string key, Func<T> factory);
 
         void Remove(string key);
+
+        void Save<T>(T entity) where T : class, IProjectRelatedEntity;
+
+        T New<T>() where T : class;
+
+        ITransaction OpenTransaction();
     }
 }
