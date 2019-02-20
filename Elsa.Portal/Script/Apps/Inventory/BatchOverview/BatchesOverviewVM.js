@@ -64,7 +64,22 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
 
                 return;
             }
+
+            receivedBatch.stockEvents = [];
+            var eventsSource = receivedBatch.StockEventCounts || {};
             
+            for (var eventType in eventsSource) {
+                if (eventsSource.hasOwnProperty(eventType)) {
+                    receivedBatch.stockEvents.push({
+                        "type": eventType,
+                        "count": eventsSource[eventType],
+                        "expanded": false,
+                        "items": [],
+                        "batchId": receivedBatch.BatchId
+                    });
+                }
+            }
+
             var found = false;
             
             for (var j = 0; j < session.list.length; j++) {
@@ -103,8 +118,8 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.canExpand = toExtend.hasComponents ||
                     toExtend.hasCompositions ||
                     toExtend.hasOrders ||
-                    toExtend.hasSteps;
-
+                    toExtend.hasSteps ||
+                    toExtend.stockEvents.length > 0;
             }
         }
     };
@@ -137,6 +152,19 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
         fakeSession.list.push(batchModel);
 
         self.load(fakeSession, callback);
+    };
+
+    self.loadStockEvents = function(model) {
+        lt.api("/stockEvents/getBatchEvents")
+            .query({ "batchId": model.batchId, "eventTypeName": model.type })
+            .get(function(events) {
+                model.items = events;
+                model.expanded = true;
+            });
+    };
+
+    self.deleteStockEvent = function(eventId, callback) {
+        lt.api("/stockEvents/deleteStockEvent").query({ "eventId": eventId }).get(callback);
     };
 };
 

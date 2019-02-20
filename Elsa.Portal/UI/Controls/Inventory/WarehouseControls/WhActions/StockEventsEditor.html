@@ -39,9 +39,10 @@
     </div>
 </div>
 <script>
-    lt.element("stockEventsEditor").withModel("app.StockEvents.vm").attach(function(tab, tbMaterialName, materialAutocompleteContainer) {
+    lt.element("stockEventsEditor").withModel("app.StockEvents.vm").attach(function(tab, tbMaterialName, materialAutocompleteContainer, tbAmount, tbNote) {
 
         const eventTypesTab = new app.ui.TabControl(tab);
+        const self = this;
 
         var switchEventType = function(etypeModel) {
             app.StockEvents.vm.changeCurrentEventType(etypeModel.Id);
@@ -83,6 +84,8 @@
 
         this.cancel = function () {
             tbMaterialName.value = "";
+            tbAmount.value = null;
+            tbNote.value = null;
             app.StockEvents.vm.cancelEdit();
         };
 

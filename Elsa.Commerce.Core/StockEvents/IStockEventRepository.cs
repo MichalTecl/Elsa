@@ -15,5 +15,7 @@ namespace Elsa.Commerce.Core.StockEvents
         void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason);
 
         IEnumerable<IMaterialStockEvent> GetBatchEvents(int batchId);
+
+        void DeleteStockEvent(int eventId);
     }
 }

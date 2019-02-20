@@ -85,9 +85,9 @@ namespace Elsa.Commerce.Core.StockEvents
                 
                 resolutions.AddRange(m_batchFacade.Value.AutoResolve(materialId, eventAmount, true, batchId));
 
-                if (resolutions.Any(r => r.Item2 == null))
+                if (resolutions.Any(r => r.Item1 == null))
                 {
-                    var max = m_amountProcessor.Sum(resolutions.Where(r => r.Item2 != null).Select(r => r.Item2));
+                    var max = m_amountProcessor.Sum(resolutions.Where(r => r.Item1 != null).Select(r => r.Item2));
                     throw new InvalidOperationException($"Není možné odebrat více než {max}");
                 }
 
@@ -122,6 +122,22 @@ namespace Elsa.Commerce.Core.StockEvents
                     .Where(m => m.ProjectId == m_session.Project.Id)
                     .Where(m => m.BatchId == batchId)
                     .Execute();
+        }
+
+        public void DeleteStockEvent(int eventId)
+        {
+            var evt =
+                m_database.SelectFrom<IMaterialStockEvent>()
+                    .Where(e => e.Id == eventId)
+                    .Where(e => e.ProjectId == m_session.Project.Id)
+                    .Take(1)
+                    .Execute()
+                    .FirstOrDefault()
+                    .Ensure();
+
+            m_batchFacade.Value.ReleaseBatchAmountCache(m_batchRepository.GetBatchById(evt.BatchId).Ensure().Batch);
+
+            m_database.Delete(evt);
         }
     }
 }

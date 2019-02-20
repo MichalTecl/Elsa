@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+using Elsa.Apps.Inventory.Model;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 using Robowire.RoboApi;
@@ -49,6 +48,22 @@ namespace Elsa.Apps.Inventory
         public void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason)
         {
             m_eventRepository.SaveEvent(eventTypeId, materialId, batchNumber, quantity, reason);
+        }
+
+        public IEnumerable<StockEventViewModel> GetBatchEvents(int batchId, string eventTypeName)
+        {
+            var etype =
+                m_eventRepository.GetAllEventTypes().FirstOrDefault(etp => etp.TabTitle == eventTypeName).Ensure();
+
+            return
+                m_eventRepository.GetBatchEvents(batchId)
+                    .Where(e => e.TypeId == etype.Id)
+                    .Select(e => new StockEventViewModel(e));
+        }
+
+        public void DeleteStockEvent(int eventId)
+        {
+            m_eventRepository.DeleteStockEvent(eventId);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchReporting;
 using Elsa.Commerce.Core.Production;
+using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
@@ -34,6 +35,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private readonly IOrderStatusRepository m_orderStatusRepository;
         private readonly IPurchaseOrderRepository m_orderRepository;
         private readonly IUserRepository m_userRepository;
+        private readonly IStockEventRepository m_stockEventRepository;
 
         public BatchReportingFacade(ISession session,
             IDatabase database,
@@ -44,9 +46,10 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             AmountProcessor amountProcessor,
             IUnitRepository unitRepository,
             IOrdersFacade ordersFacade,
-            IOrderStatusRepository orderStatusRepository, 
-            IPurchaseOrderRepository orderRepository, 
-            IUserRepository userRepository)
+            IOrderStatusRepository orderStatusRepository,
+            IPurchaseOrderRepository orderRepository,
+            IUserRepository userRepository,
+            IStockEventRepository stockEventRepository)
         {
             m_session = session;
             m_database = database;
@@ -60,6 +63,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             m_orderStatusRepository = orderStatusRepository;
             m_orderRepository = orderRepository;
             m_userRepository = userRepository;
+            m_stockEventRepository = stockEventRepository;
         }
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
@@ -128,6 +132,11 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                 b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
                 b.CanDelete = string.IsNullOrWhiteSpace(b.NoDelReason);
+
+                if (b.HasStockEvents)
+                {
+                    PopulateStockEventCounts(b);
+                }
             }
 
             if ((query.BatchId != null) && (result.Report.Count == 0))
@@ -156,6 +165,20 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             }
             
             return result;
+        }
+
+        private void PopulateStockEventCounts(BatchReportEntry batchReportEntry)
+        {
+            foreach (var evt in m_stockEventRepository.GetBatchEvents(batchReportEntry.BatchId))
+            {
+                int sum;
+                if (!batchReportEntry.StockEventCounts.TryGetValue(evt.Type.TabTitle, out sum))
+                {
+                    sum = 0;
+                }
+
+                batchReportEntry.StockEventCounts[evt.Type.TabTitle] = sum + 1;
+            }
         }
 
         private List<BatchReportEntryBase> PopulateRelativeToOrder(IPurchaseOrder order, List<BatchReportEntryBase> batches)
@@ -424,6 +447,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             const int numberOfOrders = 16;
             const int price = 17;
             const int invoiceNr = 18;
+            const int numberOfStockEvents = 19;
             #endregion
 
 
@@ -444,7 +468,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 NumberOfRequiredSteps = row.GetInt32(numberOfRequiredSteps),
                 NumberOfOrders = row.GetInt32(numberOfOrders),
                 Price = row.IsDBNull(price) ? string.Empty : $"{StringUtil.FormatDecimal(row.GetDecimal(price))} CZK",
-                InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : row.GetString(invoiceNr)
+                InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : row.GetString(invoiceNr),
+                HasStockEvents = (!row.IsDBNull(numberOfStockEvents)) && (row.GetInt32(numberOfStockEvents) > 0)
             };
             
             return entry;
