@@ -52,7 +52,7 @@ body, html {
 
 
 .panelHead {
-    background-color: #00bfff;
+    background-color: #36558F;
     display: flex;
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
@@ -62,6 +62,7 @@ body, html {
 .panelTitle {
     font-size: 1.2em;
     font-weight: bold;
+    color: #f0f0f0;
 }
 
 .panelToolbox {
@@ -75,6 +76,15 @@ body, html {
     padding-bottom: 8px;
     padding-left: 10px;
     padding-right: 10px;
+}
+
+#userPanel > .panelHead {
+	background-color:#40376E;
+	color:#fff !important;
+}
+
+#loggedUserLabel {
+  color:#c0c0c0;
 }
 
 .wTiny { width: 4%; }
@@ -118,6 +128,7 @@ body, html {
 .stackLeft {
     display: flex;
     flex-wrap: nowrap;
+    align-items:center;
 }
 
 .centerChildHori {

@@ -209,7 +209,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 foreach (var requestedStep in request)
                 {
                     IMaterialProductionStep stepEntity;
-                    if (requestedStep.StepId == null)
+                    if (requestedStep.StepId < 1)
                     {
                         stepEntity = m_database.New<IMaterialProductionStep>();
                         setupEntity(stepEntity, requestedStep);

@@ -7,18 +7,16 @@ using Robowire;
 
 namespace Elsa.Common
 {
-    public static class CommonRegistry
+    public class CommonRegistry : IRobowireRegistry
     {
-        public static void SetupContainer(IContainer container)
+        public void Setup(IContainerSetup setup)
         {
-            ElsaDbInstaller.Initialize(container);
-
             AsyncLogger.Initialize(new ConnectionStringProvider());
-            
-            container.Setup(c => c.For<IConfigurationRepository>().Use<ConfigurationRepository>());
-            container.Setup(c => c.For<ILog>().Use<Logger>());
-            container.Setup(c => c.For<ICache>().Use<Cache>());
-            container.Setup(c => c.For<IPerProjectDbCache>().Use<PerProjectDbCache>());
+
+            setup.For<IConfigurationRepository>().Use<ConfigurationRepository>();
+            setup.For<ILog>().Use<Logger>();
+            setup.For<ICache>().Use<Cache>();
+            setup.For<IPerProjectDbCache>().Use<PerProjectDbCache>();
         }
     }
 }

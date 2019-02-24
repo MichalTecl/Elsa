@@ -21,5 +21,7 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
             }
             set { }
         }
+
+        public bool IntegerOnly { get; set; }
     }
 }

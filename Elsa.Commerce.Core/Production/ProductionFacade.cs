@@ -473,6 +473,11 @@ namespace Elsa.Commerce.Core.Production
             var sourceSteps = GetStepsToProceed(batchId, materialId, true).ToList();
             var sourceStep = sourceSteps.FirstOrDefault(srs => srs.IsSameStep(model));
 
+            if ((batchId != null) && (sourceStep == null))
+            {
+                throw new InvalidOperationException("Pro požadovanou šarži není možné vložit tento výrobní krok");
+            }
+
             if ((sourceStep == null) && model.NeedsBatchNumber)
             {
                 if (model.NeedsBatchNumber)
@@ -698,6 +703,12 @@ namespace Elsa.Commerce.Core.Production
 
                 m_batchFacade.ReleaseBatchAmountCache(batch.Batch);
 
+                if (batch.Batch.AllStepsDone == true)
+                {
+                    batch.Batch.AllStepsDone = false;
+                    m_database.Save(batch);
+                }
+
                 foreach (var sourceBatch in step.SourceBatches)
                 {
                     m_database.Delete(sourceBatch);
@@ -705,7 +716,7 @@ namespace Elsa.Commerce.Core.Production
                 }
 
                 m_database.Delete(step);
-
+                
                 tx.Commit();
             }
         }

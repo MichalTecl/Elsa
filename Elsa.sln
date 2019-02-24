@@ -109,6 +109,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CurrencyConversion", "Curre
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.LoadCurrencyRates", "Elsa.Jobs.LoadCurrencyRates\Elsa.Jobs.LoadCurrencyRates.csproj", "{68C066E6-C31A-454C-845F-F2BF1693F76D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Assembly", "Elsa.Assembly\Elsa.Assembly.csproj", "{D610496E-A291-4EB5-A7B0-B6A693D485BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -267,6 +269,10 @@ Global
 		{68C066E6-C31A-454C-845F-F2BF1693F76D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68C066E6-C31A-454C-845F-F2BF1693F76D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68C066E6-C31A-454C-845F-F2BF1693F76D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D610496E-A291-4EB5-A7B0-B6A693D485BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D610496E-A291-4EB5-A7B0-B6A693D485BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D610496E-A291-4EB5-A7B0-B6A693D485BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D610496E-A291-4EB5-A7B0-B6A693D485BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -317,5 +323,6 @@ Global
 		{00851E14-33BE-4F64-91D1-E27FA48422BD} = {456527A3-2BE8-4010-8AC6-187539CE484D}
 		{A07C34A2-2A1E-434D-8ABE-DEEE09CCF4AB} = {A188EE1B-B81C-4698-B872-CB072E73525D}
 		{68C066E6-C31A-454C-845F-F2BF1693F76D} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
+		{D610496E-A291-4EB5-A7B0-B6A693D485BE} = {326F0792-00AF-4D82-B170-4CE248D4A975}
 	EndGlobalSection
 EndGlobal

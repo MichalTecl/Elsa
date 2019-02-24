@@ -142,6 +142,7 @@
     <Content Include="UI\Controls\Inventory\VirtualProducts.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesStyle.css" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionSteps.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\StockEventsEditor.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProdBatchEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesList.html" />
@@ -206,7 +207,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Setup.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -265,6 +265,10 @@
     <ProjectReference Include="..\Elsa.Apps.ScheduledJobs\Elsa.Apps.ScheduledJobs.csproj">
       <Project>{55482891-37C2-4C35-83BE-68100012AE25}</Project>
       <Name>Elsa.Apps.ScheduledJobs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Assembly\Elsa.Assembly.csproj">
+      <Project>{d610496e-a291-4eb5-a7b0-b6a693d485be}</Project>
+      <Name>Elsa.Assembly</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
       <Project>{61dd96b7-bf13-4c48-9353-08f2f907048e}</Project>

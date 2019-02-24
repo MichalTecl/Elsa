@@ -1,0 +1,50 @@
+﻿#matTree {
+    margin:20px;
+}
+
+#matTree .materialTreeItemTemplate {
+    margin-bottom:10px;
+}
+
+#matTree .materialTreeItemTemplate > div > i {
+    width:12px;
+}
+
+#matTree .materialTreeItemTemplate {
+    font-size:1.2em;
+    font-weight:bold;
+}
+
+#matTree .stepTreeNodeName {
+    font-weight:normal;
+    margin-left:20px;
+    margin-top:4px;
+    cursor:pointer;
+}
+
+
+#prodStepEditUi {
+    margin:10px;
+}
+
+#prodStepEditUi > #prStepHead {
+    background-color:#0BDDE8;
+    padding:5px;
+    border-top-left-radius:7px;
+    border-top-right-radius:7px;
+    font-size:1.2em;
+}
+
+#prStepHead > .stepName {
+    font-weight:bold;
+}
+
+#prodStepEditUi label {
+    font-weight:bold;
+    padding-top:10px;
+}
+
+#prodStepEditUi .inputAmount {
+    width:100px;
+    margin-right:4px;
+}

@@ -59,7 +59,7 @@ app.productionSteps.ViewModel = app.productionSteps.ViewModel || function() {
         validateStep();
     };
 
-    self.cancelStepEdit = function() {
+    self.cancelStepEdit = function () {
         self.selectedStep = null;
         lt.notify();
     };

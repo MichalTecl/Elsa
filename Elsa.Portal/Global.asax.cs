@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 
 using Elsa.App.Profile;
+using Elsa.Assembly;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Users;
@@ -25,7 +26,7 @@ namespace Elsa.Portal
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional });
 
-            Setup.SetupContainer(m_container);
+            DiSetup.SetupContainer(m_container);
 
             var installer = new RoboApiInstaller();
             installer.Install(
@@ -76,7 +77,10 @@ namespace Elsa.Portal
 
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
-
+            if (Request.Path == "/")
+            {
+                Context.RewritePath("/Home.html");
+            }
         }
 
         protected void Application_AuthenticateRequest(object sender, EventArgs e)

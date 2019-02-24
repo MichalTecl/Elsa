@@ -1,22 +1,22 @@
 ﻿<script src="/Script/Apps/Inventory/WarehouseActions/ProductionSteps.VM.js"></script>
 
 <div id="productionStepsMainUi">
-    <div id="materialsTree" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionStepsPartial/MaterialsTreeView.html"></div>
-    
-    <div id="selectedStepUi" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionStepsPartial/ProductionStepEdit.html"></div>
+   
+    <div id="viewHolder"></div>
 
 </div>
 <script>
-    lt.element("productionStepsMainUi").withModel("app.productionSteps.vm").attach(function(materialsTree, selectedStepUi) {
+    lt.element("productionStepsMainUi").withModel("app.productionSteps.vm").attach(function(viewHolder) {
 
         this.bind(function(selectedStep) {
             
             if (selectedStep === null) {
-                materialsTree.style.display = 'block';
-                selectedStepUi.style.display = 'none';
+                lt.fillBy(viewHolder,
+                    "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionStepsPartial/MaterialsTreeView.html");
             } else {
-                materialsTree.style.display = 'none';
-                selectedStepUi.style.display = 'block';
+
+                lt.fillBy(viewHolder,
+                    "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionStepsPartial/ProductionStepEdit.html");
             }
 
 
@@ -24,3 +24,5 @@
 
     });
 </script>
+
+<link href="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionSteps.css" rel="stylesheet" />

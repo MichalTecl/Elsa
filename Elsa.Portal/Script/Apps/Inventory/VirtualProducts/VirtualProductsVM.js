@@ -287,7 +287,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
         if (!found) {
 
-            var newMat = { editMode: true, materials: [], RequiresPrice: self.currentMaterialInventory.RequirePriceDefault || false, RequiresInvoice: self.currentMaterialInventory.RequireInvoicesDefault };
+            var newMat = { editMode: true, materials: [], RequiresPrice: self.currentMaterialInventory.RequirePriceDefault || false, RequiresInvoice: self.currentMaterialInventory.RequireInvoicesDefault, ProductionSteps:[] };
             if (self.currentMaterialInventory.AllowedUnit) {
                 newMat.nominalAmountText = "1" + self.currentMaterialInventory.AllowedUnit.Symbol;
             }

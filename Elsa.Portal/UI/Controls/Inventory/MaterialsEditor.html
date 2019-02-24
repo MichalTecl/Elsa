@@ -28,20 +28,21 @@
                             <div class="materialEditor" lt-name="materialEditPlaceholder"></div>
                             <div class="productionStepsSection">
                                 <div class="stepsLabel">Kroky výroby</div>
-                                <div lt-name="stepsList">
+                                <div lt-name="stepsList" class="stepsList">
                                     <div lt-name="stepItemTemplate" class="stepItemTemplate lt-template">
                                         <div class="stackLeft prodStepTitlePanel">
                                             <input lt-name="tbStepName" event-bind="change:onProdStepNameChanged(VM, this.value)" class="tbStepName" data-bind="value:StepName" />
                                             <i class="fas fa-minus faButton" event-bind="click:onProductionStepRemoveClick(VM)"></i>
                                         </div>
-                                        <div class="stackLeft materialFlagEdit">
+                                        <div class="stackLeft stepFlags">
                                             <input type="checkbox" lt-name="cbPrice" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresPrice"/><label>Cena</label>
                                             <input type="checkbox" lt-name="cbTime" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresSpentTime" /><label>Čas</label>
                                             <input type="checkbox" lt-name="cbWorker" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresWorkerReference" /><label>Pracovník</label>
                                         </div>
                                         <div class="workStepMaterialSection">
+                                            <div class="stepMaterialsTitle">Materiál použitý v kroku</div>
                                             <div lt-name="stepMaterialList" class="stepMaterialList">
-                                                
+
                                             </div>
                                         </div>
                                     </div>
@@ -204,7 +205,7 @@
 
         this.addProductionStep = function (model) {
 
-            var stepModel = { Components:[], RequiresPrice: true, RequiresSpentTime: true, RequiresWorkerReference: true, materials:[] };
+            var stepModel = { Components: [], RequiresPrice: true, RequiresSpentTime: true, RequiresWorkerReference: true, materials: [], Id: parseInt("-" + ((new Date().getTime()).toString().substr(7))) };
             model.ProductionSteps.push(stepModel);
             lt.notify();
         };
