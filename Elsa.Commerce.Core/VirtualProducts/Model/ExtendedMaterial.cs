@@ -38,7 +38,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                 ThresholdText = $"{StringUtil.FormatDecimal(threshold.ThresholdQuantity)} {threshold.Unit.Symbol}";
             }
 
-            var stepsAssorted = adaptee.Steps.Select(s => new MaterialProductionStepModel(s)).ToList();
+            var stepsAssorted = adaptee.Steps.Where(s => s.DeleteDateTime == null).Select(s => new MaterialProductionStepModel(s)).ToList();
             List<MaterialProductionStepModel> stepsSorted = null;
 
             if (stepsAssorted.Count < 2)

@@ -529,3 +529,27 @@ input.readonly {
   box-shadow: 5px 5px 8px -2px #000;
   background-color:#0BDDE8;
 }
+
+.menu {
+    min-width: 120px;
+    box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    display: none;
+    background-color: white;
+    z-index: 9999;
+}
+
+.menu .menu-options {
+    list-style: none;
+    padding: 10px 0;
+}
+
+.menu-option {
+    font-weight: 500;
+    font-size: 14px;
+    padding: 10px 40px 10px 20px;
+    cursor: pointer;
+}
+.menu_option:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
