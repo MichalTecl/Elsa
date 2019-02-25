@@ -304,6 +304,14 @@ div.searchPanel {
   margin-bottom:12px;
 }
 
+.formCard {
+    margin-left: 20px;
+    margin-top: 10px;
+    max-width: 600px;
+    min-width: 400px;
+    width: 50%;
+}
+
 .formRow label {
     display: block;
     text-align: left;

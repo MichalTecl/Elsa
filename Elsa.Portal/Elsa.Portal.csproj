@@ -142,6 +142,7 @@
     <Content Include="UI\Controls\Inventory\VirtualProducts.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesStyle.css" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchInput.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionSteps.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\StockEventsEditor.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProdBatchEdit.html" />

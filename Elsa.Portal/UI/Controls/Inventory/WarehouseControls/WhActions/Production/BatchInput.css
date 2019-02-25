@@ -1,0 +1,51 @@
+﻿#prodBatchesUi button.addBatchBut {
+    margin-left:12px;
+    margin-bottom:10px;
+    margin-top: 10px;
+}
+
+#componentsList {
+    
+    margin-left:20px;
+    border:1px solid #eee;       
+    padding:2px;
+}
+
+#componentListItemTemplate {
+    margin-bottom:8px;
+    padding:5px;
+}
+
+#componentListItemTemplate:nth-child(odd)
+{
+    background-color:#f6f6f6;
+}
+
+
+.requiredMaterialRow {
+    min-width:250px;
+}
+
+.requiredMaterialRow > .rUnit {
+    margin-left:2px;
+}
+
+.requiredMaterialRow > .rMaterial {
+    margin-left:5px;
+}
+
+.assignedBatchItemTemplate i {
+    margin-left:5px;
+}
+
+
+.componentsTitle{
+   color: #777799;
+   font-weight: bold;
+   margin-top: 8px;
+   margin-left:19px;
+}
+
+#prodBatchHead {
+    margin-bottom:20px;
+}
