@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Net.Http;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchReporting;
@@ -128,6 +129,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 {
                     var available = m_batchFacade.GetAvailableAmount(b.BatchId);
                     b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
+                    b.Available = available;
                 }
 
                 b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
@@ -137,6 +139,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 {
                     PopulateStockEventCounts(b);
                 }
+
+                PopulateStockEventSuggestions(b);
             }
 
             if ((query.BatchId != null) && (result.Report.Count == 0))
@@ -165,6 +169,42 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             }
             
             return result;
+        }
+
+        private void PopulateStockEventSuggestions(BatchReportEntry batchReportEntry)
+        {
+            if (batchReportEntry.Available?.IsNotPositive ?? true)
+            {
+                return;
+            }
+
+            Func<IStockEventType, Amount, BatchStockEventSuggestion> addSuggestion = (type, amount) =>
+            {
+                var sug = new BatchStockEventSuggestion()
+                {
+                    BatchNumber = batchReportEntry.BatchNumber,
+                    Amount = amount.Value,
+                    EventTypeId = type.Id,
+                    MaterialId = batchReportEntry.MaterialId,
+                    MaterialName = batchReportEntry.MaterialName,
+                    UnitId = amount.Unit.Id,
+                    Title = $"{type.Name} {StringUtil.FormatDecimal(amount.Value)} {amount.Unit.Symbol}"
+                };
+
+                batchReportEntry.EventSuggestions.Add(sug);
+
+                return sug;
+            };
+
+            foreach (var eventType in m_stockEventRepository.GetAllEventTypes())
+            {
+                if (batchReportEntry.Available.Unit.IntegerOnly)
+                {
+                    addSuggestion(eventType, new Amount(1m, batchReportEntry.Available.Unit));
+                }
+
+                addSuggestion(eventType, batchReportEntry.Available);
+            }
         }
 
         private void PopulateStockEventCounts(BatchReportEntry batchReportEntry)

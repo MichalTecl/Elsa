@@ -39,7 +39,9 @@
     </div>
 </div>
 <script>
-    lt.element("stockEventsEditor").withModel("app.StockEvents.vm").attach(function(tab, tbMaterialName, materialAutocompleteContainer, tbAmount, tbNote) {
+    lt.element("stockEventsEditor").withModel("app.StockEvents.vm").attach(function(tab, tbMaterialName, materialAutocompleteContainer, tbAmount, tbNote, tbBatchNr) {
+
+        var tabsCreated = false;
 
         const eventTypesTab = new app.ui.TabControl(tab);
         const self = this;
@@ -48,19 +50,36 @@
             app.StockEvents.vm.changeCurrentEventType(etypeModel.Id);
         };
 
-        this.bind(function(eventTypes) {
+        this.bind(function (eventTypes, currentEventType) {
 
-            for (let i = 0; i < eventTypes.length; i++) {
-                var etype = eventTypes[i];
-                eventTypesTab.addTab(etype.TabTitle, null, etype, switchEventType, etype.Id);
+            if (!tabsCreated) {
+                for (let i = 0; i < eventTypes.length; i++) {
+                    var etype = eventTypes[i];
+                    eventTypesTab.addTab(etype.TabTitle, null, etype, switchEventType, etype.Id);
+                }
+
+                tabsCreated = true;
+            }
+
+            if (!!currentEventType) {
+                eventTypesTab.selectTab(currentEventType.Id);
             }            
-        });
+        }).currentEventTypeCanBeNull();
 
         this.bind(function (currentEventType) {
 
             tbMaterialName.value = "";
             
             eventTypesTab.selectTab(currentEventType.Id);
+
+            var model = app.urlBus.get("setStockEvent");
+            if (!!model) {
+                tbMaterialName.value = model.MaterialName;
+                tbBatchNr.value = model.BatchNumber;
+                tbAmount.value = model.Amount;
+
+                app.StockEvents.vm.setMaterialId(model.MaterialId);
+            }
         });
 
         this.onMaterialChanged = function(materialName) {
@@ -87,6 +106,8 @@
             tbAmount.value = null;
             tbNote.value = null;
             app.StockEvents.vm.cancelEdit();
+
+            app.urlBus.clear("setStockEvent");
         };
 
         this.save = function(materialName, batchNumber, strAmount, note) {
@@ -108,9 +129,11 @@
                 throw new Error("Množství musí být kladné číslo");
             }
 
-            app.StockEvents.vm.save(material.MaterialId, batchNumber, numAmount, note, function() {
+            app.StockEvents.vm.save(material.MaterialId, batchNumber, numAmount, note, function () {
+                app.urlBus.clear("setStockEvent");
                 self.cancel();
             });
-        };
+        };      
+        
     });
 </script>

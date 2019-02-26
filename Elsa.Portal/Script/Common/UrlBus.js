@@ -128,6 +128,9 @@ app.UrlBus = app.UrlBus || function() {
         self.set(param, null);
     };
 
+    self.get = function(param) {
+        return currentObjValues[param];
+    };
 };
 
 

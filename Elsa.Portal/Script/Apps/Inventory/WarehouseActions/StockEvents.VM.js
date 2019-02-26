@@ -12,11 +12,17 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
     
     var materialId = null;
 
-    var loadEventTypes = function() {
+    var loadEventTypes = function () {
+        
         lt.api("/stockEvents/getEventTypes").get(function(types) {
         	self.eventTypes = types;
             if (self.currentEventType == null && self.eventTypes.length > 0) {
                 self.currentEventType = self.eventTypes[0];
+            }
+            
+            var model = app.urlBus.get("setStockEvent");
+            if (model != null) {
+                self.changeCurrentEventType(model.EventTypeId);
             }
         });
     };
@@ -46,6 +52,8 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
             	break;
             }
         }
+
+        lt.notify();
     };
 
     this.setMaterialId = function(id) {
@@ -90,6 +98,12 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
             })
             .get(successCallback);
     };
+
+    app.urlBus.watch("setStockEvent", function (model) {
+
+        self.changeCurrentEventType(model.EventTypeId);
+        lt.notify();
+    });
 };
 
 app.StockEvents.vm = app.StockEvents.vm || new app.StockEvents.ViewModel();

@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Common;
+
+using Newtonsoft.Json;
+
 namespace Elsa.Commerce.Core.Model.BatchReporting
 {
     public class BatchReportEntry : BatchReportEntryBase
@@ -17,6 +21,9 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int MaterialId { get; set; }
         public string BatchVolume { get; set; }
         public string AvailableAmount { get; set; }
+
+        [JsonIgnore]
+        public Amount Available { get; set; }
         public string CreateDt { get; set; }
         public bool IsClosed { get; set; }
         public bool IsLocked { get; set; }
@@ -31,6 +38,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public bool HasStockEvents { get; set; }
         public Dictionary<string, int> StockEventCounts { get; set; } = new Dictionary<string, int>();
 
+        public List<BatchStockEventSuggestion> EventSuggestions { get; } = new List<BatchStockEventSuggestion>();
         public BatchReportEntry(int batchId) : base(batchId)
         {
         }

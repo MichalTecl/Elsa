@@ -59,7 +59,10 @@
         app.urlBus.watch("findBatches", function() {
             tab.selectTab("batchSearch");
         });
-        
+
+        app.urlBus.watch("setStockEvent", function() {
+            tab.selectTab("discards");
+        });
 
     </script>
 

@@ -537,19 +537,29 @@ input.readonly {
     display: none;
     background-color: white;
     z-index: 9999;
+    border-radius:8px;
+    border-top-left-radius:0;
 }
 
-.menu .menu-options {
-    list-style: none;
+.menu .menu-options {    
     padding: 10px 0;
+}
+
+.menu li {
+  list-style: none;
 }
 
 .menu-option {
     font-weight: 500;
-    font-size: 14px;
-    padding: 10px 40px 10px 20px;
+    font-size:0.9em;
+    padding: 5px 40px 5px 20px;
     cursor: pointer;
 }
-.menu_option:hover {
+.menu-option:hover {
     background-color: rgba(0, 0, 0, 0.2);
+}
+
+.menuItemIcon {  
+  margin-right:5px;
+  color:#88C;
 }
