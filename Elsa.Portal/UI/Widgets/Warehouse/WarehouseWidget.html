@@ -5,12 +5,19 @@
     </div>
 
     <div class="panelContent" id="ordersOvwPanel" style="">
-        <div class="actionTile"> <a href="/UI/Pages/Inventory/WhEvents.html">Akce skladu</a></div>
-        <div class="actionTile"><a href="/UI/Pages/Inventory/VirtualProductsEditor.html">Konfigurace</a></div>
+        <div class="actionTile">
+            <i class="fas fa-warehouse actionTileIcon"></i>
+            <a href="/UI/Pages/Inventory/WhEvents.html">Akce skladu</a>
+        </div>
+        <div class="actionTile">
+            <i class="fas fa-cogs actionTileIcon"></i>
+            <a href="/UI/Pages/Inventory/VirtualProductsEditor.html">Konfigurace</a>
+        </div>
 
         <div class="actionTile">
             <div class="stackLeft">
                 <i class="fas fa-exclamation-triangle lowMaterialLevelExcl" lt-name="icoLowMaterial"></i>
+                <i class="fas fa-check-double actionTileIcon" style="color:#009922" lt-name="icoOk" ></i>
                 <a href="/UI/Pages/Inventory/MaterialLevels.html">Přehled zásob</a>
             </div>
         </div>
@@ -19,14 +26,16 @@
 
 </div>
 <script>
-    lt.element("whWidget").attach(function (icoLowMaterial) {
+    lt.element("whWidget").attach(function (icoLowMaterial, icoOk) {
 
         this.bind(function(currentWarning) {
                 
                 if (currentWarning == null) {
                     icoLowMaterial.style.display = 'none';
+                    icoOk.style.display = 'inline-block';
                 } else {
                     icoLowMaterial.style.display = 'inline-block';
+                    icoOk.style.display = 'none';
                     icoLowMaterial.setAttribute("title", currentWarning);
                 }
             })

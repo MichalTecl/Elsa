@@ -706,7 +706,7 @@ namespace Elsa.Commerce.Core.Production
                 if (batch.Batch.AllStepsDone == true)
                 {
                     batch.Batch.AllStepsDone = false;
-                    m_database.Save(batch);
+                    m_database.Save(batch.Batch);
                 }
 
                 foreach (var sourceBatch in step.SourceBatches)

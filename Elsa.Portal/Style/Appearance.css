@@ -563,3 +563,8 @@ input.readonly {
   margin-right:5px;
   color:#88C;
 }
+
+.actionTileIcon {
+  min-width:22px;
+  color:#88C;
+}
