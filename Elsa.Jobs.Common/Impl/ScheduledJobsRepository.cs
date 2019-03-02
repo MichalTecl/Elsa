@@ -120,6 +120,11 @@ namespace Elsa.Jobs.Common.Impl
                     .Execute();
         }
 
+        public IJobSchedule GetJobByUid(string uid)
+        {
+            return GetCompleteScheduler().FirstOrDefault(j => j.Uid == uid);
+        }
+
         private static DateTime GetLastHhMmTime(string hhMm)
         {
             int hour;

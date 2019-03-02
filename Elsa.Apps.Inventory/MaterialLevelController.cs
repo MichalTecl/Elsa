@@ -30,6 +30,7 @@ namespace Elsa.Apps.Inventory
             return m_batchFacade.GetMaterialLevels(true).OrderBy(m => m.PercentLevel);
         }
 
+        [DoNotLog]
         public LevelWarningBucket GetCurrentWarning()
         {
             var sb = new StringBuilder();

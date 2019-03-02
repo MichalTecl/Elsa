@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -43,10 +44,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoloLogger.cs" />
     <Compile Include="JobSession.cs" />
     <Compile Include="JobsManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scheduler\ElsaJob.cs" />
+    <Compile Include="Scheduler\ElsaJobRepo.cs" />
+    <Compile Include="Scheduler\ElsaJobsScheduler.cs" />
+    <Compile Include="Scheduler\JobDefinitions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -143,6 +149,10 @@
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{a9148d58-0f0e-43e7-8a11-a9f9bb04333c}</Project>
       <Name>Elsa.Users</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Schedoo.Core\Schedoo.Core.csproj">
+      <Project>{52768AA8-2EBF-4660-B7A4-277A3D8842BC}</Project>
+      <Name>Schedoo.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

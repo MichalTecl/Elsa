@@ -27,7 +27,7 @@ namespace Elsa.Jobs.SetPaidStatus
             m_log.Info("Zacinam zpracovani dobirek a plateb z Pay Pal");
 
             var toBePaid = new List<IPurchaseOrder>();
-
+            
             AddPayOnDeliveryOrders(toBePaid);
             AddOrdersToBeSetPaidByMapping(toBePaid);
 

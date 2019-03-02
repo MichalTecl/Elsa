@@ -1,7 +1,13 @@
-﻿using System.Threading;
+﻿using System;
+using System.Configuration;
+using System.Threading;
 
 using Elsa.Assembly;
 using Elsa.Common;
+using Elsa.Common.Logging;
+using Elsa.JobLauncher.Scheduler;
+
+using Schedoo.Core;
 
 namespace Elsa.JobLauncher
 {
@@ -9,16 +15,38 @@ namespace Elsa.JobLauncher
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Starting...");
+
             var container = DiSetup.GetContainer();
             container.Setup(s => s.For<ISession>().Use<JobSession>());
+            container.Setup(s => s.For<IDataRepository>().Use<ElsaJobRepo>());
+            container.Setup(s => s.For<ElsaJobsScheduler>().Use<ElsaJobsScheduler>());
+            container.Setup(s => s.For<ILog>().Use<ConsoloLogger>());
 
-            var manager = new JobsManager(container, "michal", "123123");
+            var user = ConfigurationManager.AppSettings["robotLogin"];
+            var password = ConfigurationManager.AppSettings["robotPassword"];
+            
+            Console.WriteLine("Creating container...");
 
-            while (true)
+            using (var locator = container.GetLocator())
             {
-                var wait = manager.Run();
-                Thread.Sleep(wait);
+                Console.WriteLine("Container created");
+
+                var session = (locator.Get<ISession>() as JobSession);
+
+                if (session == null)
+                {
+                    throw new InvalidOperationException("Cannot instatiate session");
+                }
+
+                session.Login(user, password);
+
+                Console.WriteLine("Authenticated, starting scheduler");
+
+                var scheduler = locator.Get<ElsaJobsScheduler>();
+                scheduler.Start();
             }
+            
         }
     }
 }

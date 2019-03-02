@@ -98,6 +98,8 @@ namespace Elsa.Common.Logging
             return entry;
         }
 
+        protected virtual void OnBeforeEntryEnqueue(ISysLog entry) { }
+
         private sealed class StopWatch : IDisposable
         {
             private readonly Logger m_owner;

@@ -36,5 +36,8 @@ namespace Elsa.Core.Entities.Commerce.Automation
         int? RetryMinutes { get; set; }
 
         int? LoopLaunchPriority { get; set; }
+
+        [NVarchar(64, true)]
+        string Uid { get; set; }
     }
 }

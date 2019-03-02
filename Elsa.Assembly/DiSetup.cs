@@ -69,6 +69,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(CustomersSyncJob).Assembly);
                     s.ScanAssembly(typeof(CustomersController).Assembly);
                     s.ScanAssembly(typeof(ImportRatesJob).Assembly);
+                    s.ScanAssembly(typeof(CommonRegistry).Assembly);
                 });
 
             ElsaDbInstaller.Initialize(container);

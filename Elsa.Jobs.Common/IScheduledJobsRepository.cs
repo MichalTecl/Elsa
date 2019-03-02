@@ -15,5 +15,7 @@ namespace Elsa.Jobs.Common
         void MarkJobFailed(IJobSchedule job);
 
         IEnumerable<IJobSchedule> GetCompleteScheduler();
+
+        IJobSchedule GetJobByUid(string uid);
     }
 }
