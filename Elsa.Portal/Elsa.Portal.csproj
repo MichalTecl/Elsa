@@ -121,6 +121,7 @@
     <Content Include="Script\Apps\Packing\OrdersPacking.VM.js" />
     <Content Include="Script\Apps\Production\ProductionVM.js" />
     <Content Include="Script\Common\ContextMenu.js" />
+    <Content Include="Script\Common\GlobalEventHandlers.js" />
     <Content Include="Script\Common\UrlBus.js" />
     <Content Include="Script\Lanta\AttributeBinding.js" />
     <Content Include="UI\Controls\Common\Autosuggest.css" />

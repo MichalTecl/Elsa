@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common;
 
@@ -14,15 +15,16 @@ namespace Elsa.Common.Configuration
     public class ConfigurationRepository : IConfigurationRepository
     {
         private readonly ILog m_log;
-
         private readonly IDatabase m_database;
+        private readonly ICache m_cache;
+        private readonly ISession m_session;
 
-        private List<ISysConfig> m_allConfig;
-
-        public ConfigurationRepository(IDatabase database, ILog log)
+        public ConfigurationRepository(IDatabase database, ILog log, ICache cache, ISession session)
         {
             m_database = database;
             m_log = log;
+            m_cache = cache;
+            m_session = session;
         }
       
         public T Load<T>(int? projectId, int? userId) where T : new()
@@ -32,38 +34,47 @@ namespace Elsa.Common.Configuration
 
         public object Load(Type t, int? projectId, int? userId)
         {
-            var inst = Activator.CreateInstance(t);
+            var cacheKey = $"config_class_{t.FullName}_{projectId}_{userId}";
 
-            var propFound = false;
-
-            foreach (var prop in inst.GetType().GetProperties())
-            {
-                var definition = ConfigEntryAttribute.GetDefinition(prop);
-                if (definition == null)
+            return m_cache.ReadThrough(cacheKey,
+                TimeSpan.FromHours(1),
+                () =>
                 {
-                    continue;
-                }
-                propFound = true;
+                    var inst = Activator.CreateInstance(t);
 
-                var entry = GetEntry(projectId, userId, definition);
+                    var propFound = false;
 
-                var json = entry?.ValueJson;
-                if (string.IsNullOrEmpty(json))
-                {
-                    continue;
-                }
+                    foreach (var prop in inst.GetType().GetProperties())
+                    {
+                        var definition = ConfigEntryAttribute.GetDefinition(prop);
+                        if (definition == null)
+                        {
+                            continue;
+                        }
 
-                var obj = JsonConvert.DeserializeObject(json, prop.PropertyType);
+                        propFound = true;
 
-                prop.SetValue(inst, obj);
-            }
+                        var entry = GetEntry(projectId, userId, definition);
 
-            if (!propFound)
-            {
-                throw new InvalidOperationException($"Requested configuration type {t} doesn't have any configuration property (marked by {typeof(ConfigEntryAttribute)})");
-            }
+                        var json = entry?.ValueJson;
+                        if (string.IsNullOrEmpty(json))
+                        {
+                            continue;
+                        }
 
-            return inst;
+                        var obj = JsonConvert.DeserializeObject(json, prop.PropertyType);
+
+                        prop.SetValue(inst, obj);
+                    }
+
+                    if (!propFound)
+                    {
+                        throw new InvalidOperationException(
+                            $"Requested configuration type {t} doesn't have any configuration property (marked by {typeof(ConfigEntryAttribute)})");
+                    }
+
+                    return inst;
+                });
         }
 
         public void Save<T>(int projectId, int userId, T configSet) where T : new()
@@ -81,10 +92,7 @@ namespace Elsa.Common.Configuration
             var now = DateTime.Now;
             var future = DateTime.Now.AddDays(100);
 
-            return m_allConfig ?? (m_allConfig = m_database.SelectFrom<ISysConfig>()
-                      .Where(i => (i.ValidFrom < now)
-                         && ((i.ValidTo ?? future) > now))
-                         .Execute().ToList());
+            return GetAllConfiguration().Where(i => (i.ValidFrom < now) && ((i.ValidTo ?? future) > now)).ToList();
         }
         
         private ISysConfig GetEntry(int? projectId, int? userId, IConfigEntryDefinition definition)
@@ -121,6 +129,13 @@ namespace Elsa.Common.Configuration
             }
 
             return entry;
+        }
+
+        private List<ISysConfig> GetAllConfiguration()
+        {
+            return m_cache.ReadThrough($"All_sysConfig",
+                TimeSpan.FromHours(1),
+                () => m_database.SelectFrom<ISysConfig>().Execute().ToList());
         }
     }
 }

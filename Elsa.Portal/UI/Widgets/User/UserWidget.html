@@ -17,10 +17,10 @@
                 </div>
                 <div>
                     <label for="tbUser">heslo</label>
-                    <input id="tbPwd" type="password" />
+                    <input id="tbPwd" type="password" event-bind="keydown:enterTo($butLogin)" />
                 </div>
                 <div>
-                    <button event-bind="click:onLoginClick($tbUser.value, $tbPwd.value)">Přihlásit</button>
+                    <button lt-name="butLogin" event-bind="click:onLoginClick($tbUser.value, $tbPwd.value)">Přihlásit</button>
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 
 namespace Schedoo.Core
@@ -20,55 +21,72 @@ namespace Schedoo.Core
         {
             while (true)
             {
-                var jobs = m_dataRepository.AllJobs.OrderBy(j => j.Priority).ToList();
-
-                foreach (var job in jobs)
+                try
                 {
-                    var context = CreateContext(job);
+                    var jobs = m_dataRepository.AllJobs.OrderBy(j => j.Priority).ToList();
 
-                    try
+                    foreach (var job in jobs)
                     {
-                        if (context.IsNowRunning())
+                        var context = CreateContext(job);
+
+                        try
                         {
-                            var lastStart = m_dataRepository.GetLastJobStarted(job) ?? DateTime.MinValue;
-                            if ((m_dataRepository.Now - lastStart) > job.RunTimeout)
+                            if (context.IsNowRunning())
                             {
-                                throw new TimeoutException("Job timed out");
+                                var lastStart = m_dataRepository.GetLastJobStarted(job) ?? DateTime.MinValue;
+                                if ((m_dataRepository.Now - lastStart) > job.RunTimeout)
+                                {
+                                    throw new TimeoutException("Job timed out");
+                                }
+
+                                continue;
                             }
 
-                            continue;
+                            if (!EvalPreconditions(job, context))
+                            {
+                                continue;
+                            }
+
+                            OnJobStart(job);
+
+                            m_dataRepository.OnJobStart(job);
+                            StartJob(job);
+                            m_dataRepository.OnJobSucceeded(job);
+
+                            OnJobSucceeded(job);
                         }
-                        
-                        if (!EvalPreconditions(job, context))
+                        catch (Exception ex)
                         {
-                            continue;
+                            try
+                            {
+                                m_dataRepository.OnJobFailed(job, ex);
+                            }
+                            catch
+                            {
+                                ;
+                            }
+
+                            try
+                            {
+                                OnJobFailed(job, ex);
+                            }
+                            catch
+                            {
+                                ;
+                            }
                         }
-
-                        OnJobStart(job);
-
-                        m_dataRepository.OnJobStart(job);
-                        StartJob(job);
-                        m_dataRepository.OnJobSucceeded(job);
-                        
-                        OnJobSucceeded(job);
                     }
-                    catch (Exception ex)
-                    {
-                        try
-                        {
-                            m_dataRepository.OnJobFailed(job, ex);
-                        }
-                        catch { ; }
 
-                        try
-                        {
-                            OnJobFailed(job, ex);
-                        }
-                        catch { ; }
-                    }
+                    Thread.Sleep(m_tick);
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("GENERAL JOB LAUNCHER ERROR:");
+                    Console.WriteLine(ex);
 
-                Thread.Sleep(m_tick);
+                    Thread.Sleep(5000);
+                }
             }
         }
 

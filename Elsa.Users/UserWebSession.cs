@@ -4,6 +4,7 @@ using System.Web;
 using System.Web.Routing;
 
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
@@ -16,14 +17,16 @@ namespace Elsa.Users
         private const string c_sessionCookieIdentifier = "elsa_sid";
         private bool m_initialized;
         private Guid? m_sessionPublicId;
+        private ICache m_cache;
 
         private readonly IDatabase m_database;
 
         private IUserSession m_session;
 
-        public UserWebSession(IDatabase database)
+        public UserWebSession(IDatabase database, ICache cache)
         {
             m_database = database;
+            m_cache = cache;
         }
 
         public IUser User
@@ -88,6 +91,7 @@ namespace Elsa.Users
 
             if (User != null)
             {
+                m_cache.Remove(GetCacheKey(m_session.PublicId));
                 m_session.EndDt = DateTime.Now;
                 m_database.Save(m_session);
                 m_session = null;
@@ -112,14 +116,16 @@ namespace Elsa.Users
                 Guid sid;
                 if (Guid.TryParse(sessionCookie.Value, out sid))
                 {
-                    m_session =
-                        m_database.SelectFrom<IUserSession>()
-                            .Join(s => s.User)
-                            .Join(s => s.Project)
-                            //.Take(1)
-                            .Where(s => (s.PublicId == sid) && (s.EndDt == null))
-                            .Execute()
-                            .FirstOrDefault();
+                    m_session = m_cache.ReadThrough(GetCacheKey(sid),
+                        TimeSpan.FromMinutes(1),
+                        () =>
+                            m_database.SelectFrom<IUserSession>()
+                                .Join(s => s.User)
+                                .Join(s => s.Project)
+                                .Take(1)
+                                .Where(s => (s.PublicId == sid) && (s.EndDt == null))
+                                .Execute()
+                                .FirstOrDefault());
 
                     if (m_session == null)
                     {
@@ -137,6 +143,7 @@ namespace Elsa.Users
                 m_session = null;
 
                 m_sessionPublicId = Guid.NewGuid();
+                m_cache.Remove(GetCacheKey(m_sessionPublicId.Value));
 
                 sessionCookie = new HttpCookie(c_sessionCookieIdentifier, m_sessionPublicId.ToString())
                                     {
@@ -156,6 +163,11 @@ namespace Elsa.Users
             {
                 throw new InvalidOperationException("Session was not initialized");
             }
+        }
+
+        private string GetCacheKey(Guid sid)
+        {
+            return $"usix_{sid}";
         }
     }
 }
