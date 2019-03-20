@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Automation;
 
 using Robowire.RobOrm.Core;

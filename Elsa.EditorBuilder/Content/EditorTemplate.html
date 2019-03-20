@@ -1,0 +1,178 @@
+﻿<script type="text/javascript">
+    var app = app || {};
+    app.autoVms = app.autoVms || {};
+    app.autoVms.$vmName$ = app.autoVms.$vmName$ || function() {
+        var self = this;
+
+        self.items = [];
+        self.nextPageKey = null;
+        self.hasNextPage = false;
+        self.editItem = null;
+        self.hasEditItem = false;
+        self.isValid = false;
+
+        var receiveItem = function(serverItem, isNew) {
+
+            if ((!!self.editItem) && (self.editItem.$uidName$ === serverItem.$uidName$)) {
+                self.editItem = serverItem;
+            }
+
+            if (serverItem.$uidName$ == null) {
+                self.editItem = serverItem;
+                self.hasEditItem = true;
+                return;
+            }
+
+            var found = false;
+            for (var i = 0; i < self.items.length; i++) {
+                if (self.items[i].$uidName$ === serverItem.$uidName$) {
+                    self.items[i] = serverItem;
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                if (isNew) {
+                    self.items.unshift(serverItem);
+                } else {
+                    self.items.push(serverItem);
+                }
+            }
+        };
+
+        self.setEditItem = function(model) {
+
+            if (!model) {
+                lt.api("$controllerUrl$/New").get(receiveItem);
+                return;
+            }
+
+            for (var i = 0; i < self.items.length; i++) {
+                var item = self.items[i];
+                if (item.$uidName$ === model.$uidName$) {
+                    self.editItem = item;
+                    self.hasEditItem = true;
+                    lt.notify();
+                    return;
+                }
+            }
+        };
+
+        self.validate = function() {
+            self.isValid = false;
+            if (!self.editItem) {
+                return;
+            }
+
+            lt.api("$controllerUrl$/GetFieldErrors")
+                .silent()
+                .body(self.editItem)
+                .post(function(errors) {
+                    self.isValid = (!errors) || (errors.length === 0);
+                });
+        };
+
+        self.save = function(model) {
+            lt.api("$controllerUrl$/Save").body(model).post(function(received) {
+                receiveItem(received, !model.$uidName$);
+                self.editItem = null;
+                self.cancelEdit();
+            });
+        };
+
+        self.cancelEdit = function () {
+
+            if (self.editItem !== null && (!!self.editItem.$uidName$)) {
+
+                lt.api("$controllerUrl$/Get").body(self.editItem).post(function(received) {
+                    self.editItem = null;
+                    self.hasEditItem = false;
+                    receiveItem(received);
+                });
+                return;
+            }
+
+            self.editItem = null;
+            self.hasEditItem = false;
+        };
+
+        var loadPage = function(pageKey) {
+
+            var call = lt.api("$controllerUrl$/List").query({ "pageKey": pageKey });
+
+            if (!pageKey) {
+                call = call.silent();
+            }
+
+            call.get(function(result) {
+
+                self.nextPageKey = result.NextPageTag;
+                self.hasNextPage = !!self.nextPageKey;
+
+                for (var i = 0; i < result.Items.length; i++) {
+                    var sourceItem = result.items[i];
+                    receiveItem(sourceItem);
+                }
+            });
+        };
+
+        var init = function() {
+            if (!lt || !lt.api) {
+                setTimeout(init, 100);
+                return;
+            }
+
+            loadPage(null);
+        };
+
+        setTimeout(init, 50);
+    };
+
+    app.autoVms.$vmName$.vm = app.autoVms.$vmName$.vm || new app.autoVms.$vmName$();
+</script>    
+
+<div id="$editorContainerName$" class="autoEditorContainer">
+    <div data-bind="class!.hidden:hasEditItem"  >
+        <div class="autoEditPanel form formCard" lt-name="editForm">
+            $editForm$
+        </div>
+        <div class="batchesEditButtons formActions">
+            <button class="butCancel" event-bind="click:cancelEdit"></button>
+            <i class="fas fa-sync" event-bind="click:doValidation" data-bind="class.hidden:isValid"></i>
+            <button class="butSubmit" event-bind="click:save" data-bind="class!.hidden:isValid"></button>
+        </div>
+    </div>
+    <div class="autoEditGridHolder" data-bind="class.hidden:hasEditItem">
+        <button event-bind="click:createNew">+</button>
+        $grid$
+    </div>
+</div>
+
+<script>
+    lt.element("$editorContainerName$").withModel("app.autoVms.$vmName$.vm").attach(function(editForm) {
+        const self = this;
+        const vm = app.autoVms.$vmName$.vm;
+
+        self.doValidation = function() {
+            lt.updateModelByForm(vm.editItem, editForm);
+            vm.validate();
+        };
+
+        self.cancelEdit = function() {
+            vm.cancelEdit();
+        };
+
+        self.save = function() {
+            lt.updateModelByForm(vm.editItem, editForm);
+            vm.save();
+        };
+
+        self.createNew = function() {
+            vm.editItem(null);
+        };
+
+        self.editEntity = function(model) {
+            vm.editItem(model);
+        };
+    });
+</script>

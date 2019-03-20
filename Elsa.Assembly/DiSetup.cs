@@ -5,6 +5,7 @@ using Elsa.App.OrdersPacking;
 using Elsa.App.Shipment;
 using Elsa.Apps.Inventory;
 using Elsa.Apps.ScheduledJobs;
+using Elsa.Apps.Suppliers;
 using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Common.UserRightsInfrastructure;
@@ -70,6 +71,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(CustomersController).Assembly);
                     s.ScanAssembly(typeof(ImportRatesJob).Assembly);
                     s.ScanAssembly(typeof(CommonRegistry).Assembly);
+                    s.ScanAssembly(typeof(SuppliersAutoController).Assembly);
                 });
 
             ElsaDbInstaller.Initialize(container);

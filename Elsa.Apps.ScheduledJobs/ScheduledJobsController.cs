@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Elsa.Apps.ScheduledJobs.Model;
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Automation;
@@ -19,33 +20,47 @@ namespace Elsa.Apps.ScheduledJobs
     {
         private readonly IScheduledJobsRepository m_jobsRepository;
         private readonly IJobExecutor m_executor;
+        private readonly ICache m_cache;
+        private readonly ISession m_session;
 
-        public ScheduledJobsController(IWebSession webSession, ILog log, IScheduledJobsRepository jobsRepository, IJobExecutor executor)
+        public ScheduledJobsController(IWebSession webSession, ILog log, IScheduledJobsRepository jobsRepository, IJobExecutor executor, ICache cache, ISession session)
             : base(webSession, log)
         {
             m_jobsRepository = jobsRepository;
             m_executor = executor;
+            m_cache = cache;
+            m_session = session;
         }
 
         [DoNotLog]
         public IEnumerable<ScheduledJobStatus> GetStatus()
         {
-            var scheduler = m_jobsRepository.GetCompleteScheduler().OrderBy(s => s.LoopLaunchPriority).ToList();
+            return m_cache.ReadThrough($"jobsStat_{m_session.Project.Id}",
+                TimeSpan.FromSeconds(20),
+                () =>
+                {
+                    var scheduler = m_jobsRepository.GetCompleteScheduler().OrderBy(s => s.LoopLaunchPriority).ToList();
 
-            foreach (var sch in scheduler)
-            {
-                yield return new ScheduledJobStatus()
-                                 {
-                                     ScheduleId = sch.Id,
-                                     Name = sch.ScheduledJob.Name,
-                                     LastRun = sch.LastStartDt == null ? "Nikdy" : DateUtil.FormatDateWithAgo(sch.LastStartDt ?? sch.LastEndDt.Value, true),
-                                     CanBeStarted = sch.CanBeStartedManually && !IsRunning(sch),
-                                     CurrentStatus = GetJobStatus(sch),
-                                     StartMode = GetStartMode(sch)
-                                 };
+                    var result = new List<ScheduledJobStatus>(scheduler.Count);
 
-            }
+                    foreach (var sch in scheduler)
+                    {
+                        result.Add(new ScheduledJobStatus()
+                        {
+                            ScheduleId = sch.Id,
+                            Name = sch.ScheduledJob.Name,
+                            LastRun =
+                                sch.LastStartDt == null
+                                    ? "Nikdy"
+                                    : DateUtil.FormatDateWithAgo(sch.LastStartDt ?? sch.LastEndDt.Value, true),
+                            CanBeStarted = sch.CanBeStartedManually && !IsRunning(sch),
+                            CurrentStatus = GetJobStatus(sch),
+                            StartMode = GetStartMode(sch)
+                        });
+                    }
 
+                    return result;
+                });
         }
 
         public IEnumerable<ScheduledJobStatus> Launch(int scheduleId)

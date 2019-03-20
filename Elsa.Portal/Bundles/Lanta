@@ -10,6 +10,7 @@
 ~/Script/Lanta/Lt.Call.js
 ~/Script/Lanta/Lt.CustomAttributes.js
 ~/Script/Lanta/ViewsLoader.js
+~/Script/Lanta/UpdateModelByForm.js
 ~/Script/Common/UrlBus.js
 ~/Script/Common/ContextMenu.js
 ~/Script/Common/GlobalEventHandlers.js

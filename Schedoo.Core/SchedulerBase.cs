@@ -19,8 +19,8 @@ namespace Schedoo.Core
 
         public void Start()
         {
-            while (true)
-            {
+            //while (true)
+            //{
                 try
                 {
                     var jobs = m_dataRepository.AllJobs.OrderBy(j => j.Priority).ToList();
@@ -87,7 +87,7 @@ namespace Schedoo.Core
 
                     Thread.Sleep(5000);
                 }
-            }
+            //}
         }
 
         protected abstract void StartJob(IJob job);

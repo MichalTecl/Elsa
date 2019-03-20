@@ -67,6 +67,7 @@
     <Compile Include="IPaymentRepository.cs" />
     <Compile Include="IProductRepository.cs" />
     <Compile Include="IPurchaseOrderRepository.cs" />
+    <Compile Include="ISupplierRepository.cs" />
     <Compile Include="IUnitRepository.cs" />
     <Compile Include="IKitProductRepository.cs" />
     <Compile Include="IUserRepository.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Repositories\ErpRepository.cs" />
     <Compile Include="Repositories\KitProductRepository.cs" />
     <Compile Include="Repositories\PreferredBatchRepository.cs" />
+    <Compile Include="Repositories\SupplierRepository.cs" />
     <Compile Include="Repositories\UnitRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Repositories\VirtualProductRepository.cs" />

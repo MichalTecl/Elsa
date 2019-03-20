@@ -46,6 +46,7 @@ namespace Elsa.Commerce.Core
             setup.For<IBatchReportingFacade>().Use<BatchReportingFacade>();
             setup.For<IMaterialThresholdRepository>().Use<MaterialThresholdRepository>();
             setup.For<IStockEventRepository>().Use<StockEventRepository>();
+            setup.For<ISupplierRepository>().Use<SupplierRepository>();
         }
     }
 }

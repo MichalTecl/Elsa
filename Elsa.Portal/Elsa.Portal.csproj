@@ -124,6 +124,7 @@
     <Content Include="Script\Common\GlobalEventHandlers.js" />
     <Content Include="Script\Common\UrlBus.js" />
     <Content Include="Script\Lanta\AttributeBinding.js" />
+    <Content Include="Script\Lanta\UpdateModelByForm.js" />
     <Content Include="UI\Controls\Common\Autosuggest.css" />
     <Content Include="UI\Controls\Common\AutoSuggest.js" />
     <Content Include="UI\Controls\Common\BusyOverlay.html" />
