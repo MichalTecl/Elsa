@@ -30,7 +30,7 @@ namespace Elsa.EditorBuilder.Internal
         {
             sb.Append("<div class=\"").Append(string.Join(" ", ContainerClasses)).Append("\">");
 
-            sb.Append("<label for=\"").Append(EditorElementId).Append("\" class=\"").Append(string.Join(" ", LabelClasses)).Append("\">").Append(Title).Append("<)/label>");
+            sb.Append("<label for=\"").Append(EditorElementId).Append("\" class=\"").Append(string.Join(" ", LabelClasses)).Append("\">").Append(Title).Append("</label>");
 
             var node = EditElementNodeType ?? "div";
 

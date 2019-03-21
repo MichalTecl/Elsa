@@ -40,7 +40,7 @@ namespace Elsa.EditorBuilder.Internal
                 target.Append(" data-bind=\"text:").Append(SourceProperty).Append("\" ");
             }
             
-            target.Append("\"></div>");
+            target.Append("></div>");
         }
     }
 }
