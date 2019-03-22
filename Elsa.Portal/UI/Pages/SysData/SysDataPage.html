@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ELSA</title>
+    <meta charset="utf-8" />
+    <script src="/Bundles/Bundle.ashx?bundle=Lanta"></script>
+    <script src="/Script/Apps/User/UserVM.js"></script>
+    <script src="/UI/Controls/Common/PickItemDialog.js"></script>
+    <link href="/Style/Appearance.css" rel="stylesheet" />
+    <link href="/Style/Layout.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <script src="/UI/Controls/Common/TabControl.js"></script>
+    <script src="/UI/Controls/Common/MaterialList/MaterialListVm.js"></script>
+</head>
+<body>
+    <script src="../../Controls/Common/AutoSuggest.js"></script>
+    <div replace-by="/UI/Widgets/User/UserWidget.html"></div>
+  
+
+    <div class="panel w4" id="mainTab">
+
+    </div>
+
+    <script>
+        var tab = new app.ui.TabControl(document.getElementById("mainTab"));
+        tab.addTab("Dodavatelé", "/suppliers/getEditor", null, null, "batchSearch");
+
+    </script>
+
+    <script src="/Script/Apps/Inventory/VirtualProducts/VirtualProductsVM.js"></script>
+    <div replace-by="/UI/Controls/Common/BusyOverlay.html"></div>
+</body>
+</html>
+<link href="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/BatchInput.css" rel="stylesheet" />

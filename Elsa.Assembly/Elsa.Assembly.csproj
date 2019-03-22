@@ -88,6 +88,10 @@
       <Project>{30186ab2-8f35-469d-9917-da2fa80cc3f8}</Project>
       <Name>Elsa.App.Shipment</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Apps.CommonData\Elsa.Apps.CommonData.csproj">
+      <Project>{A59B602C-0A86-48F6-944D-CE7C675F99DD}</Project>
+      <Name>Elsa.Apps.CommonData</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Apps.Common\Elsa.Apps.Common.csproj">
       <Project>{b09c721a-b22e-47a6-bc6b-9cd9155e174a}</Project>
       <Name>Elsa.Apps.Common</Name>
@@ -99,10 +103,6 @@
     <ProjectReference Include="..\Elsa.Apps.ScheduledJobs\Elsa.Apps.ScheduledJobs.csproj">
       <Project>{55482891-37c2-4c35-83be-68100012ae25}</Project>
       <Name>Elsa.Apps.ScheduledJobs</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Elsa.Apps.Suppliers\Elsa.Apps.Suppliers.csproj">
-      <Project>{9354885E-0C89-446F-BC84-EA624B24005B}</Project>
-      <Name>Elsa.Apps.Suppliers</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
       <Project>{61dd96b7-bf13-4c48-9353-08f2f907048e}</Project>

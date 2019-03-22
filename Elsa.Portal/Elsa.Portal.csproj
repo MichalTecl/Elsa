@@ -195,9 +195,11 @@
     <Content Include="Script\Lanta\ViewsLoader.js" />
     <Content Include="Style\Appearance.css" />
     <Content Include="Style\Layout.css" />
+    <Content Include="UI\Pages\SysData\SysDataPage.html" />
     <Content Include="UI\Widgets\Jobs\ScheduledJobsWidget.html" />
     <Content Include="UI\Widgets\OrderProcessing\OrdersProcessingWidget.html" />
     <Content Include="UI\Widgets\Orders\OrdersOverviewWidget.html" />
+    <Content Include="UI\Widgets\Sys\SystemWidget.html" />
     <Content Include="UI\Widgets\User\UserWidget.html" />
     <Content Include="UI\Widgets\User\UserWidget.js" />
     <Content Include="UI\Widgets\Warehouse\WarehouseWidget.html" />

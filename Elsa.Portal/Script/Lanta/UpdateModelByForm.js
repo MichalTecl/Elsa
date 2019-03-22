@@ -33,7 +33,7 @@ lt.updateModelByForm = lt.updateModelByForm || function(model, formRoot) {
                 }
             }
 
-            updater.call(model, targetAndSource[0].trim(), targetAndSource[1].trim());
+            updater.call(element, model, targetAndSource[0].trim(), targetAndSource[1].trim());
         }
     }
 

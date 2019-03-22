@@ -56,7 +56,7 @@ namespace Elsa.EditorBuilder.Internal
 
             stringBuilder.Append($"<div class=\"autoGridBody\" data-key=\"{m_keyPropertyName}\" data-bind=\"itemsSource:items\">");
 
-            stringBuilder.Append("<div class=\"lt-template autoGridRow\">");
+            stringBuilder.Append("<div class=\"lt-template autoGridRow gridRow\">");
             foreach (var column in m_columns)
             {
                 column.RenderContent(stringBuilder);

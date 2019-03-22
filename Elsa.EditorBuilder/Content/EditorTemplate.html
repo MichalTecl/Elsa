@@ -110,7 +110,7 @@
                 self.hasNextPage = !!self.nextPageKey;
 
                 for (var i = 0; i < result.Items.length; i++) {
-                    var sourceItem = result.items[i];
+                    var sourceItem = result.Items[i];
                     receiveItem(sourceItem);
                 }
             });
@@ -135,12 +135,13 @@
     <div data-bind="class!.hidden:hasEditItem"  >
         <div class="autoEditPanel form formCard" lt-name="editForm">
             $editForm$
+            <div class="batchesEditButtons formActions">
+                <button class="butCancel" event-bind="click:cancelEdit"></button>
+                <i class="fas fa-sync" event-bind="click:doValidation" data-bind="class.hidden:isValid"></i>
+                <button class="butSubmit" event-bind="click:save" data-bind="class!.hidden:isValid"></button>
+            </div>
         </div>
-        <div class="batchesEditButtons formActions">
-            <button class="butCancel" event-bind="click:cancelEdit"></button>
-            <i class="fas fa-sync" event-bind="click:doValidation" data-bind="class.hidden:isValid"></i>
-            <button class="butSubmit" event-bind="click:save" data-bind="class!.hidden:isValid"></button>
-        </div>
+        
     </div>
     <div class="autoEditGridHolder" data-bind="class.hidden:hasEditItem">
         <button event-bind="click:createNew">+</button>
@@ -168,11 +169,11 @@
         };
 
         self.createNew = function() {
-            vm.editItem(null);
+            vm.setEditItem(null);
         };
 
         self.editEntity = function(model) {
-            vm.editItem(model);
+            vm.setEditItem(model);
         };
     });
 </script>
