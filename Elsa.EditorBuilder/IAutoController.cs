@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+
+using Elsa.EditorBuilder.Internal;
 
 namespace Elsa.EditorBuilder
 {
@@ -10,7 +8,7 @@ namespace Elsa.EditorBuilder
     {
         EntityListingPage<T> List(string pageKey);
 
-        IEnumerable<Tuple<string, string>> GetFieldErrors(T entity);
+        IEnumerable<FieldValidationError> GetFieldErrors(T entity);
 
         T Save(T entity);
 

@@ -14,7 +14,7 @@ namespace Elsa.Commerce.Core
 
         ISupplier SaveSupplier(ISupplier supplier);
 
-        ISupplier CreateSupplier(Action<ISupplier> populate);
+        ISupplier WriteSupplier(int? id, Action<ISupplier> populate);
 
         void DeleteSupplier(int supplierId);
 

@@ -40,21 +40,40 @@
             }
         };
 
-        self.setEditItem = function(model) {
+        var clearValidations = function(model) {
 
-            if (!model) {
-                lt.api("$controllerUrl$/New").get(receiveItem);
-                return;
+            var properties = [];
+            for (let property in model) {
+                if (model.hasOwnProperty(property)) {
+                    if (property.indexOf("__err_") === 0) {
+                        properties.push(property);
+                    }
+                }
             }
 
-            for (var i = 0; i < self.items.length; i++) {
-                var item = self.items[i];
-                if (item.$uidName$ === model.$uidName$) {
-                    self.editItem = item;
-                    self.hasEditItem = true;
-                    lt.notify();
+            for (let i = 0; i < properties.length; i++) {
+                model[properties[i]] = "";
+            }
+        };
+
+        self.setEditItem = function(model) {
+            try {
+                if (!model) {
+                    lt.api("$controllerUrl$/New").get(receiveItem);
                     return;
                 }
+
+                for (var i = 0; i < self.items.length; i++) {
+                    var item = self.items[i];
+                    if (item.$uidName$ === model.$uidName$) {
+                        self.editItem = item;
+                        self.hasEditItem = true;
+                        lt.notify();
+                        return;
+                    }
+                }
+            } finally {
+                self.validate();
             }
         };
 
@@ -69,12 +88,26 @@
                 .body(self.editItem)
                 .post(function(errors) {
                     self.isValid = (!errors) || (errors.length === 0);
+                    
+                    clearValidations(self.editItem);
+
+                    for (let i = 0; i < errors.length; i++) {
+                        var errorObject = errors[i];
+
+                        var errProp = "__err_" + errorObject.Field;
+
+                        self.editItem[errProp] = [(self.editItem[errProp] || ""), errorObject.Error].join(" ");
+                    }
+
                 });
         };
 
-        self.save = function(model) {
-            lt.api("$controllerUrl$/Save").body(model).post(function(received) {
-                receiveItem(received, !model.$uidName$);
+        self.save = function () {
+
+            var isNew = !self.editItem.$uidName$;
+
+            lt.api("$controllerUrl$/Save").body(self.editItem).post(function(received) {
+                receiveItem(received, isNew);
                 self.editItem = null;
                 self.cancelEdit();
             });
@@ -94,6 +127,8 @@
 
             self.editItem = null;
             self.hasEditItem = false;
+
+            lt.notify();
         };
 
         var loadPage = function(pageKey) {
@@ -129,6 +164,8 @@
     };
 
     app.autoVms.$vmName$.vm = app.autoVms.$vmName$.vm || new app.autoVms.$vmName$();
+
+    //# sourceURL=/autoUi/app.autoVms.$vmName$.vm
 </script>    
 
 <div id="$editorContainerName$" class="autoEditorContainer">
@@ -174,6 +211,7 @@
 
         self.editEntity = function(model) {
             vm.setEditItem(model);
-        };
+        };
+
     });
 </script>

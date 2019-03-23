@@ -27,39 +27,39 @@ namespace Elsa.Apps.CommonData.Model
 
         public int? Id { get; set; }
         
-        [DisplayName("Název")]
+        [Display(Name ="Název")]
         [Required]
         public string Name { get; set; }
 
-        [DisplayName("Ulice a číslo")]
+        [Display(Name ="Ulice a číslo")]
         [Required]
         public string Street { get; set; }
 
-        [DisplayName("Město")]
+        [Display(Name ="Město")]
         public string City { get; set; }
 
-        [DisplayName("Stát")]
+        [Display(Name ="Stát")]
         public string Country { get; set; }
 
-        [DisplayName("PSČ")]
+        [Display(Name ="PSČ")]
         public string Zip { get; set; }
 
-        [DisplayName("IČO")]
+        [Display(Name ="IČO")]
         public string IdentificationNumber { get; set; }
 
-        [DisplayName("DIČ")]
+        [Display(Name ="DIČ")]
         public string TaxIdentificationNumber { get; set; }
 
-        [DisplayName("Kontaktní telefon")]
+        [Display(Name ="Kontaktní telefon")]
         public string ContactPhone { get; set; }
 
-        [DisplayName("Kontaktní e-mail")]
+        [Display(Name ="Kontaktní e-mail")]
         public string ContactEmail { get; set; }
 
-        [DisplayName("Měna")]
+        [Display(Name ="Měna")]
         public string CurrencyName { get; set; }
 
-        [DisplayName("Poznámky")]
+        [Display(Name ="Poznámky")]
         public string Note { get; set; }
     }
 }

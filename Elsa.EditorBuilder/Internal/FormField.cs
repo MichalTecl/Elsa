@@ -54,6 +54,10 @@ namespace Elsa.EditorBuilder.Internal
 
             sb.Append("></").Append(node).Append(">");
 
+            sb.Append("<div class=\"fieldValidationError\" data-bind=\"text:editItem.__err_")
+                .Append(ModelBoundProperty)
+                .Append("\"></div>");
+
             sb.Append("</div>");
         }
 

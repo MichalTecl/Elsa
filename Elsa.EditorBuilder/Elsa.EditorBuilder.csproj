@@ -44,6 +44,7 @@
     <Compile Include="CellClass.cs" />
     <Compile Include="Content\ContentLoader.cs" />
     <Compile Include="Internal\DivBlock.cs" />
+    <Compile Include="Internal\FieldValidationError.cs" />
     <Compile Include="Internal\FormBuilder.cs" />
     <Compile Include="GuiFor.cs" />
     <Compile Include="EntityListingPage.cs" />

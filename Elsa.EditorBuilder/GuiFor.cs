@@ -25,23 +25,33 @@ namespace Elsa.EditorBuilder
             m_grid.EditActionColumn();
             return this;
         }
-
-        public static ISetIdProperty<T> Calls<TController>(string address = null) where TController : IAutoController<T>
+        
+        private static ISetIdProperty<T> Calls(Type controllerType, string address = null)
         {
-            var controllerAttribute = typeof(TController).GetCustomAttribute(typeof(ControllerAttribute)) as ControllerAttribute;
+            var controllerAttribute = controllerType.GetCustomAttribute(typeof(ControllerAttribute)) as ControllerAttribute;
             if (controllerAttribute == null)
             {
                 throw new InvalidOperationException(
-                    $"{typeof(TController)} is not marked by {typeof(ControllerAttribute)} attribute");
+                    $"{controllerType} is not marked by {typeof(ControllerAttribute)} attribute");
             }
 
             var builder = new GuiFor<T>
             {
-                m_controllerType = typeof(TController),
+                m_controllerType = controllerType,
                 m_controllerUrl = address ?? $"/{controllerAttribute.Name}"
             };
 
             return builder;
+        }
+
+        public static ISetIdProperty<T> Calls(IAutoController<T> controller, string address = null)
+        {
+            return Calls(controller.GetType(), address);
+        }
+
+        public static ISetIdProperty<T> Calls<TController>(string address = null) where TController : IAutoController<T>
+        {
+            return Calls(typeof(TController), address);
         }
 
         public string Render()

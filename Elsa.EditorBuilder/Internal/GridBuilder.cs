@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -29,7 +30,7 @@ namespace Elsa.EditorBuilder.Internal
         {
             var p = ReflectionHelper.GetPropertyInfo(property);
 
-            title = title ?? p.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName ?? p.Name;
+            title = title ?? p.GetCustomAttribute<DisplayAttribute>()?.Name ?? p.Name;
 
             m_columns.Add(new GridColumnDefinition(title, p.Name, cssClass, null));
 

@@ -43,7 +43,7 @@ namespace Elsa.EditorBuilder.Internal
 
             field.ModelBoundProperty = property.Name;
 
-            field.Title = (property.GetCustomAttribute(typeof(DisplayNameAttribute)) as DisplayNameAttribute)?.DisplayName ?? property.Name;
+            field.Title = (property.GetCustomAttribute(typeof(DisplayAttribute)) as DisplayAttribute)?.Name ?? property.Name;
 
             if (!property.CanWrite)
             {
