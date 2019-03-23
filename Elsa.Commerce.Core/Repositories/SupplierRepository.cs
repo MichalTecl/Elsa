@@ -42,13 +42,29 @@ namespace Elsa.Commerce.Core.Repositories
 
             m_cache.Remove(GetSuppliersCacheKey());
 
-            return supplier;
+            return GetSupplier(supplier.Id);
         }
 
-        public ISupplier CreateSupplier(Action<ISupplier> populate)
+        public ISupplier WriteSupplier(int? id, Action<ISupplier> populate)
         {
-            var supplier = m_database.New(populate);
-            return SaveSupplier(supplier);
+            ISupplier entity;
+
+            if (id != null)
+            {
+                entity = GetSupplier(id.Value);
+                if (entity == null)
+                {
+                    throw new InvalidOperationException("Invalid entity reference");
+                }
+            }
+            else
+            {
+                entity = m_database.New<ISupplier>();
+            }
+
+            populate(entity);
+
+            return SaveSupplier(entity);
         }
 
         public void DeleteSupplier(int supplierId)

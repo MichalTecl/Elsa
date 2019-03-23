@@ -26,10 +26,10 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         [NVarchar(250, false)]
         string City { get; set; }
 
-        [NVarchar(5, false)]
+        [NVarchar(250, false)]
         string Country { get; set; }
 
-        [NVarchar(250, false)]
+        [NVarchar(10, false)]
         string Zip { get; set; }
 
         [NVarchar(250, false)]
