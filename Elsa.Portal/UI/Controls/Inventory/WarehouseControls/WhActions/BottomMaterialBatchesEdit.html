@@ -69,7 +69,7 @@
                     <!-- Supplier -->
                     <div class="formRow" lt-name="supplierCell">
                         <label>Dodavatel</label>
-                        <div replace-by="/UI/Controls/Common/Elements/SupplierAutosuggest.html" data-bind="value:SupplierName"></div>
+                        <div lt-name="inpSupplier" replace-by="/UI/Controls/Common/Elements/SupplierAutosuggest.html" data-bind="value:SupplierName"></div>
                     </div>
 
                     <!-- Price -->
@@ -84,7 +84,7 @@
                 </div>
                 <div class="batchesEditButtons formActions">
                     <button class="butCancel" event-bind="click:cancelBatchEdit"></button>
-                    <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value)"></button>
+                    <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value, $inpSupplier.value)"></button>
                     
                 </div>
             </div>
@@ -145,7 +145,7 @@
             return (!s || s.length < 1);
         };
 
-        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price, invoiceNr) {
+        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price, invoiceNr, supplierName) {
             batchNr = batchNr || "";
 
             if (isEmpty(material)) {
@@ -167,6 +167,7 @@
             model.DisplayDt = dt;
             model.Price = parseFloat(price);
             model.InvoiceNumber = invoiceNr;
+            model.SupplierName = supplierName;
 
             app.warehouseActions.vm.saveBottomMaterialBatch(model, function() {
                 batchList.children[0].refreshBatchView();
