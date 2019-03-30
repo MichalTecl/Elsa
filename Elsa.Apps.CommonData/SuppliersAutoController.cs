@@ -114,8 +114,13 @@ namespace Elsa.Apps.CommonData
                         .Field(s => s.City)
                         .Field(s => s.Country)
                         .Field(s => s.Zip))
-                .Div("splCurr", f => f.Field(s => s.CurrencyName))
+                .Div("splCurr", f => f.Field(s => s.CurrencyName, fld => fld.ReplaceByUrl = "/UI/Controls/Common/Elements/CurrencyDropDown.html"))
                 .Div("splNote", f => f.Field(s => s.Note, ff => ff.EditElementNodeType = "textarea"));
+        }
+
+        public IEnumerable<string> GetSupplierNames()
+        {
+            return m_supplierRepository.GetSuppliers().Select(s => s.Name);
         }
     }
 }

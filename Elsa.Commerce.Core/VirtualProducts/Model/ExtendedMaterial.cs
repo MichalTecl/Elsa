@@ -30,6 +30,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             AutomaticBatches = adaptee.AutomaticBatches;
             RequiresInvoice = adaptee.RequiresInvoiceNr ?? false;
             RequiresPrice = adaptee.RequiresPrice ?? false;
+            RequiresSupplierReference = adaptee.RequiresSupplierReference ?? false;
 
             var threshold = adaptee.Thresholds?.FirstOrDefault();
             if (threshold != null)
@@ -156,6 +157,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool RequiresPrice { get; }
 
         public bool RequiresInvoice { get; }
+
+        public bool RequiresSupplierReference { get; }
 
         public void AddComponent(decimal amount, IMaterialUnit unit, IExtendedMaterialModel material)
         {

@@ -50,6 +50,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool automaticBatches,
             bool requiresPrice,
             bool requiresIncvoice, 
+            bool requiresSupplierReference,
             IEnumerable<string> components,
             string thresholdText)
         {
@@ -80,7 +81,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     materialInventoryId,
                     automaticBatches,
                     requiresPrice,
-                    requiresIncvoice);
+                    requiresIncvoice,
+                    requiresSupplierReference);
 
                 var toDelete =
                     material.Components.Where(
@@ -325,7 +327,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                             MaterialName = material.Name,
                             RequiresInvoice = material.RequiresInvoice,
                             RequiresPrice = material.RequiresInvoice,
-                            AutomaticBatches = material.AutomaticBatches
+                            AutomaticBatches = material.AutomaticBatches,
+                            RequiresSupplierReference = material.RequiresSupplierReference
                         };
 
             if (material.AutomaticBatches)

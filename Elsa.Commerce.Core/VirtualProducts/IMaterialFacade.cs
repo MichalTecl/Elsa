@@ -15,6 +15,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool automaticBatches,
             bool requiresPrice,
             bool requiresInvoice,
+            bool requiresSupplierReference,
             IEnumerable<string> components,
             string thresholdText);
 

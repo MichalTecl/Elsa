@@ -228,6 +228,7 @@ namespace Elsa.Apps.Inventory
                     request.AutomaticBatches,
                     request.RequiresPrice,
                     request.RequiresInvoice,
+                    request.RequiresSupplierReference,
                     request.Materials.Select(s => s.DisplayText),
                     thresholdText);
                 

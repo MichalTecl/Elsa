@@ -1,0 +1,38 @@
+﻿<div class="autocomplete" id="supplier_autosug_container_{%GENERATE%}">
+    <input lt-name="suppInp" event-bind="{attr.event-bind}" update-model="{attr.update-model}" class="{attr.class}" data-bind="{attr.data-bind}" />
+</div>
+<script>
+    var app = app || {};
+    app.commonVms = app.commonVms || {};
+    app.commonVms.SupplierAutosuggestVm = app.commonVms.SupplierAutosuggestVm || function() {
+        var self = this;
+
+        self.suppliers = [];
+
+        var load = function () {
+
+            if (!lt) {
+                setTimeout(load, 100);
+                return;
+            }
+
+            lt.api("/suppliers/getSupplierNames").get(function(names) {
+                self.suppliers = names;
+            });
+        }
+
+        load();
+
+        self.getSuppliers = function(query, callback) {
+            callback(self.suppliers);
+        };
+    };
+    app.commonVms.SupplierAutosuggestVm.vm = app.commonVms.SupplierAutosuggestVm.vm ||
+        new app.commonVms.SupplierAutosuggestVm();
+
+
+    lt.element("supplier_autosug_container_{%GENERATE%}").attach(function() {
+        app.ui.autosuggest(this, app.commonVms.SupplierAutosuggestVm.vm.getSuppliers);
+    });
+
+</script>

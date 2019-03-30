@@ -22,8 +22,16 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IVirtualProductRepository m_virtualProductRepository;
         private readonly ICache m_cache;
         private readonly Lazy<IMaterialBatchFacade> m_materialBatchFacade;
-        
-        public MaterialBatchRepository(IDatabase database, ISession session, IUnitConversionHelper conversionHelper, IMaterialRepository materialRepository, IVirtualProductRepository virtualProductRepository, ICache cache, Lazy<IMaterialBatchFacade> materialBatchFacade)
+        private readonly ISupplierRepository m_supplierRepository;
+
+        public MaterialBatchRepository(IDatabase database,
+            ISession session,
+            IUnitConversionHelper conversionHelper,
+            IMaterialRepository materialRepository,
+            IVirtualProductRepository virtualProductRepository,
+            ICache cache,
+            Lazy<IMaterialBatchFacade> materialBatchFacade,
+            ISupplierRepository supplierRepository)
         {
             m_database = database;
             m_session = session;
@@ -32,24 +40,20 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_virtualProductRepository = virtualProductRepository;
             m_cache = cache;
             m_materialBatchFacade = materialBatchFacade;
+            m_supplierRepository = supplierRepository;
         }
 
         public MaterialBatchComponent GetBatchById(int id)
         {
             var entity = GetBatchQuery().Where(b => b.Id == id).Execute().FirstOrDefault();
-            if (entity == null)
-            {
-                return null;
-            }
-
-            return MapToModel(entity);
+            return entity == null ? null : MapToModel(entity);
         }
 
         public MaterialBatchComponent GetBatchByNumber(int materialId, string batchNumber)
         {
             var batch =
                 GetBatchQuery()
-                    .Where(b => b.MaterialId == materialId && b.BatchNumber == batchNumber)
+                    .Where(b => (b.MaterialId == materialId) && (b.BatchNumber == batchNumber))
                     .Execute()
                     .FirstOrDefault();
 
@@ -114,7 +118,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return entities;
         }
 
-        public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr)
+        public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr, string supplierName)
         {
             if ((material.ProjectId != m_session.Project.Id) || (unit.ProjectId != m_session.Project.Id))
             {
@@ -125,6 +129,21 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             if (m.Components.Any())
             {
                 throw new InvalidOperationException($"Materiál '{material.Name}' nelze naskladnit, protože se skládá z jiných materiálů. Použijte prosím funkci Výroba");
+            }
+
+            int? supplierId = null;
+            if (!string.IsNullOrWhiteSpace(supplierName))
+            {
+                var supplier =
+                    m_supplierRepository.GetSuppliers()
+                        .FirstOrDefault(s => s.Name.Equals(supplierName, StringComparison.InvariantCultureIgnoreCase));
+
+                if (supplier == null)
+                {
+                    throw new InvalidOperationException($"Nenalezen dodavatel \"{supplierName}\"");
+                }
+
+                supplierId = supplier.Id;
             }
 
             MaterialBatchComponent result;
@@ -183,6 +202,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     throw new InvalidOperationException("Číslo faktury je povinný údaj");
                 }
 
+                if ((material.RequiresSupplierReference == true) && (supplierId == null))
+                {
+                    throw new InvalidOperationException("Dodavatel je povinný údaj");
+                }
+
                 entity.BatchNumber = batchNr;
                 entity.Created = receiveDt;
                 entity.MaterialId = material.Id;
@@ -192,6 +216,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 entity.Note = string.Empty;
                 entity.IsAvailable = true;
                 entity.InvoiceNr = invoiceNr;
+                entity.SupplierId = supplierId;
                 
                 m_database.Save(entity);
 

@@ -25,6 +25,44 @@ lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
 
     };
 
+lanta.ViewLoading.inheritAttributes = lanta.ViewLoading.inheritAttributes || function(element, html) {
+
+    var matches = html.match(/{attr\.[^}]+}/gim) || [];
+
+    for (let i = 0; i < matches.length; i++) {
+        var attributeName = matches[i].match(/\.[^}]+/gim)[0].substring(1);
+
+        var sourceValue = element.getAttribute(attributeName) || "";
+
+        html = html.split(matches[i]).join(sourceValue);
+    }
+
+    var binding = element.getAttribute("data-bind");
+    if ((!binding) || (binding.length === 0)) {
+        return html;
+    }
+
+    var expressions = binding.split(";");
+    for (var expIndex = 0; expIndex < expressions.length; expIndex++) {
+        var exp = expressions[expIndex];
+        if (exp.trim().length === 0) {
+            continue;
+        }
+
+        var parts = exp.split(":");
+        if (parts.length !== 2) {
+            throw new Error("Invalid expression '" + exp + "'");
+        }
+
+        var to = parts[0].trim();
+        var from = parts[1].trim();
+
+        html = html.split("$" + to + "$").join(from);
+    }
+
+    return html;
+};
+
 lanta.ViewLoading.loader = function (target, value, attribute, callback) {
 
     lt.api(value).useCache().ignoreDisabledApi().noJson().get(function (html) {
@@ -36,6 +74,11 @@ lanta.ViewLoading.loader = function (target, value, attribute, callback) {
                 html = html.replace("{%GENERATE%}", dynamicValue);
             }
         }
+
+        html = lanta.ViewLoading.inheritAttributes(target, html);
+
+        var content = target.innerHTML;
+        html = html.split("{content}").join(content);
 
         if (attribute === "fill-by") {
             target.innerHTML = html;
@@ -49,7 +92,7 @@ lanta.ViewLoading.loader = function (target, value, attribute, callback) {
         if (attribute === "replace-by") {
             var xdiv = document.createElement("DIV");
             xdiv.innerHTML = html;
-
+            
             lanta.ViewLoading.makeScriptsLive(xdiv, value);
 
             var parent = target.parentElement;

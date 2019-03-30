@@ -123,6 +123,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.EditorBuilder", "Elsa.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Apps.CommonData", "Elsa.Apps.CommonData\Elsa.Apps.CommonData.csproj", "{A59B602C-0A86-48F6-944D-CE7C675F99DD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Looper", "Elsa.Looper\Elsa.Looper.csproj", "{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -301,6 +303,10 @@ Global
 		{A59B602C-0A86-48F6-944D-CE7C675F99DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A59B602C-0A86-48F6-944D-CE7C675F99DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A59B602C-0A86-48F6-944D-CE7C675F99DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -358,5 +364,6 @@ Global
 		{52768AA8-2EBF-4660-B7A4-277A3D8842BC} = {6A8FCE0F-CE35-48A7-8221-38104FF32EEB}
 		{9C5C1039-A135-4D87-9E41-70BBEE4D6E1A} = {326F0792-00AF-4D82-B170-4CE248D4A975}
 		{A59B602C-0A86-48F6-944D-CE7C675F99DD} = {456527A3-2BE8-4010-8AC6-187539CE484D}
+		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
 	EndGlobalSection
 EndGlobal

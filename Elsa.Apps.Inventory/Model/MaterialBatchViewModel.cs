@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Units;
 using Elsa.Common;
 using Elsa.Common.Utils;
@@ -13,7 +14,7 @@ namespace Elsa.Apps.Inventory.Model
 {
     public class MaterialBatchViewModel
     {
-        public MaterialBatchViewModel(IMaterialBatch batch)
+        public MaterialBatchViewModel(IMaterialBatch batch, ISupplierRepository suppliers)
         {
             Id = batch.Id;
             MaterialName = batch.Material.Name;
@@ -27,6 +28,7 @@ namespace Elsa.Apps.Inventory.Model
             InvoiceNumber = batch.InvoiceNr;
             MaterialId = batch.MaterialId;
             AutomaticBatches = batch.Material.AutomaticBatches;
+            SupplierName = batch.SupplierId == null ? null : suppliers.GetSupplier(batch.SupplierId.Value)?.Name;
         }
 
         public MaterialBatchViewModel() { }
@@ -55,6 +57,8 @@ namespace Elsa.Apps.Inventory.Model
 
         public string InvoiceNumber { get; set; }
 
+        public string SupplierName { get; set; }
+        
         public static IEnumerable<MaterialBatchViewModel> JoinAutomaticBatches(IEnumerable<MaterialBatchViewModel> source, AmountProcessor processor)
         {
             var targetList = new List<MaterialBatchViewModel>();

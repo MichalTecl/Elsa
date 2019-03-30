@@ -1,0 +1,53 @@
+﻿<script>
+    var app = app || {};
+    app.commonVms = app.commonVms || {};
+    app.commonVms.CurrencyDropdownVm = app.commonVms.CurrencyDropdownVm || function() {
+        var self = this;
+
+        self.items = [];
+
+        var load = function() {
+            
+            if (!lt) {
+                setTimeout(load, 100);
+                return;
+            }
+
+            lt.api("/currency/getSymbols").get(function(symbols) {
+                self.items = [];
+
+                for (var i = 0; i < symbols.length; i++) {
+                    self.items.push({ "symbol": symbols[i] });
+                }
+            });
+        };
+
+        load();
+    };
+
+    app.commonVms.CurrencyDropdownVm.vm = app.commonVms.CurrencyDropdownVm.vm || new app.commonVms.CurrencyDropdownVm();
+</script>
+
+<select id="currencyCombo_{%GENERATE%}" event-bind="{attr.event-bind}" update-model="{attr.update-model}" class="{attr.class}" >
+    <option class="lt-template" lt-name="optionTemplate" data-bind="text:symbol"></option>
+</select>
+
+<script>
+    lt.element("currencyCombo_{%GENERATE%}").attach(function(optionTemplate) {
+
+        const self = this;
+
+        this.bind(function(items) {
+            lt.generate(this, optionTemplate, items, function(s) { return s.symbol; });
+        }).itemsRelativeToGlobal("app.commonVms.CurrencyDropdownVm.vm");
+
+        this.bind(function (value) {
+            console.log(value);
+            self.value = value;
+        }).valueRelativeToVm("$value$");
+
+        this.updateModel = function (model, targetPropertyName, sourcePropertyName) {
+            model[targetPropertyName] = self.value;
+        };
+    });
+</script>

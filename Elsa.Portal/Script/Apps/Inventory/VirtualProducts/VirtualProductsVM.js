@@ -307,6 +307,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             AutomaticBatches: model.AutomaticBatches,
             RequiresPrice: model.RequiresPrice,
             RequiresInvoice: model.RequiresInvoice,
+            RequiresSupplierReference:model.RequiresSupplierReference,
             Materials: [],
             ProductionSteps: [],
             HasThreshold: model.HasThreshold,

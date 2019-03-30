@@ -35,6 +35,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         bool? RequiresInvoiceNr { get; set; }
 
         bool? RequiresPrice { get; set; }
+
+        bool? RequiresSupplierReference { get; set; }
         
         IEnumerable<IMaterialProductionStep> Steps { get; }
         

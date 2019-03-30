@@ -157,7 +157,12 @@ lanta.BindingCore.defaultRelativeSourceFactory = lanta.BindingCore.defaultRelati
 
 };
 
-lanta.BindingCore.defaultExpressionEvaluator = lanta.BindingCore.defaultExpressionEvaluator || function(owner, expression, relativeSourceFactory) {
+lanta.BindingCore.defaultExpressionEvaluator = lanta.BindingCore.defaultExpressionEvaluator || function (owner, expression, relativeSourceFactory) {
+
+    if (expression === null || expression === undefined) {
+        expression = "";
+    }
+
     var parts = expression.split(".");
     
     var parentExp = relativeSourceFactory(owner, expression);

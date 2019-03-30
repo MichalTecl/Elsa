@@ -132,6 +132,8 @@
     <Content Include="UI\Controls\Common\CustomerView\Customer.html" />
     <Content Include="UI\Controls\Common\CustomerView\CustomerViewPanel.html" />
     <Content Include="UI\Controls\Common\CustomerView\CustomerViewStyle.css" />
+    <Content Include="UI\Controls\Common\Elements\CurrencyDropDown.html" />
+    <Content Include="UI\Controls\Common\Elements\SupplierAutosuggest.html" />
     <Content Include="UI\Controls\Common\MaterialList\MaterialListView.html" />
     <Content Include="UI\Controls\Common\MaterialList\MaterialListVm.js" />
     <Content Include="UI\Controls\Common\PickItemDialog.html" />

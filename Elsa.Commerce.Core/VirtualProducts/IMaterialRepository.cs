@@ -30,7 +30,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             int materialInventoryId,
             bool automaticBatches,
             bool requiresPrice,
-            bool requiresInvoice);
+            bool requiresInvoice,
+            bool requiresSupplierReference);
         
         void CleanCache();
 

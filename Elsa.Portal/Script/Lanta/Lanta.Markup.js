@@ -220,7 +220,10 @@ lanta.Markup.bindExpression = lanta.Markup.bindExpression || function(owner, ele
 	var expressions = expression.split(";");
 
 	for (var expIndex = 0; expIndex < expressions.length; expIndex ++) {
-		var exp = expressions[expIndex];
+	    var exp = expressions[expIndex];
+        if (exp.trim().length === 0) {
+            continue;
+        }
 
 		var parts = exp.split(":");
 		if (parts.length !== 2) {

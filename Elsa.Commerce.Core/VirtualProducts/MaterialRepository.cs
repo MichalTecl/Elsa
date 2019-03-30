@@ -185,7 +185,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_cache.Remove(VirtualProductCompositionsCacheKey);
         }
 
-        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId, int materialInventoryId, bool automaticBatches, bool requiresPrice, bool requiresInvoice)
+        public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount, int nominalUnitId, int materialInventoryId, bool automaticBatches, bool requiresPrice, bool requiresInvoice, bool requiresSupplierReference)
         {
             IMaterial material;
             if (materialId != null)
@@ -202,7 +202,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     && (material.InventoryId == materialInventoryId)
                     && (material.AutomaticBatches == automaticBatches)
                     && (material.RequiresPrice == requiresPrice)
-                    && (material.RequiresInvoiceNr == requiresInvoice))
+                    && (material.RequiresInvoiceNr == requiresInvoice)
+                    && (material.RequiresSupplierReference == requiresSupplierReference))
                 {
                     return GetAllMaterials(null).Single(m => m.Id == materialId);
                 }
@@ -253,6 +254,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             material.AutomaticBatches = automaticBatches;
             material.RequiresPrice = requiresPrice;
             material.RequiresInvoiceNr = requiresInvoice;
+            material.RequiresSupplierReference = requiresSupplierReference;
 
             m_database.Save(material);
 

@@ -25,14 +25,16 @@ namespace Elsa.Apps.Inventory
         private readonly IUnitRepository m_unitRepository;
         private readonly IMaterialBatchRepository m_batchRepository;
         private readonly IMaterialBatchFacade m_batchFacade;
+        private readonly ISupplierRepository m_supplierRepository;
 
-        public WarehouseActionsController(IWebSession webSession, ILog log, IMaterialRepository materialRepository, IUnitRepository unitRepository, IMaterialBatchRepository batchRepository, IMaterialBatchFacade batchFacade)
+        public WarehouseActionsController(IWebSession webSession, ILog log, IMaterialRepository materialRepository, IUnitRepository unitRepository, IMaterialBatchRepository batchRepository, IMaterialBatchFacade batchFacade, ISupplierRepository supplierRepository)
             : base(webSession, log)
         {
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
             m_batchRepository = batchRepository;
             m_batchFacade = batchFacade;
+            m_supplierRepository = supplierRepository;
         }
 
         public IEnumerable<MaterialBatchViewModel> GetBottomMaterialBatches(long? before)
@@ -45,7 +47,8 @@ namespace Elsa.Apps.Inventory
             do
             {
                 var result = m_batchRepository.GetMaterialBatches(from, to, true, null).ToList();
-                batches.AddRange(result.Select(m => new MaterialBatchViewModel(m.Batch)));
+                
+                batches.AddRange(result.Select(m => new MaterialBatchViewModel(m.Batch, m_supplierRepository)));
 
                 if (batches.Any(i => i.SortDt < to.Ticks))
                 {
@@ -73,7 +76,7 @@ namespace Elsa.Apps.Inventory
             {
                 throw new InvalidOperationException($"Neznámý název měrné jednotky '{model.UnitName}'");
             }
-
+            
             var received = "AUTO".Equals(model.DisplayDt, StringComparison.InvariantCultureIgnoreCase) ? DateTime.Now : StringUtil.ParseDateTime(model.DisplayDt);
 
             var result = m_batchRepository.SaveBottomLevelMaterialBatch(
@@ -84,9 +87,10 @@ namespace Elsa.Apps.Inventory
                 model.BatchNumber,
                 received,
                 model.Price ?? 0m,
-                model.InvoiceNumber);
+                model.InvoiceNumber,
+                model.SupplierName);
 
-            return new MaterialBatchViewModel(result.Batch);
+            return new MaterialBatchViewModel(result.Batch, m_supplierRepository);
         }
 
         public void DeleteMaterialBatch(int batchId)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
@@ -58,5 +59,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         IEnumerable<IBatchProductionStep> PerformedSteps { get; }
 
         bool? AllStepsDone { get; set; }
+
+        int? SupplierId { get; set; }
+        ISupplier Supplier { get; }
     }
 }

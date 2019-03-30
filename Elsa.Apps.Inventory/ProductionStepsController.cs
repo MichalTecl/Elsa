@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.XPath;
 
 using Elsa.Apps.Inventory.Model;
+using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Production;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
-using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
 
@@ -24,12 +20,20 @@ namespace Elsa.Apps.Inventory
         private readonly IProductionFacade m_productionFacade;
         private readonly AmountProcessor m_amountProcessor;
         private readonly IMaterialRepository m_materialRepository;
+        private readonly ISupplierRepository m_supplierRepository;
 
-        public ProductionStepsController(IWebSession webSession, ILog log, IProductionFacade productionFacade, AmountProcessor amountProcessor, IMaterialRepository materialRepository) : base(webSession, log)
+        public ProductionStepsController(IWebSession webSession,
+            ILog log,
+            IProductionFacade productionFacade,
+            AmountProcessor amountProcessor,
+            IMaterialRepository materialRepository,
+            ISupplierRepository supplierRepository)
+            : base(webSession, log)
         {
             m_productionFacade = productionFacade;
             m_amountProcessor = amountProcessor;
             m_materialRepository = materialRepository;
+            m_supplierRepository = supplierRepository;
         }
 
         public IEnumerable<MaterialWithStepsViewModel> GetAllMaterialsWithSteps()
@@ -63,7 +67,8 @@ namespace Elsa.Apps.Inventory
         {
             return MaterialBatchViewModel.JoinAutomaticBatches(
                 m_productionFacade.FindBatchesWithUnresolvedProductionSteps(query)
-                    .Select(b => new MaterialBatchViewModel(b)).OrderBy(mb => mb.MaterialName), m_amountProcessor);
+                    .Select(b => new MaterialBatchViewModel(b, m_supplierRepository)).OrderBy(mb => mb.MaterialName),
+                m_amountProcessor);
         }
 
         public IEnumerable<ProductionStepViewModel> GetStepsToProceed(int materialId, int? materialBatchId)
