@@ -69,7 +69,7 @@
                     <!-- Supplier -->
                     <div class="formRow" lt-name="supplierCell">
                         <label>Dodavatel</label>
-                        <div lt-name="inpSupplier" replace-by="/UI/Controls/Common/Elements/SupplierAutosuggest.html" data-bind="value:SupplierName"></div>
+                        <div lt-name="inpSupplier" replace-by="/UI/Controls/Common/Elements/SupplierAutosuggest.html" data-bind="value:SupplierName" event-bind="change:updateCurrencyBySupplier($inpSupplier, $currencyDd)"></div>
                     </div>
 
                     <!-- Price -->
@@ -222,6 +222,13 @@
         lt.fillBy(batchList, "/UI/Controls/Inventory/BatchesOverview/BatchList.html", function(blst) {
             blst.children[0].setQuery({ "PurchasedOnly": true });
         });
+
+        this.updateCurrencyBySupplier = function(inpSupplier, currencyDd) {
+            var currency = app.commonVms.SupplierAutosuggestVm.vm.getSupplierCurrency(inpSupplier.value);
+            if (currency) {
+                currencyDd.value = currency;
+            }
+        };
     });
 </script>
 <link href="/UI/Controls/Inventory/WarehouseControls/WhActions/BottomMaterialBatchesStyle.css" rel="stylesheet" />

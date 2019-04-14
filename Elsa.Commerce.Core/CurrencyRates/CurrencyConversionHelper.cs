@@ -31,6 +31,7 @@ namespace Elsa.Commerce.Core.CurrencyRates
 
                 if (sourceCurrency.IsProjectMainCurrency)
                 {
+                    tx.Commit();
                     return sourcePrice;
                 }
 

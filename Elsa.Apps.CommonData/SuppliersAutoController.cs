@@ -122,5 +122,10 @@ namespace Elsa.Apps.CommonData
         {
             return m_supplierRepository.GetSuppliers().Select(s => s.Name);
         }
+
+        public Dictionary<string, string> GetSupplierCurrencyMap()
+        {
+            return m_supplierRepository.GetSuppliers().ToDictionary(s => s.Name, s => s.Currency.Symbol);
+        }
     }
 }

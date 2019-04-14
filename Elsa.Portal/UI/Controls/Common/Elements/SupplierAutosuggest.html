@@ -7,8 +7,10 @@
     app.commonVms.SupplierAutosuggestVm = app.commonVms.SupplierAutosuggestVm || function() {
         var self = this;
 
-        self.suppliers = [];
+        var supplierCurrencyMap = {};
 
+        self.suppliers = [];
+        
         var load = function () {
 
             if (!lt) {
@@ -16,8 +18,15 @@
                 return;
             }
 
-            lt.api("/suppliers/getSupplierNames").get(function(names) {
-                self.suppliers = names;
+            lt.api("/suppliers/getSupplierCurrencyMap").get(function(map) {
+
+                supplierCurrencyMap = map;
+
+                for (var supplierName in map) {
+                    if (map.hasOwnProperty(supplierName)) {
+                        self.suppliers.push(supplierName);
+                    }
+                }
             });
         }
 
@@ -25,6 +34,10 @@
 
         self.getSuppliers = function(query, callback) {
             callback(self.suppliers);
+        };
+
+        self.getSupplierCurrency = function(supplierName) {
+            return supplierCurrencyMap[supplierName];
         };
     };
     app.commonVms.SupplierAutosuggestVm.vm = app.commonVms.SupplierAutosuggestVm.vm ||

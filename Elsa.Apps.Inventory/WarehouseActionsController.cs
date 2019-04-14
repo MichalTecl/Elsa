@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.XPath;
 
 using Elsa.Apps.Inventory.Model;
 using Elsa.Commerce.Core;
@@ -12,7 +9,6 @@ using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
-using Elsa.Core.Entities.Commerce.Inventory;
 
 using Robowire.RoboApi;
 
