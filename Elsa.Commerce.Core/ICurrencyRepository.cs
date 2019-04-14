@@ -25,5 +25,6 @@ namespace Elsa.Commerce.Core
             DateTime validFrom,
             string sourceLink);
 
+        ICurrencyConversion CreateCurrencyConversion(ICurrencyRate usedRate, decimal sourceValue);
     }
 }

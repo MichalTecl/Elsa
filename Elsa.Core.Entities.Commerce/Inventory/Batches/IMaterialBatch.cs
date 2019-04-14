@@ -35,6 +35,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         decimal Price { get; set; }
 
+        int? PriceConversionId { get; set; }
+        ICurrencyConversion PriceConversion { get; }
+
         [ForeignKey(nameof(IMaterialBatchComposition.CompositionId))]
         IEnumerable<IMaterialBatchComposition> Components { get; }
 

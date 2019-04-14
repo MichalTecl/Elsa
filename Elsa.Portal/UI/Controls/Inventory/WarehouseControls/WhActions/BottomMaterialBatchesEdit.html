@@ -77,14 +77,16 @@
                         <label>Cena</label>
                         <div class="inputGroup stackLeft">
                             <input lt-name="price" type="number" required="required" data-bind="value:Price"/>
-                            <div class="currencyLbl">CZK</div>
+                            <div class="stackLeft">
+                                <input lt-name="currencyDd" replace-by="/UI/Controls/Common/Elements/CurrencyDropDown.html" />
+                            </div>
                         </div>
                     </div>
 
                 </div>
                 <div class="batchesEditButtons formActions">
                     <button class="butCancel" event-bind="click:cancelBatchEdit"></button>
-                    <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value, $inpSupplier.value)"></button>
+                    <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value, $inpSupplier.value, $currencyDd.value)"></button>
                     
                 </div>
             </div>
@@ -145,7 +147,7 @@
             return (!s || s.length < 1);
         };
 
-        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price, invoiceNr, supplierName) {
+        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price, invoiceNr, supplierName, currencySymbol) {
             batchNr = batchNr || "";
 
             if (isEmpty(material)) {
@@ -168,6 +170,7 @@
             model.Price = parseFloat(price);
             model.InvoiceNumber = invoiceNr;
             model.SupplierName = supplierName;
+            model.CurrencySymbol = currencySymbol;
 
             app.warehouseActions.vm.saveBottomMaterialBatch(model, function() {
                 batchList.children[0].refreshBatchView();

@@ -1,4 +1,5 @@
 ﻿using Elsa.Commerce.Core.Crm;
+using Elsa.Commerce.Core.CurrencyRates;
 using Elsa.Commerce.Core.Impl;
 using Elsa.Commerce.Core.Production;
 using Elsa.Commerce.Core.Repositories;
@@ -47,6 +48,7 @@ namespace Elsa.Commerce.Core
             setup.For<IMaterialThresholdRepository>().Use<MaterialThresholdRepository>();
             setup.For<IStockEventRepository>().Use<StockEventRepository>();
             setup.For<ISupplierRepository>().Use<SupplierRepository>();
+            setup.For<ICurrencyConversionHelper>().Use<CurrencyConversionHelper>();
         }
     }
 }

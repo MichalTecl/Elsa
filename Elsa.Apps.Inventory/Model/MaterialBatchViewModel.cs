@@ -58,6 +58,8 @@ namespace Elsa.Apps.Inventory.Model
         public string InvoiceNumber { get; set; }
 
         public string SupplierName { get; set; }
+
+        public string CurrencySymbol { get; set; }
         
         public static IEnumerable<MaterialBatchViewModel> JoinAutomaticBatches(IEnumerable<MaterialBatchViewModel> source, AmountProcessor processor)
         {

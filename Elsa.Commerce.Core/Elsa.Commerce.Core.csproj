@@ -48,6 +48,8 @@
     <Compile Include="Crm\ICustomerRepository.cs" />
     <Compile Include="Crm\Model\CustomerOverview.cs" />
     <Compile Include="Crm\Model\ICommonCustomerInfo.cs" />
+    <Compile Include="CurrencyRates\CurrencyConversionHelper.cs" />
+    <Compile Include="CurrencyRates\ICurrencyConversionHelper.cs" />
     <Compile Include="ErpDataMapperBase.cs" />
     <Compile Include="ICurrencyRepository.cs" />
     <Compile Include="IErpClient.cs" />
@@ -155,9 +157,7 @@
     <Compile Include="Warehouse\Thresholds\IMaterialThresholdRepository.cs" />
     <Compile Include="Warehouse\Thresholds\MaterialThresholdRepository.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="CurrencyRates\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
       <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>

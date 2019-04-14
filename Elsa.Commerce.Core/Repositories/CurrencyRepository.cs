@@ -117,5 +117,26 @@ namespace Elsa.Commerce.Core.Repositories
                 m_cache.Remove("currates");
             }
         }
+
+        public ICurrencyConversion CreateCurrencyConversion(ICurrencyRate usedRate, decimal sourceValue)
+        {
+            var converted = sourceValue * usedRate.Rate;
+
+            var conversion = m_database.New<ICurrencyConversion>(c =>
+            {
+                c.ConversionDt = DateTime.Now;
+                c.CurrencyRateId = usedRate.Id;
+                c.SourceCurrencyId = usedRate.SourceCurrencyId;
+                c.TargetCurrencyId = usedRate.TargetCurrencyId;
+                c.SourceValue = sourceValue;
+                c.TargetValue = converted;
+                c.ConversionDt = DateTime.Now;
+                c.ProjectId = usedRate.ProjectId;
+            });
+
+            m_database.Save(conversion);
+
+            return conversion;
+        }
     }
 }

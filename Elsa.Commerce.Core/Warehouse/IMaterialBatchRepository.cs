@@ -34,7 +34,8 @@ namespace Elsa.Commerce.Core.Warehouse
             DateTime receiveDt,
             decimal price,
             string invoiceNr,
-            string supplierName);
+            string supplierName,
+            string currencySymbol);
 
         IEnumerable<IMaterialStockEvent> GetBatchEvents(int materialBatchId);
 

@@ -28,7 +28,7 @@
     app.commonVms.CurrencyDropdownVm.vm = app.commonVms.CurrencyDropdownVm.vm || new app.commonVms.CurrencyDropdownVm();
 </script>
 
-<select id="currencyCombo_{%GENERATE%}" event-bind="{attr.event-bind}" update-model="{attr.update-model}" class="{attr.class}" >
+<select id="currencyCombo_{%GENERATE%}" event-bind="{attr.event-bind}" update-model="{attr.update-model}" class="{attr.class}" lt-name="{attr.lt-name}" >
     <option class="lt-template" lt-name="optionTemplate" data-bind="text:symbol"></option>
 </select>
 

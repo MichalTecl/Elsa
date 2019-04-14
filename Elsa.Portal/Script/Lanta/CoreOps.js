@@ -87,7 +87,7 @@ lanta.CoreOps.seekClosestElement = lanta.CoreOps.seekClosestElement || function 
         var result = lanta.CoreOps.seekElement(refElement, name, true);
         if (!!result) {
 
-            if (result.length != null) {
+            if (Array.isArray(result) && (result.length > 0)) {
                 return result[0];
             }
 

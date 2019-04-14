@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Elsa.Commerce.Core.CurrencyRates;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
@@ -23,6 +24,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly ICache m_cache;
         private readonly Lazy<IMaterialBatchFacade> m_materialBatchFacade;
         private readonly ISupplierRepository m_supplierRepository;
+        private readonly ICurrencyConversionHelper m_currencyConversionHelper;
 
         public MaterialBatchRepository(IDatabase database,
             ISession session,
@@ -31,7 +33,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             IVirtualProductRepository virtualProductRepository,
             ICache cache,
             Lazy<IMaterialBatchFacade> materialBatchFacade,
-            ISupplierRepository supplierRepository)
+            ISupplierRepository supplierRepository, 
+            ICurrencyConversionHelper currencyConversionHelper)
         {
             m_database = database;
             m_session = session;
@@ -41,6 +44,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_cache = cache;
             m_materialBatchFacade = materialBatchFacade;
             m_supplierRepository = supplierRepository;
+            m_currencyConversionHelper = currencyConversionHelper;
         }
 
         public MaterialBatchComponent GetBatchById(int id)
@@ -118,7 +122,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return entities;
         }
 
-        public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr, string supplierName)
+        public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr, string supplierName, string currencySymbol)
         {
             if ((material.ProjectId != m_session.Project.Id) || (unit.ProjectId != m_session.Project.Id))
             {
@@ -152,6 +156,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 IMaterialBatch entity;
                 if (id > 0)
                 {
+                    throw new InvalidOperationException("UPDATE not implemented => Currency conversion");
+
                     entity =
                         GetBatchQuery()
                             .Where(b => (b.Id == id) && (b.ProjectId == m_session.Project.Id))
@@ -167,7 +173,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     entity = m_database.New<IMaterialBatch>();
                     entity.AuthorId = m_session.User.Id;
                     entity.ProjectId = m_session.Project.Id;
-
+                    
                     var materialId = material.Id;
 
                     var existingBatchNr =
@@ -212,7 +218,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 entity.MaterialId = material.Id;
                 entity.Volume = amount;
                 entity.UnitId = unit.Id;
-                entity.Price = price;
+                
+                entity.Price = m_currencyConversionHelper.TryConvertToPrimaryCurrency(currencySymbol,
+                    price,
+                    c => entity.PriceConversionId = c.Id);
+                
                 entity.Note = string.Empty;
                 entity.IsAvailable = true;
                 entity.InvoiceNr = invoiceNr;
