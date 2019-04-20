@@ -122,7 +122,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return entities;
         }
 
-        public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr, string supplierName, string currencySymbol)
+        public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr, string supplierName, string currencySymbol, string variableSymbol)
         {
             if ((material.ProjectId != m_session.Project.Id) || (unit.ProjectId != m_session.Project.Id))
             {
@@ -208,6 +208,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     throw new InvalidOperationException("Číslo faktury je povinný údaj");
                 }
 
+                if ((material.RequiresInvoiceNr == true) && string.IsNullOrWhiteSpace(variableSymbol))
+                {
+                    throw new InvalidOperationException("Var. symbol je povinný údaj");
+                }
+
                 if ((material.RequiresSupplierReference == true) && (supplierId == null))
                 {
                     throw new InvalidOperationException("Dodavatel je povinný údaj");
@@ -226,6 +231,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 entity.Note = string.Empty;
                 entity.IsAvailable = true;
                 entity.InvoiceNr = invoiceNr;
+                entity.InvoiceVarSymbol = variableSymbol;
                 entity.SupplierId = supplierId;
                 
                 m_database.Save(entity);

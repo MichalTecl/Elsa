@@ -58,6 +58,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         [NVarchar(100, true)]
         string InvoiceNr { get; set; }
 
+        [NVarchar(100, true)]
+        string InvoiceVarSymbol { get; set; }
+
         [ForeignKey(nameof(IBatchProductionStep.BatchId))]
         IEnumerable<IBatchProductionStep> PerformedSteps { get; }
 

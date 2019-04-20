@@ -29,6 +29,7 @@ namespace Elsa.Apps.Inventory.Model
             MaterialId = batch.MaterialId;
             AutomaticBatches = batch.Material.AutomaticBatches;
             SupplierName = batch.SupplierId == null ? null : suppliers.GetSupplier(batch.SupplierId.Value)?.Name;
+            VariableSymbol = batch.InvoiceVarSymbol;
         }
 
         public MaterialBatchViewModel() { }
@@ -60,6 +61,8 @@ namespace Elsa.Apps.Inventory.Model
         public string SupplierName { get; set; }
 
         public string CurrencySymbol { get; set; }
+
+        public string VariableSymbol { get; set; }
         
         public static IEnumerable<MaterialBatchViewModel> JoinAutomaticBatches(IEnumerable<MaterialBatchViewModel> source, AmountProcessor processor)
         {

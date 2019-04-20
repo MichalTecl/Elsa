@@ -85,7 +85,8 @@ namespace Elsa.Apps.Inventory
                 model.Price ?? 0m,
                 model.InvoiceNumber,
                 model.SupplierName,
-                model.CurrencySymbol
+                model.CurrencySymbol,
+                model.VariableSymbol
                 );
 
             return new MaterialBatchViewModel(result.Batch, m_supplierRepository);

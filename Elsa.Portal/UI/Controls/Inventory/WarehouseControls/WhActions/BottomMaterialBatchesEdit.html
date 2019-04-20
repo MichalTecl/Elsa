@@ -62,7 +62,14 @@
                     <div class="formRow" lt-name="invoiceCell">
                         <label>Číslo faktury</label>
                         <div class="inputGroup">
-                            <input lt-name="invoiceNr" data-bind="value:InvoiceNumber" />
+                            <input lt-name="invoiceNr" data-bind="value:InvoiceNumber" event-bind="change:setVarSymbol($invoiceNr, $varSymbol)" />
+                        </div>
+                        
+                        <div class="formRow" lt-name="invoiceCell">
+                            <label>Var. symbol</label>
+                            <div class="inputGroup">
+                                <input lt-name="varSymbol" data-bind="value:InvoiceVarSymbol" />
+                            </div>
                         </div>
                     </div>
                     
@@ -86,7 +93,7 @@
                 </div>
                 <div class="batchesEditButtons formActions">
                     <button class="butCancel" event-bind="click:cancelBatchEdit"></button>
-                    <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value, $inpSupplier.value, $currencyDd.value)"></button>
+                    <button class="butSubmit" event-bind="click:saveEdit(VM, $batchNr.value, $material.value, $amount.value, $unit.value, $dt.value, $price.value, $invoiceNr.value, $inpSupplier.value, $currencyDd.value, $varSymbol.value)"></button>
                     
                 </div>
             </div>
@@ -147,7 +154,7 @@
             return (!s || s.length < 1);
         };
 
-        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price, invoiceNr, supplierName, currencySymbol) {
+        this.saveEdit = function(model, batchNr, material, amount, unit, dt, price, invoiceNr, supplierName, currencySymbol, varSymbol) {
             batchNr = batchNr || "";
 
             if (isEmpty(material)) {
@@ -171,6 +178,7 @@
             model.InvoiceNumber = invoiceNr;
             model.SupplierName = supplierName;
             model.CurrencySymbol = currencySymbol;
+            model.VariableSymbol = varSymbol;
 
             app.warehouseActions.vm.saveBottomMaterialBatch(model, function() {
                 batchList.children[0].refreshBatchView();
@@ -227,6 +235,12 @@
             var currency = app.commonVms.SupplierAutosuggestVm.vm.getSupplierCurrency(inpSupplier.value);
             if (currency) {
                 currencyDd.value = currency;
+            }
+        };
+
+        this.setVarSymbol = function(tbInvoice, tbVarSymbol) {
+            if ((tbVarSymbol.value || "").trim().length < 1) {
+                tbVarSymbol.value = tbInvoice.value;
             }
         };
     });
