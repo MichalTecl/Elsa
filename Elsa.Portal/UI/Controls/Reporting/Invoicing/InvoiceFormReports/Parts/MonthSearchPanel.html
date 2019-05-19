@@ -1,0 +1,36 @@
+﻿<div id="mthSearch">
+    <select lt-name="selYear" data-bind="itemsSource:reportMonths" data-key="Text" event-bind="change:onSelectedMonthChanged(this)">
+        <option class="lt-template" data-bind="text:Text"  ></option>
+    </select>
+</div>
+<script>
+    lt.element("mthSearch").withModel("app.invoiceReporting.vm").attach(function(selYear) {
+
+        var self = this;
+
+        this.onSelectedMonthChanged = function(monthDropdown) {
+            var text = monthDropdown.options[monthDropdown.selectedIndex].innerHTML;
+            console.log(text);
+
+            var parts = text.split("/");
+
+            var month = parseInt(parts[0]);
+            var year = parseInt(parts[1]);
+
+            app.invoiceReporting.vm.selectMonth(month, year);
+        };
+
+
+        var doInitialSelection = function() {
+            if (selYear.children.length < 3) {
+                setTimeout(doInitialSelection, 50);
+                return;
+            }
+
+            self.onSelectedMonthChanged(selYear);
+        };
+
+        doInitialSelection();
+
+    });
+</script>

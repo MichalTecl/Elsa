@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ELSA</title>
+    <meta charset="utf-8" />
+    <script src="/Bundles/Bundle.ashx?bundle=Lanta"></script>
+    <script src="/Script/Apps/User/UserVM.js"></script>
+    <script src="/UI/Controls/Common/PickItemDialog.js"></script>
+    <link href="/Style/Appearance.css" rel="stylesheet" />
+    <link href="/Style/Layout.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <script src="/UI/Controls/Common/TabControl.js"></script>
+    <script src="/UI/Controls/Common/MaterialList/MaterialListVm.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/Script/Apps/Reporting/InvoiceReporting/InvoiceReportingVm.js"></script>
+</head>
+<body>
+    <script src="../../Controls/Common/AutoSuggest.js"></script>
+    <div replace-by="/UI/Widgets/User/UserWidget.html"></div>
+  
+
+    <div class="panel w4" id="mainTab">
+
+    </div>
+
+    <script>
+        
+        lt.element("mainTab").withModel("app.invoiceReporting.vm").attach(function() {
+
+            var tab = new app.ui.TabControl(this);
+
+            this.bind(function(invoiceReportTypes) {
+
+                for (var i = 0; i < invoiceReportTypes.length; i++) {
+                    var reportType = invoiceReportTypes[i];
+
+                    tab.addTab(reportType.Name, reportType.ViewControlUrl, reportType.DataSourceUrl, function (data) {
+                        app.invoiceReporting.vm.setQueryMethod(data);
+                    });
+                }
+
+            });
+        });
+
+    </script>
+    
+
+    
+<div replace-by="/UI/Controls/Common/BusyOverlay.html"></div>
+</body>
+</html>

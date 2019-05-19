@@ -121,6 +121,7 @@
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
     <Content Include="Script\Apps\Packing\OrdersPacking.VM.js" />
     <Content Include="Script\Apps\Production\ProductionVM.js" />
+    <Content Include="Script\Apps\Reporting\InvoiceReporting\InvoiceReportingVm.js" />
     <Content Include="Script\Common\ContextMenu.js" />
     <Content Include="Script\Common\GlobalEventHandlers.js" />
     <Content Include="Script\Common\UrlBus.js" />
@@ -157,11 +158,14 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionSteps.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\MaterialsTreeView.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\ProductionStepEdit.html" />
+    <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\MonthSearchPanel.html" />
+    <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\ReceivingInvoicesReport.html" />
     <Content Include="UI\Pages\Inventory\MaterialLevels.css" />
     <Content Include="UI\Pages\Inventory\MaterialLevels.html" />
     <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />
     <Content Include="UI\Pages\Inventory\VpEditorStyle.css" />
     <Content Include="UI\Pages\Inventory\WhEvents.html" />
+    <Content Include="UI\Pages\Invoicing\InvoicingPage.html" />
     <Content Include="UI\Pages\Packing\OrdersPacking.html" />
     <Content Include="UI\Pages\Packing\PackingUI.css" />
     <Content Include="UI\Pages\Packing\Partial\BatchSelectorTemplate.html" />
@@ -202,6 +206,7 @@
     <Content Include="UI\Widgets\Jobs\ScheduledJobsWidget.html" />
     <Content Include="UI\Widgets\OrderProcessing\OrdersProcessingWidget.html" />
     <Content Include="UI\Widgets\Orders\OrdersOverviewWidget.html" />
+    <Content Include="UI\Widgets\Reporting\ReportingWidget.html" />
     <Content Include="UI\Widgets\Sys\SystemWidget.html" />
     <Content Include="UI\Widgets\User\UserWidget.html" />
     <Content Include="UI\Widgets\User\UserWidget.js" />

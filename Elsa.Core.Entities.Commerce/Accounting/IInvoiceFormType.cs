@@ -14,6 +14,9 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         [NVarchar(300, false)]
         string Name { get; set; }
 
+        [NVarchar(300, true)]
+        string CollectionName { get; set; }
+
         [NVarchar(100, false)]
         string GeneratorName { get; set; }
 

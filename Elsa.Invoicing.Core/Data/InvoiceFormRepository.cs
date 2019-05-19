@@ -57,7 +57,9 @@ namespace Elsa.Invoicing.Core.Data
         public IEnumerable<IInvoiceForm> FindInvoiceForms(int? invoiceFormTypeId,
             int? materialBatchId,
             string externalInvoiceNumber,
-            int? supplierId)
+            int? supplierId, 
+            DateTime? from, 
+            DateTime? to)
         {
             var query = GetInvoiceQuery();
 
@@ -88,6 +90,16 @@ namespace Elsa.Invoicing.Core.Data
             if (supplierId != null)
             {
                 query = query.Where(i => i.SupplierId == supplierId.Value);
+            }
+
+            if (from != null)
+            {
+                query = query.Where(i => i.IssueDate >= from.Value);
+            }
+
+            if (to != null)
+            {
+                query = query.Where(i => i.IssueDate <= to.Value);
             }
 
             return query.Execute();
@@ -179,6 +191,13 @@ namespace Elsa.Invoicing.Core.Data
             return GetInvoiceForm(invoiceId);
         }
 
+        public IEnumerable<IInvoiceFormReportType> GetInvoiceFormReportTypes()
+        {
+            return m_cache.ReadThrough($"invoiceReportTypes_{m_session.Project.Id}",
+                TimeSpan.FromDays(1),
+                () => m_database.SelectFrom<IInvoiceFormReportType>().OrderBy(r => r.ViewOrder).Execute().ToList());
+        }
+
         public IInvoiceForm GetInvoiceForm(int id)
         {
             return GetInvoiceQuery().Where(i => i.Id == id).Take(1).Execute().FirstOrDefault();
@@ -190,6 +209,7 @@ namespace Elsa.Invoicing.Core.Data
                 .Join(i => i.Items)
                 .Join(i => i.Items.Each().Batches)
                 .Join(i => i.Items.Each().Conversion)
+                .Join(i => i.Items.Each().Conversion.CurrencyRate)
                 .Join(i => i.Items.Each().SourceCurrency)
                 .Join(i => i.Items.Each().Unit)
                 .Join(i => i.FormType)

@@ -159,6 +159,11 @@ namespace Elsa.Common.Utils
             return dt.ToString("dd.MM.yy HH:mm");
         }
 
+        public static string FormatDate(DateTime dt)
+        {
+            return dt.ToString("dd.MM.yyyy");
+        }
+
         public static DateTime ParseDateTime(string modelDisplayDt)
         {
             return DateTime.ParseExact(modelDisplayDt, "dd.MM.yy HH:mm", CultureInfo.CurrentCulture);

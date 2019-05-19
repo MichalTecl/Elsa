@@ -18,7 +18,7 @@ namespace Elsa.Invoicing.Generation.Tasks.ReceivingInvoicesTasks
             context.InvoiceForm = m_invoiceFormsRepository.FindInvoiceForms(context.InvoiceFormTypeId,
                 null,
                 context.SourceBatch.InvoiceNr,
-                context.SourceBatch.SupplierId).LastOrDefault();
+                context.SourceBatch.SupplierId, null, null).LastOrDefault();
         }
     }
 }

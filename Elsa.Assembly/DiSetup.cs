@@ -5,6 +5,7 @@ using Elsa.App.OrdersPacking;
 using Elsa.App.Shipment;
 using Elsa.Apps.CommonData;
 using Elsa.Apps.Inventory;
+using Elsa.Apps.InvoiceForms;
 using Elsa.Apps.ScheduledJobs;
 using Elsa.Commerce.Core;
 using Elsa.Common;
@@ -79,6 +80,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(SuppliersAutoController).Assembly);
                     s.ScanAssembly(typeof(GenerateFormsJob).Assembly);
                     s.ScanAssembly(typeof(IContextGenerator).Assembly);
+                    s.ScanAssembly(typeof(InvoiceFormsController).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });
