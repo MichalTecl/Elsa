@@ -112,6 +112,10 @@
       <Project>{61dd96b7-bf13-4c48-9353-08f2f907048e}</Project>
       <Name>Elsa.Commerce.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Excel\Elsa.Common.XTable.csproj">
+      <Project>{65F8DF91-8593-4B33-BDBF-2DEBB43CEE2E}</Project>
+      <Name>Elsa.Common.XTable</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
       <Name>Elsa.Common</Name>

@@ -11,6 +11,7 @@ using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Common.UserRightsInfrastructure;
+using Elsa.Common.XTable;
 using Elsa.Core.Entities.Commerce;
 using Elsa.GenerateInvoiceForms;
 using Elsa.Integration.Erp.Elerp;
@@ -81,6 +82,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(GenerateFormsJob).Assembly);
                     s.ScanAssembly(typeof(IContextGenerator).Assembly);
                     s.ScanAssembly(typeof(InvoiceFormsController).Assembly);
+                    s.ScanAssembly(typeof(XTableController).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });

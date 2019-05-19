@@ -1,42 +1,44 @@
 ﻿<div>
     <div fill-by="/UI/Controls/Reporting/Invoicing/InvoiceFormReports/Parts/MonthSearchPanel.html"></div>
 </div>
-<div id="reportBody">
-    <div class="rirHead"></div>
-    <div class="rirBody">
-        <div class="gridRow gridHead">
-            <div class="cell10">Datum</div>
-            <div class="cell10">Číslo</div>
-            <div class="cell10">Var. Symbol</div>
-            <div class="cell10">Dodavatel</div>
-            <div class="cell10">Cena CZK</div>
-            <div class="cell10">Cena v cizí měně</div>
-            <div class="cell5">Měna</div>
-            <div class="cell5">Kurz</div>
-            <div class="cell10">Stav</div>
+<div id="reportBody" xsheet="report">
+    <div class="rirHead">
+        <i class="far fa-file-excel faButton" event-bind="click:download"></i>
+    </div>
+    <div class="rirBody" lt-name="reportBody">
+        <div class="gridRow gridHead" xrow="header">
+            <div class="cell10" xcell>Datum</div>
+            <div class="cell10" xcell>Číslo</div>
+            <div class="cell10" xcell>Var. Symbol</div>
+            <div class="cell10" xcell>Dodavatel</div>
+            <div class="cell10" xcell>Cena CZK</div>
+            <div class="cell10" xcell>Cena v cizí měně</div>
+            <div class="cell5" xcell>Měna</div>
+            <div class="cell5" xcell>Kurz</div>
+            <div class="cell10" xcell>Stav</div>
         </div>
         <div data-bind="itemsSource:data.Forms" data-key="InvoiceFormId">
-            <div class="lt-template gridRow">
-                <div class="cell10" data-bind="text:IssueDate"></div>
-                <div class="cell10" data-bind="text:InvoiceFormNumber"></div>
-                <div class="cell10" data-bind="text:InvoiceVarSymbol"></div>
-                <div class="cell10" data-bind="text:Supplier"></div>
-                <div class="cell10" data-bind="text:FormattedPrimaryCurrencyPriceWithoutVat"></div>
-                <div class="cell10" data-bind="text:OriginalCurrencyPrice"></div>
-                <div class="cell5" data-bind="text:OriginalCurrencySymbol"></div>
-                <div class="cell5" data-bind="text:ConversionRate"></div>
-                <div class="cell10">Stav</div>
+            <div class="lt-template gridRow" xrow>
+                <div class="cell10" data-bind="text:IssueDate" xcell></div>
+                <div class="cell10" data-bind="text:InvoiceFormNumber" xcell></div>
+                <div class="cell10" data-bind="text:InvoiceVarSymbol" xcell></div>
+                <div class="cell10" data-bind="text:Supplier" xcell></div>
+                <div class="cell10" data-bind="text:FormattedPrimaryCurrencyPriceWithoutVat" xcell></div>
+                <div class="cell10" data-bind="text:OriginalCurrencyPrice" xcell></div>
+                <div class="cell5" data-bind="text:OriginalCurrencySymbol" xcell></div>
+                <div class="cell5" data-bind="text:ConversionRate" xcell></div>
+                <div class="cell10" xcell>Stav</div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    lt.element("reportBody").withModel("app.invoiceReporting.vm").attach(function() {
+    lt.element("reportBody").withModel("app.invoiceReporting.vm").attach(function (reportBody) {
 
         var self = this;
 
-        this.bind(function(data) {
+        this.bind(function (data) {
 
             if ((!data) || (!data.Forms) || (data.Forms.length === 0)) {
                 self.style.display = 'none';
@@ -46,5 +48,12 @@
 
         }).dataCanBeNull();
 
+        self.download = function() {
+
+            var table = new XTable();
+            table.scan(reportBody);
+            table.createExcel("soupiskaPrijemek.xlsx");
+        };
     });
 </script>
+<script src="/Script/Common/XTable.js"></script>
