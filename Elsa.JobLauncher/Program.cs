@@ -17,12 +17,11 @@ namespace Elsa.JobLauncher
         {
             Console.WriteLine("Starting...");
 
-            var container = DiSetup.GetContainer();
+            var container = DiSetup.GetContainer(new FileLogWriter("Jobs"));
             container.Setup(s => s.For<ISession>().Use<JobSession>());
             container.Setup(s => s.For<IDataRepository>().Use<ElsaJobRepo>());
             container.Setup(s => s.For<ElsaJobsScheduler>().Use<ElsaJobsScheduler>());
-            container.Setup(s => s.For<ILog>().Use<ConsoloLogger>());
-
+            
             var user = ConfigurationManager.AppSettings["robotLogin"];
             var password = ConfigurationManager.AppSettings["robotPassword"];
             

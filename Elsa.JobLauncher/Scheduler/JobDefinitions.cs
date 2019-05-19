@@ -13,6 +13,7 @@ namespace Elsa.JobLauncher.Scheduler
         public static readonly ElsaJob BigImport = new ElsaJob("VELKY_IMPORT_FLOX", -10, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(2, 5));
         public static readonly ElsaJob Currencies = new ElsaJob("MENOVE_KURZY", -9, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(2, 5));
         public static readonly ElsaJob Geocoding = new ElsaJob("GEOCODING", -8, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(2, 5));
+        public static readonly ElsaJob InvoicingData = new ElsaJob("UCETNI_DATA", -7, TimeSpan.FromHours(2), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(2, 5));
 
         public static IEnumerable<ElsaJob> All
         {
@@ -25,7 +26,9 @@ namespace Elsa.JobLauncher.Scheduler
 
                 yield return BigImport;
                 yield return Currencies;
-                yield return Geocoding;
+                yield return InvoicingData;
+
+                //yield return Geocoding;
             }
         }
     }

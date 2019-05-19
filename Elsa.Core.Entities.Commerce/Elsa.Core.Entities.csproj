@@ -48,6 +48,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Accounting\IInvoiceForm.cs" />
+    <Compile Include="Accounting\IInvoiceFormItem.cs" />
+    <Compile Include="Accounting\IInvoiceFormItemMaterialBatch.cs" />
+    <Compile Include="Accounting\IInvoiceFormType.cs" />
+    <Compile Include="Accounting\IInvoiceFormTypeInventory.cs" />
     <Compile Include="Automation\IJobSchedule.cs" />
     <Compile Include="Automation\IScheduledJob.cs" />
     <Compile Include="Commerce\IDirectSaleEvent.cs" />
@@ -65,6 +70,7 @@
     <Compile Include="Common\Logging\ISysLog.cs" />
     <Compile Include="Common\IPayment.cs" />
     <Compile Include="Common\ISysConfig.cs" />
+    <Compile Include="Common\SystemCounters\ISystemCounter.cs" />
     <Compile Include="Common\Widgets\IAppWidget.cs" />
     <Compile Include="Common\IProject.cs" />
     <Compile Include="Common\Security\IUser.cs" />

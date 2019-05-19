@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 
+using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Common;
 
 using Robowire.RobOrm.Core;
@@ -11,12 +13,15 @@ namespace Elsa.Commerce.Core.CurrencyRates
     {
         private readonly ICurrencyRepository m_currencyRepository;
         private readonly IDatabase m_database;
+        private readonly ICache m_cache;
+        private readonly ISession m_session;
 
-
-        public CurrencyConversionHelper(ICurrencyRepository currencyRepository, IDatabase database)
+        public CurrencyConversionHelper(ICurrencyRepository currencyRepository, IDatabase database, ICache cache, ISession session)
         {
             m_currencyRepository = currencyRepository;
             m_database = database;
+            m_cache = cache;
+            m_session = session;
         }
 
         public decimal TryConvertToPrimaryCurrency(string sourceCurrencySymbol, decimal sourcePrice, Action<ICurrencyConversion> conversionCallback)
@@ -60,6 +65,15 @@ namespace Elsa.Commerce.Core.CurrencyRates
 
                 return conversion.TargetValue;
             }
+        }
+
+        public ICurrencyConversion GetConversion(int id)
+        {
+            return m_cache.ReadThrough($"currency_conversion_{id}",
+                TimeSpan.FromMinutes(1),
+                () => m_database.SelectFrom<ICurrencyConversion>().Join(c => c.CurrencyRate).Join(c => c.SourceCurrency)
+                    .Join(c => c.TargetCurrency).Where(c => c.ProjectId == m_session.Project.Id).Where(c => c.Id == id)
+                    .Take(1).Execute().FirstOrDefault());
         }
     }
 }

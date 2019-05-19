@@ -44,7 +44,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConsoloLogger.cs" />
     <Compile Include="JobSession.cs" />
     <Compile Include="JobsManager.cs" />
     <Compile Include="Program.cs" />

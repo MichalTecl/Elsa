@@ -39,6 +39,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IMaterialRepository m_materialRepository;
         private readonly IUnitRepository m_unitRepository;
         private readonly IStockEventRepository m_stockEventRepository;
+        private readonly ISession m_session;
 
         public MaterialBatchFacade(
             ILog log,
@@ -55,7 +56,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             IMaterialThresholdRepository materialThresholdRepository,
             IMaterialRepository materialRepository,
             IUnitRepository unitRepository,
-            IStockEventRepository stockEventRepository)
+            IStockEventRepository stockEventRepository,
+            ISession session)
         {
             m_log = log;
             m_virtualProductFacade = virtualProductFacade;
@@ -72,6 +74,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
             m_stockEventRepository = stockEventRepository;
+            m_session = session;
         }
 
         public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity)
@@ -646,6 +649,34 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             suggestion.AddSuggestion(available);
             
             return suggestion;
+        }
+
+        public IMaterialBatch FindBatchWithMissingInvoiceItem(int invoiceFormTypeId, int inventoryId)
+        {
+            var objBatchId = m_database.Sql().Execute(@"SELECT TOP 1 b.Id
+	                    FROM       MaterialBatch     b
+	                    INNER JOIN Material          m ON (b.MaterialId = m.Id)	  
+	                    WHERE b.ProjectId = @projectId
+	                    AND m.ProjectId = @projectId
+	                    AND m.InventoryId = @inventoryId
+	                    AND b.Id NOT IN (select ib.MaterialBatchId
+						                    from       InvoiceForm inv
+						                    inner join InvoiceFormItem it ON (it.InvoiceFormId = inv.Id)
+						                    inner join InvoiceFormItemMaterialBatch ib ON (it.Id = ib.InvoiceFormItemId)
+						                    where inv.ProjectId = @projectId
+							                    and inv.FormTypeId = @invoiceFormType)
+	                    ORDER BY b.Id")
+                .WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@invoiceFormType", invoiceFormTypeId)
+                .WithParam("@inventoryId", inventoryId)
+                .Scalar<int?>();
+
+            if (objBatchId == null)
+            {
+                return null;
+            }
+
+            return m_batchRepository.GetBatchById(objBatchId.Value)?.Batch;
         }
 
         public IMaterialBatchStatus GetBatchStatus(int batchId)

@@ -116,6 +116,10 @@
       <Project>{91481B08-E437-474D-9793-A135F1DB465C}</Project>
       <Name>Elsa.Core.Entities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.GenerateInvoiceForms\Elsa.GenerateInvoiceForms.csproj">
+      <Project>{3BA9E0D7-9BF7-4EDD-A048-B3A9E67DBACA}</Project>
+      <Name>Elsa.GenerateInvoiceForms</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Integration.Erp.Elerp\Elsa.Integration.Erp.Elerp.csproj">
       <Project>{c0829b5d-153b-4efe-a692-e53354326fe4}</Project>
       <Name>Elsa.Integration.Erp.Elerp</Name>
@@ -147,6 +151,14 @@
     <ProjectReference Include="..\Elsa.Integration.ShipmentProviders.Zasilkovna\Elsa.Integration.ShipmentProviders.Zasilkovna.csproj">
       <Project>{07e140fe-7d72-4138-80d6-781e712acb0a}</Project>
       <Name>Elsa.Integration.ShipmentProviders.Zasilkovna</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Invoicing.Core\Elsa.Invoicing.Core.csproj">
+      <Project>{680A0E79-828B-4284-9AF8-32BCF09D62CF}</Project>
+      <Name>Elsa.Invoicing.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Invoicing.Generation\Elsa.Invoicing.Generation.csproj">
+      <Project>{76A0AAFF-C123-418D-A1F8-083399B04063}</Project>
+      <Name>Elsa.Invoicing.Generation</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
       <Project>{5ef07762-137b-4bf7-8199-5961768fcaec}</Project>

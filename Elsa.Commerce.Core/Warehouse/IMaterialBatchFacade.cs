@@ -44,5 +44,7 @@ namespace Elsa.Commerce.Core.Warehouse
         int GetMaterialIdByBatchId(int batchId);
 
         BatchEventAmountSuggestions GetEventAmountSuggestions(int eventTypeId, int batchId);
+
+        IMaterialBatch FindBatchWithMissingInvoiceItem(int invoiceFormTypeId, int inventoryId);
     }
 }

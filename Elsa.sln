@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{326F0792-00AF-4D82-B170-4CE248D4A975}"
 EndProject
@@ -124,6 +124,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Apps.CommonData", "Elsa.Apps.CommonData\Elsa.Apps.CommonData.csproj", "{A59B602C-0A86-48F6-944D-CE7C675F99DD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Looper", "Elsa.Looper\Elsa.Looper.csproj", "{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Invoicing.Core", "Elsa.Invoicing.Core\Elsa.Invoicing.Core.csproj", "{680A0E79-828B-4284-9AF8-32BCF09D62CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Invoicing.Generation", "Elsa.Invoicing.Generation\Elsa.Invoicing.Generation.csproj", "{76A0AAFF-C123-418D-A1F8-083399B04063}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.GenerateInvoiceForms", "Elsa.GenerateInvoiceForms\Elsa.GenerateInvoiceForms.csproj", "{3BA9E0D7-9BF7-4EDD-A048-B3A9E67DBACA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -307,6 +313,18 @@ Global
 		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{680A0E79-828B-4284-9AF8-32BCF09D62CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{680A0E79-828B-4284-9AF8-32BCF09D62CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{680A0E79-828B-4284-9AF8-32BCF09D62CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{680A0E79-828B-4284-9AF8-32BCF09D62CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76A0AAFF-C123-418D-A1F8-083399B04063}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76A0AAFF-C123-418D-A1F8-083399B04063}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76A0AAFF-C123-418D-A1F8-083399B04063}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76A0AAFF-C123-418D-A1F8-083399B04063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BA9E0D7-9BF7-4EDD-A048-B3A9E67DBACA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BA9E0D7-9BF7-4EDD-A048-B3A9E67DBACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BA9E0D7-9BF7-4EDD-A048-B3A9E67DBACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BA9E0D7-9BF7-4EDD-A048-B3A9E67DBACA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -365,5 +383,11 @@ Global
 		{9C5C1039-A135-4D87-9E41-70BBEE4D6E1A} = {326F0792-00AF-4D82-B170-4CE248D4A975}
 		{A59B602C-0A86-48F6-944D-CE7C675F99DD} = {456527A3-2BE8-4010-8AC6-187539CE484D}
 		{C693926B-45CB-486C-8A05-7A0C8B8FCF3E} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
+		{680A0E79-828B-4284-9AF8-32BCF09D62CF} = {326F0792-00AF-4D82-B170-4CE248D4A975}
+		{76A0AAFF-C123-418D-A1F8-083399B04063} = {326F0792-00AF-4D82-B170-4CE248D4A975}
+		{3BA9E0D7-9BF7-4EDD-A048-B3A9E67DBACA} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}
 	EndGlobalSection
 EndGlobal

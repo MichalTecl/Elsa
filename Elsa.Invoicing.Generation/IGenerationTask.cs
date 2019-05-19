@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elsa.Core.Entities.Commerce.Accounting
+namespace Elsa.Invoicing.Generation
 {
-    interface IInventoryMoveReceipt
+    public interface IGenerationTask
     {
+        void Run(GenerationContext context);
     }
 }

@@ -26,7 +26,7 @@ namespace Elsa.Portal
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional });
 
-            DiSetup.SetupContainer(m_container);
+            DiSetup.SetupContainer(m_container, new FileLogWriter("Frontend"));
 
             var installer = new RoboApiInstaller();
             installer.Install(

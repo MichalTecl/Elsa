@@ -59,6 +59,8 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
 
         public bool? RequiresPrice { get; set; }
 
+        public bool? RequiresSupplierReference { get; set; }
+
         public IEnumerable<IMaterialProductionStep> Steps { get; }
 
         public IEnumerable<IMaterialThreshold> Thresholds { get; }

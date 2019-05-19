@@ -9,5 +9,7 @@ namespace Elsa.Commerce.Core.CurrencyRates
         decimal TryConvertToPrimaryCurrency(string sourceCurrencySymbol,
             decimal sourcePrice,
             Action<ICurrencyConversion> conversionCallback);
+
+        ICurrencyConversion GetConversion(int id);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Elsa.Common.Caching;
 using Elsa.Common.Configuration;
 using Elsa.Common.Logging;
+using Elsa.Common.SysCounters;
 using Elsa.Core.Entities.Commerce;
 
 using Robowire;
@@ -17,6 +18,7 @@ namespace Elsa.Common
             setup.For<ILog>().Use<Logger>();
             setup.For<ICache>().Use<Cache>();
             setup.For<IPerProjectDbCache>().Use<PerProjectDbCache>();
+            setup.For<ISysCountersManager>().Use<SysCounterManager>();
         }
     }
 }

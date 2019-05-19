@@ -19,8 +19,6 @@ namespace Elsa.Common.Logging
 
         public static void Write(ISysLog entry)
         {
-            return;
-
             s_queue.Add(entry);
         }
 

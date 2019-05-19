@@ -9,13 +9,13 @@ namespace Elsa.Common.Logging
 {
     public class Logger : ILog
     {
-        private readonly IDatabase m_database;
         private readonly ISession m_session;
+        private readonly ILogWriter m_logWriter;
 
-        public Logger(IDatabase database, ISession session)
+        public Logger(ISession session, ILogWriter logWriter)
         {
-            m_database = database;
             m_session = session;
+            m_logWriter = logWriter;
         }
 
         public void Info(string s, 
@@ -79,25 +79,22 @@ namespace Elsa.Common.Logging
 
             entrySetter(entry);
 
-            if (entry.Message.Length > 1000)
-            {
-                entry.Message = $"{entry.Message.Substring(0, 997)}...";
-            }
-
-            AsyncLogger.Write(entry);
+            m_logWriter.Write(entry);
         }
 
         private ISysLog CreateEntry(string member, string path, int line)
         {
-            var entry = m_database.New<ISysLog>();
+            var entry = new Entry
+            {
+                EventDt = DateTime.Now,
+                SessionId = m_session.SessionId,
+                Method = $"{path}.{member}:{line}"
+            };
 
-            entry.EventDt = DateTime.Now;
-            entry.SessionId = m_session.SessionId;
-            entry.Method = $"{path}.{member}:{line}";
 
             return entry;
         }
-
+        
         protected virtual void OnBeforeEntryEnqueue(ISysLog entry) { }
 
         private sealed class StopWatch : IDisposable
@@ -136,5 +133,23 @@ namespace Elsa.Common.Logging
             }
         }
 
+        private class Entry : ISysLog
+        {
+            public long Id { get; }
+
+            public long? SessionId { get; set; }
+
+            public DateTime EventDt { get; set; }
+
+            public bool IsError { get; set; }
+
+            public bool IsStopWatch { get; set; }
+
+            public int? MeasuredTime { get; set; }
+
+            public string Method { get; set; }
+
+            public string Message { get; set; }
+        }
     }
 }
