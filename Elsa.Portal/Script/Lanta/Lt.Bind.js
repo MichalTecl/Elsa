@@ -41,7 +41,7 @@ lanta.BindingCore.BindingBuilder = lanta.BindingCore.BindingBuilder || function(
     this.relativeToVmFunction = function(expression, argument) {
         var param = this.getParamByArgument(argument);
         param.sourceFactory = findVmSourceFactory;
-        param.expression = expression;
+        param.expression = expression || param.expression;
         this.updateBinding();
         return this;
     };

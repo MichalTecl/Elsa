@@ -323,15 +323,13 @@ app.ui.MaterialList.renderTo = app.ui.MaterialList.renderTo || function(target) 
             
         };
         
-
-
         lt.element(target).attach(function (theList, materialEntryItemTemplate) {
 
             var self = this;
             var materialsCollection = [];
 
             var setMaterials = function(materials) {
-
+            
                 for (var i = 0; i < materials.length; i++) {
                     var src = materials[i];
 
