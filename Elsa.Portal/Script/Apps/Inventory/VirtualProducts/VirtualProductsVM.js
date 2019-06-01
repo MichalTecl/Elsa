@@ -329,6 +329,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             stepModel.Price = step.RequiresPrice;
             stepModel.Time = step.RequiresSpentTime;
             stepModel.Worker = step.RequiresWorkerReference;
+            stepModel.PricePerUnit = step.PricePerUnit;
             stepModel.Materials = [];
 
             for (var k = 0; k < step.materials.length; k++) {

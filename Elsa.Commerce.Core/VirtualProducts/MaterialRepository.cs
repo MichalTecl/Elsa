@@ -127,7 +127,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     .Join(m => m.Inventory)
                     .Join(m => m.Steps.Each().Components.Each().Material)
                     .Join(m => m.Steps.Each().Components.Each().Unit)
-                    .Join(m => m.Steps.Each().PricePerUnitUnit)
                     .Where(m => m.ProjectId == m_session.Project.Id)
                     .Execute();
         }

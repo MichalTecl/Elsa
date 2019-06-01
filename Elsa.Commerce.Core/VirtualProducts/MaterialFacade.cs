@@ -198,6 +198,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                         t.RequiresWorkerReference = s.Worker;
                         t.DeleteDateTime = null;
                         t.PreviousStepId = null;
+                        t.PricePerUnit = s.PricePerUnit;
 
                         if (t.Id < 1)
                         {

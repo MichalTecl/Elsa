@@ -16,6 +16,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public bool Worker { get; set; }
 
+        public decimal PricePerUnit { get; set; }
+
         public List<ProductionStepMaterialRequestModel> Materials { get; set; } = new List<ProductionStepMaterialRequestModel>();
     }
 
