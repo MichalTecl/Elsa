@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.CurrencyRates;
 using Elsa.Commerce.Core.VirtualProducts;
+using Elsa.Common.Utils;
 using Elsa.Invoicing.Core.Data;
 
 namespace Elsa.Invoicing.Generation.Tasks.ReceivingInvoicesTasks
@@ -38,6 +39,8 @@ namespace Elsa.Invoicing.Generation.Tasks.ReceivingInvoicesTasks
             {
                 throw new InvalidOperationException("Batch material not found");
             }
+
+            context.InvoiceForm.SetAndThrowIfReassign(f => f.MaterialInventoryId, material.InventoryId);
 
             item.MaterialName = material.Name;
             item.PrimaryCurrencyPrice = batch.Price;

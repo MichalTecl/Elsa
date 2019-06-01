@@ -20,15 +20,8 @@ UPDATE InvoiceFormType
    AND SystemCounterId IS NULL;
  
 
-DECLARE @receivingInvoiceFormTypeId INT;
-SELECT TOP 1 @receivingInvoiceFormTypeId = Id
-  FROM InvoiceFormType
- WHERE ProjectId = @projectId
-   AND GeneratorName = 'ReceivingInvoice';
+UPDATE 
 
-INSERT INTO InvoiceFormTypeInventory (InvoiceFormTypeId, MaterialInventoryId)
-SELECT @receivingInvoiceFormTypeId, mi.Id
-  FROM MaterialInventory mi
- WHERE mi.IsManufactured = 0
-   AND NOT EXISTS (SELECT TOP 1 1 FROM InvoiceFormTypeInventory ex WHERE ex.InvoiceFormTypeId = @receivingInvoiceFormTypeId AND ex.MaterialInventoryId = mi.Id);
+
+
 

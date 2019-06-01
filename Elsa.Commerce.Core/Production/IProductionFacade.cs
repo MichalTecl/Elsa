@@ -21,7 +21,8 @@ namespace Elsa.Commerce.Core.Production
             int materialId,
             string batchNumber,
             decimal amount,
-            IMaterialUnit unit);
+            IMaterialUnit unit,
+            decimal productionWorkPrice);
 
         ProductionBatchModel SetComponentSourceBatch(
             int? materialBatchCompositionId,

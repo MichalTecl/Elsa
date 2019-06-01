@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Newtonsoft.Json;
@@ -21,7 +22,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             RequiresPrice = entity.RequiresPrice;
             RequiresSpentTime = entity.RequiresSpentTime;
             RequiresWorkerReference = entity.RequiresWorkerReference;
-
+            PricePerUnit = entity.PricePerUnit ?? 0;
+            PricePerUnitAmountUnitText = $"{StringUtil.FormatDecimal(entity.PricePerUnitAmount ?? 1)}{entity.PricePerUnitUnit?.Symbol}";
+            
             Components = entity.Components.Select(c => new MaterialProductionStepMaterialModel(c)).ToList();
         }
 
@@ -41,5 +44,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool RequiresWorkerReference { get; }
 
         public List<MaterialProductionStepMaterialModel> Components { get; }
+
+        public decimal PricePerUnit { get; set; }
+        public string PricePerUnitAmountUnitText { get; set; }
     }
 }

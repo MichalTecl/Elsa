@@ -17,6 +17,9 @@ namespace Elsa.Core.Entities.Commerce.Common
         [NVarchar(128, false)]
         string Name { get; set; }
 
+        [NVarchar(300, true)]
+        string HomeUrl { get; set; }
+
         [JsonIgnore]
         IEnumerable<IUser> Users { get; }
     }

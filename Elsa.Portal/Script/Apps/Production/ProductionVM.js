@@ -125,14 +125,15 @@ app.production.ViewModel = app.production.ViewModel || function() {
         lt.notify();
     };
 
-    self.setBatchHead = function(materialName, batchNumber, amount, unit) {
+    self.setBatchHead = function(materialName, batchNumber, amount, unit, productionPrice) {
 
         var request = {
             "BatchId": self.editBatch.BatchId,
             "MaterialName": materialName,
             "BatchNumber": batchNumber,
             "Amount": amount,
-            "AmountUnitSymbol": unit
+            "AmountUnitSymbol": unit,
+            "ProductionWorkPrice": productionPrice
         };
 
         lt.api("/production/createBatch").body(request).post(function(batch) {

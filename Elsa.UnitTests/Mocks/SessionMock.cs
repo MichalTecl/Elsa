@@ -35,6 +35,8 @@ namespace Elsa.UnitTests.Mocks
 
         public string Name { get; set; }
 
+        public string HomeUrl { get; set; }
+
         public IEnumerable<IUser> Users { get; }
     }
 }

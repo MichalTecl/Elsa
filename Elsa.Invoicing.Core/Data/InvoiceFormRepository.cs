@@ -40,20 +40,7 @@ namespace Elsa.Invoicing.Core.Data
         {
             return GetInvoiceFormTypes().FirstOrDefault(i => i.Id == id);
         }
-
-        public IEnumerable<IInvoiceFormTypeInventory> GetInvoiceFormTypeInventories()
-        {
-            return m_cache.ReadThrough($"invoiceFormTypeInventories_{m_session.Project.Id}",
-                TimeSpan.FromDays(1),
-                () => m_database.SelectFrom<IInvoiceFormTypeInventory>()
-                    .Join(i => i.InvoiceFormType)
-                    .Join(i => i.MaterialInventory)
-                    .Where(i => i.InvoiceFormType.ProjectId == m_session.Project.Id)
-                    .Where(i => i.MaterialInventory.ProjectId == m_session.Project.Id)
-                    .Execute()
-                    .ToList());
-        }
-
+        
         public IEnumerable<IInvoiceForm> FindInvoiceForms(int? invoiceFormTypeId,
             int? materialBatchId,
             string externalInvoiceNumber,
@@ -188,7 +175,7 @@ namespace Elsa.Invoicing.Core.Data
                 tx.Commit();
             }
 
-            return GetInvoiceForm(invoiceId);
+            return GetInvoiceFormById(invoiceId);
         }
 
         public IEnumerable<IInvoiceFormReportType> GetInvoiceFormReportTypes()
@@ -197,10 +184,10 @@ namespace Elsa.Invoicing.Core.Data
                 TimeSpan.FromDays(1),
                 () => m_database.SelectFrom<IInvoiceFormReportType>().OrderBy(r => r.ViewOrder).Execute().ToList());
         }
-
-        public IInvoiceForm GetInvoiceForm(int id)
+        
+        public IInvoiceForm GetInvoiceFormById(int id)
         {
-            return GetInvoiceQuery().Where(i => i.Id == id).Take(1).Execute().FirstOrDefault();
+            return GetInvoiceQuery().Where(i => i.Id == id).Execute().FirstOrDefault();
         }
 
         private IQueryBuilder<IInvoiceForm> GetInvoiceQuery()
@@ -214,6 +201,7 @@ namespace Elsa.Invoicing.Core.Data
                 .Join(i => i.Items.Each().Unit)
                 .Join(i => i.FormType)
                 .Join(i => i.Supplier)
+                .Join(i => i.MaterialInventory)
                 .Where(i => i.ProjectId == m_session.Project.Id);
             return query;
         }

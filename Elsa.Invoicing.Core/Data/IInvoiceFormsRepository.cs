@@ -14,8 +14,6 @@ namespace Elsa.Invoicing.Core.Data
 
         IInvoiceFormType GetInvoiceFormType(int id);
 
-        IEnumerable<IInvoiceFormTypeInventory> GetInvoiceFormTypeInventories();
-
         IEnumerable<IInvoiceForm> FindInvoiceForms(int? invoiceFormTypeId, int? materialBatchId, string externalInvoiceNumber, int? supplierId, DateTime? from, DateTime? to);
 
         IInvoiceForm GetTemplate(int typeId,  Action<IInvoiceForm> setup);
@@ -25,5 +23,7 @@ namespace Elsa.Invoicing.Core.Data
         IInvoiceForm SaveInvoiceForm(IInvoiceForm invoice, List<IInvoiceFormItem> items, List<KeyValuePair<IInvoiceFormItem, int>> itemBatchId);
 
         IEnumerable<IInvoiceFormReportType> GetInvoiceFormReportTypes();
+
+        IInvoiceForm GetInvoiceFormById(int id);
     }
 }

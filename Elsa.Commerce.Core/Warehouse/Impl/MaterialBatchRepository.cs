@@ -295,7 +295,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
-        public MaterialBatchComponent CreateProductionBatch(int materialId, string batchNumber, decimal amount, IMaterialUnit unit)
+        public MaterialBatchComponent CreateProductionBatch(int materialId,
+            string batchNumber,
+            decimal amount,
+            IMaterialUnit unit,
+            decimal productionWorkPrice)
         {
             if (string.IsNullOrWhiteSpace(batchNumber))
             {
@@ -340,6 +344,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             entity.MaterialId = material.Id;
             entity.Volume = amount;
             entity.Note = string.Empty;
+            entity.ProductionWorkPrice = productionWorkPrice;
 
             m_database.Save(entity);
 

@@ -26,6 +26,10 @@ namespace Elsa.Apps.InvoiceForms.Model
 
         public string ConversionRate { get; set; }
 
-        public bool IsCanceled { get; set; }
+        public string CancelReason { get; set; }
+
+        public string InventoryName { get; set; }
+
+        public string DownloadUrl { get; set; }
     }
 }

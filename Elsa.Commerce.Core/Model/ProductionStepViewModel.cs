@@ -49,6 +49,8 @@ namespace Elsa.Commerce.Core.Model
         public bool IsValid { get; set; }
         public bool NeedsBatchNumber { get; set; }
 
+        public decimal PricePerUnit { get; set; }
+
         public static IEnumerable<ProductionStepViewModel> JoinAutomaticMaterials(List<ProductionStepViewModel> source)
         {
             var result = new List<ProductionStepViewModel>(source.Count);

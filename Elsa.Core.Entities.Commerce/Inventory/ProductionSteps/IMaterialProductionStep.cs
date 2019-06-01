@@ -31,5 +31,10 @@ namespace Elsa.Core.Entities.Commerce.Inventory.ProductionSteps
         IEnumerable<IMaterialProductionStepMaterial> Components { get; }
 
         DateTime? DeleteDateTime { get; set; }
+
+        decimal? PricePerUnit { get; set; }
+        int? PricePerUnitUnitId { get; set; }
+        IMaterialUnit PricePerUnitUnit { get; }
+        decimal? PricePerUnitAmount { get; set; }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Elsa.Apps.Inventory.Model
+﻿namespace Elsa.Apps.Inventory.Model
 {
     public class BatchSetupRequest
     {
@@ -17,5 +11,7 @@ namespace Elsa.Apps.Inventory.Model
         public decimal Amount { get; set; }
 
         public string AmountUnitSymbol { get; set; }
+
+        public decimal ProductionWorkPrice { get; set; }
     }
 }

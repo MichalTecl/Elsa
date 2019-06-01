@@ -28,7 +28,7 @@ namespace Elsa.Invoicing.Generation.Tasks.ReceivingInvoicesTasks
             }
 
             //IssueDate
-            invoice.SetAndThrowIfReassign(i => i.IssueDate, batch.Created);
+            invoice.SetAndThrowIfReassign(i => i.IssueDate, batch.Created.Date);
 
             //SupplierId
             if (batch.SupplierId != null)

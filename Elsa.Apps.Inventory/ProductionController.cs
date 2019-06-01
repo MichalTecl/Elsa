@@ -65,7 +65,7 @@ namespace Elsa.Apps.Inventory
                 throw new InvalidOperationException($"Neznama jednotka");
             }
 
-            return m_productionFacade.CreateOrUpdateProductionBatch(rq.BatchId, material.Id, rq.BatchNumber, rq.Amount, unit);
+            return m_productionFacade.CreateOrUpdateProductionBatch(rq.BatchId, material.Id, rq.BatchNumber, rq.Amount, unit, rq.ProductionWorkPrice);
         }
 
         public ProductionBatchModel AddComponentSourceBatch(

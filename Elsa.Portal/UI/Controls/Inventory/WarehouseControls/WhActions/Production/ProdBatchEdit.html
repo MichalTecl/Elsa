@@ -25,6 +25,12 @@
                 <label for="tbBatchNr">Číslo šarže</label>
                 <input id="tbBatchNr" data-bind="value:BatchNumber" required="required" event-bind="change:onHeadChanged; keyup:onHeadChanged"/>
             </div>
+            
+            <div id="prodPriceContainer" class="formRow">
+                <label for="tbProductionPrice">Cena práce</label>
+                <input type="number" min="0" step=".01" id="tbProductionPrice" data-bind="value:ProductionWorkPrice"/>
+            </div>
+
             <div id="batchHeadChangesButtonsContainer" class="formActions">
                 <button class="butSubmit" event-bind="click:saveHeadChanges"></button>
             </div>
@@ -66,7 +72,7 @@
 </div>
 
 <script>
-    lt.element("batchEdit").withModel("app.production.vm.editBatch").attach(function (materialSelectorContainer, unitSelectorContainer, tbMaterial, tbAmount, tbUnit, tbBatchNr, batchHeadChangesButtonsContainer, componentsList, componentListItemTemplate, prodBatchComponentsContainer, prodBatchFlagsContainer) {
+    lt.element("batchEdit").withModel("app.production.vm.editBatch").attach(function (materialSelectorContainer, unitSelectorContainer, tbMaterial, tbAmount, tbUnit, tbBatchNr, batchHeadChangesButtonsContainer, componentsList, componentListItemTemplate, prodBatchComponentsContainer, prodBatchFlagsContainer, tbProductionPrice) {
 
         var self = this;
 
@@ -125,7 +131,7 @@
         };
 
         this.saveHeadChanges = function() {
-            app.production.vm.setBatchHead(tbMaterial.value, tbBatchNr.value, tbAmount.value, tbUnit.value);
+            app.production.vm.setBatchHead(tbMaterial.value, tbBatchNr.value, tbAmount.value, tbUnit.value, tbProductionPrice.value);
         };
 
 

@@ -57,12 +57,12 @@ namespace Elsa.Commerce.Core.Production
             return LoadAndValidateBatchModel(batchId);
         }
 
-        public ProductionBatchModel CreateOrUpdateProductionBatch(
-            int? batchId,
+        public ProductionBatchModel CreateOrUpdateProductionBatch(int? batchId,
             int materialId,
             string batchNumber,
             decimal amount,
-            IMaterialUnit unit)
+            IMaterialUnit unit,
+            decimal productionWorkPrice)
         {
             using (var tx = m_database.OpenTransaction())
             {
@@ -75,7 +75,7 @@ namespace Elsa.Commerce.Core.Production
                 MaterialBatchComponent batchEntity;
                 if (batchId == null)
                 {
-                    batchEntity = m_batchRepository.CreateProductionBatch(materialId, batchNumber, amount, unit);
+                    batchEntity = m_batchRepository.CreateProductionBatch(materialId, batchNumber, amount, unit, productionWorkPrice);
                 }
                 else
                 {
@@ -893,7 +893,8 @@ namespace Elsa.Commerce.Core.Production
                                 ProducedAmountUnitSymbol = topBatch.Unit.Symbol,
                                 MaterialId = topMaterial.Id,
                                 MaterialName = topMaterial.Name,
-                                IsLocked = topBatch.LockDt != null
+                                IsLocked = topBatch.LockDt != null,
+                                ProductionWorkPrice = topBatch.ProductionWorkPrice ?? 0
                             };
 
             if (string.IsNullOrWhiteSpace(model.BatchNumber))

@@ -651,14 +651,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return suggestion;
         }
 
-        public IMaterialBatch FindBatchWithMissingInvoiceItem(int invoiceFormTypeId, int inventoryId)
+        public IMaterialBatch FindBatchWithMissingInvoiceItem(int invoiceFormTypeId)
         {
             var objBatchId = m_database.Sql().Execute(@"SELECT TOP 1 b.Id
-	                    FROM       MaterialBatch     b
-	                    INNER JOIN Material          m ON (b.MaterialId = m.Id)	  
-	                    WHERE b.ProjectId = @projectId
-	                    AND m.ProjectId = @projectId
-	                    AND m.InventoryId = @inventoryId
+	                    FROM       MaterialBatch     b	                    
+	                    WHERE b.ProjectId = @projectId	                    
 	                    AND b.Id NOT IN (select ib.MaterialBatchId
 						                    from       InvoiceForm inv
 						                    inner join InvoiceFormItem it ON (it.InvoiceFormId = inv.Id)
@@ -668,7 +665,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 	                    ORDER BY b.Id")
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@invoiceFormType", invoiceFormTypeId)
-                .WithParam("@inventoryId", inventoryId)
                 .Scalar<int?>();
 
             if (objBatchId == null)

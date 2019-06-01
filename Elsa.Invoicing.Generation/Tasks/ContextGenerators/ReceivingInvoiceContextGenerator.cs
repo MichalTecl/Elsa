@@ -3,6 +3,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
+using Elsa.Common.Logging;
 using Elsa.Invoicing.Core.Data;
 
 namespace Elsa.Invoicing.Generation.Tasks.ContextGenerators
@@ -12,39 +13,43 @@ namespace Elsa.Invoicing.Generation.Tasks.ContextGenerators
         public const string ReceivingInvoiceGeneratorName = "ReceivingInvoice";
 
         private readonly IMaterialBatchFacade m_batchFacade;
-        
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
+        private readonly ILog m_log;
 
         public ReceivingInvoiceContextGenerator(IMaterialBatchFacade batchFacade,
-            IInvoiceFormsRepository invoiceFormsRepository)
+            IInvoiceFormsRepository invoiceFormsRepository,
+            ILog log)
         {
             m_batchFacade = batchFacade;
             m_invoiceFormsRepository = invoiceFormsRepository;
+            m_log = log;
         }
 
         public bool FillNextContext(GenerationContext context)
         {
-            var bridges = m_invoiceFormsRepository.GetInvoiceFormTypeInventories().Where(b =>
-                b.InvoiceFormType.GeneratorName.Equals(ReceivingInvoiceGeneratorName,
-                    StringComparison.InvariantCultureIgnoreCase)).ToList();
+            m_log.Info("Zacinam nastavovat kontext pro nove generovani prijemek");
 
-            foreach (var bridge in bridges)
+            var invoiceFormType = m_invoiceFormsRepository.GetInvoiceFormTypes()
+                .FirstOrDefault(t => t.GeneratorName == ReceivingInvoiceGeneratorName);
+
+            if (invoiceFormType == null)
             {
-                var remainingBatch =
-                    m_batchFacade.FindBatchWithMissingInvoiceItem(bridge.InvoiceFormTypeId, bridge.MaterialInventoryId);
-                if (remainingBatch == null)
-                {
-                    continue;
-                }
-
-                context.MaterialInventoryId = bridge.MaterialInventoryId;
-                context.InvoiceFormTypeId = bridge.InvoiceFormTypeId;
-                context.SourceBatch = remainingBatch;
-
-                return true;
+                throw new InvalidOperationException($"No InvoiceForType found by GeneratorName = '{ReceivingInvoiceGeneratorName}'");
             }
 
-            return false;
+            var remainingBatch = m_batchFacade.FindBatchWithMissingInvoiceItem(invoiceFormType.Id);
+            if (remainingBatch == null)
+            {
+                m_log.Info("zadne dalsi sarze pro generovani prijemek");
+                return false;
+            }
+            
+            context.InvoiceFormTypeId = invoiceFormType.Id;
+            context.SourceBatch = remainingBatch;
+
+            m_log.Info($"Vytvoren kontext pro generovani prijemky pro sarzi {remainingBatch.BatchNumber}");
+
+            return true;
         }
     }
 }

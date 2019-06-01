@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
+using Elsa.Core.Entities.Commerce.Inventory;
 
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -42,6 +43,9 @@ namespace Elsa.Core.Entities.Commerce.Accounting
 
         int? SupplierId { get; set; }
         ISupplier Supplier { get; }
+
+        int MaterialInventoryId { get; set; }
+        IMaterialInventory MaterialInventory { get; }
 
         IEnumerable<IInvoiceFormItem> Items { get; }
     }

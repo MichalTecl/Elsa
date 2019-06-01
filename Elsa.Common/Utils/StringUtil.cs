@@ -232,5 +232,26 @@ namespace Elsa.Common.Utils
 
             return sb.ToString();
         }
+
+        public static string JoinUrlSegments(params string[] segments)
+        {
+            return string.Join("/",
+                segments.Select(s =>
+                {
+                    s = s.Trim();
+
+                    while (s.StartsWith("/"))
+                    {
+                        s = s.Substring(1);
+                    }
+
+                    while (s.EndsWith("/"))
+                    {
+                        s = s.Substring(0, s.Length - 1);
+                    }
+
+                    return s;
+                }));
+        }
     }
 }

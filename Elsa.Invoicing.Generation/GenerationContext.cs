@@ -18,9 +18,7 @@ namespace Elsa.Invoicing.Generation
         private IInvoiceForm m_invoice = null;
 
         public IMaterialBatch SourceBatch { get; set; }
-
-        public int MaterialInventoryId { get; set; }
-
+        
         public int InvoiceFormTypeId { get; set; }
 
         public IInvoiceForm InvoiceForm

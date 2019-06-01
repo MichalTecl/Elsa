@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Elsa.Apps.InvoiceForms.Model;
+using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting;
@@ -15,11 +16,13 @@ namespace Elsa.Apps.InvoiceForms.Facade
     {
         private readonly ILog m_log;
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
+        private readonly ISession m_session;
 
-        public InvoiceFormsQueryingFacade(ILog log, IInvoiceFormsRepository invoiceFormsRepository)
+        public InvoiceFormsQueryingFacade(ILog log, IInvoiceFormsRepository invoiceFormsRepository, ISession session)
         {
             m_log = log;
             m_invoiceFormsRepository = invoiceFormsRepository;
+            m_session = session;
         }
 
         public InvoiceFormsCollection<T> Load<T>(int invoiceFormType,
@@ -54,6 +57,8 @@ namespace Elsa.Apps.InvoiceForms.Facade
 
             m_log.Info($"Loded {forms.Count} of forms");
 
+            var homeUrl = m_session.Project.HomeUrl ?? "Project.HomeUrl";
+
             var collection = new InvoiceFormsCollection<T>();
             foreach (var form in forms)
             {
@@ -66,7 +71,9 @@ namespace Elsa.Apps.InvoiceForms.Facade
                 itemModel.FormattedPrimaryCurrencyPriceWithoutVat =
                     StringUtil.FormatDecimal(itemModel.PrimaryCurrencyPriceWithoutVat);
 
-                itemModel.IsCanceled = form.CancelDt != null;
+                itemModel.CancelReason = form.CancelDt == null ? string.Empty : form.CancelReason ?? "STORNO";
+                itemModel.InventoryName = form.MaterialInventory?.Name;
+                itemModel.DownloadUrl = $"{StringUtil.JoinUrlSegments(homeUrl, "/invoiceforms/DownloadInvoiceForm")}?id={form.Id}";
 
                 ManageSourceCurrency(itemModel, form);
 
@@ -119,7 +126,7 @@ namespace Elsa.Apps.InvoiceForms.Facade
 
             if (rateInfo == null)
             {
-                throw new InvalidOperationException($"Pro fakturu {form.InvoiceNumber} chybi informace o prevodim kurzu, nelze zpracovat");
+                throw new InvalidOperationException($"Pro fakturu {form.InvoiceNumber} chybi informace o prevodnim kurzu, nelze zpracovat");
             }
 
             var sum = form.Items.Sum(i => i.SourceCurrencyPrice ?? 0);

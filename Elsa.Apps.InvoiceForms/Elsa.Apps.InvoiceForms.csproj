@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,6 +51,7 @@
     <Compile Include="Model\ReportMonthModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
+    <Compile Include="UiForms\ReceivingInvoiceFormRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
@@ -59,6 +61,14 @@
     <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
       <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Noml.Forms\Elsa.Common.Noml.Forms.csproj">
+      <Project>{9FA823D4-27DA-4512-9C59-ECB1E03BAFA8}</Project>
+      <Name>Elsa.Common.Noml.Forms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Noml\Elsa.Common.Noml.csproj">
+      <Project>{3C44767F-B6AB-4ADD-87F7-EF28051F5FD3}</Project>
+      <Name>Elsa.Common.Noml</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>

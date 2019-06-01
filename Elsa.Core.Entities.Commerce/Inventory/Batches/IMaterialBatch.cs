@@ -35,6 +35,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         decimal Price { get; set; }
 
+        decimal? ProductionWorkPrice { get; set; }
+
         int? PriceConversionId { get; set; }
         ICurrencyConversion PriceConversion { get; }
 

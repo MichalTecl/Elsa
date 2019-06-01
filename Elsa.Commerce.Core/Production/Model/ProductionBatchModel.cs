@@ -20,6 +20,8 @@ namespace Elsa.Commerce.Core.Production.Model
 
         public string ProducedAmountUnitSymbol { get; set; }
 
+        public decimal ProductionWorkPrice { get; set; }
+
         public bool IsComplete { get; set; }
 
         public bool IsLocked { get; set; }

@@ -53,7 +53,6 @@
     <Compile Include="Accounting\IInvoiceFormItemMaterialBatch.cs" />
     <Compile Include="Accounting\IInvoiceFormReportType.cs" />
     <Compile Include="Accounting\IInvoiceFormType.cs" />
-    <Compile Include="Accounting\IInvoiceFormTypeInventory.cs" />
     <Compile Include="Automation\IJobSchedule.cs" />
     <Compile Include="Automation\IScheduledJob.cs" />
     <Compile Include="Commerce\IDirectSaleEvent.cs" />
