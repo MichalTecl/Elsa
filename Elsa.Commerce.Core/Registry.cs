@@ -3,6 +3,7 @@ using Elsa.Commerce.Core.CurrencyRates;
 using Elsa.Commerce.Core.Impl;
 using Elsa.Commerce.Core.Production;
 using Elsa.Commerce.Core.Repositories;
+using Elsa.Commerce.Core.Repositories.Automation;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -49,6 +50,8 @@ namespace Elsa.Commerce.Core
             setup.For<IStockEventRepository>().Use<StockEventRepository>();
             setup.For<ISupplierRepository>().Use<SupplierRepository>();
             setup.For<ICurrencyConversionHelper>().Use<CurrencyConversionHelper>();
+            setup.For<IRepositoryFactory>().Use<RepositoryFactory>();
+            setup.For<IFixedCostRepository>().Use<FixedCostRepository>();
         }
     }
 }

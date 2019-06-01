@@ -24,8 +24,8 @@
 
     <script>
         var tab = new app.ui.TabControl(document.getElementById("mainTab"));
-        tab.addTab("Dodavatelé", "/suppliers/getEditor", null, null, "batchSearch");
-
+        tab.addTab("Dodavatelé", "/suppliers/getEditor", null, null, "suppliers");
+        tab.addTab("Typy fixních výdajů", "/fixedCostTypes/getEditor", null, null, "fixedCostTypes");
     </script>
 
     <script src="/Script/Apps/Inventory/VirtualProducts/VirtualProductsVM.js"></script>
