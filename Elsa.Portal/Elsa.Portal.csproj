@@ -97,6 +97,7 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <Content Include="Bundles\Bundle.ashx" />
+    <Content Include="Script\Apps\Accounting\FixedCosts.vm.js" />
     <Content Include="Script\Apps\Inventory\WarehouseActions\StockEvents.VM.js" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -160,6 +161,7 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionSteps.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\MaterialsTreeView.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\ProductionStepEdit.html" />
+    <Content Include="UI\Controls\Accounting\FixedCostValuesEditor.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\MonthSearchPanel.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\ReceivingInvoicesReport.html" />
     <Content Include="UI\Pages\Inventory\MaterialLevels.css" />

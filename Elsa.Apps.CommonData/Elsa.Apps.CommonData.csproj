@@ -43,7 +43,9 @@
   <ItemGroup>
     <Compile Include="CurrencyController.cs" />
     <Compile Include="FixedCostTypeController.cs" />
+    <Compile Include="Model\AccMonthModel.cs" />
     <Compile Include="Model\FixedCostTypeViewModel.cs" />
+    <Compile Include="Model\FixedCostValueViewModel.cs" />
     <Compile Include="Model\SupplierViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SuppliersAutoController.cs" />

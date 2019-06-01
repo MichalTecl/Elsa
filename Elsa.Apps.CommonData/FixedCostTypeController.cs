@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 using Elsa.Apps.Common;
 using Elsa.Apps.CommonData.Model;
@@ -75,6 +74,41 @@ namespace Elsa.Apps.CommonData
         protected override void SetupForm(IFormBuilder<FixedCostTypeViewModel> formBuilder)
         {
             formBuilder.Div("fctForm", d => d.Field(s => s.Name).Field(s => s.Percent));
+        }
+
+        public IEnumerable<FixedCostValueViewModel> GetValues(int month, int year)
+        {
+            var allTypes = m_repository.GetFixedCostTypes().ToList();
+            var existingValues = m_repository.GetValues(year, month).ToList();
+
+            foreach (var type in allTypes)
+            {
+                var value = existingValues.FirstOrDefault(v => v.FixedCostTypeId == type.Id);
+
+                yield return new FixedCostValueViewModel
+                {
+                    TypeId = type.Id,
+                    TypeName = type.Name,
+                    Month = month,
+                    Year = year,
+                    Value = value?.Value ?? 0
+                };
+            }
+        }
+
+        public void SetValue(FixedCostValueViewModel model)
+        {
+            m_repository.SetValue(model.TypeId, model.Year, model.Month, model.Value);
+        }
+
+        public IEnumerable<AccMonthModel> GetMonths()
+        {
+            var historyDepth = DateTime.Now.AddYears(-2);
+
+            for (var dt = DateTime.Now; dt > historyDepth; dt = dt.AddMonths(-1))
+            {
+                yield return new AccMonthModel(dt);
+            }
         }
     }
 }

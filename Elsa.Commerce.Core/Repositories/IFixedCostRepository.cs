@@ -16,6 +16,8 @@ namespace Elsa.Commerce.Core.Repositories
 
         void DeleteFixedCostType(int id);
 
+        IEnumerable<IFixedCostValue> GetValues(int year, int month);
 
+        void SetValue(int typeId, int year, int month, decimal value);
     }
 }

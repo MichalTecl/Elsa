@@ -1,0 +1,52 @@
+﻿<script src="/Script/Apps/Accounting/FixedCosts.vm.js"></script>
+
+<div id="fcvUi">
+    <div class="paramsPanel">
+        <select data-bind="itemsSource:months" data-key="Text" event-bind="change:onDateSelected(this)">
+            <option data-bind="text:Text" class="lt-template"></option>
+        </select>
+    </div>
+    <div>
+        <div>
+            <div class="gridRow gridHead">
+                <div class="cell10">Výdaj</div>
+                <div class="cell10">Hodnota</div>
+            </div>
+            <div data-bind="itemsSource:values" data-key="Uid">
+                <div class="gridRow lt-template">
+                    <div class="cell10" data-bind="text:TypeName"></div>
+                    <div class="cell10">
+                        <input type="number" data-bind="value:Value" event-bind="change:onValueChanged(this.value, VM)"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <button data-bind="class!.hidden:canSave" class="butSubmit" event-bind="click:save"></button>
+    </div>
+</div>
+
+<script>
+    lt.element("fcvUi").withModel("app.fixedCosts.vm").attach(function() {
+
+        this.onDateSelected = function(monthDropdown) {
+            var text = monthDropdown.options[monthDropdown.selectedIndex].innerHTML;
+            
+            var parts = text.split("/");
+
+            var month = parseInt(parts[0]);
+            var year = parseInt(parts[1]);
+
+            app.fixedCosts.vm.selectMonth(year, month);
+        };
+
+        this.onValueChanged = function(value, model) {
+            app.fixedCosts.vm.setValue(model, parseFloat(value));
+        };
+
+        this.save = function() {
+            app.fixedCosts.vm.save();
+        };
+    });
+</script>

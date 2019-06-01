@@ -138,7 +138,7 @@ if (lanta.Markup.attributeSetters.length === 0) {
 
             for (var i = 0; i < target.children.length; i++) {
                 var child = target.children[i];
-                var childClass = child.getAttribute("class");
+                var childClass = child.getAttribute("class") || "";
                 if (childClass.indexOf("lt-template") > -1) {
                     templates.push(child);
                 }
