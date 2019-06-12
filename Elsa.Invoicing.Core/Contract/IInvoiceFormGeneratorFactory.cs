@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Elsa.Invoicing.Core.Contract
 {
-    public interface IInvoiceFormGenerationJob
+    public interface IInvoiceFormGeneratorFactory
     {
-        string Name { get; }
-
-        void Start();
+        IInvoiceFormGenerator Get(string name);
     }
 }

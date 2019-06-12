@@ -34,8 +34,8 @@
                 for (var i = 0; i < invoiceReportTypes.length; i++) {
                     var reportType = invoiceReportTypes[i];
 
-                    tab.addTab(reportType.Name, reportType.ViewControlUrl, reportType.DataSourceUrl, function (data) {
-                        app.invoiceReporting.vm.setQueryMethod(data);
+                    tab.addTab(reportType.Name, reportType.ViewControlUrl, reportType, function (data) {
+                        app.invoiceReporting.vm.setMethods(data.DataSourceUrl, data.GenerateCommandUrl);
                     });
                 }
 

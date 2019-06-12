@@ -25,6 +25,9 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         [NVarchar(300, true)]
         string DataSourceUrl { get; set; }
 
+        [NVarchar(300, true)]
+        string GenerateCommandUrl { get; set; }
+
         int ViewOrder { get; set; }
     }
 }

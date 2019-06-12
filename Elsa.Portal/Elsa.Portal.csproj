@@ -162,6 +162,8 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\MaterialsTreeView.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\ProductionStepEdit.html" />
     <Content Include="UI\Controls\Accounting\FixedCostValuesEditor.html" />
+    <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\GenerateButton.html" />
+    <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\GenerationLogUi.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\MonthSearchPanel.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\ReceivingInvoicesReport.html" />
     <Content Include="UI\Pages\Inventory\MaterialLevels.css" />

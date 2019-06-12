@@ -7,7 +7,11 @@ app.fixedCosts.ViewModel = app.fixedCosts.ViewModel || function() {
     self.values = [];
     self.canSave = false;
 
-    self.selectMonth = function(year, month) {
+    self.selectMonth = function (year, month) {
+        self.canSave = false;
+        self.values = [];
+        lt.notify();
+
         lt.api("/fixedCostTypes/getValues").query({ "month": month, "year": year }).get(
             function (data) {
 
@@ -43,6 +47,7 @@ app.fixedCosts.ViewModel = app.fixedCosts.ViewModel || function() {
             }
 
             value.isChanged = false;
+
             lt.api("/fixedCostTypes/setValue").body(value).post(function(done) {
                 saveItem();
                 return;

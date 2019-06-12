@@ -1,0 +1,49 @@
+﻿<div id="glgui">
+    <div class="glActions">
+
+    </div>
+    <div class="glLogContainer">
+        <div data-bind="itemsSource:collection.Log" data-key="Id">
+            <div class="lt-template glLogRow" >
+                <div class="stackLeft">
+
+                    <div class="glItemStatus">
+                        <i class="fas fa-exclamation-circle icoError" data-bind="class!.hidden:IsError"></i>
+                        <i class="fas fa-exclamation-triangle icoWarning" data-bind="class!.hidden:IsWarning"></i>
+                        <span data-bind="class.hidden:IsError">
+                            <span data-bind="class.hidden:IsWarning">
+                                <i class="far fa-check-circle icoOk"></i>
+                            </span>
+                        </span>
+                    </div>
+                    
+                    <div class="glItemText" data-bind="text:Message"></div>
+                    
+                    <div class="glItemAction">
+                        <i class="far fa-check-circle faButton icoApprove" data-bind="class!.hidden:CanApprove" event-bind="click:approve(GroupedRecords)"></i>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    lt.element("glgui").withModel("app.invoiceReporting.vm").attach(function() {
+        this.bind(function(collection) {
+
+            if ((!collection) || (!collection.IsGenerated) || (collection.IsApproved)) {
+                this.style.display = 'none';
+            } else {
+                this.style.display = 'block';
+            }
+
+
+
+        }).collectionCanBeNull();
+
+        this.approve = function(ids) {
+            app.invoiceReporting.vm.approveWarnings(ids);
+        };
+    });
+</script>

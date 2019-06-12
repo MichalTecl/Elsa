@@ -12,6 +12,7 @@ using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Common.Noml.Forms;
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
 
 using Robowire.RoboApi;
@@ -24,19 +25,22 @@ namespace Elsa.Apps.InvoiceForms
         private readonly ILog m_log;
         private readonly InvoiceFormsQueryingFacade m_facade;
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
+        private readonly IInvoiceFormsGenerationRunner m_generationRunner;
 
         public InvoiceFormsController(IWebSession webSession,
             ILog log,
             InvoiceFormsQueryingFacade facade,
-            IInvoiceFormsRepository invoiceFormsRepository)
+            IInvoiceFormsRepository invoiceFormsRepository,
+            IInvoiceFormsGenerationRunner generationRunner)
             : base(webSession, log)
         {
             m_log = log;
             m_facade = facade;
             m_invoiceFormsRepository = invoiceFormsRepository;
+            m_generationRunner = generationRunner;
         }
 
-        public InvoiceFormsCollection<ReceivingInvoiceFormModel> GetReceivingInvoicesForm(int? month, int? year)
+        public InvoiceFormsCollection<ReceivingInvoiceFormModel> GetReceivingInvoicesCollection(int month, int year)
         {
             var type = m_invoiceFormsRepository.GetInvoiceFormTypes()
                 .FirstOrDefault(t => t.GeneratorName == "ReceivingInvoice");
@@ -48,9 +52,12 @@ namespace Elsa.Apps.InvoiceForms
             return m_facade.Load(type.Id, year, month,
                 item =>
                 {
-                    var model = new ReceivingInvoiceFormModel();
-                    model.InvoiceVarSymbol = item.InvoiceVarSymbol ?? item.InvoiceNumber;
-                    model.Supplier = item.Supplier?.Name; 
+                    var model = new ReceivingInvoiceFormModel
+                    {
+                        InvoiceVarSymbol = item.InvoiceVarSymbol ?? item.InvoiceNumber,
+                        Supplier = item.Supplier?.Name
+                    };
+
                     return model;
                 });
         }
@@ -94,6 +101,18 @@ namespace Elsa.Apps.InvoiceForms
             var fileName = $"{invoiceForm.InvoiceFormNumber}.pdf";
 
             return new FileResult(fileName, renderer.GetPdf());
+        }
+
+        public InvoiceFormsCollection<ReceivingInvoiceFormModel> GenerateReceivingInvoicesCollection(int type, int year, int month)
+        {
+            var x = m_generationRunner.Run(type, year, month);
+
+            return GetReceivingInvoicesCollection(month, year);
+        }
+
+        public void ApproveLogWarnings(List<int> ids)
+        {
+            m_invoiceFormsRepository.ApproveLogWarnings(ids);
         }
     }
 }

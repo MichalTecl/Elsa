@@ -45,8 +45,10 @@
     <Compile Include="Facade\InvoiceFormsQueryingFacade.cs" />
     <Compile Include="InvoiceFormsController.cs" />
     <Compile Include="Model\FormReportTypeViewModel.cs" />
+    <Compile Include="Model\GenerationInfoModel.cs" />
     <Compile Include="Model\InvoiceFormModelBase.cs" />
     <Compile Include="Model\InvoiceFormsCollection.cs" />
+    <Compile Include="Model\InvoiceFormsGenerationRequest.cs" />
     <Compile Include="Model\ReceivingInvoiceFormModel.cs" />
     <Compile Include="Model\ReportMonthModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

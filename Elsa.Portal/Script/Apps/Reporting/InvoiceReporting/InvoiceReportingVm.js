@@ -6,11 +6,12 @@ app.invoiceReporting.ViewModel = app.invoiceReporting.ViewModel || function() {
 
     self.invoiceReportTypes = null;
     self.reportMonths = null;
-    self.data = [];
+    self.collection = null;
 
     var year = null;
     var month = null;
     var dataMethod = null;
+    var generatorMethod = null;
 
     var loadReportTypes = function() {
         lt.api("/invoiceForms/GetInvoicingReportTypes").get(function(result) {
@@ -29,7 +30,7 @@ app.invoiceReporting.ViewModel = app.invoiceReporting.ViewModel || function() {
 
     var load = function() {
 
-        self.data = [];
+        self.collection = null;
 
         if (!dataMethod) {
             return;
@@ -40,7 +41,7 @@ app.invoiceReporting.ViewModel = app.invoiceReporting.ViewModel || function() {
         }
 
         lt.api(dataMethod).query({ "year": year, "month": month }).get(function(data) {
-            self.data = data;
+            self.collection = data;
         });
     };
 
@@ -50,10 +51,31 @@ app.invoiceReporting.ViewModel = app.invoiceReporting.ViewModel || function() {
         load();
     };
 
-    self.setQueryMethod = function(method) {
+    self.setMethods = function(queryMethod, generateMethod) {
         year = null;
         month = null;
-        dataMethod = method;
+        dataMethod = queryMethod;
+        generatorMethod = generateMethod;
+    };
+
+    self.requestGeneration = function() {
+        if (!self.collection) {
+            return;
+        }
+
+        lt.api(generatorMethod).query({
+            "type": self.collection.InvoiceFormTypeId,
+            "year": self.collection.Year,
+            "month": self.collection.Month
+        }).get(function(coll) {
+            self.collection = coll;
+        });
+    };
+
+    self.approveWarnings = function(ids) {
+        lt.api("/invoiceForms/approveLogWarnings").body(ids).post(function() {
+            load();
+        });
     };
 };
 

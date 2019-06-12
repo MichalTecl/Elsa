@@ -8,6 +8,8 @@ using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
+using Robowire.RobOrm.Core;
+
 namespace Elsa.Commerce.Core.Warehouse
 {
     public interface IMaterialBatchRepository
@@ -50,5 +52,7 @@ namespace Elsa.Commerce.Core.Warehouse
         string GetBatchNumberById(int batchId);
 
         int? GetBatchIdByNumber(int materialId, string batchNumber);
+
+        IEnumerable<int> QueryBatchIds(Action<IQueryBuilder<IMaterialBatch>> customize);
     }
 }

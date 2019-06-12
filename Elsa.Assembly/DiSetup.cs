@@ -1,4 +1,6 @@
-﻿using Elsa.App.Commerce.Payments;
+﻿using System.Diagnostics;
+
+using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
 using Elsa.App.Crm;
 using Elsa.App.OrdersPacking;
@@ -8,12 +10,12 @@ using Elsa.Apps.Inventory;
 using Elsa.Apps.InvoiceForms;
 using Elsa.Apps.ScheduledJobs;
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Common.UserRightsInfrastructure;
 using Elsa.Common.XTable;
 using Elsa.Core.Entities.Commerce;
-using Elsa.GenerateInvoiceForms;
 using Elsa.Integration.Erp.Elerp;
 using Elsa.Integration.Erp.Fler;
 using Elsa.Integration.Erp.Flox;
@@ -22,7 +24,6 @@ using Elsa.Integration.PaymentSystems.Common;
 using Elsa.Integration.PaymentSystems.Fio;
 using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Invoicing.Core.Contract;
-using Elsa.Invoicing.Generation;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.GeocodeAddresses;
 using Elsa.Jobs.ImportOrders;
@@ -48,6 +49,8 @@ namespace Elsa.Assembly
 
         public static void SetupContainer(IContainer container, ILogWriter logWriter)
         {
+            Debug.WriteLine("Setting up the container");
+
             container.Setup(s => s.For<IWebSession>().Use<UserWebSession>());
             container.Setup(s => s.For<ISession>().Import.FromFactory(l => l.Get<IWebSession>()));
             container.Setup(s => s.Collect<IStartupJob>());
@@ -55,7 +58,7 @@ namespace Elsa.Assembly
             container.Setup(
                 s =>
                 {
-                    s.ScanAssembly(typeof(IInvoiceFormGenerationJob).Assembly);
+                    s.ScanAssembly(typeof(IInvoiceFormGeneratorFactory).Assembly);
                     s.ScanAssembly(typeof(FloxClient).Assembly);
                     s.ScanAssembly(typeof(FlerClient).Assembly);
                     s.ScanAssembly(typeof(FioClient).Assembly);
@@ -79,15 +82,18 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(ImportRatesJob).Assembly);
                     s.ScanAssembly(typeof(CommonRegistry).Assembly);
                     s.ScanAssembly(typeof(SuppliersAutoController).Assembly);
-                    s.ScanAssembly(typeof(GenerateFormsJob).Assembly);
-                    s.ScanAssembly(typeof(IContextGenerator).Assembly);
                     s.ScanAssembly(typeof(InvoiceFormsController).Assembly);
                     s.ScanAssembly(typeof(XTableController).Assembly);
+                    s.ScanAssembly(typeof(InvoiceFormsGenerationRunner).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });
 
+            Debug.WriteLine("Container set up");
+
+            Debug.WriteLine("Initializing ElsaDb");
             ElsaDbInstaller.Initialize(container);
+            Debug.WriteLine("ElsaDb initialized");
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Invoicing.Core.Contract;
 
 namespace Elsa.Invoicing.Core.Data
 {
@@ -25,5 +26,23 @@ namespace Elsa.Invoicing.Core.Data
         IEnumerable<IInvoiceFormReportType> GetInvoiceFormReportTypes();
 
         IInvoiceForm GetInvoiceFormById(int id);
+
+        IInvoiceFormGenerationLog AddEvent(int collectionId, string message, bool warning, bool error);
+
+        IInvoiceForm NewForm(Action<IInvoiceForm> setup);
+
+        IInvoiceFormItem NewItem(IInvoiceForm form, int materialBatchId, Action<IInvoiceFormItem> setup);
+
+        IInvoiceFormGenerationContext StartGeneration(string contextName, int year, int month, int invoiceformTypeId);
+
+        IInvoiceFormCollection GetCollectionByMaterialBatchId(int batchId);
+
+        IInvoiceFormCollection GetCollectionById(int collectionId);
+
+        IInvoiceFormCollection FindCollection(int invoiceFormTypeId, int year, int month);
+
+        void DeleteCollection(int existingCollectionId);
+
+        void ApproveLogWarnings(List<int> ids);
     }
 }

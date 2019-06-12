@@ -51,6 +51,8 @@
     <Compile Include="Accounting\IFixedCostType.cs" />
     <Compile Include="Accounting\IFixedCostValue.cs" />
     <Compile Include="Accounting\IInvoiceForm.cs" />
+    <Compile Include="Accounting\IInvoiceFormCollection.cs" />
+    <Compile Include="Accounting\IInvoiceFormGenerationLog.cs" />
     <Compile Include="Accounting\IInvoiceFormItem.cs" />
     <Compile Include="Accounting\IInvoiceFormItemMaterialBatch.cs" />
     <Compile Include="Accounting\IInvoiceFormReportType.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="Crm\ICustomerRelatedNote.cs" />
     <Compile Include="ElsaDbInstaller.cs" />
     <Compile Include="Extensions\MappedToOrderItemExtensions.cs" />
+    <Compile Include="Extensions\MaterialBatchExtensions.cs" />
     <Compile Include="Extensions\ProductionStepExtensions.cs" />
     <Compile Include="Integration\IErp.cs" />
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />

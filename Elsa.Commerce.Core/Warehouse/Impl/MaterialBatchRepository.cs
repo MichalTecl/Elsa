@@ -388,6 +388,15 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                         .FirstOrDefault()?.Id);
         }
 
+        public IEnumerable<int> QueryBatchIds(Action<IQueryBuilder<IMaterialBatch>> customize)
+        {
+            var qry = m_database.SelectFrom<IMaterialBatch>().Where(b => b.ProjectId == m_session.Project.Id);
+
+            customize(qry);
+
+            return qry.Execute().Select(b => b.Id).Distinct();
+        }
+
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()
         {
             return

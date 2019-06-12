@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Apps.InvoiceForms.Model;
@@ -25,42 +26,28 @@ namespace Elsa.Apps.InvoiceForms.Facade
             m_session = session;
         }
 
-        public InvoiceFormsCollection<T> Load<T>(int invoiceFormType,
-            int? year,
-            int? month,
+        public InvoiceFormsCollection<T> Load<T>(int invoiceFormTypeId, int year, int month,
             Func<IInvoiceForm, T> itemMapper) where T : InvoiceFormModelBase
         {
-            var type = m_invoiceFormsRepository.GetInvoiceFormTypes().FirstOrDefault(t => t.Id == invoiceFormType);
-            if (type == null)
+            var coll = m_invoiceFormsRepository.FindCollection(invoiceFormTypeId, year, month);
+
+            if (coll == null)
             {
-                throw new InvalidOperationException("Invalid invoiceFormTypeId");
+                return new InvoiceFormsCollection<T>()
+                {
+                    CanApprove = false,
+                    CanGenerate = true,
+                    InvoiceFormTypeId = invoiceFormTypeId,
+                    IsGenerated = false,
+                    Month = month,
+                    Year = year
+                };
             }
-
-            var fromDt = new DateTime(year ?? 2000, month ?? 1, 1);
-            var toDt = fromDt.AddMonths(1);
-
-            if (year == null)
-            {
-                toDt = new DateTime(DateTime.Now.Year, fromDt.Month, 1).AddMonths(1);
-            }
-
-            if (month == null)
-            {
-                toDt = new DateTime(toDt.Year, 11, 1).AddMonths(1);
-            }
-
-            m_log.Info($"Invoice forms will be loaded. Type={invoiceFormType}, From={fromDt}, To={toDt}");
-
-            var forms = m_invoiceFormsRepository.FindInvoiceForms(invoiceFormType, null, null, null, fromDt, toDt)
-                .OrderBy(f => f.IssueDate)
-                .ToList();
-
-            m_log.Info($"Loded {forms.Count} of forms");
-
+            
             var homeUrl = m_session.Project.HomeUrl ?? "Project.HomeUrl";
 
             var collection = new InvoiceFormsCollection<T>();
-            foreach (var form in forms)
+            foreach (var form in coll.Forms)
             {
                 var itemModel = itemMapper(form);
                 itemModel.InvoiceFormId = form.Id;
@@ -80,14 +67,59 @@ namespace Elsa.Apps.InvoiceForms.Facade
                 collection.Forms.Add(itemModel);
             }
             
-            collection.Year = year;
-            collection.Month = month;
-            collection.InvoiceFormTypeId = invoiceFormType;
-            collection.Title = type.CollectionName ?? "InvoiceFormType.CollectionName not set";
+            collection.Year = coll.Year;
+            collection.Month = coll.Month;
+            collection.InvoiceFormTypeId = coll.InvoiceFormTypeId;
+            collection.Title = coll.Name ?? "InvoiceFormType.CollectionName not set";
             collection.TotalPriceFormatted =
                 StringUtil.FormatDecimal(collection.Forms.Sum(i => i.PrimaryCurrencyPriceWithoutVat));
 
+            collection.CanApprove = (coll.ApproveDt == null) && IsLogClear(coll.Log);
+            collection.CanGenerate = (coll.ApproveDt == null);
+            collection.IsGenerated = true;
+            collection.IsApproved = (coll.ApproveDt != null);
+            collection.CanDelete = !collection.IsApproved;
+
+            GroupLogEntries(coll.Log, collection.Log);
+
             return collection;
+        }
+
+        private void GroupLogEntries(IEnumerable<IInvoiceFormGenerationLog> collLog, List<GenerationInfoModel> target)
+        {
+            foreach (var src in collLog)
+            {
+                var model = target.FirstOrDefault(t =>
+                    (t.Message == src.Message) &&
+                    (t.IsError == src.IsError) &&
+                    (t.IsWarning == src.IsWarning) &&
+                    (t.CanApprove == (src.ApproveDt == null)));
+                if (model == null)
+                {
+                    model = new GenerationInfoModel(src);
+                    target.Add(model);
+                }
+
+                model.GroupedRecords.Add(src.Id);
+            }
+        }
+
+        private bool IsLogClear(IEnumerable<IInvoiceFormGenerationLog> entries)
+        {
+            foreach (var entry in entries)
+            {
+                if (entry.IsError)
+                {
+                    return false;
+                }
+
+                if (entry.IsWarning && (entry.ApproveDt == null))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private void ManageSourceCurrency<T>(T itemModel, IInvoiceForm form)

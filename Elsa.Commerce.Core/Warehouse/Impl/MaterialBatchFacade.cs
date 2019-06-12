@@ -651,28 +651,45 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return suggestion;
         }
 
-        public IMaterialBatch FindBatchWithMissingInvoiceItem(int invoiceFormTypeId)
+        public IEnumerable<IMaterialBatch> FindBatchesWithMissingInvoiceItem(int inventoryId)
         {
-            var objBatchId = m_database.Sql().Execute(@"SELECT TOP 1 b.Id
-	                    FROM       MaterialBatch     b	                    
-	                    WHERE b.ProjectId = @projectId	                    
-	                    AND b.Id NOT IN (select ib.MaterialBatchId
-						                    from       InvoiceForm inv
-						                    inner join InvoiceFormItem it ON (it.InvoiceFormId = inv.Id)
-						                    inner join InvoiceFormItemMaterialBatch ib ON (it.Id = ib.InvoiceFormItemId)
-						                    where inv.ProjectId = @projectId
-							                    and inv.FormTypeId = @invoiceFormType)
-	                    ORDER BY b.Id")
-                .WithParam("@projectId", m_session.Project.Id)
-                .WithParam("@invoiceFormType", invoiceFormTypeId)
-                .Scalar<int?>();
+            var ids = m_database.Sql().ExecuteWithParams(@"SELECT DISTINCT mb.Id
+            FROM MaterialBatch mb
+                INNER JOIN Material      m ON(m.Id = mb.MaterialId)
+            WHERE mb.ProjectId = {0}
+            AND m.InventoryId = {1}
+            AND NOT EXISTS(SELECT TOP 1 1
+            FROM InvoiceFormItemMaterialBatch ib
+                WHERE ib.MaterialBatchId = mb.Id)",
+                m_session.Project.Id,
+                inventoryId).MapRows(r => r.GetInt32(0));
 
-            if (objBatchId == null)
+            return ids.Select(id => m_batchRepository.GetBatchById(id).Batch);
+        }
+
+        public IEnumerable<IMaterialBatch> FindBatches(int inventoryId, DateTime @from, DateTime to)
+        {
+            return m_batchRepository
+                .QueryBatchIds(q =>
+                    q.Join(b => b.Material).Where(b => b.Material.InventoryId == inventoryId)
+                        .Where(b => (b.Created >= @from) && (b.Created <= to)))
+                .Select(b => m_batchRepository.GetBatchById(b).Batch);
+        }
+
+        public BatchPriceInfo CalculateBatchPrice(int batchId)
+        {
+            var batch = m_batchRepository.GetBatchById(batchId);
+            if (batch == null)
             {
-                return null;
+                throw new InvalidOperationException("Invalid entity reference");
             }
 
-            return m_batchRepository.GetBatchById(objBatchId.Value)?.Batch;
+            if (batch.Components.Count == 0)
+            {
+                return new BatchPriceInfo(batch.Batch.Price, batch.Batch.PriceConversion?.SourceValue, batch.Batch.PriceConversion);
+            }
+
+            throw new NotImplementedException("TODO");
         }
 
         public IMaterialBatchStatus GetBatchStatus(int batchId)

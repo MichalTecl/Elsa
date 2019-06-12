@@ -62,7 +62,12 @@ lanta.CustomAttributes.Watcher = lanta.CustomAttributes.Watcher || function() {
         }
     };
 
-    var visitAll = function() {
+    var visitAll = function () {
+        if (!document.body) {
+            setTimeout(visitAll, 50);
+            return;
+        }
+
         var allElements = document.body.getElementsByTagName("*");
             for (var i = 0; i < allElements.length; i++) {
                 var e = allElements[i];

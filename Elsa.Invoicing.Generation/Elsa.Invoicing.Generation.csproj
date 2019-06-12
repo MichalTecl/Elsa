@@ -41,20 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GenerationContext.cs" />
-    <Compile Include="GenerationJobList.cs" />
-    <Compile Include="GenerationRunner.cs" />
-    <Compile Include="IContextGenerator.cs" />
-    <Compile Include="IGenerationTask.cs" />
-    <Compile Include="JobsSetup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Registry.cs" />
-    <Compile Include="Tasks\ContextGenerators\ReceivingInvoiceContextGenerator.cs" />
-    <Compile Include="Tasks\ReceivingInvoicesTasks\CreateInvoiceTask.cs" />
-    <Compile Include="Tasks\ReceivingInvoicesTasks\FindInvoiceTask.cs" />
-    <Compile Include="Tasks\ReceivingInvoicesTasks\PopulateInvoiceItemTask.cs" />
-    <Compile Include="Tasks\ReceivingInvoicesTasks\PopulateInvoiceTask.cs" />
-    <Compile Include="Tasks\ReceivingInvoicesTasks\SaveInvoiceTask.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

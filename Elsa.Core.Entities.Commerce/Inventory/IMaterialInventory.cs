@@ -29,5 +29,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         int? AllowedUnitId { get; set; }
         IMaterialUnit AllowedUnit { get; }
+
+        [NVarchar(300, true)]
+        string ReceivingInvoiceFormGeneratorName { get; set; }
     }
 }

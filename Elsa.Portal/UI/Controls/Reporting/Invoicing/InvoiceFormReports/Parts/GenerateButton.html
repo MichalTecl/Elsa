@@ -1,0 +1,11 @@
+﻿<div id="gbui">
+    <button data-bind="class.hidden:collection.IsGenerated" event-bind="click:requestGeneration">Vygenerovat</button>
+    <button data-bind="class!.hidden:collection.CanDelete" event-bind="click:requestGeneration">Vygenerovat znovu</button>
+</div>
+<script>
+    lt.element("gbui").attach(function() {
+        this.requestGeneration = function() {
+            app.invoiceReporting.vm.requestGeneration();
+        };
+    });
+</script>

@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Logging;
 using Elsa.Common.SysCounters;
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Invoicing.Core.Contract;
+using Elsa.Invoicing.Core.Internal;
 
 using Robowire.RobOrm.Core;
 
@@ -19,13 +22,15 @@ namespace Elsa.Invoicing.Core.Data
         private readonly ISession m_session;
         private readonly ICache m_cache;
         private readonly ISysCountersManager m_countersManager;
+        private readonly ILog m_log;
         
-        public InvoiceFormRepository(IDatabase database, ISession session, ICache cache, ISysCountersManager countersManager)
+        public InvoiceFormRepository(IDatabase database, ISession session, ICache cache, ISysCountersManager countersManager, ILog log)
         {
             m_database = database;
             m_session = session;
             m_cache = cache;
             m_countersManager = countersManager;
+            m_log = log;
         }
 
         public IEnumerable<IInvoiceFormType> GetInvoiceFormTypes()
@@ -188,6 +193,170 @@ namespace Elsa.Invoicing.Core.Data
         public IInvoiceForm GetInvoiceFormById(int id)
         {
             return GetInvoiceQuery().Where(i => i.Id == id).Execute().FirstOrDefault();
+        }
+
+        public IInvoiceFormGenerationLog AddEvent(int collectionId, string message, bool warning, bool error)
+        {
+            var entry = m_database.New<IInvoiceFormGenerationLog>(e =>
+            {
+                e.InvoiceFormCollectionId = collectionId;
+                e.EventDt = DateTime.Now;
+                e.IsError = error;
+                e.IsWarning = warning;
+                e.Message = message;
+            });
+
+            m_database.Save(entry);
+
+            return entry;
+        }
+
+        public IInvoiceForm NewForm(Action<IInvoiceForm> setup)
+        {
+            var form = m_database.New<IInvoiceForm>();
+            form.ProjectId = m_session.Project.Id;
+
+            setup(form);
+
+            m_database.Save(form);
+
+            return form;
+        }
+
+        public IInvoiceFormItem NewItem(IInvoiceForm form, int materialBatchId, Action<IInvoiceFormItem> setup)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var item = m_database.New<IInvoiceFormItem>();
+                item.InvoiceFormId = form.Id;
+
+                setup(item);
+
+                m_database.Save(item);
+
+                var bridge = m_database.New<IInvoiceFormItemMaterialBatch>();
+                bridge.MaterialBatchId = materialBatchId;
+                bridge.InvoiceFormItemId = item.Id;
+
+                m_database.Save(bridge);
+
+                tx.Commit();
+
+                return item;
+            }
+        }
+
+        public IInvoiceFormGenerationContext StartGeneration(string contextName, int year, int month, int invoiceformTypeId)
+        {
+            var collection = m_database.New<IInvoiceFormCollection>();
+            collection.GenerateUserId = m_session.User.Id;
+            collection.Name = contextName;
+            collection.Year = year;
+            collection.Month = month;
+            collection.InvoiceFormTypeId = invoiceformTypeId;
+            collection.ProjectId = m_session.Project.Id;
+
+            m_database.Save(collection);
+
+            return new InvoiceFormsGenerationContext(m_log, this,  collection.Id);
+        }
+
+        public IInvoiceFormCollection GetCollectionByMaterialBatchId(int batchId)
+        {
+            return m_database.SelectFrom<IInvoiceFormItemMaterialBatch>()
+                .Join(b => b.InvoiceFormItem)
+                .Join(b => b.InvoiceFormItem.InvoiceForm)
+                .Join(b => b.InvoiceFormItem.InvoiceForm.InvoiceFormCollection)
+                .Where(b => b.MaterialBatchId == batchId)
+                .Execute().FirstOrDefault()?.InvoiceFormItem?.InvoiceForm?.InvoiceFormCollection;
+        }
+
+        public IInvoiceFormCollection GetCollectionById(int collectionId)
+        {
+            return GetCollectionsQuery()
+                .Where(c => c.Id == collectionId)
+                .Execute()
+                .FirstOrDefault();
+        }
+
+        public IInvoiceFormCollection FindCollection(int invoiceFormTypeId, int year, int month)
+        {
+            return GetCollectionsQuery().Where(c => c.InvoiceFormTypeId == invoiceFormTypeId)
+                .Where(c => (c.Year == year) && (c.Month == month)).Execute().FirstOrDefault();
+        }
+
+        public void DeleteCollection(int existingCollectionId)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var collection = GetCollectionById(existingCollectionId);
+                if (collection == null)
+                {
+                    throw new InvalidOperationException("Invalid entity reference");
+                }
+
+                m_database.DeleteAll(collection.Log);
+
+                foreach (var form in collection.Forms)
+                {
+                    foreach (var item in form.Items)
+                    {
+                        m_database.DeleteAll(item.Batches);
+                        m_database.Delete(item);
+                    }
+                    m_database.Delete(form);
+                }
+
+                m_database.Delete(collection);
+
+                tx.Commit();
+            }
+        }
+
+        public void ApproveLogWarnings(List<int> ids)
+        {
+            if (ids == null)
+            {
+                throw new InvalidOperationException("No ids received");
+            }
+
+            using (var tx = m_database.OpenTransaction())
+            {
+
+                var warns = m_database.SelectFrom<IInvoiceFormGenerationLog>()
+                    .Join(l => l.InvoiceFormCollection)
+                    .Where(l => l.InvoiceFormCollection.ProjectId == m_session.Project.Id)
+                    .Where(l => l.Id.InCsv(ids)).Execute().ToList();
+
+                foreach (var item in warns)
+                {
+                    item.ApproveDt = DateTime.Now;
+                    item.ApproveUserId = m_session.User.Id;
+                }
+
+                m_database.SaveAll(warns);
+
+                tx.Commit();
+            }
+        }
+
+        private IQueryBuilder<IInvoiceFormCollection> GetCollectionsQuery()
+        {
+            return m_database.SelectFrom<IInvoiceFormCollection>()
+                .Join(c => c.GenerateUser)
+                .Join(c => c.ApproveUser)
+                .Join(c => c.Forms)
+                .Join(c => c.Forms.Each().FormType)
+                .Join(c => c.Forms.Each().CancelUser)
+                .Join(c => c.Forms.Each().Supplier)
+                .Join(c => c.Forms.Each().MaterialInventory)
+                .Join(c => c.Forms.Each().Items)
+                .Join(c => c.Forms.Each().Items.Each().Conversion)
+                .Join(c => c.Forms.Each().Items.Each().SourceCurrency)
+                .Join(c => c.Forms.Each().Items.Each().Unit)
+                .Join(c => c.Forms.Each().Items.Each().Batches)
+                .Join(c => c.Log)
+                .Where(c => c.ProjectId == m_session.Project.Id);
         }
 
         private IQueryBuilder<IInvoiceForm> GetInvoiceQuery()

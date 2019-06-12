@@ -25,7 +25,7 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         [NVarchar(100, true)]
         string InvoiceVarSymbol { get; set; }
 
-        [NVarchar(100, false)]
+        [NVarchar(100, true)]
         string InvoiceFormNumber { get; set; }
 
         int FormTypeId { get; set; }
@@ -48,5 +48,8 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         IMaterialInventory MaterialInventory { get; }
 
         IEnumerable<IInvoiceFormItem> Items { get; }
+
+        int InvoiceFormCollectionId { get; set; }
+        IInvoiceFormCollection InvoiceFormCollection { get; }
     }
 }

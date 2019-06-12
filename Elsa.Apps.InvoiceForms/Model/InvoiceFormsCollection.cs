@@ -19,5 +19,17 @@ namespace Elsa.Apps.InvoiceForms.Model
         public string TotalPriceFormatted { get; set; }
         
         public List<T> Forms { get; } = new List<T>();
+
+        public List<GenerationInfoModel> Log { get; } = new List<GenerationInfoModel>();
+
+        public bool CanApprove { get; set; }
+
+        public bool CanGenerate { get; set; }
+
+        public bool CanDelete { get; set; }
+
+        public bool IsGenerated { get; set; }
+
+        public bool IsApproved { get; set; }
     }
 }

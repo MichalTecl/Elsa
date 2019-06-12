@@ -74,6 +74,7 @@
     <Compile Include="IKitProductRepository.cs" />
     <Compile Include="IUserRepository.cs" />
     <Compile Include="Model\BatchEventAmountSuggestions.cs" />
+    <Compile Include="Model\BatchPriceInfo.cs" />
     <Compile Include="Model\BatchReporting\BatchOrderModel.cs" />
     <Compile Include="Model\BatchReporting\BatchOrdersReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchProductionStepReportEntry.cs" />

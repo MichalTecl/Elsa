@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Web.Mvc;
 using System.Web.Routing;
 
@@ -19,6 +20,8 @@ namespace Elsa.Portal
 
         protected void Application_Start(object sender, EventArgs e)
         {
+            Debug.WriteLine("Starting routes registration");
+
             RouteTable.Routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             RouteTable.Routes.MapRoute(
@@ -26,8 +29,13 @@ namespace Elsa.Portal
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional });
 
-            DiSetup.SetupContainer(m_container, new FileLogWriter("Frontend"));
+            Debug.WriteLine("Routes registration done");
 
+            Debug.WriteLine("Setting up the container");
+            DiSetup.SetupContainer(m_container, new FileLogWriter("Frontend"));
+            Debug.WriteLine("Container set up");
+
+            Debug.WriteLine("Initializing RoboApi");
             var installer = new RoboApiInstaller();
             installer.Install(
                 ControllerBuilder.Current,
@@ -40,7 +48,9 @@ namespace Elsa.Portal
                 typeof(ElsaControllerBase).Assembly,
                 typeof(ProfileController).Assembly,
                 typeof(UserController).Assembly);
+            Debug.WriteLine("RoboApi initialized");
 
+            Debug.WriteLine("Loading startup jobs");
             using (var startupJobsLocator = m_container.GetLocator())
             {
                 var jobs = startupJobsLocator.GetCollection<IStartupJob>();
@@ -68,6 +78,8 @@ namespace Elsa.Portal
                 }
                 logger.Info("Startup jobs done");
             }
+
+            Debug.WriteLine("Application startup complete");
         }
 
         protected void Session_Start(object sender, EventArgs e)
