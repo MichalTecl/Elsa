@@ -46,7 +46,11 @@ namespace Elsa.Apps.InvoiceForms.Facade
             
             var homeUrl = m_session.Project.HomeUrl ?? "Project.HomeUrl";
 
-            var collection = new InvoiceFormsCollection<T>();
+            var collection = new InvoiceFormsCollection<T>()
+            {
+                Id = coll.Id
+            };
+
             foreach (var form in coll.Forms)
             {
                 var itemModel = itemMapper(form);
@@ -79,8 +83,12 @@ namespace Elsa.Apps.InvoiceForms.Facade
             collection.IsGenerated = true;
             collection.IsApproved = (coll.ApproveDt != null);
             collection.CanDelete = !collection.IsApproved;
-
+            
             GroupLogEntries(coll.Log, collection.Log);
+
+            collection.HasWarnings = collection.Log.Any(l => l.IsWarning);
+            collection.HasErrors = collection.Log.Any(l => l.IsError);
+            collection.NeedsAttention = (!collection.IsApproved) && (collection.HasWarnings || collection.HasErrors);
 
             return collection;
         }

@@ -84,6 +84,11 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
                     }
                 }
 
+                if (context.CountForms() == 0)
+                {
+                    context.Error($"Nebyla vygenerována žádná příjemka");
+                }
+
                 tx.Commit();
 
                 return context;

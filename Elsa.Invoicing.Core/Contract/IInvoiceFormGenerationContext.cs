@@ -31,5 +31,7 @@ namespace Elsa.Invoicing.Core.Contract
         IInvoiceFormItem NewFormItem(IInvoiceForm form, IMaterialBatch batch, Action<IInvoiceFormItem> setup);
 
         void AutoApproveWarnings(HashSet<string> preapprovedMessages);
+
+        int CountForms();
     }
 }

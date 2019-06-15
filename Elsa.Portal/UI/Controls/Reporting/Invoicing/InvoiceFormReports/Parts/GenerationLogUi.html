@@ -1,36 +1,91 @@
 ﻿<div id="glgui">
     <div class="glActions">
-
+        <button data-bind="class!.hidden:collection.CanApprove" event-bind="click:approveCollection">Schválit</button>
     </div>
     <div class="glLogContainer">
-        <div data-bind="itemsSource:collection.Log" data-key="Id">
-            <div class="lt-template glLogRow" >
-                <div class="stackLeft">
+        <div class="stackLeft logExpanderTitleContainer">
+            <div class="expanderCont">
+                <i class="far fa-plus-square faButton" lt-name="butExpand" event-bind="click:toggleExpansion"></i>
+                <i class="far fa-minus-square faButton" lt-name="butCollapse" event-bind="click:toggleExpansion"></i>
+            </div>
+            <div class="logExpanderTitle">Report generátoru</div>
+            <div class="logOverallStatusCont">
+                <i lt-name="icoStatus"></i>
+            </div>
+        </div>
+        <div lt-name="expansionContainer" class="logExpandContainer">
+            <div data-bind="itemsSource:collection.Log" data-key="Id">
+                <div class="lt-template glLogRow">
+                    <div class="stackLeft">
 
-                    <div class="glItemStatus">
-                        <i class="fas fa-exclamation-circle icoError" data-bind="class!.hidden:IsError"></i>
-                        <i class="fas fa-exclamation-triangle icoWarning" data-bind="class!.hidden:IsWarning"></i>
-                        <span data-bind="class.hidden:IsError">
-                            <span data-bind="class.hidden:IsWarning">
-                                <i class="far fa-check-circle icoOk"></i>
+                        <div class="glItemStatus">
+                            <i class="fas fa-exclamation-circle icoError" data-bind="class!.hidden:IsError"></i>
+                            <i class="fas fa-exclamation-triangle icoWarning" data-bind="class!.hidden:IsWarning;class.icoWarningApproved:IsApproved"></i>
+                            <span data-bind="class.hidden:IsError">
+                                <span data-bind="class.hidden:IsWarning">
+                                    <i class="far fa-check-circle icoOk"></i>
+                                </span>
                             </span>
-                        </span>
-                    </div>
-                    
-                    <div class="glItemText" data-bind="text:Message"></div>
-                    
-                    <div class="glItemAction">
-                        <i class="far fa-check-circle faButton icoApprove" data-bind="class!.hidden:CanApprove" event-bind="click:approve(GroupedRecords)"></i>
-                    </div>
+                        </div>
 
+                        <div class="glItemText" data-bind="text:Message"></div>
+
+                        <div class="glItemAction">
+                            <i class="far fa-check-circle faButton icoApprove" data-bind="class!.hidden:CanApprove" event-bind="click:approve(GroupedRecords)"></i>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 <script>
-    lt.element("glgui").withModel("app.invoiceReporting.vm").attach(function() {
-        this.bind(function(collection) {
+    lt.element("glgui").withModel("app.invoiceReporting.vm").attach(function(butExpand, butCollapse, expansionContainer, icoStatus) {
+
+        var isExpanded = true;
+
+        var icons = [
+            {
+                //OK
+                eva: function(entry) { return true; },
+                cls: "far fa-check-circle icoOk"
+            },
+            {
+                //Warn Approved
+                eva: function(entry) { return entry.IsWarning && entry.IsApproved; },
+                cls: "far fa-check-circle icoOk"
+            },
+            {
+                // Warn
+                eva: function (entry) { return entry.IsWarning && (!entry.IsApproved); },
+                cls: "fas fa-exclamation-triangle icoWarning"
+            },
+            {
+                // Error
+                eva: function(entry) { return entry.IsError; },
+                cls: "fas fa-exclamation-circle icoError"
+            }
+        ];
+        
+        var setExpansion = function(value) {
+
+            if (value) {
+                butExpand.style.display = 'none';
+                butCollapse.style.display = 'block';
+                expansionContainer.style.display = 'block';
+            } else {
+                butExpand.style.display = 'block';
+                butCollapse.style.display = 'none';
+                expansionContainer.style.display = 'none';
+            }
+
+            isExpanded = value;
+        };
+
+        setExpansion(isExpanded);
+
+        this.bind(function (collection) {
 
             if ((!collection) || (!collection.IsGenerated) || (collection.IsApproved)) {
                 this.style.display = 'none';
@@ -38,12 +93,38 @@
                 this.style.display = 'block';
             }
 
+            if (collection) {
+                setExpansion(collection.NeedsAttention);
 
+                var status = 0;
+
+                for (var i = 0; i < collection.Log.length; i++) {
+                    var entry = collection.Log[i];
+
+                    for (var j = status; j < icons.length; j++) {
+                        var icObj = icons[j];
+
+                        if (icObj.eva(entry)) {
+                            status = j;
+                        }
+                    }
+                }
+
+                icoStatus.setAttribute("class", icons[status].cls);
+            }
 
         }).collectionCanBeNull();
 
         this.approve = function(ids) {
             app.invoiceReporting.vm.approveWarnings(ids);
+        };
+
+        this.approveCollection = function() {
+            app.invoiceReporting.vm.approveCollection();
+        };
+
+        this.toggleExpansion = function() {
+            setExpansion(!isExpanded);
         };
     });
 </script>

@@ -17,19 +17,19 @@
 <body>
     <script src="../../Controls/Common/AutoSuggest.js"></script>
     <div replace-by="/UI/Widgets/User/UserWidget.html"></div>
-  
+
 
     <div class="panel w4" id="mainTab">
 
     </div>
 
     <script>
-        
-        lt.element("mainTab").withModel("app.invoiceReporting.vm").attach(function() {
+
+        lt.element("mainTab").withModel("app.invoiceReporting.vm").attach(function () {
 
             var tab = new app.ui.TabControl(this);
 
-            this.bind(function(invoiceReportTypes) {
+            this.bind(function (invoiceReportTypes) {
 
                 for (var i = 0; i < invoiceReportTypes.length; i++) {
                     var reportType = invoiceReportTypes[i];
@@ -43,9 +43,12 @@
         });
 
     </script>
-    
 
-    
-<div replace-by="/UI/Controls/Common/BusyOverlay.html"></div>
+
+
+    <div replace-by="/UI/Controls/Common/BusyOverlay.html"></div>
+
+
+    <link href="/UI/Controls/Reporting/Invoicing/InvoiceFormReports/InvoiceFormReports.css" rel="stylesheet" />
 </body>
 </html>

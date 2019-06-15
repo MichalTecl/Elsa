@@ -18,6 +18,7 @@ namespace Elsa.Apps.InvoiceForms.Model
             IsWarning = log.IsWarning;
             Message = log.Message;
             CanApprove = log.IsWarning && (log.ApproveDt == null);
+            IsApproved = log.ApproveDt != null;
         }
 
         public int Id { get; }
@@ -27,6 +28,8 @@ namespace Elsa.Apps.InvoiceForms.Model
         public bool IsError { get; }
 
         public bool IsWarning { get; }
+
+        public bool IsApproved { get; }
 
         public bool CanApprove { get; }
 

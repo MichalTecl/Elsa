@@ -77,6 +77,18 @@ app.invoiceReporting.ViewModel = app.invoiceReporting.ViewModel || function() {
             load();
         });
     };
+
+    self.deleteCollection = function() {
+        lt.api("/invoiceForms/deleteCollection").query({ "id": self.collection.Id }).get(function() {
+            load();
+        });
+    };
+
+    self.approveCollection = function() {
+        lt.api("/invoiceForms/approveCollection").query({ "id": self.collection.Id }).get(function () {
+            load();
+        });
+    };
 };
 
 app.invoiceReporting.vm = app.invoiceReporting.vm || new app.invoiceReporting.ViewModel();

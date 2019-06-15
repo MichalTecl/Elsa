@@ -5,7 +5,7 @@
         <div fill-by="/UI/Controls/Reporting/Invoicing/InvoiceFormReports/Parts/GenerationLogUi.html"></div>
     </div>
     <div id="reportBody" xsheet="report">
-        <div class="rirHead" data-bind="class!.hidden:IsApproved">
+        <div class="rirHead" data-bind="class!.hidden:collection.IsApproved">
             <i class="far fa-file-excel faButton" event-bind="click:download"></i>
         </div>
         <div class="rirBody" lt-name="reportBody">

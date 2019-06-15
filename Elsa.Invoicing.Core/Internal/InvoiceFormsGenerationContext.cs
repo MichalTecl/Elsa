@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 using Elsa.Common.Logging;
@@ -16,7 +17,7 @@ namespace Elsa.Invoicing.Core.Internal
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
         private readonly int m_collectionId;
         private HashSet<string> m_preapprovedWarnings = new HashSet<string>();
-
+        
         public InvoiceFormsGenerationContext(ILog log, IInvoiceFormsRepository invoiceFormsRepository, int collectionId)
         {
             m_log = log;
@@ -88,6 +89,13 @@ namespace Elsa.Invoicing.Core.Internal
         public void AutoApproveWarnings(HashSet<string> preapprovedMessages)
         {
             m_preapprovedWarnings = preapprovedMessages;
+        }
+
+        public int CountForms()
+        {
+            var coll = m_invoiceFormsRepository.GetCollectionById(m_collectionId);
+
+            return coll?.Forms.Count() ?? 0;
         }
     }
 }

@@ -44,5 +44,7 @@ namespace Elsa.Invoicing.Core.Data
         void DeleteCollection(int existingCollectionId);
 
         void ApproveLogWarnings(List<int> ids);
+
+        void ApproveCollection(int id);
     }
 }

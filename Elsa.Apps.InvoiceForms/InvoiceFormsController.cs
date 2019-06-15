@@ -114,5 +114,15 @@ namespace Elsa.Apps.InvoiceForms
         {
             m_invoiceFormsRepository.ApproveLogWarnings(ids);
         }
+
+        public void DeleteCollection(int id)
+        {
+            m_invoiceFormsRepository.DeleteCollection(id);
+        }
+
+        public void ApproveCollection(int id)
+        {
+            m_invoiceFormsRepository.ApproveCollection(id);
+        }
     }
 }

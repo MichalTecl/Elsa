@@ -295,6 +295,11 @@ namespace Elsa.Invoicing.Core.Data
                     throw new InvalidOperationException("Invalid entity reference");
                 }
 
+                if ((collection.ApproveDt != null) || (collection.ApproveUserId != null))
+                {
+                    throw new InvalidOperationException("Soupiska jiz byla schvalena");
+                }
+
                 m_database.DeleteAll(collection.Log);
 
                 foreach (var form in collection.Forms)
@@ -335,6 +340,47 @@ namespace Elsa.Invoicing.Core.Data
                 }
 
                 m_database.SaveAll(warns);
+
+                tx.Commit();
+            }
+        }
+
+        public void ApproveCollection(int id)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var collection = GetCollectionById(id);
+                if (collection == null)
+                {
+                    throw new InvalidOperationException("Invalid entity reference");
+                }
+
+                if ((collection.ApproveDt != null) || (collection.ApproveUserId != null))
+                {
+                    throw new InvalidOperationException("Soupiska jiz byla schvalena");
+                }
+
+                if ((collection.Log.Any(e => e.IsError || (e.IsWarning && (e.ApproveUserId == null)))))
+                {
+                    throw new InvalidOperationException("Soupisku nelze schvalit, protoze ma neschvalena varovani nebo chyby");
+                }
+
+                foreach (var form in collection.Forms)
+                {
+                    if (form.FormType?.SystemCounterId == null)
+                    {
+                        throw new InvalidOperationException("SyastemCounter not set");
+                    }
+
+                    m_countersManager.WithCounter(form.FormType.SystemCounterId.Value, nv => form.InvoiceFormNumber = nv);
+                    
+                    m_database.Save(form);
+                }
+
+                collection.ApproveDt = DateTime.Now;
+                collection.ApproveUserId = m_session.User.Id;
+                
+                m_database.Save(collection);
 
                 tx.Commit();
             }

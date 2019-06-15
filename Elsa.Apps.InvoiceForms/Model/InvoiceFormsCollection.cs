@@ -8,6 +8,8 @@ namespace Elsa.Apps.InvoiceForms.Model
 {
     public class InvoiceFormsCollection<T>
     {
+        public int? Id { get; set; }
+
         public string Title { get; set; }
 
         public int? Month { get; set; }
@@ -31,5 +33,11 @@ namespace Elsa.Apps.InvoiceForms.Model
         public bool IsGenerated { get; set; }
 
         public bool IsApproved { get; set; }
+
+        public bool NeedsAttention { get; set; }
+
+        public bool HasErrors { get; set; }
+
+        public bool HasWarnings { get; set; }
     }
 }

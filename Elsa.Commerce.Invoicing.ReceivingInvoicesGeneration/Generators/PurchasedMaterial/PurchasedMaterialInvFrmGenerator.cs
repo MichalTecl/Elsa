@@ -50,7 +50,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.Purchas
                     StringComparison.InvariantCultureIgnoreCase),
                 (reference, candidate, log) =>
                 {
-                    log.Warning($"Šarže \"{reference.GetTextInfo()}\" a \"{candidate.GetTextInfo()}\" mají stejné číslo faktury, ale rozdínlý variabilní symbol - nemohou být sloučeny do jedné příjemky");
+                    log.Warning($"Šarže \"{reference.GetTextInfo()}\" a \"{candidate.GetTextInfo()}\" mají stejné číslo faktury, ale rozdílný variabilní symbol - nemohou být sloučeny do jedné příjemky");
                 });
 
             m_batchesGrouping.AddValidator((b, l) =>
