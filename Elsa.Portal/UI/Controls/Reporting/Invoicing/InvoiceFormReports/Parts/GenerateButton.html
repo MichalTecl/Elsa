@@ -1,7 +1,7 @@
 ﻿<div id="gbui">
-    <button data-bind="class.hidden:collection.IsGenerated" event-bind="click:requestGeneration">Vygenerovat</button>
-    <button data-bind="class!.hidden:collection.CanDelete" event-bind="click:requestGeneration">Vygenerovat znovu</button>
-    <button data-bind="class!.hidden:collection.CanDelete" event-bind="click:deleteCollection">Smazat</button>
+    <button data-bind="class.hidden:collection.IsGenerated" event-bind="click:requestGeneration" title="Spustit generování"><i class="fas fa-rocket"></i></button>
+    <button data-bind="class!.hidden:collection.CanDelete" event-bind="click:requestGeneration" title="Generovat znovu"><i class="fas fa-sync"></i></button>
+    <button data-bind="class!.hidden:collection.CanDelete" event-bind="click:deleteCollection" title="Vymazat"><i class="far fa-trash-alt"></i></button>
 </div>
 <script>
     lt.element("gbui").attach(function() {

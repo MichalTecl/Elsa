@@ -26,13 +26,12 @@
                                     <i class="far fa-check-circle icoOk"></i>
                                 </span>
                             </span>
+                            <div class="glItemAction">
+                                <button  data-bind="class!.hidden:CanApprove" event-bind="click:approve(GroupedRecords)"><i class="far fa-check-circle faButton icoApprove"></i></button>
+                            </div>
                         </div>
 
                         <div class="glItemText" data-bind="text:Message"></div>
-
-                        <div class="glItemAction">
-                            <i class="far fa-check-circle faButton icoApprove" data-bind="class!.hidden:CanApprove" event-bind="click:approve(GroupedRecords)"></i>
-                        </div>
 
                     </div>
                 </div>

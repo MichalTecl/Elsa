@@ -1,4 +1,5 @@
-﻿.icoOk {
+﻿
+.icoOk {
     color: #3333AA;
 }
 
@@ -12,4 +13,69 @@
 
 .icoError {
     color: #FF0000;
+}
+
+.tabPanelContentPanel {
+    padding: 6px;
+}
+
+#gbui button {
+    margin-top: 10px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+}
+
+#glgui .glActions button {
+}
+
+.glLogContainer {
+    padding: 5px;
+    padding-top: 10px;
+}
+
+.logExpanderTitleContainer {
+    font-weight: bold;
+}
+
+.logExpanderTitleContainer .expanderCont {
+    margin-right: 4px;
+}
+
+.logExpanderTitleContainer .logOverallStatusCont {
+    padding-left: 4px;
+}
+
+#glgui .logExpandContainer {
+    margin: 5px;
+    margin-left: 20px;
+}
+
+.glLogRow {
+    border-bottom: 1px solid #eee;
+    min-height: 30px;
+}
+
+.glLogRow .glItemStatus {
+    border-right: 1px solid #eee;
+    padding: 4px;
+}
+
+.glLogRow .glItemStatus > * {
+    display: inline;
+    float: none;
+}
+
+.glLogRow .glItemText {
+    padding-left: 5px;
+}
+
+.rirHead {
+    background-color: #efefef;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.rirHead > i {
+    font-size: 2em;
 }
