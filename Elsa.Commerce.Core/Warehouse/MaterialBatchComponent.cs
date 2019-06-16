@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
@@ -11,6 +12,8 @@ namespace Elsa.Commerce.Core.Warehouse
 {
     public class MaterialBatchComponent
     {
+        private readonly object m_priceLock = new object();
+
         public MaterialBatchComponent(IMaterialBatch batch)
         {
             Batch = batch;

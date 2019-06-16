@@ -25,6 +25,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         bool? RequirePriceDefault { get; set; } 
 
+        bool? IncludesFixedCosts { get; set; }
+
         bool CanBeConnectedToTag { get; set; }
 
         int? AllowedUnitId { get; set; }

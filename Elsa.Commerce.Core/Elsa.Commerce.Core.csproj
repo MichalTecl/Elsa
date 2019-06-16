@@ -74,7 +74,8 @@
     <Compile Include="IKitProductRepository.cs" />
     <Compile Include="IUserRepository.cs" />
     <Compile Include="Model\BatchEventAmountSuggestions.cs" />
-    <Compile Include="Model\BatchPriceInfo.cs" />
+    <Compile Include="Model\BatchPriceExpl\BatchAccountingDate.cs" />
+    <Compile Include="Model\BatchPriceExpl\BatchPrice.cs" />
     <Compile Include="Model\BatchReporting\BatchOrderModel.cs" />
     <Compile Include="Model\BatchReporting\BatchOrdersReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchProductionStepReportEntry.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="Model\MaterialBatchResolutionModel.cs" />
     <Compile Include="Model\MaterialLevelModel.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
+    <Compile Include="Model\ProductionSteps\BatchStepProgressInfo.cs" />
     <Compile Include="Model\ProductionStepViewModel.cs" />
     <Compile Include="Production\IProductionFacade.cs" />
     <Compile Include="Production\Model\ProductionBatchComponentModel.cs" />

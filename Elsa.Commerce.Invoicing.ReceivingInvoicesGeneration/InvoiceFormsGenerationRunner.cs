@@ -63,7 +63,10 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
                     m_invoiceFormsRepository.DeleteCollection(existingCollection.Id);
                 }
 
-                var context = m_invoiceFormsRepository.StartGeneration($"{month.ToString().PadLeft(2, '0')}/{year}", year, month, formTypeId);
+                var context = m_invoiceFormsRepository.StartGeneration($"{month.ToString().PadLeft(2, '0')}/{year}",
+                    year,
+                    month,
+                    formTypeId);
                 context.AutoApproveWarnings(preapprovedMessages);
 
                 foreach (var inventory in m_materialRepository.GetMaterialInventories())

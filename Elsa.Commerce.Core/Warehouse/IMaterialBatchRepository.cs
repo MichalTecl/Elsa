@@ -54,5 +54,9 @@ namespace Elsa.Commerce.Core.Warehouse
         int? GetBatchIdByNumber(int materialId, string batchNumber);
 
         IEnumerable<int> QueryBatchIds(Action<IQueryBuilder<IMaterialBatch>> customize);
+
+        IEnumerable<IMaterialBatch> QueryBatches(Action<IQueryBuilder<IMaterialBatch>> customize);
+
+        MaterialBatchComponent UpdateBatch(int id, Action<IMaterialBatchEditables> edit);
     }
 }

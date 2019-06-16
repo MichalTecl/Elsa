@@ -53,7 +53,7 @@ namespace Elsa.Common
 
         public override string ToString()
         {
-            return $"{StringUtil.FormatDecimal(Value)} {Unit.Symbol}";
+            return $"{StringUtil.FormatDecimal(Value)}{Unit.Symbol}";
         }
 
         public Amount Clone()

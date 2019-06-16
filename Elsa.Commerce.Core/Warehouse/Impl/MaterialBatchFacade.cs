@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.Model.BatchPriceExpl;
+using Elsa.Commerce.Core.Model.ProductionSteps;
+using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -15,6 +19,7 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
+using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
@@ -40,6 +45,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IUnitRepository m_unitRepository;
         private readonly IStockEventRepository m_stockEventRepository;
         private readonly ISession m_session;
+        private readonly IFixedCostRepository m_fixedCostRepository;
 
         public MaterialBatchFacade(
             ILog log,
@@ -57,7 +63,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             IMaterialRepository materialRepository,
             IUnitRepository unitRepository,
             IStockEventRepository stockEventRepository,
-            ISession session)
+            ISession session,
+            IFixedCostRepository fixedCostRepository)
         {
             m_log = log;
             m_virtualProductFacade = virtualProductFacade;
@@ -75,6 +82,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_unitRepository = unitRepository;
             m_stockEventRepository = stockEventRepository;
             m_session = session;
+            m_fixedCostRepository = fixedCostRepository;
         }
 
         public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity)
@@ -667,36 +675,79 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return ids.Select(id => m_batchRepository.GetBatchById(id).Batch);
         }
 
-        public IEnumerable<IMaterialBatch> FindBatches(int inventoryId, DateTime @from, DateTime to)
+        public IEnumerable<IMaterialBatch> FindNotClosedBatches(int inventoryId, DateTime @from, DateTime to, Func<IMaterialBatch, bool> filter = null)
         {
             return m_batchRepository
-                .QueryBatchIds(q =>
+                .QueryBatches(q =>
                     q.Join(b => b.Material).Where(b => b.Material.InventoryId == inventoryId)
-                        .Where(b => (b.Created >= @from) && (b.Created <= to)))
-                .Select(b => m_batchRepository.GetBatchById(b).Batch);
+                        .Where(b => (b.Created >= @from) && (b.Created <= to)).Where(b => b.CloseDt == null)).Where(b => filter?.Invoke(b) != false)
+                .Select(b => m_batchRepository.GetBatchById(b.Id).Batch);
         }
 
-        public BatchPriceInfo CalculateBatchPrice(int batchId)
+        public IEnumerable<BatchStepProgressInfo> GetProductionStepsProgress(IMaterialBatch batch)
         {
-            var batch = m_batchRepository.GetBatchById(batchId);
-            if (batch == null)
-            {
-                throw new InvalidOperationException("Invalid entity reference");
-            }
+            var material = m_materialRepository.GetMaterialById(batch.MaterialId);
 
-            if (batch.Components.Count == 0)
-            {
-                return new BatchPriceInfo(batch.Batch.Price, batch.Batch.PriceConversion?.SourceValue, batch.Batch.PriceConversion);
-            }
+            var requiredAmount = m_conversionHelper.ConvertAmount(new Amount(batch), material.NominalUnit.Id);
 
-            throw new NotImplementedException("TODO");
+
+            var allPerformedSteps = batch.PerformedSteps.ToList();
+
+            foreach (var materialProductionStep in m_materialRepository.GetMaterialProductionSteps(batch.MaterialId).Ordered())
+            {
+                var performed = allPerformedSteps.Where(s => s.StepId == materialProductionStep.Id).ToList();
+                var totalProduced = new Amount(performed.Sum(s => s.ProducedAmount), requiredAmount.Unit);
+
+                yield return new BatchStepProgressInfo(materialProductionStep, requiredAmount, totalProduced, performed);
+            }
         }
 
+        public BatchAccountingDate GetBatchAccountingDate(IMaterialBatch batch)
+        {
+            if (batch.FinalAccountingDate != null)
+            {
+                return new BatchAccountingDate(batch.FinalAccountingDate.Value);
+            }
+
+            var d = batch.Created;
+            var sb = new StringBuilder();
+
+            var batchAmount = new Amount(batch);
+            
+            foreach (var step in GetProductionStepsProgress(batch))
+            {
+                var maxDt = step.PerformedSteps.Max(s => s.ConfirmDt);
+                if (maxDt > d)
+                {
+                    d = maxDt;
+                }
+
+                var reminingAmount = m_amountProcessor.Subtract(step.RequiredAmount, step.TotalProducedAmount);
+                if (reminingAmount.IsPositive)
+                {
+                    sb.AppendLine($"Zbývá {reminingAmount} {step.RequiredStep.Name}");
+                }
+            }
+
+            if (sb.Length == 0)
+            {
+                m_batchRepository.UpdateBatch(batch.Id, b => b.FinalAccountingDate = d);
+                return new BatchAccountingDate(d);
+            }
+
+            return new BatchAccountingDate(d, false, sb.ToString());
+        }
+        
         public IMaterialBatchStatus GetBatchStatus(int batchId)
         {
             return m_cache.ReadThrough(GetBatchAmountCacheKey(batchId),
                 TimeSpan.FromMinutes(10),
                 () => m_batchStatusManager.GetStatus(batchId));
+        }
+
+        public BatchPrice GetBatchPrice(int batchId)
+        {
+            return GetBatchStatus(batchId).Ensure().BatchPrice;
         }
 
         private string GetBatchAmountCacheKey(int batchId)
@@ -860,7 +911,33 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             return result;
         }
-        
+
+        public Tuple<decimal, BatchPrice> GetPriceOfAmount(int batchId, Amount amount)
+        {
+            var batchPrice = GetBatchPrice(batchId);
+
+            var totalAmount = m_conversionHelper.ConvertAmount(new Amount(batchPrice.Batch), amount.Unit.Id);
+            var pricePerUnit = batchPrice.TotalPriceInPrimaryCurrency / totalAmount.Value;
+
+            return new Tuple<decimal, BatchPrice>(pricePerUnit * amount.Value, batchPrice);
+        }
+
+        public Amount GetNumberOfProducedProducts(int accountingDateYear, int accountingDateMonth, int inventoryId)
+        {
+            var allBatches = m_database.SelectFrom<IMaterialBatch>().Join(b => b.Material)
+                .Where(b => b.ProjectId == m_session.Project.Id).Where(b => b.CloseDt == null)
+                .Where(b => b.Material.InventoryId == inventoryId).Execute();
+
+            return m_amountProcessor.Sum(allBatches.Where(b =>
+            {
+                var ad = GetBatchAccountingDate(b);
+                
+                return ad.IsFinal &&
+                       (ad.AccountingDate.Year == accountingDateYear) &&
+                       (ad.AccountingDate.Month == accountingDateMonth);
+            }).Select(b => new Amount(b)));
+        }
+
         #region Nested
         private class DefaultThreshold : IMaterialThreshold
         {

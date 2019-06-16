@@ -7,6 +7,7 @@ using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
@@ -395,6 +396,26 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             customize(qry);
 
             return qry.Execute().Select(b => b.Id).Distinct();
+        }
+
+        public IEnumerable<IMaterialBatch> QueryBatches(Action<IQueryBuilder<IMaterialBatch>> customize)
+        {
+            var qry = m_database.SelectFrom<IMaterialBatch>().Where(b => b.ProjectId == m_session.Project.Id);
+
+            customize(qry);
+
+            return qry.Execute();
+        }
+
+        public MaterialBatchComponent UpdateBatch(int id, Action<IMaterialBatchEditables> edit)
+        {
+            var batch = GetBatchById(id).Ensure();
+
+            edit(batch.Batch);
+
+            m_database.Save(batch.Batch);
+
+            return GetBatchById(id);
         }
 
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()

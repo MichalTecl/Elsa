@@ -6,11 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.Model.BatchPriceExpl;
+using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -34,12 +37,17 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IServiceLocator m_serviceLocator;
         private readonly IMaterialRepository m_materialRepository;
         private readonly IStockEventRepository m_eventRepository;
+        private readonly IFixedCostRepository m_fixedCostRepository;
 
         private IOrdersFacade m_injectedOrdersFacade;
+        private IMaterialBatchFacade m_injectedBatchFacade;
 
         private IOrdersFacade OrdersFacade => m_injectedOrdersFacade ?? (m_injectedOrdersFacade = m_serviceLocator.Get<IOrdersFacade>());
 
-        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator, IMaterialRepository materialRepository, IStockEventRepository eventRepository)
+        private IMaterialBatchFacade BatchFacade =>
+            m_injectedBatchFacade ?? (m_injectedBatchFacade = m_serviceLocator.Get<IMaterialBatchFacade>());
+
+        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator, IMaterialRepository materialRepository, IStockEventRepository eventRepository, IFixedCostRepository fixedCostRepository)
         {
             m_batchRepository = batchRepository;
             m_orderRepository = orderRepository;
@@ -48,6 +56,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_serviceLocator = serviceLocator;
             m_materialRepository = materialRepository;
             m_eventRepository = eventRepository;
+            m_fixedCostRepository = fixedCostRepository;
         }
 
         public IMaterialBatchStatus GetStatus(int batchId)
@@ -67,10 +76,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             PopulateEvents(batchId, model);
             PopulateOrders(batchId, model);
             PopulateCompositions(batchId, model);
-
+            
             var mainBatchAmount = model.CalculateAvailableAmount(m_amountProcessor, filteredProductionStepId);
 
             model.CurrentAvailableAmount = mainBatchAmount;
+
+            model.BatchPrice = CalculateBatchPrice(batch.Batch.Id);
 
             return model;
         }
@@ -103,7 +114,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             model.ResolvedSteps.AddRange(steps);
         }
-       
  
         private void PopulateCompositions(int batchId, BatchStatus model)
         {
@@ -167,6 +177,167 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             var materialSteps = m_materialRepository.GetMaterialProductionSteps(batch.Batch.MaterialId);
 
             model.RequiredSteps.AddRange(materialSteps);
+        }
+        
+        private BatchPrice CalculateBatchPrice(int batchId)
+        {
+            var batch = m_batchRepository.GetBatchById(batchId);
+            if (batch == null)
+            {
+                throw new InvalidOperationException("Invalid entity reference");
+            }
+
+            var result = new BatchPrice(batch.Batch);
+
+            #region Purchase price
+            if (batch.Batch.PriceConversion != null)
+            {
+                var conversion = batch.Batch.PriceConversion;
+                result.AddComponent(false, null, $"Nákupní cena {StringUtil.FormatDecimal(conversion.TargetValue)}CZK <= ({StringUtil.FormatDecimal(conversion.SourceValue)}{conversion.SourceCurrency.Symbol} * {conversion.CurrencyRate.Rate})", conversion.TargetValue);
+            }
+            else if (batch.Batch.Price > 0)
+            {
+                result.AddComponent(false, null, $"Nákupní cena {StringUtil.FormatDecimal(batch.Batch.Price)} CZK", batch.Batch.Price);
+            }
+            #endregion
+
+            #region Production work price
+            if (batch.Batch.ProductionWorkPrice != null)
+            {
+                result.AddComponent(false,
+                    null,
+                    $"Cena práce při výrobě {batch.Batch.ProductionWorkPrice.Value.Display("CZK")}",
+                    batch.Batch.ProductionWorkPrice.Value);
+            }
+            #endregion
+
+            #region Price of components
+            foreach (var component in batch.Components)
+            {
+                var componentUsedAmount = new Amount(component.ComponentAmount, component.ComponentUnit);
+                var componentPrice = BatchFacade.GetPriceOfAmount(component.Batch.Id, componentUsedAmount);
+
+                var priceEntry = result.AddComponent(false,
+                    component.Batch.Id,
+                    $"{StringUtil.FormatDecimal(componentUsedAmount.Value)}{componentUsedAmount.Unit.Symbol} {component.Batch.Material.Name} z šarže {component.Batch.BatchNumber} => {StringUtil.FormatDecimal(componentPrice.Item1)}CZK",
+                    componentPrice.Item1);
+
+                priceEntry.ChildPrices.Add(componentPrice.Item2);
+            }
+            #endregion
+
+            #region Price of production steps
+            foreach (var step in BatchFacade.GetProductionStepsProgress(batch.Batch))
+            {
+                string warn = null;
+
+                if (m_amountProcessor.GreaterThan(step.RequiredAmount, step.TotalProducedAmount))
+                {
+                    warn = " POZOR - nejsou dokončeny všechny výrobní kroky, výpočet ceny není kompletní";
+                }
+
+                if (step.RequiredStep.PricePerUnit == null)
+                {
+                    warn = $" POZOR - krok {step.RequiredStep.Name}{warn}";
+                }
+
+                var stepPrice = (step.RequiredStep.PricePerUnit ?? 0) * step.TotalProducedAmount.Value;
+                result.AddComponent(warn != null,
+                    null,
+                    $"Cena práce na {step.TotalProducedAmount} {step.RequiredStep.Name} => {stepPrice.Display("CZK")}{warn}",
+                    stepPrice);
+
+
+                var amountsOfBatchesUsedInStep = new Dictionary<int, Amount>();
+                foreach (var performedStep in step.PerformedSteps)
+                {
+                    foreach (var stepSourceBatch in performedStep.SourceBatches)
+                    {
+                        amountsOfBatchesUsedInStep.TryGetValue(stepSourceBatch.SourceBatchId, out var sum);
+
+                        var added = new Amount(stepSourceBatch.UsedAmount, stepSourceBatch.Unit);
+                        if (sum != null)
+                        {
+                            added = m_amountProcessor.Add(added, sum);
+                        }
+
+                        amountsOfBatchesUsedInStep[stepSourceBatch.Id] = added;
+                    }
+                }
+
+                foreach (var stepSourceBatchIdAndAmount in amountsOfBatchesUsedInStep)
+                {
+                    var price = BatchFacade.GetPriceOfAmount(stepSourceBatchIdAndAmount.Key, stepSourceBatchIdAndAmount.Value);
+
+                    var entry = result.AddComponent(false,
+                        stepSourceBatchIdAndAmount.Key,
+                        $"Pro {step.RequiredStep.Name} použito {stepSourceBatchIdAndAmount} {price.Item2.Batch.Material.Name} ze šarže {price.Item2.Batch.BatchNumber} => {price.Item1.Display("CZK")}",
+                        price.Item1);
+
+                    entry.ChildPrices.Add(price.Item2);
+                }
+            }
+            #endregion
+
+            #region Fixed costs
+            var inventory = m_materialRepository.GetMaterialInventories()
+                .FirstOrDefault(i => i.Id == batch.Batch.Material.InventoryId).Ensure();
+
+            if (inventory.IncludesFixedCosts == true)
+            {
+                if (inventory.AllowedUnitId == null)
+                {
+                    throw new InvalidOperationException(
+                        "Confiuration error - inventory with IncludesFixedCosts must have AllowedUnitId set");
+                }
+
+                var accountingDate = BatchFacade.GetBatchAccountingDate(batch.Batch);
+
+                if (!accountingDate.IsFinal)
+                {
+                    result.AddComponent(true, null, $"Vypočtená cena není konečná: {accountingDate.NotFinalReason}", null);
+                }
+
+                var sum = 0m;
+                var fixCostTypes = m_fixedCostRepository.GetFixedCostTypes();
+                var allValues = m_fixedCostRepository.GetValues(accountingDate.AccountingDate.Year, accountingDate.AccountingDate.Month).ToList();
+                
+                var numOfAll = BatchFacade.GetNumberOfProducedProducts(accountingDate.AccountingDate.Year,
+                    accountingDate.AccountingDate.Month,
+                    inventory.Id);
+                if (numOfAll.IsNotPositive)
+                {
+                    result.AddComponent(true,
+                        null,
+                        $"Nelze započítat fixní náklady, protože celková výroba v {accountingDate} má hodnotu {numOfAll}",
+                        null);
+                }
+                else
+                {
+                    foreach (var costType in fixCostTypes)
+                    {
+                        var value = allValues.FirstOrDefault(v => v.FixedCostTypeId == costType.Id);
+                        if (value == null)
+                        {
+                            result.AddComponent(true,
+                                null,
+                                $"Vypočtená cena není konečná - pro období {accountingDate} není zadána hodnota fixního nákladu \"{costType.Name}\"",
+                                0);
+                            continue;
+                        }
+
+                        var percentedPrice = value.Value / 100m * ((decimal)costType.PercentToDistributeAmongProducts);
+                        var final = percentedPrice / numOfAll.Value * batch.Batch.Volume;
+
+                        var text = $"Fixní náklad (({costType.Name} {accountingDate} = {value.Value.Display("CZK")}) * {costType.PercentToDistributeAmongProducts}% = {percentedPrice.Display("CZK")}) / (celkem výroba {accountingDate} = {numOfAll}) * {new Amount(batch.Batch)} = {final.Display("CZK")}";
+
+                        result.AddComponent(false, null, text, final);
+                    }
+                }
+            }
+            #endregion
+
+            return result;
         }
 
         #region Invalidations
@@ -251,7 +422,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             public List<IBatchProuctionStepSourceBatch> UsedInSteps { get; } = new List<IBatchProuctionStepSourceBatch>();
 
             public Amount CurrentAvailableAmount { get; set; }
-
+            
+            public BatchPrice BatchPrice { get; set; }
+            
             public Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId)
             {
                 var steps = new List<Func<Amount, Amount>>();
@@ -273,7 +446,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                             var resolvedStepsSum =
                             amountProcessor.Sum(
                                 resolvedSteps.Select(s => new Amount(s.ProducedAmount, m_batch.Unit)));
-
+                            
                             mainBatchAmount = amountProcessor.Min(mainBatchAmount, resolvedStepsSum);
                         }
 

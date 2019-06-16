@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Elsa.Commerce.Core.Model.BatchPriceExpl;
 using Elsa.Commerce.Core.Units;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
@@ -23,7 +24,9 @@ namespace Elsa.Commerce.Core.Model
         List<IBatchProuctionStepSourceBatch> UsedInSteps { get; } 
         
         Amount CurrentAvailableAmount { get; }
-
+        
+        BatchPrice BatchPrice { get; }
+        
         Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId);
     }
 }

@@ -41,7 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Generators\PremanufacturedMixtures\PremanufacturedMixturesInvFrmGenerator.cs" />
     <Compile Include="Generators\PurchasedMaterial\PurchasedMaterialInvFrmGenerator.cs" />
+    <Compile Include="Generators\ReceivingInvoiceGeneratorBase.cs" />
     <Compile Include="InvoiceFormGeneratorFactory.cs" />
     <Compile Include="InvoiceFormsGenerationRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -74,7 +76,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Generators\PurchasedMaterial\Internal\" />
     <Folder Include="Internal\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

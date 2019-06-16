@@ -13,7 +13,7 @@ using Robowire.RobOrm.SqlServer.Attributes;
 namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 {
     [Entity]
-    public interface IMaterialBatch : IProjectRelatedEntity, IVolumeAndUnit
+    public interface IMaterialBatch : IProjectRelatedEntity, IVolumeAndUnit, IMaterialBatchEditables
     {
         int Id { get; }
 
@@ -22,20 +22,6 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         
         int AuthorId { get; set; }
         IUser Author { get; }
-
-        DateTime Created { get; set; }
-        
-        [NVarchar(64, true)]
-        string BatchNumber { get; set; }
-
-        [NVarchar(1024, false)]
-        string Note { get; set; }
-
-        DateTime? Expiration { get; set; }
-
-        decimal Price { get; set; }
-
-        decimal? ProductionWorkPrice { get; set; }
 
         int? PriceConversionId { get; set; }
         ICurrencyConversion PriceConversion { get; }
@@ -57,18 +43,37 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         DateTime? Produced { get; set; }
 
+        [ForeignKey(nameof(IBatchProductionStep.BatchId))]
+        IEnumerable<IBatchProductionStep> PerformedSteps { get; }
+
+        bool? AllStepsDone { get; set; }
+    }
+
+    public interface IMaterialBatchEditables
+    {
+        DateTime Created { get; set; }
+
+        [NVarchar(64, true)]
+        string BatchNumber { get; set; }
+
+        [NVarchar(1024, false)]
+        string Note { get; set; }
+
+        DateTime? Expiration { get; set; }
+
+        decimal Price { get; set; }
+
+        decimal? ProductionWorkPrice { get; set; }
+
         [NVarchar(100, true)]
         string InvoiceNr { get; set; }
 
         [NVarchar(100, true)]
         string InvoiceVarSymbol { get; set; }
-
-        [ForeignKey(nameof(IBatchProductionStep.BatchId))]
-        IEnumerable<IBatchProductionStep> PerformedSteps { get; }
-
-        bool? AllStepsDone { get; set; }
-
+  
         int? SupplierId { get; set; }
         ISupplier Supplier { get; }
+
+        DateTime? FinalAccountingDate { get; set; }
     }
 }

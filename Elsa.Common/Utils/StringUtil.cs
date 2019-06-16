@@ -139,6 +139,16 @@ namespace Elsa.Common.Utils
             return s.TrimEnd('.');
         }
 
+        public static string Display(this decimal value, string unit = null)
+        {
+            if (unit == null)
+            {
+                return FormatDecimal(value);
+            }
+
+            return $"{FormatDecimal(value)}{unit}";
+        }
+
         public static string Limit(string inp, int len)
         {
             if (string.IsNullOrEmpty(inp))

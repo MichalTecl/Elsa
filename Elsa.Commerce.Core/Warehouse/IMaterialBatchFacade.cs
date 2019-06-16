@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.Model.BatchPriceExpl;
+using Elsa.Commerce.Core.Model.ProductionSteps;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -40,15 +42,23 @@ namespace Elsa.Commerce.Core.Warehouse
         IEnumerable<MaterialLevelModel> GetMaterialLevels(bool includeUnwatched = false);
 
         MaterialLevelModel GetMaterialLevel(int materialId);
-
+        
         int GetMaterialIdByBatchId(int batchId);
 
         BatchEventAmountSuggestions GetEventAmountSuggestions(int eventTypeId, int batchId);
 
         IEnumerable<IMaterialBatch> FindBatchesWithMissingInvoiceItem(int inventoryId);
 
-        IEnumerable<IMaterialBatch> FindBatches(int inventoryId, DateTime from, DateTime to);
+        IEnumerable<IMaterialBatch> FindNotClosedBatches(int inventoryId, DateTime from, DateTime to, Func<IMaterialBatch, bool> filter = null);
+        
+        IEnumerable<BatchStepProgressInfo> GetProductionStepsProgress(IMaterialBatch batch);
 
-        BatchPriceInfo CalculateBatchPrice(int batchId);
+        BatchAccountingDate GetBatchAccountingDate(IMaterialBatch batch);
+
+        Tuple<decimal, BatchPrice> GetPriceOfAmount(int batchId, Amount amount);
+
+        BatchPrice GetBatchPrice(int batchId);
+
+        Amount GetNumberOfProducedProducts(int accountingDateYear, int accountingDateMonth, int inventoryId);
     }
 }
