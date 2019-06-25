@@ -12,7 +12,7 @@ namespace Elsa.Common
     {
         public void Setup(IContainerSetup setup)
         {
-            AsyncLogger.Initialize(new ConnectionStringProvider());
+            //AsyncLogger.Initialize(new ConnectionStringProvider());
 
             setup.For<IConfigurationRepository>().Use<ConfigurationRepository>();
             setup.For<ILog>().Use<Logger>();

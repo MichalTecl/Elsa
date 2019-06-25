@@ -688,9 +688,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             var material = m_materialRepository.GetMaterialById(batch.MaterialId);
 
-            var requiredAmount = m_conversionHelper.ConvertAmount(new Amount(batch), material.NominalUnit.Id);
-
-
+            var requiredAmount = m_conversionHelper.ConvertAmount(new Amount(batch.Volume, batch.Unit ?? m_unitRepository.GetUnit(batch.UnitId)), material.NominalUnit.Id);
+            
             var allPerformedSteps = batch.PerformedSteps.ToList();
 
             foreach (var materialProductionStep in m_materialRepository.GetMaterialProductionSteps(batch.MaterialId).Ordered())
@@ -712,7 +711,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             var d = batch.Created;
             var sb = new StringBuilder();
 
-            var batchAmount = new Amount(batch);
+            var batchAmount = new Amount(batch.Volume, m_unitRepository.GetUnit(batch.UnitId));
             
             foreach (var step in GetProductionStepsProgress(batch))
             {

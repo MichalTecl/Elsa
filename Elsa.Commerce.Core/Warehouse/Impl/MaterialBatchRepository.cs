@@ -433,6 +433,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     .Join(b => b.PerformedSteps.Each().ConfirmUser)
                     .Join(b => b.PerformedSteps.Each().Worker)
                     .Join(b => b.PerformedSteps.Each().SourceBatches)
+                    .Join(b => b.PerformedSteps.Each().SourceBatches.Each().Unit)
+                    .Join(b => b.PriceConversion)
+                    .Join(b => b.PriceConversion.SourceCurrency)
+                    .Join(b => b.PriceConversion.TargetCurrency)
+                    .Join(b => b.PriceConversion.CurrencyRate)
+                    .Join(b => b.PriceConversion.CurrencyRate.SourceCurrency)
+                    .Join(b => b.PriceConversion.CurrencyRate.TargetCurrency)
                     .Where(b => b.ProjectId == m_session.Project.Id);
         }
     }

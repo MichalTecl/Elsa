@@ -30,6 +30,8 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.Premanu
 
         protected override void SetupGrouping(BatchesGrouping grouping)
         {
+            grouping.AddGrouping((c,n) => false, null);
+
             #region Production price
             grouping.AddValidator((b, c) =>
             {

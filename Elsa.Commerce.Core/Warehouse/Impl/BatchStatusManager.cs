@@ -261,7 +261,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                             added = m_amountProcessor.Add(added, sum);
                         }
 
-                        amountsOfBatchesUsedInStep[stepSourceBatch.Id] = added;
+                        amountsOfBatchesUsedInStep[stepSourceBatch.SourceBatchId] = added;
                     }
                 }
 

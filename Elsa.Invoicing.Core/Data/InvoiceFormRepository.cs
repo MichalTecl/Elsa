@@ -398,6 +398,7 @@ namespace Elsa.Invoicing.Core.Data
                 .Join(c => c.Forms.Each().MaterialInventory)
                 .Join(c => c.Forms.Each().Items)
                 .Join(c => c.Forms.Each().Items.Each().Conversion)
+                .Join(c => c.Forms.Each().Items.Each().Conversion.CurrencyRate)
                 .Join(c => c.Forms.Each().Items.Each().SourceCurrency)
                 .Join(c => c.Forms.Each().Items.Each().Unit)
                 .Join(c => c.Forms.Each().Items.Each().Batches)
