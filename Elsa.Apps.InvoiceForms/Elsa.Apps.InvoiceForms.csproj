@@ -49,6 +49,7 @@
     <Compile Include="Model\InvoiceFormModelBase.cs" />
     <Compile Include="Model\InvoiceFormsCollection.cs" />
     <Compile Include="Model\InvoiceFormsGenerationRequest.cs" />
+    <Compile Include="Model\PriceCalculationLog.cs" />
     <Compile Include="Model\ReceivingInvoiceFormModel.cs" />
     <Compile Include="Model\ReportMonthModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,6 +64,10 @@
     <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
       <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
+      <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>
+      <Name>Elsa.Commerce.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Noml.Forms\Elsa.Common.Noml.Forms.csproj">
       <Project>{9FA823D4-27DA-4512-9C59-ECB1E03BAFA8}</Project>

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 
@@ -58,5 +59,7 @@ namespace Elsa.Commerce.Core.Warehouse
         IEnumerable<IMaterialBatch> QueryBatches(Action<IQueryBuilder<IMaterialBatch>> customize);
 
         MaterialBatchComponent UpdateBatch(int id, Action<IMaterialBatchEditables> edit);
+
+        IEnumerable<IBatchProductionStep> GetPerformedSteps(int batchId);
     }
 }

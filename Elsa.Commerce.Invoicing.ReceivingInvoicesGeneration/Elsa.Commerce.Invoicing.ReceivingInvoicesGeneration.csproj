@@ -44,6 +44,7 @@
     <Compile Include="Generators\PremanufacturedMixtures\PremanufacturedMixturesInvFrmGenerator.cs" />
     <Compile Include="Generators\PurchasedMaterial\PurchasedMaterialInvFrmGenerator.cs" />
     <Compile Include="Generators\ReceivingInvoiceGeneratorBase.cs" />
+    <Compile Include="Generators\SellableProducts\FinalProductRecInvFormGenerator.cs" />
     <Compile Include="InvoiceFormGeneratorFactory.cs" />
     <Compile Include="InvoiceFormsGenerationRunner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -28,7 +28,7 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         DateTime? ApproveDt { get; set; }
 
         IEnumerable<IInvoiceForm> Forms { get; }
-
+        
         IEnumerable<IInvoiceFormGenerationLog> Log { get; }
 
         int InvoiceFormTypeId { get; set; }

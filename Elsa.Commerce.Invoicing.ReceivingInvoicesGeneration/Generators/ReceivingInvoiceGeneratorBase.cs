@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Elsa.Commerce.Core.Model.BatchPriceExpl;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Core.Entities.Commerce.Accounting;
@@ -67,6 +68,10 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                     continue;
                 }
 
+                var priceIndex = group.ToDictionary(b => b.Id, b => m_batchFacade.GetBatchPrice(b.Id));
+
+                var totalPrice = BatchPrice.Combine(priceIndex.Values);
+
                 var form = context.NewInvoiceForm(f =>
                 {
                     f.InvoiceFormNumber = $"NESCHVALENO_{Guid.NewGuid():N}";
@@ -76,10 +81,12 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                     f.MaterialInventoryId = referenceBatch.Material.InventoryId;
                     f.SupplierId = referenceBatch.SupplierId;
                     f.FormTypeId = formType.Id;
+                    f.PriceCalculationLog = totalPrice.Text;
+                    f.PriceHasWarning = totalPrice.HasWarning;
                 });
 
                 CustomizeFormMapping(referenceBatch, form, context);
-
+                
                 foreach (var batch in group)
                 {
                     var existingCollection = m_invoiceFormsRepository.GetCollectionByMaterialBatchId(batch.Id);
@@ -96,7 +103,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                             item.Quantity = batch.Volume;
                             item.UnitId = batch.UnitId;
 
-                            var price = m_batchFacade.GetBatchPrice(batch.Id);
+                            var price = priceIndex[batch.Id];
 
                             item.PrimaryCurrencyPrice = price.TotalPriceInPrimaryCurrency;
                             if (batch.PriceConversionId != null)

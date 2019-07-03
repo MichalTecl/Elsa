@@ -10,6 +10,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 
@@ -416,6 +417,16 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_database.Save(batch.Batch);
 
             return GetBatchById(id);
+        }
+
+        public IEnumerable<IBatchProductionStep> GetPerformedSteps(int batchId)
+        {
+            return m_database.SelectFrom<IBatchProductionStep>()
+                .Join(s => s.Batch)
+                .Join(s => s.Step)
+                .Where(s => s.BatchId == batchId)
+                .Where(s => s.Batch.ProjectId == m_session.Project.Id)
+                .Execute();
         }
 
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()

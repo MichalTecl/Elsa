@@ -37,7 +37,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.Premanu
             {
                 if (b.ProductionWorkPrice == null)
                 {
-                    c.Warning($"Šarže nemá \"{b.GetTextInfo()}\" uvedenu cenu práce při výrobě");
+                    c.Warning($"Šarže \"{b.GetTextInfo()}\" nemá uvedenu cenu práce při výrobě");
                 }
             });
             #endregion

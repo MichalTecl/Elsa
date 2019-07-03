@@ -51,5 +51,10 @@ namespace Elsa.Core.Entities.Commerce.Accounting
 
         int InvoiceFormCollectionId { get; set; }
         IInvoiceFormCollection InvoiceFormCollection { get; }
+
+        [NVarchar(0, true)]
+        string PriceCalculationLog { get; set; }
+
+        bool? PriceHasWarning { get; set; }
     }
 }

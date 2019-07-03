@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.PremanufacturedMixtures;
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.PurchasedMaterial;
+using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.SellableProducts;
 using Elsa.Invoicing.Core.Contract;
 
 using Robowire;
@@ -31,6 +32,8 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
                     return m_serviceLocator.InstantiateNow<PurchasedMaterialInvFrmGenerator>();
                 case "MIXTURES":
                     return m_serviceLocator.InstantiateNow<PremanufacturedMixturesInvFrmGenerator>();
+                case "PRODUCTS":
+                    return m_serviceLocator.InstantiateNow<FinalProductRecInvFormGenerator>();
                 default:
                     throw new InvalidOperationException($"Invoice form generator '{name}' does not exist");
             }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Elsa.Commerce.Core.Model.BatchPriceExpl;
 
 namespace Elsa.Apps.InvoiceForms.Model
 {
@@ -17,6 +13,8 @@ namespace Elsa.Apps.InvoiceForms.Model
         public decimal PrimaryCurrencyPriceWithoutVat { get; set; }
 
         public string FormattedPrimaryCurrencyPriceWithoutVat { get; set; }
+
+        public PriceCalculationLog PriceCalculationLog { get; set; } = PriceCalculationLog.Empty;
 
         public string OriginalCurrencyPrice { get; set; }
 

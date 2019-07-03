@@ -28,9 +28,11 @@ app.invoiceReporting.ViewModel = app.invoiceReporting.ViewModel || function() {
     loadReportTypes();
     loadReportMonths();
 
-    var load = function() {
+    var load = function(updateOnly) {
 
-        self.collection = null;
+        if (!updateOnly) {
+            self.collection = null;
+        }
 
         if (!dataMethod) {
             return;
@@ -74,7 +76,7 @@ app.invoiceReporting.ViewModel = app.invoiceReporting.ViewModel || function() {
 
     self.approveWarnings = function(ids) {
         lt.api("/invoiceForms/approveLogWarnings").body(ids).post(function() {
-            load();
+            load(true);
         });
     };
 

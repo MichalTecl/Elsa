@@ -62,6 +62,9 @@ namespace Elsa.Apps.InvoiceForms.Facade
                 itemModel.FormattedPrimaryCurrencyPriceWithoutVat =
                     StringUtil.FormatDecimal(itemModel.PrimaryCurrencyPriceWithoutVat);
 
+                itemModel.PriceCalculationLog =
+                    PriceCalculationLog.Get(form.PriceCalculationLog, form.PriceHasWarning ?? false);
+
                 itemModel.CancelReason = form.CancelDt == null ? string.Empty : form.CancelReason ?? "STORNO";
                 itemModel.InventoryName = form.MaterialInventory?.Name;
                 itemModel.DownloadUrl = $"{StringUtil.JoinUrlSegments(homeUrl, "/invoiceforms/DownloadInvoiceForm")}?id={form.Id}";

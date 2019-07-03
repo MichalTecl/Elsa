@@ -76,6 +76,7 @@
     <Compile Include="Model\BatchEventAmountSuggestions.cs" />
     <Compile Include="Model\BatchPriceExpl\BatchAccountingDate.cs" />
     <Compile Include="Model\BatchPriceExpl\BatchPrice.cs" />
+    <Compile Include="Model\BatchPriceExpl\IBatchPrice.cs" />
     <Compile Include="Model\BatchReporting\BatchOrderModel.cs" />
     <Compile Include="Model\BatchReporting\BatchOrdersReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchProductionStepReportEntry.cs" />
