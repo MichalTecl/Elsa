@@ -52,6 +52,28 @@ namespace Elsa.Common.Noml.Forms
             return table;
         }
 
+        protected IElement TitleValue(string title, string value)
+        {
+            return Div(Class("titvalcont"),
+                Div(Class("titvaltit"), title),
+                Div(Class("titvalval"), value));
+        }
+
+        protected IElement ValueRow(string value)
+        {
+            return Div(Class("valueRow"), value);
+        }
+
+        protected IElement Crlf()
+        {
+            return Div(Class("crlf"), HtmlLiteral("&nbsp;"));
+        }
+
+        protected IElement Tabbed(params IRenderable[] content)
+        {
+            return Div(Class("tabbed"), content);
+        }
+
         protected Column Col(int? width, params object[] content)
         {
             return new Column(width, content);
@@ -90,9 +112,11 @@ namespace Elsa.Common.Noml.Forms
                 }
             }
 
+            target.SetClass("frame");
+
             return target;
         }
-
+        
         protected class Column
         {
             public Column(int? widthPercent, params object[] content)

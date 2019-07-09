@@ -41,11 +41,11 @@ blockquote, q {
     quotes: none;
 }
 
-blockquote:before, blockquote:after,
-q:before, q:after {
-    content: '';
-    content: none;
-}
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+        content: '';
+        content: none;
+    }
 
 table {
     border-collapse: collapse;
@@ -53,6 +53,27 @@ table {
 }
 
 /****************************/
+
+b {
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 1.2em;
+}
+
+td {
+    border: 1px solid #eee;
+    padding: 2px;
+    border-right: none;
+}
+
+thead > tr > th {
+    font-weight: bold;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
 
 html, body {
     width: 100%;
@@ -76,23 +97,37 @@ html, body {
 }
 
 .fullWidth {
-    width:100%;
+    width: 100%;
 }
 
 .frameLeft {
-    border-left:1px solid black;
+    border-left: 1px solid black;
 }
 
 .frameTop {
-    border-top:1px solid black;
+    border-top: 1px solid black;
 }
 
 .frameRight {
-    border-right:1px solid black;
+    border-right: 1px solid black;
 }
 
 .frameBottom {
-    border-bottom:1px solid black;
+    border-bottom: 1px solid black;
 }
 
+.titvalcont > * {
+    display: inline;
+}
 
+.titvalcont > .titvaltit {
+    font-weight: bold;
+}
+
+.clrf {
+    height: 200px;
+}
+
+.tabbed {
+    margin-left: 20px;
+}

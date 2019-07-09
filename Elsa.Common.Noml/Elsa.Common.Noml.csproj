@@ -48,6 +48,7 @@
     <Compile Include="Core\IAttribute.cs" />
     <Compile Include="Core\IElement.cs" />
     <Compile Include="Core\IRenderable.cs" />
+    <Compile Include="Core\Literal.cs" />
     <Compile Include="Markup.Attributes.cs" />
     <Compile Include="Markup.Elements.cs" />
     <Compile Include="Markup.Special.cs" />

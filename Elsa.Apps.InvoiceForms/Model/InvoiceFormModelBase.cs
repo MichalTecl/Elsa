@@ -29,5 +29,7 @@ namespace Elsa.Apps.InvoiceForms.Model
         public string InventoryName { get; set; }
 
         public string DownloadUrl { get; set; }
+
+        public string DetailUrl { get; set; }
     }
 }

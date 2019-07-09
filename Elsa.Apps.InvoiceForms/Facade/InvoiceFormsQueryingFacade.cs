@@ -68,7 +68,7 @@ namespace Elsa.Apps.InvoiceForms.Facade
                 itemModel.CancelReason = form.CancelDt == null ? string.Empty : form.CancelReason ?? "STORNO";
                 itemModel.InventoryName = form.MaterialInventory?.Name;
                 itemModel.DownloadUrl = $"{StringUtil.JoinUrlSegments(homeUrl, "/invoiceforms/DownloadInvoiceForm")}?id={form.Id}";
-
+                itemModel.DetailUrl = $"{StringUtil.JoinUrlSegments(homeUrl, "/invoiceforms/DownloadReceivingInvoice")}?id={form.Id}";
                 ManageSourceCurrency(itemModel, form);
 
                 collection.Forms.Add(itemModel);

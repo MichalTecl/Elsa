@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 using iTextSharp.text;
 using iTextSharp.text.pdf;
@@ -15,6 +16,8 @@ namespace Elsa.Common.Noml.Forms
     {
         public static void Generate(string html, string css, Stream pdfStream)
         {
+            GetCalibri();
+
             using (var document = new Document())
             {
                 var writer = PdfWriter.GetInstance(document, pdfStream);
@@ -30,7 +33,8 @@ namespace Elsa.Common.Noml.Forms
                 var htmlPipeline = new HtmlPipeline(htmlPipelineContext, pdfWriterPipeline);
 
                 var cssResolver = XMLWorkerHelper.GetInstance().GetDefaultCssResolver(true);
-                cssResolver.AddCss(css, "utf-8", true);
+                cssResolver.Clear();
+                cssResolver.AddCss(css, "utf-8", false);
                 var cssResolverPipeline = new CssResolverPipeline(cssResolver, htmlPipeline);
 
                 var worker = new XMLWorker(cssResolverPipeline, true);
@@ -40,6 +44,18 @@ namespace Elsa.Common.Noml.Forms
                     parser.Parse(stringReader);
                 }
             }
+        }
+
+        private static iTextSharp.text.Font GetCalibri()
+        {
+            var fontName = "Calibri";
+            if (!FontFactory.IsRegistered(fontName))
+            {
+                var fontPath = Environment.GetEnvironmentVariable("SystemRoot") + "\\fonts\\calibri.ttf";
+                FontFactory.Register(fontPath);
+            }
+
+            return FontFactory.GetFont(fontName, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
         }
 
     }

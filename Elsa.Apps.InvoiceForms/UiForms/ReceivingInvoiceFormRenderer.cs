@@ -22,59 +22,56 @@ namespace Elsa.Apps.InvoiceForms.UiForms
 
         protected override IEnumerable<IRenderable> Build()
         {
-            yield return RenderTitle();
-            yield return RenderHead();
+            //Title
+            yield return Div(Class("captionCont"), H1($"Příjemka na sklad \"{m_form.MaterialInventory.Name}\""));
+
+            yield return Crlf();
+
+            yield return Frame(FrameStyle.All, Div(RenderHead(), RenderSupplierInfo()));
+
             yield return RenderItems();
         }
         
-        private IRenderable RenderTitle()
+
+        private IEnumerable<IRenderable> RenderHead()
         {
-            return Row(Col(null, H1("Příjemka na sklad")));
+            yield return Div(Class("captionCont"), B($"Příjemka č. {m_form.InvoiceFormNumber}"));
+
+            yield return TitleValue("Vystaveno:", StringUtil.FormatDate(m_form.IssueDate));
+            yield return TitleValue("Faktura - V.S.:", m_form.InvoiceVarSymbol);
         }
 
-        private IRenderable RenderHead()
+        private IEnumerable<IRenderable> RenderSupplierInfo()
         {
-            return Frame(FrameStyle.All, Row(RenderLeftTopHead(), RenderSupplierInfo()));
-        }
-
-        private Column RenderSupplierInfo()
-        {
-            var table = NewTable().Row(B("Dodavatel:"));
-
-            if (m_form.Supplier != null)
+            if (m_form.Supplier == null)
             {
-                var sup = m_form.Supplier;
-                table
-                    .Row(sup.Name)
-                    .Row(sup.Street)
-                    .Row(string.Join(" ", sup.Zip, sup.City))
-                    .Row($"IČ: {sup.IdentificationNumber}")
-                    .Row($"DIČ: {sup.TaxIdentificationNumber}");
+                yield break;
             }
 
-            return Col50(Frame(FrameStyle.Left, table));
+            yield return Crlf();
+
+            yield return Div(Class("captionCont"), B("Dodavatel:"));
+
+            var sup = m_form.Supplier;
+
+            yield return Tabbed(ValueRow(sup.Name),
+                ValueRow(sup.Street),
+                ValueRow(string.Join(" ", sup.Zip, sup.City)),
+                ValueRow($"IČ: {sup.IdentificationNumber}"),
+                ValueRow($"DIČ: {sup.TaxIdentificationNumber}"));
         }
 
-        private Column RenderLeftTopHead()
-        {
-            return Col50(
-                NewTable()
-                    .Row(B("PŘÍJEMKA NA SKLAD č.:"), m_form.InvoiceFormNumber)
-                    .Row(B("Vystaveno:"), StringUtil.FormatDate(m_form.IssueDate))
-                    .Row(B("Faktura - V.S.:"), m_form.InvoiceVarSymbol)
-                );
-        }
-
+        
         private IRenderable RenderItems()
         {
-            return Frame(FrameStyle.All,
+            return Frame(FrameStyle.All, Div(
                 NewTable().Head("Položka", "Množství", "Cena bez DPH").Rows(m_form.Items,
                     i => { return new object[]
                     {
                         i.MaterialName,
                         $"{StringUtil.FormatDecimal(i.Quantity)} {i.Unit.Symbol}",
                         StringUtil.FormatDecimal(i.SourceCurrencyPrice ?? i.PrimaryCurrencyPrice)
-                    }; }));
+                    }; })));
         }
         
     }

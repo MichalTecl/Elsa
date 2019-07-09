@@ -44,5 +44,10 @@ namespace Elsa.Common.Noml
         {
             return NonPairTagElement("link", Attr("href", url), Attr("rel", "stylesheet"));
         }
+
+        public static IRenderable HtmlLiteral(string html)
+        {
+            return new Literal(html);
+        }
     }
 }
