@@ -38,8 +38,13 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
             return $"Příjemky na sklad {forInventory.Name} {month.ToString().PadLeft(2, '0')}/{year}";
         }
 
-        public void Generate(IMaterialInventory forInventory, int year, int month, IInvoiceFormGenerationContext context)
+        public void Generate(IMaterialInventory forInventory, int year, int month, IInvoiceFormGenerationContext context, IReleasingFormsGenerationTask task = null)
         {
+            if (task != null)
+            {
+                throw new InvalidOperationException("Illegal usage of generator");
+            }
+
             if (!m_groupingSetup)
             {
                 SetupGrouping(m_batchesGrouping);

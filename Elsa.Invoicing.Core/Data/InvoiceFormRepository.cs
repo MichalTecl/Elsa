@@ -386,6 +386,16 @@ namespace Elsa.Invoicing.Core.Data
             }
         }
 
+        public IEnumerable<IReleasingFormsGenerationTask> GetReleasingFormsTasks()
+        {
+            return m_cache.ReadThrough($"rel_f_tasks_{m_session.Project.Id}", TimeSpan.FromHours(1), () =>
+            {
+                return m_database.SelectFrom<IReleasingFormsGenerationTask>()
+                    .Join(t => t.Inventories)
+                    .Where(t => t.ProjectId == m_session.Project.Id).Execute().ToList();
+            });
+        }
+
         private IQueryBuilder<IInvoiceFormCollection> GetCollectionsQuery()
         {
             return m_database.SelectFrom<IInvoiceFormCollection>()

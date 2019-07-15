@@ -46,5 +46,7 @@ namespace Elsa.Invoicing.Core.Data
         void ApproveLogWarnings(List<int> ids);
 
         void ApproveCollection(int id);
+
+        IEnumerable<IReleasingFormsGenerationTask> GetReleasingFormsTasks();
     }
 }

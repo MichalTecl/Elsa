@@ -5,6 +5,7 @@ using System.Linq;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Logging;
+using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
@@ -37,37 +38,13 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
             m_session = session;
         }
 
-        public IInvoiceFormGenerationContext Run(int formTypeId, int year, int month)
+        public IInvoiceFormGenerationContext RunReceivingInvoicesGeneration(int formTypeId, int year, int month)
         {
             m_log.Info($"Called for month={month}, year={year}");
             
             using (var tx = m_database.OpenTransaction())
             {
-                var existingCollection = m_invoiceFormsRepository.FindCollection(formTypeId, year, month);
-
-                if (existingCollection?.ApproveUserId != null)
-                {
-                    throw new InvalidOperationException("Jiz bylo vygenerovano");
-                }
-
-                var preapprovedMessages = new HashSet<string>();
-
-                if (existingCollection != null)
-                {
-                    foreach (var m in existingCollection.Log.Where(l =>
-                        l.IsWarning && (l.ApproveUserId == m_session.User.Id)))
-                    {
-                        preapprovedMessages.Add(m.Message);
-                    }
-
-                    m_invoiceFormsRepository.DeleteCollection(existingCollection.Id);
-                }
-
-                var context = m_invoiceFormsRepository.StartGeneration($"{month.ToString().PadLeft(2, '0')}/{year}",
-                    year,
-                    month,
-                    formTypeId);
-                context.AutoApproveWarnings(preapprovedMessages);
+                var context = PrepareContext(formTypeId, year, month);
 
                 foreach (var inventory in m_materialRepository.GetMaterialInventories())
                 {
@@ -79,7 +56,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 
                     try
                     {
-                        DoGeneration(inventory, context, year, month);
+                        DoGeneration(inventory, context, year, month, null);
                     }
                     catch (Exception ex)
                     {
@@ -98,13 +75,98 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
             }
         }
 
-        private void DoGeneration(IMaterialInventory inventory, IInvoiceFormGenerationContext context, int year, int month)
+        private IInvoiceFormGenerationContext PrepareContext(int formTypeId, int year, int month)
         {
-            var generator = m_generatorFactory.Get(inventory.ReceivingInvoiceFormGeneratorName);
+            var existingCollection = m_invoiceFormsRepository.FindCollection(formTypeId, year, month);
 
-            context.Info($"Zacinam generovat: {generator.GetGenerationName(inventory, year, month)}");
+            if (existingCollection?.ApproveUserId != null)
+            {
+                throw new InvalidOperationException("Jiz bylo vygenerovano");
+            }
 
-            generator.Generate(inventory, year, month, context);
+            var preapprovedMessages = new HashSet<string>();
+
+            if (existingCollection != null)
+            {
+                foreach (var m in existingCollection.Log.Where(l =>
+                    l.IsWarning && (l.ApproveUserId == m_session.User.Id)))
+                {
+                    preapprovedMessages.Add(m.Message);
+                }
+
+                m_invoiceFormsRepository.DeleteCollection(existingCollection.Id);
+            }
+
+            var context = m_invoiceFormsRepository.StartGeneration($"{month.ToString().PadLeft(2, '0')}/{year}",
+                year,
+                month,
+                formTypeId);
+            context.AutoApproveWarnings(preapprovedMessages);
+            return context;
+        }
+
+        public IInvoiceFormGenerationContext RunTasks(int year, int month)
+        {
+            var invoiceFormType = m_invoiceFormsRepository.GetInvoiceFormTypes()
+                .FirstOrDefault(t => t.Name == "ReleasingForm");
+            if (invoiceFormType == null)
+            {
+                throw new InvalidOperationException("InvoiceFormType was not found by GeneratorName 'ReleasingForm'");
+            }
+
+            m_log.Info($"Called for month={month}, year={year}");
+            
+            using (var tx = m_database.OpenTransaction())
+            {
+                var context = PrepareContext(invoiceFormType.Id, year, month);
+                var allGenerationTasks = m_invoiceFormsRepository.GetReleasingFormsTasks();
+
+                foreach (var task in allGenerationTasks)
+                {
+                    foreach (var inventory in task.Inventories)
+                    {
+                        var materialInventory = m_materialRepository.GetMaterialInventories()
+                            .FirstOrDefault(i => i.Id == inventory.MaterialInventoryId);
+
+                        if (materialInventory == null)
+                        {
+                            throw new InvalidOperationException("Unknown inventory Id");
+                        }
+
+                        try
+                        {
+                            context.Info($"Začínám generování výdejek typu \"{task.FormText}\" ze skladu {materialInventory.Name}");
+                            DoGeneration(materialInventory, context, year, month, task);
+                            context.Info($"Dokončeno generování výdejek typu \"{task.FormText}\" ze skladu {materialInventory.Name}");
+                        }
+                        catch (Exception ex)
+                        {
+                            context.Error($"Generovani vydejek typu \"{task.FormText}\" pro sklad {materialInventory.Name} selhalo: {ex.Message}", ex);
+                        }
+                    }
+                }
+                
+                if (context.CountForms() == 0)
+                {
+                    context.Error($"Nebyla vygenerována žádná výdejka");
+                }
+
+                tx.Commit();
+
+                return context;
+            }
+        }
+
+        private void DoGeneration(IMaterialInventory inventory, IInvoiceFormGenerationContext context, int year, int month, IReleasingFormsGenerationTask task)
+        {
+            var generator = m_generatorFactory.Get(task == null ? inventory.ReceivingInvoiceFormGeneratorName : task.GeneratorName);
+
+            if (task == null)
+            {
+                context.Info($"Zacinam generovat: {generator.GetGenerationName(inventory, year, month)}");
+            }
+
+            generator.Generate(inventory, year, month, context, task);
         }
     }
 }

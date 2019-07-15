@@ -105,7 +105,7 @@ namespace Elsa.Apps.InvoiceForms
 
         public InvoiceFormsCollection<ReceivingInvoiceFormModel> GenerateReceivingInvoicesCollection(int type, int year, int month)
         {
-            var x = m_generationRunner.Run(type, year, month);
+            var x = m_generationRunner.RunReceivingInvoicesGeneration(type, year, month);
 
             return GetReceivingInvoicesCollection(month, year);
         }
