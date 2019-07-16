@@ -429,6 +429,27 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 .Execute();
         }
 
+        public IEnumerable<MaterialBatchComponent> GetBatchesByComponentInventory(int componentMaterialInventoryId, int compositionYear, int compositionMonth)
+        {
+            var from = new DateTime(compositionYear, compositionMonth, 1).Date;
+            var to = from.AddMonths(1);
+
+            var compositionIds = m_database.SelectFrom<IMaterialBatch>()
+                .Join(b => b.Material)
+                .Join(b => b.Components)
+                .Join(b => b.Components.Each().Component)
+                .Join(b => b.Components.Each().Component.Material)
+                .Where(b => b.ProjectId == m_session.Project.Id)
+                .Where(b => b.Created >= from && b.Created < to)
+                .Where(b => b.Components.Each().Component.Material.InventoryId == componentMaterialInventoryId)
+                .Execute().Select(r => r.Id).Distinct();
+
+            foreach (var compositionBatchId in compositionIds)
+            {
+                yield return GetBatchById(compositionBatchId);
+            }
+        }
+
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()
         {
             return

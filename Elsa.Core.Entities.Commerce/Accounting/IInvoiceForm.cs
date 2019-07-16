@@ -56,5 +56,11 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         string PriceCalculationLog { get; set; }
 
         bool? PriceHasWarning { get; set; }
+
+        [NVarchar(350, true)]
+        string Text { get; set; }
+
+        int? SourceTaskId { get; set; }
+        IReleasingFormsGenerationTask SourceTask { get; }
     }
 }

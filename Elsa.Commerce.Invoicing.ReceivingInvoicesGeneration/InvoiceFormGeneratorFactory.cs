@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.PremanufacturedMixtures;
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.PurchasedMaterial;
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.SellableProducts;
+using Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators;
 using Elsa.Invoicing.Core.Contract;
 
 using Robowire;
@@ -15,7 +13,17 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 {
     public class InvoiceFormGeneratorFactory : IInvoiceFormGeneratorFactory
     {
+        private static readonly Dictionary<string, Type> s_types = new Dictionary<string, Type>();
         private readonly IServiceLocator m_serviceLocator;
+
+        static InvoiceFormGeneratorFactory()
+        {
+            s_types["PURCHASED"] = typeof(PurchasedMaterialInvFrmGenerator);
+            s_types["MIXTURES"] = typeof(PremanufacturedMixturesInvFrmGenerator);
+            s_types["PRODUCTS"] = typeof(FinalProductRecInvFormGenerator);
+
+            s_types["COMPOSITIONS"] = typeof(BatchCompositionReleaseFormsGenerator);
+        }
 
         public InvoiceFormGeneratorFactory(IServiceLocator serviceLocator)
         {
@@ -26,17 +34,12 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
         {
             name = name.ToUpperInvariant().Trim();
 
-            switch (name)
+            if (s_types.TryGetValue(name, out var generatorType))
             {
-                case "PURCHASED":
-                    return m_serviceLocator.InstantiateNow<PurchasedMaterialInvFrmGenerator>();
-                case "MIXTURES":
-                    return m_serviceLocator.InstantiateNow<PremanufacturedMixturesInvFrmGenerator>();
-                case "PRODUCTS":
-                    return m_serviceLocator.InstantiateNow<FinalProductRecInvFormGenerator>();
-                default:
-                    throw new InvalidOperationException($"Invoice form generator '{name}' does not exist");
+                return m_serviceLocator.InstantiateNow<IInvoiceFormGenerator>(generatorType);
             }
+
+            throw new InvalidOperationException($"Invoice form generator '{name}' does not exist");
         }
     }
 }

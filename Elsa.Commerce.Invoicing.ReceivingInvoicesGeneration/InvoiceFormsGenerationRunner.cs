@@ -123,10 +123,16 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 
                 foreach (var task in allGenerationTasks)
                 {
-                    foreach (var inventory in task.Inventories)
+                    var inventories = task.Inventories?.Select(i => i.MaterialInventoryId).ToList();
+                    if (inventories?.Any() != true)
+                    {
+                        inventories = m_materialRepository.GetMaterialInventories().Select(i => i.Id).ToList();
+                    }
+                    
+                    foreach (var inventoryId in inventories)
                     {
                         var materialInventory = m_materialRepository.GetMaterialInventories()
-                            .FirstOrDefault(i => i.Id == inventory.MaterialInventoryId);
+                            .FirstOrDefault(i => i.Id == inventoryId);
 
                         if (materialInventory == null)
                         {

@@ -59,6 +59,7 @@ namespace Elsa.Apps.InvoiceForms
             return GetFormsCollection(month, year, "ReleasingForm", item =>
             {
                 var model = new ReleaseFormModel();
+                model.Text = item.Text;
                 return model;
             });
         }

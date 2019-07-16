@@ -9,6 +9,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Common.SysCounters;
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Internal;
 
@@ -284,7 +285,7 @@ namespace Elsa.Invoicing.Core.Data
             return GetCollectionsQuery().Where(c => c.InvoiceFormTypeId == invoiceFormTypeId)
                 .Where(c => (c.Year == year) && (c.Month == month)).Execute().FirstOrDefault();
         }
-
+        
         public void DeleteCollection(int existingCollectionId)
         {
             using (var tx = m_database.OpenTransaction())
@@ -306,6 +307,13 @@ namespace Elsa.Invoicing.Core.Data
                 {
                     foreach (var item in form.Items)
                     {
+                        var bridgesToCompositions = m_database.SelectFrom<IMaterialBatchCompositionFormItem>()
+                            .Where(b => b.InvoiceFormItemId == item.Id).Execute().ToList();
+                        if (bridgesToCompositions.Any())
+                        {
+                            m_database.DeleteAll(bridgesToCompositions);
+                        }
+
                         m_database.DeleteAll(item.Batches);
                         m_database.Delete(item);
                     }
@@ -367,12 +375,24 @@ namespace Elsa.Invoicing.Core.Data
 
                 foreach (var form in collection.Forms)
                 {
-                    if (form.FormType?.SystemCounterId == null)
+                    int counterId; 
+
+                    if (form.SourceTaskId != null)
                     {
-                        throw new InvalidOperationException("SyastemCounter not set");
+                        var task = GetTask(form.SourceTaskId.Value);
+                        counterId = task.CounterId;
+                    }
+                    else if (form.FormType?.SystemCounterId != null)
+                    {
+                        counterId = form.FormType.SystemCounterId.Value;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("SystemCounter not set");
                     }
 
-                    m_countersManager.WithCounter(form.FormType.SystemCounterId.Value, nv => form.InvoiceFormNumber = nv);
+                    //TODO - this is wrong. All used counters should be in exclusive use to generate continuous sequnece of numbers
+                    m_countersManager.WithCounter(counterId, nv => form.InvoiceFormNumber = nv);
                     
                     m_database.Save(form);
                 }
@@ -384,6 +404,17 @@ namespace Elsa.Invoicing.Core.Data
 
                 tx.Commit();
             }
+        }
+
+        private IReleasingFormsGenerationTask GetTask(int id)
+        {
+            var task = GetReleasingFormsTasks().FirstOrDefault(t => t.Id == id);
+            if (task == null)
+            {
+                throw new InvalidOperationException("Invalid entity reference");
+            }
+
+            return task;
         }
 
         public IEnumerable<IReleasingFormsGenerationTask> GetReleasingFormsTasks()

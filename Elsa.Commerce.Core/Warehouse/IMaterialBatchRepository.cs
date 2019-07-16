@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
@@ -61,5 +57,7 @@ namespace Elsa.Commerce.Core.Warehouse
         MaterialBatchComponent UpdateBatch(int id, Action<IMaterialBatchEditables> edit);
 
         IEnumerable<IBatchProductionStep> GetPerformedSteps(int batchId);
+
+        IEnumerable<MaterialBatchComponent> GetBatchesByComponentInventory(int componentMaterialInventoryId, int compositionYear, int compositionMonth);
     }
 }

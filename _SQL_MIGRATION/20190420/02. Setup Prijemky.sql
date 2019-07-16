@@ -20,7 +20,7 @@ UPDATE InvoiceFormType
    AND SystemCounterId IS NULL;
  
 
-UPDATE 
+
 
 
 

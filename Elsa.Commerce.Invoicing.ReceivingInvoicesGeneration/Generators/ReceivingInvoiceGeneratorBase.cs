@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
-using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Extensions;
@@ -22,8 +18,8 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
         private readonly IMaterialBatchFacade m_batchFacade;
         private readonly BatchesGrouping m_batchesGrouping = new BatchesGrouping();
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
-        
-        private bool m_groupingSetup = false;
+
+        private bool m_groupingSetup;
 
         protected ReceivingInvoiceGeneratorBase(IMaterialBatchFacade batchFacade, IInvoiceFormsRepository invoiceFormsRepository)
         {

@@ -66,6 +66,10 @@
       <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>
       <Name>Elsa.Commerce.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Commerce.Invoicing.ReleasingFormsGeneration\Elsa.Commerce.Invoicing.ReleasingFormsGeneration.csproj">
+      <Project>{661D09CE-C255-4086-B88A-EDC5028EB795}</Project>
+      <Name>Elsa.Commerce.Invoicing.ReleasingFormsGeneration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
       <Name>Elsa.Common</Name>

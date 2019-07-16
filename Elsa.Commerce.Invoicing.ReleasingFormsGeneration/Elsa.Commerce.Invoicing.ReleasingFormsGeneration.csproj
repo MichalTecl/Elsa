@@ -4,4 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj" />
+    <ProjectReference Include="..\Elsa.Invoicing.Core\Elsa.Invoicing.Core.csproj" />
+  </ItemGroup>
+
 </Project>
