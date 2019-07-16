@@ -108,7 +108,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
         public IInvoiceFormGenerationContext RunTasks(int year, int month)
         {
             var invoiceFormType = m_invoiceFormsRepository.GetInvoiceFormTypes()
-                .FirstOrDefault(t => t.Name == "ReleasingForm");
+                .FirstOrDefault(t => t.GeneratorName == "ReleasingForm");
             if (invoiceFormType == null)
             {
                 throw new InvalidOperationException("InvoiceFormType was not found by GeneratorName 'ReleasingForm'");

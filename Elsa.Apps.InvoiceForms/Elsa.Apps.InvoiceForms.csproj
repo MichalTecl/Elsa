@@ -54,6 +54,7 @@
     <Compile Include="Model\InvoiceFormsGenerationRequest.cs" />
     <Compile Include="Model\PriceCalculationLog.cs" />
     <Compile Include="Model\ReceivingInvoiceFormModel.cs" />
+    <Compile Include="Model\ReleaseFormModel.cs" />
     <Compile Include="Model\ReportMonthModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />

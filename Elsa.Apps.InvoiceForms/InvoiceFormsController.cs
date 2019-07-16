@@ -42,24 +42,25 @@ namespace Elsa.Apps.InvoiceForms
 
         public InvoiceFormsCollection<ReceivingInvoiceFormModel> GetReceivingInvoicesCollection(int month, int year)
         {
-            var type = m_invoiceFormsRepository.GetInvoiceFormTypes()
-                .FirstOrDefault(t => t.GeneratorName == "ReceivingInvoice");
-            if (type == null)
+            return GetFormsCollection(month, year, "ReceivingInvoice", item =>
             {
-                throw new InvalidOperationException($"Nenalezen InvoiceFormType.GeneratroName=ReceivingInvoice");
-            }
-
-            return m_facade.Load(type.Id, year, month,
-                item =>
+                var model = new ReceivingInvoiceFormModel
                 {
-                    var model = new ReceivingInvoiceFormModel
-                    {
-                        InvoiceVarSymbol = item.InvoiceVarSymbol ?? item.InvoiceNumber,
-                        Supplier = item.Supplier?.Name
-                    };
+                    InvoiceVarSymbol = item.InvoiceVarSymbol ?? item.InvoiceNumber,
+                    Supplier = item.Supplier?.Name
+                };
 
-                    return model;
-                });
+                return model;
+            });
+        }
+
+        public InvoiceFormsCollection<ReleaseFormModel> GetReleaseFormsCollection(int month, int year)
+        {
+            return GetFormsCollection(month, year, "ReleasingForm", item =>
+            {
+                var model = new ReleaseFormModel();
+                return model;
+            });
         }
 
         public IEnumerable<IInvoiceFormReportType> GetInvoicingReportTypes()
@@ -110,6 +111,15 @@ namespace Elsa.Apps.InvoiceForms
             return GetReceivingInvoicesCollection(month, year);
         }
 
+        public InvoiceFormsCollection<ReleaseFormModel> GenerateReleaseFormsCollection(int type, int year, int month)
+        {
+            // type has probably no sense here, but the method signature needs to be same as GenerateReceivingInvoicesCollection
+
+            var x = m_generationRunner.RunTasks(year, month);
+
+            return GetReleaseFormsCollection(month, year);
+        }
+
         public void ApproveLogWarnings(List<int> ids)
         {
             m_invoiceFormsRepository.ApproveLogWarnings(ids);
@@ -123,6 +133,19 @@ namespace Elsa.Apps.InvoiceForms
         public void ApproveCollection(int id)
         {
             m_invoiceFormsRepository.ApproveCollection(id);
+        }
+
+        private InvoiceFormsCollection<T> GetFormsCollection<T>(int month, int year, string generatorName,
+            Func<IInvoiceForm, T> itemMapper) where T : InvoiceFormModelBase
+        {
+            var type = m_invoiceFormsRepository.GetInvoiceFormTypes()
+                .FirstOrDefault(t => t.GeneratorName == generatorName);
+            if (type == null)
+            {
+                throw new InvalidOperationException($"Nenalezen InvoiceFormType.GeneratroName=ReceivingInvoice");
+            }
+
+            return m_facade.Load(type.Id, year, month, itemMapper);
         }
     }
 }

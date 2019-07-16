@@ -19,6 +19,7 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         int CounterId { get; set; }
         ISystemCounter Counter { get; }
 
+        [ForeignKey(nameof(IReleasingFormsGenerationTaskInventory.GenerationTaskId))]
         IEnumerable<IReleasingFormsGenerationTaskInventory> Inventories { get; }
     }
 }
