@@ -43,14 +43,12 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         public void Generate(IMaterialInventory forInventory, int year, int month, IInvoiceFormGenerationContext context,
             IReleasingFormsGenerationTask task = null)
         {
-            string GetKey(ItemReleaseModel i) => $"{i.Date.Date}:{i.TookFromBatch.MaterialId}";
-
             var index = new Dictionary<string, List<ItemReleaseModel>>();
             
             GenerateItems(forInventory, year, month, context, task, (time, batch, amount, descriptor) =>
             {
                 var item = new ItemReleaseModel(time, batch, amount, descriptor);
-                var key = GetKey(item);
+                var key = GetGroupingKey(item);
 
                 if (!index.TryGetValue(key, out var items))
                 {
@@ -84,7 +82,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                     f.PriceCalculationLog = totalPriceModel.Text;
                     f.PriceHasWarning = totalPriceModel.HasWarning;
                     f.SourceTaskId = task?.Id;
-
+                    f.Explanation = GetExplanation(list, f);
                     CustomizeFormCreation(list, f);
                 });
                 
@@ -107,6 +105,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
             }
         }
 
+        protected abstract string GetExplanation(List<ItemReleaseModel> item, IInvoiceForm invoiceForm);
+
         protected virtual void CustomizeFormCreation(List<ItemReleaseModel> formItems, IInvoiceForm form) { }
 
         protected virtual void CustomizeFormItemCreation(ItemReleaseModel releaseModel, IInvoiceFormItem item) { }
@@ -121,6 +121,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         protected abstract void GenerateItems(IMaterialInventory forInventory, int year, int month,
             IInvoiceFormGenerationContext context,
             IReleasingFormsGenerationTask task, Action<DateTime, IMaterialBatch, Amount, TItemDescriptor> itemCallback);
+
+        protected abstract string GetGroupingKey(ItemReleaseModel item);
         
         protected sealed class ItemReleaseModel
         {

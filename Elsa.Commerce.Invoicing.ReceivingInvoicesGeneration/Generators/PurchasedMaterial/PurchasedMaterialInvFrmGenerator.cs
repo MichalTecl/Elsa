@@ -100,7 +100,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.Purchas
             #region Purchase Date
             grouping.AddGrouping((reference, candidate) => reference.Created.Date == candidate.Created.Date, (reference, candidate, log) =>
             {
-                log.Warning($"Šarže \"{reference.GetTextInfo()}\" a \"{reference.GetTextInfo()}\" mají datum naskladnění - nebudou na stejné příjemce");
+                log.Warning($"Šarže \"{reference.GetTextInfo()}\" a \"{candidate.GetTextInfo()}\" mají stejné číslo faktury a dodavatele, ale rozdílné datum naskladnění - nebudou na stejné příjemce");
             });
             #endregion
 

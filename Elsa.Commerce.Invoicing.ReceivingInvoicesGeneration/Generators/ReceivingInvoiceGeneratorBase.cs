@@ -90,7 +90,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                 
                 foreach (var batch in group)
                 {
-                    var existingCollection = m_invoiceFormsRepository.GetCollectionByMaterialBatchId(batch.Id);
+                    var existingCollection = m_invoiceFormsRepository.GetCollectionByMaterialBatchId(batch.Id, formType.Id);
                     if (existingCollection != null)
                     {
                         context.Error($"Šarže \"{batch.GetTextInfo()}\" je již zahrnuta v soupisce příjemek \"{existingCollection.Name}\", novou soupisku není možné vygenerovat");

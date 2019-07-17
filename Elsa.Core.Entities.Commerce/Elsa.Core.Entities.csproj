@@ -120,6 +120,7 @@
     <Compile Include="Inventory\Kits\IKitSelectionGroupItem.cs" />
     <Compile Include="Inventory\ProductionSteps\IBatchProductionStep.cs" />
     <Compile Include="Inventory\ProductionSteps\IBatchProuctionStepSourceBatch.cs" />
+    <Compile Include="Inventory\ProductionSteps\IBatchStepBatchInvoiceItem.cs" />
     <Compile Include="Inventory\ProductionSteps\IMaterialProductionStep.cs" />
     <Compile Include="Inventory\ProductionSteps\IMaterialProductionStepMaterial.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

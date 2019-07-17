@@ -38,6 +38,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IMaterialRepository m_materialRepository;
         private readonly IStockEventRepository m_eventRepository;
         private readonly IFixedCostRepository m_fixedCostRepository;
+        private readonly IUnitRepository m_unitRepository;
 
         private IOrdersFacade m_injectedOrdersFacade;
         private IMaterialBatchFacade m_injectedBatchFacade;
@@ -47,7 +48,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private IMaterialBatchFacade BatchFacade =>
             m_injectedBatchFacade ?? (m_injectedBatchFacade = m_serviceLocator.Get<IMaterialBatchFacade>());
 
-        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator, IMaterialRepository materialRepository, IStockEventRepository eventRepository, IFixedCostRepository fixedCostRepository)
+        public BatchStatusManager(IMaterialBatchRepository batchRepository, IPurchaseOrderRepository orderRepository, AmountProcessor amountProcessor, IDatabase database, IServiceLocator serviceLocator, IMaterialRepository materialRepository, IStockEventRepository eventRepository, IFixedCostRepository fixedCostRepository, IUnitRepository unitRepository)
         {
             m_batchRepository = batchRepository;
             m_orderRepository = orderRepository;
@@ -57,6 +58,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_materialRepository = materialRepository;
             m_eventRepository = eventRepository;
             m_fixedCostRepository = fixedCostRepository;
+            m_unitRepository = unitRepository;
         }
 
         public IMaterialBatchStatus GetStatus(int batchId)
@@ -255,7 +257,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     {
                         amountsOfBatchesUsedInStep.TryGetValue(stepSourceBatch.SourceBatchId, out var sum);
 
-                        var added = new Amount(stepSourceBatch.UsedAmount, stepSourceBatch.Unit);
+                        var added = new Amount(stepSourceBatch.UsedAmount, stepSourceBatch.Unit ?? m_unitRepository.GetUnit(stepSourceBatch.UnitId));
                         if (sum != null)
                         {
                             added = m_amountProcessor.Add(added, sum);

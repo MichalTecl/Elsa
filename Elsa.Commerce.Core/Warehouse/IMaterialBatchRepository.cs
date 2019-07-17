@@ -59,5 +59,8 @@ namespace Elsa.Commerce.Core.Warehouse
         IEnumerable<IBatchProductionStep> GetPerformedSteps(int batchId);
 
         IEnumerable<MaterialBatchComponent> GetBatchesByComponentInventory(int componentMaterialInventoryId, int compositionYear, int compositionMonth);
+
+        IEnumerable<int> GetBatchesByProductionStepComponentInventory(int stepComponentInventory,
+            int compositionYear, int compositionMonth);
     }
 }

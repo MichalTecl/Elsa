@@ -10,6 +10,7 @@ using Elsa.Common.Logging;
 using Elsa.Common.SysCounters;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
+using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Internal;
 
@@ -262,13 +263,14 @@ namespace Elsa.Invoicing.Core.Data
             return new InvoiceFormsGenerationContext(m_log, this,  collection.Id);
         }
 
-        public IInvoiceFormCollection GetCollectionByMaterialBatchId(int batchId)
+        public IInvoiceFormCollection GetCollectionByMaterialBatchId(int batchId, int invoiceFormTypeId)
         {
             return m_database.SelectFrom<IInvoiceFormItemMaterialBatch>()
                 .Join(b => b.InvoiceFormItem)
                 .Join(b => b.InvoiceFormItem.InvoiceForm)
                 .Join(b => b.InvoiceFormItem.InvoiceForm.InvoiceFormCollection)
                 .Where(b => b.MaterialBatchId == batchId)
+                .Where(b => b.InvoiceFormItem.InvoiceForm.FormTypeId == invoiceFormTypeId)
                 .Execute().FirstOrDefault()?.InvoiceFormItem?.InvoiceForm?.InvoiceFormCollection;
         }
 
@@ -312,6 +314,13 @@ namespace Elsa.Invoicing.Core.Data
                         if (bridgesToCompositions.Any())
                         {
                             m_database.DeleteAll(bridgesToCompositions);
+                        }
+
+                        var bridgesToSteps = m_database.SelectFrom<IBatchStepBatchInvoiceItem>()
+                            .Where(b => b.InvoiceFormItemId == item.Id).Execute().ToList();
+                        if (bridgesToSteps.Any())
+                        {
+                            m_database.DeleteAll(bridgesToSteps);
                         }
 
                         m_database.DeleteAll(item.Batches);

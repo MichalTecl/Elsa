@@ -35,7 +35,7 @@ namespace Elsa.Invoicing.Core.Data
 
         IInvoiceFormGenerationContext StartGeneration(string contextName, int year, int month, int invoiceformTypeId);
 
-        IInvoiceFormCollection GetCollectionByMaterialBatchId(int batchId);
+        IInvoiceFormCollection GetCollectionByMaterialBatchId(int batchId, int invoiceFormTypeId);
 
         IInvoiceFormCollection GetCollectionById(int collectionId);
 

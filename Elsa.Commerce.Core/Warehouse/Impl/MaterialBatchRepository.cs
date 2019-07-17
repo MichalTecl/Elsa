@@ -424,6 +424,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return m_database.SelectFrom<IBatchProductionStep>()
                 .Join(s => s.Batch)
                 .Join(s => s.Step)
+                .Join(s => s.SourceBatches)
+                .Join(s => s.SourceBatches.Each().Unit)
+                .Join(s => s.SourceBatches.Each().SourceBatch)
+                .Join(s => s.SourceBatches.Each().SourceBatch.Unit)
+                .Join(s => s.SourceBatches.Each().SourceBatch.Material)
                 .Where(s => s.BatchId == batchId)
                 .Where(s => s.Batch.ProjectId == m_session.Project.Id)
                 .Execute();
@@ -448,6 +453,23 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 yield return GetBatchById(compositionBatchId);
             }
+        }
+
+        public IEnumerable<int> GetBatchesByProductionStepComponentInventory(int stepComponentInventory,
+            int compositionYear,
+            int compositionMonth)
+        {
+            var from = new DateTime(compositionYear, compositionMonth, 1).Date;
+            var to = from.AddMonths(1);
+
+            return m_database.SelectFrom<IBatchProductionStep>()
+                .Join(s => s.SourceBatches)
+                .Join(s => s.SourceBatches.Each().SourceBatch)
+                .Join(s => s.SourceBatches.Each().SourceBatch.Material)
+                .Where(s => s.SourceBatches.Each().SourceBatch.ProjectId == m_session.Project.Id)
+                .Where(s => s.SourceBatches.Each().SourceBatch.Material.InventoryId == stepComponentInventory)
+                .Where(s => s.ConfirmDt >= from && s.ConfirmDt < to).Execute().Select(s => s.BatchId).Distinct()
+                .ToList();
         }
 
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()

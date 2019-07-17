@@ -60,6 +60,9 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         [NVarchar(350, true)]
         string Text { get; set; }
 
+        [NVarchar(1000, true)]
+        string Explanation { get; set; }
+
         int? SourceTaskId { get; set; }
         IReleasingFormsGenerationTask SourceTask { get; }
     }
