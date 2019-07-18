@@ -53,5 +53,11 @@ namespace Elsa.Common.Utils
 
             return $"{((int)diff.TotalMinutes)} minut";
         }
+
+        public static void GetMonthDt(int year, int month, out DateTime from, out DateTime to)
+        {
+            from = new DateTime(year, month, 1).Date;
+            to = from.AddMonths(1).AddDays(1).Date;
+        }
     }
 }

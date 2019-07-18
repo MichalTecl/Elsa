@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
+using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Accounting;
@@ -16,11 +17,13 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
     public abstract class ReleaseFormsGeneratorBase<TItemDescriptor> : IInvoiceFormGenerator
     {
         private readonly IMaterialBatchFacade m_batchFacade;
+        private readonly IMaterialRepository m_materialRepository;
 
         protected ReleaseFormsGeneratorBase(IMaterialBatchFacade batchFacade, 
-            IInvoiceFormsRepository invoiceFormsRepository)
+            IInvoiceFormsRepository invoiceFormsRepository, IMaterialRepository materialRepository)
         {
             m_batchFacade = batchFacade;
+            m_materialRepository = materialRepository;
 
             FormType = invoiceFormsRepository.GetInvoiceFormTypes().FirstOrDefault(t =>
                 t.GeneratorName.Equals("ReleasingForm", StringComparison.InvariantCultureIgnoreCase));
@@ -88,9 +91,12 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                 
                 foreach (var item in list)
                 {
+                    var material = item.TookFromBatch.Material ??
+                                   m_materialRepository.GetMaterialById(item.TookFromBatch.MaterialId).Adaptee;
+
                     var formItem = context.NewFormItem(form, item.TookFromBatch, i =>
                         {
-                            i.MaterialName = item.TookFromBatch.Material.Name;
+                            i.MaterialName = material.Name;
                             i.Quantity = item.TookAmount.Value;
                             i.UnitId = item.TookAmount.Unit.Id;
 

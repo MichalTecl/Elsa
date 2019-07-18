@@ -16,3 +16,9 @@ BEGIN
 	INSERT INTO ReleasingFormsGenerationTask (FormText, ProjectId, GeneratorName, CounterId)
 	VALUES (N'VÝROBA', @projectId, 'COMPOSITIONS', @counterId);
 END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM ReleasingFormsGenerationTask t WHERE t.GeneratorName = 'SALES')
+BEGIN
+	INSERT INTO ReleasingFormsGenerationTask (FormText, ProjectId, GeneratorName, CounterId)
+	VALUES (N'PRODEJ e-shop', @projectId, 'SALES', @counterId);
+END

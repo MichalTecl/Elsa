@@ -494,7 +494,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             var entry = new BatchReportEntry(row.GetInt32(batchId))
             {
                 InventoryName = row.GetString(inventoryName),
-                BatchNumber = row.GetString(batchNumber),
+                BatchNumber = row.IsDBNull(batchNumber) ? "?" : row.GetString(batchNumber),
                 MaterialName = row.GetString(materialName),
                 MaterialId = row.GetInt32(materialId),
                 BatchVolume = $"{StringUtil.FormatDecimal(row.GetDecimal(batchVolume))} {row.GetString(unit)}",

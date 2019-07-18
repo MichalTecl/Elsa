@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
 namespace Elsa.Common.Caching
 {
+    [DebuggerNonUserCode]
     public class Cache : ICache
     {
         private static readonly Random s_rnd = new Random();

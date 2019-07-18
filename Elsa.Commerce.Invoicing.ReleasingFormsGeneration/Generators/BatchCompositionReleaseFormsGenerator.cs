@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Accounting;
@@ -21,8 +22,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
         public BatchCompositionReleaseFormsGenerator(IMaterialBatchFacade batchFacade,
             IInvoiceFormsRepository invoiceFormsRepository, IMaterialBatchRepository batchRepository,
-            IDatabase database) : base(
-            batchFacade, invoiceFormsRepository)
+            IDatabase database, IMaterialRepository materialRepo) : base(
+            batchFacade, invoiceFormsRepository, materialRepo)
         {
             m_batchRepository = batchRepository;
             m_database = database;

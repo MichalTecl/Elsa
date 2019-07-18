@@ -23,6 +23,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
             s_types["PRODUCTS"] = typeof(FinalProductRecInvFormGenerator);
 
             s_types["COMPOSITIONS"] = typeof(BatchCompositionReleaseFormsGenerator);
+            s_types["SALES"] = typeof(EshopSalesGenerator);
         }
 
         public InvoiceFormGeneratorFactory(IServiceLocator serviceLocator)
