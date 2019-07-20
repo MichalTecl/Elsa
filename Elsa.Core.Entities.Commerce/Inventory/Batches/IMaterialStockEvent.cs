@@ -1,4 +1,5 @@
-﻿using Elsa.Core.Entities.Commerce.Common.Security;
+﻿using System;
+using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
 
 using Robowire.RobOrm.Core;
@@ -27,6 +28,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         int UserId { get; set; }
         IUser User { get; }
+
+        DateTime EventDt { get; set; }
 
         [NVarchar(32, false)]
         string EventGroupingKey { get; set; }

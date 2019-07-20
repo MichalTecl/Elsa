@@ -102,6 +102,7 @@ namespace Elsa.Commerce.Core.StockEvents
                     evt.Note = reason;
                     evt.TypeId = eventTypeId;
                     evt.UserId = m_session.User.Id;
+                    evt.EventDt = DateTime.Now;
 
                     m_cache.Save(evt);
 
@@ -122,6 +123,18 @@ namespace Elsa.Commerce.Core.StockEvents
                     .Where(m => m.ProjectId == m_session.Project.Id)
                     .Where(m => m.BatchId == batchId)
                     .Execute();
+        }
+
+        public IEnumerable<IMaterialStockEvent> GetEvents(DateTime @from, DateTime to, int inventoryId)
+        {
+            return m_database.SelectFrom<IMaterialStockEvent>()
+                .Join(e => e.Unit)
+                .Join(e => e.Type)
+                .Join(e => e.Batch)
+                .Join(e => e.Batch.Material)
+                .Where(e => e.ProjectId == m_session.Project.Id)
+                .Where(e => e.Batch.Material.InventoryId == inventoryId)
+                .Where(e => e.EventDt >= from && e.EventDt <= to).Execute();
         }
 
         public void DeleteStockEvent(int eventId)

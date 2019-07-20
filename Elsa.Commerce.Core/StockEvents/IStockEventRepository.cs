@@ -16,6 +16,8 @@ namespace Elsa.Commerce.Core.StockEvents
 
         IEnumerable<IMaterialStockEvent> GetBatchEvents(int batchId);
 
+        IEnumerable<IMaterialStockEvent> GetEvents(DateTime @from, DateTime to, int inventoryId);
+
         void DeleteStockEvent(int eventId);
     }
 }

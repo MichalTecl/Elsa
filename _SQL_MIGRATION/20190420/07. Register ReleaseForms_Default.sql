@@ -22,3 +22,10 @@ BEGIN
 	INSERT INTO ReleasingFormsGenerationTask (FormText, ProjectId, GeneratorName, CounterId)
 	VALUES (N'PRODEJ e-shop', @projectId, 'SALES', @counterId);
 END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM ReleasingFormsGenerationTask t WHERE t.GeneratorName = 'STOCK_EVENTS')
+BEGIN
+	INSERT INTO ReleasingFormsGenerationTask (FormText, ProjectId, GeneratorName, CounterId)
+	VALUES (N'?', @projectId, 'STOCK_EVENTS', @counterId);
+END
+

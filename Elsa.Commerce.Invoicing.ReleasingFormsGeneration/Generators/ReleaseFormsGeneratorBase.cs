@@ -35,12 +35,10 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         }
 
         protected IInvoiceFormType FormType { get; }
-
-        protected abstract string FormText { get; }
-
+        
         public string GetGenerationName(IMaterialInventory forInventory, int year, int month)
         {
-            return $"Výdejky ze skladu '{forInventory.Name}' typu '{FormText}' pro {month}/{year}";
+            return $"Generator vydejeky ze skladu '{forInventory.Name}' typu '{GetType().Name}' pro {month}/{year}";
         }
 
         public void Generate(IMaterialInventory forInventory, int year, int month, IInvoiceFormGenerationContext context,
@@ -81,7 +79,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                     f.IssueDate = list[0].Date.Date;
                     f.MaterialInventoryId = forInventory.Id;
                     f.FormTypeId = FormType.Id;
-                    f.Text = task?.FormText ?? FormText;
+                    f.Text = task?.FormText ?? "?";
                     f.PriceCalculationLog = totalPriceModel.Text;
                     f.PriceHasWarning = totalPriceModel.HasWarning;
                     f.SourceTaskId = task?.Id;

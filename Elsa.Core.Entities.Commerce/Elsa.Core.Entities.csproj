@@ -53,7 +53,8 @@
     <Compile Include="Accounting\IInvoiceFormCollection.cs" />
     <Compile Include="Accounting\IInvoiceFormGenerationLog.cs" />
     <Compile Include="Accounting\IInvoiceFormItem.cs" />
-    <Compile Include="Accounting\IInvoiceFormItemMaterialBatch.cs" />
+    <Compile Include="Accounting\InvoiceFormItemBridges\IInvoiceFormItemBridgeBase.cs" />
+    <Compile Include="Accounting\InvoiceFormItemBridges\IInvoiceFormItemMaterialBatch.cs" />
     <Compile Include="Accounting\IInvoiceFormReportType.cs" />
     <Compile Include="Accounting\IInvoiceFormType.cs" />
     <Compile Include="Accounting\IReleasingFormsGenerationTask.cs" />
@@ -98,10 +99,12 @@
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IPaymentSource.cs" />
     <Compile Include="Inventory\Batches\IMaterialBatchComposition.cs" />
-    <Compile Include="Inventory\Batches\IMaterialBatchCompositionFormItem.cs" />
+    <Compile Include="Accounting\InvoiceFormItemBridges\IMaterialBatchCompositionFormItem.cs" />
     <Compile Include="Inventory\Batches\IMaterialStockEvent.cs" />
+    <Compile Include="Accounting\InvoiceFormItemBridges\IOrderItemInvoiceFormItem.cs" />
     <Compile Include="Inventory\Batches\IOrderItemMaterialBatch.cs" />
     <Compile Include="Inventory\Batches\IPackingPreferredBatch.cs" />
+    <Compile Include="Accounting\InvoiceFormItemBridges\IStockEventInvoiceFormItem.cs" />
     <Compile Include="Inventory\Batches\IStockEventType.cs" />
     <Compile Include="Inventory\IMappedToOrderItem.cs" />
     <Compile Include="Inventory\IMaterial.cs" />

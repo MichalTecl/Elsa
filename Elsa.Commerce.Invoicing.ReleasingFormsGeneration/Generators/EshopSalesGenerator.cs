@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
+using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 {
@@ -20,18 +21,18 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         private readonly IPurchaseOrderRepository m_orderRepository;
         private readonly IMaterialRepository m_materialRepository;
         private readonly IUnitRepository m_unitRepository;
+        private readonly IDatabase m_database;
 
         public EshopSalesGenerator(IMaterialBatchFacade batchFacade, IInvoiceFormsRepository invoiceFormsRepository,
             IPurchaseOrderRepository orderRepository, IMaterialRepository materialRepository,
-            IUnitRepository unitRepository) : base(batchFacade, invoiceFormsRepository, materialRepository)
+            IUnitRepository unitRepository, IDatabase database) : base(batchFacade, invoiceFormsRepository, materialRepository)
         {
             m_orderRepository = orderRepository;
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
+            m_database = database;
         }
-
-        protected override string FormText => "Prodej E-Shop";
-
+        
         protected override string GetExplanation(List<ItemReleaseModel> item, IInvoiceForm invoiceForm)
         {
             return $"Objednávka č.: {item[0].Descriptor.OrderIdentifierText}";
@@ -42,7 +43,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         {
             if (!forInventory.CanBeConnectedToTag)
             {
-                context.Info($"Pro sklad \"{forInventory.Name}\" se výdejky typu \"{FormText}\" negenerují - přeskakuji");
+                context.Info($"Pro sklad \"{forInventory.Name}\" se výdejky typu \"PRODEJ e-shop\" negenerují - přeskakuji");
                 return;
             }
 
@@ -75,7 +76,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                     {
                         itemCallback(order.BuyDate, itemBatch.MaterialBatch, new Amount(itemBatch.Quantity, unit), new EshopOrderDescriptor()
                         {
-                            OrderIdentifierText = orderText
+                            OrderIdentifierText = orderText,
+                            OrderItemBatchAssignmentId = itemBatch.Id
                         });
                     }
 
@@ -85,7 +87,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                         {
                             itemCallback(order.BuyDate, kitBatchBridge.MaterialBatch, new Amount(kitBatchBridge.Quantity, unit), new EshopOrderDescriptor()
                             {
-                                OrderIdentifierText = orderText
+                                OrderIdentifierText = orderText,
+                                OrderItemBatchAssignmentId = kitBatchBridge.Id
                             });
                         }
                     }
@@ -97,10 +100,21 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         {
             return item.Descriptor.OrderIdentifierText;
         }
+
+        protected override void OnAfterItemSaved(IInvoiceForm form, IInvoiceFormItem item, ItemReleaseModel releaseModel)
+        {
+            m_database.Save(m_database.New<IOrderItemInvoiceFormItem>(i =>
+            {
+                i.InvoiceFormItemId = item.Id;
+                i.BatchAssignmentId = releaseModel.Descriptor.OrderItemBatchAssignmentId;
+            }));
+        }
     }
 
     public class EshopOrderDescriptor
     {
         public string OrderIdentifierText { get; set; }
+
+        public long OrderItemBatchAssignmentId { get; set; }
     }
 }

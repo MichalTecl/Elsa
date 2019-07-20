@@ -9,6 +9,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Common.SysCounters;
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 using Elsa.Invoicing.Core.Contract;
@@ -303,33 +304,27 @@ namespace Elsa.Invoicing.Core.Data
                     throw new InvalidOperationException("Soupiska jiz byla schvalena");
                 }
 
-                m_database.DeleteAll(collection.Log);
+                m_database.Sql().Call("DeleteInvoiceFormCollection").WithParam("@collectionId", existingCollectionId)
+                    .NonQuery();
 
-                foreach (var form in collection.Forms)
-                {
-                    foreach (var item in form.Items)
-                    {
-                        var bridgesToCompositions = m_database.SelectFrom<IMaterialBatchCompositionFormItem>()
-                            .Where(b => b.InvoiceFormItemId == item.Id).Execute().ToList();
-                        if (bridgesToCompositions.Any())
-                        {
-                            m_database.DeleteAll(bridgesToCompositions);
-                        }
+                //m_database.DeleteAll(collection.Log);
 
-                        var bridgesToSteps = m_database.SelectFrom<IBatchStepBatchInvoiceItem>()
-                            .Where(b => b.InvoiceFormItemId == item.Id).Execute().ToList();
-                        if (bridgesToSteps.Any())
-                        {
-                            m_database.DeleteAll(bridgesToSteps);
-                        }
+                ////TODO Should be SP
+                //foreach (var form in collection.Forms)
+                //{
+                //    foreach (var item in form.Items)
+                //    {
+                //        m_database.DeleteFrom<IMaterialBatchCompositionFormItem>(q => q.Where(b => b.InvoiceFormItemId == item.Id));
+                //        m_database.DeleteFrom<IBatchStepBatchInvoiceItem>(q => q.Where(b => b.InvoiceFormItemId == item.Id));
+                //        m_database.DeleteFrom<IOrderItemInvoiceFormItem>(q => q.Where(b => b.InvoiceFormItemId == item.Id));
+                        
+                //        m_database.DeleteAll(item.Batches);
+                //        m_database.Delete(item);
+                //    }
+                //    m_database.Delete(form);
+                //}
 
-                        m_database.DeleteAll(item.Batches);
-                        m_database.Delete(item);
-                    }
-                    m_database.Delete(form);
-                }
-
-                m_database.Delete(collection);
+                //m_database.Delete(collection);
 
                 tx.Commit();
             }
@@ -453,7 +448,8 @@ namespace Elsa.Invoicing.Core.Data
                 .Join(c => c.Forms.Each().Items.Each().Unit)
                 .Join(c => c.Forms.Each().Items.Each().Batches)
                 .Join(c => c.Log)
-                .Where(c => c.ProjectId == m_session.Project.Id);
+                .Where(c => c.ProjectId == m_session.Project.Id)
+                .OrderBy(c => c.Forms.Each().IssueDate);
         }
 
         private IQueryBuilder<IInvoiceForm> GetInvoiceQuery()
@@ -468,6 +464,7 @@ namespace Elsa.Invoicing.Core.Data
                 .Join(i => i.FormType)
                 .Join(i => i.Supplier)
                 .Join(i => i.MaterialInventory)
+                .OrderBy(i => i.IssueDate)
                 .Where(i => i.ProjectId == m_session.Project.Id);
             return query;
         }

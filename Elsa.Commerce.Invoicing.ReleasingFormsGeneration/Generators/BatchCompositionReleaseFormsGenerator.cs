@@ -4,7 +4,9 @@ using System.Linq;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -28,8 +30,6 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
             m_batchRepository = batchRepository;
             m_database = database;
         }
-
-        protected override string FormText => "VÝROBA";
         
         protected override void GenerateItems(IMaterialInventory forInventory, int year, int month, IInvoiceFormGenerationContext context,
             IReleasingFormsGenerationTask task, Action<DateTime, IMaterialBatch, Amount, ManufacturingReleseEventDescriptor> itemCallback)
@@ -53,7 +53,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                         continue;
                     }
 
-                    itemCallback(composition.Created.Date, componentBatch,
+                    itemCallback(composition.Created, componentBatch,
                         new Amount(componentRecord.Volume, componentRecord.Unit), new ManufacturingReleseEventDescriptor()
                         {
                             BatchCompositionRecordId = componentRecord.Id,
@@ -65,6 +65,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
         private void CreateItemsByProductionSteps(IMaterialInventory forInventory, int year, int month, Action<DateTime, IMaterialBatch, Amount, ManufacturingReleseEventDescriptor> itemCallback)
         {
+            DateUtil.GetMonthDt(year, month, out var dtFrom, out var dtTo);
+
             var batchesWithStepMaterialFromThisInventory = m_batchRepository
                 .GetBatchesByProductionStepComponentInventory(forInventory.Id, year, month).ToList();
 
@@ -76,6 +78,11 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
                 foreach (var step in performedSteps)
                 {
+                    if (step.ConfirmDt < dtFrom || step.ConfirmDt > dtTo)
+                    {
+                        continue;
+                    }
+
                     foreach (var sourceBatchBridge in step.SourceBatches)
                     {
                         if (sourceBatchBridge.SourceBatch.Material.InventoryId != forInventory.Id)

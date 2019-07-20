@@ -78,7 +78,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                     f.InvoiceFormNumber = $"NESCHVALENO_{Guid.NewGuid():N}";
                     f.InvoiceNumber = referenceBatch.InvoiceNr;
                     f.InvoiceVarSymbol = referenceBatch.InvoiceVarSymbol;
-                    f.IssueDate = referenceBatch.Created.Date;
+                    f.IssueDate = m_batchFacade.GetBatchAccountingDate(referenceBatch).AccountingDate;
                     f.MaterialInventoryId = referenceBatch.Material.InventoryId;
                     f.SupplierId = referenceBatch.SupplierId;
                     f.FormTypeId = formType.Id;

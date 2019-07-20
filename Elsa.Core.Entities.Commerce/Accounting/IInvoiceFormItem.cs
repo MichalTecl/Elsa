@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -39,5 +39,8 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         int ItemLogicalNumber { get; set; }
 
         IEnumerable<IInvoiceFormItemMaterialBatch> Batches { get; }
+
+        [NVarchar(NVarchar.Max, true)]
+        string Note { get; set; }
     }
 }
