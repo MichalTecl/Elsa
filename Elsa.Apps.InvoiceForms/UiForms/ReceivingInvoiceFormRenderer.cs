@@ -66,12 +66,17 @@ namespace Elsa.Apps.InvoiceForms.UiForms
         {
             return Frame(FrameStyle.All, Div(
                 NewTable().Head("Položka", "Množství", "Cena bez DPH").Rows(m_form.Items,
-                    i => { return new object[]
+                    i =>
                     {
-                        i.MaterialName,
-                        $"{StringUtil.FormatDecimal(i.Quantity)} {i.Unit.Symbol}",
-                        StringUtil.FormatDecimal(i.SourceCurrencyPrice ?? i.PrimaryCurrencyPrice)
-                    }; })));
+                        var batchesString = string.Join(",", i.Batches.Select(b => b.MaterialBatch?.BatchNumber));
+
+                        return new object[]
+                        {
+                            HtmlLiteral($"{i.MaterialName}&nbsp;<span class=\"note\">({batchesString})</span>"),
+                            $"{StringUtil.FormatDecimal(i.Quantity)} {i.Unit.Symbol}",
+                            StringUtil.FormatPrice(i.SourceCurrencyPrice ?? i.PrimaryCurrencyPrice)
+                        };
+                    })));
         }
         
     }

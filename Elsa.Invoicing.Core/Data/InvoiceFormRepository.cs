@@ -457,6 +457,7 @@ namespace Elsa.Invoicing.Core.Data
             var query = m_database.SelectFrom<IInvoiceForm>()
                 .Join(i => i.Items)
                 .Join(i => i.Items.Each().Batches)
+                .Join(i => i.Items.Each().Batches.Each().MaterialBatch)
                 .Join(i => i.Items.Each().Conversion)
                 .Join(i => i.Items.Each().Conversion.CurrencyRate)
                 .Join(i => i.Items.Each().SourceCurrency)

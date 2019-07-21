@@ -13,15 +13,17 @@ namespace Elsa.Common
         private readonly string m_fileName;
         private readonly byte[] m_data;
         private readonly string m_contentType;
+        private readonly string m_contentDisposition;
 
         public FileResult(string fileName, byte[] data)
             : this(fileName, data, null){}
 
-        public FileResult(string fileName, byte[] data, string contentType)
+        public FileResult(string fileName, byte[] data, string contentType, string contentDisposition = "attachment")
         {
             m_fileName = fileName;
             m_data = data;
             m_contentType = contentType;
+            m_contentDisposition = contentDisposition;
         }
       
         public void WriteResponse(HttpContextBase context)
@@ -30,7 +32,7 @@ namespace Elsa.Common
 
             context.Response.Clear();
             context.Response.ContentType = m_contentType ?? $"application/{fileType}";
-            context.Response.AddHeader("Content-Disposition", $"attachment; filename={m_fileName}");
+            context.Response.AddHeader("Content-Disposition", $"{m_contentDisposition}; filename={m_fileName}");
             context.Response.OutputStream.Write(m_data, 0, m_data.Length);
             context.Response.End();
         }

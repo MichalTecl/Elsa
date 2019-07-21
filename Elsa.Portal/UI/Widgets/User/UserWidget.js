@@ -11,7 +11,7 @@ lt.element("userWidget").withModel("app.user.vm").attach(function (loginPanel, u
     var isLoggedIn = false;
 
     var updateView = function() {
-        
+
         if (!isLoggedIn) {
             loginPanel.style.display = 'block';
             detail.style.display = 'none';
@@ -44,7 +44,7 @@ lt.element("userWidget").withModel("app.user.vm").attach(function (loginPanel, u
             self.style.paddingTop = "6px";
             self.style.paddingBottom = "6px";
         }
-    }
+    };
 
     detail.addEventListener("click",
         function() {
@@ -89,5 +89,12 @@ lt.element("userWidget").withModel("app.user.vm").attach(function (loginPanel, u
         app.user.vm.changePassword(oldPass, newPass);
         
     };
+
+    try {
+        if (document.location.hostname === "localhost") {
+            var userPanelHead = document.getElementById("userPanelHead");
+            userPanelHead.style.backgroundColor = 'green';
+        }
+    } catch (e) {} 
 
 });

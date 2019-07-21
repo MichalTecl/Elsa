@@ -139,6 +139,11 @@ namespace Elsa.Common.Utils
             return s.TrimEnd('.');
         }
 
+        public static string FormatPrice(decimal price)
+        {
+            return price.ToString("F");
+        }
+
         public static string Display(this decimal value, string unit = null)
         {
             if (unit == null)

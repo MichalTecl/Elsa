@@ -116,12 +116,22 @@ html, body {
     border-bottom: 1px solid black;
 }
 
+.frame {
+    padding: 4px;
+}
+
+.frame > div {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
 .titvalcont > * {
     display: inline;
 }
 
 .titvalcont > .titvaltit {
     font-weight: bold;
+    margin-right: 4px;
 }
 
 .clrf {
@@ -130,4 +140,9 @@ html, body {
 
 .tabbed {
     margin-left: 20px;
+}
+
+.note {
+    color: #999;
+    font-style: italic;
 }

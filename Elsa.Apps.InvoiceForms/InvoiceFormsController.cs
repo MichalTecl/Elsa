@@ -11,11 +11,13 @@ using Elsa.Apps.InvoiceForms.UiForms;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Common.Noml.Forms;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
 
 using Robowire.RoboApi;
+using SelectPdf;
 
 namespace Elsa.Apps.InvoiceForms
 {
@@ -26,6 +28,7 @@ namespace Elsa.Apps.InvoiceForms
         private readonly InvoiceFormsQueryingFacade m_facade;
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
         private readonly IInvoiceFormsGenerationRunner m_generationRunner;
+        private readonly ISession m_session;
 
         public InvoiceFormsController(IWebSession webSession,
             ILog log,
@@ -38,6 +41,7 @@ namespace Elsa.Apps.InvoiceForms
             m_facade = facade;
             m_invoiceFormsRepository = invoiceFormsRepository;
             m_generationRunner = generationRunner;
+            m_session = webSession;
         }
 
         public InvoiceFormsCollection<ReceivingInvoiceFormModel> GetReceivingInvoicesCollection(int month, int year)
@@ -80,7 +84,7 @@ namespace Elsa.Apps.InvoiceForms
             }
         }
 
-        public HtmlResult DownloadReceivingInvoice(int id)
+        public HtmlResult GetFormHtml(int id)
         {
             var inv = m_invoiceFormsRepository.GetInvoiceFormById(id);
 
@@ -89,7 +93,7 @@ namespace Elsa.Apps.InvoiceForms
             return new HtmlResult(new Paper(inv.InvoiceFormNumber, renderer));
         }
 
-        public FileResult DownloadInvoiceForm(int id)
+        public FileResult LoadFormPdf(int id)
         {
             var invoiceForm = m_invoiceFormsRepository.GetInvoiceFormById(id);
             if (invoiceForm == null)
@@ -100,9 +104,7 @@ namespace Elsa.Apps.InvoiceForms
             //TODO distinguish generator
             var renderer = new ReceivingInvoiceFormRenderer(invoiceForm);
             
-            var fileName = $"{invoiceForm.InvoiceFormNumber}.pdf";
-
-            return new FileResult(fileName, renderer.GetPdf());
+            return new FileResult($"{invoiceForm.InvoiceFormNumber}.pdf", renderer.GetPdf(), "application/pdf", "inline");
         }
 
         public InvoiceFormsCollection<ReceivingInvoiceFormModel> GenerateReceivingInvoicesCollection(int type, int year, int month)

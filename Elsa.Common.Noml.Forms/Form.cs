@@ -10,10 +10,6 @@ using System.Web;
 using Elsa.Common.Noml.Core;
 using Elsa.Common.Noml.Forms.Tables;
 
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using iTextSharp.tool.xml;
-
 using IElement = Elsa.Common.Noml.Core.IElement;
 
 namespace Elsa.Common.Noml.Forms
@@ -150,12 +146,7 @@ namespace Elsa.Common.Noml.Forms
 
             var cssText = File.ReadAllText(HttpContext.Current.Server.MapPath("/Style/PaperForms.css"));
 
-            using (var pdfStream = new MemoryStream())
-            {
-                PdfGenerator.Generate(htmlText.ToString(), cssText, pdfStream);
-
-                return pdfStream.GetBuffer();
-            }
+            return PdfGenerator.Generate(htmlText.ToString(), cssText);
         }
         
         [DebuggerNonUserCode]
