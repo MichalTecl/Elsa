@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common.Security;
+using Elsa.Core.Entities.Commerce.Common.SystemCounters;
 using Elsa.Core.Entities.Commerce.Core;
 using Elsa.Core.Entities.Commerce.Inventory;
 
@@ -65,5 +66,8 @@ namespace Elsa.Core.Entities.Commerce.Accounting
 
         int? SourceTaskId { get; set; }
         IReleasingFormsGenerationTask SourceTask { get; }
+
+        int? CounterId { get; set; }
+        ISystemCounter Counter { get; }
     }
 }

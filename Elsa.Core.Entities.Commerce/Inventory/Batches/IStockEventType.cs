@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Elsa.Core.Entities.Commerce.Common.SystemCounters;
 using Elsa.Core.Entities.Commerce.Core;
 
 using Robowire.RobOrm.Core;
@@ -25,5 +25,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         bool IsSubtracting { get; set; }
 
         bool RequiresNote { get; set; }
+
+        int? InvoiceFormNumberCounterId { get; set; }
+        ISystemCounter InvoiceFormNumberCounter { get; }
     }
 }

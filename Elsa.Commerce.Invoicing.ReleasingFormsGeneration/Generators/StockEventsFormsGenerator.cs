@@ -64,7 +64,13 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
         protected override void CustomizeFormCreation(List<ItemReleaseModel> formItems, IInvoiceForm form)
         {
+            if (formItems[0].Descriptor.Event.Type.InvoiceFormNumberCounterId == null)
+            {
+                throw new InvalidOperationException($"No InvoiceFormNumberCounterId defined for StockEventType = {formItems[0].Descriptor.Event.Type.Name}");
+            }
+
             form.Text = formItems[0].Descriptor.StockEventTypeName;
+            form.CounterId = formItems[0].Descriptor.Event.Type.InvoiceFormNumberCounterId;
         }
 
         protected override string GetGroupingKey(ItemReleaseModel item)

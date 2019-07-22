@@ -379,9 +379,13 @@ namespace Elsa.Invoicing.Core.Data
 
                 foreach (var form in collection.Forms)
                 {
-                    int counterId; 
+                    int counterId;
 
-                    if (form.SourceTaskId != null)
+                    if (form.CounterId != null)
+                    {
+                        counterId = form.CounterId.Value;
+                    }
+                    else if (form.SourceTaskId != null)
                     {
                         var task = GetTask(form.SourceTaskId.Value);
                         counterId = task.CounterId;
