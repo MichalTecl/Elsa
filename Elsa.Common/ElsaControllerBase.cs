@@ -5,7 +5,7 @@ using System.Threading;
 using System.Web.Routing;
 
 using Elsa.Common.Logging;
-
+using Newtonsoft.Json;
 using Robowire.RoboApi.Extensibility;
 
 namespace Elsa.Common
@@ -97,13 +97,11 @@ namespace Elsa.Common
             {
                 context.HttpContext.Response.StatusCode = 401;
             }
-            else
-            {
-                context.HttpContext.Response.StatusCode = 500;
-            }
+
+            var errorObj = new ErrorResponseModel(500, exception?.Message ?? "Došlo k chybě");
 
             context.HttpContext.Response.ClearContent();
-            context.HttpContext.Response.Write(exception?.Message ?? "Došlo k chybě :(");
+            context.HttpContext.Response.Write(JsonConvert.SerializeObject(errorObj));
         }
 
         private static string GetParamString(MethodInfo method, object[] parameters)
@@ -136,6 +134,18 @@ namespace Elsa.Common
         private static bool ShouldBeLogged(MethodInfo method)
         {
             return !Attribute.IsDefined(method, typeof(DoNotLogAttribute));
+        }
+
+        internal class ErrorResponseModel
+        {
+            public ErrorResponseModel(int statusCode, string executionError)
+            {
+                StatusCode = statusCode;
+                ExecutionError = executionError;
+            }
+
+            public int StatusCode { get; }
+            public string ExecutionError { get; }
         }
     }
 }

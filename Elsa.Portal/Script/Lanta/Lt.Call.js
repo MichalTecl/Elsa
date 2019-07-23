@@ -63,10 +63,40 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
 
             var parsedResponse = xmlHttp.responseText;
 
+            if (parsedResponse.indexOf("ExecutionError") > -1) {
+                try {
+                    var errorObj = JSON.parse(parsedResponse);
+
+                    if (errorObj.ExecutionError && errorObj.StatusCode > 499) {
+                        try {
+                            errorHandler(errorObj.StatusCode + ": " + errorObj.ExecutionError);
+                            return;
+                        }
+                        finally
+                        {
+                            if (!silent) {
+                                lt.api.usageManager.notifyOperationEnd();
+                            }
+                        }
+                    }
+
+                } catch (e) {
+                    try {
+                        console.error("Parsing of error response failed:" + e.toString());
+                        return;
+                    } finally {
+                        if (!silent) {
+                            lt.api.usageManager.notifyOperationEnd();
+                        }
+                    }
+                } 
+            }
+
             if (!noJson) {
                 try {
                     parsedResponse = JSON.parse(parsedResponse);
                 } catch (e) {
+                    console.warn("JSON expected - use .nojson modifier in call builder (" + url +")");
                 }
             }
 
