@@ -95,7 +95,6 @@
     <Content Include="Bundles\Bundle.ashx" />
     <Content Include="Script\Apps\Accounting\FixedCosts.vm.js" />
     <Content Include="Script\Apps\Inventory\WarehouseActions\StockEvents.VM.js" />
-    <Content Include="Error500.ashx" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -221,9 +220,6 @@
   <ItemGroup>
     <Compile Include="Bundles\Bundle.ashx.cs">
       <DependentUpon>Bundle.ashx</DependentUpon>
-    </Compile>
-    <Compile Include="Error500.ashx.cs">
-      <DependentUpon>Error500.ashx</DependentUpon>
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>

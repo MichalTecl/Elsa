@@ -6,7 +6,7 @@ using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
-
+using Elsa.Core.Entities.Commerce.Inventory.Kits;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Impl
@@ -223,6 +223,41 @@ namespace Elsa.Commerce.Core.Impl
                 .Skip(pageSize*pageNumber)
                 .Take(pageSize)
                 .Execute();
+        }
+
+        public IPurchaseOrder ResolveSingleItemKitSelection(IPurchaseOrder entity)
+        {
+            var modified = false;
+
+            foreach (var orderItem in entity.Items)
+            {
+                var kit = m_kitProductRepository.GetKitForOrderItem(entity, orderItem).ToList();
+                if (!kit.Any())
+                {
+                    continue;
+                }
+                
+                foreach (var kitItem in kit)
+                {
+                    var groupItems = kitItem.GroupItems.ToList();
+                    if (kitItem.SelectedItem != null || groupItems.Count != 1)
+                    {
+                        // Item already selected or it should be chosen by the operator
+                        continue;
+                    }
+
+                    m_kitProductRepository.SetKitItemSelection(entity, orderItem, groupItems.Single().Id, kitItem.KitItemIndex);
+                    modified = true;
+                }
+
+            }
+
+            if (!modified)
+            {
+                return entity;
+            }
+
+            return m_orderRepository.GetOrder(entity.Id);
         }
 
         private IPurchaseOrder PerformErpActionSafe(

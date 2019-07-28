@@ -17,5 +17,6 @@ namespace Elsa.Commerce.Core
         IEnumerable<IOrderItem> GetAllConcreteOrderItems(IPurchaseOrder order);
 
         IEnumerable<IPurchaseOrder> GetOrdersByUsedBatch(int batchId, int pageSize, int pageNumber);
+        IPurchaseOrder ResolveSingleItemKitSelection(IPurchaseOrder entity);
     }
 }

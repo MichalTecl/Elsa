@@ -223,6 +223,8 @@ namespace Elsa.App.OrdersPacking
 
         private PackingOrderModel MapOrder(IPurchaseOrder entity, Tuple<long, int, decimal> orderItemBatchPreference = null)
         {
+            entity = m_ordersFacade.ResolveSingleItemKitSelection(entity);
+
             var batchAssignments = m_batchFacade.TryResolveBatchAssignments(entity, orderItemBatchPreference).ToList();
 
             var orderModel = new PackingOrderModel
@@ -237,7 +239,7 @@ namespace Elsa.App.OrdersPacking
                                      DiscountsText = entity.DiscountsText,
                                      Price = $"{StringUtil.FormatDecimal(entity.PriceWithVat)} {entity.Currency.Symbol}"
                                  };
-
+            
             foreach (var sourceItem in entity.Items)
             {
                 var item = new PackingOrderItemModel
@@ -249,10 +251,11 @@ namespace Elsa.App.OrdersPacking
                                };
 
                 var kitItems = new List<KitItemsCollectionModel>();
-
+                
                 foreach (var sourceKitItem in m_kitProductRepository.GetKitForOrderItem(entity, sourceItem))
                 {
                     var model = new KitItemsCollectionModel(sourceKitItem);
+                    
                     if (sourceKitItem.SelectedItem != null)
                     {
                         var selitem = new PackingOrderItemModel
