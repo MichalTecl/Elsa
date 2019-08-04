@@ -37,7 +37,7 @@ namespace Elsa.Integration.PaymentSystems.Common.Internal
 
         public IEnumerable<IPaymentSystemClient> GetAllPaymentSystemClients()
         {
-            return m_database.SelectFrom<IPaymentSource>().Where(p => p.ProjectId == m_session.Project.Id).Execute().Select(GetClient);
+            return m_database.SelectFrom<IPaymentSource>().Where(p => p.ProjectId == m_session.Project.Id && (p.IsActive != false)).Execute().Select(GetClient);
         }
     }
 }

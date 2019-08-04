@@ -18,5 +18,7 @@ namespace Elsa.Core.Entities.Commerce.Integration
 
         [NVarchar(-1, true)]
         string ClientData { get; set; }
+
+        bool? IsActive { get; set; }
     }
 }

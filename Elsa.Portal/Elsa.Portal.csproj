@@ -95,6 +95,7 @@
     <Content Include="Bundles\Bundle.ashx" />
     <Content Include="Script\Apps\Accounting\FixedCosts.vm.js" />
     <Content Include="Script\Apps\Inventory\WarehouseActions\StockEvents.VM.js" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -103,7 +104,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Bundles\Lanta" />
+    <None Include="Bundles\Lanta">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
     <Content Include="Script\Apps\Crm\Customers.VM.js" />
