@@ -104,9 +104,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Bundles\Lanta">
+    <Content Include="Bundles\Lanta">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Global.asax" />
     <Content Include="Home.html" />
     <Content Include="Script\Apps\Crm\Customers.VM.js" />

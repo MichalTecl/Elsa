@@ -6,6 +6,7 @@ using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.Kits;
 using Robowire.RobOrm.Core;
 
@@ -101,11 +102,16 @@ namespace Elsa.Commerce.Core.Impl
                 order.PackingDt = DateTime.Now;
                 order.PackingUserId = m_session.User.Id;
 
-                foreach (var item in order.Items)
+                foreach (var item in GetAllConcreteOrderItems(order))
                 {
-                    var assignments = item.AssignedBatches.ToList();
+                    var assignments = GetAssignedBatches(item.Id).ToList();
                     if (assignments.Count == 0)
                     {
+                        if (item.KitChildren.Any())
+                        {
+                            continue;
+                        }
+
                         throw new InvalidOperationException($"Batch assignment missing - OrderItemId = {item.Id}");
                     }
 
@@ -304,6 +310,15 @@ namespace Elsa.Commerce.Core.Impl
             }
 
             return order;
+        }
+
+        private IEnumerable<IOrderItemMaterialBatch> GetAssignedBatches(long orderItemId)
+        {
+            var qry = m_database.SelectFrom<IOrderItemMaterialBatch>()
+                .Join(ib => ib.MaterialBatch)
+                .Where(ib => ib.OrderItemId == orderItemId);
+
+            return qry.Execute();
         }
     }
 }
