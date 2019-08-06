@@ -121,10 +121,11 @@ namespace Elsa.Commerce.Core.Impl
                         throw new InvalidOperationException($"Invalid assignment quantity - OrderItemId={item.Id}, diff={Math.Abs(sum - item.Quantity)}");
                     }
 
-                    foreach (var assignment in assignments)
-                    {
-                        m_batchFacade.AssignOrderItemToBatch(assignment.MaterialBatchId, order, item.Id, assignment.Quantity);
-                    }
+                    // why we are duplicating assignments here? I cannot understand what I tried to do here :(
+                    //foreach (var assignment in assignments)
+                    //{
+                    //    m_batchFacade.AssignOrderItemToBatch(assignment.MaterialBatchId, order, item.Id, assignment.Quantity);
+                    //}
                 }
 
                 if (order.ErpId == null)

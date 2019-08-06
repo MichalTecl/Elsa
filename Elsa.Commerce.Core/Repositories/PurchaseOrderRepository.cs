@@ -215,6 +215,7 @@ namespace Elsa.Commerce.Core.Repositories
                 m_database.SelectFrom<IOrderItem>()
                     .Join(i => i.KitParent)
                     .Join(i => i.KitParent.PurchaseOrder)
+                    .Join(i => i.AssignedBatches)
                     //.Where(i => i.KitParentId != null)
                     .Where(i => i.KitParentId == parentItemId)
                     .Where(i => i.KitParent.PurchaseOrder.ProjectId == m_session.Project.Id)
