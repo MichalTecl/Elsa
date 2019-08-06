@@ -1,4 +1,50 @@
-﻿var app = app || {};
+﻿var natcharmap = natcharmap ||
+{
+    "Á": "A",
+    "Č": "C",
+    "Ď": "D",
+    "Ě": "E",
+    "É": "E",
+    "Í": "I",
+    "Ň": "N",
+    "Ó": "O",
+    "Ř": "R",
+    "Š": "S",
+    "Ť": "T",
+    "Ú": "U",
+    "Ů": "U",
+    "Ý": "Y",
+    "Ž": "Z",
+    "á": "a",
+    "č": "c",
+    "ď": "d",
+    "ě": "e",
+    "é": "e",
+    "í": "i",
+    "ň": "n",
+    "ó": "o",
+    "ř": "r",
+    "š": "s",
+    "ť": "t",
+    "ú": "u",
+    "ů": "u",
+    "ý": "y",
+    "ž": "z",
+    "denat": function(inp) {
+        var rb = [];
+
+        for (var i = 0; i < inp.length; i++) {
+            var orichar = inp.charAt(i);
+            rb.push(natcharmap[orichar] || orichar);
+        }
+
+        return rb.join();
+    }
+ };
+
+
+
+var app = app || {};
 app.ui = app.ui || {};
 app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, argumentFactory) {
 
@@ -46,7 +92,7 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
             function(arr) {
                 for (i = 0; i < arr.length; i++) {
                     /*check if the item starts with the same letters as the text field value:*/
-                    if (/* arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()*/ arr[i].toUpperCase().indexOf(val.toUpperCase()) > -1) {
+                    if (/* arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()*/ natcharmap.denat(arr[i].toUpperCase()).indexOf(natcharmap.denat(val.toUpperCase())) > -1) {
                         /*create a DIV element for each matching element:*/
                         b = document.createElement("DIV");
                         /*make the matching letters bold:*/

@@ -244,14 +244,13 @@ namespace Elsa.Commerce.Core.Production
                     throw new InvalidOperationException($"Šarže {childBatch.Batch.BatchNumber} je již plně spotřebována");
                 }
 
-                var amountToAllocate =
-                    m_amountProcessor.Min(
-                        m_amountProcessor.Min(
-                            batchAvailableAmount,
-                            new Amount(
-                                batchPlaceholder.UsedAmount,
-                                m_unitRepository.GetUnitBySymbol(batchPlaceholder.UsedAmountUnitSymbol))),
-                        new Amount(usedAmount, unit));
+                var placeholderUnit = m_unitRepository.GetUnitBySymbol(batchPlaceholder.UsedAmountUnitSymbol);
+
+                var usedAmountAmount = m_unitConversion.ConvertAmount(new Amount(usedAmount, unit), placeholderUnit.Id);
+                var placeholdlerAmount = new Amount(batchPlaceholder.UsedAmount, placeholderUnit);
+                var availabAmount = m_unitConversion.ConvertAmount(batchAvailableAmount, placeholderUnit.Id);
+
+                var amountToAllocate = m_unitConversion.ConvertAmount(m_amountProcessor.Min(availabAmount, usedAmountAmount, placeholdlerAmount), placeholderUnit.Id);
 
                 m_batchFacade.AssignComponent(parentBatch.BatchId, childBatch.Batch.Id, amountToAllocate);
 

@@ -33,6 +33,16 @@ namespace Elsa.Commerce.Core.Units
             return Calculate(a, b, Math.Min);
         }
 
+        public Amount Min(Amount a, params Amount[] b)
+        {
+            foreach(var amt in b)
+            {
+                a = Min(a, amt);
+            }
+
+            return a;
+        }
+
         public Amount Divide(Amount a, Amount b)
         {
             return Calculate(a, b, (c, d) => c/d);
