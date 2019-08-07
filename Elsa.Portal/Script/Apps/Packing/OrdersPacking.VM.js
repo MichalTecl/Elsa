@@ -211,6 +211,12 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     };
 
     setTimeout(loadOrdersToPack, 0);
+
+    self.releaseBatches = function() {
+        lt.api("/materialBatches/releaseUnsentOrdersAllocations").get(function() {
+            self.cancelCurrentOrder();
+        });
+    };
 };
 
 app.ordersPacking.vm = app.ordersPacking.vm || new app.ordersPacking.ViewModel();

@@ -21,5 +21,10 @@ namespace Elsa.Apps.Inventory
         {
             m_batchFacade.DeleteBatch(id);
         }
+
+        public void ReleaseUnsentOrdersAllocations()
+        {
+            m_batchFacade.ReleaseUnsentOrdersAllocations();
+        }
     }
 }

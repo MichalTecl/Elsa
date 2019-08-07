@@ -60,5 +60,6 @@ namespace Elsa.Commerce.Core.Warehouse
         BatchPrice GetBatchPrice(int batchId);
 
         Amount GetNumberOfProducedProducts(int accountingDateYear, int accountingDateMonth, int inventoryId);
+        void ReleaseUnsentOrdersAllocations();
     }
 }

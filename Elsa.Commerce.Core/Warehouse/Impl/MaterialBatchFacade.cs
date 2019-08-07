@@ -132,8 +132,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 }
                 
                 m_orderRepository.UpdateOrderItemBatch(orderItem, batchId, assignmentQuantity);
-
+                
                 tx.Commit();
+
+                InvalidateBatchCache(batchId);
             }
         }
         
@@ -287,6 +289,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     {
                         m_database.Delete(oldAssignment);
                         tx.Commit();
+                        InvalidateBatchCache(oldAssignment.MaterialBatchId);
                         return;
                     }
 
@@ -935,6 +938,19 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                        (ad.AccountingDate.Year == accountingDateYear) &&
                        (ad.AccountingDate.Month == accountingDateMonth);
             }).Select(b => new Amount(b)));
+        }
+
+        public void ReleaseUnsentOrdersAllocations()
+        {
+            var releasedBatches = new List<int>();
+            m_database.Sql()
+                .Call("sp_deallocateUnpackOrderBatches")
+                .ReadRows<int>(i => releasedBatches.Add(i));
+
+            foreach (var batchId in releasedBatches)
+            {
+                InvalidateBatchCache(batchId);
+            }
         }
 
         #region Nested
