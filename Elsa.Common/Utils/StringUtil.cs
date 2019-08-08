@@ -154,7 +154,7 @@ namespace Elsa.Common.Utils
             return $"{FormatDecimal(value)}{unit}";
         }
 
-        public static string Limit(string inp, int len)
+        public static string Limit(this string inp, int len)
         {
             if (string.IsNullOrEmpty(inp))
             {

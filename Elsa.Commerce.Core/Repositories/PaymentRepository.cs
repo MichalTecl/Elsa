@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Common;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Common;
 
 using Robowire.RobOrm.Core;
@@ -47,6 +48,17 @@ namespace Elsa.Commerce.Core.Repositories
             payment.ProjectId = m_session.Project.Id;
 
             var entity = m_database.New(payment);
+
+            entity.RemoteAccountNumber = entity.RemoteAccountNumber.Limit(255);
+            entity.RemoteAccountBankCode = entity.RemoteAccountBankCode.Limit(64);
+            entity.RemoteBankName = entity.RemoteBankName.Limit(255);
+            entity.ConstantSymbol = entity.ConstantSymbol.Limit(255);
+            entity.SpecificSymbol = entity.SpecificSymbol.Limit(255);
+            entity.VariableSymbol = entity.VariableSymbol.Limit(255);
+            entity.Message = entity.Message.Limit(255);
+            entity.SearchText = entity.SearchText.Limit(255);
+            entity.SenderName = entity.SenderName.Limit(100);
+
             m_database.Save(entity);
             m_cache.Add(entity);
         }
