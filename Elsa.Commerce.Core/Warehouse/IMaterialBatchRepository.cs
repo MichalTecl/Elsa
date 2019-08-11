@@ -24,6 +24,13 @@ namespace Elsa.Commerce.Core.Warehouse
             bool includeClosed = false,
             bool includedUnavailable = false);
 
+        IEnumerable<int> GetBatchIds(DateTime from,
+            DateTime to,
+            int? materialId,
+            bool includeLocked = false,
+            bool includeClosed = false,
+            bool includedUnavailable = false);
+
         MaterialBatchComponent SaveBottomLevelMaterialBatch(
             int id,
             IMaterial material,

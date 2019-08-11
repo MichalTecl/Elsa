@@ -132,8 +132,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     b.Available = available;
                 }
 
-                b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
-                b.CanDelete = string.IsNullOrWhiteSpace(b.NoDelReason);
+                //b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
+                b.CanDelete = !(b.HasStockEvents || b.NumberOfCompositions > 0 || b.NumberOfOrders > 0);
 
                 if (b.HasStockEvents)
                 {

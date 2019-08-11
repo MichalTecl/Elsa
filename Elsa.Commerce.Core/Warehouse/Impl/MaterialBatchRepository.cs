@@ -124,6 +124,33 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return entities;
         }
 
+        public IEnumerable<int> GetBatchIds(DateTime @from, DateTime to, int? materialId, bool includeLocked = false,
+            bool includeClosed = false, bool includeUnavailable = false)
+        {
+            return QueryBatches(query =>
+            {
+                if (materialId != null)
+                {
+                    query = query.Where(b => b.MaterialId == materialId.Value);
+                }
+
+                if (!includeLocked)
+                {
+                    query = query.Where(b => b.LockDt == null);
+                }
+
+                if (!includeClosed)
+                {
+                    query = query.Where(b => b.CloseDt == null);
+                }
+
+                if (!includeUnavailable)
+                {
+                    query = query.Where(b => b.IsAvailable);
+                }
+            }).Select(b => b.Id);
+        }
+
         public MaterialBatchComponent SaveBottomLevelMaterialBatch(int id, IMaterial material, decimal amount, IMaterialUnit unit, string batchNr, DateTime receiveDt, decimal price, string invoiceNr, string supplierName, string currencySymbol, string variableSymbol)
         {
             if ((material.ProjectId != m_session.Project.Id) || (unit.ProjectId != m_session.Project.Id))

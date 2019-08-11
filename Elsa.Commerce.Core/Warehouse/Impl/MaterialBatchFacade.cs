@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using System.Threading;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
 using Elsa.Commerce.Core.Model.ProductionSteps;
@@ -141,7 +141,56 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         
         public Amount GetAvailableAmount(int batchId)
         {
-            return GetBatchStatus(batchId).CurrentAvailableAmount;
+            return m_cache.ReadThrough(GetBatchAmountCacheKey(batchId), TimeSpan.FromMinutes(10), () =>
+            {
+                var result = ExecBatchAmountProcedure(batchId, null).FirstOrDefault();
+
+                if (result != null)
+                {
+                    return new Amount(result.Amount, m_unitRepository.GetUnit(result.UnitId));
+                }
+
+                var b = m_batchRepository.GetBatchById(batchId);
+                if (b == null)
+                {
+                    throw new InvalidOperationException("Invalid entity reference");
+                }
+
+                return new Amount(0, b.ComponentUnit);
+            });
+        }
+
+        private static readonly object s_preloadLock = new object();
+        public void PreloadBatchAmountCache()
+        {
+            try
+            {
+                if (!Monitor.TryEnter(s_preloadLock))
+                {
+                    return;
+                }
+
+                var flag = $"batchAmountCachePreloaded_for_project_{m_session.Project.Id}";
+
+                var itsMe = Guid.NewGuid();
+                if (!m_cache.ReadThrough(flag, TimeSpan.FromMinutes(10), () => itsMe).Equals(itsMe))
+                {
+                    //it returned another Guid so it was already preloaded in last 10 minutes
+                    return;
+                }
+
+                var results = ExecBatchAmountProcedure(null, null);
+
+                foreach (var res in results)
+                {
+                    m_cache.ReadThrough(GetBatchAmountCacheKey(res.BatchId), TimeSpan.FromMinutes(10),
+                        () => new Amount(res.Amount, m_unitRepository.GetUnit(res.UnitId)));
+                }
+            }
+            finally
+            {
+                Monitor.Exit(s_preloadLock);
+            }
         }
 
         public IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference = null)
@@ -548,6 +597,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public MaterialLevelModel GetMaterialLevel(int materialId)
         {
+            PreloadBatchAmountCache();
+
             return m_cache.ReadThrough(GetMaterialLevelCacheKey(materialId), TimeSpan.FromDays(1),
                 () =>
                 {
@@ -559,15 +610,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     var amount = new Amount(0, material.NominalUnit);
 
                     var batches =
-                        m_batchRepository.GetMaterialBatches(DateTime.Now.AddYears(-10),
+                        m_batchRepository.GetBatchIds(DateTime.Now.AddYears(-10),
                             DateTime.Now.AddYears(1),
-                            false,
-                            materialId,
-                            true);
+                            materialId:material.Id);
 
-                    foreach (var b in batches)
+                    foreach (var batchId in batches)
                     {
-                        amount = m_amountProcessor.Add(amount, GetAvailableAmount(b.Batch.Id));
+                        amount = m_amountProcessor.Add(amount, GetAvailableAmount(batchId));
                     }
                     
                     var threshold = m_materialThresholdRepository.GetThreshold(materialId) ?? CreateFakeThreshold(material, amount);
@@ -742,7 +791,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         
         public IMaterialBatchStatus GetBatchStatus(int batchId)
         {
-            return m_cache.ReadThrough(GetBatchAmountCacheKey(batchId),
+            return m_cache.ReadThrough(GetBatchStatusCacheKey(batchId),
                 TimeSpan.FromMinutes(10),
                 () => m_batchStatusManager.GetStatus(batchId));
         }
@@ -750,6 +799,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         public BatchPrice GetBatchPrice(int batchId)
         {
             return GetBatchStatus(batchId).Ensure().BatchPrice;
+        }
+
+        private string GetBatchStatusCacheKey(int batchId)
+        {
+            return $"btchstat_{batchId}";
         }
 
         private string GetBatchAmountCacheKey(int batchId)
@@ -767,6 +821,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             var materialId = GetMaterialIdByBatchId(batchId);
             
             m_cache.Remove(GetMaterialLevelCacheKey(materialId));
+            m_cache.Remove(GetBatchStatusCacheKey(batchId));
             m_cache.Remove(GetBatchAmountCacheKey(batchId));
         }
 
@@ -953,6 +1008,20 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
+        private IList<BatchAmountProcedureResult> ExecBatchAmountProcedure(int? batchId, int? materialId)
+        {
+            var result = new List<BatchAmountProcedureResult>();
+
+            m_database.Sql().Call("CalculateBatchUsages")
+                .WithParam("@ProjectId", m_session.Project.Id)
+                .WithParam("@batchId", batchId)
+                .WithParam("@materialId", materialId)
+                .ReadRows<int, int, decimal>((bId, unitId, amount) =>
+                    result.Add(new BatchAmountProcedureResult(bId, unitId, amount)));
+
+            return result;
+        }
+
         #region Nested
         private class DefaultThreshold : IMaterialThreshold
         {
@@ -977,6 +1046,20 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             public int UpdateUserId { get; set; }
 
             public IUser UpdateUser { get; } = null;
+        }
+
+        private sealed class BatchAmountProcedureResult
+        {
+            public readonly int BatchId;
+            public readonly int UnitId;
+            public readonly decimal Amount;
+
+            public BatchAmountProcedureResult(int batchId, int unitId, decimal amount)
+            {
+                BatchId = batchId;
+                UnitId = unitId;
+                Amount = amount;
+            }
         }
 
         #endregion
