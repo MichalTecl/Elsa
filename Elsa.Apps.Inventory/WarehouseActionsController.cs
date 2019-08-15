@@ -96,5 +96,7 @@ namespace Elsa.Apps.Inventory
         {
             m_batchFacade.DeleteBatch(batchId);
         }
+
+
     }
 }

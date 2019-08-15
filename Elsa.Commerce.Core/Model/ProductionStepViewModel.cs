@@ -70,18 +70,23 @@ namespace Elsa.Commerce.Core.Model
             return result;
         }
 
-        public bool IsSameStep(ProductionStepViewModel other)
+        public bool IsSameStep(ProductionStepViewModel other, bool ignoreBatches)
         {
             if ((MaterialId != other.MaterialId) || (MaterialProductionStepId != other.MaterialProductionStepId))
             {
                 return false;
             }
 
+            if (ignoreBatches && IsAutoBatch && other.IsAutoBatch)
+            {
+                return true;
+            }
+
             if (BatchIds.Count != other.BatchIds.Count)
             {
                 return false;
             }
-
+            
             return BatchIds.All(myBid => other.BatchIds.Contains(myBid));
         }
 

@@ -6,6 +6,7 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.Kits;
 
 using Robowire.RobOrm.Core;
@@ -97,6 +98,11 @@ namespace Elsa.Commerce.Core.Repositories
                     {
                         if (group.SelectedItem != null)
                         {
+                            var assignmentsToDelete = m_database.SelectFrom<IOrderItemMaterialBatch>()
+                                .Where(a => a.OrderItemId == group.SelectedItem.Id).Execute();
+
+                            m_database.DeleteAll(assignmentsToDelete);
+
                             m_database.Delete(group.SelectedItem);
                         }
 

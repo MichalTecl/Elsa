@@ -3,8 +3,8 @@
         <div class="stepMaterial" data-bind="text:MaterialName"></div>
         <div class="stepName" data-bind="text:StepName"></div>
     </div>
-    <div id="stepBatch" data-bind="class.hidden:IsAutoBatch">
-        <div id="stepBatchVw">
+    <div id="stepBatch" >
+        <div id="stepBatchVw"><!-- data-bind="class.hidden:IsAutoBatch" -->
             <div class="formRow">
                 <label>Číslo šarže</label>
                 <div data-bind="class!.hidden:NeedsBatchNumber" class="stackLeft">
@@ -12,7 +12,7 @@
                 </div>
                 <div id="staticBatchView" data-bind="text:BatchNumber; class.hidden:NeedsBatchNumber">?</div>
             </div>
-            
+
 
             <div data-bind="class.hidden:NeedsBatchNumber">
                 <div class="formRow">
@@ -24,10 +24,10 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="formRow" data-bind="class!.hidden:hasComponents">
                     <div id="stepMaterialsPanel">
-                        
+
                         <label>Použitý materiál</label>
                         <div class="gridRow gridHead">
                             <div class="cell10">Materiál</div>
@@ -61,15 +61,15 @@
 
                 <div id="stepWorkerPanel" data-bind="class!.hidden:RequiresWorkerReference" class="formRow">
                     <label>Pracovník</label>
-                    <input id="tbWorker" data-bind="value:Worker" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)"/>
+                    <input id="tbWorker" data-bind="value:Worker" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)" />
                 </div>
                 <div id="stepTimePanel" data-bind="class!.hidden:RequiresTime" class="formRow">
                     <label>Počet hodin</label>
-                    <input id="tbTime" data-bind="value:Hours" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)"/>
+                    <input id="tbTime" data-bind="value:Hours" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)" />
                 </div>
                 <div id="stepPricePanel" data-bind="class!.hidden:RequiresPrice" class="formRow">
                     <label>Cena</label>
-                    <input id="tbPrice" data-bind="value:Price" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)"/>
+                    <input id="tbPrice" data-bind="value:Price" event-bind="change:onAdditionalFieldsUpdate($tbWorker.value, $tbTime.value, $tbPrice.value)" />
                 </div>
             </div>
 

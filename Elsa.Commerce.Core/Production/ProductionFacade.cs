@@ -470,14 +470,19 @@ namespace Elsa.Commerce.Core.Production
             }
 
             var sourceSteps = GetStepsToProceed(batchId, materialId, true).ToList();
-            var sourceStep = sourceSteps.FirstOrDefault(srs => srs.IsSameStep(model));
+            var sourceStep = sourceSteps.FirstOrDefault(srs => srs.IsSameStep(model, false));
 
+            if (sourceStep == null && model.IsAutoBatch)
+            {
+                sourceStep = sourceSteps.FirstOrDefault(srs => srs.IsSameStep(model, true));
+            }
+            
             if ((batchId != null) && (sourceStep == null))
             {
                 throw new InvalidOperationException("Pro požadovanou šarži není možné vložit tento výrobní krok");
             }
 
-            if ((sourceStep == null) && model.NeedsBatchNumber)
+            if (sourceStep == null)
             {
                 if (model.NeedsBatchNumber)
                 {
