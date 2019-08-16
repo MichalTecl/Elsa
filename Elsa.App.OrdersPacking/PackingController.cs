@@ -240,7 +240,7 @@ namespace Elsa.App.OrdersPacking
                                      Price = $"{StringUtil.FormatDecimal(entity.PriceWithVat)} {entity.Currency.Symbol}"
                                  };
             
-            foreach (var sourceItem in entity.Items)
+            foreach (var sourceItem in entity.Items.OrderBy(i => i.Id))
             {
                 var item = new PackingOrderItemModel
                                {

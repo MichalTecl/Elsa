@@ -41,22 +41,24 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IEnumerable<KitItemsCollection> GetKitForOrderItem(IPurchaseOrder order, IOrderItem item)
         {
+            var result = new List<KitItemsCollection>();
+
             var matchingDefinitions = GetAllKitDefinitions().Where(k => k.IsMatch(order, item)).OrderBy(k => k.Id).ToList();
             if (matchingDefinitions.Count == 0)
             {
-                yield break;
+                return result;
             }
 
             var selectedChildItems = m_orderRepository.GetChildItemsByParentItemId(item.Id).OrderBy(i => i.Id).ToList();
 
             for (var kitItemIndex = 0; kitItemIndex < (int)item.Quantity; kitItemIndex++)
             {
-                foreach (var kitDefinition in matchingDefinitions)
+                foreach (var kitDefinition in matchingDefinitions.OrderBy(md => md.Id))
                 {
-                    foreach (var selection in kitDefinition.SelectionGroups)
+                    foreach (var selection in kitDefinition.SelectionGroups.OrderBy(sg => sg.Id))
                     {
                         IOrderItem selectedItem = null;
-                        foreach (var selectionItem in selection.Items)
+                        foreach (var selectionItem in selection.Items.OrderBy(i => i.Id))
                         {
                             selectedItem = selectedChildItems.FirstOrDefault(i => selectionItem.IsMatch(null, i) && (i.KitItemIndex == kitItemIndex));
                             if (selectedItem != null)
@@ -66,10 +68,12 @@ namespace Elsa.Commerce.Core.Repositories
                             }
                         }
 
-                        yield return new KitItemsCollection(selection.Items, selectedItem, kitItemIndex, selection.Id, selection.Name);
+                        result.Add(new KitItemsCollection(selection.Items, selectedItem, kitItemIndex, selection.Id, selection.Name));
                     }
                 }
             }
+
+            return result.OrderBy(r => r.GroupId);
         }
 
         public IEnumerable<KitItemsCollection> SetKitItemSelection(IPurchaseOrder order, IOrderItem item, int kitItemId, int kitItemIndex)
