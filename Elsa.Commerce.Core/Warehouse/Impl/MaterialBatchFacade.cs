@@ -764,6 +764,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             var sb = new StringBuilder();
 
             var batchAmount = new Amount(batch.Volume, m_unitRepository.GetUnit(batch.UnitId));
+
+            var events = m_stockEventRepository.GetBatchEvents(batch.Id);
+            foreach(var evt in events)
+            {
+                batchAmount = m_amountProcessor.Subtract(batchAmount,
+                    new Amount(evt.Delta, evt.Unit ?? m_unitRepository.GetUnit(evt.UnitId)));
+            }
             
             foreach (var step in GetProductionStepsProgress(batch))
             {

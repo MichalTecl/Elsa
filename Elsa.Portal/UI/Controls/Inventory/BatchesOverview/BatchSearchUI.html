@@ -1,5 +1,5 @@
 ﻿<div id="batchSearchPanel">
-    <div class="batchesSearchSearchPanel">
+    <div class="batchesSearchSearchPanel" event-bind="keydown:onSearchPanelKeyDown(event)">
         <div class="srchSegment text">
             <label>Číslo šarže</label>
             <input lt-name="tbBatchNumber" />
@@ -45,7 +45,7 @@
             </div>
         </div>
         <div class="srchSubmit">
-            <button event-bind="click:doSearch"></button>
+            <button event-bind="click:doSearch"><i class="fas fa-search"></i></button>
         </div>
     </div>
 
@@ -123,6 +123,12 @@
                 });
             } else {
                 self.list.setQuery(q);
+            }
+        };
+
+        this.onSearchPanelKeyDown = function(e) {
+            if ((e.code || e.key) === "Enter") {
+                self.doSearch();
             }
         };
     });

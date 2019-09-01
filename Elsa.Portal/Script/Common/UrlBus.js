@@ -124,11 +124,18 @@ app.UrlBus = app.UrlBus || function() {
         if (keepThisTab) {
             window.location.hash = setter.toString();
         } else {
+            setter.set("elNewTab", "yes");
             window.open(window.location.href + "#" + setter.toString(), "_blank");
         }
     };
 
-    self.clear = function(param) {
+    self.clear = function (param) {
+
+        if (window.location.href.indexOf("elNewTab=yes") > -1) {
+            window.close();
+            return;
+        }
+
         self.set(param, null);
     };
 
