@@ -27,6 +27,11 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
             return a;
         }
 
+        public IMaterialUnit GetSmallestCompatibleUnit(IMaterialUnit u)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool AreCompatible(int unitId1, int unitId2)
         {
             return unitId1 == unitId2;

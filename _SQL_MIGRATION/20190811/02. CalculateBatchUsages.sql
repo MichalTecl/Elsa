@@ -5,7 +5,7 @@ END
 
 GO
 
-CREATE PROCEDURE CalculateBatchUsages (@ProjectId INT, @BatchId INT = NULL, @MaterialId INT = NULL, @debug BIT = NULL)
+CREATE PROCEDURE [dbo].[CalculateBatchUsages] (@ProjectId INT, @BatchId INT = NULL, @MaterialId INT = NULL, @debug BIT = NULL)
 AS
 BEGIN	
 	DECLARE @batches TABLE (Id INT, CalcUnitId INT);
@@ -29,8 +29,7 @@ BEGIN
 	   AND b.IsAvailable = 1
 	   AND b.ProjectId = @ProjectId
 	   AND ((@BatchId IS NULL) OR (@BatchId = b.Id))
-	   AND ((@MaterialId IS NULL) OR (b.MaterialId = @MaterialId))
-	   AND NOT EXISTS (SELECT TOP 1 1 FROM BatchUsageLog WHERE BatchId = b.Id);
+	   AND ((@MaterialId IS NULL) OR (b.MaterialId = @MaterialId));
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM @batches)
 	BEGIN
@@ -125,5 +124,3 @@ BEGIN
 			as Subtract ON (src.Id = Subtract.BatchId);
 	END
 END
-
--- EXEC CalculateBatchUsages 1, null, null, 0

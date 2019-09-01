@@ -53,7 +53,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                 throw new InvalidOperationException("No InvoiceFormType found by GeneratorName == ReceivingInvoice");
             }
 
-            var sourceBatches = FindSourceBatches(forInventory, year, month, m_batchFacade, context).ToList();
+            var sourceBatches = FindSourceBatches(forInventory, year, month, m_batchFacade, context).Where(b => b.IsHiddenForAccounting != true).ToList();
 
             context.Info($"Nalezeno {sourceBatches.Count}. Začínám indexování");
 

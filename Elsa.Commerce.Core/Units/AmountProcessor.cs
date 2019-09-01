@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Common;
 using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Inventory;
 
 namespace Elsa.Commerce.Core.Units
 {
@@ -65,29 +66,29 @@ namespace Elsa.Commerce.Core.Units
             return result;
         }
 
-        public Amount ConvertToSuitableUnit(Amount source)
-        {
-            if (source.Unit == null)
-            {
-                return source;
-            }
+        //public Amount ConvertToSuitableUnit(Amount source)
+        //{
+        //    if (source.Unit == null)
+        //    {
+        //        return source;
+        //    }
             
-            var availableUnits = m_conversionHelper.GetCompatibleUnits(source.Unit.Id).ToList();
-            if (!availableUnits.Any())
-            {
-                return source;
-            }
+        //    var availableUnits = m_conversionHelper.GetCompatibleUnits(source.Unit.Id).ToList();
+        //    if (!availableUnits.Any())
+        //    {
+        //        return source;
+        //    }
 
-            var bestUnit = source.Unit;
-            var readability = StringUtil.GetReadability(source.Value);
+        //    var bestUnit = source.Unit;
+        //    var readability = StringUtil.GetReadability(source.Value);
 
-            foreach (var availableUnit in availableUnits)
-            {
-                //var converted = m_conversionHelper.ConvertAmount(source.Unit.Id, availableUnit.Id, )
-            }
+        //    foreach (var availableUnit in availableUnits)
+        //    {
+        //        //var converted = m_conversionHelper.ConvertAmount(source.Unit.Id, availableUnit.Id, )
+        //    }
 
-            throw new NotImplementedException();
-        }
+        //    throw new NotImplementedException();
+        //}
 
         private Amount Calculate(Amount a, Amount b, Func<decimal, decimal, decimal> numericOp)
         {
@@ -141,6 +142,17 @@ namespace Elsa.Commerce.Core.Units
         {
             var sub = Subtract(a, b);
             return sub.IsPositive;
+        }
+
+        public Amount Convert(Amount a, IMaterialUnit to)
+        {
+            return m_conversionHelper.ConvertAmount(a, to.Id);
+        }
+
+        public Amount ToSmallestUnit(Amount amount)
+        {
+            var smallestUnit = m_conversionHelper.GetSmallestCompatibleUnit(amount.Unit);
+            return Convert(amount, smallestUnit);
         }
     }
 }

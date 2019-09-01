@@ -116,5 +116,7 @@ namespace Elsa.Core.Entities.Commerce.Commerce
 
         [NVarchar(1000, true)]
         string DiscountsText { get; set; }
+
+        DateTime? ReturnDt { get; set; }
     }
 }

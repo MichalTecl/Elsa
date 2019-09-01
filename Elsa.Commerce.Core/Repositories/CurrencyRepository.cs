@@ -97,6 +97,7 @@ namespace Elsa.Commerce.Core.Repositories
                     if (oldRate != null)
                     {
                         oldRate.ValidTo = validFrom;
+                        m_database.Save(oldRate);
                     }
 
                     var actualRate = m_database.New<ICurrencyRate>();

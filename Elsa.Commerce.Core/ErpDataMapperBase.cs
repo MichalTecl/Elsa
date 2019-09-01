@@ -69,6 +69,11 @@ namespace Elsa.Commerce.Core
             currencyByCurrencySymbol(source.CurrencyCode);
 
             target.OrderStatusId = ResolveOrderStatusId(source, erpOrderStatusMappings);
+
+            if (OrderStatus.IsReturned(target.OrderStatusId) && (target.ReturnDt == null))
+            {
+                target.ReturnDt = DateTime.Now.Date;
+            }
         }
 
         protected virtual int ResolveOrderStatusId(IErpOrderModel source, IDictionary<string, IErpOrderStatusMapping> erpOrderStatusMappings)

@@ -48,6 +48,11 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
             
             GenerateItems(forInventory, year, month, context, task, (time, batch, amount, descriptor) =>
             {
+                if (batch.IsHiddenForAccounting == true)
+                {
+                    return;
+                }
+
                 var item = new ItemReleaseModel(time, batch, amount, descriptor);
                 var key = GetGroupingKey(item);
 

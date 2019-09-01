@@ -46,6 +46,26 @@ namespace Elsa.Commerce.Core.Units
             return a;
         }
 
+        public IMaterialUnit GetSmallestCompatibleUnit(IMaterialUnit u)
+        {
+            IUnitConversion smallest = null;
+            
+            foreach (var conversion in GetAllConversions().Where(c => c.SourceUnitId == u.Id))
+            {
+                if ((smallest?.Multiplier ?? 1) < conversion.Multiplier)
+                {
+                    smallest = conversion;
+                }
+            }
+
+            if (smallest == null)
+            {
+                return u;
+            }
+
+            return m_unitRepository.GetUnit(smallest.TargetUnitId);
+        }
+
         public bool AreCompatible(int unitId1, int unitId2)
         {
             return (unitId1 == unitId2)

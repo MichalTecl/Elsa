@@ -189,6 +189,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetDir)\*.*" "C:\ELSA_LocalPub\JobLauncher\"
+del "C:\ELSA_LocalPub\JobLauncher\*.pdb" /q
+del "C:\ELSA_LocalPub\JobLauncher\*.exe.config" /q</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>del "C:\ELSA_LocalPub\JobLauncher\*.*" /q</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

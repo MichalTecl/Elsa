@@ -484,18 +484,25 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public IEnumerable<int> GetBatchesByProductionStepComponentInventory(int stepComponentInventory,
             int compositionYear,
-            int compositionMonth)
+            int compositionMonth, bool includeBatchesHiddenForAccounting)
         {
             var from = new DateTime(compositionYear, compositionMonth, 1).Date;
             var to = from.AddMonths(1);
 
-            return m_database.SelectFrom<IBatchProductionStep>()
+            var query = m_database.SelectFrom<IBatchProductionStep>()
                 .Join(s => s.SourceBatches)
                 .Join(s => s.SourceBatches.Each().SourceBatch)
                 .Join(s => s.SourceBatches.Each().SourceBatch.Material)
                 .Where(s => s.SourceBatches.Each().SourceBatch.ProjectId == m_session.Project.Id)
                 .Where(s => s.SourceBatches.Each().SourceBatch.Material.InventoryId == stepComponentInventory)
-                .Where(s => s.ConfirmDt >= from && s.ConfirmDt < to).Execute().Select(s => s.BatchId).Distinct()
+                .Where(s => s.ConfirmDt >= from && s.ConfirmDt < to);
+
+            if (!includeBatchesHiddenForAccounting)
+            {
+                query = query.Where(s => s.SourceBatches.Each().SourceBatch.IsHiddenForAccounting != true);
+            }
+                
+            return query.Execute().Select(s => s.BatchId).Distinct()
                 .ToList();
         }
 

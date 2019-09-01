@@ -97,7 +97,7 @@ app.UrlBus = app.UrlBus || function() {
         (callbacks[param] = callbacks[param] || []).push(callback);
     };
 
-    self.set = function(param, value) {
+    self.set = function(param, value, keepThisTab) {
         var setter = new URLSearchParams(window.location.hash);
 
         if (value == null) {
@@ -121,7 +121,11 @@ app.UrlBus = app.UrlBus || function() {
             history.replaceState(null, null, ' ');
         } catch(e){}
 
-        window.location.hash = setter.toString();
+        if (keepThisTab) {
+            window.location.hash = setter.toString();
+        } else {
+            window.open(window.location.href + "#" + setter.toString(), "_blank");
+        }
     };
 
     self.clear = function(param) {

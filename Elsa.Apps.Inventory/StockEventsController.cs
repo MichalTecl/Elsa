@@ -45,9 +45,9 @@ namespace Elsa.Apps.Inventory
             return m_batchFacade.GetEventAmountSuggestions(eventTypeId, batchId);
         }
 
-        public void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason)
+        public void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason, string unitSymbol)
         {
-            m_eventRepository.SaveEvent(eventTypeId, materialId, batchNumber, quantity, reason);
+            m_eventRepository.SaveEvent(eventTypeId, materialId, batchNumber, quantity, reason, unitSymbol);
         }
 
         public IEnumerable<StockEventViewModel> GetBatchEvents(int batchId, string eventTypeName)

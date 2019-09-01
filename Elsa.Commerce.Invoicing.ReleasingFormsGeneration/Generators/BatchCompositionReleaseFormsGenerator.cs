@@ -41,7 +41,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         private void CreateItemsByBatchComposition(IMaterialInventory forInventory, int year, int month, Action<DateTime, IMaterialBatch, Amount, ManufacturingReleseEventDescriptor> itemCallback)
         {
             var allBatchesWithComponentsFromThisInventory =
-                m_batchRepository.GetBatchesByComponentInventory(forInventory.Id, year, month).ToList();
+                m_batchRepository.GetBatchesByComponentInventory(forInventory.Id, year, month).Where(b => b.Batch.IsHiddenForAccounting != true).ToList();
 
             foreach (var composition in allBatchesWithComponentsFromThisInventory.Select(c => c.Batch))
             {
@@ -68,7 +68,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
             DateUtil.GetMonthDt(year, month, out var dtFrom, out var dtTo);
 
             var batchesWithStepMaterialFromThisInventory = m_batchRepository
-                .GetBatchesByProductionStepComponentInventory(forInventory.Id, year, month).ToList();
+                .GetBatchesByProductionStepComponentInventory(forInventory.Id, year, month, false).ToList();
 
             foreach (var targetBatchId in batchesWithStepMaterialFromThisInventory)
             {

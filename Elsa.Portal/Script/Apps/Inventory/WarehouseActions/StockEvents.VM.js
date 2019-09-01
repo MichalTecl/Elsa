@@ -8,7 +8,8 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
 	this.materialUnit = null;
 	this.batchRequired = false;
 	this.currentBatchNumber = "";
-	this.suggestedAmounts = [];
+    this.suggestedAmounts = [];
+    this.materialUnitOverride = {};
     
     var materialId = null;
 
@@ -63,7 +64,7 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
 		    self.batchRequired = false;
 		} else {
 			self.batchRequired = !info.AutomaticBatches;
-			self.materialUnit = info.PreferredUnitSymbol;
+			self.materialUnit = self.materialUnitOverride[id] || info.PreferredUnitSymbol;
 		    materialId = info.MaterialId;
 		}
 
@@ -94,13 +95,15 @@ app.StockEvents.ViewModel = app.StockEvents.ViewModel || function() {
                 "materialId": matId,
                 "batchNumber": batchNumber,
                 "quantity": quantity,
-                "reason": reason
+                "reason": reason,
+                "unitSymbol": self.materialUnit
             })
             .get(successCallback);
     };
 
     app.urlBus.watch("setStockEvent", function (model) {
-
+        self.materialUnitOverride[model.MaterialId] = model.UnitSymbol;
+        self.materialUnit = model.UnitSymbol;
         self.changeCurrentEventType(model.EventTypeId);
         lt.notify();
     });

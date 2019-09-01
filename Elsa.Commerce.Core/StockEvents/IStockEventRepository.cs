@@ -12,7 +12,7 @@ namespace Elsa.Commerce.Core.StockEvents
     {
         IEnumerable<IStockEventType> GetAllEventTypes();
 
-        void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason);
+        void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason, string unitSymbol);
 
         IEnumerable<IMaterialStockEvent> GetBatchEvents(int batchId);
 

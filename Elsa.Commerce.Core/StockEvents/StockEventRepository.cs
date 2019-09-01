@@ -23,14 +23,16 @@ namespace Elsa.Commerce.Core.StockEvents
         private readonly IMaterialRepository m_materialRepository;
         private readonly ISession m_session;
         private readonly IDatabase m_database;
+        private readonly IUnitRepository m_unitRepository;
+        private readonly IUnitConversionHelper m_conversionHelper;
 
         public StockEventRepository(IPerProjectDbCache cache,
             Lazy<IMaterialBatchFacade> batchFacade,
             IMaterialBatchRepository batchRepository,
             AmountProcessor amountProcessor,
             IMaterialRepository materialRepository,
-            ISession session, 
-            IDatabase database)
+            ISession session,
+            IDatabase database, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper)
         {
             m_cache = cache;
             m_batchFacade = batchFacade;
@@ -39,6 +41,8 @@ namespace Elsa.Commerce.Core.StockEvents
             m_materialRepository = materialRepository;
             m_session = session;
             m_database = database;
+            m_unitRepository = unitRepository;
+            m_conversionHelper = conversionHelper;
         }
 
         public IEnumerable<IStockEventType> GetAllEventTypes()
@@ -46,7 +50,8 @@ namespace Elsa.Commerce.Core.StockEvents
             return m_cache.ReadThrough("stockEventTypes", q => q.SelectFrom<IStockEventType>().OrderBy(t => t.Name));
         }
 
-        public void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason)
+        public void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason,
+            string unitSymbol)
         {
             var eventType = GetAllEventTypes().FirstOrDefault(et => et.Id == eventTypeId).Ensure();
 
@@ -77,7 +82,17 @@ namespace Elsa.Commerce.Core.StockEvents
                 }
             }
 
-            var eventAmount = new Amount(quantity, material.NominalUnit);
+            var unit = material.NominalUnit;
+            if (!string.IsNullOrWhiteSpace(unitSymbol))
+            {
+                unit = m_unitRepository.GetUnitBySymbol(unitSymbol);
+                if (unit == null || (!m_conversionHelper.AreCompatible(material.NominalUnit.Id, unit.Id)))
+                {
+                    throw new InvalidOperationException($"Pro materiál \"{material.Name}\" nelze použít jednotku \"{unitSymbol}\"");
+                }
+            }
+
+            var eventAmount = new Amount(quantity, unit);
            
             using (var tx = m_cache.OpenTransaction())
             {

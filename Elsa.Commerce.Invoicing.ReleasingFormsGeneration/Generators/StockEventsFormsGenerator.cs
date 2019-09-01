@@ -45,6 +45,11 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
             foreach(var evt in events)
             {
+                if (evt.Batch.IsHiddenForAccounting == true)
+                {
+                    continue;
+                }
+
                 itemCallback(evt.EventDt.Date, evt.Batch, new Amount(evt.Delta, evt.Unit), new StockEventDescriptor()
                 {
                     StockEventId = evt.Id,

@@ -42,37 +42,33 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
         {
             m_log.Info($"Called for month={month}, year={year}");
             
-            using (var tx = m_database.OpenTransaction())
+            var context = PrepareContext(formTypeId, year, month);
+
+            foreach (var inventory in m_materialRepository.GetMaterialInventories())
             {
-                var context = PrepareContext(formTypeId, year, month);
-
-                foreach (var inventory in m_materialRepository.GetMaterialInventories())
+                if (string.IsNullOrWhiteSpace(inventory.ReceivingInvoiceFormGeneratorName))
                 {
-                    if (string.IsNullOrWhiteSpace(inventory.ReceivingInvoiceFormGeneratorName))
-                    {
-                        context.Info($"Pro sklad {inventory.Name} neni nastaveno generovani prijemek, preskakuji");
-                        continue;
-                    }
-
-                    try
-                    {
-                        DoGeneration(inventory, context, year, month, null);
-                    }
-                    catch (Exception ex)
-                    {
-                        context.Error($"Generovani prijemek pro sklad {inventory.Name} selhalo: {ex.Message}", ex);
-                    }
+                    context.Info($"Pro sklad {inventory.Name} neni nastaveno generovani prijemek, preskakuji");
+                    continue;
                 }
 
-                if (context.CountForms() == 0)
+                try
                 {
-                    context.Error($"Nebyla vygenerována žádná příjemka");
+
+                    DoGeneration(inventory, context, year, month, null);
                 }
-
-                tx.Commit();
-
-                return context;
+                catch (Exception ex)
+                {
+                    context.Error($"Generovani prijemek pro sklad {inventory.Name} selhalo: {ex.Message}", ex);
+                }
             }
+
+            if (context.CountForms() == 0)
+            {
+                context.Error($"Nebyla vygenerována žádná příjemka");
+            }
+
+            return context;
         }
 
         private IInvoiceFormGenerationContext PrepareContext(int formTypeId, int year, int month)
@@ -116,8 +112,8 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 
             m_log.Info($"Called for month={month}, year={year}");
             
-            using (var tx = m_database.OpenTransaction())
-            {
+            //using (var tx = m_database.OpenTransaction())
+            //{
                 var context = PrepareContext(invoiceFormType.Id, year, month);
                 var allGenerationTasks = m_invoiceFormsRepository.GetReleasingFormsTasks();
 
@@ -157,10 +153,10 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
                     context.Error($"Nebyla vygenerována žádná výdejka");
                 }
 
-                tx.Commit();
+                //tx.Commit();
 
                 return context;
-            }
+            //}
         }
 
         private void DoGeneration(IMaterialInventory inventory, IInvoiceFormGenerationContext context, int year, int month, IReleasingFormsGenerationTask task)

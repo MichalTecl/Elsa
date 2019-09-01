@@ -47,6 +47,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         IEnumerable<IBatchProductionStep> PerformedSteps { get; }
 
         bool? AllStepsDone { get; set; }
+
+        bool? IsHiddenForAccounting { get; set; }
     }
 
     public interface IMaterialBatchEditables

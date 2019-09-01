@@ -47,6 +47,11 @@ namespace Elsa.Commerce.Core
         {
             return orderStatusId == Sent.Id;
         }
+
+        public static bool IsReturned(int orderStatusId)
+        {
+            return orderStatusId == Returned.Id;
+        }
         
         private sealed class Status : IOrderStatus
         {

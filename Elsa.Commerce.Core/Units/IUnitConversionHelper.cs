@@ -9,6 +9,8 @@ namespace Elsa.Commerce.Core.Units
     {
         IMaterialUnit GetPrefferedUnit(IMaterialUnit a, IMaterialUnit b);
 
+        IMaterialUnit GetSmallestCompatibleUnit(IMaterialUnit u);
+
         bool AreCompatible(int unitId1, int unitId2);
 
         IEnumerable<IMaterialUnit> GetCompatibleUnits(int sourceUnitId);

@@ -180,14 +180,16 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
             Func<IStockEventType, Amount, BatchStockEventSuggestion> addSuggestion = (type, amount) =>
             {
+                var manipulationAmount = m_amountProcessor.ToSmallestUnit(amount);
+
                 var sug = new BatchStockEventSuggestion()
                 {
                     BatchNumber = batchReportEntry.BatchNumber,
-                    Amount = amount.Value,
+                    Amount = manipulationAmount.Value,
                     EventTypeId = type.Id,
                     MaterialId = batchReportEntry.MaterialId,
                     MaterialName = batchReportEntry.MaterialName,
-                    UnitId = amount.Unit.Id,
+                    UnitSymbol = manipulationAmount.Unit.Symbol,
                     Title = $"{type.Name} {StringUtil.FormatDecimal(amount.Value)} {amount.Unit.Symbol}"
                 };
 
