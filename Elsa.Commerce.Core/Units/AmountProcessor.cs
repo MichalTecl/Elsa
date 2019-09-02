@@ -66,6 +66,11 @@ namespace Elsa.Commerce.Core.Units
             return result;
         }
 
+        public Amount Neg(Amount a)
+        {
+            return new Amount(a.Value * -1m, a.Unit);
+        }
+
         //public Amount ConvertToSuitableUnit(Amount source)
         //{
         //    if (source.Unit == null)

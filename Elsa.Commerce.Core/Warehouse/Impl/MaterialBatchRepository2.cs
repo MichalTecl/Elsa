@@ -17,7 +17,7 @@ using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse.Impl
 {
-    public class MaterialBatchRepository : IMaterialBatchRepository
+    public class MaterialBatchRepository2 : IMaterialBatchRepository
     {
         private readonly IDatabase m_database;
         private readonly ISession m_session;
@@ -30,7 +30,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly ICurrencyConversionHelper m_currencyConversionHelper;
         private readonly IServiceLocator m_serviceLocator;
 
-        public MaterialBatchRepository(IDatabase database,
+        public MaterialBatchRepository2(IDatabase database,
             ISession session,
             IUnitConversionHelper conversionHelper,
             IMaterialRepository materialRepository,
@@ -40,8 +40,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             ISupplierRepository supplierRepository, 
             ICurrencyConversionHelper currencyConversionHelper, IServiceLocator serviceLocator)
         {
-            throw new InvalidOperationException("DO NOT USE");
-
             m_database = database;
             m_session = session;
             m_conversionHelper = conversionHelper;
@@ -67,19 +65,18 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     .Where(b => (b.MaterialId == materialId) && (b.BatchNumber == batchNumber))
                     .Execute()
                     .FirstOrDefault();
-
-            if (batch == null)
-            {
-                return null;
-            }
-
+            
             return MapToModel(batch);
         }
 
         private MaterialBatchComponent MapToModel(IMaterialBatch entity)
         {
-            var model = new MaterialBatchComponent(entity, this);
+            if (entity == null)
+            {
+                return null;
+            }
 
+            var model = new MaterialBatchComponent(new MaterialBatchAdapter(entity, m_serviceLocator), this);
             return model;
         }
 
@@ -513,24 +510,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             return
                 m_database.SelectFrom<IMaterialBatch>()
-                    .Join(b => b.Author)
-                    .Join(b => b.Material)
-                    .Join(b => b.Unit)
-                    .Join(b => b.Components)
-                    .Join(b => b.Components.Each().Unit)
-                    .Join(b => b.Components.Each().Component)
-                    .Join(b => b.Components.Each().Component.Unit)
-                    .Join(b => b.PerformedSteps)
-                    .Join(b => b.PerformedSteps.Each().ConfirmUser)
-                    .Join(b => b.PerformedSteps.Each().Worker)
-                    .Join(b => b.PerformedSteps.Each().SourceBatches)
-                    .Join(b => b.PerformedSteps.Each().SourceBatches.Each().Unit)
-                    .Join(b => b.PriceConversion)
-                    .Join(b => b.PriceConversion.SourceCurrency)
-                    .Join(b => b.PriceConversion.TargetCurrency)
-                    .Join(b => b.PriceConversion.CurrencyRate)
-                    .Join(b => b.PriceConversion.CurrencyRate.SourceCurrency)
-                    .Join(b => b.PriceConversion.CurrencyRate.TargetCurrency)
                     .Where(b => b.ProjectId == m_session.Project.Id);
         }
     }

@@ -416,7 +416,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     {
                         Amount = doneStepAmount.ToString(),
                         ConfirmDt = StringUtil.FormatDateTime(doneStep.ConfirmDt),
-                        ConfirmUser = doneStep.ConfirmUser.EMail,
+                        ConfirmUser = m_userRepository.GetUser(doneStep.ConfirmUserId).EMail,
                         Price = StringUtil.FormatDecimal(doneStep.Price ?? 0m),
                         SpentHours = StringUtil.FormatDecimal(doneStep.SpentHours ?? 0m),
                         StepId = doneStep.Id,

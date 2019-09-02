@@ -35,7 +35,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.Premanu
             #region Production price
             grouping.AddValidator((b, c) =>
             {
-                if (b.ProductionWorkPrice == null)
+                if (b.ProductionWorkPrice == null && b.Price == 0)
                 {
                     c.Warning($"Šarže \"{b.GetTextInfo()}\" nemá uvedenu cenu práce při výrobě");
                 }

@@ -306,26 +306,7 @@ namespace Elsa.Invoicing.Core.Data
 
                 m_database.Sql().Call("DeleteInvoiceFormCollection").WithParam("@collectionId", existingCollectionId)
                     .NonQuery();
-
-                //m_database.DeleteAll(collection.Log);
-
-                ////TODO Should be SP
-                //foreach (var form in collection.Forms)
-                //{
-                //    foreach (var item in form.Items)
-                //    {
-                //        m_database.DeleteFrom<IMaterialBatchCompositionFormItem>(q => q.Where(b => b.InvoiceFormItemId == item.Id));
-                //        m_database.DeleteFrom<IBatchStepBatchInvoiceItem>(q => q.Where(b => b.InvoiceFormItemId == item.Id));
-                //        m_database.DeleteFrom<IOrderItemInvoiceFormItem>(q => q.Where(b => b.InvoiceFormItemId == item.Id));
-                        
-                //        m_database.DeleteAll(item.Batches);
-                //        m_database.Delete(item);
-                //    }
-                //    m_database.Delete(form);
-                //}
-
-                //m_database.Delete(collection);
-
+                
                 tx.Commit();
             }
         }

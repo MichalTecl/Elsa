@@ -26,5 +26,7 @@ namespace Elsa.Commerce.Core
             string sourceLink);
 
         ICurrencyConversion CreateCurrencyConversion(ICurrencyRate usedRate, decimal sourceValue);
+
+        ICurrencyConversion GetCurrencyConversion(int id);
     }
 }

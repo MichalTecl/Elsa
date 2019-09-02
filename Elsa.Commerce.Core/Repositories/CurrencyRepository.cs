@@ -17,6 +17,7 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly ISession m_session;
 
         private readonly IPerProjectDbCache m_cache;
+        
 
         public CurrencyRepository(IDatabase database, ISession session, IPerProjectDbCache cache)
         {
@@ -138,6 +139,13 @@ namespace Elsa.Commerce.Core.Repositories
             m_database.Save(conversion);
 
             return conversion;
+        }
+
+        public ICurrencyConversion GetCurrencyConversion(int id)
+        {
+            return m_cache.ReadThrough($"currency_conversion_{id}",
+                db => db.SelectFrom<ICurrencyConversion>().Join(c => c.CurrencyRate).Join(c => c.SourceCurrency)
+                    .Join(c => c.TargetCurrency).Where(c => c.Id == id)).FirstOrDefault();
         }
     }
 }

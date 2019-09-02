@@ -35,5 +35,7 @@ namespace Elsa.Commerce.Core
         IEnumerable<IPurchaseOrder> GetOrdersByMaterialBatch(int batchId);
 
         void UpdateOrderItemBatch(IOrderItem orderItem, int batchId, decimal quantity);
+
+        IEnumerable<IPurchaseOrder> GetReturns(int month, int year);
     }
 }

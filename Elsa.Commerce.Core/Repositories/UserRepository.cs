@@ -34,6 +34,11 @@ namespace Elsa.Commerce.Core.Repositories
             return user.EMail;
         }
 
+        public IUser GetUser(int id)
+        {
+            return GetAllUsers().FirstOrDefault(u => u.Id == id);
+        }
+
         private IEnumerable<IUser> GetAllUsers()
         {
             return m_cache.ReadThrough("allUsers", database => database.SelectFrom<IUser>());

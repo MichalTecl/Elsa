@@ -69,5 +69,7 @@ namespace Elsa.Commerce.Core.Warehouse
 
         IEnumerable<int> GetBatchesByProductionStepComponentInventory(int stepComponentInventory,
             int compositionYear, int compositionMonth, bool includeBatchesHiddenForAccounting);
+
+        IEnumerable<IMaterialBatchComposition> GetBatchComponents(int compositionId);
     }
 }

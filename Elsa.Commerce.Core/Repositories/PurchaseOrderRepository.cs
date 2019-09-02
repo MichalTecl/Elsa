@@ -277,6 +277,22 @@ namespace Elsa.Commerce.Core.Repositories
             }
         }
 
+        public IEnumerable<IPurchaseOrder> GetReturns(int month, int year)
+        {
+            var ids = new List<long>();
+
+            m_database.Sql().ExecuteWithParams(
+                "SELECT Id FROM PurchaseOrder WHERE OrderStatusId=6 AND ProjectId = {0} AND MONTH(ReturnDt) = {1} AND YEAR(ReturnDt) = {2}",
+                m_session.Project.Id,
+                month,
+                year).ReadRows<long>(ids.Add);
+
+            foreach (var id in ids)
+            {
+                yield return GetOrder(id);
+            }
+        }
+
         private IQueryBuilder<IPurchaseOrder> BuildOrdersQuery()
         {
             return
