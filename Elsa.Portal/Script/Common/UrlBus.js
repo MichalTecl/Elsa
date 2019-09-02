@@ -132,8 +132,12 @@ app.UrlBus = app.UrlBus || function() {
     self.clear = function (param) {
 
         if (window.location.href.indexOf("elNewTab=yes") > -1) {
-            window.close();
-            return;
+            try {
+                window.close();
+                return;
+            } catch (e) {
+                console.error(e);
+            }
         }
 
         self.set(param, null);

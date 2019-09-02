@@ -252,7 +252,7 @@ namespace Elsa.App.OrdersPacking
 
                 var kitItems = new List<KitItemsCollectionModel>();
                 
-                foreach (var sourceKitItem in m_kitProductRepository.GetKitForOrderItem(entity, sourceItem))
+                foreach (var sourceKitItem in m_kitProductRepository.GetKitForOrderItem(entity, sourceItem).OrderBy(ki => ki.KitItemIndex))
                 {
                     var model = new KitItemsCollectionModel(sourceKitItem);
                     

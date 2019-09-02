@@ -234,6 +234,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                 foreach (var item in allItems)
                 {
+                    if (item.KitParentId != null)
+                    {
+                        // Items in kit shouldn't affect preferrences
+                        continue;
+                    }
+
                     var assignments = item.AssignedBatches.ToList();
                     if (assignments.Count < 2)
                     {
@@ -907,7 +913,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 }
 
                 //2. assignment by preferrence
-                var preferrence = preferrences.FirstOrDefault(p => p.MaterialId == material.MaterialId);
+                var preferrence = orderItem.KitParentId != null ? null : preferrences.FirstOrDefault(p => p.MaterialId == material.MaterialId);
 
                 if ((preferrence != null) || (adHocPreferrence != null))
                 {
