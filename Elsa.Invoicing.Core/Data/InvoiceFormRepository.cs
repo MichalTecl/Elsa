@@ -13,8 +13,9 @@ using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 using Elsa.Invoicing.Core.Contract;
+using Elsa.Invoicing.Core.Data.Adapters;
 using Elsa.Invoicing.Core.Internal;
-
+using Robowire;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Invoicing.Core.Data
@@ -26,14 +27,16 @@ namespace Elsa.Invoicing.Core.Data
         private readonly ICache m_cache;
         private readonly ISysCountersManager m_countersManager;
         private readonly ILog m_log;
+        private readonly IServiceLocator m_serviceLocator;
         
-        public InvoiceFormRepository(IDatabase database, ISession session, ICache cache, ISysCountersManager countersManager, ILog log)
+        public InvoiceFormRepository(IDatabase database, ISession session, ICache cache, ISysCountersManager countersManager, ILog log, IServiceLocator serviceLocator)
         {
             m_database = database;
             m_session = session;
             m_cache = cache;
             m_countersManager = countersManager;
             m_log = log;
+            m_serviceLocator = serviceLocator;
         }
 
         public IEnumerable<IInvoiceFormType> GetInvoiceFormTypes()
@@ -97,7 +100,7 @@ namespace Elsa.Invoicing.Core.Data
                 query = query.Where(i => i.IssueDate <= to.Value);
             }
 
-            return query.Execute();
+            return query.Execute().Select(e => new InvoiceFormAdapter(m_serviceLocator, e));
         }
 
         public IInvoiceForm GetTemplate(int typeId, Action<IInvoiceForm> setup)
@@ -195,7 +198,7 @@ namespace Elsa.Invoicing.Core.Data
         
         public IInvoiceForm GetInvoiceFormById(int id)
         {
-            return GetInvoiceQuery().Where(i => i.Id == id).Execute().FirstOrDefault();
+            return GetInvoiceQuery().Where(i => i.Id == id).Execute().Select(e => new InvoiceFormAdapter(m_serviceLocator, e)).FirstOrDefault();
         }
 
         public IInvoiceFormGenerationLog AddEvent(int collectionId, string message, bool warning, bool error)
@@ -266,6 +269,7 @@ namespace Elsa.Invoicing.Core.Data
 
         public IInvoiceFormCollection GetCollectionByMaterialBatchId(int batchId, int invoiceFormTypeId)
         {
+            // todo: can be optimized
             return m_database.SelectFrom<IInvoiceFormItemMaterialBatch>()
                 .Join(b => b.InvoiceFormItem)
                 .Join(b => b.InvoiceFormItem.InvoiceForm)
@@ -279,14 +283,14 @@ namespace Elsa.Invoicing.Core.Data
         {
             return GetCollectionsQuery()
                 .Where(c => c.Id == collectionId)
-                .Execute()
+                .Execute().Select(e => new InvoiceFormCollectionAdapter(m_serviceLocator, e))
                 .FirstOrDefault();
         }
 
         public IInvoiceFormCollection FindCollection(int invoiceFormTypeId, int year, int month)
         {
             return GetCollectionsQuery().Where(c => c.InvoiceFormTypeId == invoiceFormTypeId)
-                .Where(c => (c.Year == year) && (c.Month == month)).Execute().FirstOrDefault();
+                .Where(c => (c.Year == year) && (c.Month == month)).Execute().Select(e => new InvoiceFormCollectionAdapter(m_serviceLocator, e)).FirstOrDefault();
         }
         
         public void DeleteCollection(int existingCollectionId)
@@ -416,40 +420,53 @@ namespace Elsa.Invoicing.Core.Data
             });
         }
 
+        public IEnumerable<IInvoiceForm> GetInvoiceFormsByCollectionId(int collectionId)
+        {
+            return m_database.SelectFrom<IInvoiceForm>()
+                .Where(f => f.ProjectId == m_session.Project.Id && f.InvoiceFormCollectionId == collectionId).Execute()
+                .Select(e => new InvoiceFormAdapter(m_serviceLocator, e));
+        }
+
+        public IEnumerable<IInvoiceFormGenerationLog> GetLogByCollectionId(int collectionId)
+        {
+            return m_database.SelectFrom<IInvoiceFormGenerationLog>()
+                .Where(l => l.InvoiceFormCollectionId == collectionId).Execute()
+                .Select(i => new InvoiceFormGenerationLogAdapter(m_serviceLocator, i));
+        }
+
+        public IEnumerable<IInvoiceFormItem> GetItemsByFormId(int invoiceFormId)
+        {
+            var form = GetInvoiceFormById(invoiceFormId);
+            return GetItemsByCollection(form.InvoiceFormCollectionId).Where(i => i.InvoiceFormId == invoiceFormId);
+        }
+
+        public IEnumerable<IInvoiceFormItemMaterialBatch> GetFormItemBatchesByItemId(int invoiceFormItemId)
+        {
+            return m_database.SelectFrom<IInvoiceFormItemMaterialBatch>()
+                .Where(e => e.InvoiceFormItemId == invoiceFormItemId).Execute()
+                .Select(e => new InvoiceFormMaterialBatchAdapter(m_serviceLocator, e));
+        }
+
         private IQueryBuilder<IInvoiceFormCollection> GetCollectionsQuery()
         {
             return m_database.SelectFrom<IInvoiceFormCollection>()
-                .Join(c => c.GenerateUser)
-                .Join(c => c.ApproveUser)
                 .Join(c => c.Forms)
-                .Join(c => c.Forms.Each().FormType)
-                .Join(c => c.Forms.Each().CancelUser)
-                .Join(c => c.Forms.Each().Supplier)
-                .Join(c => c.Forms.Each().MaterialInventory)
-                .Join(c => c.Forms.Each().Items)
-                .Join(c => c.Forms.Each().Items.Each().Conversion)
-                .Join(c => c.Forms.Each().Items.Each().Conversion.CurrencyRate)
-                .Join(c => c.Forms.Each().Items.Each().SourceCurrency)
-                .Join(c => c.Forms.Each().Items.Each().Unit)
-                .Join(c => c.Forms.Each().Items.Each().Batches)
-                .Join(c => c.Log)
                 .Where(c => c.ProjectId == m_session.Project.Id)
                 .OrderBy(c => c.Forms.Each().IssueDate);
         }
 
+        private IEnumerable<IInvoiceFormItem> GetItemsByCollection(int collectionId)
+        {
+            return m_cache.ReadThrough($"invFrmItemsByCollid_{collectionId}", TimeSpan.FromMinutes(1), () => m_database
+                .SelectFrom<IInvoiceFormItem>().Join(i => i.InvoiceForm)
+                .Where(i => i.InvoiceForm.InvoiceFormCollectionId == collectionId).Execute()
+                .Select(e => new InvoiceFormItemAdapter(m_serviceLocator, e)));
+        }
+
+        
         private IQueryBuilder<IInvoiceForm> GetInvoiceQuery()
         {
             var query = m_database.SelectFrom<IInvoiceForm>()
-                .Join(i => i.Items)
-                .Join(i => i.Items.Each().Batches)
-                .Join(i => i.Items.Each().Batches.Each().MaterialBatch)
-                .Join(i => i.Items.Each().Conversion)
-                .Join(i => i.Items.Each().Conversion.CurrencyRate)
-                .Join(i => i.Items.Each().SourceCurrency)
-                .Join(i => i.Items.Each().Unit)
-                .Join(i => i.FormType)
-                .Join(i => i.Supplier)
-                .Join(i => i.MaterialInventory)
                 .OrderBy(i => i.IssueDate)
                 .Where(i => i.ProjectId == m_session.Project.Id);
             return query;

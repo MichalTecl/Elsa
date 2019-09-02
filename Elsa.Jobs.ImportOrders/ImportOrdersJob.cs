@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Jobs.Common;
@@ -6,9 +7,10 @@ using Elsa.Jobs.Common;
 using Newtonsoft.Json;
 
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Core.StockEvents;
 using Elsa.Common;
 using Elsa.Common.Logging;
-
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Jobs.ImportOrders
@@ -20,14 +22,16 @@ namespace Elsa.Jobs.ImportOrders
         private readonly IDatabase m_database;
         private readonly ISession m_session;
         private readonly ILog m_log;
+        private readonly IStockEventRepository m_stockEventRepository;
         
-        public ImportOrdersJob(IErpClientFactory erpClientFactory, IDatabase database, ISession session, IPurchaseOrderRepository purchaseOrderRepository, ILog log)
+        public ImportOrdersJob(IErpClientFactory erpClientFactory, IDatabase database, ISession session, IPurchaseOrderRepository purchaseOrderRepository, ILog log, IStockEventRepository stockEventRepository)
         {
             m_erpClientFactory = erpClientFactory;
             m_database = database;
             m_session = session;
             m_purchaseOrderRepository = purchaseOrderRepository;
             m_log = log;
+            m_stockEventRepository = stockEventRepository;
         }
 
         public void Run(string customDataJson)
@@ -93,12 +97,72 @@ namespace Elsa.Jobs.ImportOrders
                     startDate = endDate;
                 }
 
+                ProcessReturns();
+
                m_log.Info("Job dokoncen");
 
             }
             finally
             {
                 (erp as IDisposable)?.Dispose();
+            }
+        }
+
+        private void ProcessReturns()
+        {
+            try
+            {
+                m_log.Info("Zacinam zpracovavat vracene objednavky");
+                using (var tx = m_database.OpenTransaction())
+                {
+                    var ordids = new List<long>();
+
+                    m_database.Sql().ExecuteWithParams(@"select distinct po.Id
+                                                              from PurchaseOrder po
+                                                              inner join OrderItem     oi ON (oi.PurchaseOrderId = po.Id)
+                                                              left join  OrderItem     ki ON (ki.KitParentId = oi.Id)
+                                                              inner join OrderItemMaterialBatch omb ON (omb.OrderItemId = ISNULL(ki.Id, oi.Id))
+                                                            where po.ProjectId = {0}
+                                                              and po.ReturnDt is not null
+                                                              and not exists(select top 1 1
+                                                                               from MaterialStockEvent evt
+				                                                               join StockEventType st on evt.TypeId = st.Id
+				                                                               where evt.SourcePurchaseOrderId = po.Id)", m_session.Project.Id).ReadRows<long>(ordids.Add);
+
+                    if (!ordids.Any())
+                    {
+                        tx.Commit();
+                        m_log.Info("Zadne vratky");
+                        return;
+                    }
+
+                    var targetEventType = m_stockEventRepository.GetAllEventTypes()
+                        .FirstOrDefault(e => e.GenerateForReturnedOrders == true);
+
+                    if (targetEventType == null)
+                    {
+                        m_log.Info("Neni zadny StockEventType.GenerateForReturnedOrders");
+                        tx.Commit();
+                        return;
+                    }
+
+                    foreach (var ordid in ordids)
+                    {
+                        var order = m_purchaseOrderRepository.GetOrder(ordid);
+
+                        m_log.Info($"Generuji odpis pro vracenou objednavku {order.OrderNumber}");
+
+                        m_stockEventRepository.MoveOrderToEvent(ordid, targetEventType.Id, $"Vráceno z objednávky {order.OrderNumber}");
+
+                        m_log.Info("Hotovo");
+                    }
+
+                    tx.Commit();
+                }
+            }
+            catch (Exception ex)
+            {
+                m_log.Error("Chyba pri zpracovani vratek", ex);
             }
         }
     }

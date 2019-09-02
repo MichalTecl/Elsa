@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Invoicing.Core.Contract;
 
 namespace Elsa.Invoicing.Core.Data
@@ -48,5 +49,12 @@ namespace Elsa.Invoicing.Core.Data
         void ApproveCollection(int id);
 
         IEnumerable<IReleasingFormsGenerationTask> GetReleasingFormsTasks();
+
+        IEnumerable<IInvoiceForm> GetInvoiceFormsByCollectionId(int collectionId);
+
+        IEnumerable<IInvoiceFormGenerationLog> GetLogByCollectionId(int collectionId);
+
+        IEnumerable<IInvoiceFormItem> GetItemsByFormId(int invoiceFormId);
+        IEnumerable<IInvoiceFormItemMaterialBatch> GetFormItemBatchesByItemId(int invoiceFormItemId);
     }
 }

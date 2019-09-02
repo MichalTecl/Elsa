@@ -1,4 +1,5 @@
 ﻿using System;
+using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
 
@@ -33,5 +34,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         [NVarchar(32, false)]
         string EventGroupingKey { get; set; }
+
+        long? SourcePurchaseOrderId { get; set; }
+        IPurchaseOrder SourcePurchaseOrder { get; }
     }
 }

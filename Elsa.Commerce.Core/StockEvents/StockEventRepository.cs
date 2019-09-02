@@ -25,6 +25,7 @@ namespace Elsa.Commerce.Core.StockEvents
         private readonly IDatabase m_database;
         private readonly IUnitRepository m_unitRepository;
         private readonly IUnitConversionHelper m_conversionHelper;
+        private readonly IPurchaseOrderRepository m_orderRepository;
 
         public StockEventRepository(IPerProjectDbCache cache,
             Lazy<IMaterialBatchFacade> batchFacade,
@@ -32,7 +33,7 @@ namespace Elsa.Commerce.Core.StockEvents
             AmountProcessor amountProcessor,
             IMaterialRepository materialRepository,
             ISession session,
-            IDatabase database, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper)
+            IDatabase database, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper, IPurchaseOrderRepository orderRepository)
         {
             m_cache = cache;
             m_batchFacade = batchFacade;
@@ -43,6 +44,7 @@ namespace Elsa.Commerce.Core.StockEvents
             m_database = database;
             m_unitRepository = unitRepository;
             m_conversionHelper = conversionHelper;
+            m_orderRepository = orderRepository;
         }
 
         public IEnumerable<IStockEventType> GetAllEventTypes()
@@ -51,7 +53,7 @@ namespace Elsa.Commerce.Core.StockEvents
         }
 
         public void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason,
-            string unitSymbol)
+            string unitSymbol, long? sourceOrderId = null)
         {
             var eventType = GetAllEventTypes().FirstOrDefault(et => et.Id == eventTypeId).Ensure();
 
@@ -118,7 +120,7 @@ namespace Elsa.Commerce.Core.StockEvents
                     evt.TypeId = eventTypeId;
                     evt.UserId = m_session.User.Id;
                     evt.EventDt = DateTime.Now;
-
+                    evt.SourcePurchaseOrderId = sourceOrderId;
                     m_cache.Save(evt);
 
                     m_batchFacade.Value.ReleaseBatchAmountCache(resolution.Item1);
@@ -166,6 +168,34 @@ namespace Elsa.Commerce.Core.StockEvents
             m_batchFacade.Value.ReleaseBatchAmountCache(m_batchRepository.GetBatchById(evt.BatchId).Ensure().Batch);
 
             m_database.Delete(evt);
+        }
+
+        public void MoveOrderToEvent(long returnedOrderId, int eventTypeId, string reason)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var order = m_orderRepository.GetOrder(returnedOrderId).Ensure();
+                var assignments = new List<IOrderItemMaterialBatch>();
+
+                foreach (var orderitem in order.Items)
+                {
+                    assignments.AddRange(orderitem.AssignedBatches);
+
+                    foreach (var kitItem in orderitem.KitChildren)
+                    {
+                        assignments.AddRange(kitItem.AssignedBatches);
+                    }
+                }
+
+                m_database.DeleteAll(assignments);
+
+                foreach (var assignment in assignments)
+                {
+                    SaveEvent(eventTypeId, assignment.MaterialBatch.MaterialId, assignment.MaterialBatch.BatchNumber, assignment.Quantity, reason, null, returnedOrderId);
+                }
+
+                tx.Commit();
+            }
         }
     }
 }

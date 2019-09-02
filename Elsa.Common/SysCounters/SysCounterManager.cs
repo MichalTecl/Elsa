@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading;
-
+using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Common.SystemCounters;
 
 using Robowire.RobOrm.Core;
@@ -18,11 +18,13 @@ namespace Elsa.Common.SysCounters
         private readonly IDatabase m_database;
 
         private readonly ISession m_session;
+        private readonly ICache m_cache;
 
-        public SysCounterManager(IDatabase database, ISession session)
+        public SysCounterManager(IDatabase database, ISession session, ICache cache)
         {
             m_database = database;
             m_session = session;
+            m_cache = cache;
         }
 
         public void WithCounter(int counterTypeId, Action<string> newValueCallback)
@@ -36,9 +38,7 @@ namespace Elsa.Common.SysCounters
 
                 using (var tx = m_database.OpenTransaction())
                 {
-                    var counter = m_database.SelectFrom<ISystemCounter>()
-                        .Where(c => (c.ProjectId == m_session.Project.Id) && (c.Id == counterTypeId)).Take(1).Execute()
-                        .FirstOrDefault();
+                    var counter = GetCounter(counterTypeId);
 
                     if (counter == null)
                     {
@@ -77,7 +77,16 @@ namespace Elsa.Common.SysCounters
             finally
             {
                 Monitor.Exit(lockObj);
+                m_cache.Remove($"syscounter_{ counterTypeId}");
             }
+        }
+
+        public ISystemCounter GetCounter(int counterTypeId)
+        {
+            return m_cache.ReadThrough($"syscounter_{counterTypeId}", TimeSpan.FromMinutes(1), () => m_database
+                .SelectFrom<ISystemCounter>()
+                .Where(c => (c.ProjectId == m_session.Project.Id) && (c.Id == counterTypeId)).Take(1).Execute()
+                .FirstOrDefault());
         }
 
         private static string FormatDtPart(string format, DateTime now)
