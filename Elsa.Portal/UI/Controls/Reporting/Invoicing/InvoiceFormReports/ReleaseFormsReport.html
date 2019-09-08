@@ -15,9 +15,10 @@
                 <div class="cell5" xcell>Text</div>
                 <div class="cell10" xcell>Ze skladu</div>
                 <div class="cell5" xcell>Cena CZK</div>
+                <div class="cell5">Faktura VS</div>
                 <div class="cell5" xcell>Download</div>
                 <div class="cell5" >Detail</div>
-                <div class="cell10">Popis</div>
+                <div class="cell10" xcell>Popis</div>
                 <!--<div class="cell10" xcell>Storno</div>-->
             </div>
             <div data-bind="itemsSource:collection.Forms" data-key="InvoiceFormId">
@@ -27,9 +28,10 @@
                     <div class="cell5" data-bind="text:Text" xcell></div>
                     <div class="cell10" data-bind="text:InventoryName" xcell></div>
                     <div class="cell5" data-bind="text:FormattedPrimaryCurrencyPriceWithoutVat" xcell></div>
+                    <div class="cell5" data-bind="text:InvoiceVarSymbol"></div>
                     <div class="cell5"><a target="_blank" data-bind="text:DownloadUrl; href:DownloadUrl" xcell></a></div>
                     <div class="cell5"><a target="_blank" data-bind="text:DownloadUrl; href:DetailUrl"></a></div>
-                    <div class="cell10" data-bind="text:Explanation"></div>
+                    <div class="cell10" data-bind="text:Explanation" xcell></div>
                     <!--<div class="cell10" data-bind="text:CancelReason" xcell></div>-->
                 </div>
             </div>

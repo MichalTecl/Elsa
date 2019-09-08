@@ -1,3 +1,4 @@
+
 IF EXISTS(SELECT TOP 1 1 FROM sys.procedures WHERE name = 'GetOrderIdsByUsedBatch')
 BEGIN
 	DROP PROCEDURE GetOrderIdsByUsedBatch;
@@ -8,16 +9,20 @@ GO
 CREATE PROCEDURE GetOrderIdsByUsedBatch (@projectId INT, @materialId INT, @batchNumber NVARCHAR(64), @skip INT, @take INT)
 AS
 BEGIN
-	SELECT DISTINCT po.Id, ABS(po.OrderStatusId - 5) DUMMY
+	SELECT DISTINCT po.Id, ABS(po.OrderStatusId - 5) PRIO, OrderNumber PONR, usages.used
 		  FROM PurchaseOrder po
-		  INNER JOIN OrderItem oi ON (oi.PurchaseOrderId = po.Id)
-		  LEFT JOIN OrderItem  ki ON (ki.KitParentId = oi.Id)
-		  LEFT JOIN OrderItemMaterialBatch oimb ON (oimb.OrderItemId = ISNULL(ki.Id, oi.Id))
-		  LEFT JOIN MaterialBatch mb ON (mb.Id = oimb.MaterialBatchId)
-		WHERE mb.ProjectId = @projectId
-		  AND mb.MaterialId = @materialId
-		  AND mb.BatchNumber = @batchNumber
-	 ORDER BY ABS(po.OrderStatusId - 5) DESC, po.Id ASC
+		  INNER JOIN OrderItem oi ON (po.Id = dbo.GetOrderItemOrderId(oi.Id))		  	  
+		  INNER JOIN (SELECT oimb.OrderItemId, SUM(oimb.Quantity) as used
+		                FROM OrderItemMaterialBatch oimb
+						JOIN MaterialBatch mb ON (mb.Id = oimb.MaterialBatchId)
+					  WHERE mb.MaterialId = @materialId
+					    AND mb.BatchNumber = @batchNumber						
+					  GROUP BY oimb.OrderItemId
+					  HAVING SUM(oimb.Quantity) > 0) as usages ON (usages.OrderItemId = oi.Id)
+
+
+		WHERE po.ProjectId = @projectId
+	 ORDER BY PRIO DESC, PONR ASC
 	 OFFSET @skip ROWS
 	 FETCH NEXT @take ROWS ONLY;
 END

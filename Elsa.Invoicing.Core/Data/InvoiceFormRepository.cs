@@ -362,7 +362,7 @@ namespace Elsa.Invoicing.Core.Data
                     throw new InvalidOperationException("Soupisku nelze schvalit, protoze ma neschvalena varovani nebo chyby");
                 }
 
-                foreach (var form in collection.Forms)
+                foreach (var form in collection.Forms.OrderBy(f => f.IssueDate))
                 {
                     int counterId;
 

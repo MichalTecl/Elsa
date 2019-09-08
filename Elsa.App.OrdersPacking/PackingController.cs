@@ -143,7 +143,7 @@ namespace Elsa.App.OrdersPacking
                 {
                     throw new InvalidOperationException("Objednavka nenalezena");
                 }
-
+                
                 var mapped = MapOrder(order);
 
                 foreach (var item in mapped.Items)

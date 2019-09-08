@@ -67,6 +67,7 @@ namespace Elsa.Apps.InvoiceForms
             {
                 var model = new ReleaseFormModel();
                 model.Text = item.Text;
+                model.InvoiceVarSymbol = item.InvoiceVarSymbol;
                 return model;
             });
         }

@@ -51,7 +51,7 @@ namespace Elsa.Apps.InvoiceForms.Facade
                 Id = coll.Id
             };
 
-            foreach (var form in coll.Forms)
+            foreach (var form in coll.Forms.OrderBy(f => f.IssueDate))
             {
                 var itemModel = itemMapper(form);
                 itemModel.InvoiceFormId = form.Id;
@@ -99,7 +99,7 @@ namespace Elsa.Apps.InvoiceForms.Facade
 
         private void GroupLogEntries(IEnumerable<IInvoiceFormGenerationLog> collLog, List<GenerationInfoModel> target)
         {
-            foreach (var src in collLog)
+            foreach (var src in collLog.OrderBy(c => c.EventDt))
             {
                 var model = target.FirstOrDefault(t =>
                     (t.Message == src.Message) &&
