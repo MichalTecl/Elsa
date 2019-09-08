@@ -18,7 +18,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.Model
         {
             s_poboNameMapping.Add("Česká pošta - BALÍK DO RUKY", "Česká pošta");
             s_poboNameMapping.Add("Česká republika - KURÝR (DPD)", "Česká republika DPD");
-            s_poboNameMapping.Add("SLOVENSKO - Kurýr", "Slovensko kurýr");
+            s_poboNameMapping.Add("SLOVENSKO - Kurýr", "Slovensko GLS");
             s_poboNameMapping.Add("SLOVENSKO - Slovenská pošta", "Slovenská pošta");
         }
 

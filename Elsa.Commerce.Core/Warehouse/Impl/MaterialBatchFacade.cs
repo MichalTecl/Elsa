@@ -234,12 +234,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                 foreach (var item in allItems)
                 {
-                    if (item.KitParentId != null)
-                    {
-                        // Items in kit shouldn't affect preferrences
-                        continue;
-                    }
-
                     var assignments = item.AssignedBatches.ToList();
                     if (assignments.Count < 2)
                     {
@@ -913,7 +907,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 }
 
                 //2. assignment by preferrence
-                var preferrence = orderItem.KitParentId != null ? null : preferrences.FirstOrDefault(p => p.MaterialId == material.MaterialId);
+                var preferrence = preferrences.FirstOrDefault(p => p.MaterialId == material.MaterialId);
 
                 if ((preferrence != null) || (adHocPreferrence != null))
                 {
@@ -1021,6 +1015,51 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
+        /// <summary>
+        /// Use key = null to delete all allocations from this order
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <param name="key"></param>
+        public void CutOrderAllocation(int orderId, BatchKey key)
+        {
+            var order = m_orderRepository.GetOrder(orderId).Ensure();
+
+            if (OrderStatus.IsSent(order.OrderStatusId))
+            {
+                throw new InvalidOperationException($"Tato objednávka již byla odeslána");
+            }
+
+            var assignmentsToCut = new List<IOrderItemMaterialBatch>();
+
+            foreach (var item in order.Items)
+            {
+                foreach (var orderItemMaterialBatch in item.AssignedBatches.Where(i => key?.Match(i.MaterialBatch, this) ?? true))
+                {
+                    assignmentsToCut.Add(orderItemMaterialBatch);
+                }
+
+                foreach (var kitChild in item.KitChildren)
+                {
+                    foreach (var orderItemMaterialBatch in kitChild.AssignedBatches.Where(i => key?.Match(i.MaterialBatch, this) ?? true))
+                    {
+                        assignmentsToCut.Add(orderItemMaterialBatch);
+                    }
+                }
+            }
+            
+            if (!assignmentsToCut.Any())
+            {
+                m_log.Error($"CutOrderAllocation - no allocations found orderId={orderId}, key={key?.ToString(this)}");
+            }
+
+            m_database.DeleteAll(assignmentsToCut);
+
+            foreach (var cutBatchId in assignmentsToCut.Select(a => a.MaterialBatchId).Distinct())
+            {
+                InvalidateBatchCache(cutBatchId);
+            }
+        }
+
         private IList<BatchAmountProcedureResult> ExecBatchAmountProcedure(int? batchId, int? materialId)
         {
             var result = new List<BatchAmountProcedureResult>();
@@ -1076,5 +1115,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         }
 
         #endregion
+
+        public Tuple<int, string> GetBatchNumberAndMaterialIdByBatchId(int batchId)
+        {
+            return m_batchRepository.GetBatchNumberAndMaterialIdByBatchId(batchId);
+        }
     }
 }

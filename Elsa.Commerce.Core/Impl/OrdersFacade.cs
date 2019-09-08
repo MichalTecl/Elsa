@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Net.Mail;
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
@@ -214,22 +215,31 @@ namespace Elsa.Commerce.Core.Impl
             }
         }
 
-        public IEnumerable<IPurchaseOrder> GetOrdersByUsedBatch(int batchId, int pageSize, int pageNumber)
+        public IEnumerable<Tuple<IPurchaseOrder, decimal>> GetOrdersByUsedBatch(BatchKey bqatch, int pageSize, int pageNumber)
         {
-            return m_database.SelectFrom<IPurchaseOrder>()
-                .Join(o => o.Items)
-                .Join(o => o.Items.Each().KitChildren)
-                .Join(o => o.Items.Each().AssignedBatches)
-                .Join(o => o.Items.Each().KitChildren.Each().AssignedBatches)
-                .Where(o => o.ProjectId == m_session.Project.Id)
-                .Where(
-                    o =>
-                        (o.Items.Each().AssignedBatches.Each().MaterialBatchId == batchId) ||
-                        (o.Items.Each().KitChildren.Each().AssignedBatches.Each().MaterialBatchId == batchId))
-                .OrderBy(o => o.OrderNumber)
-                .Skip(pageSize*pageNumber)
-                .Take(pageSize)
-                .Execute();
+            var orderIds = new List<Tuple<long, decimal>>();
+
+            m_database.Sql().Call("GetOrderIdsByUsedBatch").WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@materialId", bqatch.GetMaterialId(m_batchFacade))
+                .WithParam("@batchNumber", bqatch.GetBatchNumber(m_batchFacade))
+                .WithParam("@skip", pageSize * pageNumber).WithParam("@take", pageSize).ReadRows<long, int, string, decimal>(
+                    (orderId, prio, orderNum, qty) =>
+                    {
+                        orderIds.Add(new Tuple<long, decimal>(orderId, qty));
+                    });
+
+            var entities = m_database.SelectFrom<IPurchaseOrder>()
+                .Where(o => o.Id.InCsv(orderIds.Select(i => i.Item1)))
+                .Execute().ToList();
+
+            foreach (var id in orderIds)
+            {
+                var ett = entities.FirstOrDefault(e => e.Id == id.Item1);
+                if (ett != null)
+                {
+                    yield return new Tuple<IPurchaseOrder, decimal>(ett, id.Item2);
+                }
+            }
         }
 
         public IPurchaseOrder ResolveSingleItemKitSelection(IPurchaseOrder entity)

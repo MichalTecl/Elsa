@@ -21,6 +21,8 @@ namespace Elsa.Invoicing.Core.Helpers
             m_classifiers = classifiers;
         }
 
+        public string Text { get; set; }
+
         public string InvoiceNumber
         {
             get

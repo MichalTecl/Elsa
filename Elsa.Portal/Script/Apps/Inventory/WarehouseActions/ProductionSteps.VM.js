@@ -62,6 +62,7 @@ app.productionSteps.ViewModel = app.productionSteps.ViewModel || function() {
     self.cancelStepEdit = function () {
         self.selectedStep = null;
         lt.notify();
+        app.urlBus.clear("fillstep");
     };
 
     self.updateQuantity = function(qty) {
@@ -114,8 +115,6 @@ app.productionSteps.ViewModel = app.productionSteps.ViewModel || function() {
         self.selectedStep.BatchIds = [model.batchId];
         self.selectedStep.MaterialProductionStepId = model.stepId;
         validateStep();
-
-        return true;
     });
 };
 

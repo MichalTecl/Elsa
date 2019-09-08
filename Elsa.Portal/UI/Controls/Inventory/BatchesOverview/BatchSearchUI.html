@@ -26,7 +26,7 @@
             </div>
         </div>
 
-        <div class="srchSegment btstatus">
+        <div class="srchSegment btstatus" style="display: none">
             <div class="srchCheck">
                 <label>Zamčené</label>
                 <input lt-name="cbLocked" type="checkbox" checked="checked" />
@@ -44,6 +44,14 @@
                 <input lt-name="cbOpen" type="checkbox" checked="checked" />
             </div>
         </div>
+        
+        <div class="srchSegment">
+            <div class="srchCheck">
+                <label>Pouze blokované v neodeslaných objednávkách</label>
+                <input lt-name="cbBlocking" type="checkbox" />
+            </div>
+        </div>
+
         <div class="srchSubmit">
             <button event-bind="click:doSearch"><i class="fas fa-search"></i></button>
         </div>
@@ -54,7 +62,7 @@
 
 <!-- {"PageNumber":0,"MaterialId":null,"InventoryTypeId":null,"OrderNumber":null,"BatchNumberQuery":null,"From":null,"To":null,"ClosedBatches":null,"LockedBatches":null -->
 <script>
-    lt.element("batchSearchPanel").attach(function (tbBatchNumber, tbOrderNumber, tbFrom, tbTo, cbLocked, cbUnlocked, cbClosed, cbOpen, materialAutocompleteContainer, tbMaterial, resultsPlaceholder) {
+    lt.element("batchSearchPanel").attach(function (tbBatchNumber, tbOrderNumber, tbFrom, tbTo, cbLocked, cbUnlocked, cbClosed, cbOpen, cbBlocking, materialAutocompleteContainer, tbMaterial, resultsPlaceholder) {
 
         var self = this;
 
@@ -112,6 +120,7 @@
             q.To = emptyToNull(tbTo);
             q.ClosedBatches = trufanu(cbClosed, cbOpen);
             q.LockedBatches = trufanu(cbLocked, cbUnlocked);
+            q.BlockedBatchesOnly = cbBlocking.checked; 
 
             var materialName = emptyToNull(tbMaterial);
             if (materialName != null) {

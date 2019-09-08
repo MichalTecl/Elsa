@@ -113,7 +113,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 .WithParam("@onlyBought", query.PurchasedOnly)
                 .WithParam("@compositionId", query.CompositionId)
                 .WithParam("@componentId", query.ComponentId)
-                .WithParam("@orderId", query.RelativeToOrderId);
+                .WithParam("@orderId", query.RelativeToOrderId)
+                .WithParam("@onlyBlocking", query.BlockedBatchesOnly);
 
             var result = new BatchReportModel { Query = query };
             result.Report.AddRange(sql.MapRows(MapEntry));
@@ -284,7 +285,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         private BatchReportModel LoadOrders(int queryBatchId, int ordersPageNumber)
         {
-            var orders = m_ordersFacade.GetOrdersByUsedBatch(queryBatchId, c_pageSize, ordersPageNumber).ToList();
+            var key = new BatchKey(queryBatchId);
+            var orders = m_ordersFacade.GetOrdersByUsedBatch(key, c_pageSize, ordersPageNumber).ToList();
 
             var entry = new BatchOrdersReportEntry(queryBatchId)
             {
@@ -296,11 +298,14 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             {
                 entry.Orders.Add(new BatchOrderModel
                 {
-                    OrderId = entity.Id,
-                    Customer = entity.CustomerEmail,
-                    OrderNumber = entity.OrderNumber,
-                    PurchaseDate = StringUtil.FormatDateTime(entity.PurchaseDate),
-                    Status = m_orderStatusRepository.Translate(entity.OrderStatusId)
+                    OrderId = entity.Item1.Id,
+                    Customer = entity.Item1.CustomerEmail,
+                    OrderNumber = entity.Item1.OrderNumber,
+                    PurchaseDate = StringUtil.FormatDateTime(entity.Item1.PurchaseDate),
+                    Status = m_orderStatusRepository.Translate(entity.Item1.OrderStatusId),
+                    Quantity = StringUtil.FormatDecimal(entity.Item2),
+                    IsAllocation = !OrderStatus.IsSent(entity.Item1.OrderStatusId),
+                    AllocationHandle = OrderStatus.IsSent(entity.Item1.OrderStatusId) ? null : $"{entity.Item1.Id}|{key.ToString(m_batchFacade)}"
                 });
             }
 

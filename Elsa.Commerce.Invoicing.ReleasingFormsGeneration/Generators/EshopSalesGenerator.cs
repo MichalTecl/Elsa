@@ -77,7 +77,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                         itemCallback(order.BuyDate, itemBatch.MaterialBatch, new Amount(itemBatch.Quantity, unit), new EshopOrderDescriptor()
                         {
                             OrderIdentifierText = orderText,
-                            OrderItemBatchAssignmentId = itemBatch.Id
+                            OrderItemBatchAssignmentId = itemBatch.Id,
+                            OrderInvoiceVarSymbol = order.VarSymbol
                         });
                     }
 
@@ -88,7 +89,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                             itemCallback(order.BuyDate, kitBatchBridge.MaterialBatch, new Amount(kitBatchBridge.Quantity, unit), new EshopOrderDescriptor()
                             {
                                 OrderIdentifierText = orderText,
-                                OrderItemBatchAssignmentId = kitBatchBridge.Id
+                                OrderItemBatchAssignmentId = kitBatchBridge.Id,
+                                OrderInvoiceVarSymbol = order.VarSymbol
                             });
                         }
                     }
@@ -109,6 +111,12 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                 i.BatchAssignmentId = releaseModel.Descriptor.OrderItemBatchAssignmentId;
             }));
         }
+
+        protected override void CustomizeFormCreation(List<ItemReleaseModel> formItems, IInvoiceForm form)
+        {
+            form.InvoiceVarSymbol = formItems.Select(fi => fi.Descriptor.OrderInvoiceVarSymbol)
+                                        .FirstOrDefault(vs => !string.IsNullOrWhiteSpace(vs)) ?? string.Empty;
+        }
     }
 
     public class EshopOrderDescriptor
@@ -116,5 +124,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         public string OrderIdentifierText { get; set; }
 
         public long OrderItemBatchAssignmentId { get; set; }
+
+        public string OrderInvoiceVarSymbol { get; set; }
     }
 }

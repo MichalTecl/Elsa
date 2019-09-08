@@ -33,7 +33,16 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
         protected override string GetExplanation(List<ItemReleaseModel> item, IInvoiceForm invoiceForm)
         {
-            return $"{item[0].Descriptor.StockEventTypeName} ze šarže {item[0].Descriptor.Event.Batch.BatchNumber}";
+            var notes = string.Join("; ",
+                item.Where(it => !string.IsNullOrWhiteSpace(it.Descriptor.StockEventNote))
+                    .Select(it => it.Descriptor.StockEventNote).Distinct());
+
+            if (!string.IsNullOrWhiteSpace(notes))
+            {
+                notes = $" ({notes})";
+            }
+
+            return $"{item[0].Descriptor.StockEventTypeName} ze šarže {item[0].Descriptor.Event.Batch.BatchNumber}{notes}";
         }
 
         protected override void GenerateItems(IMaterialInventory forInventory, int year, int month, IInvoiceFormGenerationContext context,
@@ -54,7 +63,8 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                 {
                     StockEventId = evt.Id,
                     StockEventTypeName = evt.Type.Name,
-                    Event = evt
+                    Event = evt,
+                    StockEventNote = evt.Note
                 });
             }
         }
@@ -100,5 +110,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         public string StockEventTypeName { get; set; }
 
         public IMaterialStockEvent Event { get; set; }
+
+        public string StockEventNote { get; set; }
     }
 }

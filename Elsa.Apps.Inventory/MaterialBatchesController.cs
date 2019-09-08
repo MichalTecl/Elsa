@@ -1,4 +1,5 @@
-﻿using Elsa.Commerce.Core.Warehouse;
+﻿using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Logging;
 
@@ -25,6 +26,23 @@ namespace Elsa.Apps.Inventory
         public void ReleaseUnsentOrdersAllocations()
         {
             m_batchFacade.ReleaseUnsentOrdersAllocations();
+        }
+
+        public void CutOrderAllocation(string handle)
+        {
+            // "orderId|batchKey"
+            var parts = handle.Split('|');
+            var orderId = int.Parse(parts[0]);
+
+            if (parts.Length == 2)
+            {
+                var key = BatchKey.Parse(parts[1]);
+                m_batchFacade.CutOrderAllocation(orderId, key);
+            }
+            else if (parts.Length == 1)
+            {
+                m_batchFacade.CutOrderAllocation(orderId, null);
+            }
         }
     }
 }

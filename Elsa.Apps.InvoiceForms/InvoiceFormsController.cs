@@ -29,18 +29,21 @@ namespace Elsa.Apps.InvoiceForms
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
         private readonly IInvoiceFormsGenerationRunner m_generationRunner;
         private readonly ISession m_session;
+        private readonly IInvoiceFormRendererFactory m_formRendererFactory;
 
         public InvoiceFormsController(IWebSession webSession,
             ILog log,
             InvoiceFormsQueryingFacade facade,
             IInvoiceFormsRepository invoiceFormsRepository,
-            IInvoiceFormsGenerationRunner generationRunner)
+            IInvoiceFormsGenerationRunner generationRunner, 
+            IInvoiceFormRendererFactory formRendererFactory)
             : base(webSession, log)
         {
             m_log = log;
             m_facade = facade;
             m_invoiceFormsRepository = invoiceFormsRepository;
             m_generationRunner = generationRunner;
+            m_formRendererFactory = formRendererFactory;
             m_session = webSession;
         }
 
@@ -88,7 +91,7 @@ namespace Elsa.Apps.InvoiceForms
         {
             var inv = m_invoiceFormsRepository.GetInvoiceFormById(id);
 
-            var renderer = new ReceivingInvoiceFormRenderer(inv);
+            var renderer = m_formRendererFactory.GetRenderer(inv);
 
             return new HtmlResult(new Paper(inv.InvoiceFormNumber, renderer));
         }
@@ -102,7 +105,7 @@ namespace Elsa.Apps.InvoiceForms
             }
 
             //TODO distinguish generator
-            var renderer = new ReceivingInvoiceFormRenderer(invoiceForm);
+            var renderer = m_formRendererFactory.GetRenderer(invoiceForm);
             
             return new FileResult($"{invoiceForm.InvoiceFormNumber}.pdf", renderer.GetPdf(), "application/pdf", "inline");
         }

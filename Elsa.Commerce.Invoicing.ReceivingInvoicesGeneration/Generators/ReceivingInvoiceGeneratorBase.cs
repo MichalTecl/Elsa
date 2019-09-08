@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
 using Elsa.Commerce.Core.Warehouse;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
@@ -69,6 +70,8 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                     continue;
                 }
 
+                var explanation = GetFormExplanation(group).Limit(1000);
+
                 var priceIndex = group.ToDictionary(b => b.Id, b => m_batchFacade.GetBatchPrice(b.Id));
 
                 var totalPrice = BatchPrice.Combine(priceIndex.Values);
@@ -84,6 +87,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                     f.FormTypeId = formType.Id;
                     f.PriceCalculationLog = totalPrice.Text;
                     f.PriceHasWarning = totalPrice.HasWarning;
+                    f.Explanation = explanation;
                 });
 
                 CustomizeFormMapping(referenceBatch, form, context);
@@ -103,6 +107,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
                             item.MaterialName = batch.Material.Name;
                             item.Quantity = batch.Volume;
                             item.UnitId = batch.UnitId;
+                            item.Note = GetFormItemNote(batch);
 
                             var price = priceIndex[batch.Id];
 
@@ -130,5 +135,15 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
             int month,
             IMaterialBatchFacade facade,
             IInvoiceFormGenerationContext context);
+
+        protected virtual string GetFormExplanation(BatchesGroup @group)
+        {
+            return string.Join(", ", group.Select(GetFormItemNote));
+        }
+
+        protected virtual string GetFormItemNote(IMaterialBatch batch)
+        {
+            return $"{batch.Material.Name} {batch.BatchNumber}";
+        }
     }
 }

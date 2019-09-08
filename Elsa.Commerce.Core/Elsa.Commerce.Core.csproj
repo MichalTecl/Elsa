@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adapters\MaterialStockEventAdapter.cs" />
     <Compile Include="Configuration\PackingPreferredBatchesConfig.cs" />
     <Compile Include="Crm\ICustomerRepository.cs" />
     <Compile Include="Crm\Model\CustomerOverview.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="IKitProductRepository.cs" />
     <Compile Include="IUserRepository.cs" />
     <Compile Include="Model\BatchEventAmountSuggestions.cs" />
+    <Compile Include="Model\BatchKey.cs" />
     <Compile Include="Model\BatchPriceExpl\BatchAccountingDate.cs" />
     <Compile Include="Model\BatchPriceExpl\BatchPrice.cs" />
     <Compile Include="Model\BatchPriceExpl\IBatchPrice.cs" />
@@ -156,13 +158,13 @@
     <Compile Include="Warehouse\BatchReporting\BatchReportingFacade.cs" />
     <Compile Include="Warehouse\BatchReporting\IBatchReportingFacade.cs" />
     <Compile Include="Warehouse\BatchStatus.cs" />
+    <Compile Include="Warehouse\IBatchKeyResolver.cs" />
     <Compile Include="Warehouse\IBatchStatusManager.cs" />
     <Compile Include="Warehouse\IMaterialBatchFacade.cs" />
     <Compile Include="Warehouse\IMaterialBatchRepository.cs" />
     <Compile Include="Warehouse\Impl\BatchStatusManager.cs" />
     <Compile Include="Warehouse\Impl\MaterialBatchFacade.cs" />
     <Compile Include="Warehouse\Impl\MaterialBatchRepository2.cs" />
-    <Compile Include="Warehouse\Impl\MaterialBatchRepository.cs" />
     <Compile Include="Warehouse\Impl\Model\MaterialBatchAdapter.cs" />
     <Compile Include="Warehouse\Impl\Model\MaterialBatchCompositionAdapter.cs" />
     <Compile Include="Warehouse\MaterialBatchComponent.cs" />

@@ -475,6 +475,9 @@ input.readonly {
     margin-right: auto;
 }
 
+.highlightCell {
+    background-color: chartreuse;
+}
 
 .lowMaterialLevelExcl{
     margin-right:5px;

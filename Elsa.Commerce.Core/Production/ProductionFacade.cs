@@ -496,7 +496,7 @@ namespace Elsa.Commerce.Core.Production
                 }
                 else
                 {
-                    throw new InvalidOperationException("Invalid request");
+                    throw new InvalidOperationException("Žádné zbývající výrobní kroky");
                 }
             } 
 

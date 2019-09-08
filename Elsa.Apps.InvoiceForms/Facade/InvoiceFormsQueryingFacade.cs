@@ -59,8 +59,7 @@ namespace Elsa.Apps.InvoiceForms.Facade
                 itemModel.InvoiceFormNumber = form.InvoiceFormNumber;
                 itemModel.PrimaryCurrencyPriceWithoutVat = form.Items.Sum(i => i.PrimaryCurrencyPrice);
 
-                itemModel.FormattedPrimaryCurrencyPriceWithoutVat =
-                    StringUtil.FormatDecimal(itemModel.PrimaryCurrencyPriceWithoutVat);
+                itemModel.FormattedPrimaryCurrencyPriceWithoutVat = itemModel.PrimaryCurrencyPriceWithoutVat.ToString("F");
 
                 itemModel.PriceCalculationLog =
                     PriceCalculationLog.Get(form.PriceCalculationLog, form.PriceHasWarning ?? false);

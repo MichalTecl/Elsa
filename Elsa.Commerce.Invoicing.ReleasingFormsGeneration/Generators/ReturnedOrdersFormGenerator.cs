@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
@@ -22,13 +24,15 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         private readonly IUnitRepository m_unitRepository;
         private readonly IMaterialRepository m_materialRepository;
         private readonly AmountProcessor m_amountProcessor;
+        private readonly IStockEventRepository m_stockEventRepository;
 
-        public ReturnedOrdersFormGenerator(IMaterialBatchFacade batchFacade, IInvoiceFormsRepository invoiceFormsRepository, IMaterialRepository materialRepository, IPurchaseOrderRepository orderRepository, IUnitRepository unitRepository, AmountProcessor amountProcessor) : base(batchFacade, invoiceFormsRepository, materialRepository)
+        public ReturnedOrdersFormGenerator(IMaterialBatchFacade batchFacade, IInvoiceFormsRepository invoiceFormsRepository, IMaterialRepository materialRepository, IPurchaseOrderRepository orderRepository, IUnitRepository unitRepository, AmountProcessor amountProcessor, IStockEventRepository stockEventRepository) : base(batchFacade, invoiceFormsRepository, materialRepository)
         {
             m_materialRepository = materialRepository;
             m_orderRepository = orderRepository;
             m_unitRepository = unitRepository;
             m_amountProcessor = amountProcessor;
+            m_stockEventRepository = stockEventRepository;
         }
 
         protected override string GetExplanation(List<ItemReleaseModel> item, IInvoiceForm invoiceForm)
@@ -44,8 +48,10 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                 context.Info($"Pro sklad \"{forInventory.Name}\" se výdejky typu \"VRACENE OBJEDNAVKY\" negenerují - přeskakuji");
                 return;
             }
-
+            
             var returns = m_orderRepository.GetReturns(month, year).ToList();
+
+            DateUtil.GetMonthDt(year, month, out var dtFrom, out var dtTo);
 
             foreach (var order in returns)
             {
@@ -81,6 +87,15 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                             OrderNumber = order.OrderNumber
                         });
                     }
+                }
+
+                foreach (var connectedEvent in m_stockEventRepository.GetEvents(dtFrom, dtTo, order.Id))
+                {
+                    itemCallback(order.ReturnDt ?? order.BuyDate, connectedEvent.Batch,
+                        m_amountProcessor.Neg(new Amount(connectedEvent.Delta, connectedEvent.Unit)), new ReturnedOrderDescriptor
+                        {
+                            OrderNumber = order.OrderNumber
+                        });
                 }
 
             }

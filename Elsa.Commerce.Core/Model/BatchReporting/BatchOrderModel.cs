@@ -11,5 +11,8 @@
         public string PurchaseDate { get; set; }
 
         public string Customer { get; set; }
+        public string Quantity { get; set; }
+        public bool IsAllocation { get; set; }
+        public string AllocationHandle { get; set; }
     }
 }

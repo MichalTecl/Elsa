@@ -512,5 +512,15 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 m_database.SelectFrom<IMaterialBatch>()
                     .Where(b => b.ProjectId == m_session.Project.Id);
         }
+
+        public Tuple<int, string> GetBatchNumberAndMaterialIdByBatchId(int batchId)
+        {
+            return m_cache.ReadThrough($"batchkey_{batchId}", TimeSpan.FromHours(1), () =>
+            {
+                var batch = GetBatchById(batchId).Ensure();
+
+                return new Tuple<int, string>(batch.Batch.MaterialId, batch.Batch.BatchNumber);
+            });
+        }
     }
 }

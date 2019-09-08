@@ -10,7 +10,7 @@ using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 namespace Elsa.Commerce.Core.Warehouse
 {
-    public interface IMaterialBatchFacade
+    public interface IMaterialBatchFacade : IBatchKeyResolver
     {
         void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity);
 
@@ -63,5 +63,6 @@ namespace Elsa.Commerce.Core.Warehouse
 
         Amount GetNumberOfProducedProducts(int accountingDateYear, int accountingDateMonth, int inventoryId);
         void ReleaseUnsentOrdersAllocations();
+        void CutOrderAllocation(int orderId, BatchKey key);
     }
 }

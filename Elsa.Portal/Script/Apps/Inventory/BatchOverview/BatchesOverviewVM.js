@@ -166,6 +166,10 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
     self.deleteStockEvent = function(eventId, callback) {
         lt.api("/stockEvents/deleteStockEvent").query({ "eventId": eventId }).get(callback);
     };
+
+    self.cutOrderAllocation = function(handle, callback) {
+        lt.api("/materialBatches/cutOrderAllocation").query({ "handle": handle }).get(callback);
+    };
 };
 
 app.batchesOverview.vm = app.batchesOverview.vm || new app.batchesOverview.ViewModel();

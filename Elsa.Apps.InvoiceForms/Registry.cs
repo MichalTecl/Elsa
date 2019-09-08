@@ -1,5 +1,5 @@
 ﻿using Elsa.Apps.InvoiceForms.Facade;
-
+using Elsa.Apps.InvoiceForms.UiForms;
 using Robowire;
 
 namespace Elsa.Apps.InvoiceForms
@@ -9,6 +9,7 @@ namespace Elsa.Apps.InvoiceForms
         public void Setup(IContainerSetup setup)
         {
             setup.For<InvoiceFormsQueryingFacade>().Use<InvoiceFormsQueryingFacade>();
+            setup.For<IInvoiceFormRendererFactory>().Use<InvoiceFormRendererFactory>();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int PageNumber { get; set; }
 
         public int? BatchId { get; set; }
-
+        
         public int? MaterialId { get; set; }
 
         public int? InventoryTypeId { get; set; }
@@ -37,5 +37,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int? LoadOrdersPage { get; set; }
 
         public long? RelativeToOrderId { get; set; }
+
+        public bool BlockedBatchesOnly { get; set; }
     }
 }

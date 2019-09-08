@@ -202,10 +202,13 @@
         <div class="bovOrders" data-bind="class!.hidden:ordersExpanded">
             <div class="bovOrdersHead gridRow gridHead">
                 <div class="cell1"></div>
-                <div class="cell10">Číslo</div>
+                <div class="cell5">Číslo</div>
+                <div class="cell5">Množství</div>
                 <div class="cell10">Zákazník</div>
                 <div class="cell10">Datum</div>
                 <div class="cell10">Stav</div>
+                <div class="cell1"></div>
+                <div class="cell1"></div>
             </div>
             <div data-bind="itemsSource:Orders" data-key="OrderId">
                 <div class="lt-template">
@@ -214,10 +217,17 @@
                             <i data-bind="class.hidden:BatchesExpanded" class="far fa-plus-square faButton" event-bind="click:toggleOrderBatches(VM, $orderBatchesPlaceHolder)"></i>
                             <i data-bind="class!.hidden:BatchesExpanded" class="far fa-minus-square faButton" event-bind="click:toggleOrderBatches(VM)"></i>
                         </div>
-                        <div class="cell10" data-bind="text:OrderNumber"></div>
+                        <div class="cell5" data-bind="text:OrderNumber"></div>
+                        <div class="cell5" data-bind="text:Quantity"></div>
                         <div class="cell10" data-bind="text:Customer"></div>
                         <div class="cell10" data-bind="text:PurchaseDate"></div>
-                        <div class="cell10" data-bind="text:Status"></div>
+                        <div class="cell10" data-bind="text:Status;class.highlightCell:IsAllocation"></div>
+                        <div class="cell1">
+                            <i class="fas fa-cut faButton" data-bind="class!.hidden:IsAllocation" event-bind="click:cutOrderAllocation(AllocationHandle)"></i>
+                        </div>
+                        <div class="cell1">
+                            <i class="fas fa-times-circle  faButton" data-bind="class!.hidden:IsAllocation" event-bind="click:cutAllOrderAllocations(OrderId, OrderNumber)"></i>
+                        </div>
                     </div>
                     <div lt-name="orderBatchesPlaceHolder" data-bind="class!.hidden:BatchesExpanded"></div>
                 </div>
@@ -490,6 +500,23 @@
 
         self.invokeStockEvent = function(model) {
             app.urlBus.set("setStockEvent", model);
+        };
+
+        self.cutOrderAllocation = function(handle) {
+            app.batchesOverview.vm.cutOrderAllocation(handle, function () {
+                self.refreshBatchView(1);
+            });
+        };
+
+        self.cutAllOrderAllocations = function (orderId, orderNumber) {
+
+            if (!confirm("Opravdu uvolnit všechny šarže přiřazené k objednávce "+orderNumber+"?")) {
+                return;
+            }
+
+            app.batchesOverview.vm.cutOrderAllocation(orderId.toString(), function () {
+                self.refreshBatchView(1);
+            });
         };
 
         updateView();

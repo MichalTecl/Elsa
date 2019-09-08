@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Elsa.Commerce.Core.Adapters;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
@@ -9,7 +9,7 @@ using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-
+using Robowire;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.StockEvents
@@ -26,6 +26,7 @@ namespace Elsa.Commerce.Core.StockEvents
         private readonly IUnitRepository m_unitRepository;
         private readonly IUnitConversionHelper m_conversionHelper;
         private readonly IPurchaseOrderRepository m_orderRepository;
+        private readonly IServiceLocator m_serviceLocator;
 
         public StockEventRepository(IPerProjectDbCache cache,
             Lazy<IMaterialBatchFacade> batchFacade,
@@ -33,7 +34,8 @@ namespace Elsa.Commerce.Core.StockEvents
             AmountProcessor amountProcessor,
             IMaterialRepository materialRepository,
             ISession session,
-            IDatabase database, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper, IPurchaseOrderRepository orderRepository)
+            IDatabase database, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper,
+            IPurchaseOrderRepository orderRepository, IServiceLocator serviceLocator)
         {
             m_cache = cache;
             m_batchFacade = batchFacade;
@@ -45,6 +47,7 @@ namespace Elsa.Commerce.Core.StockEvents
             m_unitRepository = unitRepository;
             m_conversionHelper = conversionHelper;
             m_orderRepository = orderRepository;
+            m_serviceLocator = serviceLocator;
         }
 
         public IEnumerable<IStockEventType> GetAllEventTypes()
@@ -134,24 +137,20 @@ namespace Elsa.Commerce.Core.StockEvents
         {
             return
                 m_database.SelectFrom<IMaterialStockEvent>()
-                    .Join(m => m.Unit)
-                    .Join(m => m.User)
-                    .Join(m => m.Type)
                     .Where(m => m.ProjectId == m_session.Project.Id)
                     .Where(m => m.BatchId == batchId)
-                    .Execute();
+                    .Execute().Select(b => new MaterialStockEventAdapter(m_serviceLocator, b));
         }
 
         public IEnumerable<IMaterialStockEvent> GetEvents(DateTime @from, DateTime to, int inventoryId)
         {
             return m_database.SelectFrom<IMaterialStockEvent>()
-                .Join(e => e.Unit)
-                .Join(e => e.Type)
                 .Join(e => e.Batch)
                 .Join(e => e.Batch.Material)
                 .Where(e => e.ProjectId == m_session.Project.Id)
                 .Where(e => e.Batch.Material.InventoryId == inventoryId)
-                .Where(e => e.EventDt >= from && e.EventDt <= to).Execute();
+                .Where(e => e.EventDt >= from && e.EventDt <= to).Execute()
+                .Select(b => new MaterialStockEventAdapter(m_serviceLocator, b));
         }
 
         public void DeleteStockEvent(int eventId)
@@ -196,6 +195,16 @@ namespace Elsa.Commerce.Core.StockEvents
 
                 tx.Commit();
             }
+        }
+
+        public IEnumerable<IMaterialStockEvent> GetEvents(DateTime @from, DateTime to, long sourcePurchaseOrderId)
+        {
+            return m_database.SelectFrom<IMaterialStockEvent>()
+                .Join(e => e.Type)
+                .Where(e => e.ProjectId == m_session.Project.Id)
+                .Where(e => e.SourcePurchaseOrderId == sourcePurchaseOrderId)
+                .Where(e => e.EventDt >= from && e.EventDt <= to).Execute()
+                .Select(b => new MaterialStockEventAdapter(m_serviceLocator, b));
         }
     }
 }

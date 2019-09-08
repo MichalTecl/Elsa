@@ -9,7 +9,7 @@ using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse
 {
-    public interface IMaterialBatchRepository
+    public interface IMaterialBatchRepository : IBatchKeyResolver
     {
         MaterialBatchComponent GetBatchById(int id);
 
