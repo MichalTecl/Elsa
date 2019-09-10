@@ -7,7 +7,7 @@
 
         if (element.hasAttribute("xcell")) {
             parentObject.Cells = parentObject.Cells || [];
-            parentObject.Cells.push({ "Value": element.innerHTML, "Data": element.getAttribute("xcell") });
+            parentObject.Cells.push({ "Value": element.innerHTML, "Data": element.getAttribute("xcell"), "NumberFormat": element.getAttribute("xnumber") });
             return;
         }
 

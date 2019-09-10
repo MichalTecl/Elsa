@@ -38,7 +38,20 @@ namespace Elsa.Common.XTable.Generators
 
                 for (var colIndex = 0; colIndex < row.Cells.Count; colIndex++)
                 {
-                    excelSheet.Cells[rowIndex + 1, colIndex + 1].Value = row.Cells[colIndex].Value;
+                    var sourceCell = row.Cells[colIndex];
+                    var excelCell = excelSheet.Cells[rowIndex + 1, colIndex + 1];
+
+                    excelCell.Value = sourceCell.Value;
+
+                    if (!string.IsNullOrWhiteSpace(sourceCell.NumberFormat))
+                    {
+                        if (decimal.TryParse(sourceCell.Value, out var decimalValue))
+                        {
+                            excelCell.Value = decimalValue;
+                        }
+
+                        excelCell.Style.Numberformat.Format = sourceCell.NumberFormat;
+                    }
                 }
             }
         }
