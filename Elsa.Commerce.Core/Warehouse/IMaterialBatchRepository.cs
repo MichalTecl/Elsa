@@ -71,5 +71,7 @@ namespace Elsa.Commerce.Core.Warehouse
             int compositionYear, int compositionMonth, bool includeBatchesHiddenForAccounting);
 
         IEnumerable<IMaterialBatchComposition> GetBatchComponents(int compositionId);
+
+        IEnumerable<IMaterialBatch> GetBatchesByInvoiceNumber(string invoiceNumber, int supplierId);
     }
 }

@@ -141,7 +141,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Invoicing", "Invoicing", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration", "Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration\Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.csproj", "{41B6892E-A074-43A5-BF29-6E0AD659CE67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Commerce.Invoicing.ReleasingFormsGeneration", "Elsa.Commerce.Invoicing.ReleasingFormsGeneration\Elsa.Commerce.Invoicing.ReleasingFormsGeneration.csproj", "{661D09CE-C255-4086-B88A-EDC5028EB795}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Commerce.Invoicing.ReleasingFormsGeneration", "Elsa.Commerce.Invoicing.ReleasingFormsGeneration\Elsa.Commerce.Invoicing.ReleasingFormsGeneration.csproj", "{661D09CE-C255-4086-B88A-EDC5028EB795}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Apps.Invoices", "Elsa.Apps.Invoices\Elsa.Apps.Invoices.csproj", "{6FCEA8AB-D629-468E-B0D2-C7F006AF41A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -353,6 +355,10 @@ Global
 		{661D09CE-C255-4086-B88A-EDC5028EB795}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{661D09CE-C255-4086-B88A-EDC5028EB795}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{661D09CE-C255-4086-B88A-EDC5028EB795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FCEA8AB-D629-468E-B0D2-C7F006AF41A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FCEA8AB-D629-468E-B0D2-C7F006AF41A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FCEA8AB-D629-468E-B0D2-C7F006AF41A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FCEA8AB-D629-468E-B0D2-C7F006AF41A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -419,6 +425,7 @@ Global
 		{17B02449-1F07-4B2E-AD19-E20F35FEB9E9} = {17CFFCB7-A83F-405D-969E-CC1396850E26}
 		{41B6892E-A074-43A5-BF29-6E0AD659CE67} = {17B02449-1F07-4B2E-AD19-E20F35FEB9E9}
 		{661D09CE-C255-4086-B88A-EDC5028EB795} = {17B02449-1F07-4B2E-AD19-E20F35FEB9E9}
+		{6FCEA8AB-D629-468E-B0D2-C7F006AF41A0} = {456527A3-2BE8-4010-8AC6-187539CE484D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}

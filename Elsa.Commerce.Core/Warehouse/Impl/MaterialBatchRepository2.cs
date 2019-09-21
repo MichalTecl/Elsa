@@ -506,6 +506,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 .Execute().Select(i => new MaterialBatchCompositionAdapter(m_serviceLocator, i));
         }
 
+        public IEnumerable<IMaterialBatch> GetBatchesByInvoiceNumber(string invoiceNumber, int supplierId)
+        {
+            return GetBatchQuery().Where(b => b.SupplierId == supplierId).Where(b => b.InvoiceNr == invoiceNumber)
+                .Where(b => b.CloseDt == null).Execute()
+                .Select(b => MapToModel(b).Batch);
+        }
+
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()
         {
             return

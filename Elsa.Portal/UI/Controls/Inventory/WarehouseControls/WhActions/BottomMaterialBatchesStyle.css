@@ -87,3 +87,28 @@ button.addBatchBut {
 #loadOlderBatches:hover {
     opacity:1;
 }
+
+.xlsInvoicesPanel {
+    padding: 6px;
+    margin-left: 6px;
+    margin-bottom: 10px;
+}
+
+    .xlsInvoicesPanel .fa-file-excel {
+        font-size: 2em;
+    }
+
+    .xlsInvoicesPanel a, form {
+        display: none;
+        margin-bottom: 20px;
+    }
+
+    .xlsInvoicesPanel:hover a {
+        display: block;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .xlsInvoicesPanel:hover form {
+        display: block;
+    }

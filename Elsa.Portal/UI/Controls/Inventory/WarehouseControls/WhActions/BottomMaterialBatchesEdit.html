@@ -1,7 +1,15 @@
 ﻿<div id="batchesEdit">
     
     <button event-bind="click:createNewBatch" class="addBatchBut"><i class="fas fa-plus"></i></button>
-
+    
+    <div class="xlsInvoicesPanel">
+        <i class="far fa-file-excel faButton"></i>
+        <a href="/Invoicefiles/gettemplate">Stáhnout šablonu</a>
+        <form id="xlsPanel" event-bind="submit:onInvoiceFilePasted($fuXlsInvoice)">
+            <input type="file" lt-name="fuXlsInvoice" />
+            <input type="submit" value="Nahrát" />
+        </form>
+    </div>    
     <div id="batchesList">
 
         <div id="batchTemplate">
@@ -109,7 +117,7 @@
 
 
 <script>
-    lt.element("batchesEdit").withModel("app.warehouseActions.vm").attach(function(batchesList, batchTemplate, batchList) {
+    lt.element("batchesEdit").withModel("app.warehouseActions.vm").attach(function(batchesList, batchTemplate, batchList, xlsPanel) {
         
         var batchItemController = function (materialAutocompleteContainer, materialUnitAutocompleteContainer, material) {
             
@@ -242,6 +250,17 @@
             if ((tbVarSymbol.value || "").trim().length < 1) {
                 tbVarSymbol.value = tbInvoice.value;
             }
+        };
+
+        this.onInvoiceFilePasted = function(fileUpload) {
+
+            var file = fileUpload.files[0];
+
+            app.warehouseActions.vm.importXlsInvoice(file, function() {
+                batchList.children[0].refreshBatchView();
+            });
+
+            return false;
         };
     });
 </script>

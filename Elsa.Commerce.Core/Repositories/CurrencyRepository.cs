@@ -33,6 +33,11 @@ namespace Elsa.Commerce.Core.Repositories
                     .FirstOrDefault(c => c.Symbol.Equals(symbol, StringComparison.InvariantCultureIgnoreCase));
         }
 
+        public ICurrency GetCurrency(int id)
+        {
+            return GetAllCurrencies().FirstOrDefault(c => c.Id == id);
+        }
+
         public void SaveCurrency(ICurrency currency)
         {
             try

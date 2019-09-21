@@ -28,6 +28,12 @@ namespace Elsa.Commerce.Core.Repositories
             return GetSuppliers().FirstOrDefault(s => s.Id == supplierId);
         }
 
+        public ISupplier GetSupplier(string supplierName)
+        {
+            return GetSuppliers()
+                .FirstOrDefault(s => s.Name.Equals(supplierName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         public ISupplier SaveSupplier(ISupplier supplier)
         {
             if (supplier.Id < 1)

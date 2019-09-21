@@ -146,6 +146,16 @@ app.warehouseActions.ViewModel = app.warehouseActions.ViewModel || function() {
 
     };
 
+    self.importXlsInvoice = function(file, callback) {
+        if (!file) {
+            return;
+        }
+        
+        lt.api("/invoiceFiles/uploadInvoiceFile").formData(file.name, file).post(function(response) {
+            callback();
+        });
+    };
+
     setTimeout(loadMaterialNames, 0);
     setTimeout(self.loadBottomMaterialBatches, 100);
 };

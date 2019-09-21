@@ -6,7 +6,7 @@ namespace Elsa.Common.Utils
 {
     public static class ObjectExtensions
     {
-        public static T Ensure<T>(this T entity) where T : class
+        public static T Ensure<T>(this T entity, string errorMessage = "Invalid entity reference") where T : class
         {
             if (entity == null)
             {

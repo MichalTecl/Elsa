@@ -14,7 +14,7 @@ namespace Elsa.Common
         private readonly byte[] m_data;
         private readonly string m_contentType;
         private readonly string m_contentDisposition;
-
+        
         public FileResult(string fileName, byte[] data)
             : this(fileName, data, null){}
 

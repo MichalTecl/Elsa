@@ -10,6 +10,7 @@ namespace Elsa.Commerce.Core
     {
         ICurrency GetCurrency(string symbol);
 
+        ICurrency GetCurrency(int id);
         void SaveCurrency(ICurrency currency);
 
         IEnumerable<ICurrency> GetAllCurrencies();
