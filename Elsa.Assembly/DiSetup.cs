@@ -4,6 +4,7 @@ using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
 using Elsa.App.Crm;
 using Elsa.App.OrdersPacking;
+using Elsa.App.SaleEvents;
 using Elsa.App.Shipment;
 using Elsa.Apps.CommonData;
 using Elsa.Apps.Inventory;
@@ -87,6 +88,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(XTableController).Assembly);
                     s.ScanAssembly(typeof(InvoiceFormsGenerationRunner).Assembly);
                     s.ScanAssembly(typeof(InvoiceFilesController).Assembly);
+                    s.ScanAssembly(typeof(SaleEventsController).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });

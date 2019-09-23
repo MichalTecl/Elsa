@@ -44,6 +44,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Adapters\MaterialStockEventAdapter.cs" />
+    <Compile Include="Adapters\SaleEventAdapter.cs" />
+    <Compile Include="Adapters\SaleEventAllocationAdapter.cs" />
     <Compile Include="Configuration\PackingPreferredBatchesConfig.cs" />
     <Compile Include="Crm\ICustomerRepository.cs" />
     <Compile Include="Crm\Model\CustomerOverview.cs" />
@@ -116,6 +118,9 @@
     <Compile Include="Repositories\UnitRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Repositories\VirtualProductRepository.cs" />
+    <Compile Include="SaleEvents\ISaleEventRepository.cs" />
+    <Compile Include="SaleEvents\SaleEventAllocationDto.cs" />
+    <Compile Include="SaleEvents\SaleEventRepository.cs" />
     <Compile Include="Shipment\IShipmentProvider.cs" />
     <Compile Include="StockEvents\IStockEventRepository.cs" />
     <Compile Include="StockEvents\StockEventRepository.cs" />
@@ -196,6 +201,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

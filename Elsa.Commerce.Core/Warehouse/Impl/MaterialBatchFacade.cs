@@ -1060,6 +1060,56 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
+        public IEnumerable<Tuple<int?, Amount>> ProposeAllocations(int materialId, string batchNumber, Amount requestedAmount)
+        {
+            var query = m_database.SelectFrom<IMaterialBatch>()
+                .Where(b => b.CloseDt == null)
+                .Where(b => b.ProjectId == m_session.Project.Id)
+                .Where(b => b.MaterialId == materialId)
+                .OrderBy(b => b.Created);
+
+            if (string.IsNullOrWhiteSpace(batchNumber))
+            {
+                var material = m_materialRepository.GetMaterialById(materialId).Ensure();
+                if (!material.AutomaticBatches)
+                {
+                    throw new InvalidOperationException($"Chybi cislo sarze");
+                }
+            }
+            else
+            {
+                query = query.Where(b => b.BatchNumber == batchNumber);
+            }
+
+            var batches = query.Execute().ToList();
+
+            foreach (var b in batches)
+            {
+                if (!requestedAmount.IsPositive)
+                {
+                    break;
+                }
+
+                var available = GetAvailableAmount(b.Id);
+
+                if (!available.IsPositive)
+                {
+                    continue;
+                }
+
+                var allocatedFromThisBatch = m_amountProcessor.Min(available, requestedAmount);
+
+                requestedAmount = m_amountProcessor.Subtract(requestedAmount, allocatedFromThisBatch);
+
+                yield return new Tuple<int?, Amount>(b.Id, allocatedFromThisBatch);
+            }
+
+            if (requestedAmount.IsPositive)
+            {
+                yield return new Tuple<int?, Amount>(null, requestedAmount);
+            }
+        }
+
         private IList<BatchAmountProcedureResult> ExecBatchAmountProcedure(int? batchId, int? materialId)
         {
             var result = new List<BatchAmountProcedureResult>();

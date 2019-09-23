@@ -40,10 +40,7 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         IEnumerable<IOrderItem> KitChildren { get; }
 
         int? KitItemIndex { get; set; }
-
-        int? DirectSaleEventId { get; set; }
-        IDirectSaleEvent DirectSaleEvent { get; }
-
+        
         [ForeignKey(nameof(IOrderItemMaterialBatch.OrderItemId))]
         IEnumerable<IOrderItemMaterialBatch> AssignedBatches { get; }
     }

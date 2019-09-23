@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Elsa.Apps.CommonData.ExcelInterop;
 using Elsa.Apps.Invoices.Model;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -45,7 +46,7 @@ namespace Elsa.Apps.Invoices
             var supplier = m_supplierRepository.GetSupplier(model.SupplierName ?? string.Empty).Ensure($"Neexistující dodavatel \"{model.SupplierName}\"");
             var currency = m_currencyRepository.GetCurrency(model.Currency).Ensure($"Neexistující symbol měny \"{model.Currency}\"");
 
-            if (!DateTime.TryParseExact(model.Date, "dd.MM.yyyy", CultureInfo.InvariantCulture,
+            if (!DateTime.TryParseExact(model.Date, ElsaExcelModelBase.ExcelDateFormat, CultureInfo.InvariantCulture,
                 DateTimeStyles.None, out var receiveDate))
             {
                 throw new InvalidOperationException($"Chybný formát data \"{model.Date}\"");

@@ -19,7 +19,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
         private readonly ISession m_session;
         private readonly ICache m_cache;
         private readonly IUnitConversionHelper m_conversionHelper;
-
+        
         private string MaterialsCacheKey => $"AllMaterialsBy_ProjectId={m_session.Project.Id}";
         private string VirtualProductCompositionsCacheKey => $"AllVPCompositionsBy_ProjectID={m_session.Project.Id}";
 
@@ -420,6 +420,14 @@ namespace Elsa.Commerce.Core.VirtualProducts
                         .Join(m => m.Components.Each().Unit)
                         .Where(m => m.Material.ProjectId == m_session.Project.Id)
                         .Execute());
+        }
+
+        public void EnsureCompatibleUnit(IExtendedMaterialModel material, IMaterialUnit unit)
+        {
+            if (!m_conversionHelper.AreCompatible(material.NominalUnit.Id, unit.Id))
+            {
+                throw new InvalidOperationException($"Jednotku '{unit.Symbol}' nelze použít pro materiál '{material.Name}'");
+            }
         }
 
         public IMaterialRepositoryWithPostponedCache GetWithPostponedCache()

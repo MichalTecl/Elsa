@@ -268,5 +268,36 @@ namespace Elsa.Common.Utils
                     return s;
                 }));
         }
+
+        public static string ToFileName(string a)
+        {
+            if (string.IsNullOrWhiteSpace(a))
+            {
+                return "BezNazvu";
+            }
+
+            a = a.Trim();
+
+            return string.Join(string.Empty, Underscorise(a));
+        }
+
+        private static IEnumerable<char> Underscorise(string inp)
+        {
+            var lastWasUnderscore = false;
+
+            foreach (var ch in inp)
+            {
+                if (char.IsLetterOrDigit(ch))
+                {
+                    yield return ch;
+                    lastWasUnderscore = false;
+                }
+                else if (!lastWasUnderscore)
+                {
+                    yield return '_';
+                    lastWasUnderscore = true;
+                }
+            }
+        }
     }
 }

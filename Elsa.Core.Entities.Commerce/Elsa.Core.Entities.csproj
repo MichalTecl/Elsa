@@ -61,12 +61,13 @@
     <Compile Include="Accounting\IReleasingFormsGenerationTaskInventory.cs" />
     <Compile Include="Automation\IJobSchedule.cs" />
     <Compile Include="Automation\IScheduledJob.cs" />
-    <Compile Include="Commerce\IDirectSaleEvent.cs" />
     <Compile Include="Commerce\IOrderItem.cs" />
     <Compile Include="Commerce\IOrderStatus.cs" />
     <Compile Include="Commerce\IProduct.cs" />
     <Compile Include="Commerce\IPurchaseOrder.cs" />
     <Compile Include="Commerce\ISupplier.cs" />
+    <Compile Include="Commerce\SaleEvents\ISaleEvent.cs" />
+    <Compile Include="Commerce\SaleEvents\ISaleEventAllocation.cs" />
     <Compile Include="Common\IAddress.cs" />
     <Compile Include="Common\IAmountAndUnit.cs" />
     <Compile Include="Common\IBaseCalendar.cs" />

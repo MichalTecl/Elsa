@@ -59,8 +59,6 @@
     <Compile Include="InvoiceModelProcessor.cs" />
     <Compile Include="Model\InvoiceItem.cs" />
     <Compile Include="Model\InvoiceModel.cs" />
-    <Compile Include="Model\MaterialAndUnit.cs" />
-    <Compile Include="Model\SupplierAndCurrency.cs" />
     <Compile Include="Registry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -76,6 +74,10 @@
     <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
       <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Apps.CommonData\Elsa.Apps.CommonData.csproj">
+      <Project>{A59B602C-0A86-48F6-944D-CE7C675F99DD}</Project>
+      <Name>Elsa.Apps.CommonData</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
       <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>

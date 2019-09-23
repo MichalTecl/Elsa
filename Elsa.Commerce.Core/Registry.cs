@@ -4,6 +4,7 @@ using Elsa.Commerce.Core.Impl;
 using Elsa.Commerce.Core.Production;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.Repositories.Automation;
+using Elsa.Commerce.Core.SaleEvents;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -52,6 +53,7 @@ namespace Elsa.Commerce.Core
             setup.For<ICurrencyConversionHelper>().Use<CurrencyConversionHelper>();
             setup.For<IRepositoryFactory>().Use<RepositoryFactory>();
             setup.For<IFixedCostRepository>().Use<FixedCostRepository>();
+            setup.For<ISaleEventRepository>().Use<SaleEventRepository>();
         }
     }
 }

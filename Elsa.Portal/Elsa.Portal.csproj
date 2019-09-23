@@ -122,6 +122,7 @@
     <Content Include="Script\Apps\Packing\OrdersPacking.VM.js" />
     <Content Include="Script\Apps\Production\ProductionVM.js" />
     <Content Include="Script\Apps\Reporting\InvoiceReporting\InvoiceReportingVm.js" />
+    <Content Include="Script\Apps\SaleEvents\SaleEvents.VM.js" />
     <Content Include="Script\Common\ContextMenu.js" />
     <Content Include="Script\Common\GlobalEventHandlers.js" />
     <Content Include="Script\Common\UrlBus.js" />
@@ -147,6 +148,7 @@
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.html" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchSearchUI.html" />
     <Content Include="UI\Controls\Inventory\MaterialsEditor.html" />
+    <Content Include="UI\Controls\Inventory\SaleEvents.html" />
     <Content Include="UI\Controls\Inventory\TaggingEditor.html" />
     <Content Include="UI\Controls\Inventory\VirtualProducts.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesEdit.html" />

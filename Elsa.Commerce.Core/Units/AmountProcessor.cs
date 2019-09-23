@@ -159,5 +159,12 @@ namespace Elsa.Commerce.Core.Units
             var smallestUnit = m_conversionHelper.GetSmallestCompatibleUnit(amount.Unit);
             return Convert(amount, smallestUnit);
         }
+
+        public bool AreEqual(Amount a, Amount b)
+        {
+            var diff = Subtract(a, b);
+
+            return Math.Abs(diff.Value) < 0.0001m;
+        }
     }
 }

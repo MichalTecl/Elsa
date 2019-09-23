@@ -51,7 +51,7 @@
         tab.addTab("Výroba", "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionBatchesUI.html", null, null, "batchProduction");
         tab.addTab("Výrobní kroky", "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionSteps.html", null, null, "prodSteps");
         tab.addTab("Odpisy","/UI/Controls/Inventory/WarehouseControls/WhActions/StockEventsEditor.html", null, null, "discards");
-        tab.addTab("Přímý prodej", "/UI/Controls/Inventory/MaterialsEditor.html", null, null, "directSales");
+        tab.addTab("Prodejní akce", "/UI/Controls/Inventory/SaleEvents.html", null, null, "directSales");
 
         app.urlBus.watch("fillstep", function() {
             tab.selectTab("prodSteps");

@@ -1,4 +1,5 @@
-﻿using XlsSerializer.Core.Attributes;
+﻿using Elsa.Apps.CommonData.ExcelInterop;
+using XlsSerializer.Core.Attributes;
 
 namespace Elsa.Apps.Invoices.Model
 {
@@ -13,15 +14,14 @@ namespace Elsa.Apps.Invoices.Model
         public string BatchNumber { get; set; }
 
         [XlsColumn("C", "Materiál")]
-        [ListValidation("DATA_Materials!A:A", AllowBlank = false, Error = "Zadejte platný symbol jednotky", ErrorTitle = "!")]
+        [ValidateMaterial]
         public string MaterialName { get; set; }
 
         [XlsColumn("D", "Množství")]
         public decimal Quantity { get; set; }
 
         [XlsColumn("E", "Jednotka")]
-        //[ListValidation("DATA_Units!A:A", AllowBlank = false, Error = "Zadejte platný symbol jednotky", ErrorTitle = "!")]
-        [R1C1Formula("=VLOOKUP(R[0]C[-2], DATA_Materials!A1:B9999, 2, FALSE)")]
+        [SetUnitByMaterial("R[0]C[-2]")]
         public string Unit { get; set; }
 
         [XlsColumn("F", "Cena bez DPH")]

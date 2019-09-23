@@ -87,6 +87,10 @@
       <Project>{09e35860-d69e-42a0-aabd-a7431f283c97}</Project>
       <Name>Elsa.App.Profile</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.SaleEvents\Elsa.App.SaleEvents.csproj">
+      <Project>{0C94EB6A-E1DD-4791-B7F3-AA1E86AB9231}</Project>
+      <Name>Elsa.App.SaleEvents</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.Shipment\Elsa.App.Shipment.csproj">
       <Project>{30186ab2-8f35-469d-9917-da2fa80cc3f8}</Project>
       <Name>Elsa.App.Shipment</Name>

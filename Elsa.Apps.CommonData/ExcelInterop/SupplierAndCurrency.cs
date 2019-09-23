@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using XlsSerializer.Core.Attributes;
+﻿using XlsSerializer.Core.Attributes;
 
-namespace Elsa.Apps.Invoices.Model
+namespace Elsa.Apps.CommonData.ExcelInterop
 {
     public class SupplierAndCurrency
     {

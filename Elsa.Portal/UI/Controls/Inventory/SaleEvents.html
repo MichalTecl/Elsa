@@ -1,0 +1,48 @@
+﻿<script src="/Script/Apps/SaleEvents/SaleEvents.VM.js"></script>
+
+<div id="saleEventsUi">
+    <form id="xlsPanel" event-bind="submit:onSaleEventFilePasted($seXlsEvent)">
+        <input type="file" lt-name="seXlsEvent" />
+        <input type="submit" value="Nahrát" />
+    </form>
+
+    <a href="/saleEvents/getTemplate">Stáhnout šablonu pro import</a>
+    <div class="seEventsTable">
+        <div class="gridRow gridHead">
+            <div class="cell10">Název</div>
+            <div class="cell5">Datum</div>
+            <div class="cell5">Vložil</div>
+            <div class="cell1"></div>
+        </div>
+        <div lt-name="eventsPanel" data-key="Id" data-bind="itemsSource:events">
+            <div class="lt-template gridRow">
+                <div class="cell10" data-bind="text:Name"></div>
+                <div class="cell5" data-bind="text:Date"></div>
+                <div class="cell5" data-bind="text:User"></div>
+                <div class="cell1">
+                    <a data-bind="href:DownloadLink"><i class="far fa-file-excel faButton"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button data-bind="class!.hidden:canLoadMore" event-bind="click:loadMore">Načíst více</button>
+</div>
+
+<script>
+    lt.element("saleEventsUi").withModel("app.SaleEvents.vm").attach(function() {
+
+        this.loadMore = function() {
+            app.SaleEvents.vm.loadEvents();
+        };
+
+        this.onSaleEventFilePasted = function(fileUpload) {
+
+            var file = fileUpload.files[0];
+
+            app.SaleEvents.vm.uploadXls(file);
+
+            return false;
+        };
+
+    });
+</script>

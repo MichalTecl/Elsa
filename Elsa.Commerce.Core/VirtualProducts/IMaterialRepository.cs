@@ -52,6 +52,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
         IEnumerable<IMaterialProductionStep> GetMaterialProductionSteps(int materialId);
 
         IEnumerable<IMaterialProductionStep> GetMaterialProductionSteps();
+        void EnsureCompatibleUnit(IExtendedMaterialModel material, IMaterialUnit unit);
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }
