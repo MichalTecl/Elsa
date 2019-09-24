@@ -1,7 +1,7 @@
 ﻿<script src="/Script/Apps/SaleEvents/SaleEvents.VM.js"></script>
 
 <div id="saleEventsUi">
-    <form id="xlsPanel" event-bind="submit:onSaleEventFilePasted($seXlsEvent)">
+    <form id="xlsPanel" event-bind="submit:onSaleEventFilePasted($seXlsEvent)"  onsubmit="return false">
         <input type="file" lt-name="seXlsEvent" />
         <input type="submit" value="Nahrát" />
     </form>

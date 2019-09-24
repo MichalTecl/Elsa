@@ -5,7 +5,7 @@
     <div class="xlsInvoicesPanel">
         <i class="far fa-file-excel faButton"></i>
         <a href="/Invoicefiles/gettemplate">Stáhnout šablonu</a>
-        <form id="xlsPanel" event-bind="submit:onInvoiceFilePasted($fuXlsInvoice)">
+        <form id="xlsPanel" event-bind="submit:onInvoiceFilePasted($fuXlsInvoice)" onsubmit="return false">
             <input type="file" lt-name="fuXlsInvoice" />
             <input type="submit" value="Nahrát" />
         </form>

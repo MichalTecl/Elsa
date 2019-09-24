@@ -10,7 +10,7 @@ namespace Elsa.Common.Utils
         {
             if (entity == null)
             {
-                throw new InvalidOperationException("Invalid entity reference");
+                throw new InvalidOperationException(errorMessage);
             }
 
             return entity;
