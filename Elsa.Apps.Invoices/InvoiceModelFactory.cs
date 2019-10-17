@@ -16,8 +16,8 @@ namespace Elsa.Apps.Invoices
         public InvoiceModel Create()
         {
             var model = m_excelModelFactory.Setup(new InvoiceModel(), m => !m.IsManufactured);
-            
-            model.Date = DateTime.Now.ToString(ElsaExcelModelBase.ExcelDateFormat);
+
+            model.Date = DateTime.Now.Date;
 
             for (var i = 0; i < 5; i++)
             {

@@ -21,13 +21,13 @@ namespace Elsa.App.SaleEvents.Model.Xls
         [Label("Název")]
         public string Name { get; set; }
 
-        [XlsCell("B3", ExcelDateFormat)]
+        [XlsCell("B3")]
         [Label("Datum blokace")]
-        public string AllocDate { get; set; }
+        public DateTime AllocDate { get; set; }
 
-        [XlsCell("B4", ExcelDateFormat)]
+        [XlsCell("B4")]
         [Label("Datum vrácení")]
-        public string ReturnDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
 
         [XlsCell("A6")]
         public List<SaleEventAllocationModel> Items { get; } = new List<SaleEventAllocationModel>();

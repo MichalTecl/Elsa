@@ -83,17 +83,13 @@ namespace Elsa.Jobs.ImportOrders
 
                     m_log.Info($"Stazeno {erpOrders.Count} zaznamu");
                     
-                    using (var trx = m_database.OpenTransaction())
+                    foreach (var srcOrder in erpOrders)
                     {
-                        foreach (var srcOrder in erpOrders)
-                        {
-                            m_purchaseOrderRepository.ImportErpOrder(srcOrder);
-                        }
-
-                        trx.Commit();
-                        m_log.Info("Ulozeno");
+                        m_purchaseOrderRepository.ImportErpOrder(srcOrder);
                     }
-
+                    
+                    m_log.Info("Ulozeno");
+                    
                     startDate = endDate;
                 }
 

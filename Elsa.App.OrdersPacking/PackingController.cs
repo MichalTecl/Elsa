@@ -66,7 +66,7 @@ namespace Elsa.App.OrdersPacking
             var paid =
                 m_orderRepository.GetOrdersByStatus(
                     OrderStatus.ReadyToPack,
-                    DateTime.Now.AddDays(-30),
+                    DateTime.Now.AddDays(-90),
                     DateTime.Now.AddDays(1)).ToList();
 
             var filtered = paid.Where(o => GetTrackingNumber(o).EndsWith(number)).ToList();

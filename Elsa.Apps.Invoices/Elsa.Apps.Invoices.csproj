@@ -47,9 +47,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="XlsSerializer.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\LIB\XlsSerializer.Core.dll</HintPath>
+    <Reference Include="XlsSerializer.Core, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\XlsSerializer.Core.1.0.3\lib\net461\XlsSerializer.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

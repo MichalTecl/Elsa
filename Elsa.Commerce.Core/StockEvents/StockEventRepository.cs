@@ -8,6 +8,7 @@ using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Robowire;
 using Robowire.RobOrm.Core;
@@ -186,6 +187,13 @@ namespace Elsa.Commerce.Core.StockEvents
                     }
                 }
 
+                var invoiceFormBridges = new List<IOrderItemInvoiceFormItem>();
+                foreach (var orderItemMaterialBatch in assignments)
+                {
+                    invoiceFormBridges.AddRange(m_database.SelectFrom<IOrderItemInvoiceFormItem>().Where(i => i.BatchAssignmentId == orderItemMaterialBatch.Id).Execute());
+                }
+
+                m_database.DeleteAll(invoiceFormBridges);
                 m_database.DeleteAll(assignments);
 
                 foreach (var assignment in assignments)

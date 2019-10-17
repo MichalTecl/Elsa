@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Elsa.Apps.CommonData.ExcelInterop;
 using XlsSerializer.Core.Attributes;
 
@@ -21,9 +18,9 @@ namespace Elsa.Apps.Invoices.Model
         [Label("V.S.")]
         public string VarSymbol { get; set; }
         
-        [XlsCell("B3", ExcelDateFormat)]
+        [XlsCell("B3")]
         [Label("Datum")]
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
 
         [XlsCell("B4")]
         [Label("Dodavatel")]

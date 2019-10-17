@@ -45,13 +45,7 @@ namespace Elsa.Apps.Invoices
 
             var supplier = m_supplierRepository.GetSupplier(model.SupplierName ?? string.Empty).Ensure($"Neexistující dodavatel \"{model.SupplierName}\"");
             var currency = m_currencyRepository.GetCurrency(model.Currency).Ensure($"Neexistující symbol měny \"{model.Currency}\"");
-
-            if (!DateTime.TryParseExact(model.Date, ElsaExcelModelBase.ExcelDateFormat, CultureInfo.InvariantCulture,
-                DateTimeStyles.None, out var receiveDate))
-            {
-                throw new InvalidOperationException($"Chybný formát data \"{model.Date}\"");
-            }
-
+            
             if (string.IsNullOrWhiteSpace(model.InvoiceNumber))
             {
                 throw new InvalidOperationException("Chybí číslo faktury");
@@ -140,7 +134,7 @@ namespace Elsa.Apps.Invoices
                         invoiceItem.Quantity, 
                         unit,
                         batchNumber, 
-                        receiveDate, 
+                        model.Date, 
                         itemWithCorrectedPrice.Item2, 
                         model.InvoiceNumber,
                         supplier.Name, 

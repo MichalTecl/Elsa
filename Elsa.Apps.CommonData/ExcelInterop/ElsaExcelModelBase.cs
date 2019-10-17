@@ -5,8 +5,6 @@ namespace Elsa.Apps.CommonData.ExcelInterop
 {
     public class ElsaExcelModelBase
     {
-        public const string ExcelDateFormat = "dd.mm.yyyy";
-
         [XlsSheet(20, "DATA_Suppliers", IsHidden = true)]
         public List<SupplierAndCurrency> Suppliers { get;  } = new List<SupplierAndCurrency>();
 

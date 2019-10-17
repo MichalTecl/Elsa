@@ -34,7 +34,7 @@ namespace Elsa.App.SaleEvents
         {
             var model = m_excelModelFactory.Setup(new SaleEventModel(), m => m.CanBeConnectedToTag, true, false);
 
-            model.AllocDate = DateTime.Now.ToString(ElsaExcelModelBase.ExcelDateFormat);
+            model.AllocDate = DateTime.Now.Date;
 
             for (var i = 0; i < 5; i++)
             {
@@ -55,15 +55,14 @@ namespace Elsa.App.SaleEvents
 
             if (saleEvent.Allocations.Any())
             {
-                model.AllocDate = saleEvent.Allocations.Min(a => a.AllocationDt)
-                    .ToString(ElsaExcelModelBase.ExcelDateFormat);
+                model.AllocDate = saleEvent.Allocations.Min(a => a.AllocationDt);
             }
 
             var allocations = saleEvent.Allocations.ToList();
 
             if (allocations.Any(a => a.ReturnDt != null))
             {
-                model.ReturnDate = allocations.Where(a => a.ReturnDt != null).Min(e => e.ReturnDt.Value).ToString(ElsaExcelModelBase.ExcelDateFormat);
+                model.ReturnDate = allocations.Where(a => a.ReturnDt != null).Min(e => e.ReturnDt.Value);
             }
             
             model.Items.Clear();
@@ -110,10 +109,7 @@ namespace Elsa.App.SaleEvents
             {
                 throw new InvalidOperationException("Chybi nazev prodejni akce");
             }
-
-            var alocDate = DateTime.ParseExact(deserializedModel.AllocDate, ElsaExcelModelBase.ExcelDateFormat,
-                CultureInfo.InvariantCulture);
-
+            
             var dtos = new List<SaleEventAllocationDto>(deserializedModel.Items.Count);
 
             foreach (var item in deserializedModel.Items)
