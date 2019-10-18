@@ -63,8 +63,10 @@ namespace Elsa.Commerce.Core.Warehouse
 
         Amount GetNumberOfProducedProducts(int accountingDateYear, int accountingDateMonth, int inventoryId);
         void ReleaseUnsentOrdersAllocations();
-        void CutOrderAllocation(int orderId, BatchKey key);
+        void CutOrderAllocation(long orderId, BatchKey key);
 
         IEnumerable<Tuple<int?, Amount>> ProposeAllocations(int materialId, string batchNumber, Amount requestedAmount);
+
+        void InvalidateBatchCache(int batchId);
     }
 }

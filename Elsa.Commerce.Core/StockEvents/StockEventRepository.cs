@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Elsa.Commerce.Core.Adapters;
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
@@ -195,6 +196,11 @@ namespace Elsa.Commerce.Core.StockEvents
 
                 m_database.DeleteAll(invoiceFormBridges);
                 m_database.DeleteAll(assignments);
+
+                foreach (var assignment in assignments)
+                {
+                    m_batchFacade.Value.InvalidateBatchCache(assignment.MaterialBatchId);
+                }
 
                 foreach (var assignment in assignments)
                 {

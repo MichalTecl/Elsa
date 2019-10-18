@@ -823,7 +823,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return $"mrlvl_{materialId}";
         }
 
-        private void InvalidateBatchCache(int batchId)
+        public void InvalidateBatchCache(int batchId)
         {
             var materialId = GetMaterialIdByBatchId(batchId);
             
@@ -1020,7 +1020,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         /// </summary>
         /// <param name="orderId"></param>
         /// <param name="key"></param>
-        public void CutOrderAllocation(int orderId, BatchKey key)
+        public void CutOrderAllocation(long orderId, BatchKey key)
         {
             var order = m_orderRepository.GetOrder(orderId).Ensure();
 

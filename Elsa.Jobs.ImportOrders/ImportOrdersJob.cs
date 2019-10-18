@@ -70,27 +70,50 @@ namespace Elsa.Jobs.ImportOrders
                         startDate = erp.CommonSettings.HistoryStart;
                     }
                 }
-
+                
                 while (startDate < DateTime.Now)
                 {
-                    var endDate = startDate.AddDays(erp.CommonSettings.MaxQueryDays);
+                    var queryDays = erp.CommonSettings.MaxQueryDays;
 
-                    m_purchaseOrderRepository.PreloadOrders(startDate, endDate);
-
-                    m_log.Info($"Stahuji objednavky {startDate} - {endDate}");
-
-                    var erpOrders = erp.LoadOrders(startDate, endDate).ToList();
-
-                    m_log.Info($"Stazeno {erpOrders.Count} zaznamu");
-                    
-                    foreach (var srcOrder in erpOrders)
+                    while (queryDays > 0)
                     {
-                        m_purchaseOrderRepository.ImportErpOrder(srcOrder);
+                        try
+                        {
+                            var endDate = startDate.AddDays(queryDays);
+
+                            m_purchaseOrderRepository.PreloadOrders(startDate, endDate);
+
+                            m_log.Info($"Stahuji objednavky {startDate} - {endDate}");
+
+                            var erpOrders = erp.LoadOrders(startDate, endDate).ToList();
+
+                            m_log.Info($"Stazeno {erpOrders.Count} zaznamu");
+
+                            foreach (var srcOrder in erpOrders)
+                            {
+                                m_purchaseOrderRepository.ImportErpOrder(srcOrder);
+                            }
+
+                            m_log.Info("Ulozeno");
+
+                            startDate = endDate;
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            queryDays = queryDays / 2;
+                            
+                            if (queryDays < 1)
+                            {
+                                m_log.Error($"Nepodarilo se stahnout objednavky: {ex.Message}");
+                                throw;
+                            }
+                            else
+                            {
+                                m_log.Info($"Stazeni objednavek z ERP selhalo, zkracuji interval dotazu na {queryDays} dnu");
+                            }
+                        }
                     }
-                    
-                    m_log.Info("Ulozeno");
-                    
-                    startDate = endDate;
                 }
 
                 ProcessReturns();
