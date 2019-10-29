@@ -195,10 +195,10 @@ namespace Elsa.Commerce.Core.StockEvents
                 }
 
                 m_database.DeleteAll(invoiceFormBridges);
-                m_database.DeleteAll(assignments);
 
                 foreach (var assignment in assignments)
                 {
+                    m_database.Delete(assignment);
                     m_batchFacade.Value.InvalidateBatchCache(assignment.MaterialBatchId);
                 }
 

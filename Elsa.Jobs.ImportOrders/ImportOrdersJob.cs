@@ -132,51 +132,57 @@ namespace Elsa.Jobs.ImportOrders
             try
             {
                 m_log.Info("Zacinam zpracovavat vracene objednavky");
-                using (var tx = m_database.OpenTransaction())
+
+                var ordids = new List<long>();
+                m_database.Sql().ExecuteWithParams(@"select distinct po.Id
+                                                          from PurchaseOrder po
+                                                          inner join OrderItem     oi ON (oi.PurchaseOrderId = po.Id)
+                                                          left join  OrderItem     ki ON (ki.KitParentId = oi.Id)
+                                                          inner join OrderItemMaterialBatch omb ON (omb.OrderItemId = ISNULL(ki.Id, oi.Id))
+                                                        where po.ProjectId = {0}
+                                                          and po.ReturnDt is not null
+                                                          and not exists(select top 1 1
+                                                                           from MaterialStockEvent evt
+				                                                           join StockEventType st on evt.TypeId = st.Id
+				                                                           where evt.SourcePurchaseOrderId = po.Id)", m_session.Project.Id).ReadRows<long>(ordids.Add);
+
+                if (!ordids.Any())
                 {
-                    var ordids = new List<long>();
+                    m_log.Info("Zadne vratky");
+                    return;
+                }
 
-                    m_database.Sql().ExecuteWithParams(@"select distinct po.Id
-                                                              from PurchaseOrder po
-                                                              inner join OrderItem     oi ON (oi.PurchaseOrderId = po.Id)
-                                                              left join  OrderItem     ki ON (ki.KitParentId = oi.Id)
-                                                              inner join OrderItemMaterialBatch omb ON (omb.OrderItemId = ISNULL(ki.Id, oi.Id))
-                                                            where po.ProjectId = {0}
-                                                              and po.ReturnDt is not null
-                                                              and not exists(select top 1 1
-                                                                               from MaterialStockEvent evt
-				                                                               join StockEventType st on evt.TypeId = st.Id
-				                                                               where evt.SourcePurchaseOrderId = po.Id)", m_session.Project.Id).ReadRows<long>(ordids.Add);
+                var targetEventType = m_stockEventRepository.GetAllEventTypes()
+                    .FirstOrDefault(e => e.GenerateForReturnedOrders == true);
 
-                    if (!ordids.Any())
+                if (targetEventType == null)
+                {
+                    m_log.Info("Neni zadny StockEventType.GenerateForReturnedOrders");
+                    return;
+                }
+
+                foreach (var ordid in ordids)
+                {
+                    try
                     {
-                        tx.Commit();
-                        m_log.Info("Zadne vratky");
-                        return;
-                    }
+                        using (var tx = m_database.OpenTransaction())
+                        {
+                            var order = m_purchaseOrderRepository.GetOrder(ordid);
 
-                    var targetEventType = m_stockEventRepository.GetAllEventTypes()
-                        .FirstOrDefault(e => e.GenerateForReturnedOrders == true);
+                            m_log.Info($"Generuji odpis pro vracenou objednavku {order.OrderNumber}");
 
-                    if (targetEventType == null)
-                    {
-                        m_log.Info("Neni zadny StockEventType.GenerateForReturnedOrders");
-                        tx.Commit();
-                        return;
-                    }
+                            m_stockEventRepository.MoveOrderToEvent(ordid, targetEventType.Id,
+                                $"Vráceno z objednávky {order.OrderNumber}");
 
-                    foreach (var ordid in ordids)
-                    {
-                        var order = m_purchaseOrderRepository.GetOrder(ordid);
-
-                        m_log.Info($"Generuji odpis pro vracenou objednavku {order.OrderNumber}");
-
-                        m_stockEventRepository.MoveOrderToEvent(ordid, targetEventType.Id, $"Vráceno z objednávky {order.OrderNumber}");
+                            tx.Commit();
+                        }
 
                         m_log.Info("Hotovo");
                     }
-
-                    tx.Commit();
+                    catch (Exception ex)
+                    {
+                        m_log.Error($"Chyba pri zpracovani vratky pro objednavku ID = {ordid}", ex);
+                    }
                 }
             }
             catch (Exception ex)
