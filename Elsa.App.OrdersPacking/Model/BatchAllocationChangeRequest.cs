@@ -10,6 +10,8 @@ namespace Elsa.App.OrdersPacking.Model
 
         public int? OriginalBatchId { get; set; }
 
+        public string OriginalBatchNumber { get; set; }
+
         public decimal? NewAmount { get; set; }
 
         public string NewBatchSearchQuery { get; set; }

@@ -179,6 +179,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             OrderId: self.currentOrder.OrderId,
             OrderItemId: assignmentModel.OrderItemId,
             OriginalBatchId: assignmentModel.MaterialBatchId,
+            OriginalBatchNumber: assignmentModel.BatchNumber,
             NewBatchSearchQuery: query
         };
 
@@ -193,6 +194,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             OrderId: self.currentOrder.OrderId,
             OrderItemId: assignmentModel.OrderItemId,
             OriginalBatchId: assignmentModel.MaterialBatchId,
+            OriginalBatchNumber: assignmentModel.BatchNumber,
             NewAmount: assignmentModel.AssignedQuantity - 1
         };
 
