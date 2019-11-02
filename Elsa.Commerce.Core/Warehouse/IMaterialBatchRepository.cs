@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
@@ -56,6 +56,8 @@ namespace Elsa.Commerce.Core.Warehouse
         string GetBatchNumberById(int batchId);
 
         int? GetBatchIdByNumber(int materialId, string batchNumber);
+
+        IEnumerable<IMaterialBatch> GetBatches(BatchKey key);
 
         IEnumerable<int> QueryBatchIds(Action<IQueryBuilder<IMaterialBatch>> customize);
 

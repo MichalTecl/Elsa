@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elsa.Commerce.Core.Model
 {
@@ -15,5 +11,16 @@ namespace Elsa.Commerce.Core.Model
         public decimal AssignedQuantity { get; set; }
 
         public string BatchNumber { get; set; }
+        
+        public void Add(OrderItemBatchAssignmentModel assignment)
+        {
+            if (!assignment.BatchNumber.Equals(BatchNumber, StringComparison.InvariantCultureIgnoreCase) ||
+                assignment.OrderItemId != OrderItemId)
+            {
+                throw new InvalidOperationException("Attempt to add incompatible assignment");
+            }
+
+            AssignedQuantity += assignment.AssignedQuantity;
+        }
     }
 }

@@ -535,7 +535,7 @@ namespace Elsa.Commerce.Core.Production
 
         private void ResolveBatch(ProductionStepViewModel model)
         {
-            var batch = m_batchFacade.FindBatchBySearchQuery(model.MaterialId, model.BatchNumber);
+            var batch = m_batchRepository.GetBatches(m_batchFacade.FindBatchBySearchQuery(model.MaterialId, model.BatchNumber).Ensure()).SingleOrDefault();
             if (batch == null)
             {
                 throw new InvalidOperationException($"Nenalezena sarze \"{model.BatchNumber}\"");
@@ -595,7 +595,7 @@ namespace Elsa.Commerce.Core.Production
                         componentEntity.StepId = stepEntity.Id;
                         componentEntity.UnitId = entryAmount.Unit.Id;
 
-                        var batch = m_batchFacade.FindBatchBySearchQuery(matEntry.MaterialId, matEntry.BatchNumber);
+                        var batch = m_batchRepository.GetBatches(m_batchFacade.FindBatchBySearchQuery(matEntry.MaterialId, matEntry.BatchNumber).Ensure("Sarze nenalezena")).Single();
                         var availableBatchAmount = m_batchFacade.GetAvailableAmount(batch.Id);
 
                         if (m_amountProcessor.GreaterThan(entryAmount, availableBatchAmount))
@@ -748,7 +748,7 @@ namespace Elsa.Commerce.Core.Production
 
             foreach (var i in currentMats)
             {
-                var batch = m_batchFacade.FindBatchBySearchQuery(i.MaterialId, i.BatchNumber);
+                var batch = m_batchRepository.GetBatches(m_batchFacade.FindBatchBySearchQuery(i.MaterialId, i.BatchNumber).Ensure()).Single();
                 i.BatchNumber = batch.BatchNumber;
                 batchIndex.Add(batch);
             }

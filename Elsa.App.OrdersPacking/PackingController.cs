@@ -177,33 +177,32 @@ namespace Elsa.App.OrdersPacking
                     throw new InvalidOperationException("Objednávka nebyla v systému nalezena");
                 }
 
-                if ((request.OriginalBatchId != null) && (request.OriginalBatchId > 0))
+                if (!string.IsNullOrWhiteSpace(request.OriginalBatchNumber))
                 {
                     m_batchFacade.ChangeOrderItemBatchAssignment(
                         order,
                         request.OrderItemId,
-                        request.OriginalBatchId.Value,
+                        request.OriginalBatchNumber,
                         request.NewAmount);
-
+                    
                     order = m_orderRepository.GetOrder(order.Id);
+
+                    if (request.NewAmount > 0m)
+                    {
+                        request.NewBatchSearchQuery = request.NewBatchSearchQuery ?? request.OriginalBatchNumber;
+                    }
                 }
 
-                if (!string.IsNullOrWhiteSpace(request.NewBatchSearchQuery))
-                {
-                    var item =
-                        m_ordersFacade.GetAllConcreteOrderItems(order).FirstOrDefault(i => i.Id == request.OrderItemId);
-                    if (item == null)
-                    {
-                        throw new InvalidOperationException("Invalid object reference");
-                    }
+                var item = m_ordersFacade.GetAllConcreteOrderItems(order).FirstOrDefault(i => i.Id == request.OrderItemId).Ensure();
 
+                if (!string.IsNullOrWhiteSpace(request.NewBatchSearchQuery) && ((request.NewAmount ?? item.Quantity) > 0m))
+                {
                     var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, item);
                     var batch = m_batchFacade.FindBatchBySearchQuery(material.MaterialId, request.NewBatchSearchQuery);
 
-
                     result = MapOrder(
                         order,
-                        new Tuple<long, int, decimal>(item.Id, batch.Id, request.NewAmount ?? item.Quantity));
+                        new Tuple<long, BatchKey, decimal>(item.Id, batch, request.NewAmount ?? item.Quantity));
                 }
                 else
                 {
@@ -221,7 +220,7 @@ namespace Elsa.App.OrdersPacking
             return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), true).Select(i => new LightOrderInfo(i));
         }
 
-        private PackingOrderModel MapOrder(IPurchaseOrder entity, Tuple<long, int, decimal> orderItemBatchPreference = null)
+        private PackingOrderModel MapOrder(IPurchaseOrder entity, Tuple<long, BatchKey, decimal> orderItemBatchPreference = null)
         {
             entity = m_ordersFacade.ResolveSingleItemKitSelection(entity);
 
@@ -284,8 +283,23 @@ namespace Elsa.App.OrdersPacking
             PackingOrderItemModel item,
             IEnumerable<OrderItemBatchAssignmentModel> assignments)
         {
-            var models = assignments.Select(a => new BatchAssignmentViewModel(a)).ToList();
+            var models = new List<BatchAssignmentViewModel>();
 
+            foreach (var assignment in assignments)
+            {
+                var viewModel = models.FirstOrDefault(m =>
+                    m.BatchNumber.Equals(assignment.BatchNumber, StringComparison.InvariantCultureIgnoreCase));
+                if (viewModel == null)
+                {
+                    viewModel = new BatchAssignmentViewModel(assignment);
+                    models.Add(viewModel);
+                }
+                else
+                {
+                    viewModel.Add(assignment);
+                }
+            }
+            
             foreach (var model in models)
             {
                 model.CanSplit = item.NumericQuantity > 1m;

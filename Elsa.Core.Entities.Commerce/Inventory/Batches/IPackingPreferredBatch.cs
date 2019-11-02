@@ -3,6 +3,7 @@
 using Elsa.Core.Entities.Commerce.Common.Security;
 
 using Robowire.RobOrm.Core;
+using Robowire.RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 {
@@ -17,8 +18,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         int MaterialId { get; set; }
         IMaterial Material { get; }
 
-        int BatchId { get; set; }
-        IMaterialBatch Batch { get; }
+        [NVarchar(64, true)]
+        string BatchNumber { get; set; }
 
         DateTime LastActivity { get; set; }
     }

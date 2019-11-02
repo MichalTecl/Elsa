@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Commerce.Core.CurrencyRates;
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse.Impl.Model;
@@ -40,8 +41,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             ISupplierRepository supplierRepository, 
             ICurrencyConversionHelper currencyConversionHelper, IServiceLocator serviceLocator)
         {
-            throw new InvalidOperationException("DO NOT USE");
-
             m_database = database;
             m_session = session;
             m_conversionHelper = conversionHelper;
@@ -67,19 +66,18 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     .Where(b => (b.MaterialId == materialId) && (b.BatchNumber == batchNumber))
                     .Execute()
                     .FirstOrDefault();
-
-            if (batch == null)
-            {
-                return null;
-            }
-
+            
             return MapToModel(batch);
         }
 
         private MaterialBatchComponent MapToModel(IMaterialBatch entity)
         {
-            var model = new MaterialBatchComponent(entity, this);
+            if (entity == null)
+            {
+                return null;
+            }
 
+            var model = new MaterialBatchComponent(new MaterialBatchAdapter(entity, m_serviceLocator), this);
             return model;
         }
 
@@ -414,6 +412,18 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                         .FirstOrDefault()?.Id);
         }
 
+        public IEnumerable<IMaterialBatch> GetBatches(BatchKey key)
+        {
+            var materialId = key.GetMaterialId(this);
+            var batchNumber = key.GetBatchNumber(this);
+
+            var entities = m_database.SelectFrom<IMaterialBatch>().Where(b => b.ProjectId == m_session.Project.Id)
+                .Where(b => b.CloseDt == null).Where(b => b.MaterialId == materialId && b.BatchNumber == batchNumber)
+                .OrderBy(b => b.Created).Execute().ToList();
+
+            return entities.Select(e => new MaterialBatchAdapter(e, m_serviceLocator));
+        }
+
         public IEnumerable<int> QueryBatchIds(Action<IQueryBuilder<IMaterialBatch>> customize)
         {
             var qry = m_database.SelectFrom<IMaterialBatch>().Where(b => b.ProjectId == m_session.Project.Id);
@@ -509,29 +519,28 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 .Execute().Select(i => new MaterialBatchCompositionAdapter(m_serviceLocator, i));
         }
 
+        public IEnumerable<IMaterialBatch> GetBatchesByInvoiceNumber(string invoiceNumber, int supplierId)
+        {
+            return GetBatchQuery().Where(b => b.SupplierId == supplierId).Where(b => b.InvoiceNr == invoiceNumber)
+                .Where(b => b.CloseDt == null).Execute()
+                .Select(b => MapToModel(b).Batch);
+        }
+
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()
         {
             return
                 m_database.SelectFrom<IMaterialBatch>()
-                    .Join(b => b.Author)
-                    .Join(b => b.Material)
-                    .Join(b => b.Unit)
-                    .Join(b => b.Components)
-                    .Join(b => b.Components.Each().Unit)
-                    .Join(b => b.Components.Each().Component)
-                    .Join(b => b.Components.Each().Component.Unit)
-                    .Join(b => b.PerformedSteps)
-                    .Join(b => b.PerformedSteps.Each().ConfirmUser)
-                    .Join(b => b.PerformedSteps.Each().Worker)
-                    .Join(b => b.PerformedSteps.Each().SourceBatches)
-                    .Join(b => b.PerformedSteps.Each().SourceBatches.Each().Unit)
-                    .Join(b => b.PriceConversion)
-                    .Join(b => b.PriceConversion.SourceCurrency)
-                    .Join(b => b.PriceConversion.TargetCurrency)
-                    .Join(b => b.PriceConversion.CurrencyRate)
-                    .Join(b => b.PriceConversion.CurrencyRate.SourceCurrency)
-                    .Join(b => b.PriceConversion.CurrencyRate.TargetCurrency)
                     .Where(b => b.ProjectId == m_session.Project.Id);
+        }
+
+        public Tuple<int, string> GetBatchNumberAndMaterialIdByBatchId(int batchId)
+        {
+            return m_cache.ReadThrough($"batchkey_{batchId}", TimeSpan.FromHours(1), () =>
+            {
+                var batch = GetBatchById(batchId).Ensure();
+
+                return new Tuple<int, string>(batch.Batch.MaterialId, batch.Batch.BatchNumber);
+            });
         }
     }
 }

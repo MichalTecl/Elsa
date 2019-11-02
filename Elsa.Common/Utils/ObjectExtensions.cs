@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -6,6 +7,8 @@ namespace Elsa.Common.Utils
 {
     public static class ObjectExtensions
     {
+        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
         public static T Ensure<T>(this T entity, string errorMessage = "Invalid entity reference") where T : class
         {
             if (entity == null)

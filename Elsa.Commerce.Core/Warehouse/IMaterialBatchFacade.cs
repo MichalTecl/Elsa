@@ -20,13 +20,13 @@ namespace Elsa.Commerce.Core.Warehouse
 
         IMaterialBatchStatus GetBatchStatus(int batchId);
 
-        IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference = null);
+        IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, BatchKey, decimal> orderItemBatchPreference = null);
 
-        IMaterialBatch FindBatchBySearchQuery(int materialId, string query);
+        BatchKey FindBatchBySearchQuery(int materialId, string query);
 
         bool AlignOrderBatches(long purchaseOrderId);
 
-        void ChangeOrderItemBatchAssignment(IPurchaseOrder order, long orderItemId, int batchId, decimal? requestNewAmount);
+        void ChangeOrderItemBatchAssignment(IPurchaseOrder order, long orderItemId, string batchNumber, decimal? requestNewAmount);
 
         void AssignComponent(int parentBatchId, int componentBatchId, Amount amountToAssign);
 

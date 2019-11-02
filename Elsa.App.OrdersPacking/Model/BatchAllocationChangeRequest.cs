@@ -8,8 +8,6 @@ namespace Elsa.App.OrdersPacking.Model
 
         public long OrderItemId { get; set; }
 
-        public int? OriginalBatchId { get; set; }
-
         public string OriginalBatchNumber { get; set; }
 
         public decimal? NewAmount { get; set; }

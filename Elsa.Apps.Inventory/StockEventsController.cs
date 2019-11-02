@@ -21,13 +21,17 @@ namespace Elsa.Apps.Inventory
         private readonly IStockEventRepository m_eventRepository;
         private readonly IMaterialBatchFacade m_batchFacade;
         private readonly IMaterialRepository m_materialRepository;
+        private readonly IMaterialBatchRepository m_batchRepository;
 
-        public StockEventsController(IWebSession webSession, ILog log, IStockEventRepository eventRepository, IMaterialBatchFacade batchFacade, IMaterialRepository materialRepository)
+        public StockEventsController(IWebSession webSession, ILog log, IStockEventRepository eventRepository,
+            IMaterialBatchFacade batchFacade, IMaterialRepository materialRepository,
+            IMaterialBatchRepository batchRepository)
             : base(webSession, log)
         {
             m_eventRepository = eventRepository;
             m_batchFacade = batchFacade;
             m_materialRepository = materialRepository;
+            m_batchRepository = batchRepository;
         }
 
         public IEnumerable<IStockEventType> GetEventTypes()
@@ -37,7 +41,7 @@ namespace Elsa.Apps.Inventory
 
         public IMaterialBatch FindBatch(int materialId, string query)
         {
-            return m_batchFacade.FindBatchBySearchQuery(materialId, query);
+            return m_batchRepository.GetBatches(m_batchFacade.FindBatchBySearchQuery(materialId, query)).Single();
         }
 
         public BatchEventAmountSuggestions GetSuggestedAmounts(int eventTypeId, int batchId)

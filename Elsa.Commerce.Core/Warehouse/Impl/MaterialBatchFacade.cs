@@ -193,12 +193,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
         }
 
-        public IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference = null)
+        public IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, BatchKey, decimal> orderItemBatchPreference = null)
         {
             return TryResolveBatchAssignmentsPrivate(order, orderItemBatchPreference, false).ToList();
         }
 
-        public IMaterialBatch FindBatchBySearchQuery(int materialId, string query)
+        public BatchKey FindBatchBySearchQuery(int materialId, string query)
         {
             var batches = m_batchRepository.GetMaterialBatches(
                 DateTime.Now.AddDays(-365),
@@ -206,16 +206,16 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 false,
                 materialId);
 
-            var found = batches.Where(b => b.Batch.BatchNumber.EndsWith(query)).ToList();
+            var found = batches.Where(b => b.Batch.BatchNumber.EndsWith(query)).Select(b => b.Batch.BatchNumber).Distinct().ToList();
 
             if (found.Count == 1)
             {
-                return found[0].Batch;
+                return new BatchKey(materialId, found[0]);
             }
 
             if (found.Count > 1)
             {
-                throw new InvalidOperationException($"Více než jedna šarže odpovídá zadanému číslu \"{query}\" , použijte prosím celé číslo šarže");
+                throw new InvalidOperationException($"Více než jedna šarže odpovídá zadanému číslu \"{query}\", nalezeno: \"[{string.Join(",",found)}]\" , použijte prosím celé číslo šarže");
             }
 
             throw new InvalidOperationException($"Šarže \"{query}\" nebyla nalezena");
@@ -225,7 +225,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             var result = false;
 
-            var preferrences = new Dictionary<int, Tuple<int, DateTime>>();
+            var preferrences = new HashSet<int>();
 
             using (var tx = m_database.OpenTransaction())
             {
@@ -235,27 +235,21 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 foreach (var item in allItems)
                 {
                     var assignments = item.AssignedBatches.ToList();
-                    if (assignments.Count < 2)
+                    
+                    if (assignments.Select(a => a.MaterialBatch.BatchNumber).Distinct().Count() == 1)
                     {
-                        if (assignments.Count == 1)
-                        {
-                            Tuple<int, DateTime> preference;
-                            if ((!preferrences.TryGetValue(assignments[0].MaterialBatch.MaterialId, out preference)) || (preference.Item2 < assignments[0].AssignmentDt))
-                            {
-                                preferrences[assignments[0].MaterialBatch.MaterialId] = new Tuple<int, DateTime>(assignments[0].MaterialBatchId, assignments[0].AssignmentDt);
-                            }
-                        }
+                        preferrences.Add(assignments[0].MaterialBatchId);
                         continue;
                     }
-
+                    
                     result = AlignAssignments(assignments) | result;
                 }
 
-                foreach (var pref in preferrences.Values)
+                foreach (var pref in preferrences)
                 {
-                    if (GetAvailableAmount(pref.Item1).IsPositive)
+                    if (GetAvailableAmount(pref).IsPositive)
                     {
-                        m_batchPreferrenceRepository.SetBatchPreferrence(pref.Item1);
+                        m_batchPreferrenceRepository.SetBatchPreferrence(new BatchKey(pref));
                     }
                 }
 
@@ -310,10 +304,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return result;
         }
 
-        public void ChangeOrderItemBatchAssignment(
-            IPurchaseOrder order,
+        public void ChangeOrderItemBatchAssignment(IPurchaseOrder order,
             long orderItemId,
-            int batchId,
+            string batchNumber,
             decimal? requestNewAmount)
         {
             using (var tx = m_database.OpenTransaction())
@@ -324,46 +317,24 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     throw new InvalidOperationException("Invalid item id");
                 }
 
-                var oldAssignment = item.AssignedBatches.FirstOrDefault(b => b.MaterialBatchId == batchId);
-                if (oldAssignment == null)
+                var oldAssignments = item.AssignedBatches.Where(a =>
+                        a.MaterialBatch.BatchNumber.Equals(batchNumber, StringComparison.InvariantCultureIgnoreCase))
+                    .ToList();
+                if (!oldAssignments.Any())
                 {
                     throw new InvalidOperationException("Invalid batch id");
                 }
                 
-                m_batchPreferrenceRepository.RemoveBatchFromPreferrence(batchId);
-
-                try
+                //m_batchPreferrenceRepository.RemoveBatchFromPreferrence(batchNumber);
+                
+                m_database.DeleteAll(oldAssignments);
+            
+                foreach (var oldAssignment in oldAssignments)
                 {
-                    if ((requestNewAmount == null) || (requestNewAmount == 0m))
-                    {
-                        m_database.Delete(oldAssignment);
-                        tx.Commit();
-                        InvalidateBatchCache(oldAssignment.MaterialBatchId);
-                        return;
-                    }
-
-                    if (requestNewAmount.Value > oldAssignment.Quantity)
-                    {
-                        m_database.Delete(oldAssignment);
-
-                        InvalidateBatchCache(batchId);
-                        TryResolveBatchAssignments(
-                            order,
-                            new Tuple<long, int, decimal>(orderItemId, batchId, requestNewAmount.Value));
-
-                        tx.Commit();
-                        return;
-                    }
-
-                    oldAssignment.Quantity = requestNewAmount.Value;
-                    m_database.Save(oldAssignment);
-
-                    tx.Commit();
+                    InvalidateBatchCache(oldAssignment.MaterialBatchId);
                 }
-                finally
-                {
-                    InvalidateBatchCache(batchId);
-                }
+                
+                tx.Commit();
             }
         }
 
@@ -865,14 +836,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return items;
         }
 
-        private IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignmentsPrivate(IPurchaseOrder order, Tuple<long, int, decimal> orderItemBatchPreference, bool doNotRetry)
+        private IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignmentsPrivate(IPurchaseOrder order, Tuple<long, BatchKey, decimal> orderItemBatchPreference, bool doNotRetry)
         {
             var items = GetAllOrderItems(order);
 
             var result = new List<OrderItemBatchAssignmentModel>(items.Count * 2);
-
-            var preferrences = m_batchPreferrenceRepository.GetPreferredBatches().ToList();
-
+            
             foreach (var orderItem in items)
             {
                 var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, orderItem);
@@ -907,42 +876,50 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 }
 
                 //2. assignment by preferrence
-                var preferrence = preferrences.FirstOrDefault(p => p.MaterialId == material.MaterialId);
+                var preferredBatchNumber = m_batchPreferrenceRepository.GetPrefferedBatchNumber(material.MaterialId);
 
-                if ((preferrence != null) || (adHocPreferrence != null))
+                if (adHocPreferrence != null)
                 {
-                    var preferredBatch = adHocPreferrence?.Item2 ?? preferrence.BatchId;
+                    preferredBatchNumber = adHocPreferrence.Item2.GetBatchNumber(m_batchRepository);
+                }
 
-                    var availableBatchAmount = GetAvailableAmount(preferredBatch);
-                    if (availableBatchAmount.Value > 0m)
+                if (preferredBatchNumber != null)
+                {
+                    var preferredBatchesKey = new BatchKey(material.MaterialId, preferredBatchNumber);
+                    var preferredBatches = m_batchRepository.GetBatches(preferredBatchesKey).ToList();
+
+                    foreach (var preferredBatch in preferredBatches)
                     {
-                        var allocateByPreferrence = m_amountProcessor.Min(amountToAllocate, availableBatchAmount);
-
-                        if (adHocPreferrence != null)
+                        var availableBatchAmount = GetAvailableAmount(preferredBatch.Id);
+                        if (availableBatchAmount.Value > 0m)
                         {
-                            allocateByPreferrence =
-                                m_amountProcessor.Min(
-                                    new Amount(adHocPreferrence.Item3, material.Amount.Unit),
-                                    allocateByPreferrence);
+                            var allocateByPreferrence = m_amountProcessor.Min(amountToAllocate, availableBatchAmount);
+
+                            if (adHocPreferrence != null)
+                            {
+                                allocateByPreferrence =
+                                    m_amountProcessor.Min(
+                                        new Amount(adHocPreferrence.Item3, material.Amount.Unit),
+                                        allocateByPreferrence);
+                            }
+
+                            amountToAllocate = m_amountProcessor.Subtract(amountToAllocate, allocateByPreferrence);
+
+                            result.Add(new OrderItemBatchAssignmentModel()
+                            {
+                                AssignedQuantity = allocateByPreferrence.Value,
+                                MaterialBatchId = preferredBatch.Id,
+                                BatchNumber = preferredBatch.BatchNumber,
+                                OrderItemId = orderItem.Id
+                            });
+
+                            AssignOrderItemToBatch(preferredBatch.Id, order, orderItem.Id, allocateByPreferrence.Value);
                         }
 
-                        amountToAllocate = m_amountProcessor.Subtract(amountToAllocate, allocateByPreferrence);
-
-                        result.Add(new OrderItemBatchAssignmentModel()
+                        if (availableBatchAmount.IsNotPositive)
                         {
-                            AssignedQuantity = allocateByPreferrence.Value,
-                            MaterialBatchId = preferredBatch,
-                            BatchNumber = m_batchRepository.GetBatchById(preferredBatch)?.Batch?.BatchNumber,
-                            OrderItemId = orderItem.Id
-                        });
-
-                        AssignOrderItemToBatch(preferredBatch, order, orderItem.Id, allocateByPreferrence.Value);
-                    }
-
-                    if (availableBatchAmount.IsNotPositive && (preferrence != null))
-                    {
-                        preferrences.Remove(preferrence);
-                        m_batchPreferrenceRepository.InvalidatePreferrence(preferrence.Id);
+                            m_batchPreferrenceRepository.InvalidatePreferrenceByMaterialId(material.MaterialId);
+                        }
                     }
                 }
 

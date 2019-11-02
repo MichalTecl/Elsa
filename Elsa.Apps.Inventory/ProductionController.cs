@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Elsa.Apps.Inventory.Model;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Production;
@@ -25,6 +22,7 @@ namespace Elsa.Apps.Inventory
         private readonly IMaterialRepository m_materialRepository;
         private readonly IUnitRepository m_unitRepository;
         private readonly IMaterialBatchFacade m_batchFacade;
+        private readonly IMaterialBatchRepository m_batchRepository;
 
         public ProductionController(
             IWebSession webSession,
@@ -32,13 +30,14 @@ namespace Elsa.Apps.Inventory
             IProductionFacade productionFacade,
             IMaterialRepository materialRepository,
             IUnitRepository unitRepository,
-            IMaterialBatchFacade batchFacade)
+            IMaterialBatchFacade batchFacade, IMaterialBatchRepository batchRepository)
             : base(webSession, log)
         {
             m_productionFacade = productionFacade;
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
             m_batchFacade = batchFacade;
+            m_batchRepository = batchRepository;
         }
 
         public ProductionBatchModel GetProductionBatch(int batchId)
@@ -76,7 +75,7 @@ namespace Elsa.Apps.Inventory
             decimal usedAmount,
             string usedAmountUnitSymbol)
         {
-            var batch = m_batchFacade.FindBatchBySearchQuery(materialId, sourceBatchNumber);
+            var batch = m_batchRepository.GetBatches(m_batchFacade.FindBatchBySearchQuery(materialId, sourceBatchNumber).Ensure()).Single();
             if (batch == null)
             {
                 throw new InvalidOperationException("Šarže nenalezena");

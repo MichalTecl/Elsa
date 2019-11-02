@@ -1,19 +1,13 @@
-﻿using System.Collections.Generic;
-
-using Elsa.Core.Entities.Commerce.Inventory.Batches;
+﻿using Elsa.Commerce.Core.Model;
 
 namespace Elsa.Commerce.Core
 {
     public interface IPackingPreferredBatchRepository
     {
-        IEnumerable<IPackingPreferredBatch> GetPreferredBatches();
+        string GetPrefferedBatchNumber(int materialId);
 
-        void SetBatchPreferrence(int batchId);
-
-        void NotifyPreferrenceActivity(int preferrenceId);
-
-        void InvalidatePreferrence(int preferrenceId);
-
-        void RemoveBatchFromPreferrence(int batchId);
+        void InvalidatePreferrenceByMaterialId(int materialId);
+        
+        void SetBatchPreferrence(BatchKey batchKey);
     }
 }

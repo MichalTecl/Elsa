@@ -40,7 +40,7 @@ namespace Elsa.Commerce.Core
             setup.For<IKitProductRepository>().Use<KitProductRepository>();
             setup.For<ICustomerRepository>().Use<CustomerRepository>();
             setup.For<IUserRepository>().Use<UserRepository>();
-            setup.For<IMaterialBatchRepository>().Use<MaterialBatchRepository2>();
+            setup.For<IMaterialBatchRepository>().Use<MaterialBatchRepository>();
             setup.For<IMaterialBatchFacade>().Use<MaterialBatchFacade>();
             setup.For<AmountProcessor>().Use<AmountProcessor>();
             setup.For<IPackingPreferredBatchRepository>().Use<PreferredBatchRepository>();
