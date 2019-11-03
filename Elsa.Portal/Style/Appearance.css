@@ -451,6 +451,11 @@ input.readonly {
     width:200px;
 }
 
+.cell20 {
+    min-width: 400px;
+    width: 400px;
+}
+
 .cell1:hover {
   width:20px;
   -webkit-box-shadow: none !important;

@@ -39,7 +39,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public Dictionary<string, int> StockEventCounts { get; set; } = new Dictionary<string, int>();
 
         public List<BatchStockEventSuggestion> EventSuggestions { get; } = new List<BatchStockEventSuggestion>();
-        public BatchReportEntry(int batchId) : base(batchId)
+        public BatchReportEntry(BatchKey batchKey) : base(batchKey)
         {
         }
     }

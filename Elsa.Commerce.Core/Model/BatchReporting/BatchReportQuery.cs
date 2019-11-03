@@ -4,9 +4,9 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 {
     public class BatchReportQuery
     {
-        public int PageNumber { get; set; }
+        public string BatchId { get; set; }
 
-        public int? BatchId { get; set; }
+        public int PageNumber { get; set; }
         
         public int? MaterialId { get; set; }
 
@@ -27,10 +27,10 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public bool ProducedOnly { get; set; }
 
         public bool PurchasedOnly { get; set; }
+        
+        public string ComponentId { get; set; }
 
-        public int? ComponentId { get; set; }
-
-        public int? CompositionId { get; set; }
+        public string CompositionId { get; set; }
 
         public bool LoadSteps { get; set; }
 
@@ -39,5 +39,22 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public long? RelativeToOrderId { get; set; }
 
         public bool BlockedBatchesOnly { get; set; }
+
+        public bool HasKey => (!string.IsNullOrWhiteSpace(BatchNumberQuery) && MaterialId != null) || !string.IsNullOrWhiteSpace(BatchId);
+
+        public BatchKey ToKey()
+        {
+            if (!string.IsNullOrWhiteSpace(BatchId))
+            {
+                return BatchKey.Parse(BatchId);
+            }
+
+            if (string.IsNullOrWhiteSpace(BatchNumberQuery) || MaterialId == null)
+            {
+                throw new InvalidOperationException("Cannot complete batch key");
+            }
+
+            return new BatchKey(MaterialId.Value, BatchNumberQuery);
+        }
     }
 }

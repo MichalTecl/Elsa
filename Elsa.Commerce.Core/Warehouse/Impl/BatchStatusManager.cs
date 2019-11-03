@@ -163,7 +163,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private void PopulateEvents(int batchId, BatchStatus model)
         {
             var events = m_cache.ReadThrough(GetEventsCacheKey(batchId), s_cacheTimeout,
-                () => m_eventRepository.GetBatchEvents(batchId));
+                () => m_eventRepository.GetBatchEvents(new BatchKey(batchId)).Where(e => e.BatchId == batchId));
 
             model.Events.AddRange(events);
         }

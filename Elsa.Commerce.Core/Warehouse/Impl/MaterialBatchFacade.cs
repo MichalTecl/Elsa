@@ -116,7 +116,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 throw new InvalidOperationException($"Šarže '{batch.Batch?.BatchNumber}' je uzavřená");
             }
 
-            InvalidateBatchCache(batchId);
+            ReleaseBatchAmountCache(batchId);
 
             using (var tx = m_database.OpenTransaction())
             {
@@ -135,7 +135,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 
                 tx.Commit();
 
-                InvalidateBatchCache(batchId);
+                ReleaseBatchAmountCache(batchId);
             }
         }
         
@@ -158,6 +158,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                 return new Amount(0, b.ComponentUnit);
             });
+        }
+
+        public Amount GetAvailableAmount(BatchKey batchKey)
+        {
+            var batches = m_batchRepository.GetBatches(batchKey);
+            return m_amountProcessor.Sum(batches.Select(b => GetAvailableAmount(b.Id)));
         }
 
         private static readonly object s_preloadLock = new object();
@@ -331,7 +337,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             
                 foreach (var oldAssignment in oldAssignments)
                 {
-                    InvalidateBatchCache(oldAssignment.MaterialBatchId);
+                    ReleaseBatchAmountCache(oldAssignment.MaterialBatchId);
                 }
                 
                 tx.Commit();
@@ -369,8 +375,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
             finally
             {
-                InvalidateBatchCache(parentBatchId);
-                InvalidateBatchCache(componentBatchId);
+                ReleaseBatchAmountCache(parentBatchId);
+                ReleaseBatchAmountCache(componentBatchId);
 
                 m_batchStatusManager.OnBatchChanged(parentBatchId);
                 m_batchStatusManager.OnBatchChanged(componentBatchId);
@@ -395,8 +401,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
             finally
             {
-                InvalidateBatchCache(parentBatchId);
-                InvalidateBatchCache(componentBatchId);
+                ReleaseBatchAmountCache(parentBatchId);
+                ReleaseBatchAmountCache(componentBatchId);
             }
         }
 
@@ -511,10 +517,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                 foreach (var compo in toDel)
                 {
-                    InvalidateBatchCache(compo.ComponentId);
+                    ReleaseBatchAmountCache(compo.ComponentId);
                 }
 
-                InvalidateBatchCache(batchId);
+                ReleaseBatchAmountCache(batchId);
 
                 tx.Commit();
             }
@@ -522,7 +528,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public void ReleaseBatchAmountCache(IMaterialBatch batch)
         {
-            InvalidateBatchCache(batch.Id);
+            ReleaseBatchAmountCache(batch.Id);
         }
 
         public IEnumerable<string> GetDeletionBlockReasons(int batchId)
@@ -736,7 +742,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             var batchAmount = new Amount(batch.Volume, m_unitRepository.GetUnit(batch.UnitId));
 
-            var events = m_stockEventRepository.GetBatchEvents(batch.Id);
+            var events = m_stockEventRepository.GetBatchEvents(new BatchKey(batch.Id));
             foreach(var evt in events)
             {
                 batchAmount = m_amountProcessor.Subtract(batchAmount,
@@ -794,7 +800,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return $"mrlvl_{materialId}";
         }
 
-        public void InvalidateBatchCache(int batchId)
+        public void ReleaseBatchAmountCache(int batchId)
         {
             var materialId = GetMaterialIdByBatchId(batchId);
             
@@ -988,7 +994,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             foreach (var batchId in releasedBatches)
             {
-                InvalidateBatchCache(batchId);
+                ReleaseBatchAmountCache(batchId);
             }
         }
 
@@ -1033,7 +1039,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             foreach (var cutBatchId in assignmentsToCut.Select(a => a.MaterialBatchId).Distinct())
             {
-                InvalidateBatchCache(cutBatchId);
+                ReleaseBatchAmountCache(cutBatchId);
             }
         }
 

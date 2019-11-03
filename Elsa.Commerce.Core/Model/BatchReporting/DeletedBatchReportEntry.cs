@@ -2,8 +2,8 @@
 {
     public class DeletedBatchReportEntry : BatchReportEntryBase
     {
-        public DeletedBatchReportEntry(int batchId)
-            : base(batchId)
+        public DeletedBatchReportEntry(BatchKey batchKey)
+            : base(batchKey)
         {
         }
 

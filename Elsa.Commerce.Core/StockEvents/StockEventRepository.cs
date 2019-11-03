@@ -73,20 +73,9 @@ namespace Elsa.Commerce.Core.StockEvents
             }
             
             var material = m_materialRepository.GetMaterialById(materialId).Ensure();
-
-            int? batchId = null;
             if (!material.AutomaticBatches && string.IsNullOrWhiteSpace(batchNumber?.Trim()))
             {
                 throw new InvalidOperationException("Je třeba zadat číslo šarže");
-            }
-
-            if (!string.IsNullOrWhiteSpace(batchNumber))
-            {
-                batchId = m_batchRepository.GetBatchIdByNumber(materialId, batchNumber);
-                if (batchId == null)
-                {
-                    throw new InvalidOperationException("Neplatné číslo šarže");
-                }
             }
 
             var unit = material.NominalUnit;
@@ -99,48 +88,71 @@ namespace Elsa.Commerce.Core.StockEvents
                 }
             }
 
+            var batches = new List<IMaterialBatch>();
+            if (!string.IsNullOrWhiteSpace(batchNumber))
+            {
+                batches.AddRange(m_batchRepository.GetBatches(new BatchKey(material.Id, batchNumber)).OrderBy(b => b.Created));
+            }
+            else
+            {
+                batches.AddRange(m_batchRepository
+                    .GetMaterialBatches(DateTime.Now.AddYears(-2), DateTime.Now.AddYears(99), true, materialId, false,
+                        false, false).Select(b => b.Batch).OrderBy(b => b.Created));
+            }
+            
             var eventAmount = new Amount(quantity, unit);
-           
+            var groupingKey = Guid.NewGuid().ToString("N");
+            var eventDt = DateTime.Now;
+
             using (var tx = m_cache.OpenTransaction())
             {
-                var resolutions = new List<Tuple<IMaterialBatch, Amount>>();
-                
-                resolutions.AddRange(m_batchFacade.Value.AutoResolve(materialId, eventAmount, true, batchId));
-
-                if (resolutions.Any(r => r.Item1 == null))
+                foreach (var batch in batches)
                 {
-                    var max = m_amountProcessor.Sum(resolutions.Where(r => r.Item1 != null).Select(r => r.Item2));
-                    throw new InvalidOperationException($"Není možné odebrat více než {max}");
-                }
+                    var available = m_batchFacade.Value.GetAvailableAmount(batch.Id);
 
-                var groupingKey = Guid.NewGuid().ToString("N");
-                foreach (var resolution in resolutions)
-                {
+                    if (available.IsNotPositive)
+                    {
+                        continue;
+                    }
+
+                    var toProcess = m_amountProcessor.Min(available, eventAmount);
+                    
                     var evt = m_cache.New<IMaterialStockEvent>();
                     evt.EventGroupingKey = groupingKey;
-                    evt.BatchId = resolution.Item1.Id;
-                    evt.Delta = resolution.Item2.Value;
-                    evt.UnitId = resolution.Item2.Unit.Id;
+                    evt.BatchId = batch.Id;
+                    evt.Delta = toProcess.Value;
+                    evt.UnitId = toProcess.Unit.Id;
                     evt.Note = reason;
                     evt.TypeId = eventTypeId;
                     evt.UserId = m_session.User.Id;
-                    evt.EventDt = DateTime.Now;
+                    evt.EventDt = eventDt;
                     evt.SourcePurchaseOrderId = sourceOrderId;
                     m_cache.Save(evt);
 
-                    m_batchFacade.Value.ReleaseBatchAmountCache(resolution.Item1);
+                    m_batchFacade.Value.ReleaseBatchAmountCache(batch.Id);
+
+                    eventAmount = m_amountProcessor.Subtract(eventAmount, toProcess);
+
+                    if (!eventAmount.IsPositive)
+                    {
+                        break;
+                    }
                 }
 
                 tx.Commit();
             }
         }
-
-        public IEnumerable<IMaterialStockEvent> GetBatchEvents(int batchId)
+        
+        public IEnumerable<IMaterialStockEvent> GetBatchEvents(BatchKey key)
         {
+            var batchNumber = key.GetBatchNumber(m_batchRepository);
+            var materialId = key.GetMaterialId(m_batchRepository);
+
             return
                 m_database.SelectFrom<IMaterialStockEvent>()
+                    .Join(e => e.Batch)
                     .Where(m => m.ProjectId == m_session.Project.Id)
-                    .Where(m => m.BatchId == batchId)
+                    .Where(m => m.Batch.MaterialId == materialId && m.Batch.BatchNumber == batchNumber)
                     .Execute().Select(b => new MaterialStockEventAdapter(m_serviceLocator, b));
         }
 
@@ -199,7 +211,7 @@ namespace Elsa.Commerce.Core.StockEvents
                 foreach (var assignment in assignments)
                 {
                     m_database.Delete(assignment);
-                    m_batchFacade.Value.InvalidateBatchCache(assignment.MaterialBatchId);
+                    m_batchFacade.Value.ReleaseBatchAmountCache(assignment.MaterialBatchId);
                 }
 
                 foreach (var assignment in assignments)

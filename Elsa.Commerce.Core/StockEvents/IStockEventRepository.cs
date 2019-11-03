@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 namespace Elsa.Commerce.Core.StockEvents
@@ -14,7 +14,7 @@ namespace Elsa.Commerce.Core.StockEvents
 
         void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason, string unitSymbol, long? sourceOrderId = null);
 
-        IEnumerable<IMaterialStockEvent> GetBatchEvents(int batchId);
+        IEnumerable<IMaterialStockEvent> GetBatchEvents(BatchKey key);
 
         IEnumerable<IMaterialStockEvent> GetEvents(DateTime @from, DateTime to, int inventoryId);
 

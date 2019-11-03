@@ -71,15 +71,15 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         {
             if (query.LoadSteps)
             {
-                return LoadSteps(query.BatchId ?? -1);
+                return LoadSteps(query.ToKey());
             }
             else if (query.LoadOrdersPage != null)
             {
-                return LoadOrders(query.BatchId ?? -1, query.LoadOrdersPage.Value);
+                return LoadOrders(query.ToKey(), query.LoadOrdersPage.Value);
             }
-            
-            var pageSize = query.BatchId == null ? c_pageSize : 1;
-            var pageNumber = query.BatchId == null ? query.PageNumber : 0;
+
+            var pageSize = query.HasKey ? 1 : c_pageSize;
+            var pageNumber = query.HasKey ? 0 : query.PageNumber;
 
             IPurchaseOrder order = null;
 
@@ -100,7 +100,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@pageSize", pageSize)
                 .WithParam("@pageNumber", pageNumber)
-                .WithParam("@batchId", query.BatchId)
+                .WithParam("@batchId", query.HasKey ? query.ToKey().UnsafeToString() : null) 
                 .WithParam("@materialId", query.MaterialId)
                 .WithParam("@orderNumber", query.OrderNumber)
                 .WithParam("@batchNumber", query.BatchNumberQuery?.Replace("*", "%"))
@@ -117,7 +117,10 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 .WithParam("@onlyBlocking", query.BlockedBatchesOnly);
 
             var result = new BatchReportModel { Query = query };
-            result.Report.AddRange(sql.MapRows(MapEntry));
+
+            var rawEntries = sql.MapRows(MapEntry);
+            
+            result.Report.AddRange(rawEntries);
             result.CanLoadMore = (result.Report.Count == c_pageSize);
 
             foreach (var b in result.Report.OfType<BatchReportEntry>())
@@ -128,7 +131,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 }
                 else
                 {
-                    var available = m_batchFacade.GetAvailableAmount(b.BatchId);
+                    var available = m_batchFacade.GetAvailableAmount(b.BatchKey);
                     b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
                     b.Available = available;
                 }
@@ -144,20 +147,20 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 PopulateStockEventSuggestions(b);
             }
 
-            if ((query.BatchId != null) && (result.Report.Count == 0))
+            if ((query.HasKey) && (result.Report.Count == 0))
             {
-                result.Report.Add(new DeletedBatchReportEntry(query.BatchId.Value));
+                result.Report.Add(new DeletedBatchReportEntry(query.ToKey()));
                 return result;
             }
 
             if (query.CompositionId != null)
             {
-                PopulateComponentAmounts(query.CompositionId.Value, result.Report);
+                PopulateComponentAmounts(BatchKey.Parse(query.CompositionId), result.Report);
                 result.CustomField1Name = "Použito";
             }
             else if (query.ComponentId != null)
             {
-                PopulateCompositionAmounts(query.ComponentId.Value, result.Report);
+                PopulateCompositionAmounts(BatchKey.Parse(query.ComponentId), result.Report);
                 result.CustomField1Name = "Použito";
             }
             else if (query.RelativeToOrderId != null)
@@ -212,7 +215,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         private void PopulateStockEventCounts(BatchReportEntry batchReportEntry)
         {
-            foreach (var evt in m_stockEventRepository.GetBatchEvents(batchReportEntry.BatchId))
+            foreach (var evt in m_stockEventRepository.GetBatchEvents(batchReportEntry.BatchKey))
             {
                 int sum;
                 if (!batchReportEntry.StockEventCounts.TryGetValue(evt.Type.TabTitle, out sum))
@@ -241,11 +244,16 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                 foreach (var assignment in assignedBatches)
                 {
-                    var sourceRecord = batches.OfType<BatchReportEntry>().FirstOrDefault(b => b.BatchId == assignment?.MaterialBatchId);
+                    var assignmentBatchKey = new BatchKey(assignment.MaterialBatchId);
+
+                    var assignmentBatchMaterialId = assignmentBatchKey.GetMaterialId(m_batchFacade);
+                    var assignmentBatchNumber = assignmentBatchKey.GetBatchNumber(m_batchFacade);
+
+                    var sourceRecord = batches.OfType<BatchReportEntry>().FirstOrDefault(b => b.MaterialId == assignmentBatchMaterialId && b.BatchNumber.Equals(assignmentBatchNumber, StringComparison.InvariantCultureIgnoreCase));
 
                     var user = assignment == null ? string.Empty : m_userRepository.GetUserNick(assignment.UserId);
 
-                    var reportRow = new BatchReportEntry(assignment?.MaterialBatchId ?? -1)
+                    var reportRow = new BatchReportEntry(BatchKey.Parse(sourceRecord.BatchId))
                     {
                         CustomField1 = StringUtil.FormatDecimal(assignment?.Quantity ?? orderItem.Quantity),
                         CustomField2 = user,
@@ -283,12 +291,11 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             return result;
         }
 
-        private BatchReportModel LoadOrders(int queryBatchId, int ordersPageNumber)
+        private BatchReportModel LoadOrders(BatchKey key, int ordersPageNumber)
         {
-            var key = new BatchKey(queryBatchId);
             var orders = m_ordersFacade.GetOrdersByUsedBatch(key, c_pageSize, ordersPageNumber).ToList();
 
-            var entry = new BatchOrdersReportEntry(queryBatchId)
+            var entry = new BatchOrdersReportEntry(key)
             {
                 CanLoadMoreOrders = orders.Count == c_pageSize,
                 NextOrdersPage = ordersPageNumber + 1
@@ -315,106 +322,112 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             return result;
         }
 
-        private void PopulateCompositionAmounts(int componentBatchId, List<BatchReportEntryBase> report)
+        private void PopulateCompositionAmounts(BatchKey componentBatchId, List<BatchReportEntryBase> report)
         {
-            var thisBatch = m_batchRepository.GetBatchById(componentBatchId);
-            if (thisBatch == null)
-            {
-                throw new InvalidOperationException("Invalid entity reference");
-            }
+            //var thisBatch = m_batchRepository.GetBatchById(componentBatchId);
+            //if (thisBatch == null)
+            //{
+            //    throw new InvalidOperationException("Invalid entity reference");
+            //}
             
-            var zeroAmount = new Amount(0, thisBatch.ComponentUnit);
+            //var zeroAmount = new Amount(0, thisBatch.ComponentUnit);
 
-            foreach (var row in report.OfType<BatchReportEntry>())
-            {
-                var amount = zeroAmount.Clone();
+            //foreach (var row in report.OfType<BatchReportEntry>())
+            //{
+            //    var amount = zeroAmount.Clone();
 
-                var componentBatch = m_batchRepository.GetBatchById(row.BatchId);
-                foreach (var component in componentBatch.Components.Where(c => c.Batch.Id == componentBatchId))
-                {
-                    amount = m_amountProcessor.Add(amount,
-                        new Amount(component.ComponentAmount, component.ComponentUnit));
-                }
+            //    var componentBatch = m_batchRepository.GetBatchById(row.BatchId);
+            //    foreach (var component in componentBatch.Components.Where(c => c.Batch.Id == componentBatchId))
+            //    {
+            //        amount = m_amountProcessor.Add(amount,
+            //            new Amount(component.ComponentAmount, component.ComponentUnit));
+            //    }
 
-                if (row.NumberOfRequiredSteps > 0)
-                {
-                    foreach (var stp in componentBatch.Batch.PerformedSteps.SelectMany(s => s.SourceBatches).Where(s => s.SourceBatchId == componentBatchId))
-                    {
-                        amount = m_amountProcessor.Add(amount, m_amountProcessor.ToAmount(stp.UsedAmount, stp.UnitId));
-                    }
-                }
+            //    if (row.NumberOfRequiredSteps > 0)
+            //    {
+            //        foreach (var stp in componentBatch.Batch.PerformedSteps.SelectMany(s => s.SourceBatches).Where(s => s.SourceBatchId == componentBatchId))
+            //        {
+            //            amount = m_amountProcessor.Add(amount, m_amountProcessor.ToAmount(stp.UsedAmount, stp.UnitId));
+            //        }
+            //    }
 
-                row.CustomField1 = amount.ToString();
-            }
+            //    row.CustomField1 = amount.ToString();
+            //}
         }
 
-        private void PopulateComponentAmounts(int compositionId, List<BatchReportEntryBase> resultReport)
+        private void PopulateComponentAmounts(BatchKey compositionId, List<BatchReportEntryBase> resultReport)
         {
-            var composition = m_batchRepository.GetBatchById(compositionId);
+            var compositionPartials = m_batchRepository.GetBatches(compositionId);
+
+            var usedAmounts = new Dictionary<string, Amount>(resultReport.Count);
+
+            foreach (var composition in compositionPartials)
+            {
+                foreach (var componentEntity in composition.Components)
+                {
+                    var componentBatch = componentEntity.Component;
+                    var componentBatchKey = new BatchKey(componentBatch.MaterialId, componentBatch.BatchNumber).UnsafeToString();
+
+                    var usedAmount = new Amount(componentEntity.Volume, componentEntity.Unit);
+
+                    if (usedAmounts.TryGetValue(componentBatchKey, out var rollingSum))
+                    {
+                        usedAmount = m_amountProcessor.Add(rollingSum, usedAmount);
+                    }
+
+                    usedAmounts[componentBatchKey] = usedAmount;
+                }
+            }
             
             foreach (var row in resultReport.OfType<BatchReportEntry>())
             {
-                var componentBatchId = row.BatchId;
-                var amount = new Amount(0, m_materialRepository.GetMaterialById(row.MaterialId).NominalUnit);
-                
-                var components = composition.Components.Where(c => componentBatchId == c.Batch.Id);
+                var usageKey = new BatchKey(row.MaterialId, row.BatchNumber).UnsafeToString();
 
-                foreach (var component in components)
+                if (usedAmounts.TryGetValue(usageKey, out var amount))
                 {
-                    amount = m_amountProcessor.Add(amount, new Amount(component.ComponentAmount, component.ComponentUnit));
+                    row.CustomField1 = amount.ToString();
                 }
-
-                foreach (var steps in composition.Batch.PerformedSteps)
-                {
-                    foreach (var stepComponent in steps.SourceBatches.Where(sb => sb.SourceBatchId == componentBatchId))
-                    {
-                        amount = m_amountProcessor.Add(amount,
-                            new Amount(stepComponent.UsedAmount, m_unitRepository.GetUnit(stepComponent.UnitId)));
-                    }
-                }
-
-                row.CustomField1 = amount.ToString();
             }
         }
 
-        private BatchReportModel LoadSteps(int queryBatchId)
+        private BatchReportModel LoadSteps(BatchKey key)
         {
-            var batch = m_batchRepository.GetBatchById(queryBatchId);
+            var batch = m_batchRepository.GetBatches(key).Single();
             if (batch == null)
             {
                 throw new InvalidOperationException("not found");
             }
 
-            var batchStatus = m_batchFacade.GetBatchStatus(queryBatchId);
+            var batchStatus = m_batchFacade.GetBatchStatus(batch.Id);
 
-            var requiredSteps = m_materialRepository.GetMaterialProductionSteps(batch.Batch.MaterialId).Ordered().ToList();
+            var requiredSteps = m_materialRepository.GetMaterialProductionSteps(batch.MaterialId).Ordered().ToList();
 
             if (!requiredSteps.Any())
             {
                 throw new InvalidOperationException("invalid request");
             }
 
-            var entry = new BatchProductionStepReportEntry(queryBatchId);
+            var entry = new BatchProductionStepReportEntry(new BatchKey(batch.Id));
 
-            var performedSteps = batch.Batch.PerformedSteps.ToList();
+            var performedSteps = batch.PerformedSteps.ToList();
             foreach (var requiredStep in requiredSteps)
             {
                 var stepModel = new BatchProductionStepReportEntry.ProductionStepModel
                 {
                     MaterialStepId = requiredStep.Id,
                     StepName = requiredStep.Name,
-                    BatchId = batch.Batch.Id
+                    BatchId = batch.Id
                 };
 
                 entry.Steps.Add(stepModel);
 
                 var done =
-                    performedSteps.Where(s => (s.BatchId == queryBatchId) && (s.StepId == requiredStep.Id)).ToList();
+                    performedSteps.Where(s => (s.BatchId == batch.Id) && (s.StepId == requiredStep.Id)).ToList();
 
-                var producedAmount = new Amount(0, batch.ComponentUnit);
+                var producedAmount = new Amount(0, batch.Unit);
                 foreach (var doneStep in done)
                 {
-                    var doneStepAmount = new Amount(doneStep.ProducedAmount, batch.ComponentUnit);
+                    var doneStepAmount = new Amount(doneStep.ProducedAmount, batch.Unit);
                     producedAmount = m_amountProcessor.Add(producedAmount, doneStepAmount);
 
                     var doneModel = new BatchProductionStepReportEntry.PerformedStepModel()
@@ -426,7 +439,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                         SpentHours = StringUtil.FormatDecimal(doneStep.SpentHours ?? 0m),
                         StepId = doneStep.Id,
                         Worker = doneStep.Worker?.EMail,
-                        CanDelete =  m_productionFacade.CheckProductionStepCanBeDeleted(batchStatus, doneStep.Id, batch.Batch)
+                        CanDelete =  m_productionFacade.CheckProductionStepCanBeDeleted(batchStatus, doneStep.Id, batch)
                     };
 
                     stepModel.PerformedSteps.Add(doneModel);
@@ -453,7 +466,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                 var perc = producedAmount.IsNotPositive
                     ? decimal.Zero
-                    : m_amountProcessor.Divide(producedAmount, new Amount(batch.ComponentAmount, batch.ComponentUnit))
+                    : m_amountProcessor.Divide(producedAmount, new Amount(batch.Volume, batch.Unit))
                         .Value;
 
                 perc = perc*100m;
@@ -497,8 +510,9 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             const int numberOfStockEvents = 19;
             #endregion
 
+            var key = BatchKey.Parse(row.GetString(batchId));
 
-            var entry = new BatchReportEntry(row.GetInt32(batchId))
+            var entry = new BatchReportEntry(key)
             {
                 InventoryName = row.GetString(inventoryName),
                 BatchNumber = row.IsDBNull(batchNumber) ? "?" : row.GetString(batchNumber),
@@ -515,7 +529,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 NumberOfRequiredSteps = row.GetInt32(numberOfRequiredSteps),
                 NumberOfOrders = row.GetInt32(numberOfOrders),
                 Price = row.IsDBNull(price) ? string.Empty : $"{StringUtil.FormatDecimal(row.GetDecimal(price))} CZK",
-                InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : row.GetString(invoiceNr),
+                InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : string.Join(", ", row.GetString(invoiceNr).Split(';').Distinct()),
                 HasStockEvents = (!row.IsDBNull(numberOfStockEvents)) && (row.GetInt32(numberOfStockEvents) > 0)
             };
             

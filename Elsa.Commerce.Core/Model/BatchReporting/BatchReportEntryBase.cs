@@ -8,12 +8,17 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 {
     public abstract class BatchReportEntryBase
     {
-        protected BatchReportEntryBase(int batchId)
+        protected BatchReportEntryBase(BatchKey batchKey)
         {
-            BatchId = batchId;
+            //To ensure key was resolved
+            batchKey.UnsafeToString();
+
+            BatchKey = batchKey;
         }
 
-        public int BatchId { get; }
+        public BatchKey BatchKey { get; }
+
+        public string BatchId => BatchKey.UnsafeToString();
 
         public int? ParentId { get; set; }
 

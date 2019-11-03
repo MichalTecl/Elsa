@@ -54,14 +54,14 @@ namespace Elsa.Apps.Inventory
             m_eventRepository.SaveEvent(eventTypeId, materialId, batchNumber, quantity, reason, unitSymbol);
         }
 
-        public IEnumerable<StockEventViewModel> GetBatchEvents(int batchId, string eventTypeName)
+        public IEnumerable<StockEventViewModel> GetBatchEvents(string batchId, string eventTypeName)
         {
             var etype =
                 m_eventRepository.GetAllEventTypes().FirstOrDefault(etp => etp.TabTitle == eventTypeName).Ensure();
 
             return
-                m_eventRepository.GetBatchEvents(batchId)
-                    .Where(e => e.TypeId == etype.Id)
+                m_eventRepository.GetBatchEvents(BatchKey.Parse(batchId))
+                    .Where(e => e.TypeId == etype.Id /* && e.BatchId == batchId*/)
                     .Select(e => new StockEventViewModel(e));
         }
 

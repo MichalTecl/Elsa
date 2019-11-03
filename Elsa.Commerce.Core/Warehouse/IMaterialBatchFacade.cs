@@ -16,6 +16,8 @@ namespace Elsa.Commerce.Core.Warehouse
 
         Amount GetAvailableAmount(int batchId);
 
+        Amount GetAvailableAmount(BatchKey batchKey);
+
         void PreloadBatchAmountCache();
 
         IMaterialBatchStatus GetBatchStatus(int batchId);
@@ -38,6 +40,8 @@ namespace Elsa.Commerce.Core.Warehouse
 
         void DeleteBatch(int batchId);
         void ReleaseBatchAmountCache(IMaterialBatch batch);
+
+        void ReleaseBatchAmountCache(int batchId);
 
         IEnumerable<string> GetDeletionBlockReasons(int batchId);
 
@@ -67,6 +71,6 @@ namespace Elsa.Commerce.Core.Warehouse
 
         IEnumerable<Tuple<int?, Amount>> ProposeAllocations(int materialId, string batchNumber, Amount requestedAmount);
 
-        void InvalidateBatchCache(int batchId);
+        
     }
 }

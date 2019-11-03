@@ -4,8 +4,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 {
     public class BatchOrdersReportEntry : BatchReportEntryBase
     {
-        public BatchOrdersReportEntry(int batchId)
-            : base(batchId)
+        public BatchOrdersReportEntry(BatchKey batchKey)
+            : base(batchKey)
         {
         }
 
