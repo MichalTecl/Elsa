@@ -8,7 +8,6 @@ using Castle.Components.DictionaryAdapter;
 
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
 {
@@ -60,9 +59,7 @@ namespace Elsa.UnitTests.Commerce.Core.VirtualProducts.Mocks
         public bool? RequiresPrice { get; set; }
 
         public bool? RequiresSupplierReference { get; set; }
-
-        public IEnumerable<IMaterialProductionStep> Steps { get; }
-
+        
         public IEnumerable<IMaterialThreshold> Thresholds { get; }
 
         public IMaterialThreshold Threshold { get; }

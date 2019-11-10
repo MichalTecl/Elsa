@@ -48,7 +48,6 @@
     <Compile Include="MaterialController.cs" />
     <Compile Include="MaterialLevelController.cs" />
     <Compile Include="Model\BatchSetupRequest.cs" />
-    <Compile Include="Model\MaterialWithStepsViewModel.cs" />
     <Compile Include="Model\ProducedBatchModel.cs" />
     <Compile Include="Model\StockEventViewModel.cs" />
     <Compile Include="ProductionController.cs" />
@@ -59,7 +58,6 @@
     <Compile Include="Model\MaterialInfo.cs" />
     <Compile Include="Model\VirtualProductEditRequestModel.cs" />
     <Compile Include="Model\VirtualProductViewModel.cs" />
-    <Compile Include="ProductionStepsController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StockEventsController.cs" />
     <Compile Include="VirtualProductsController.cs" />

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Inventory;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 namespace Elsa.Commerce.Core.VirtualProducts
 {
@@ -46,12 +45,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
         void DeleteMaterial(int id);
 
         IEnumerable<IMaterialInventory> GetMaterialInventories();
-
-        void DeleteMaterialProductionStep(int materialId, int productionStepId);
-
-        IEnumerable<IMaterialProductionStep> GetMaterialProductionSteps(int materialId);
-
-        IEnumerable<IMaterialProductionStep> GetMaterialProductionSteps();
+        
         void EnsureCompatibleUnit(IExtendedMaterialModel material, IMaterialUnit unit);
     }
 

@@ -10,7 +10,6 @@ using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 using Robowire;
 
 namespace Elsa.Commerce.Core.Warehouse.Impl.Model
@@ -46,7 +45,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl.Model
         public string LockReason { get => m_adaptee.LockReason; set => m_adaptee.LockReason = value; }
         public bool IsAvailable { get => m_adaptee.IsAvailable; set => m_adaptee.IsAvailable = value; }
         public DateTime? Produced { get => m_adaptee.Produced; set => m_adaptee.Produced = value; }
-        public bool? AllStepsDone { get => m_adaptee.AllStepsDone; set => m_adaptee.AllStepsDone = value; }
         public bool? IsHiddenForAccounting { get => m_adaptee.IsHiddenForAccounting; set => m_adaptee.IsHiddenForAccounting = value; }
 
         public ISupplier Supplier => Get<ISupplierRepository, ISupplier>("Supplier", r => SupplierId == null ? null : r.GetSupplier(SupplierId.Value));
@@ -68,9 +66,5 @@ namespace Elsa.Commerce.Core.Warehouse.Impl.Model
         public IEnumerable<IMaterialBatchComposition> Components =>
             Get<IMaterialBatchRepository, IEnumerable<IMaterialBatchComposition>>("Components",
                 r => r.GetBatchComponents(Id));
-
-        public IEnumerable<IBatchProductionStep> PerformedSteps =>
-            Get<IMaterialBatchRepository, IEnumerable<IBatchProductionStep>>("PerformedSteps",
-                r => r.GetPerformedSteps(Id));
     }
 }

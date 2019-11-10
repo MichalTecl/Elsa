@@ -232,11 +232,6 @@ namespace Elsa.Apps.Inventory
                     request.Materials.Select(s => s.DisplayText),
                     thresholdText);
                 
-                if (saved.ProductionSteps.Any() || request.ProductionSteps.Any())
-                {
-                    saved = m_materialFacade.ProcessProductionStepsEditRequest(saved, request.ProductionSteps);
-                }
-
                 m_cache.Remove(GetMappablesCacheKey());
 
                 tx.Commit();

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
-using Elsa.Commerce.Core.Model.ProductionSteps;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -57,8 +56,6 @@ namespace Elsa.Commerce.Core.Warehouse
 
         IEnumerable<IMaterialBatch> FindNotClosedBatches(int inventoryId, DateTime from, DateTime to, Func<IMaterialBatch, bool> filter = null);
         
-        IEnumerable<BatchStepProgressInfo> GetProductionStepsProgress(IMaterialBatch batch);
-
         BatchAccountingDate GetBatchAccountingDate(IMaterialBatch batch);
 
         Tuple<decimal, BatchPrice> GetPriceOfAmount(int batchId, Amount amount);

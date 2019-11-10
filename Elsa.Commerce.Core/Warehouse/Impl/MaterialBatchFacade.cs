@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
-using Elsa.Commerce.Core.Model.ProductionSteps;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
@@ -377,9 +376,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 ReleaseBatchAmountCache(parentBatchId);
                 ReleaseBatchAmountCache(componentBatchId);
-
-                m_batchStatusManager.OnBatchChanged(parentBatchId);
-                m_batchStatusManager.OnBatchChanged(componentBatchId);
             }
         }
 
@@ -546,7 +542,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 yield return "Již bylo prodáno zboží z této šarže";
             }
 
-            if (status.UsedInCompositions.Any() || status.UsedInSteps.Any())
+            if (status.UsedInCompositions.Any())
             {
                 yield return "Šarže je použita ve složení jiné šarže";
             }
@@ -554,11 +550,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             foreach (var evt in status.Events.Select(e => e.Type.Name).Distinct())
             {
                 yield return $"Byla provedena akce typu \"{evt}\"";
-            }
-
-            if (status.ResolvedSteps.Any())
-            {
-                yield return "Byly proveden výrobní kroky";
             }
         }
         
@@ -712,24 +703,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                         .Where(b => (b.Created >= @from) && (b.Created <= to)).Where(b => b.CloseDt == null)).Where(b => filter?.Invoke(b) != false)
                 .Select(b => m_batchRepository.GetBatchById(b.Id).Batch);
         }
-
-        public IEnumerable<BatchStepProgressInfo> GetProductionStepsProgress(IMaterialBatch batch)
-        {
-            var material = m_materialRepository.GetMaterialById(batch.MaterialId);
-
-            var requiredAmount = m_conversionHelper.ConvertAmount(new Amount(batch.Volume, batch.Unit ?? m_unitRepository.GetUnit(batch.UnitId)), material.NominalUnit.Id);
-            
-            var allPerformedSteps = m_batchRepository.GetPerformedSteps(batch.Id).ToList();
-
-            foreach (var materialProductionStep in m_materialRepository.GetMaterialProductionSteps(batch.MaterialId).Ordered())
-            {
-                var performed = allPerformedSteps.Where(s => s.StepId == materialProductionStep.Id).ToList();
-                var totalProduced = new Amount(performed.Sum(s => s.ProducedAmount), requiredAmount.Unit);
-
-                yield return new BatchStepProgressInfo(materialProductionStep, requiredAmount, totalProduced, performed);
-            }
-        }
-
+        
         public BatchAccountingDate GetBatchAccountingDate(IMaterialBatch batch)
         {
             if (batch.FinalAccountingDate != null)
@@ -749,21 +723,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     new Amount(evt.Delta, evt.Unit ?? m_unitRepository.GetUnit(evt.UnitId)));
             }
             
-            foreach (var step in GetProductionStepsProgress(batch))
-            {
-                var maxDt = step.PerformedSteps.Any() ? step.PerformedSteps.Max(s => s.ConfirmDt) : d;
-                if (maxDt > d)
-                {
-                    d = maxDt;
-                }
-
-                var reminingAmount = m_amountProcessor.Subtract(step.RequiredAmount, step.TotalProducedAmount);
-                if (reminingAmount.IsPositive)
-                {
-                    sb.AppendLine($"Zbývá {reminingAmount} {step.RequiredStep.Name}");
-                }
-            }
-
             if (sb.Length == 0)
             {
                 m_batchRepository.UpdateBatch(batch.Id, b => b.FinalAccountingDate = d);

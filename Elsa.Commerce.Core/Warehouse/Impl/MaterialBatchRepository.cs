@@ -12,7 +12,6 @@ using Elsa.Common.Caching;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 using Robowire;
 using Robowire.RobOrm.Core;
 
@@ -375,14 +374,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return GetBatchById(entity.Id);
         }
 
-        public void MarkBatchAllProductionStepsDone(int batchId)
-        {
-            var batch = GetBatchById(batchId);
-            batch.Batch.AllStepsDone = true;
-
-            m_database.Save(batch.Batch);
-        }
-
         public string GetBatchNumberById(int batchId)
         {
             return m_cache.ReadThrough($"batchNrById_{m_session.Project.Id}_{batchId}",
@@ -452,22 +443,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             return GetBatchById(id);
         }
-
-        public IEnumerable<IBatchProductionStep> GetPerformedSteps(int batchId)
-        {
-            return m_database.SelectFrom<IBatchProductionStep>()
-                .Join(s => s.Batch)
-                .Join(s => s.Step)
-                .Join(s => s.SourceBatches)
-                .Join(s => s.SourceBatches.Each().Unit)
-                .Join(s => s.SourceBatches.Each().SourceBatch)
-                .Join(s => s.SourceBatches.Each().SourceBatch.Unit)
-                .Join(s => s.SourceBatches.Each().SourceBatch.Material)
-                .Where(s => s.BatchId == batchId)
-                .Where(s => s.Batch.ProjectId == m_session.Project.Id)
-                .Execute();
-        }
-
+        
         public IEnumerable<MaterialBatchComponent> GetBatchesByComponentInventory(int componentMaterialInventoryId, int compositionYear, int compositionMonth)
         {
             var from = new DateTime(compositionYear, compositionMonth, 1).Date;
@@ -488,31 +464,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 yield return GetBatchById(compositionBatchId);
             }
         }
-
-        public IEnumerable<int> GetBatchesByProductionStepComponentInventory(int stepComponentInventory,
-            int compositionYear,
-            int compositionMonth, bool includeBatchesHiddenForAccounting)
-        {
-            var from = new DateTime(compositionYear, compositionMonth, 1).Date;
-            var to = from.AddMonths(1);
-
-            var query = m_database.SelectFrom<IBatchProductionStep>()
-                .Join(s => s.SourceBatches)
-                .Join(s => s.SourceBatches.Each().SourceBatch)
-                .Join(s => s.SourceBatches.Each().SourceBatch.Material)
-                .Where(s => s.SourceBatches.Each().SourceBatch.ProjectId == m_session.Project.Id)
-                .Where(s => s.SourceBatches.Each().SourceBatch.Material.InventoryId == stepComponentInventory)
-                .Where(s => s.ConfirmDt >= from && s.ConfirmDt < to);
-
-            if (!includeBatchesHiddenForAccounting)
-            {
-                query = query.Where(s => s.SourceBatches.Each().SourceBatch.IsHiddenForAccounting != true);
-            }
-                
-            return query.Execute().Select(s => s.BatchId).Distinct()
-                .ToList();
-        }
-
+        
         public IEnumerable<IMaterialBatchComposition> GetBatchComponents(int compositionId)
         {
             return m_database.SelectFrom<IMaterialBatchComposition>().Where(c => c.CompositionId == compositionId)

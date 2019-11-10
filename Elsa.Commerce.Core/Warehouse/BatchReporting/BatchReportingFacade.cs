@@ -73,11 +73,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
         {
-            if (query.LoadSteps)
-            {
-                return LoadSteps(query.ToKey());
-            }
-            else if (query.LoadOrdersPage != null)
+            if (query.LoadOrdersPage != null)
             {
                 return LoadOrders(query.ToKey(), query.LoadOrdersPage.Value);
             }
@@ -276,10 +272,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                         IsClosed = sourceRecord?.IsClosed ?? false,
                         IsLocked = sourceRecord?.IsLocked ?? false,
                         IsAvailable = sourceRecord?.IsAvailable ?? false,
-                        AllStepsDone = sourceRecord?.AllStepsDone ?? false,
                         NumberOfComponents = sourceRecord?.NumberOfComponents ?? 0,
                         NumberOfCompositions = sourceRecord?.NumberOfCompositions ?? 0,
-                        NumberOfRequiredSteps = sourceRecord?.NumberOfRequiredSteps ?? 0,
                         NumberOfOrders = sourceRecord?.NumberOfOrders ?? 0,
                         Price = sourceRecord?.Price ?? string.Empty,
                         InvoiceNumber = sourceRecord?.InvoiceNumber ?? string.Empty,
@@ -429,101 +423,6 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 }
             }
         }
-
-        private BatchReportModel LoadSteps(BatchKey key)
-        {
-            var batch = m_batchRepository.GetBatches(key).Single();
-            if (batch == null)
-            {
-                throw new InvalidOperationException("not found");
-            }
-
-            var batchStatus = m_batchFacade.GetBatchStatus(batch.Id);
-
-            var requiredSteps = m_materialRepository.GetMaterialProductionSteps(batch.MaterialId).Ordered().ToList();
-
-            if (!requiredSteps.Any())
-            {
-                throw new InvalidOperationException("invalid request");
-            }
-
-            var entry = new BatchProductionStepReportEntry(new BatchKey(batch.Id));
-
-            var performedSteps = batch.PerformedSteps.ToList();
-            foreach (var requiredStep in requiredSteps)
-            {
-                var stepModel = new BatchProductionStepReportEntry.ProductionStepModel
-                {
-                    MaterialStepId = requiredStep.Id,
-                    StepName = requiredStep.Name,
-                    BatchId = batch.Id
-                };
-
-                entry.Steps.Add(stepModel);
-
-                var done =
-                    performedSteps.Where(s => (s.BatchId == batch.Id) && (s.StepId == requiredStep.Id)).ToList();
-
-                var producedAmount = new Amount(0, batch.Unit);
-                foreach (var doneStep in done)
-                {
-                    var doneStepAmount = new Amount(doneStep.ProducedAmount, batch.Unit);
-                    producedAmount = m_amountProcessor.Add(producedAmount, doneStepAmount);
-
-                    var doneModel = new BatchProductionStepReportEntry.PerformedStepModel()
-                    {
-                        Amount = doneStepAmount.ToString(),
-                        ConfirmDt = StringUtil.FormatDateTime(doneStep.ConfirmDt),
-                        ConfirmUser = m_userRepository.GetUser(doneStep.ConfirmUserId).EMail,
-                        Price = StringUtil.FormatDecimal(doneStep.Price ?? 0m),
-                        SpentHours = StringUtil.FormatDecimal(doneStep.SpentHours ?? 0m),
-                        StepId = doneStep.Id,
-                        Worker = doneStep.Worker?.EMail,
-                        CanDelete =  m_productionFacade.CheckProductionStepCanBeDeleted(batchStatus, doneStep.Id, batch)
-                    };
-
-                    stepModel.PerformedSteps.Add(doneModel);
-
-                    foreach (var component in doneStep.SourceBatches)
-                    {
-                        var sourceBatch = m_batchRepository.GetBatchById(component.SourceBatchId);
-                        var material = m_materialRepository.GetMaterialById(sourceBatch.Batch.MaterialId);
-                        var componentModel = new BatchProductionStepReportEntry.PerfomedStepComponent()
-                        {
-                            MaterialName = material.Name,
-                            Amount = new Amount(component.UsedAmount, m_unitRepository.GetUnit(component.UnitId)).ToString(),
-                            BatchNumber = m_batchRepository.GetBatchNumberById(component.SourceBatchId),
-                            StepBatchId = component.Id
-                        };
-
-                        doneModel.Components.Add(componentModel);
-                    }
-
-                    doneModel.Components.Sort(
-                        new GenericComparer<BatchProductionStepReportEntry.PerfomedStepComponent>(
-                            (a, b) => string.Compare(a.MaterialName, b.MaterialName, StringComparison.Ordinal)));
-                }
-
-                var perc = producedAmount.IsNotPositive
-                    ? decimal.Zero
-                    : m_amountProcessor.Divide(producedAmount, new Amount(batch.Volume, batch.Unit))
-                        .Value;
-
-                perc = perc*100m;
-
-                stepModel.DonePercent = $"{StringUtil.FormatDecimal(Math.Round(perc, 0))}%";
-            }
-            
-            var report = new BatchReportModel()
-            {
-                CanLoadMore = false,
-                IsUpdate = true
-            };
-
-            report.Report.Add(entry);
-
-            return report;
-        }
         
         private BatchReportEntry MapEntry(DbDataReader row)
         {
@@ -540,10 +439,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             const int batchLockDt = 9;
             const int batchAvailable = 10;
             const int batchProductionDt = 11;
-            const int batchStepsDone = 12;
             const int numberOfComponents = 13;
             const int numberOfCompositions = 14;
-            const int numberOfRequiredSteps = 15;
             const int numberOfOrders = 16;
             const int price = 17;
             const int invoiceNr = 18;
@@ -564,10 +461,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 IsClosed = !row.IsDBNull(batchCloseDt),
                 IsLocked = !row.IsDBNull(batchLockDt),
                 IsAvailable = row.GetBoolean(batchAvailable),
-                AllStepsDone = (!row.IsDBNull(batchStepsDone)) && row.GetBoolean(batchStepsDone),
                 NumberOfComponents = row.GetInt32(numberOfComponents),
                 NumberOfCompositions = row.GetInt32(numberOfCompositions),
-                NumberOfRequiredSteps = row.GetInt32(numberOfRequiredSteps),
                 NumberOfOrders = row.GetInt32(numberOfOrders),
                 Price = row.IsDBNull(price) ? string.Empty : $"{StringUtil.FormatDecimal(row.GetDecimal(price))} CZK",
                 InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : string.Join(", ", row.GetString(invoiceNr).Split(';').Distinct()),

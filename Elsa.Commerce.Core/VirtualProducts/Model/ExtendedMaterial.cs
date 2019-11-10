@@ -6,7 +6,6 @@ using System.Text;
 using Elsa.Commerce.Core.Units;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Newtonsoft.Json;
 
@@ -38,39 +37,6 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                 HasThreshold = true;
                 ThresholdText = $"{StringUtil.FormatDecimal(threshold.ThresholdQuantity)} {threshold.Unit.Symbol}";
             }
-
-            var stepsAssorted = adaptee.Steps.Where(s => s.DeleteDateTime == null).Select(s => new MaterialProductionStepModel(s)).ToList();
-            List<MaterialProductionStepModel> stepsSorted = null;
-
-            if (stepsAssorted.Count < 2)
-            {
-                stepsSorted = stepsAssorted;
-            }
-            else
-            {
-                stepsSorted = new List<MaterialProductionStepModel>(stepsAssorted.Count);
-
-                int? nextReference = null;
-                while (stepsAssorted.Any())
-                {
-                    var currentStep = stepsAssorted.FirstOrDefault(i => i.PreviousStepId == nextReference);
-                    if (currentStep == null)
-                    {
-                        if (stepsAssorted.Any())
-                        {
-                            throw new InvalidOperationException($"Inconsistent production steps sequnece found. MaterialId={adaptee.Id}");
-                        }
-
-                        break;
-                    }
-
-                    nextReference = currentStep.Id;
-                    stepsAssorted.Remove(currentStep);
-                    stepsSorted.Add(currentStep);
-                }
-            }
-
-            ProductionSteps = stepsSorted;
         }
 
         public int Id { get; }
@@ -93,9 +59,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool HasThreshold { get; set; }
 
         public string ThresholdText { get; set; }
-
-        public IEnumerable<MaterialProductionStepModel> ProductionSteps { get; }
-
+        
         public IExtendedMaterialModel CreateBatch(decimal batchAmount, IMaterialUnit preferredBatchUnit, IUnitConversionHelper conversions)
         {
             // Nominal = 1kg

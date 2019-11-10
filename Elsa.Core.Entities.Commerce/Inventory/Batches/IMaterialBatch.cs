@@ -5,7 +5,6 @@ using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -42,12 +41,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         bool IsAvailable { get; set; }
 
         DateTime? Produced { get; set; }
-
-        [ForeignKey(nameof(IBatchProductionStep.BatchId))]
-        IEnumerable<IBatchProductionStep> PerformedSteps { get; }
-
-        bool? AllStepsDone { get; set; }
-
+        
         bool? IsHiddenForAccounting { get; set; }
     }
 

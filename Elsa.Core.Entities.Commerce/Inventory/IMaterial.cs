@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Core;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -38,8 +37,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         bool? RequiresSupplierReference { get; set; }
         
-        IEnumerable<IMaterialProductionStep> Steps { get; }
-        
         IEnumerable<IMaterialThreshold> Thresholds { get; }
+
+        int? ExtendingMaterialId { get; set; }
+        IMaterial ExtendingMaterial { get; }
     }
 }

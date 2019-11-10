@@ -28,25 +28,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             materials.push({ Name: com.Material.Name, Amount: com.Amount, UnitSymbol: com.Unit.Symbol });
         }
         mat.materials = materials;
-
-        for (var stepIndex = 0; stepIndex < mat.ProductionSteps.length; stepIndex++) {
-            var step = mat.ProductionSteps[stepIndex];
-            
-            var stepMats = [];
-
-            for (var matIndex = 0; matIndex < step.Components.length; matIndex++) {
-                var componentMaterial = step.Components[matIndex];
-
-                stepMats.push({
-                    Name: componentMaterial.MaterialName,
-                    Amount: componentMaterial.Amount,
-                    UnitSymbol: componentMaterial.Unit
-                });
-            }
-
-            step.materials = stepMats;
-        }
-
+        
         mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;
     };
 
@@ -287,7 +269,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
         if (!found) {
 
-            var newMat = { editMode: true, materials: [], RequiresPrice: self.currentMaterialInventory.RequirePriceDefault || false, RequiresInvoice: self.currentMaterialInventory.RequireInvoicesDefault, ProductionSteps:[] };
+            var newMat = { editMode: true, materials: [], RequiresPrice: self.currentMaterialInventory.RequirePriceDefault || false, RequiresInvoice: self.currentMaterialInventory.RequireInvoicesDefault };
             if (self.currentMaterialInventory.AllowedUnit) {
                 newMat.nominalAmountText = "1" + self.currentMaterialInventory.AllowedUnit.Symbol;
             }
@@ -309,7 +291,6 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             RequiresInvoice: model.RequiresInvoice,
             RequiresSupplierReference:model.RequiresSupplierReference,
             Materials: [],
-            ProductionSteps: [],
             HasThreshold: model.HasThreshold,
             ThresholdText: model.ThresholdText
         };
@@ -317,26 +298,6 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         for (var i = 0; i < model.materials.length; i++) {
             request.Materials.push({ DisplayText: model.materials[i].displayText });
         }
-
-        for (var j = 0; j < model.ProductionSteps.length; j++) {
-            var step = model.ProductionSteps[j];
-
-            var stepModel = {};
-            request.ProductionSteps.push(stepModel);
-            stepModel.StepOrder = j;
-            stepModel.StepId = step.Id;
-            stepModel.StepName = step.StepName;
-            stepModel.Price = step.RequiresPrice;
-            stepModel.Time = step.RequiresSpentTime;
-            stepModel.Worker = step.RequiresWorkerReference;
-            stepModel.PricePerUnit = step.PricePerUnit;
-            stepModel.Materials = [];
-
-            for (var k = 0; k < step.materials.length; k++) {
-                stepModel.Materials.push({ "DisplayText": step.materials[k].displayText });
-            }
-        }
-
 
         lt.api("/virtualProducts/saveMaterial").body(request).post(receiveSingleMaterial);
         
@@ -403,25 +364,6 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             self.searchMaterials();
         });
 
-    };
-
-    self.deleteProductionStep = function(model) {
-        for (var matIndex = 0; matIndex < self.selectedMaterials.length; matIndex++) {
-            var material = self.selectedMaterials[matIndex];
-
-            if (!material.editMode) {
-                continue;
-            }
-
-            for (var stepIndex = 0; stepIndex < material.ProductionSteps.length; stepIndex++) {
-                var step = material.ProductionSteps[stepIndex];
-                if (step === model) {
-                    material.ProductionSteps.splice(stepIndex, 1);
-                    lt.notify();
-                    return;
-                }
-            }
-        }
     };
 };
 

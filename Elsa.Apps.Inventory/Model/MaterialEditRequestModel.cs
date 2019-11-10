@@ -24,9 +24,7 @@ namespace Elsa.Apps.Inventory.Model
         public string ThresholdText { get; set; }
 
         public List<VirtualProductEditRequestModel.VpMaterialEditRequestModel> Materials { get; set; }
-
-        public List<ProductionStepRequestModel> ProductionSteps { get; set; }
-
+        
         public bool RequiresSupplierReference { get; set; }
     }
 }

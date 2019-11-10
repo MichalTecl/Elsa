@@ -114,7 +114,6 @@
     <Content Include="Script\Apps\Inventory\Material\MaterialHelper.js" />
     <Content Include="Script\Apps\Inventory\Material\MaterialLevels.VM.js" />
     <Content Include="Script\Apps\Inventory\VirtualProducts\VirtualProductsVM.js" />
-    <Content Include="Script\Apps\Inventory\WarehouseActions\ProductionSteps.VM.js" />
     <Content Include="Script\Apps\Inventory\WarehouseActions\WarehouseActions.VM.js" />
     <Content Include="Script\Apps\Jobs\ScheduledJobs.VM.js" />
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
@@ -154,14 +153,10 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesStyle.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchInput.css" />
-    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionSteps.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\StockEventsEditor.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProdBatchEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesList.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesUI.html" />
-    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionSteps.html" />
-    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\MaterialsTreeView.html" />
-    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionStepsPartial\ProductionStepEdit.html" />
     <Content Include="UI\Controls\Accounting\FixedCostValuesEditor.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\InvoiceFormReports.css" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\GenerateButton.html" />

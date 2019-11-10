@@ -7,7 +7,6 @@ using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Inventory;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire.RobOrm.Core;
 
@@ -22,9 +21,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
         
         private string MaterialsCacheKey => $"AllMaterialsBy_ProjectId={m_session.Project.Id}";
         private string VirtualProductCompositionsCacheKey => $"AllVPCompositionsBy_ProjectID={m_session.Project.Id}";
-
-        private string MaterialStepsCacheKey => $"AllMaterialProdStepsBy_ProjectID={m_session.Project.Id}";
-
+        
         public MaterialRepository(IDatabase database, ISession session, ICache cache, IUnitConversionHelper conversionHelper)
         {
             m_database = database;
@@ -125,8 +122,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     .Join(m => m.Thresholds)
                     .Join(m => m.Thresholds.Each().Unit)
                     .Join(m => m.Inventory)
-                    .Join(m => m.Steps.Each().Components.Each().Material)
-                    .Join(m => m.Steps.Each().Components.Each().Unit)
                     .Where(m => m.ProjectId == m_session.Project.Id)
                     .Execute();
         }
@@ -267,7 +262,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
         {
             m_cache.Remove(VirtualProductCompositionsCacheKey);
             m_cache.Remove(MaterialsCacheKey);
-            m_cache.Remove(MaterialStepsCacheKey);
         }
 
         public void DetachMaterialComponent(int compositionMaterialId, int componentMaterialId)
@@ -362,66 +356,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                         .Where(i => i.ProjectId == m_session.Project.Id)
                         .Execute());
         }
-
-        public void DeleteMaterialProductionStep(int materialId, int productionStepId)
-        {
-            using (var tx = m_database.OpenTransaction())
-            {
-                var matr = GetMaterialById(materialId);
-                var step = matr.ProductionSteps.FirstOrDefault(i => i.Id == productionStepId)?.Adaptee;
-                if (step == null)
-                {
-                    tx.Commit();
-                    return;
-                }
-
-                var resolution =
-                    m_database.SelectFrom<IBatchProductionStep>()
-                        .Where(s => s.StepId == productionStepId)
-                        .Take(1)
-                        .Execute()
-                        .FirstOrDefault();
-
-                if (resolution != null)
-                {
-                    step.DeleteDateTime = DateTime.Now;
-                    m_database.Save(step);
-                    CleanCache();
-                    tx.Commit();
-                    return;
-                }
-
-                foreach (var component in step.Components)
-                {
-                    m_database.Delete(component);
-                }
-
-                m_database.Delete(step);
-
-                CleanCache();
-
-                tx.Commit();
-            }
-        }
-
-        public IEnumerable<IMaterialProductionStep> GetMaterialProductionSteps(int materialId)
-        {
-            return GetMaterialProductionSteps().Where(s => s.MaterialId == materialId);
-        }
-
-        public IEnumerable<IMaterialProductionStep> GetMaterialProductionSteps()
-        {
-            return m_cache.ReadThrough(MaterialStepsCacheKey,
-                TimeSpan.FromMinutes(100),
-                () =>
-                    m_database.SelectFrom<IMaterialProductionStep>()
-                        .Join(m => m.Material)
-                        .Join(m => m.Components.Each().Material)
-                        .Join(m => m.Components.Each().Unit)
-                        .Where(m => m.Material.ProjectId == m_session.Project.Id)
-                        .Execute());
-        }
-
+        
         public void EnsureCompatibleUnit(IExtendedMaterialModel material, IMaterialUnit unit)
         {
             if (!m_conversionHelper.AreCompatible(material.NominalUnit.Id, unit.Id))

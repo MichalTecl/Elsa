@@ -248,49 +248,6 @@ body, html {
     margin-top:0.2em;        
 }
 
-.productionStepsSection {
-    margin-top:15px;
-    margin-left:15px;
-    border-top:1px solid #eee;
-
-}
-
-.stepsLabel {
-    color:#777799;
-    font-weight:bold;
-    margin-top:8px;
-}
-
-.stepsList {
-    margin-left:15px;
-    margin-top:0px;
-}
-
-.stepItemTemplate {
-    margin-top:12px;
-    margin-bottom:5px;
-}
-
-.prodStepTitlePanel > i.fa-minus {
-    margin-left:5px;
-}
-
-.stepFlags {
-    font-size:0.9em;
-    margin-top:4px;
-    margin-bottom:4px;
-}
-
-.stepFlags > label {
-    margin-right:8px;
-}
-
-.stepMaterialsTitle{
-      color:#777799;
-    font-weight:bold;
-    margin-top:8px;
-}
-
 .thresholdContainer > input {
     width:100px;
     margin-left:20px;

@@ -31,9 +31,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public string ComponentId { get; set; }
 
         public string CompositionId { get; set; }
-
-        public bool LoadSteps { get; set; }
-
+        
         public int? LoadOrdersPage { get; set; }
 
         public int? LoadSaleEventsPage { get; set; }

@@ -1,14 +1,9 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Production.Model;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 namespace Elsa.Commerce.Core.Production
 {
@@ -34,17 +29,5 @@ namespace Elsa.Commerce.Core.Production
         ProductionBatchModel RemoveComponentSourceBatch(int productionBatchId, int sourceBatchId);
 
         IEnumerable<IMaterialBatch> LoadProductionBatches(long? fromDt, int pageSize);
-
-        IEnumerable<IMaterialBatch> FindBatchesWithUnresolvedProductionSteps(string query);
-
-        IEnumerable<ProductionStepViewModel> GetStepsToProceed(int? materialBatchId, int materialId, bool skipComponents = false);
-
-        ProductionStepViewModel UpdateProductionStep(ProductionStepViewModel model);
-
-        void SaveProductionStep(ProductionStepViewModel model);
-
-        bool CheckProductionStepCanBeDeleted(IMaterialBatchStatus batchStatus, int stepToDelete, IMaterialBatch batch);
-
-        void DeleteProductionStep(int productionStepId);
     }
 }

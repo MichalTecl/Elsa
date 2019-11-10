@@ -104,12 +104,10 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.hasCompositions = toExtend.hasCompositions || toExtend.NumberOfCompositions > 0;
                 toExtend.hasSaleEvents = toExtend.hasSaleEvents || toExtend.NumberOfSaleEvents > 0;
                 toExtend.hasOrders = toExtend.hasOrders || toExtend.NumberOfOrders > 0;
-                toExtend.hasSteps = toExtend.hasSteps || toExtend.NumberOfRequiredSteps > 0;
                 toExtend.expanded = toExtend.expanded || false;
 
                 toExtend.componentsExpanded = toExtend.componentsExpanded || false;
                 toExtend.composExpanded = toExtend.composExpanded || false;
-                toExtend.stepsExpanded = toExtend.stepsExpanded || false;
                 toExtend.ordersExpanded = toExtend.ordersExpanded || false;
                 toExtend.saleEventsExpanded = toExtend.saleEventsExpanded || false;
 
@@ -120,7 +118,6 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.canExpand = toExtend.hasComponents ||
                     toExtend.hasCompositions ||
                     toExtend.hasOrders ||
-                    toExtend.hasSteps ||
                     toExtend.hasSaleEvents ||
                     toExtend.stockEvents.length > 0;
             }
@@ -139,10 +136,6 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
 
     self.deleteBatch = function(batchId, callback) {
         lt.api("/materialBatches/deleteBatch").query({ "id": batchId }).get(callback);
-    };
-
-    self.deleteProductionStep = function(stepId, callback) {
-        lt.api("/production/deleteProductionStep").query({ "stepId": stepId }).get(callback);
     };
 
     self.loadSingleBatch = function (batchModel, query, callback) {

@@ -28,10 +28,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public bool IsClosed { get; set; }
         public bool IsLocked { get; set; }
         public bool IsAvailable { get; set; }
-        public bool AllStepsDone { get; set; }
         public int NumberOfComponents { get; set; }
         public int NumberOfCompositions { get; set; }
-        public int NumberOfRequiredSteps { get; set; }
         public int NumberOfOrders { get; set; }
         public string Price { get; set; }
         public string InvoiceNumber { get; set; }

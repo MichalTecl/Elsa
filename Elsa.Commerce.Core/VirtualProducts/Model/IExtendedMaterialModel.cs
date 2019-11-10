@@ -28,7 +28,6 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         string ThresholdText { get; }
 
-        IEnumerable<MaterialProductionStepModel> ProductionSteps { get; } 
         IExtendedMaterialModel CreateBatch(decimal batchAmount, IMaterialUnit preferredBatchUnit, IUnitConversionHelper conversions);
 
         IEnumerable<CompositionViewModel> Flatten();

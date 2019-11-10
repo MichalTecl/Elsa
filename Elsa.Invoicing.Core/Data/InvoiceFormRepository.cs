@@ -11,7 +11,6 @@ using Elsa.Common.SysCounters;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data.Adapters;
 using Elsa.Invoicing.Core.Internal;

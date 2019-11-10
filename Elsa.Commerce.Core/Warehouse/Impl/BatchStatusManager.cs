@@ -17,7 +17,6 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-using Elsa.Core.Entities.Commerce.Inventory.ProductionSteps;
 
 using Robowire;
 using Robowire.RobOrm.Core;
@@ -63,23 +62,15 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public IMaterialBatchStatus GetStatus(int batchId)
         {
-           return GetStatusWithoutStep(batchId, -1);
-        }
-
-        public IMaterialBatchStatus GetStatusWithoutStep(int batchId, int filteredProductionStepId)
-        {
             var batch = m_batchRepository.GetBatchById(batchId);
 
             var model = new BatchStatus(batch.Batch);
-
-            PopulateBatchInfo(batchId, model);
-            PopulateOwnSteps(batchId, model);
-            PopulateForeignSteps(batchId, model);
+            
             PopulateEvents(batchId, model);
             PopulateOrders(batchId, model);
             PopulateCompositions(batchId, model);
             
-            var mainBatchAmount = model.CalculateAvailableAmount(m_amountProcessor, filteredProductionStepId);
+            var mainBatchAmount = model.CalculateAvailableAmount(m_amountProcessor);
 
             model.CurrentAvailableAmount = mainBatchAmount;
 
@@ -87,36 +78,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             return model;
         }
-        
-        private void PopulateForeignSteps(int batchId, BatchStatus model)
-        {
-            var steps = m_cache.ReadThrough(GetForeignStepsCacheKey(batchId), s_cacheTimeout,
-                () =>
-                    {
-                        return
-                            m_database.SelectFrom<IBatchProuctionStepSourceBatch>()
-                                .Join(s => s.Unit)
-                                .Where(s => s.SourceBatchId == batchId)
-                                .Execute();
-                    });
 
-            model.UsedInSteps.AddRange(steps);
-        }
-        
-        private void PopulateOwnSteps(int batchId, BatchStatus model)
-        {
-            var steps = m_cache.ReadThrough(GetOwnStepsCacheKey(batchId), s_cacheTimeout,
-                () =>
-                {
-                    return
-                        m_database.SelectFrom<IBatchProductionStep>()
-                            .Where(s => s.BatchId == batchId)
-                            .Execute();
-                });
-
-            model.ResolvedSteps.AddRange(steps);
-        }
- 
         private void PopulateCompositions(int batchId, BatchStatus model)
         {
             var compositions = m_cache.ReadThrough(GetCompositionsCacheKey(batchId), s_cacheTimeout,
@@ -168,19 +130,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             model.Events.AddRange(events);
         }
         
-        private void PopulateBatchInfo(int batchId, BatchStatus model)
-        {
-            var batch = m_batchRepository.GetBatchById(batchId);
-            if (batch == null)
-            {
-                throw new InvalidOperationException("Invalid batch reference");
-            }
-
-            var materialSteps = m_materialRepository.GetMaterialProductionSteps(batch.Batch.MaterialId);
-
-            model.RequiredSteps.AddRange(materialSteps);
-        }
-        
         private BatchPrice CalculateBatchPrice(int batchId)
         {
             var batch = m_batchRepository.GetBatchById(batchId);
@@ -227,60 +176,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 priceEntry.ChildPrices.Add(componentPrice.Item2);
             }
             #endregion
-
-            #region Price of production steps
-            foreach (var step in BatchFacade.GetProductionStepsProgress(batch.Batch))
-            {
-                string warn = null;
-
-                if (m_amountProcessor.GreaterThan(step.RequiredAmount, step.TotalProducedAmount))
-                {
-                    warn = " POZOR - nejsou dokončeny všechny výrobní kroky, výpočet ceny není kompletní";
-                }
-
-                if (step.RequiredStep.PricePerUnit == null)
-                {
-                    warn = $" POZOR - krok {step.RequiredStep.Name}{warn}";
-                }
-
-                var stepPrice = (step.RequiredStep.PricePerUnit ?? 0) * step.TotalProducedAmount.Value;
-                result.AddComponent(warn != null,
-                    null,
-                    $"Cena práce na {step.TotalProducedAmount} {step.RequiredStep.Name} => {stepPrice.Display("CZK")}{warn}",
-                    stepPrice);
-
-
-                var amountsOfBatchesUsedInStep = new Dictionary<int, Amount>();
-                foreach (var performedStep in step.PerformedSteps)
-                {
-                    foreach (var stepSourceBatch in performedStep.SourceBatches)
-                    {
-                        amountsOfBatchesUsedInStep.TryGetValue(stepSourceBatch.SourceBatchId, out var sum);
-
-                        var added = new Amount(stepSourceBatch.UsedAmount, stepSourceBatch.Unit ?? m_unitRepository.GetUnit(stepSourceBatch.UnitId));
-                        if (sum != null)
-                        {
-                            added = m_amountProcessor.Add(added, sum);
-                        }
-
-                        amountsOfBatchesUsedInStep[stepSourceBatch.SourceBatchId] = added;
-                    }
-                }
-
-                foreach (var stepSourceBatchIdAndAmount in amountsOfBatchesUsedInStep)
-                {
-                    var price = BatchFacade.GetPriceOfAmount(stepSourceBatchIdAndAmount.Key, stepSourceBatchIdAndAmount.Value);
-
-                    var entry = result.AddComponent(false,
-                        stepSourceBatchIdAndAmount.Key,
-                        $"Pro {step.RequiredStep.Name} použito {stepSourceBatchIdAndAmount} {price.Item2.Batch.Material.Name} ze šarže {price.Item2.Batch.BatchNumber} => {price.Item1.Display("CZK")}",
-                        price.Item1);
-
-                    entry.ChildPrices.Add(price.Item2);
-                }
-            }
-            #endregion
-
+            
             #region Fixed costs
             var inventory = m_materialRepository.GetMaterialInventories()
                 .FirstOrDefault(i => i.Id == batch.Batch.Material.InventoryId).Ensure();
@@ -341,59 +237,19 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             return result;
         }
-
-        #region Invalidations
-        public void OnBatchChanged(int batchId)
-        {
-        }
-
-        public void NotifyProductionStepChanged(int batchId)
-        {
-        }
-
-        public void NotifyBatchUsageInStep(int batchId)
-        {
-        }
-
-        public void NotifyBatchEvent(int batchId)
-        {
-        }
-
-        public void NotifyComposition(int batchId)
-        {
-        }
-
-        public void NotifyBatchOrderUsage(int batchId)
-        {
-        }
-
-        #endregion
-
+        
         #region Cache Keys
         
         private static string GetOrdersCacheKey(int batchId)
         {
             return $"btst_orders_{batchId}";
         }
-
-        private static string GetBatchCacheKey(int batchId)
-        {
-            return $"btst_calculation_{batchId}";
-        }
-
-        private static string GetForeignStepsCacheKey(int batchId)
-        {
-            return $"btst_frnsts_{batchId}";
-        }
+        
         private static string GetEventsCacheKey(int batchId)
         {
             return $"btst_evts_{batchId}";
         }
-        private static string GetOwnStepsCacheKey(int batchId)
-        {
-            return $"btst_ownsts_{batchId}";
-        }
-
+        
         private string GetCompositionsCacheKey(int batchId)
         {
             return $"btst_cmpsts_{batchId}";
@@ -410,84 +266,48 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 this.m_batch = batch;
             }
-
-            public List<IMaterialProductionStep> RequiredSteps { get; } = new List<IMaterialProductionStep>();
-
-            public List<IBatchProductionStep> ResolvedSteps { get; } = new List<IBatchProductionStep>();
             
             public List<IMaterialStockEvent> Events { get; } = new List<IMaterialStockEvent>();
             
             public List<IOrderItemMaterialBatch> UsedInOrderItems { get; } = new List<IOrderItemMaterialBatch>();
             
             public List<IMaterialBatchComposition> UsedInCompositions { get; } = new List<IMaterialBatchComposition>();
-
-            public List<IBatchProuctionStepSourceBatch> UsedInSteps { get; } = new List<IBatchProuctionStepSourceBatch>();
-
+            
             public Amount CurrentAvailableAmount { get; set; }
             
             public BatchPrice BatchPrice { get; set; }
             
-            public Amount CalculateAvailableAmount(AmountProcessor amountProcessor, int filteredStepId)
+            public Amount CalculateAvailableAmount(AmountProcessor amountProcessor)
             {
-                var steps = new List<Func<Amount, Amount>>();
+                var calculators = new List<Func<Amount, Amount>>();
 
-                steps.Add(a => m_batch.IsAvailable && (m_batch.CloseDt == null) ? new Amount(m_batch.Volume, m_batch.Unit) : null);
-
-                // Resolved production steps
-                steps.Add(
-                    mainBatchAmount =>
-                    {
-                        foreach (var requiredStep in RequiredSteps.Ordered().Reverse())
-                        {
-                            var resolvedSteps = ResolvedSteps.Where(s => (s.Id != filteredStepId) && (s.StepId == requiredStep.Id)).Distinct().ToList();
-                            if (resolvedSteps.Count == 0)
-                            {
-                                return new Amount(0, mainBatchAmount.Unit);
-                            }
-
-                            var resolvedStepsSum =
-                            amountProcessor.Sum(
-                                resolvedSteps.Select(s => new Amount(s.ProducedAmount, m_batch.Unit)));
-                            
-                            mainBatchAmount = amountProcessor.Min(mainBatchAmount, resolvedStepsSum);
-                        }
-
-                        return mainBatchAmount;
-                    });
-
+                calculators.Add(a => m_batch.IsAvailable && (m_batch.CloseDt == null) ? new Amount(m_batch.Volume, m_batch.Unit) : null);
+                
                 //Events
-                steps.Add(mainBatchAmount =>
+                calculators.Add(mainBatchAmount =>
                 {
                     var eventsSum = amountProcessor.Sum(Events.Select(e => new Amount(e.Type.IsSubtracting ? -1m * e.Delta : e.Delta, e.Unit)));
                     return amountProcessor.Add(mainBatchAmount, eventsSum);
                 });
 
                 //Orders
-                steps.Add(mainBatchAmount =>
+                calculators.Add(mainBatchAmount =>
                 {
                     var eventsSum = amountProcessor.Sum(UsedInOrderItems.Select(o => new Amount(o.Quantity, m_batch.Unit)));
                     return amountProcessor.Subtract(mainBatchAmount, eventsSum);
                 });
 
                 //Compositions
-                steps.Add(mainBatchAmount =>
+                calculators.Add(mainBatchAmount =>
                 {
                     var compoSum = amountProcessor.Sum(UsedInCompositions.Select(c => new Amount(c.Volume, c.Unit)));
                     return amountProcessor.Subtract(mainBatchAmount, compoSum);
                 });
-
-                //Used in step of another batch
-                steps.Add(
-                    mainBatchAmount =>
-                    {
-                        var stpSum = amountProcessor.Sum(UsedInSteps.Select(s => new Amount(s.UsedAmount, s.Unit)));
-                        return amountProcessor.Subtract(mainBatchAmount, stpSum);
-                    });
-
+                
                 Amount amount = null;
-                foreach (var step in steps)
+                foreach (var calculator in calculators)
                 {
-                    amount = step(amount);
+                    amount = calculator(amount);
 
                     if (amount == null)
                     {

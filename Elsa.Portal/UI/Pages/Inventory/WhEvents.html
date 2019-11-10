@@ -49,13 +49,8 @@
         tab.addTab("Šarže", "/UI/Controls/Inventory/BatchesOverview/BatchSearchUI.html", null, null, "batchSearch");
         tab.addTab("Naskladnění", "/UI/Controls/Inventory/WarehouseControls/WhActions/BottomMaterialBatchesEdit.html", null, null, "batchPurchase");
         tab.addTab("Výroba", "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionBatchesUI.html", null, null, "batchProduction");
-        tab.addTab("Výrobní kroky", "/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionSteps.html", null, null, "prodSteps");
         tab.addTab("Odpisy","/UI/Controls/Inventory/WarehouseControls/WhActions/StockEventsEditor.html", null, null, "discards");
         tab.addTab("Prodejní akce", "/UI/Controls/Inventory/SaleEvents.html", null, null, "directSales");
-
-        app.urlBus.watch("fillstep", function() {
-            tab.selectTab("prodSteps");
-        });
 
         app.urlBus.watch("findBatches", function() {
             tab.selectTab("batchSearch");

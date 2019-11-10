@@ -15,9 +15,6 @@
     <div class="cell1"></div>
 </div>
 <div lt-name="theList">
-<!--{"BatchId":101,"InventoryName":"Výrobky","BatchNumber":"1952001","MaterialName":"Krém Antipupínek 30ml","MaterialId":33,"BatchVolume":"100 ks",
-"AvailableAmount":"0 ks","CreateDt":"08.01.19 20:04","IsClosed":false,"IsLocked":false,"IsAvailable":false,"AllStepsDone":false,"NumberOfComponents":0,
-"NumberOfCompositions":0,"NumberOfRequiredSteps":1,"NumberOfOrders":0}-->
 
 <div class="lt-template bovRow" lt-name="batchReviewItemTemplate" data-bind="class.expanded:expanded">
 
@@ -420,21 +417,7 @@
                 self.refreshBatchView(1);
             });
         };
-
-        self.deleteProductionStep = function(stepModel) {
-            if (!confirm("Smazat výrobní krok?")) {
-                return;
-            }
-
-            app.batchesOverview.vm.deleteProductionStep(stepModel.StepId, function () {
-                self.refreshBatchView(1);
-            });
-        };
-
-        self.resolveStep = function(stepModel) {
-            app.urlBus.set("fillstep", { "batchId": stepModel.BatchId, "stepId": stepModel.MaterialStepId });
-        };
-
+        
         self.expandStockEvents = function (model) {
 
             if (model.items.length === 0) {

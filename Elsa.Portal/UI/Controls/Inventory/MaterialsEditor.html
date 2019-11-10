@@ -26,37 +26,7 @@
                                 <i lt-name="lblNominalRight"></i>
                             </div>
                             <div class="materialEditor" lt-name="materialEditPlaceholder"></div>
-                            <div class="productionStepsSection">
-                                <div class="stepsLabel">Kroky výroby</div>
-                                <div lt-name="stepsList" class="stepsList">
-                                    <div lt-name="stepItemTemplate" class="stepItemTemplate lt-template">
-                                        <div class="stackLeft prodStepTitlePanel">
-                                            <input lt-name="tbStepName" event-bind="change:onProdStepNameChanged(VM, this.value)" class="tbStepName" data-bind="value:StepName" />
-                                            <i class="fas fa-minus faButton" event-bind="click:onProductionStepRemoveClick(VM)"></i>
-                                        </div>
-                                        <div class="stepPrice">
-                                            <div class="stepMaterialsTitle">Cena práce na jednotku</div>
-                                            <div class="stackLeft">
-                                                <input type="number" min="0" step="0.01" lt-name="tbStepUnitPrice" data-bind="value:PricePerUnit" event-bind="change:onProdStepPriceChanged(VM, this.value)" />
-                                                <span>CZK</span>
-                                            </div>
-                                        </div>
-                                        <div class="stackLeft stepFlags">
-                                            <input type="checkbox" lt-name="cbPrice" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresPrice"/><label>Cena</label>
-                                            <input type="checkbox" lt-name="cbTime" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresSpentTime" /><label>Čas</label>
-                                            <input type="checkbox" lt-name="cbWorker" event-bind="change:onProdStepFlagChanged(VM, $cbPrice.checked, $cbTime.checked, $cbWorker.checked)" data-bind="checked:RequiresWorkerReference" /><label>Pracovník</label>
-                                        </div>
-                                        <div class="workStepMaterialSection">
-                                            <div class="stepMaterialsTitle">Materiál použitý v kroku</div>
-                                            <div lt-name="stepMaterialList" class="stepMaterialList">
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <i class="fas fa-plus faButton addStepButton" event-bind="click:addProductionStep(VM)"></i>
-                            </div>
+                            
                             <div class="materialEditFlags">
                                 <div class="materialFlagEdit stackLeft">
                                     <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked)" />
@@ -108,12 +78,8 @@
 
 <script>
     lt.element("materialsEditorPanel").withModel("app.virtualProductsEditor.vm").attach(function (materialsList, materialItemTemplate) {
-
-        var productionStepController = function(stepMaterialList) {
-            app.ui.MaterialList.renderTo(stepMaterialList);
-        };
-
-        var materialItemController = function (materialEditPlaceholder, tbNominalAmount, lblNominalLeft, lblNominalRight, stepsList, stepItemTemplate) {
+        
+        var materialItemController = function (materialEditPlaceholder, tbNominalAmount, lblNominalLeft, lblNominalRight) {
             app.ui.MaterialList.renderTo(materialEditPlaceholder);
 
             this.bind(function(currentMaterialInventory) {
@@ -136,14 +102,6 @@
                 })
                 .currentMaterialInventoryRelativeToGlobal("app.virtualProductsEditor.vm")
                 .currentMaterialInventoryCanBeNull();
-
-            this.bind(function(ProductionSteps) {
-                lt.generate(stepsList,
-                    stepItemTemplate,
-                    ProductionSteps,
-                    function(s) { return s.Id; },
-                    productionStepController);
-            });
         };
 
         this.bind(function (selectedMaterials) {
@@ -193,24 +151,7 @@
             model.RequiresSupplierReference = supplier;
             lt.notify(this);
         };
-
-        this.onProdStepFlagChanged = function(model, price, time, worker) {
-            model.RequiresPrice = price;
-            model.RequiresSpentTime = time;
-            model.RequiresWorkerReference = worker;
-            lt.notify(this);
-        };
-
-        this.onProdStepNameChanged = function(model, name) {
-            model.StepName = name;
-            lt.notify(this);
-        };
-
-        this.onProdStepPriceChanged = function(model, price) {
-            model.PricePerUnit = parseFloat(price);
-            lt.notify(this);
-        };
-
+        
         this.deleteMaterial = function(model) {
             var cfm = confirm("Opravdu vymazat '" + model.Name + "'?");
             if (!cfm) {
@@ -219,19 +160,7 @@
 
             app.virtualProductsEditor.vm.deleteMaterial(model.Id);
         };
-
-        this.addProductionStep = function (model) {
-
-            var stepModel = { Components: [], RequiresPrice: true, RequiresSpentTime: true, RequiresWorkerReference: true, materials: [], Id: parseInt("-" + ((new Date().getTime()).toString().substr(7))) };
-            model.ProductionSteps.push(stepModel);
-            lt.notify();
-        };
-
-        this.onProductionStepRemoveClick = function(model) {
-            console.log(model);
-            app.virtualProductsEditor.vm.deleteProductionStep(model);
-        };
-
+        
         this.onThresholdChanged = function(model, hasThreshold, thresholdText) {
 
             model.HasThreshold = hasThreshold;

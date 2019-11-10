@@ -18,10 +18,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool requiresSupplierReference,
             IEnumerable<string> components,
             string thresholdText);
-
-        IExtendedMaterialModel ProcessProductionStepsEditRequest(
-            IExtendedMaterialModel owner,
-            IEnumerable<ProductionStepRequestModel> request);
         
         MaterialSetupInfo GetMaterialInfo(string materialName);
 
