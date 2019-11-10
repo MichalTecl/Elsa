@@ -26,6 +26,16 @@ namespace Elsa.Commerce.Core.Units
 
         public Amount Add(Amount a, Amount b)
         {
+            if (a == null)
+            {
+                return b;
+            }
+
+            if (b == null)
+            {
+                return a;
+            }
+
             return Calculate(a, b, (x, y) => x + y);
         }
 

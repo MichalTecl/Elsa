@@ -102,6 +102,7 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
 
                 toExtend.hasComponents = toExtend.hasComponents || toExtend.NumberOfComponents > 0;
                 toExtend.hasCompositions = toExtend.hasCompositions || toExtend.NumberOfCompositions > 0;
+                toExtend.hasSaleEvents = toExtend.hasSaleEvents || toExtend.NumberOfSaleEvents > 0;
                 toExtend.hasOrders = toExtend.hasOrders || toExtend.NumberOfOrders > 0;
                 toExtend.hasSteps = toExtend.hasSteps || toExtend.NumberOfRequiredSteps > 0;
                 toExtend.expanded = toExtend.expanded || false;
@@ -110,6 +111,7 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.composExpanded = toExtend.composExpanded || false;
                 toExtend.stepsExpanded = toExtend.stepsExpanded || false;
                 toExtend.ordersExpanded = toExtend.ordersExpanded || false;
+                toExtend.saleEventsExpanded = toExtend.saleEventsExpanded || false;
 
                 toExtend.showCustomField1 = toExtend.showCustomField1 || session.showCustomField1 || false;
                 toExtend.showCustomField2 = toExtend.showCustomField2 || session.showCustomField2 || false;
@@ -119,6 +121,7 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                     toExtend.hasCompositions ||
                     toExtend.hasOrders ||
                     toExtend.hasSteps ||
+                    toExtend.hasSaleEvents ||
                     toExtend.stockEvents.length > 0;
             }
         }

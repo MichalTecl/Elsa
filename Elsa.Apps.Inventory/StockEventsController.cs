@@ -4,6 +4,7 @@ using System.Linq;
 using Elsa.Apps.Inventory.Model;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.StockEvents;
+using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
@@ -20,18 +21,18 @@ namespace Elsa.Apps.Inventory
     {
         private readonly IStockEventRepository m_eventRepository;
         private readonly IMaterialBatchFacade m_batchFacade;
-        private readonly IMaterialRepository m_materialRepository;
         private readonly IMaterialBatchRepository m_batchRepository;
+        private readonly AmountProcessor m_amountProcessor;
 
         public StockEventsController(IWebSession webSession, ILog log, IStockEventRepository eventRepository,
-            IMaterialBatchFacade batchFacade, IMaterialRepository materialRepository,
-            IMaterialBatchRepository batchRepository)
+            IMaterialBatchFacade batchFacade,
+            IMaterialBatchRepository batchRepository, AmountProcessor amountProcessor)
             : base(webSession, log)
         {
             m_eventRepository = eventRepository;
             m_batchFacade = batchFacade;
-            m_materialRepository = materialRepository;
             m_batchRepository = batchRepository;
+            m_amountProcessor = amountProcessor;
         }
 
         public IEnumerable<IStockEventType> GetEventTypes()
@@ -59,15 +60,32 @@ namespace Elsa.Apps.Inventory
             var etype =
                 m_eventRepository.GetAllEventTypes().FirstOrDefault(etp => etp.TabTitle == eventTypeName).Ensure();
 
-            return
+            var rawEvents = 
                 m_eventRepository.GetBatchEvents(BatchKey.Parse(batchId))
-                    .Where(e => e.TypeId == etype.Id /* && e.BatchId == batchId*/)
+                    .Where(e => e.TypeId == etype.Id)
                     .Select(e => new StockEventViewModel(e));
+
+
+            var result = new List<StockEventViewModel>();
+
+            foreach (var rawEvent in rawEvents)
+            {
+                var sameGrpEvt = result.FirstOrDefault(e => e.GroupingKey.Equals(rawEvent.GroupingKey));
+                if (sameGrpEvt != null)
+                {
+                    sameGrpEvt.Join(rawEvent, m_amountProcessor);
+                    continue;
+                }
+
+                result.Add(rawEvent);
+            }
+
+            return result;
         }
 
         public void DeleteStockEvent(int eventId)
         {
-            m_eventRepository.DeleteStockEvent(eventId);
+            m_eventRepository.DeleteStockEvent(eventId, true);
         }
     }
 }

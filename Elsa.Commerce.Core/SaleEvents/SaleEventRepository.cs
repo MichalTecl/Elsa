@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Elsa.Commerce.Core.Adapters;
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
@@ -124,6 +125,21 @@ namespace Elsa.Commerce.Core.SaleEvents
             return evt;
         }
 
+        public IEnumerable<ISaleEventAllocation> GetAllocationsByBatch(BatchKey key)
+        {
+            var batchNumber = key.GetBatchNumber(m_batchFacade);
+            var materialId = key.GetMaterialId(m_batchFacade);
+
+            var allocs = m_database.SelectFrom<ISaleEventAllocation>()
+                .Join(a => a.Batch)
+                .Where(b =>    b.Batch.MaterialId == materialId 
+                            && b.Batch.BatchNumber == batchNumber 
+                            && b.Batch.ProjectId == m_session.Project.Id)
+                .Execute();
+
+            return allocs.Select(a => new SaleEventAllocationAdapter(m_serviceLocator, a));
+        }
+
         private ISaleEvent CreateEvent(Action<ISaleEvent> entity)
         {
             var e = m_database.New<ISaleEvent>();
@@ -168,8 +184,8 @@ namespace Elsa.Commerce.Core.SaleEvents
                     m_database.Save(m_database.New<ISaleEventAllocation>(a =>
                     {
                         a.AllocationDt = DateTime.Now;
-                        a.AllocatedQuantity = dto.AllocatedQuantity.Value;
-                        a.UnitId = dto.AllocatedQuantity.Unit.Id;
+                        a.AllocatedQuantity = batch.Item2.Value;
+                        a.UnitId = batch.Item2.Unit.Id;
                         a.BatchId = batch.Item1.Value;
                         a.AllocationUserId = m_session.User.Id;
                         a.SaleEventId = eventId;

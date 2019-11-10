@@ -128,7 +128,7 @@ namespace Elsa.App.SaleEvents
                 {
                     returnedQuantity = new Amount(item.ReturnQuantity.Value, unit);
                 }
-
+                
                 var dto = new SaleEventAllocationDto(material.Id, item.BatchNumber, new Amount(item.AllocatedQuantity, unit),  returnedQuantity);
                 dtos.Add(dto);
             }

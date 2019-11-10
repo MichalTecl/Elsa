@@ -18,7 +18,7 @@ namespace Elsa.Commerce.Core.StockEvents
 
         IEnumerable<IMaterialStockEvent> GetEvents(DateTime @from, DateTime to, int inventoryId);
 
-        void DeleteStockEvent(int eventId);
+        void DeleteStockEvent(int eventId, bool allEventsInGroup);
 
         void MoveOrderToEvent(long returnedOrderId, int eventTypeId, string reason);
 

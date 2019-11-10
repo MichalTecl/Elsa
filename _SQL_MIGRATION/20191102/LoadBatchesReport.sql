@@ -86,76 +86,89 @@ BEGIN
 		FETCH NEXT @pageSize ROWS ONLY
 		) x;
 
-    SELECT   b.CalculatedKey  BatchId, 
-			 i.Name          InventoryName,
-	         b.BatchNumber   BatchNumber, 
-			 m.Name          MaterialName, 
-			 m.Id            MaterialId,  
-			 SUM(convertedVolume.Value) BatchVolume,
-			 u.Symbol        Unit,
-			 MAX(b.Created)       BatchCreateDt,
-			 MAX(b.CloseDt)       BatchCloseDt,
-			 MAX(b.LockDt)        BatchLockDt,
-			 CAST(MIN(CAST(b.IsAvailable AS INT)) AS BIT)   BatchAvailable,
-			 MAX(b.Produced)      BatchProductionDt,
-			 CAST(MIN(CAST(b.AllStepsDone AS INT)) AS BIT)  BatchStepsDone,			 
-			 SUM(ISNULL(components.cnt, 0) + ISNULL(stepComponents.cnt, 0))    NumberOfComponents,
-			 SUM(ISNULL(compositions.cnt, 0) + ISNULL(stepCompositions.cnt, 0))  NumberOfCompositions,
-			 SUM(ISNULL(materialSteps.cnt, 0)) NumberOfRequiredSteps,
-			 SUM(ISNULL(orders.cnt, 0))           NumberOfOrders,
-			 SUM(b.Price)         BatchPrice,
-			 STRING_AGG(b.InvoiceNr, ';')     InvoiceNumber,
-			 SUM(ISNULL(stockEvents.cnt, 0)) NumberOfStockEvents
-        FROM MaterialBatch     b
-  INNER JOIN @keys             k ON (k.BatchNumber = b.BatchNumber AND k.MaterialId = b.MaterialId) 
-  INNER JOIN Material          m ON (b.MaterialId = m.Id)
-  INNER JOIN MaterialInventory i ON (m.InventoryId = i.Id)
-  
-  CROSS APPLY ConvertToSmallestUnit(b.Volume, b.UnitId) convertedVolume
-    
-  INNER JOIN MaterialUnit      u ON (convertedVolume.TargetUnitId = u.Id)
-  
-  
-  LEFT JOIN  (SELECT mbc.CompositionId, COUNT(mbc.Id) as cnt
-                FROM MaterialBatchComposition mbc
-			GROUP BY mbc.CompositionId) components ON (components.CompositionId = b.Id)
-			  	  
-  LEFT JOIN (SELECT bps.BatchId, COUNT(DISTINCT ssb.SourceBatchId) as cnt
-			   FROM       BatchProductionStep bps
-         INNER JOIN BatchProuctionStepSourceBatch ssb ON (ssb.StepId = bps.Id)
-           GROUP BY bps.BatchId) stepComponents ON (stepComponents.BatchId = b.Id)
-		   
-  LEFT JOIN  (SELECT mbc.ComponentId, COUNT(mbc.Id) as cnt
-                FROM MaterialBatchComposition mbc
-			GROUP BY mbc.ComponentId) compositions ON (compositions.ComponentId = b.Id)  
-  
-  LEFT JOIN  (select SourceBatchId, COUNT(DISTINCT BatchId) CNT
-			    from BatchProuctionStepSourceBatch ssb
-		  inner join BatchProductionStep           bps ON (ssb.StepId = bps.Id)
-			GROUP BY SourceBatchId) stepCompositions ON (stepCompositions.SourceBatchId = b.Id)
-
-  LEFT JOIN  (SELECT COALESCE(oimb.MaterialBatchId, coimb.MaterialBatchId, -1) BatchId, COUNT(DISTINCT oi.PurchaseOrderId) as cnt
-                FROM OrderItem oi
-				LEFT JOIN OrderItemMaterialBatch oimb ON (oimb.OrderItemId = oi.Id)
-				LEFT JOIN OrderItem ci ON (oi.Id = ci.KitParentId)			   
-				LEFT JOIN OrderItemMaterialBatch coimb ON (coimb.OrderItemId = ci.Id)
-			GROUP BY COALESCE(oimb.MaterialBatchId, coimb.MaterialBatchId, -1)) orders ON (orders.BatchId = b.Id)
-
-  LEFT JOIN (SELECT ms.MaterialId, COUNT(ms.Id) as cnt
-               FROM MaterialProductionStep ms
-			 GROUP BY ms.MaterialId) materialSteps ON (materialSteps.MaterialId = b.MaterialId)
-  
-  LEFT JOIN (SELECT se.BatchId, COUNT(se.Id) as cnt
-               FROM MaterialStockEvent se
-		   GROUP BY se.BatchId)      stockEvents ON (stockEvents.BatchId = b.Id) 
-  
+	SELECT y.BatchId,
+		   y.InventoryName,
+		   y.BatchNumber,
+		   y.MaterialName,
+		   y.MaterialId,
+		   y.BatchVolume,
+		   y.Unit,
+		   y.BatchCreateDt,
+		   y.BatchCloseDt,
+		   y.BatchLockDt,
+		   y.BatchAvailable,
+		   y.BatchProductionDt,
+		   y.BatchStepsDone,
+		   ISNULL(numberOfComponents.cnt, 0),
+		   ISNULL(numberOfCompositions.cnt, 0),
+		   0 as numberOfMaterialSteps, 		   		   
+		   ISNULL(numberOfOrders.cnt, 0),
+		   y.BatchPrice,
+		   y.InvoiceNumber,
+		   ISNULL(numberOfStockEvents.cnt, 0),
+		   ISNULL(numberOfSaleEvents.cnt, 0)
+     FROM (
+		SELECT   b.CalculatedKey  BatchId, 
+				 i.Name          InventoryName,
+				 b.BatchNumber   BatchNumber, 
+				 m.Name          MaterialName, 
+				 m.Id            MaterialId,  
+				 SUM(convertedVolume.Value) BatchVolume,
+				 u.Symbol        Unit,
+				 MAX(b.Created)       BatchCreateDt,
+				 MAX(b.CloseDt)       BatchCloseDt,
+				 MAX(b.LockDt)        BatchLockDt,
+				 CAST(MIN(CAST(b.IsAvailable AS INT)) AS BIT)   BatchAvailable,
+				 MAX(b.Produced)      BatchProductionDt,
+				 CAST(MIN(CAST(b.AllStepsDone AS INT)) AS BIT)  BatchStepsDone,			 				
+				 SUM(b.Price)         BatchPrice,
+				 STRING_AGG(b.InvoiceNr, ';')     InvoiceNumber				 
+			FROM MaterialBatch     b
+	  INNER JOIN @keys             k ON (k.BatchNumber = b.BatchNumber AND k.MaterialId = b.MaterialId) 
+	  INNER JOIN Material          m ON (b.MaterialId = m.Id)
+	  INNER JOIN MaterialInventory i ON (m.InventoryId = i.Id)  
+	  CROSS APPLY ConvertToSmallestUnit(b.Volume, b.UnitId) convertedVolume    
+	  INNER JOIN MaterialUnit      u ON (convertedVolume.TargetUnitId = u.Id)
+   
   GROUP BY b.CalculatedKey, 
 	       i.Name,
 		   b.BatchNumber,
 		   m.Name,
 		   m.Id,
-		   u.Symbol
-  ORDER BY MAX(b.Created) DESC;
+		   u.Symbol) as y
+
+  LEFT JOIN (SELECT b.CalculatedKey, COUNT(DISTINCT component.CalculatedKey) as cnt
+               FROM MaterialBatch b
+			   JOIN MaterialBatchComposition mbc ON mbc.CompositionId = b.Id
+			   JOIN MaterialBatch component ON mbc.ComponentId = component.Id
+			 GROUP BY b.CalculatedKey) as numberOfComponents ON (y.BatchId = numberOfComponents.CalculatedKey)	
+
+  LEFT JOIN (SELECT b.CalculatedKey, COUNT(DISTINCT composition.CalculatedKey) as cnt
+               FROM MaterialBatch b
+			   JOIN MaterialBatchComposition mbc ON mbc.ComponentId = b.Id
+			   JOIN MaterialBatch composition ON mbc.CompositionId = composition.Id
+			 GROUP BY b.CalculatedKey) as numberOfCompositions ON (y.BatchId = numberOfCompositions.CalculatedKey)
+	
+  LEFT JOIN (SELECT mb.CalculatedKey, COUNT(DISTINCT po.Id) as cnt
+               FROM       PurchaseOrder po
+			   INNER JOIN OrderItem     oi ON (oi.PurchaseOrderId = po.Id)
+			   LEFT JOIN  OrderItem     ki ON (ki.KitParentId = oi.Id)
+			   INNER JOIN OrderItemMaterialBatch oimb ON (oimb.OrderItemId = ISNULL(ki.Id, oi.Id))
+			   INNER JOIN MaterialBatch mb ON (oimb.MaterialBatchId = mb.Id)
+			 GROUP BY mb.CalculatedKey) as numberOfOrders ON (numberOfOrders.CalculatedKey = y.BatchId)
+
+   LEFT JOIN (SELECT mb.CalculatedKey, COUNT(DISTINCT se.EventGroupingKey) as cnt 
+                FROM MaterialStockEvent se
+				JOIN MaterialBatch mb ON se.BatchId = mb.Id
+			  GROUP BY mb.CalculatedKey) as numberOfStockEvents ON (numberOfStockEvents.CalculatedKey = y.BatchId)
+
+   LEFT JOIN (SELECT mb.CalculatedKey, COUNT(DISTINCT se.Id) as cnt
+                FROM SaleEvent se
+				JOIN SaleEventAllocation sea ON sea.SaleEventId = se.Id
+				JOIN MaterialBatch mb ON sea.BatchId = mb.Id
+			  GROUP BY mb.CalculatedKey) as numberOfSaleEvents ON (numberOfSaleEvents.CalculatedKey = y.BatchId)
+
+  ORDER BY y.BatchProductionDt DESC;
 
 END
 

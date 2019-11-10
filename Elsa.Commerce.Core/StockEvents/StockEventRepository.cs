@@ -167,20 +167,41 @@ namespace Elsa.Commerce.Core.StockEvents
                 .Select(b => new MaterialStockEventAdapter(m_serviceLocator, b));
         }
 
-        public void DeleteStockEvent(int eventId)
+        public void DeleteStockEvent(int eventId, bool allEventsInGroup)
         {
-            var evt =
-                m_database.SelectFrom<IMaterialStockEvent>()
-                    .Where(e => e.Id == eventId)
-                    .Where(e => e.ProjectId == m_session.Project.Id)
-                    .Take(1)
-                    .Execute()
-                    .FirstOrDefault()
-                    .Ensure();
+            using (var tx = m_database.OpenTransaction())
+            {
+                var evt =
+                    m_database.SelectFrom<IMaterialStockEvent>()
+                        .Where(e => e.Id == eventId)
+                        .Where(e => e.ProjectId == m_session.Project.Id)
+                        .Take(1)
+                        .Execute()
+                        .FirstOrDefault()
+                        .Ensure();
 
-            m_batchFacade.Value.ReleaseBatchAmountCache(m_batchRepository.GetBatchById(evt.BatchId).Ensure().Batch);
+                var events = new List<IMaterialStockEvent>();
 
-            m_database.Delete(evt);
+                if (allEventsInGroup)
+                {
+                    events.AddRange(m_database.SelectFrom<IMaterialStockEvent>()
+                        .Where(e => e.ProjectId == m_session.Project.Id)
+                        .Where(e => e.EventGroupingKey == evt.EventGroupingKey).Execute());
+                }
+                else
+                {
+                    events.Add(evt);
+                }
+
+                foreach (var e in events)
+                {
+                    m_batchFacade.Value.ReleaseBatchAmountCache(
+                        m_batchRepository.GetBatchById(e.BatchId).Ensure().Batch);
+                    m_database.Delete(e);
+                }
+
+                tx.Commit();
+            }
         }
 
         public void MoveOrderToEvent(long returnedOrderId, int eventTypeId, string reason)

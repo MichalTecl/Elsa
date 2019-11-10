@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Net.Http;
-
+using System.Runtime.InteropServices;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchReporting;
 using Elsa.Commerce.Core.Production;
+using Elsa.Commerce.Core.SaleEvents;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -37,6 +38,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private readonly IPurchaseOrderRepository m_orderRepository;
         private readonly IUserRepository m_userRepository;
         private readonly IStockEventRepository m_stockEventRepository;
+        private readonly ISaleEventRepository m_saleEventRepository;
 
         public BatchReportingFacade(ISession session,
             IDatabase database,
@@ -50,7 +52,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             IOrderStatusRepository orderStatusRepository,
             IPurchaseOrderRepository orderRepository,
             IUserRepository userRepository,
-            IStockEventRepository stockEventRepository)
+            IStockEventRepository stockEventRepository, 
+            ISaleEventRepository saleEventRepository)
         {
             m_session = session;
             m_database = database;
@@ -65,6 +68,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             m_orderRepository = orderRepository;
             m_userRepository = userRepository;
             m_stockEventRepository = stockEventRepository;
+            m_saleEventRepository = saleEventRepository;
         }
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
@@ -76,6 +80,10 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             else if (query.LoadOrdersPage != null)
             {
                 return LoadOrders(query.ToKey(), query.LoadOrdersPage.Value);
+            }
+            else if (query.LoadSaleEventsPage != null)
+            {
+                return LoadSaleEvents(query.ToKey(), query.LoadSaleEventsPage.Value);
             }
 
             var pageSize = query.HasKey ? 1 : c_pageSize;
@@ -137,7 +145,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 }
 
                 //b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
-                b.CanDelete = !(b.HasStockEvents || b.NumberOfCompositions > 0 || b.NumberOfOrders > 0);
+                b.CanDelete = !(b.HasStockEvents || b.NumberOfCompositions > 0 || b.NumberOfOrders > 0 || b.NumberOfSaleEvents > 0);
 
                 if (b.HasStockEvents)
                 {
@@ -174,7 +182,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             
             return result;
         }
-
+        
         private void PopulateStockEventSuggestions(BatchReportEntry batchReportEntry)
         {
             if (batchReportEntry.Available?.IsNotPositive ?? true)
@@ -274,7 +282,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                         NumberOfRequiredSteps = sourceRecord?.NumberOfRequiredSteps ?? 0,
                         NumberOfOrders = sourceRecord?.NumberOfOrders ?? 0,
                         Price = sourceRecord?.Price ?? string.Empty,
-                        InvoiceNumber = sourceRecord?.InvoiceNumber ?? string.Empty
+                        InvoiceNumber = sourceRecord?.InvoiceNumber ?? string.Empty,
+                        NumberOfSaleEvents = sourceRecord?.NumberOfSaleEvents ?? 0
                     };
 
                     result.Add(reportRow);
@@ -322,37 +331,68 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             return result;
         }
 
+        private BatchReportModel LoadSaleEvents(BatchKey key, int pageNumber)
+        {
+            var events = m_saleEventRepository.GetAllocationsByBatch(key).ToList();
+
+            var aggregatedAllocations = new List<SaleEventAllocationModel>(events.Count);
+
+            foreach (var evt in events)
+            {
+                if (aggregatedAllocations.Any(ag => ag.Populate(evt, m_amountProcessor)))
+                {
+                    continue;
+                }
+
+                var newRecord = new SaleEventAllocationModel();
+                newRecord.Populate(evt, m_amountProcessor);
+                aggregatedAllocations.Add(newRecord);
+            }
+
+            var entry = new BatchSaleEventsReportEntry(key);
+            entry.SaleEvents.AddRange(aggregatedAllocations.OrderByDescending(a => a.SortDt));
+
+            var result = new BatchReportModel();
+            result.Report.Add(entry);
+
+            return result;
+        }
+
         private void PopulateCompositionAmounts(BatchKey componentBatchId, List<BatchReportEntryBase> report)
         {
-            //var thisBatch = m_batchRepository.GetBatchById(componentBatchId);
-            //if (thisBatch == null)
-            //{
-            //    throw new InvalidOperationException("Invalid entity reference");
-            //}
-            
-            //var zeroAmount = new Amount(0, thisBatch.ComponentUnit);
+            foreach (var reportRow in report.OfType<BatchReportEntry>())
+            {
+                var componentBatches = m_batchRepository.GetBatches(componentBatchId).ToList();
+                if (!componentBatches.Any())
+                {
+                    continue;
+                }
 
-            //foreach (var row in report.OfType<BatchReportEntry>())
-            //{
-            //    var amount = zeroAmount.Clone();
+                Amount theAmount = null;
 
-            //    var componentBatch = m_batchRepository.GetBatchById(row.BatchId);
-            //    foreach (var component in componentBatch.Components.Where(c => c.Batch.Id == componentBatchId))
-            //    {
-            //        amount = m_amountProcessor.Add(amount,
-            //            new Amount(component.ComponentAmount, component.ComponentUnit));
-            //    }
+                foreach (var compnentBatch in componentBatches)
+                {
+                    foreach (var compositionBatch in m_batchRepository.GetBatches(reportRow.BatchKey))
+                    {
+                        foreach (var componentEntity in compositionBatch.Components)
+                        {
+                            var componentBatch = componentEntity.Component;
+                            if (componentBatch.MaterialId != componentBatchId.GetMaterialId(m_batchRepository) ||
+                                (!componentBatch.BatchNumber.Equals(componentBatchId.GetBatchNumber(m_batchRepository),
+                                    StringComparison.InvariantCultureIgnoreCase)))
+                            {
+                                continue;
+                            }
 
-            //    if (row.NumberOfRequiredSteps > 0)
-            //    {
-            //        foreach (var stp in componentBatch.Batch.PerformedSteps.SelectMany(s => s.SourceBatches).Where(s => s.SourceBatchId == componentBatchId))
-            //        {
-            //            amount = m_amountProcessor.Add(amount, m_amountProcessor.ToAmount(stp.UsedAmount, stp.UnitId));
-            //        }
-            //    }
+                            var usedAmount = new Amount(componentEntity.Volume, componentEntity.Unit);
 
-            //    row.CustomField1 = amount.ToString();
-            //}
+                            theAmount = m_amountProcessor.Add(theAmount, usedAmount);
+                        }
+                    }
+                }
+
+                reportRow.CustomField1 = theAmount?.ToString();
+            }
         }
 
         private void PopulateComponentAmounts(BatchKey compositionId, List<BatchReportEntryBase> resultReport)
@@ -508,6 +548,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             const int price = 17;
             const int invoiceNr = 18;
             const int numberOfStockEvents = 19;
+            const int numberOfSaleEvents = 20;
             #endregion
 
             var key = BatchKey.Parse(row.GetString(batchId));
@@ -530,7 +571,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 NumberOfOrders = row.GetInt32(numberOfOrders),
                 Price = row.IsDBNull(price) ? string.Empty : $"{StringUtil.FormatDecimal(row.GetDecimal(price))} CZK",
                 InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : string.Join(", ", row.GetString(invoiceNr).Split(';').Distinct()),
-                HasStockEvents = (!row.IsDBNull(numberOfStockEvents)) && (row.GetInt32(numberOfStockEvents) > 0)
+                HasStockEvents = (!row.IsDBNull(numberOfStockEvents)) && (row.GetInt32(numberOfStockEvents) > 0),
+                NumberOfSaleEvents = row.GetInt32(numberOfSaleEvents)
             };
             
             return entry;
