@@ -38,7 +38,7 @@
             rb.push(natcharmap[orichar] || orichar);
         }
 
-        return rb.join();
+        return rb.join("");
     }
  };
 

@@ -121,6 +121,9 @@
     <Compile Include="Inventory\Kits\IKitDefinition.cs" />
     <Compile Include="Inventory\Kits\IKitSelectionGroup.cs" />
     <Compile Include="Inventory\Kits\IKitSelectionGroupItem.cs" />
+    <Compile Include="Inventory\Recipes\IRecipe.cs" />
+    <Compile Include="Inventory\Recipes\IRecipeComponent.cs" />
+    <Compile Include="Inventory\Recipes\IUserFavoriteRecipe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

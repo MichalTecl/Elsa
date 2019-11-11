@@ -10,6 +10,7 @@ using Elsa.Apps.CommonData;
 using Elsa.Apps.Inventory;
 using Elsa.Apps.InvoiceForms;
 using Elsa.Apps.Invoices;
+using Elsa.Apps.ProductionService;
 using Elsa.Apps.ScheduledJobs;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration;
@@ -89,6 +90,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(InvoiceFormsGenerationRunner).Assembly);
                     s.ScanAssembly(typeof(InvoiceFilesController).Assembly);
                     s.ScanAssembly(typeof(SaleEventsController).Assembly);
+                    s.ScanAssembly(typeof(ProductionServiceController).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });

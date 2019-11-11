@@ -119,11 +119,13 @@
     <Content Include="Script\Apps\Orders\Orders.VM.js" />
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
     <Content Include="Script\Apps\Packing\OrdersPacking.VM.js" />
+    <Content Include="Script\Apps\Production\ProductionServiceVM.js" />
     <Content Include="Script\Apps\Production\ProductionVM.js" />
     <Content Include="Script\Apps\Reporting\InvoiceReporting\InvoiceReportingVm.js" />
     <Content Include="Script\Apps\SaleEvents\SaleEvents.VM.js" />
     <Content Include="Script\Common\ContextMenu.js" />
     <Content Include="Script\Common\GlobalEventHandlers.js" />
+    <Content Include="Script\Common\TextMatcher.js" />
     <Content Include="Script\Common\UrlBus.js" />
     <Content Include="Script\Common\XTable.js" />
     <Content Include="Script\Lanta\AttributeBinding.js" />
@@ -153,6 +155,8 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesStyle.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchInput.css" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\RecipesFilterUI.html" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\RecipesList.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\StockEventsEditor.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProdBatchEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesList.html" />

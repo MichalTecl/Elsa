@@ -68,7 +68,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IEnumerable<IExtendedMaterialModel> GetAllMaterials(int? inventoryId)
         {
-            var all = m_cache.ReadThrough(MaterialsCacheKey, TimeSpan.FromMinutes(1), GetAllMaterialsFromDatabase);
+            var all = m_cache.ReadThrough(MaterialsCacheKey, TimeSpan.FromMinutes(10), GetAllMaterialsFromDatabase);
 
             if (inventoryId != null)
             {

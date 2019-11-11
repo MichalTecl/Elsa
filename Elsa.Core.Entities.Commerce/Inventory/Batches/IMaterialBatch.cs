@@ -5,7 +5,7 @@ using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
-
+using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
 
@@ -43,6 +43,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         DateTime? Produced { get; set; }
         
         bool? IsHiddenForAccounting { get; set; }
+
+        int? RecipeId { get; set; }
+        IRecipe Recipe { get; }
     }
 
     public interface IMaterialBatchEditables

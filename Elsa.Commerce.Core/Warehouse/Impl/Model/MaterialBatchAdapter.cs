@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Elsa.Commerce.Core.Production.Recipes;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common.Data;
 using Elsa.Core.Entities.Commerce.Commerce;
@@ -10,6 +11,7 @@ using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
+using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 using Robowire;
 
 namespace Elsa.Commerce.Core.Warehouse.Impl.Model
@@ -46,6 +48,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl.Model
         public bool IsAvailable { get => m_adaptee.IsAvailable; set => m_adaptee.IsAvailable = value; }
         public DateTime? Produced { get => m_adaptee.Produced; set => m_adaptee.Produced = value; }
         public bool? IsHiddenForAccounting { get => m_adaptee.IsHiddenForAccounting; set => m_adaptee.IsHiddenForAccounting = value; }
+        public int? RecipeId
+        {
+            get => Adaptee.RecipeId;
+            set => Adaptee.RecipeId = value;
+        }
+
+        public IRecipe Recipe => Get<IRecipeRepository, IRecipe>("Recipe",r => RecipeId == null ? null : r.GetRecipe(RecipeId.Value));
 
         public ISupplier Supplier => Get<ISupplierRepository, ISupplier>("Supplier", r => SupplierId == null ? null : r.GetSupplier(SupplierId.Value));
 

@@ -1,0 +1,30 @@
+﻿<div id="recFilter">
+    <div >
+        <input type="text" lt-name="inpFilter" event-bind="keyup:updateSearchText(this.value)"/>
+        
+        <div class="stackLeft">
+            <div title="Jen oblíbené receptury">
+                <i class="fas fa-heart faButton" data-bind="class!.hidden:onlyFavorite" event-bind="click:toggleFavorite"></i>
+                <i class="far fa-heart faButton" data-bind="class.hidden:onlyFavorite" event-bind="click:toggleFavorite"></i>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    lt.element("recFilter").withModel("app.productionService.vm").attach(function() {
+
+        var vm = app.productionService.vm;
+
+        this.toggleFavorite = function() {
+            vm.updateFilters(!vm.onlyFavorite, vm.showDeleted, vm.searchFilter);
+        };
+
+        this.updateSearchText = function(filter) {
+            vm.updateFilters(vm.onlyFavorite, vm.showDeleted, filter);
+        };
+
+    });
+</script>

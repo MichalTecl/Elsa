@@ -1,40 +1,16 @@
-﻿<script src="/Script/Apps/Production/ProductionVM.js"></script>
-<div id="prodBatchesUi">
-    <button id="butPlus" event-bind="click:onNewBatchClick" class="addBatchBut"><i class="fas fa-plus"></i></button>
-    <div id="batchEditor" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProdBatchEdit.html"></div>
-    <div id="batchesListing" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionBatchesList.html"></div>
+﻿<script src="/Script/Apps/Production/ProductionServiceVM.js"></script>
+
+<div class="stackLeft">
+    <div id="recipesColumn">
+        <div fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/RecipesFilterUI.html"></div>
+        <div fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/RecipesList.html"></div>
+    </div>
+
+    <div id="prodBatchesUi">
+        <div id="batchesListing" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionBatchesList.html"></div>
+    </div>
 </div>
-
 <script>
-    lt.element("prodBatchesUi")
-      .withModel("app.production.vm")
-      .attach(function(batchEditor, batchesListing, butPlus) {
-
-            this.bind(function(editBatch) {
-                
-                if (!editBatch) {
-                    butPlus.style.display = 'block';
-                    batchesListing.style.display = 'block';
-                    batchEditor.style.display = 'none';
-                    document.querySelector("#mainTab > div.tabPanelHeadersContainer").style.display = 'flex';
-                    document.getElementById("userPanel").style.display = 'block';
-                    document.getElementById("backPanel").style.display = 'none';
-                } else {
-                    butPlus.style.display = 'none';
-                    batchesListing.style.display = 'none';
-                    batchEditor.style.display = 'block';
-                    document.querySelector("#mainTab > div.tabPanelHeadersContainer").style.display = 'none';
-                    document.getElementById("userPanel").style.display = 'none';
-                    document.getElementById("backPanel").style.display = 'block';
-                }
-
-            }).editBatchCanBeNull();
-
-
-            this.onNewBatchClick = function() {
-                app.production.vm.newBatch();
-            };
-
-        });
+    
 </script>
 

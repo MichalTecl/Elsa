@@ -38,8 +38,5 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         bool? RequiresSupplierReference { get; set; }
         
         IEnumerable<IMaterialThreshold> Thresholds { get; }
-
-        int? ExtendingMaterialId { get; set; }
-        IMaterial ExtendingMaterial { get; }
     }
 }

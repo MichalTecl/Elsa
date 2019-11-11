@@ -2,6 +2,7 @@
 using Elsa.Commerce.Core.CurrencyRates;
 using Elsa.Commerce.Core.Impl;
 using Elsa.Commerce.Core.Production;
+using Elsa.Commerce.Core.Production.Recipes;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.Repositories.Automation;
 using Elsa.Commerce.Core.SaleEvents;
@@ -54,6 +55,7 @@ namespace Elsa.Commerce.Core
             setup.For<IRepositoryFactory>().Use<RepositoryFactory>();
             setup.For<IFixedCostRepository>().Use<FixedCostRepository>();
             setup.For<ISaleEventRepository>().Use<SaleEventRepository>();
+            setup.For<IRecipeRepository>().Use<RecipeRepository>();
         }
     }
 }

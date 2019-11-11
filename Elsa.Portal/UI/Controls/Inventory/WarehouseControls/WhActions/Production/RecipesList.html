@@ -1,0 +1,24 @@
+﻿<div id="recipesListUi">
+    <div data-bind="itemsSource:recipes" data-key="MaterialId">
+        <div class="lt-template" data-bind="class!.hidden:Visible">
+            <div data-bind="text:MaterialName"></div>
+            <div data-bind="itemsSource:Recipes" data-key="RecipeId">
+                <div class="lt-template stackLeft" data-bind="class!.hidden:Visible">
+                    <div>
+                        <i class="fas fa-heart faButton" data-bind="class!.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
+                        <i class="far fa-heart faButton" data-bind="class.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
+                    </div>
+                    <div data-bind="text:RecipeName"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("recipesListUi").withModel("app.productionService.vm").attach(function() {
+        this.toggleFavoriteRecipe = function(recipeId) {
+            app.productionService.vm.toggleFavorite(recipeId);
+        };
+    });
+</script>
