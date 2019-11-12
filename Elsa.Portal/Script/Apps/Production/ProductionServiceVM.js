@@ -4,11 +4,34 @@ app.productionService.VM = app.productionService.VM || function() {
 
     var self = this;
 
+    this.producingRecipe = null;
+
     this.onlyFavorite = true;
     this.showDeleted = false;
     this.searchFilter = "";
 
     this.recipes = [];
+
+
+    this.uploadProducingRecipe = function() {
+
+        if (!self.producingRecipe) {
+            return;
+        }
+
+        lt.api("/productionService/ValidateProductionRequest").body(self.producingRecipe)
+            .post(function(received) {
+                self.producingRecipe = received;
+            });
+    };
+
+    self.setProducingRecipe = function(id) {
+
+        self.producingRecipe = self.producingRecipe || {};
+        self.producingRecipe.RecipeId = id;
+
+        self.uploadProducingRecipe();
+    };
     
     var updateRecipesView = function() {
 

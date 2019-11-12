@@ -41,9 +41,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\ProductionComponent.cs" />
+    <Compile Include="Models\ProductionComponentResolution.cs" />
+    <Compile Include="Models\ProductionRequest.cs" />
+    <Compile Include="Models\RequestValidationMessage.cs" />
     <Compile Include="ProductionServiceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
+    <Compile Include="Service\IProductionService.cs" />
+    <Compile Include="Service\Process\IProductionRequestProcessingStep.cs" />
+    <Compile Include="Service\Process\ProductionRequestContext.cs" />
+    <Compile Include="Service\Process\Steps\ApplyResultingMaterial.cs" />
+    <Compile Include="Service\Process\Steps\LoadRecipe.cs" />
+    <Compile Include="Service\Process\Steps\SanitizeReceivedRequest.cs" />
+    <Compile Include="Service\Process\Steps\SetComponents.cs" />
+    <Compile Include="Service\Process\Steps\ValidateAmountAndPrice.cs" />
+    <Compile Include="Service\ProductionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
@@ -68,7 +81,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\" />
     <Folder Include="Storage\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

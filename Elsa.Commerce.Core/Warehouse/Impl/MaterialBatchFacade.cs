@@ -10,6 +10,7 @@ using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
+using Elsa.Commerce.Core.Warehouse.Impl.Model;
 using Elsa.Commerce.Core.Warehouse.Thresholds;
 using Elsa.Common;
 using Elsa.Common.Caching;
@@ -1050,6 +1051,80 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 yield return new Tuple<int?, Amount>(null, requestedAmount);
             }
+        }
+
+        public AllocationRequestResult ResolveMaterialDemand(int materialId,
+                                                            Amount demand,
+                                                            string batchNumberOrNull,
+                                                            bool batchNumberIsPreferrence,
+                                                            bool includeBatchesWithoutAllocation)
+        {
+            var batchIdNumberAmount = new List<Tuple<int, string, Amount>>();
+
+            var batchCreated = new Dictionary<string, DateTime>();
+
+            m_database.Sql().Call("GetMaterialResolution")
+                .WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@materialId", materialId)
+                .ReadRows<int, string, decimal, int, DateTime>(
+                    (batchId, batchNumber, available, unitId, created) =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(batchNumberOrNull) && (!batchNumberIsPreferrence) &&
+                            !batchNumberOrNull.Equals(batchNumber, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return;
+                        }
+
+                        if (!batchCreated.TryGetValue(batchNumber.ToLowerInvariant(), out var dateA))
+                        {
+                            batchCreated[batchNumber.ToLowerInvariant()] = created;
+                        }
+                        else
+                        {
+                            batchCreated[batchNumber.ToLowerInvariant()] =  dateA > created ? dateA : created;
+                        }
+
+                        batchIdNumberAmount.Add(new Tuple<int, string, Amount>(batchId, batchNumber, new Amount(available, m_unitRepository.GetUnit(unitId))));
+                    });
+
+            if (!string.IsNullOrWhiteSpace(batchNumberOrNull) && batchNumberIsPreferrence)
+            {
+                batchIdNumberAmount = batchIdNumberAmount.OrderByDescending(r =>
+                    r.Item2.Equals(batchNumberOrNull, StringComparison.InvariantCultureIgnoreCase) ? 1 : 0).ToList();
+            }
+
+            var batchIdNumberTotalAllocated = new List<Tuple<int, string, Amount, Amount>>(batchIdNumberAmount.Count);
+
+            foreach (var src in batchIdNumberAmount)
+            {
+                var canAllocateToThisBatch = m_amountProcessor.Min(demand, src.Item3);
+                batchIdNumberTotalAllocated.Add(new Tuple<int, string, Amount, Amount>(src.Item1, src.Item2, src.Item3, canAllocateToThisBatch));
+
+                demand = m_amountProcessor.Subtract(demand, canAllocateToThisBatch);
+                if ((!includeBatchesWithoutAllocation) && (!demand.IsPositive))
+                {
+                    break;
+                }
+            }
+
+            var result = new AllocationRequestResult(materialId, demand.IsNotPositive, m_amountProcessor.Sum(batchIdNumberTotalAllocated.Select(a => a.Item4)), demand);
+
+            foreach (var batchNumber in batchIdNumberTotalAllocated.Select(b => b.Item2).Distinct())
+            {
+                var thisBatchNrAllocations = batchIdNumberTotalAllocated
+                    .Where(a => a.Item2.Equals(batchNumber, StringComparison.InvariantCultureIgnoreCase)).ToList();
+
+                batchCreated.TryGetValue(batchNumber.ToLowerInvariant(), out var dt);
+
+                result.Allocations.Add(new BatchAllocation(
+                    batchNumber, 
+                    m_amountProcessor.Sum(thisBatchNrAllocations.Select(a => a.Item3)),
+                    m_amountProcessor.Sum(thisBatchNrAllocations.Select(a => a.Item4)),
+                    thisBatchNrAllocations.Select(a => new Tuple<int, Amount>(a.Item1, a.Item4)).ToList()
+                    , dt));
+            }
+
+            return result;
         }
 
         private IList<BatchAmountProcedureResult> ExecBatchAmountProcedure(int? batchId, int? materialId)

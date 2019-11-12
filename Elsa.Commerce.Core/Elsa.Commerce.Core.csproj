@@ -168,8 +168,10 @@
     <Compile Include="Warehouse\Impl\BatchStatusManager.cs" />
     <Compile Include="Warehouse\Impl\MaterialBatchFacade.cs" />
     <Compile Include="Warehouse\Impl\MaterialBatchRepository.cs" />
+    <Compile Include="Warehouse\Impl\Model\BatchAllocation.cs" />
     <Compile Include="Warehouse\Impl\Model\MaterialBatchAdapter.cs" />
     <Compile Include="Warehouse\Impl\Model\MaterialBatchCompositionAdapter.cs" />
+    <Compile Include="Warehouse\Impl\Model\AllocationRequestResult.cs" />
     <Compile Include="Warehouse\MaterialBatchComponent.cs" />
     <Compile Include="Warehouse\Thresholds\IMaterialThresholdRepository.cs" />
     <Compile Include="Warehouse\Thresholds\MaterialThresholdRepository.cs" />

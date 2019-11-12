@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
@@ -21,12 +22,21 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Recipes
         int? DeleteUserId { get; set; }
         IUser DeleteUser { get; }
 
+        DateTime? DeleteDateTime { get; set; }
+
         int ProducedMaterialId { get; set; }
         IMaterial ProducedMaterial { get; }
 
         decimal RecipeProducedAmount { get; set; }
 
+        decimal? ProductionPricePerUnit { get; set; }
+
         int ProducedAmountUnitId { get; set; }
         IMaterialUnit ProducedAmountUnit { get; }
+
+        [NVarchar(0, true)]
+        string Note { get; set; }
+
+        IEnumerable<IRecipeComponent> Components { get; }
     }
 }

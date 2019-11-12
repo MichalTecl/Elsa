@@ -1,0 +1,105 @@
+﻿<div id="createBatchUI">
+    <div>
+        <div class="formRow">
+            <h1 data-bind="text:producingRecipe.MaterialName"></h1>
+        </div>
+        <div class="formRow">
+            <label>Šarže</label>
+            <input type="text" data-bind="text:producingRecipe.ProducingBatchNumber" event-bind="keyup:updatemodel(producingRecipe, 'ProducingBatchNumber', this.value)"/>
+        </div>
+
+        <div class="formRow">
+            <label>Množství</label>
+            <div>
+                <input type="number" step="0.001" min="0" data-bind="text:producingRecipe.ProducingAmount" event-bind="keyup:updatemodel(producingRecipe, 'ProducingAmount', this.value)"/>
+                <div data-bind="text:producingRecipe.ProducingUnitSymbol"></div>
+            </div>
+        </div>
+
+        <div class="formRow">
+            <label>Cena práce</label>
+            <div>
+                <input type="number" step="0.001" min="0" data-bind="text:producingRecipe.ProducingPrice" event-bind="keyup:updatemodel(producingRecipe, 'ProducingPrice', this.value)"/>
+                <div data-bind="text:producingRecipe.ProducingUnitSymbol"></div>
+            </div>
+        </div>
+
+        <div class="formRow">
+            <div data-bind="itemsSource:producingRecipe.Messages" data-key="Text">
+                <div class="lt-template">
+                    <div data-bind="text:Text"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div>
+        <div data-bind="itemsSource:producingRecipe.Components" data-key="MaterialId">
+            <div class="lt-template">
+                <div class="stackLeft">
+                    <div data-bind="text:RequiredAmount"></div>
+                    <div data-bind="text:UnitSymbol"></div>
+                    <span>&nbsp;</span>
+                    <div data-bind="text:MaterialName"></div>
+                </div>
+                
+                <div data-bind="itemsSource:Messages" data-key="Text">
+                    <div class="lt-template">
+                        <div data-bind="text:Text"></div>
+                    </div>
+                </div>
+                
+                <div class="gridHead gridRow">
+                    <div class="cell20">Množství</div>
+                    <div class="cell10">Číslo šarže</div>
+                    <div class="cell10">Vytvořeno</div>
+                    <div class="cell10">Dostupné</div>
+                </div>
+                
+                <div data-bind="itemsSource:Resolutions" data-key="BatchNumber">
+                    <div class="lt-template gridRow">
+                        <div class="cell20">
+                            <div class="stackLeft">
+                                <input type="number" step="0.001" min="0" data-bind="value:Amount" />
+                                <div data-bind="text:UnitSymbol"></div>
+                            </div>
+                        </div>
+                        <div class="cell10" data-bind="text:BatchNumber"></div>
+                        <div class="cell10" data-bind="text:BatchCreationDt"></div>
+                        <div class="cell10" data-bind="text:BatchAvailableAmount"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    lt.element("createBatchUI").withModel("app.productionService.vm").attach(function() {
+
+        var updateThrottle = null;
+
+        this.bind(function(producingRecipe) {
+
+            if (producingRecipe) {
+                this.style.display = 'block';
+            } else {
+                this.style.display = 'none';
+            }
+
+        }).producingRecipeCanBeNull();
+
+        this.updatemodel = function(vm, property, value) {
+            vm[property] = value;
+            lt.notify(this);
+
+            if (updateThrottle) {
+                clearTimeout(updateThrottle);
+            }
+
+            updateThrottle = setTimeout(app.productionService.vm.uploadProducingRecipe, 1000);
+        };
+    });
+</script>

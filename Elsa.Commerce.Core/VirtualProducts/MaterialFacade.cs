@@ -184,6 +184,17 @@ namespace Elsa.Commerce.Core.VirtualProducts
             return MapMaterialInfo(material);
         }
 
+        public MaterialSetupInfo GetMaterialInfo(int materialId)
+        {
+            var material = m_materialRepository.GetMaterialById(materialId);
+            if (material == null)
+            {
+                return null;
+            }
+
+            return MapMaterialInfo(material);
+        }
+
         private MaterialSetupInfo MapMaterialInfo(IExtendedMaterialModel material)
         {
             var model = new MaterialSetupInfo

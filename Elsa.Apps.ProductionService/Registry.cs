@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Elsa.Apps.ProductionService.Service;
 using Robowire;
 
 namespace Elsa.Apps.ProductionService
@@ -11,6 +7,7 @@ namespace Elsa.Apps.ProductionService
     {
         public void Setup(IContainerSetup setup)
         {
+            setup.For<IProductionService>().Use<Service.ProductionService>();
         }
     }
 }

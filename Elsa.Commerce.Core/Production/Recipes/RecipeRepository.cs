@@ -32,7 +32,12 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
         public IRecipe GetRecipe(int recipeId)
         {
-            throw new NotImplementedException();
+            //TODO cache
+            return m_database.SelectFrom<IRecipe>()
+                .Join(r => r.Components)
+                .Where(r => r.ProjectId == m_session.Project.Id)
+                .Where(r => r.Id == recipeId)
+                .OrderBy(r => r.Components.Each().SortOrder).Execute().FirstOrDefault();
         }
 
         public IList<RecipeInfo> GetRecipes()

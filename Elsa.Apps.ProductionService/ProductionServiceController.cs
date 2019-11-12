@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Elsa.Apps.ProductionService.Models;
+using Elsa.Apps.ProductionService.Service;
 using Elsa.Commerce.Core.Production.Recipes;
 using Elsa.Commerce.Core.Production.Recipes.Model;
 using Elsa.Common;
@@ -16,10 +18,12 @@ namespace Elsa.Apps.ProductionService
     public class ProductionServiceController : ElsaControllerBase
     {
         private readonly IRecipeRepository m_recipeRepository;
+        private readonly IProductionService m_productionService;
 
-        public ProductionServiceController(IWebSession webSession, ILog log, IRecipeRepository recipeRepository) : base(webSession, log)
+        public ProductionServiceController(IWebSession webSession, ILog log, IRecipeRepository recipeRepository, IProductionService productionService) : base(webSession, log)
         {
             m_recipeRepository = recipeRepository;
+            m_productionService = productionService;
         }
 
         public IEnumerable<RecipeInfo> GetRecipes()
@@ -32,6 +36,13 @@ namespace Elsa.Apps.ProductionService
             var recipe = m_recipeRepository.GetRecipes().FirstOrDefault(r => r.RecipeId == recipeId).Ensure();
 
             return m_recipeRepository.SetRecipeFavorite(recipeId, !recipe.IsFavorite);
+        }
+
+        public ProductionRequest ValidateProductionRequest(ProductionRequest request)
+        {
+            m_productionService.ValidateRequest(request.Ensure("Request object required"));
+
+            return request;
         }
     }
 }

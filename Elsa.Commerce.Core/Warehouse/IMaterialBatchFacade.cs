@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
+using Elsa.Commerce.Core.Warehouse.Impl.Model;
 using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -68,6 +69,10 @@ namespace Elsa.Commerce.Core.Warehouse
 
         IEnumerable<Tuple<int?, Amount>> ProposeAllocations(int materialId, string batchNumber, Amount requestedAmount);
 
-        
+        AllocationRequestResult ResolveMaterialDemand(int materialId, 
+            Amount demand, 
+            string batchNumberOrNull,
+            bool batchNumberIsPreferrence, 
+            bool includeBatchesWithoutAllocation);
     }
 }

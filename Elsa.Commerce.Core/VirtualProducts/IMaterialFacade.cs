@@ -21,6 +21,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
         
         MaterialSetupInfo GetMaterialInfo(string materialName);
 
+        MaterialSetupInfo GetMaterialInfo(int materialId);
+
         IEnumerable<MaterialSetupInfo> GetAllMaterialInfo();
     }
 }
