@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.CurrencyRates;
 using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.Production.Recipes;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse.Impl.Model;
@@ -29,6 +30,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly ISupplierRepository m_supplierRepository;
         private readonly ICurrencyConversionHelper m_currencyConversionHelper;
         private readonly IServiceLocator m_serviceLocator;
+        private readonly Lazy<IRecipeRepository> m_recipeRepository;
 
         public MaterialBatchRepository(IDatabase database,
             ISession session,
@@ -38,7 +40,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             ICache cache,
             Lazy<IMaterialBatchFacade> materialBatchFacade,
             ISupplierRepository supplierRepository, 
-            ICurrencyConversionHelper currencyConversionHelper, IServiceLocator serviceLocator)
+            ICurrencyConversionHelper currencyConversionHelper, IServiceLocator serviceLocator, Lazy<IRecipeRepository> recipeRepository)
         {
             m_database = database;
             m_session = session;
@@ -50,6 +52,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_supplierRepository = supplierRepository;
             m_currencyConversionHelper = currencyConversionHelper;
             m_serviceLocator = serviceLocator;
+            m_recipeRepository = recipeRepository;
         }
 
         public MaterialBatchComponent GetBatchById(int id)
@@ -476,6 +479,84 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return GetBatchQuery().Where(b => b.SupplierId == supplierId).Where(b => b.InvoiceNr == invoiceNumber)
                 .Where(b => b.CloseDt == null).Execute()
                 .Select(b => MapToModel(b).Batch);
+        }
+
+        public IMaterialBatch CreateBatchWithComponents(int recipeId, Amount amount, string batchNumber, decimal productionPrice,
+            List<Tuple<BatchKey, Amount>> components)
+        {
+            var batchesToReleaseFromCache = new HashSet<int>();
+            var newBatchId = -1;
+
+            try
+            {
+                using (var tx = m_database.OpenTransaction())
+                {
+                    var recipe = m_recipeRepository.Value.GetRecipe(recipeId).Ensure("Recipe object expected");
+
+                    var batch = m_database.New<IMaterialBatch>();
+                    batch.MaterialId = recipe.ProducedMaterialId;
+                    batch.RecipeId = recipe.Id;
+                    batch.AuthorId = m_session.User.Id;
+                    batch.IsAvailable = true;
+                    batch.Produced = batch.Created = DateTime.Now;
+                    batch.ProjectId = m_session.Project.Id;
+                    batch.ProductionWorkPrice = productionPrice;
+                    batch.BatchNumber = batchNumber.Trim();
+                    batch.Volume = amount.Value;
+                    batch.Note = string.Empty;
+                    batch.UnitId = amount.Unit.Id;
+
+                    m_database.Save(batch);
+
+                    newBatchId = batch.Id;
+                    batchesToReleaseFromCache.Add(batch.Id);
+
+                    foreach (var component in components)
+                    {
+                        var assignments = m_materialBatchFacade.Value.ResolveMaterialDemand(
+                            component.Item1.GetMaterialId(this),
+                            component.Item2,
+                            component.Item1.GetBatchNumber(this),
+                            false,
+                            false);
+
+                        if (!assignments.CompletelyAllocated)
+                        {
+                            throw new InvalidOperationException(
+                                $"Není dostupné požadované množství v šarži {component.Item1.GetBatchNumber(this)}");
+                        }
+
+                        if (assignments.Allocations.Count != 1)
+                        {
+                            throw new InvalidOperationException("Neocekavana chyba");
+                        }
+
+                        foreach (var componentBatch in assignments.Allocations.Single().BatchIdAllocations)
+                        {
+                            var composition = m_database.New<IMaterialBatchComposition>();
+                            composition.ComponentId = componentBatch.Item1;
+                            composition.CompositionId = batch.Id;
+                            composition.Volume = componentBatch.Item2.Value;
+                            composition.UnitId = componentBatch.Item2.Unit.Id;
+
+                            m_database.Save(composition);
+                            batchesToReleaseFromCache.Add(composition.ComponentId);
+                        }
+                    }
+
+
+                    tx.Commit();
+                }
+            }
+            finally
+            {
+                foreach (var bid in batchesToReleaseFromCache)
+                {
+                    m_materialBatchFacade.Value.ReleaseBatchAmountCache(bid);
+                }
+            }
+
+            return GetBatchById(newBatchId)?.Batch;
         }
 
         private IQueryBuilder<IMaterialBatch> GetBatchQuery()

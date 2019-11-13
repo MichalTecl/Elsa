@@ -44,5 +44,10 @@ namespace Elsa.Apps.ProductionService
 
             return request;
         }
+
+        public void ProcessProductionRequest(ProductionRequest request)
+        {
+            m_productionService.ProcessRequest(request.Ensure("Request object required"));
+        }
     }
 }

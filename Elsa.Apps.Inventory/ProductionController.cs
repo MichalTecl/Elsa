@@ -45,55 +45,6 @@ namespace Elsa.Apps.Inventory
             return m_productionFacade.GetProductionBatch(batchId);
         }
 
-        public ProductionBatchModel CreateBatch(BatchSetupRequest rq)
-        {
-            var material = m_materialRepository.GetMaterialByName(rq.MaterialName);
-            if (material == null)
-            {
-                throw new InvalidOperationException("Nedefinovaný materiál");
-            }
-
-            if (!material.IsManufactured)
-            {
-                throw new InvalidOperationException($"Materiál {rq.MaterialName} není nastaven jako vyráběný");
-            }
-
-            var unit = m_unitRepository.GetUnitBySymbol(rq.AmountUnitSymbol);
-            if (unit == null)
-            {
-                throw new InvalidOperationException($"Neznama jednotka");
-            }
-
-            return m_productionFacade.CreateOrUpdateProductionBatch(rq.BatchId, material.Id, rq.BatchNumber, rq.Amount, unit, rq.ProductionWorkPrice);
-        }
-
-        public ProductionBatchModel AddComponentSourceBatch(
-            int? materialBatchCompositionId,
-            int productionBatchId,
-            int materialId,
-            string sourceBatchNumber,
-            decimal usedAmount,
-            string usedAmountUnitSymbol)
-        {
-            var batch = m_batchRepository.GetBatches(m_batchFacade.FindBatchBySearchQuery(materialId, sourceBatchNumber).Ensure()).Single();
-            if (batch == null)
-            {
-                throw new InvalidOperationException("Šarže nenalezena");
-            }
-
-            return m_productionFacade.SetComponentSourceBatch(
-                materialBatchCompositionId,
-                productionBatchId,
-                batch.Id,
-                usedAmount,
-                usedAmountUnitSymbol);
-        }
-
-        public ProductionBatchModel RemoveComponentSourceBatch(int productionBatchId, int sourceBatchId)
-        {
-            return m_productionFacade.RemoveComponentSourceBatch(productionBatchId, sourceBatchId);
-        }
-
         public IEnumerable<ProducedBatchModel> GetBatches(long? lastSeen)
         {
             foreach (var b in m_productionFacade.LoadProductionBatches(lastSeen, 10))

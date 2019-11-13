@@ -41,6 +41,9 @@ namespace Elsa.Apps.ProductionService.Models
         public string BatchAvailableAmountText { get; set; }
 
         public decimal BatchAvailableAmount { get; set; }
+        public long Sorter { get; set; }
+
+        public string Key { get; set; }
 
         internal Amount GetAmount(IUnitRepository ur)
         {

@@ -11,7 +11,7 @@
         <div class="formRow">
             <label>Množství</label>
             <div>
-                <input type="number" step="0.001" min="0" data-bind="text:producingRecipe.ProducingAmount" event-bind="keyup:updatemodel(producingRecipe, 'ProducingAmount', this.value)"/>
+                <input type="number" step="0.001" min="0" data-bind="text:producingRecipe.ProducingAmount" event-bind="keyup:updatemodel(producingRecipe, '#ProducingAmount', this.value)"/>
                 <div data-bind="text:producingRecipe.ProducingUnitSymbol"></div>
             </div>
         </div>
@@ -19,7 +19,7 @@
         <div class="formRow">
             <label>Cena práce</label>
             <div>
-                <input type="number" step="0.001" min="0" data-bind="text:producingRecipe.ProducingPrice" event-bind="keyup:updatemodel(producingRecipe, 'ProducingPrice', this.value)"/>
+                <input type="number" step="0.001" min="0" data-bind="text:producingRecipe.ProducingPrice" event-bind="keyup:updatemodel(producingRecipe, '#ProducingPrice', this.value)"/>
                 <div data-bind="text:producingRecipe.ProducingUnitSymbol"></div>
             </div>
         </div>
@@ -34,6 +34,12 @@
     </div>
     
     <div>
+        <div class="gridHead gridRow">
+            <div class="cell20">Množství</div>
+            <div class="cell10">Číslo šarže</div>
+            <div class="cell10">Vytvořeno</div>
+            <div class="cell10">Dostupné</div>
+        </div>
         <div data-bind="itemsSource:producingRecipe.Components" data-key="MaterialId">
             <div class="lt-template">
                 <div class="stackLeft">
@@ -42,44 +48,55 @@
                     <span>&nbsp;</span>
                     <div data-bind="text:MaterialName"></div>
                 </div>
-                
+
                 <div data-bind="itemsSource:Messages" data-key="Text">
                     <div class="lt-template">
                         <div data-bind="text:Text"></div>
                     </div>
                 </div>
                 
-                <div class="gridHead gridRow">
-                    <div class="cell20">Množství</div>
-                    <div class="cell10">Číslo šarže</div>
-                    <div class="cell10">Vytvořeno</div>
-                    <div class="cell10">Dostupné</div>
-                </div>
-                
-                <div data-bind="itemsSource:Resolutions" data-key="BatchNumber">
+                <button data-bind="class.hidden:IsValid" event-bind="click:resetAllocations(MaterialId)"><i class="fas fa-recycle"></i></button>
+
+                <div data-bind="itemsSource:Resolutions" data-key="Key">
                     <div class="lt-template gridRow">
                         <div class="cell20">
                             <div class="stackLeft">
-                                <input type="number" step="0.001" min="0" data-bind="value:Amount" />
+                                <input type="number" class="hasUnit" step="0.001" min="0" data-bind="value:Amount" event-bind="keyup:updateAmount(Key, this.value)"/>
                                 <div data-bind="text:UnitSymbol"></div>
                             </div>
                         </div>
                         <div class="cell10" data-bind="text:BatchNumber"></div>
                         <div class="cell10" data-bind="text:BatchCreationDt"></div>
-                        <div class="cell10" data-bind="text:BatchAvailableAmount"></div>
+                        <div class="cell10" data-bind="text:BatchAvailableAmountText"></div>
                     </div>
                 </div>
 
             </div>
         </div>
     </div>
-
+    <div class="formActions stackLeft">
+        <button class="butCancel" event-bind="click:cancel"></button>
+        <button class="butSubmit" event-bind="click:save" data-bind="class!.hidden:producingRecipe.IsValid"></button>
+    </div>
 </div>
 
 <script>
     lt.element("createBatchUI").withModel("app.productionService.vm").attach(function() {
 
+        var self = this;
         var updateThrottle = null;
+
+        var cancelPendingCommit = function() {
+            if (updateThrottle) {
+                clearTimeout(updateThrottle);
+            }
+        };
+
+        var scheduleCommit = function() {
+            cancelPendingCommit();
+            lt.notify(self);
+            updateThrottle = setTimeout(app.productionService.vm.uploadProducingRecipe, 500);
+        };
 
         this.bind(function(producingRecipe) {
 
@@ -91,15 +108,36 @@
 
         }).producingRecipeCanBeNull();
 
-        this.updatemodel = function(vm, property, value) {
-            vm[property] = value;
-            lt.notify(this);
+        this.updatemodel = function (vm, property, value) {
 
-            if (updateThrottle) {
-                clearTimeout(updateThrottle);
+            if (property.indexOf("#") === 0) {
+                property = property.substring(1);
+                value = parseFloat(value) || 0;
             }
 
-            updateThrottle = setTimeout(app.productionService.vm.uploadProducingRecipe, 1000);
+            vm[property] = value;
+            
+            scheduleCommit();
+        };
+
+        this.updateAmount = function(key, amount) {
+            app.productionService.vm.updateComponentAmount(key, parseFloat(amount) || 0);
+            scheduleCommit();
+        };
+
+        this.resetAllocations = function(materialId) {
+            cancelPendingCommit();
+            app.productionService.vm.resetAllocations(materialId);
+        };
+
+        this.save = function() {
+            cancelPendingCommit();
+            app.productionService.vm.saveProducingRecipe();
+        };
+
+        this.cancel = function() {
+            cancelPendingCommit();
+            app.productionService.vm.cancelProducingRecipe();
         };
     });
 </script>

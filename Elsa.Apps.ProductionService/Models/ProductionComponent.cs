@@ -19,10 +19,12 @@ namespace Elsa.Apps.ProductionService.Models
         public decimal RequiredAmount { get; set; }
 
         public bool IsValid { get; set; }
-
+        
         public List<RequestValidationMessage> Messages { get; } = new List<RequestValidationMessage>();
 
         public List<ProductionComponentResolution> Resolutions { get; } = new List<ProductionComponentResolution>();
+        public int SortOrder { get; set; }
+        public string LastClientAmount { get; set; }
 
         public void Invalidate(string message)
         {

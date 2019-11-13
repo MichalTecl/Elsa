@@ -103,6 +103,51 @@ app.productionService.VM = app.productionService.VM || function() {
         updateRecipesView();
     };
 
+    this.updateComponentAmount = function(key, amount) {
+
+        if ((!self.producingRecipe) || (!self.producingRecipe.Components)) {
+            return;
+        }
+
+        for (var cid = 0; cid < self.producingRecipe.Components.length; cid++) {
+            var component = self.producingRecipe.Components[cid];
+
+            for (var rid = 0; rid < component.Resolutions.length; rid++) {
+                var resolution = component.Resolutions[rid];
+                if (resolution.Key === key) {
+                    resolution.Amount = amount;
+                    return;
+                }
+            }
+        }
+
+        console.warn("No resolution found by Key=" + key);
+    };
+
+    this.resetAllocations = function(materialId) {
+
+        for (var cid = 0; cid < self.producingRecipe.Components.length; cid++) {
+            var component = self.producingRecipe.Components[cid];
+            if (component.MaterialId === materialId) {
+                component.Resolutions = [];
+                self.uploadProducingRecipe();
+                return;
+            }
+        }
+    };
+
+    this.cancelProducingRecipe = function() {
+        self.producingRecipe = null;
+        lt.notify();
+    };
+
+    this.saveProducingRecipe = function() {
+        lt.api("/productionService/ProcessProductionRequest").body(self.producingRecipe)
+            .post(function (received) {
+                location.reload();
+            });
+    };
+
     this.toggleFavorite = function (recipeId) {
         lt.api("/productionService/toggleFavorite").query({ "recipeId": recipeId }).get(receiveUpdatedRecipe);
     };

@@ -21,6 +21,7 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
         {
             if ((context.Request.ProducingAmount ?? 0m) < 0.00001m)
             {
+                context.Request.ProducingAmount = 0;
                 context.InvalidateRequest("Je třeba zadat množství");
             }
             

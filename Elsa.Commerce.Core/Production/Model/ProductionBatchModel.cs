@@ -27,6 +27,5 @@ namespace Elsa.Commerce.Core.Production.Model
         public bool IsLocked { get; set; }
 
         public List<ProductionBatchComponentModel> Components { get; } = new List<ProductionBatchComponentModel>();
-
     }
 }

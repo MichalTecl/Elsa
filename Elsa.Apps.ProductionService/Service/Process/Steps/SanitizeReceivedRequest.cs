@@ -14,7 +14,7 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
             context.Request.IsValid = true;
             context.Request.Messages.Clear();
             context.Request.ProducingBatchNumber = context.Request.ProducingBatchNumber?.Trim();
-
+            
             foreach (var component in context.Request.Components)
             {
                 component.IsValid = true;

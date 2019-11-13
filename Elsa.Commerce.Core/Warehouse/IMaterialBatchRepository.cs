@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Elsa.Commerce.Core.Model;
+using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
@@ -48,8 +49,6 @@ namespace Elsa.Commerce.Core.Warehouse
         IEnumerable<IMaterialBatchComposition> GetCompositionsByComponentBatchId(int componentBatchId);
 
         void UpdateBatchAvailability(int batchId, bool isAvailable);
-
-        MaterialBatchComponent CreateProductionBatch(int materialId, string batchNumber, decimal amount, IMaterialUnit unit, decimal productionWorkPrice);
     
         string GetBatchNumberById(int batchId);
 
@@ -68,5 +67,7 @@ namespace Elsa.Commerce.Core.Warehouse
         IEnumerable<IMaterialBatchComposition> GetBatchComponents(int compositionId);
 
         IEnumerable<IMaterialBatch> GetBatchesByInvoiceNumber(string invoiceNumber, int supplierId);
+
+        IMaterialBatch CreateBatchWithComponents(int recipeId, Amount amount, string batchNumber, decimal productionPrice, List<Tuple<BatchKey, Amount>> components);
     }
 }
