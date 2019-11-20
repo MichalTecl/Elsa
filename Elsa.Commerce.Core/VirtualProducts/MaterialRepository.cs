@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Inventory;
-
+using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.VirtualProducts
@@ -81,21 +80,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
         private IEnumerable<IExtendedMaterialModel> GetAllMaterialsFromDatabase()
         {
             var data = LoadMaterialEntities().Select(m => new ExtendedMaterial(m)).ToList();
-
-            foreach (var extendedMaterial in data)
-            {
-                foreach (var composition in extendedMaterial.Adaptee.Composition)
-                {
-                    var child = data.FirstOrDefault(c => c.Id == composition.ComponentId);
-                    if (child == null)
-                    {
-                        throw new InvalidOperationException("Invalid composition");
-                    }
-
-                    extendedMaterial.AddComponent(composition.Amount, composition.Unit, child);
-                }
-            }
-
+            
             return data;
         }
 
@@ -116,8 +101,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
         {
             return m_database.SelectFrom<IMaterial>()
                     .Join(m => m.NominalUnit)
-                    .Join(m => m.Composition)
-                    .Join(m => m.Composition.Each().Unit)
                     .Join(m => m.VirtualProductMaterials)
                     .Join(m => m.Thresholds)
                     .Join(m => m.Thresholds.Each().Unit)
@@ -206,12 +189,12 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 if (material.NominalUnitId != nominalUnitId)
                 {
                     if (
-                        m_database.SelectFrom<IMaterialComposition>()
-                            .Where(mc => mc.ComponentId == materialId)
+                        m_database.SelectFrom<IRecipe>()
+                            .Where(mc => mc.ProducedMaterialId == materialId)
                             .Execute()
                             .Any())
                     {
-                        throw new InvalidOperationException($"Není možné změnit nominální jednotku materiálu, protože tento materiál je již součástí složení jiného materiálu");
+                        throw new InvalidOperationException($"Není možné změnit nominální jednotku materiálu, protože tento materiál je již součástí receptury");
                     }
 
                     if (
@@ -263,56 +246,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_cache.Remove(VirtualProductCompositionsCacheKey);
             m_cache.Remove(MaterialsCacheKey);
         }
-
-        public void DetachMaterialComponent(int compositionMaterialId, int componentMaterialId)
-        {
-            var composition =
-                m_database.SelectFrom<IMaterialComposition>()
-                    .Join(c => c.Composition)
-                    .Where(m => m.Composition.ProjectId == m_session.Project.Id)
-                    .Where(c => (c.CompositionId == compositionMaterialId) && (c.ComponentId == componentMaterialId))
-                    .Execute()
-                    .FirstOrDefault();
-
-            if (composition == null)
-            {
-                return;
-            }
-
-            m_database.Delete(composition);
-            CleanCache();
-        }
-
-        public void SetMaterialComponent(int compositionMaterialId, int componentMaterialId, decimal componentAmount, int amountUnit)
-        {
-            var composition = m_database.SelectFrom<IMaterialComposition>()
-                            .Join(c => c.Composition)
-                            .Where(m => m.Composition.ProjectId == m_session.Project.Id)
-                            .Where(c => (c.CompositionId == compositionMaterialId) && (c.ComponentId == componentMaterialId))
-                            .Execute()
-                            .FirstOrDefault();
-
-            if (composition != null)
-            {
-                if ((composition.UnitId == amountUnit) && (composition.Amount == componentAmount))
-                {
-                    return;
-                }
-            }
-            else
-            {
-                composition = m_database.New<IMaterialComposition>();
-            }
-            
-            composition.CompositionId = compositionMaterialId;
-            composition.ComponentId = componentMaterialId;
-            composition.UnitId = amountUnit;
-            composition.Amount = componentAmount;
-
-            m_database.Save(composition);
-            CleanCache();
-        }
-
+        
         public void DeleteMaterial(int id)
         {
             using (var tx = m_database.OpenTransaction())
@@ -331,12 +265,16 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
                 var toVp = m_database.SelectFrom<IVirtualProductMaterial>().Where(t => t.ComponentId == id).Execute();
                 var conns =
-                    m_database.SelectFrom<IMaterialComposition>()
-                        .Where(c => (c.CompositionId == id) || (c.ComponentId == id))
+                    m_database.SelectFrom<IRecipe>()
+                        .Where(c => c.ProducedMaterialId == id)
                         .Execute();
 
+                if (conns.Any())
+                {
+                    throw new InvalidOperationException("Nelze smazat materiál, který má recepturu");
+                }
+
                 m_database.DeleteAll(toVp);
-                m_database.DeleteAll(conns);
                 m_database.Delete(material);
 
                 tx.Commit();

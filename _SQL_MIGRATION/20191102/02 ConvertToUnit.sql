@@ -1,13 +1,3 @@
-USE [test]
-GO
-
-/****** Object:  UserDefinedFunction [dbo].[ConvertToUnit]    Script Date: 11/3/2019 1:37:34 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
 ALTER FUNCTION [dbo].[ConvertToUnit] 
 (
 	@ProjectId INT,

@@ -100,7 +100,6 @@
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
     <Compile Include="Production\IProductionFacade.cs" />
     <Compile Include="Production\Model\ProductionBatchComponentModel.cs" />
-    <Compile Include="Production\Model\ProductionBatchModel.cs" />
     <Compile Include="Production\Model\SubBatchAssignmentModel.cs" />
     <Compile Include="Production\ProductionFacade.cs" />
     <Compile Include="Production\Recipes\IRecipeRepository.cs" />

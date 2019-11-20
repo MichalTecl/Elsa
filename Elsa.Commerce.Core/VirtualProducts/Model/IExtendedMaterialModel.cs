@@ -21,17 +21,13 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         decimal BatchAmount { get; }
 
         IMaterial Adaptee { get; }
-
-        IEnumerable<MaterialComponent> Components { get; }
-
+        
         bool HasThreshold { get; }
 
         string ThresholdText { get; }
 
         IExtendedMaterialModel CreateBatch(decimal batchAmount, IMaterialUnit preferredBatchUnit, IUnitConversionHelper conversions);
-
-        IEnumerable<CompositionViewModel> Flatten();
-
+        
         void Print(StringBuilder target, string depthLevelTrim);
 
         int InventoryId { get; }

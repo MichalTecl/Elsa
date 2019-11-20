@@ -54,8 +54,6 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         [JsonIgnore]
         public IMaterial Adaptee { get; }
         
-        public IEnumerable<MaterialComponent> Components => m_components;
-
         public bool HasThreshold { get; set; }
 
         public string ThresholdText { get; set; }
@@ -86,26 +84,13 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                 var batchComponent = new MaterialComponent(sourceComponent.Unit, batchedComponentMaterial, componentBatchAmount, null);
                 batchComponents.Add(batchComponent);
             }
-
-            batch.AdoptComponents(batchComponents);
-
+            
             return batch;
-        }
-
-        public IEnumerable<CompositionViewModel> Flatten()
-        {
-            var result = new List<CompositionViewModel>();
-            Flatten(0, this, result);
-
-            return result;
         }
 
         public void Print(StringBuilder target, string depthLevelTrim)
         {
-            foreach (var f in Flatten())
-            {
-                f.Print(target, depthLevelTrim);
-            }
+            target.Append(Name);
         }
 
         public int InventoryId { get; }
@@ -124,25 +109,5 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public bool RequiresSupplierReference { get; }
 
-        public void AddComponent(decimal amount, IMaterialUnit unit, IExtendedMaterialModel material)
-        {
-            m_components.Add(new MaterialComponent(unit, material, amount, null));
-        }
-
-        private void AdoptComponents(IEnumerable<MaterialComponent> components)
-        {
-            m_components.Clear();
-            m_components.AddRange(components);
-        }
-
-        private static void Flatten(int depth, IExtendedMaterialModel model, IList<CompositionViewModel> target)
-        {
-            target.Add(new CompositionViewModel(model, model.BatchAmount, model.BatchUnit, depth));
-
-            foreach (var c in model.Components)
-            {
-                Flatten(depth+1, c.Material, target);
-            }
-        }
     }
 }

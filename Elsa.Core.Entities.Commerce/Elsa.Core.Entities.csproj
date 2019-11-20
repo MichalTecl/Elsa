@@ -109,7 +109,6 @@
     <Compile Include="Inventory\IMappedToOrderItem.cs" />
     <Compile Include="Inventory\IMaterial.cs" />
     <Compile Include="Inventory\Batches\IMaterialBatch.cs" />
-    <Compile Include="Inventory\IMaterialComposition.cs" />
     <Compile Include="Inventory\IMaterialCompositionBase.cs" />
     <Compile Include="Inventory\IMaterialInventory.cs" />
     <Compile Include="Inventory\IMaterialThreshold.cs" />

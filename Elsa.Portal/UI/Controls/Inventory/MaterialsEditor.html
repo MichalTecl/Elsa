@@ -90,15 +90,9 @@
                         tbNominalAmount.removeAttribute("readonly");
                     }
 
-                    if (currentMaterialInventory && (!currentMaterialInventory.IsManufactured)) {
-                        materialEditPlaceholder.style.display = 'none';
-                        lblNominalLeft.innerHTML = "Manipulační&nbsp;množství:";
-                        lblNominalRight.innerHTML = "";
-                    } else {
-                        materialEditPlaceholder.style.display = 'block';
-                        lblNominalLeft.innerHTML = "Pro výrobu&nbsp;";
-                        lblNominalRight.innerHTML = "&nbsp;je třeba:";
-                    }
+                    materialEditPlaceholder.style.display = 'none';
+                    lblNominalLeft.innerHTML = "Manipulační&nbsp;množství:";
+                    lblNominalRight.innerHTML = "";
                 })
                 .currentMaterialInventoryRelativeToGlobal("app.virtualProductsEditor.vm")
                 .currentMaterialInventoryCanBeNull();

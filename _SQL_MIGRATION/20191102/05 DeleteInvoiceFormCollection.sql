@@ -1,13 +1,3 @@
-USE [test]
-GO
-
-/****** Object:  StoredProcedure [dbo].[DeleteInvoiceFormCollection]    Script Date: 11/10/2019 5:29:49 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
 
 ALTER PROCEDURE [dbo].[DeleteInvoiceFormCollection](@collectionId INT)
 AS

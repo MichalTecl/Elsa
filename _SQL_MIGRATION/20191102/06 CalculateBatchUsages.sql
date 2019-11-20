@@ -1,13 +1,3 @@
-USE [test]
-GO
-
-/****** Object:  StoredProcedure [dbo].[CalculateBatchUsages]    Script Date: 11/10/2019 5:28:47 PM ******/
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
 
 ALTER PROCEDURE [dbo].[CalculateBatchUsages] (@ProjectId INT, @BatchId INT = NULL, @MaterialId INT = NULL, @debug BIT = NULL)
 AS

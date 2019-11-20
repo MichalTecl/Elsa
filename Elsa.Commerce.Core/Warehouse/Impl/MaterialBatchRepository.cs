@@ -154,13 +154,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 throw new InvalidOperationException("Illegal entity reference");
             }
-
-            var m = m_materialRepository.GetMaterialById(material.Id);
-            if (m.Components.Any())
-            {
-                throw new InvalidOperationException($"Materiál '{material.Name}' nelze naskladnit, protože se skládá z jiných materiálů. Použijte prosím funkci Výroba");
-            }
-
+            
             int? supplierId = null;
             if (!string.IsNullOrWhiteSpace(supplierName))
             {

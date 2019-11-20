@@ -20,13 +20,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         mat.editMode = false;
 
         var materials = [];
-
-        for (var i = 0; i < mat.Components.length; i++) {
-
-            var com = mat.Components[i];
-
-            materials.push({ Name: com.Material.Name, Amount: com.Amount, UnitSymbol: com.Unit.Symbol });
-        }
+        
         mat.materials = materials;
         
         mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;

@@ -33,15 +33,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool requiresSupplierReference);
         
         void CleanCache();
-
-        void DetachMaterialComponent(int compositionMaterialId, int componentMaterialId);
-
-        void SetMaterialComponent(
-            int compositionMaterialId,
-            int componentMaterialId,
-            decimal componentAmount,
-            int amountUnit);
-
+        
         void DeleteMaterial(int id);
 
         IEnumerable<IMaterialInventory> GetMaterialInventories();

@@ -19,11 +19,3 @@ SELECT mb.Id
  WHERE mb.RecipeId IS NULL
    AND mb.MaterialId IN (SELECT ProducedMaterialId FROM Recipe);
 
---WHILE EXISTS(SELECT TOP 1 1 FROM @batchIds)
---BEGIN
---	DECLARE @bid INT = (SELECT TOP 1 bid FROM @batchIds);
---	DECLARE @recid INT = (SELECT TOP 1 Id FROM Recipe WHERE ProducedMaterialId = (SELECT TOP 1 MaterialId FROM MaterialBatch mb WHERE r.
-
-
---	DELETE FROM @batchIds WHERE bid = @bid;
---END

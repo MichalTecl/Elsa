@@ -9,8 +9,6 @@ namespace Elsa.Commerce.Core.Production
 {
     public interface IProductionFacade
     {
-        ProductionBatchModel GetProductionBatch(int batchId);
-
         IEnumerable<IMaterialBatch> LoadProductionBatches(long? fromDt, int pageSize);
     }
 }

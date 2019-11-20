@@ -66,7 +66,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
             }
             
             var nominalAmountEntry = MaterialEntry.Parse(nominalAmountText, true);
-            var componentEntries = components.Select(i => MaterialEntry.Parse(i)).ToList();
 
             var nominalUnit = ValidateAmountUnit(nominalAmountEntry);
 
@@ -82,64 +81,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     requiresPrice,
                     requiresIncvoice,
                     requiresSupplierReference);
-
-                var toDelete =
-                    material.Components.Where(
-                        existing =>
-                            !componentEntries.Any(
-                                e =>
-                                    e.MaterialName.Equals(
-                                        existing.Material.Name,
-                                        StringComparison.InvariantCultureIgnoreCase))).ToList();
                 
-                using (var materialRepository = m_materialRepository.GetWithPostponedCache())
-                {
-                    foreach (var del in toDelete)
-                    {
-                        m_materialRepository.DetachMaterialComponent(material.Id, del.Material.Id);
-                    }
-
-                    var matNames = new HashSet<string>();
-
-                    foreach (var componentEntry in componentEntries)
-                    {
-                        var componentMaterial = materialRepository.GetMaterialByName(componentEntry.MaterialName);
-                        if (componentMaterial == null)
-                        {
-                            throw new ArgumentException($"Neznámý materiál \"{componentEntry.MaterialName}\"");
-                        }
-
-                        var componentUnit = m_unitRepository.GetUnitBySymbol(componentEntry.UnitName);
-                        if (componentUnit == null)
-                        {
-                            throw new ArgumentException($"Neznámá měrná jednotka \"{componentEntry.UnitName}\"");
-                        }
-
-                        if (!m_conversionHelper.AreCompatible(componentUnit.Id, componentMaterial.NominalUnit.Id))
-                        {
-                            throw new ArgumentException($"Nelze použít jednotku \"{componentUnit.Symbol}\" pro materiál \"{componentMaterial.Name}\", protože \"{componentUnit.Symbol}\" není plně kompatibilní s \"{componentMaterial.NominalUnit.Symbol}\".");
-                        }
-
-                        if (componentMaterial.Id == material.Id)
-                        {
-                            throw new ArgumentException("Materiál nesmí mít ve složení sám sebe");
-                        }
-
-                        if (!matNames.Add(componentEntry.MaterialName))
-                        {
-                            throw new ArgumentException($"Ve složení materiálu musí být každý materiál jedinečný - duplicita \"{componentEntry.MaterialName}\"");
-                        }
-
-                        var flat = componentMaterial.Flatten();
-                        if (flat.Any(f => f.Material.Id == material.Id))
-                        {
-                            throw new ArgumentException($"Není možné použít ve složení materiál {componentMaterial.Name} , protože obsahuje ve struktuře vlastního složení {material.Name}");
-                        }
-
-                        materialRepository.SetMaterialComponent(material.Id, componentMaterial.Id, componentEntry.Amount, componentUnit.Id);
-                    }
-                }
-
                 if (thresholdText == null)
                 {
                     m_materialThresholdRepository.DeleteThreshold(material.Id);
