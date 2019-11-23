@@ -44,14 +44,18 @@
 
 
 
+
+
 var app = app || {};
 app.ui = app.ui || {};
-app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, argumentFactory) {
+
+app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, argumentFactory, customizer) {
+
+    customizer = customizer || app.ui.autosuggest.defaultCustomizer;
 
     if (!window["autosuggestStlyeLoaded"]) {
         window["autosuggestStyleLoaded"] = true;
-
-        //<link href="Style/Appearance.css" rel="stylesheet" />
+        
         var link = document.createElement("link");
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", "/UI/Controls/Common/Autosuggest.css");
@@ -64,17 +68,21 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
     }
 
     var inp = input[0];
-
+    inp.customizer = customizer;
+    
     /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
     var currentFocus;
     /*execute a function when someone writes in the text field:*/
     inp.addEventListener("input", function (e) {
-        var a, b, i, val = this.value;
-        /*close any already open lists of autocompleted values*/
+
+        this.customizerContext = this.customizer.initContext(this);
+        var a, b, i, val = this.customizer.toSearchExpression(this.value, this.customizerContext);
+        
         closeAllLists();
         if (!val) { return false; }
         currentFocus = -1;
+
         /*create a DIV element that will contain the items (values):*/
         a = document.createElement("DIV");
         a.setAttribute("id", this.id + "autocomplete-list");
@@ -87,12 +95,16 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
         if (argumentFactory) {
             argument = argumentFactory();
         }
+        
 
         itemsSource(val, 
-            function(arr) {
+            function (arr) {
+
+                var matcher = new TextMatcher(val);
+                
                 for (i = 0; i < arr.length; i++) {
-                    /*check if the item starts with the same letters as the text field value:*/
-                    if (/* arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()*/ natcharmap.denat(arr[i].toUpperCase()).indexOf(natcharmap.denat(val.toUpperCase())) > -1) {
+                    
+                    if (matcher.match(arr[i])) { //    natcharmap.denat(arr[i].toUpperCase()).indexOf(natcharmap.denat(val.toUpperCase())) > -1) {
                         /*create a DIV element for each matching element:*/
                         b = document.createElement("DIV");
                         /*make the matching letters bold:*/
@@ -104,7 +116,9 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
                         b.addEventListener("click",
                             function(e) {
                                 /*insert the value for the autocomplete text field:*/
-                                inp.value = this.getElementsByTagName("input")[0].value;
+                                var chosenValue = this.getElementsByTagName("input")[0].value;
+                                inp.customizer.applySelectedValue(chosenValue, inp, inp.customizerContext);
+                                
                                 if ("createEvent" in document) {
                                     var evt = document.createEvent("HTMLEvents");
                                     evt.initEvent("change", false, true);
@@ -178,4 +192,11 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
         closeAllLists(e.target);
     });
 
+};
+
+app.ui.autosuggest.defaultCustomizer = app.ui.autosuggest.defaultCustomizer ||
+{
+    "initContext": function (inputElement) { return null; },
+    "toSearchExpression": function (inputExpression, context) { return inputExpression; },
+    "applySelectedValue": function (selectedValue, inputElement, context) { inputElement.value = selectedValue; }
 };

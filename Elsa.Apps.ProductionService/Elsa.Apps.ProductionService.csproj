@@ -41,12 +41,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\MaterialNodePlaceholder.cs" />
     <Compile Include="Models\ProductionComponent.cs" />
     <Compile Include="Models\ProductionComponentResolution.cs" />
     <Compile Include="Models\ProductionRequest.cs" />
+    <Compile Include="Models\RecipeEditRequest.cs" />
     <Compile Include="Models\RequestValidationMessage.cs" />
     <Compile Include="ProductionServiceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Recipes\IRecipeService.cs" />
+    <Compile Include="Recipes\RecipeService.cs" />
     <Compile Include="Registry.cs" />
     <Compile Include="Service\IProductionService.cs" />
     <Compile Include="Service\Process\IProductionRequestProcessingStep.cs" />

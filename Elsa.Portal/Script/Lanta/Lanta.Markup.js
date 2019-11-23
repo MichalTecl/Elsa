@@ -277,9 +277,40 @@ lanta.Markup.bindItemsSourceExpression = lanta.Markup.bindItemsSourceExpression 
     
 };
 
+lanta.Markup.multieventMacros = {
+    "userinput:":"keyup:changed:mouseup:"
+};
+
 lanta.Markup.bindEventExpression = lanta.Markup.bindEventExpression || function(owner, element, expression) {
+
+    var expressions = [];
+
+    var rawExpressions = expression.split(";");
     
-	var expressions = expression.split(";");
+    for (var ri = 0; ri < rawExpressions.length; ri++) {
+        var rawExpression = rawExpressions[ri].trim();
+
+        if (rawExpression.length < 0) {
+            continue;
+        }
+
+        for (var macro in lanta.Markup.multieventMacros) {
+            if (lanta.Markup.multieventMacros.hasOwnProperty(macro)) {
+                rawExpression = rawExpression.replace(macro, lanta.Markup.multieventMacros[macro]);
+            }
+        }
+
+        var reparts = rawExpression.split(':');
+        if (reparts.length < 3) {
+            expressions.push(rawExpression);
+            continue;
+        }
+
+        for (var evtinx = 0; evtinx < (reparts.length - 1); evtinx++) {
+            expressions.push(reparts[evtinx] + ':' + reparts[reparts.length - 1]);
+        }
+    }
+
 
 	for (var expIndex = 0; expIndex < expressions.length; expIndex++) {
 	    var exp = expressions[expIndex];

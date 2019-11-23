@@ -1,0 +1,162 @@
+﻿<div id="recipeEditor">
+    <div>
+        <div class="formRow">
+            <label>Receptura</label>
+            <input type="text" data-bind="value:RecipeName" event-bind="userinput:updateVm('RecipeName', this.value)">
+        </div>
+        <div class="formRow">
+            <label>Pro výrobu</label>
+            <input type="text" data-bind="value:ProducedAmountText"  event-bind="userinput:updateVm('ProducedAmountText', this.value)">
+            <div data-bind="text:MaterialName"></div>
+        </div>
+        <div class="formRow">
+            <label>Cena práce</label>
+            <div class="stackLeft">
+                <input type="number" data-bind="value:ProductionPrice" event-bind="userinput:updateVm('ProductionPrice', this.value)" /><span>CZK</span>
+            </div>
+        </div>
+        <div class="formRow">
+            <label>Poznámka</label>
+            <textarea data-bind="value:Note;html:Note" event-bind="userinput:updateVm('Note', this.value)" ></textarea>
+        </div>
+        <div class="formRow">
+            <h1>Složení</h1>
+
+            <div data-bind="itemsSource:Items" data-key="index" lt-name="componentListContainer">
+                <div class="lt-template">
+                    <div class="stackLeft">
+                        <div>
+                            <i class="fas fa-crown crown" data-bind="class.crown-active:IsTransformationSource" event-bind="click:toggleTransformationSource(index)" title="Hlavní složka - má vždy stejné číslo šarže jako vyrobený produkt"></i>
+                        </div>
+                        <div>
+                            <div class="autocomplete" lt-name="materialAutocompleteContainer">
+                                <input data-bind="value:Text" event-bind="userinput:onMaterialTextChange(VM, this, $materialAutocompleteContainer, $errorBox); focus:onMaterialInputFocus;blur:onMaterialInputBlur;">
+                            </div>
+                            <div lt-name="errorBox"></div>
+                        </div>
+                        <div class="recipeComponentControls">
+                            <i class="fas fa-minus faButton" event-bind="click:deleteComponent(index)"></i>
+                            <div class="recipeComponentUpDown stackLeft" data-bind="class.hidden:IsTransformationSource">
+                                <i class="fas fa-caret-up faButton" event-bind="click:moveComponent(index, -1)"></i>
+                                <i class="fas fa-caret-down faButton" event-bind="click:moveComponent(index, 1)"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <i class="fas fa-plus faButton" event-bind="click:addComponent"></i>
+            </div>
+        </div>
+        <div class="formActions stackLeft">
+            <button class="butCancel" event-bind="click:cancel"></button>
+            <button class="butSubmit" event-bind="click:save"></button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .crown {
+        cursor: pointer;
+        opacity: 0.2;
+    }
+
+    .crown-active {
+        opacity: 1;
+    }
+
+</style>
+
+<script>
+    lt.element("recipeEditor").withModel("app.recipesEditor.vm.openRecipe").attach(function () {
+
+        var matlistvm = app.ui.MaterialList.vm;
+
+        var componentAutosuggestCustomizer = 
+        {
+            "initContext": function(inputElement) {
+                return matlistvm.parseMaterialEntry(inputElement.value);
+            },
+            "toSearchExpression": function (inputExpression, context) { return context.materialName; },
+            "applySelectedValue": function (selectedValue, inputElement, context) {
+
+                inputElement.value = context.amount + " " + context.unitName + " " + selectedValue;
+            }
+        };
+
+        this.onMaterialTextChange = function (vm, componentMaterialInput, autosuggest, errorBox) {
+
+            if (!autosuggest.wasSetup) {
+                autosuggest.wasSetup = true;
+                app.ui.autosuggest(autosuggest, app.warehouseActions.vm.searchMaterialNames, null, componentAutosuggestCustomizer);
+            }
+
+            var parsed = matlistvm.parseMaterialEntry(componentMaterialInput.value);
+            errorBox.innerHTML = parsed.error;
+
+            vm.Text = componentMaterialInput.value;
+            lt.notify(this);
+        };
+
+        this.onMaterialInputFocus = function () { };
+        this.onMaterialInputBlur = function () { };
+
+        this.toggleTransformationSource = function(itemIndex) {
+            app.recipesEditor.vm.toggleTransformationSource(itemIndex);
+            lt.notify(this);
+        };
+
+        this.deleteComponent = function(index) {
+            app.recipesEditor.vm.deleteComponent(index);
+            lt.notify(this);
+        };
+
+        this.moveComponent = function(index, direction) {
+            app.recipesEditor.vm.moveComponent(index, direction);
+            lt.notify(this);
+        };
+
+        this.addComponent = function() {
+            app.recipesEditor.vm.addComponent();
+            lt.notify(this);
+        };
+
+        var updates = {};
+        var updateThrottle = null;
+
+        var sendUpdates = function() {
+
+            for (var prop in updates) {
+                if (updates.hasOwnProperty(prop)) {
+                    app.recipesEditor.vm.openRecipe[prop] = updates[prop];
+                }
+            }
+
+            updates = {};
+
+            //lt.notify();
+        };
+
+        this.updateVm = function(propertyName, value) {
+
+            if (updateThrottle) {
+                clearTimeout(updateThrottle);
+            }
+
+            updates[propertyName] = value;
+            updateThrottle = setTimeout(sendUpdates, 100);
+        };
+
+        this.cancel = function() {
+            app.recipesEditor.vm.cancelRecipeEdit();
+        };
+
+        this.save = function() {
+            app.recipesEditor.vm.saveRecipe();
+        };
+    });
+</script>
+<script src="/UI/Controls/Common/MaterialList/MaterialListVm.js"></script>
+<script src="/Script/Apps/Inventory/WarehouseActions/WarehouseActions.VM.js"></script>
+<script src="/UI/Controls/Common/AutoSuggest.js"></script>
+<link href="/UI/Controls/Common/Autosuggest.css" rel="stylesheet" />

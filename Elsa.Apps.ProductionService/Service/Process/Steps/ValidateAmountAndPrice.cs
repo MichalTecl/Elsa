@@ -24,6 +24,19 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
                 context.Request.ProducingAmount = 0;
                 context.InvalidateRequest("Je třeba zadat množství");
             }
+            else
+            {
+                if (context.Request.PriceCalcAmount != (context.Request.ProducingAmount ?? 0m))
+                {
+                    if (context.Recipe.ProductionPricePerUnit != null)
+                    {
+                        context.Request.ProducingPrice =
+                            context.Recipe.ProductionPricePerUnit * (context.Request.ProducingAmount ?? 0);
+                    }
+
+                    context.Request.PriceCalcAmount = (context.Request.ProducingAmount ?? 0m);
+                }
+            }
             
             if ((context.Request.ProducingPrice ?? 0m) < 0.001m)
             {

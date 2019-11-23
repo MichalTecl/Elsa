@@ -7,6 +7,10 @@
                 <i class="fas fa-heart faButton" data-bind="class!.hidden:onlyFavorite" event-bind="click:toggleFavorite"></i>
                 <i class="far fa-heart faButton" data-bind="class.hidden:onlyFavorite" event-bind="click:toggleFavorite"></i>
             </div>
+            <div title="Zobrazit skryté receptury">
+                <i class="far fa-eye-slash faButton" data-bind="class!.hidden:showDeleted" event-bind="click:toggleDeleted"></i>
+                <i class="far fa-eye faButton" data-bind="class.hidden:showDeleted" event-bind="click:toggleDeleted"></i>
+            </div>
         </div>
 
     </div>
@@ -20,6 +24,17 @@
 
         this.toggleFavorite = function() {
             vm.updateFilters(!vm.onlyFavorite, vm.showDeleted, vm.searchFilter);
+        };
+
+        this.toggleDeleted = function () {
+
+            var fav = vm.onlyFavorite;
+
+            if (!vm.showDeleted) {
+                fav = false;
+            };
+
+            vm.updateFilters(fav, !vm.showDeleted, vm.searchFilter);
         };
 
         this.updateSearchText = function(filter) {

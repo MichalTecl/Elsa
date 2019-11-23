@@ -1,19 +1,49 @@
 ﻿<script src="/Script/Apps/Production/ProductionServiceVM.js"></script>
-
-<div class="stackLeft">
+<script src="/Script/Apps/Production/RecipesEditorVM.js"></script>
+<div class="stackLeft" id="prodUiRoot" style="align-items: flex-start; flex-wrap: nowrap; height: 100%;">
     <div id="recipesColumn">
         <div fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/RecipesFilterUI.html"></div>
         <div fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/RecipesList.html"></div>
     </div>
 
     <div id="prodBatchesUi">
-        
-        <div fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/BatchCreationUI.html"></div>
-
+        <div id="batchCreator" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/BatchCreationUI.html"></div>
         <div id="batchesListing" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/ProductionBatchesList.html"></div>
+        <div id="recipeEditor" fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/RecipeEditor.html"></div>
     </div>
 </div>
+
 <script>
-    
+    lt.element("prodUiRoot").attach(function(batchCreator, batchesListing, recipeEditor) {
+
+        this.bind(function(producingRecipe, openRecipe) {
+
+            var showReport = true;
+
+            if (producingRecipe) {
+                batchCreator.style.display = 'block';
+                showReport = false;
+            } else {
+                batchCreator.style.display = 'none';
+            }
+
+            if (openRecipe) {
+                recipeEditor.style.display = 'block';
+                showReport = false;
+            } else {
+                recipeEditor.style.display = 'none';
+            }
+
+            if (showReport) {
+                batchesListing.style.display = 'block';
+            } else {
+                batchesListing.style.display = 'none';
+            }
+        })
+        .producingRecipeCanBeNull()
+        .openRecipeCanBeNull()
+        .producingRecipeRelativeToGlobal("app.productionService.vm")
+        .openRecipeRelativeToGlobal("app.recipesEditor.vm");
+    });
 </script>
 

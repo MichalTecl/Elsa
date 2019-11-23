@@ -103,6 +103,9 @@
     <Compile Include="Production\Model\SubBatchAssignmentModel.cs" />
     <Compile Include="Production\ProductionFacade.cs" />
     <Compile Include="Production\Recipes\IRecipeRepository.cs" />
+    <Compile Include="Production\Recipes\Model\RecipeEditing\RecipeComponentModel.cs" />
+    <Compile Include="Production\Recipes\Model\RecipeEditing\RecipeInfoWithItems.cs" />
+    <Compile Include="Production\Recipes\Model\RecipeEditing\RecipeItem.cs" />
     <Compile Include="Production\Recipes\Model\RecipeInfo.cs" />
     <Compile Include="Production\Recipes\RecipeRepository.cs" />
     <Compile Include="Repositories\Automation\IRepositoryFactory.cs" />

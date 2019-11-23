@@ -29,5 +29,6 @@ namespace Elsa.Apps.ProductionService.Models
         public List<RequestValidationMessage> Messages { get; } = new List<RequestValidationMessage>();
 
         public List<ProductionComponent> Components { get; } = new List<ProductionComponent>();
+        public decimal PriceCalcAmount { get; set; }
     }
 }

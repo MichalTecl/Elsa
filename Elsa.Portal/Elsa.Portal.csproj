@@ -120,6 +120,7 @@
     <Content Include="Script\Apps\Orders\PaymentPairing.VM.js" />
     <Content Include="Script\Apps\Packing\OrdersPacking.VM.js" />
     <Content Include="Script\Apps\Production\ProductionServiceVM.js" />
+    <Content Include="Script\Apps\Production\RecipesEditorVM.js" />
     <Content Include="Script\Apps\Reporting\InvoiceReporting\InvoiceReportingVm.js" />
     <Content Include="Script\Apps\SaleEvents\SaleEvents.VM.js" />
     <Content Include="Script\Common\ContextMenu.js" />
@@ -157,6 +158,7 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchInput.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\RecipesFilterUI.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\RecipesList.html" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\RecipeEditor.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\StockEventsEditor.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesList.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesUI.html" />

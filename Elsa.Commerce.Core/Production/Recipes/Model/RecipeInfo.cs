@@ -19,5 +19,6 @@ namespace Elsa.Commerce.Core.Production.Recipes.Model
         public bool IsActive { get; set; }
 
         public bool IsFavorite { get; set; }
+
     }
 }

@@ -31,7 +31,8 @@ END
 GO
 
 CREATE TABLE hlpReallocations 
-	(objectName NVARCHAR(100),
+	(id INT IDENTITY(1,1),
+	 objectName NVARCHAR(100),
 	 objectId BIGINT,
 	 batchId INT,
 	 amount DECIMAL(19, 5));
@@ -40,6 +41,16 @@ GO
 IF EXISTS(SELECT * FROM sys.procedures WHERe name = 'sp_reallocate')
 BEGIN
 	DROP PROCEDURE sp_reallocate;
+END
+
+GO
+
+IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE t1
+			  JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE t2 ON t1.TABLE_NAME=t2.TABLE_NAME
+              WHERE OBJECTPROPERTY(OBJECT_ID(t1.CONSTRAINT_NAME),'IsUniqueCnst')=1
+              AND t1.TABLE_NAME='RecipeComponent')
+BEGIN
+	ALTER TABLE RecipeComponent ADD CONSTRAINT UC_component UNIQUE (RecipeId, MaterialId);
 END
 
 GO
@@ -121,7 +132,7 @@ BEGIN
 				SET @allocateHere = @amount;
 			END
 
-			INSERT INTO hlpReallocations 
+			INSERT INTO hlpReallocations (objectName, objectId, batchId, amount)
 			SELECT @objectName, @objectId, @batchId, @allocateHere;
 
 			SET @amount = @amount - @allocateHere;
@@ -166,7 +177,7 @@ BEGIN TRAN;
 /****************************/
 -- DEBUG:
 
-DECLARE @debugBatchId INT; -- = 889;
+DECLARE @debugBatchId INT;-- = 672;
 
 /*****************************/
 
@@ -190,23 +201,6 @@ BEGIN
 	SET @iColId = (SELECT TOP 1 Id FROM InvoiceFormCollection);
 	EXEC DeleteInvoiceFormCollection @iColId;
 END
-
-
--- Record warehouse levels before the refactoring
-
-DECLARE @imlvls TABLE (BatchId INT, UnitId INT, Available DECIMAL(19,5));
-INSERT INTO @imlvls
-EXEC CalculateBatchUsages 1;
-
-DECLARE @lvls1 TABLE (MaterialId INT, BatchNumber NVARCHAR(100), Total DECIMAL(19,5), Available DECIMAL(19,5));
-
-INSERT INTO @lvls1 (MaterialId, BatchNumber, Total, Available)
-SELECT m.Id, mb.BatchNumber, SUM(mb.Volume), SUM(ISNULL(lvls.Available, -999999))
-  FROM Material m
-  JOIN MaterialBatch mb on mb.MaterialId = m.Id
-  LEFT JOIN @imlvls lvls on lvls.BatchId = mb.Id
-  WHERE m.NominalUnitId = 3
-  GROUP BY m.Id, mb.BatchNumber;
   
 -- 1. Create new materials
 DECLARE @prefixMap TABLE (StepName NVARCHAR(100), Prefix NVARCHAR(100));
@@ -232,7 +226,7 @@ SELECT m.Id, mps.Id
   FROM Material m
   JOIN MaterialProductionStep mps ON (m.Id = mps.MaterialId)
  WHERE m.Id NOT IN (SELECT FinalMaterialId FROM hlpMaterialRefactoringLog)
-   AND ((@debugBatchId IS NULL) OR (m.Id = (SELECT sb.MaterialId FROM MaterialBatch sb WHERE sb.Id = @debugBatchId))) ;
+   AND ((@debugBatchId IS NULL) OR (m.Id = (SELECT sb.MaterialId FROM MaterialBatch sb WHERE sb.Id = @debugBatchId)));
 
 
  IF EXISTS(SELECT TOP 1 1 FROM hlpMaterialRefactoringLog lg
@@ -244,6 +238,46 @@ END
 
 
  PRINT 'precheck ok';
+
+ -- Record warehouse levels before the refactoring -------------------
+
+DECLARE @imlvls TABLE (MaterialId INT, CalculatedKey NVARCHAR(200), Volume DECIMAL(19,5), Orders DECIMAL(19, 5), Production DECIMAL(19, 5), Sales DECIMAL(19, 5), Events DECIMAL(19,5));
+INSERT INTO @imlvls
+SELECT mb.MaterialId,
+       mb.CalculatedKey,        
+	   SUM(ISNULL(steps.Amount, mb.Volume)) Volume,
+	   SUM(ISNULL(orders.Amount, 0))        Orders,
+	   SUM(ISNULL(production.Amount, 0))    Production,
+	   SUM(ISNULL(sales.Amount, 0))         Sales,
+	   SUM(ISNULL(stevents.Amount, 0))      Events
+  FROM MaterialBatch mb
+  
+  LEFT JOIN (SELECT ps.BatchId, SUM(ps.ProducedAmount)  as Amount
+               FROM BatchProductionStep ps
+			  GROUP BY ps.BatchId) steps ON steps.BatchId = mb.Id
+
+  LEFT JOIN (SELECT ob.MaterialBatchId, SUM(ob.Quantity) as Amount
+               FROM OrderItemMaterialBatch ob 
+			 GROUP BY ob.MaterialBatchId) orders ON orders.MaterialBatchId = mb.Id
+
+  LEFT JOIN (SELECT mbc.ComponentId, SUM(mbc.Volume) as Amount
+               FROM MaterialBatchComposition mbc
+			GROUP BY mbc.ComponentId) production ON production.ComponentId = mb.Id
+
+  LEFT JOIN (SELECT se.BatchId, SUM(se.Delta) as Amount
+               FROM MaterialStockEvent se
+			 GROUP BY se.BatchId) stevents ON stevents.BatchId = mb.Id
+
+  LEFT JOIN (SELECT sea.BatchId, SUM(sea.AllocatedQuantity - ISNULL(sea.ReturnedQuantity, 0)) as Amount
+               FROM SaleEventAllocation sea
+             GROUP BY sea.BatchId) sales ON sales.BatchId = mb.Id
+  WHERE mb.MaterialId IN (SELECT lg.FinalMaterialId FROM hlpMaterialRefactoringLog lg)
+    
+GROUP BY mb.MaterialId, mb.CalculatedKey; 
+
+
+----------------------------------------------------------------------
+
 
  WHILE EXISTS(SELECT TOP 1 1 FROM hlpMaterialRefactoringLog WHERE DerivedMaterialId IS NULL)
  BEGIN
@@ -258,8 +292,8 @@ END
 	DECLARE @dbgMatName NVARCHAR(100) = (SELECT Name FROM Material WHERE Id = @targetMaterialId);
 	PRINT '>> Starting conversion of material = ' + @dbgMatName;
 
-	INSERT INTO Material (Name,           NominalUnitId,   NominalAmount,   ProjectId, InventoryId, AutomaticBatches, RequiresInvoiceNr, RequiresPrice, RequiresSupplierReference)
-	SELECT prefx.Prefix + ' ' + m.Name, m.NominalUnitId, m.NominalAmount, m.ProjectId,         2, m.AutomaticBatches, 0, 0, 0 
+	INSERT INTO Material (Name,           NominalUnitId,   NominalAmount,   ProjectId,   InventoryId, AutomaticBatches, RequiresInvoiceNr, RequiresPrice, RequiresSupplierReference)
+	SELECT prefx.Prefix + ' ' + m.Name, m.NominalUnitId, m.NominalAmount, m.ProjectId, CASE WHEN m.InventoryId < 3 THEN m.InventoryId ELSE 2 END , m.AutomaticBatches, 0, 0, 0 
 	  FROM Material m
 	  JOIN MaterialProductionStep mps ON (m.Id = mps.MaterialId)
 	  JOIN @prefixMap prefx ON (prefx.StepName = mps.Name)
@@ -270,19 +304,19 @@ END
 
 	SET @dbgMatName = (SELECT Name FROM Material WHERE Id = @newMaterialId);
 	PRINT '>> Created new material ' + @dbgMatName;
-
-	-- Create recipe
+	 
+	-- Create recipe from production step
 	INSERT INTO Recipe (RecipeName, ValidFrom, CreateUserId, ProducedMaterialId, RecipeProducedAmount, ProducedAmountUnitId, ProjectId, ProductionPricePerUnit)
 	SELECT               mps.Name, '20190101', 2,             @targetMaterialId,     m.NominalAmount, m.NominalUnitId,     m.ProjectId, mps.PricePerUnit
 	  FROM MaterialProductionStep mps 
-	  JOIN Material               m   ON (mps.MaterialId = m.Id)
+	  JOIN Material m ON (mps.MaterialId = m.Id)	   
 	 WHERE mps.Id = @productionStepId;
 	
 	SET @newRecipeId = SCOPE_IDENTITY();
 
 	-- Create recipe components based on components of originating step:
 	INSERT INTO RecipeComponent (MaterialId,   SortOrder, RecipeId, IsTransformationInput, UnitId, Amount)
-	                     SELECT @targetMaterialId, sm.Id, @newRecipeId,                 0, sm.UnitId, sm.Amount
+	                     SELECT sm.MaterialId, sm.Id, @newRecipeId,                 0, sm.UnitId, sm.Amount
 						   FROM MaterialProductionStepMaterial sm
 						  WHERE sm.StepId = @productionStepId;
 	
@@ -295,6 +329,24 @@ END
 	UPDATE hlpMaterialRefactoringLog
 	   SET DerivedMaterialId = @newMaterialId
 	 WHERE FinalMaterialId = @targetMaterialId;
+
+	 -- Create recipe from material components
+     IF EXISTS(SELECT TOP 1 1 FROM MaterialComposition mc WHERE mc.CompositionId = @targetMaterialId)
+	 BEGIN	 
+		INSERT INTO Recipe (RecipeName, ValidFrom, CreateUserId, ProducedMaterialId, RecipeProducedAmount, ProducedAmountUnitId, ProjectId, ProductionPricePerUnit)
+		SELECT               N'Výroba' , '20190101', 2,             @newMaterialId,  m.NominalAmount, m.NominalUnitId,     m.ProjectId, null
+		  FROM Material               m  
+		 WHERE m.Id = @newMaterialId;
+	
+		DECLARE @migratedRecipeId INT = SCOPE_IDENTITY();
+
+		INSERT INTO RecipeComponent (MaterialId, SortOrder, RecipeId, IsTransformationInput, UnitId, Amount)
+		SELECT mc.ComponentId, mc.Id, @migratedRecipeId, 0, mc.UnitId, mc.Amount 
+		  FROM MaterialComposition mc
+		 WHERE mc.CompositionId = @targetMaterialId;
+		
+		DELETE FROM MaterialComposition WHERE CompositionId = @targetMaterialId;
+	 END
 
 
 	 /***************** Process batches *******************************/
@@ -383,10 +435,44 @@ END
 	END	
  END
 
- -- delete step objects:
- DELETE FROM MaterialProductionStepMaterial;
- DELETE FROM MaterialProductionStep;
+ -- delete steps:
+ IF (@debugBatchId IS NULL)
+ BEGIN 
+	DELETE FROM MaterialProductionStepMaterial;
+	DELETE FROM MaterialProductionStep;
+ END
  --
+
+ -- Migrate components to recipes
+ WHILE EXISTS (SELECT TOP 1 1 FROM MaterialComposition)
+ BEGIN
+ 	DECLARE @coCompositionId INT = (SELECT TOP 1 CompositionId FROM MaterialComposition);
+
+	INSERT INTO Recipe (RecipeName, ValidFrom, CreateUserId, ProducedMaterialId, RecipeProducedAmount, ProducedAmountUnitId, ProjectId, ProductionPricePerUnit)
+		SELECT               N'Výroba' , '20190101', 2,             @coCompositionId,  m.NominalAmount, m.NominalUnitId,     m.ProjectId, null
+		  FROM Material               m  
+		 WHERE m.Id = @coCompositionId;
+	
+	DECLARE @coMigratedRecipeId INT = SCOPE_IDENTITY();
+
+	INSERT INTO RecipeComponent (MaterialId, SortOrder, RecipeId, IsTransformationInput, UnitId, Amount)
+	SELECT mc.ComponentId, mc.Id, @coMigratedRecipeId, 0, mc.UnitId, mc.Amount 
+		FROM MaterialComposition mc
+		WHERE mc.CompositionId = @coCompositionId;
+		
+	DELETE FROM MaterialComposition WHERE CompositionId = @coCompositionId;
+ END
+
+
+
+ -- Move materials with recipes to manufactured inventory
+UPDATE Material SET InventoryId = 2
+WHERE InventoryId = 1
+AND Id IN 
+(
+	SELECT ProducedMaterialId 
+	  FROM Recipe
+);
 
 
 DECLARE @realo TABLE (Id INT IDENTITY(1,1),
@@ -468,37 +554,171 @@ BEGIN
 	PRINT @m;
 	THROW  51000, @m, 1; 
 END
-
- -- check that any amount didn't change
-
-DELETE FROM @imlvls;
-INSERT INTO @imlvls
-EXEC CalculateBatchUsages 1;
-
-DECLARE @lvls2 TABLE (MaterialId INT, BatchNumber NVARCHAR(100), Total DECIMAL(19,5), Available DECIMAL(19,5));
-
-INSERT INTO @lvls2 (MaterialId, BatchNumber, Total, Available)
-SELECT m.Id, mb.BatchNumber, SUM(mb.Volume), SUM(ISNULL(lvls.Available, -999999))
-  FROM Material m
-  JOIN MaterialBatch mb on mb.MaterialId = m.Id
-  LEFT JOIN @imlvls lvls on lvls.BatchId = mb.Id
-  WHERE m.NominalUnitId = 3
-  GROUP BY m.Id, mb.BatchNumber;
-
-IF ((SELECT COUNT(*) FROM @lvls1) <> (SELECT COUNT(*) FROM @lvls2))
+ELSE
 BEGIN
-	THROW  51000, 'Different count of records in comparison check tables', 1; 
+	PRINT 'Allocations OK!';
 END
 
-IF EXISTS(SELECT TOP 1 1 FROM (
-		SELECT l1.MaterialId, l1.BatchNumber, l1.Total - l2.Total TotalDiff, l1.Available - l2.Available AvailDiff
-			 FROM @lvls1 l1
-		LEFT JOIN @lvls2 l2 ON (l1.MaterialId = l2.MaterialId AND l1.BatchNumber = l2.BatchNumber)) x
-	    WHERE x.TotalDiff <> 0 OR x.AvailDiff <> 0)
-BEGIN
-	THROW  51000, 'Levels comparison check failed!', 1; 
-END
+-------------------------------------------------------------------------------------------------------------------
+DECLARE @upsertSource TABLE (objectName NVARCHAR(200) NOT NULL, objectId BIGINT NULL, templateId BIGINT NOT NULL, batchId INT NOT NULL, amount DECIMAL(19, 5));
+INSERT INTO @upsertSource
+SELECT r.objectName, 
+       case when up.minid = r.id then r.objectId else null end, 
+	   r.objectId,
+	   r.batchId,
+	   r.amount
+  FROM hlpReallocations r
+  JOIN (SELECT sr.objectName, sr.objectId, MIN(sr.id) as minid
+         FROM hlpReallocations sr
+		GROUP BY sr.objectName, sr.objectId) as up ON (up.objectName = r.objectName AND up.objectId = r.objectId);
 
+MERGE MaterialStockEvent as tgt
+USING (SELECT s.objectId as _objectId,
+              s.batchId  as _batchId,
+			  s.amount   as _amount,
+			  template.* 
+         FROM @upsertSource s 
+		 JOIN MaterialStockEvent template ON (s.templateId = template.Id)
+	   WHERE s.objectName = 'MaterialStockEvent') as src ON (tgt.Id = src._objectId)
+WHEN MATCHED THEN
+	UPDATE SET tgt.BatchId = src._batchId,	           		
+	           tgt.Delta = src._amount
+WHEN NOT MATCHED THEN
+	INSERT (BatchId, UnitId, Delta, ProjectId, TypeId, Note, UserId, EventGroupingKey, EventDt, SourcePurchaseOrderId)
+	VALUES (src._batchId, src.UnitId, src._amount, src.ProjectId, src.TypeId, src.Note, src.UserId, src.EventGroupingKey, src.EventDt, src.SourcePurchaseOrderId);
+
+
+MERGE OrderItemMaterialBatch as tgt
+USING (SELECT s.objectId as _objectId,
+              s.batchId  as _batchId,
+			  s.amount   as _amount,
+			  template.* 
+         FROM @upsertSource s 
+		 JOIN OrderItemMaterialBatch template ON (s.templateId = template.Id)
+	   WHERE s.objectName = 'OrderItemMaterialBatch') as src ON (tgt.Id = src._objectId)
+WHEN MATCHED THEN
+	UPDATE SET tgt.MaterialBatchId = src._batchId,	           		
+	           tgt.Quantity = src._amount
+WHEN NOT MATCHED THEN
+	INSERT (OrderItemId,      MaterialBatchId, Quantity, UserId, AssignmentDt)
+	VALUES (src.OrderItemId,  src._batchId,    src._amount, src.UserId, src.AssignmentDt);
+
+
+MERGE MaterialBatchComposition as tgt
+USING (SELECT s.objectId as _objectId,
+              s.batchId  as _batchId,
+			  s.amount   as _amount,
+			  template.* 
+         FROM @upsertSource s 
+		 JOIN MaterialBatchComposition template ON (s.templateId = template.Id)
+	   WHERE s.objectName = 'MaterialBatchComposition') as src ON (tgt.Id = src._objectId)
+WHEN MATCHED THEN
+	UPDATE SET tgt.ComponentId = src._batchId,	           		
+	           tgt.Volume = src._amount
+WHEN NOT MATCHED THEN
+	INSERT (CompositionId,       ComponentId, UnitId,      Volume)
+	VALUES (src.CompositionId,  src._batchId, src.UnitId,  src._amount);
+	
+
+MERGE SaleEventAllocation as tgt
+USING (SELECT s.objectId as _objectId,
+              s.batchId  as _batchId,
+			  s.amount   as _amount,
+			  template.* 
+         FROM @upsertSource s 
+		 JOIN SaleEventAllocation template ON (s.templateId = template.Id)
+	   WHERE s.objectName = 'SaleEventAllocation') as src ON (tgt.Id = src._objectId)
+WHEN MATCHED THEN
+	UPDATE SET tgt.BatchId = src._batchId,	           		
+	           tgt.AllocatedQuantity = src._amount,
+			   tgt.ReturnedQuantity = 0
+WHEN NOT MATCHED THEN
+	INSERT (SaleEventId, BatchId, AllocatedQuantity, ReturnedQuantity, UnitId, AllocationDt, ReturnDt, AllocationUserId, ReturnUserId)
+	VALUES (src.SaleEventId, src._batchId, src._amount, 0, src.UnitId, src.AllocationDt, src.ReturnDt, src.AllocationUserId, src.ReturnUserId);
+
+-- delete reassinged batches
+
+DELETE FROM MaterialBatch
+WHERE Id IN (SELECT s.originalBatchId FROM hlpBatchSplit s);
+
+ -- Check amounts didnt change  -------------------
+
+DECLARE @imlvls2 TABLE (MaterialId INT, CalculatedKey NVARCHAR(200), Volume DECIMAL(19,5), Orders DECIMAL(19, 5), Production DECIMAL(19, 5), Sales DECIMAL(19, 5), Events DECIMAL(19,5));
+INSERT INTO @imlvls2
+SELECT mb.MaterialId,
+       mb.CalculatedKey,        
+	   SUM(ISNULL(steps.Amount, mb.Volume)) Volume,
+	   SUM(ISNULL(orders.Amount, 0))        Orders,
+	   SUM(ISNULL(production.Amount, 0))    Production,
+	   SUM(ISNULL(sales.Amount, 0))         Sales,
+	   SUM(ISNULL(stevents.Amount, 0))      Events
+  FROM MaterialBatch mb
+  
+  LEFT JOIN (SELECT ps.BatchId, SUM(ps.ProducedAmount)  as Amount
+               FROM BatchProductionStep ps
+			  GROUP BY ps.BatchId) steps ON steps.BatchId = mb.Id
+
+  LEFT JOIN (SELECT ob.MaterialBatchId, SUM(ob.Quantity) as Amount
+               FROM OrderItemMaterialBatch ob 
+			 GROUP BY ob.MaterialBatchId) orders ON orders.MaterialBatchId = mb.Id
+
+  LEFT JOIN (SELECT mbc.ComponentId, SUM(mbc.Volume) as Amount
+               FROM MaterialBatchComposition mbc
+			GROUP BY mbc.ComponentId) production ON production.ComponentId = mb.Id
+
+  LEFT JOIN (SELECT se.BatchId, SUM(se.Delta) as Amount
+               FROM MaterialStockEvent se
+			 GROUP BY se.BatchId) stevents ON stevents.BatchId = mb.Id
+
+  LEFT JOIN (SELECT sea.BatchId, SUM(sea.AllocatedQuantity - ISNULL(sea.ReturnedQuantity, 0)) as Amount
+               FROM SaleEventAllocation sea
+             GROUP BY sea.BatchId) sales ON sales.BatchId = mb.Id
+  WHERE mb.MaterialId IN (SELECT lg.FinalMaterialId FROM hlpMaterialRefactoringLog lg)
+GROUP BY mb.MaterialId, mb.CalculatedKey; 
+
+
+
+select mi.name, count(distinct m.Id) CountOfMaterials,  count(distinct r.Id) CountOfRecipes
+ from MaterialInventory mi
+ join material m on m.InventoryId = mi.id
+ left join recipe r on r.ProducedMaterialId = m.Id
+group by mi.Name;
+
+select mi.name, m.Name Material,  r.RecipeName Recipe
+ from MaterialInventory mi
+ join material m on m.InventoryId = mi.id
+ left join recipe r on r.ProducedMaterialId = m.Id
+ORDER BY mi.Id, m.Name, r.RecipeName;
+
+
+
+
+----------------------------------------------------------------------
+
+IF EXISTS(SELECT TOP 1 1
+			  FROM @imlvls a
+			  LEFT JOIN @imlvls2 b ON (a.CalculatedKey = b.CalculatedKey)
+			  WHERE (b.CalculatedKey IS NULL)
+				 OR ((a.Orders - b.Orders) <> 0)
+				 OR ((a.Production - b.Production) <> 0)
+				 OR ((a.Sales - b.Sales) <> 0)
+				 OR ((a.Events - b.Events) <> 0)
+				 OR ((a.Volume - b.Volume) <> 0))
+BEGIN
+	SELECT a.CalculatedKey, (a.Volume - b.Volume) Volume, (a.Orders - b.Orders) Orders, (a.Production - b.Production) Production, (a.Events - b.Events) Events
+			  FROM @imlvls a
+			  LEFT JOIN @imlvls2 b ON (a.CalculatedKey = b.CalculatedKey)
+			  WHERE (b.CalculatedKey IS NULL)
+				 OR ((a.Orders - b.Orders) <> 0)
+				 OR ((a.Production - b.Production) <> 0)
+				 OR ((a.Sales - b.Sales) <> 0)
+				 OR ((a.Events - b.Events) <> 0)
+				 OR ((a.Volume - b.Volume) <> 0);
+
+
+	THROW 50001, '!!!!', 1;
+END
+----------------------------------------------------------------------
 
 
 END TRY
@@ -507,8 +727,9 @@ BEGIN CATCH
 	PRINT ERROR_MESSAGE();
 END CATCH
 
-PRINT '!!! Don`t forget to backup the database before commit!';
-ROLLBACK;
+-- COMMIT
+
+ROLLBACK
 
 
 

@@ -45,7 +45,7 @@ app.productionService.VM = app.productionService.VM || function() {
                 var recipe = materialNode.Recipes[recindex];
                 recipe.Visible = true;
 
-                if (!textMatcher.match(recipe.RecipeName, true)) {
+                if (!textMatcher.match(recipe.searchText, true)) {
                     recipe.Visible = false;
                 }
 
@@ -56,8 +56,12 @@ app.productionService.VM = app.productionService.VM || function() {
                 if (self.onlyFavorite && (!recipe.IsFavorite)) {
                     recipe.Visible = false;
                 }
-
+                
                 materialNode.Visible = materialNode.Visible || recipe.Visible;
+
+                if (recipe.IsPlaceholder) {
+                    recipe.Visible = false;
+                }
             }
         }
     };
@@ -92,11 +96,17 @@ app.productionService.VM = app.productionService.VM || function() {
     var receiveUpdatedRecipe = function(updatedRecipe) {
         var materialNode = getOrCreateMaterialNode(updatedRecipe.MaterialId);
 
-        for (var i = 0; i < materialNode.Recipes.length; i++) {
-            var recipe = materialNode.Recipes[i];
-            if (recipe.RecipeId === updatedRecipe.RecipeId) {
-                recipe.IsFavorite = updatedRecipe.IsFavorite;
-                break;
+        if (updatedRecipe.IsPlaceholder) {
+            //what to do?
+
+        } else {
+            for (var i = 0; i < materialNode.Recipes.length; i++) {
+                var recipe = materialNode.Recipes[i];
+                if (recipe.RecipeId === updatedRecipe.RecipeId) {
+                    recipe.IsFavorite = updatedRecipe.IsFavorite;
+                    recipe.IsActive = updatedRecipe.IsActive;
+                    break;
+                }
             }
         }
 
@@ -152,7 +162,11 @@ app.productionService.VM = app.productionService.VM || function() {
         lt.api("/productionService/toggleFavorite").query({ "recipeId": recipeId }).get(receiveUpdatedRecipe);
     };
 
-    var loadRecipes = function() {
+    this.toggleDeleted = function (recipeId) {
+        lt.api("/productionService/toggleDeleted").query({ "recipeId": recipeId }).get(receiveUpdatedRecipe);
+    };
+
+    var loadRecipes = function(doNotModifyFilters) {
 
         self.recipes = [];
         lt.notify();
@@ -168,15 +182,26 @@ app.productionService.VM = app.productionService.VM || function() {
                 hasFavorite = hasFavorite || recipe.IsFavorite;
 
                 var materialNode = getOrCreateMaterialNode(recipe.MaterialId, recipe.MaterialName);
+                recipe.searchText = recipe.MaterialName + " " + recipe.RecipeName;
                 materialNode.Recipes.push(recipe);
             }
 
-            self.onlyFavorite = hasFavorite;
+            if (!doNotModifyFilters) {
+                self.onlyFavorite = hasFavorite;
+            }
 
             updateRecipesView();
         });
 
     };
+
+    this.reloadRecipes = function () {
+    
+        self.cancelProducingRecipe();
+        
+        loadRecipes(true);
+    };
+
     setTimeout(loadRecipes, 0);
 };
 

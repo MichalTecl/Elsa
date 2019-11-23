@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Elsa.Commerce.Core.Production.Recipes.Model;
+using Elsa.Commerce.Core.Production.Recipes.Model.RecipeEditing;
+using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
+using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 using Robowire.RobOrm.Core;
 
@@ -16,13 +21,17 @@ namespace Elsa.Commerce.Core.Production.Recipes
         private readonly ICache m_cache;
         private readonly ISession m_session;
         private readonly IMaterialRepository m_materialRepository;
+        private readonly IUnitRepository m_unitRepository;
+        private readonly IUnitConversionHelper m_conversionHelper;
         
-        public RecipeRepository(IDatabase database, ICache cache, ISession session, IMaterialRepository materialRepository)
+        public RecipeRepository(IDatabase database, ICache cache, ISession session, IMaterialRepository materialRepository, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper)
         {
             m_database = database;
             m_cache = cache;
             m_session = session;
             m_materialRepository = materialRepository;
+            m_unitRepository = unitRepository;
+            m_conversionHelper = conversionHelper;
         }
 
         public IEnumerable<IRecipe> GetRecipesByMaterialId(int materialId)
@@ -90,6 +99,206 @@ namespace Elsa.Commerce.Core.Production.Recipes
             m_cache.Remove($"recipes{m_session.User.Id}");
 
             return GetRecipes().FirstOrDefault(r => r.RecipeId == recipeId);
+        }
+
+        public RecipeInfoWithItems LoadRecipe(int recipeId)
+        {
+            var entity = m_database.SelectFrom<IRecipe>().Join(r => r.Components).Join(r => r.ProducedMaterial)
+                .Join(r => r.Components.Each().Material)
+                .Where(r => r.ProjectId == m_session.Project.Id && r.Id == recipeId).Execute().FirstOrDefault();
+
+            if (entity == null)
+            {
+                return null;
+            }
+
+            var model = new RecipeInfoWithItems()
+            {
+                IsActive = entity.DeleteDateTime == null && entity.DeleteUserId == null,
+                MaterialId = entity.ProducedMaterialId,
+                MaterialName = entity.ProducedMaterial.Name,
+                RecipeId = entity.Id,
+                RecipeName = entity.RecipeName,
+                Amount = entity.RecipeProducedAmount,
+                ProductionPrice = entity.ProductionPricePerUnit ?? 0,
+                AmountUnit = m_unitRepository.GetUnit(entity.ProducedAmountUnitId).Symbol,
+                Note = entity.Note
+            };
+
+            foreach (var c in entity.Components.OrderBy(c => c.SortOrder))
+            {
+                var me = new MaterialEntry()
+                {
+                    Amount = c.Amount,
+                    MaterialName = c.Material.Name,
+                    UnitName = m_unitRepository.GetUnit(c.UnitId).Symbol
+                };
+
+                model.Items.Add(new RecipeItem()
+                {
+                    IsTransformationSource = c.IsTransformationInput,
+                    Text = me.ToString(),
+                    IsValid = true
+                });
+            }
+
+            return model;
+        }
+
+        public RecipeInfo SetRecipeDeleted(int recipeId, bool shouldBeDeleted)
+        {
+            var entity = m_database.SelectFrom<IRecipe>()
+                .Where(r => r.ProjectId == m_session.Project.Id && r.Id == recipeId).Take(1).Execute().FirstOrDefault().Ensure();
+
+            if (shouldBeDeleted == (entity.DeleteUserId != null))
+            {
+                return GetRecipes().FirstOrDefault(r => r.RecipeId == recipeId);
+            }
+
+            if (shouldBeDeleted)
+            {
+                entity.DeleteUserId = m_session.User.Id;
+                entity.DeleteDateTime = DateTime.Now;
+            }
+            else
+            {
+                entity.DeleteUserId = null;
+                entity.DeleteDateTime = null;
+            }
+
+            m_database.Save(entity);
+
+            m_cache.Remove($"recipes{m_session.User.Id}");
+
+            return GetRecipes().FirstOrDefault(r => r.RecipeId == recipeId);
+        }
+
+        public RecipeInfo SaveRecipe(int materialId, int recipeId, string recipeName, decimal productionPrice,
+            Amount producedAmount,
+            string note, IEnumerable<RecipeComponentModel> components)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var recipeMaterial = m_materialRepository.GetMaterialById(materialId).Ensure();
+                if (!recipeMaterial.IsManufactured)
+                {
+                    throw new InvalidOperationException(
+                        $"Material {recipeMaterial.Name} není nastaven jako vyráběný (podle skladu {recipeMaterial.InventoryName}, do kterého patří)");
+                }
+
+                var allMaterialRecipes = m_database.SelectFrom<IRecipe>().Join(r => r.Components)
+                    .Where(r => r.ProjectId == m_session.Project.Id)
+                    .Where(r => r.ProducedMaterialId == materialId).Execute().ToList();
+
+                if (allMaterialRecipes.Any(r =>
+                    r.Id != recipeId && r.RecipeName.Equals(recipeName, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    throw new InvalidOperationException(
+                        $"Pro \"{recipeMaterial.Name}\" již existuje receptura s názvem \"{recipeName}\"");
+                }
+
+                if (!m_conversionHelper.AreCompatible(recipeMaterial.NominalUnit.Id, producedAmount.Unit.Id))
+                {
+                    throw new InvalidOperationException(
+                        $"Pro \"{recipeMaterial.Name}\" nelze použít jednotku \"{producedAmount.Unit.Symbol}\"");
+                }
+
+                if (producedAmount.IsNotPositive)
+                {
+                    throw new InvalidOperationException("Výsledné množství musí být kladné číslo");
+                }
+
+                var entity = allMaterialRecipes.FirstOrDefault(r => r.Id == recipeId);
+
+                if ((entity == null) && (recipeId > 0))
+                {
+                    throw new InvalidOperationException("!");
+                }
+
+                entity = entity ?? m_database.New<IRecipe>(r =>
+                {
+                    r.ValidFrom = DateTime.Now;
+                    r.CreateUserId = m_session.User.Id;
+                    r.ProjectId = m_session.Project.Id;
+                });
+
+                entity.RecipeName = recipeName;
+                entity.ProducedMaterialId = recipeMaterial.Id;
+                entity.RecipeProducedAmount = producedAmount.Value;
+                entity.ProducedAmountUnitId = producedAmount.Unit.Id;
+                entity.ProductionPricePerUnit = productionPrice > 0 ? (decimal?)productionPrice : null;
+                entity.Note = note;
+
+                m_database.Save(entity);
+
+                var transfSrcFound = false;
+                var usedMaterials = new HashSet<int>();
+                
+                foreach (var srcComponent in components)
+                {
+                    if (srcComponent.IsTransformationSource)
+                    {
+                        if (transfSrcFound)
+                        {
+                            throw new InvalidOperationException($"Pouze jedna slozka muze byt hlavni");
+                        }
+
+                        transfSrcFound = true;
+                    }
+
+                    var componetMaterial = m_materialRepository.GetMaterialById(srcComponent.MaterialId).Ensure();
+
+                    if (!srcComponent.Amount.IsPositive)
+                    {
+                        throw new InvalidOperationException($"Množství složky {componetMaterial.Name} musí být kladné číslo");
+                    }
+
+                    if (!m_conversionHelper.AreCompatible(componetMaterial.NominalUnit.Id, srcComponent.Amount.Unit.Id))
+                    {
+                        throw new InvalidOperationException(
+                            $"Pro \"{componetMaterial.Name}\" nelze použít jednotku \"{srcComponent.Amount.Unit.Symbol}\"");
+                    }
+
+                    if (!usedMaterials.Add(srcComponent.MaterialId))
+                    {
+                        throw new InvalidOperationException($"Materiál {componetMaterial.Name} je ve složení více než jednou");
+                    }
+
+
+                    var componentEntity =
+                        entity.Components.FirstOrDefault(c => c.MaterialId == srcComponent.MaterialId) ??
+                        m_database.New<IRecipeComponent>(
+                            c =>
+                            {
+                                c.MaterialId = srcComponent.MaterialId;
+                                c.RecipeId = entity.Id;
+                            });
+
+                    componentEntity.IsTransformationInput = srcComponent.IsTransformationSource;
+                    componentEntity.MaterialId = componetMaterial.Id;
+                    componentEntity.SortOrder = srcComponent.SortOrder;
+                    componentEntity.Amount = srcComponent.Amount.Value;
+                    componentEntity.UnitId = srcComponent.Amount.Unit.Id;
+
+                    m_database.Save(componentEntity);
+                }
+
+                if (!usedMaterials.Any())
+                {
+                    throw new InvalidOperationException("Receptura musí mít alespoň jednu složku!");
+                }
+
+                foreach (var removedComponent in entity.Components.Where(rc => !usedMaterials.Contains(rc.MaterialId)))
+                {
+                    m_database.Delete(removedComponent);
+                }
+
+                tx.Commit();
+
+                m_cache.Remove($"recipes{m_session.User.Id}");
+
+                return LoadRecipe(entity.Id);
+            }
         }
     }
 }

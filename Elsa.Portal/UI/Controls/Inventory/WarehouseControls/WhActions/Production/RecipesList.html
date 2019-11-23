@@ -3,13 +3,25 @@
         <div class="lt-template" data-bind="class!.hidden:Visible">
             <div data-bind="text:MaterialName"></div>
             <div data-bind="itemsSource:Recipes" data-key="RecipeId">
-                <div class="lt-template stackLeft" data-bind="class!.hidden:Visible" event-bind="click:onRecipeClick(RecipeId)">
-                    <div>
-                        <i class="fas fa-heart faButton" data-bind="class!.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
-                        <i class="far fa-heart faButton" data-bind="class.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
+                <div class="lt-template stackLeft" data-bind="class!.hidden:Visible" >
+                    <div data-bind="text:RecipeName" event-bind="click:onRecipeClick(RecipeId)"></div>
+                    
+                    <div class="stackLeft">
+                        <div>
+                            <i class="fas fa-heart faButton" data-bind="class!.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
+                            <i class="far fa-heart faButton" data-bind="class.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
+                        </div>
+                        <div>
+                            <i class="far fa-eye-slash faButton" data-bind="class.hidden:IsActive" event-bind="click:toggleDeleted(RecipeId)"></i>
+                            <i class="far fa-eye faButton" data-bind="class!.hidden:IsActive" event-bind="click:toggleDeleted(RecipeId)"></i>
+                        </div>
+                        <i class="far fa-clone faButton" event-bind="click:cloneRecipe(MaterialId, RecipeId)"></i>
+                        <i class="fas fa-edit faButton" event-bind="click:editRecipe(MaterialId, RecipeId)"></i>
                     </div>
-                    <div data-bind="text:RecipeName"></div>
                 </div>
+            </div>
+            <div>
+                <i class="fas fa-plus faButton" event-bind="click:editRecipe(MaterialId)"></i>
             </div>
         </div>
     </div>
@@ -21,8 +33,20 @@
             app.productionService.vm.toggleFavorite(recipeId);
         };
 
+        this.toggleDeleted = function(recipeId) {
+            app.productionService.vm.toggleDeleted(recipeId);
+        };
+
         this.onRecipeClick = function(recipeId) {
             app.productionService.vm.setProducingRecipe(recipeId);
+        };
+
+        this.editRecipe = function(materialId, recipeId) {
+            app.recipesEditor.vm.editRecipe(materialId, recipeId || 0);
+        };
+
+        this.cloneRecipe = function (materialId, recipeId) {
+            app.recipesEditor.vm.cloneRecipe(materialId, recipeId);
         };
     });
 </script>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Elsa.Common;
+using Elsa.Common.Utils;
 
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {
@@ -16,7 +18,13 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public override string ToString()
         {
-            return $"{Amount}{UnitName} {MaterialName}";
+            return $"{StringUtil.FormatDecimal(Amount)} {UnitName} {MaterialName}";
+        }
+
+        public Amount GetAmount(IUnitRepository ur)
+        {
+            var unit = ur.GetUnitBySymbol(UnitName).Ensure($"Neznámá měrná jednotka \"{UnitName}\"");
+            return new Amount(Amount, unit);
         }
 
         public static MaterialEntry Parse(string entry, bool allowMissingMaterialName = false)
