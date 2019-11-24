@@ -1,0 +1,72 @@
+#createBatchUI {
+    padding: 5px;
+}
+
+#createBatchUI .formRow > .formRow {
+    padding-right:25px;
+}
+
+#createBatchUI .formRow > label {
+    font-weight:600;
+    margin-bottom:1px;    
+}
+
+#createBatchUI .formRow > h1 {
+    font-weight:800;
+}
+
+#createBatchUI .messagesRow .fa-exclamation-triangle {
+    color:#ff0000;
+    font-size:0.7em;
+    margin-right:4px;
+}
+
+#createBatchUI .messagesRow .errorItem {
+    padding-top:4px;
+    padding-bottom:4px;
+}
+
+#createBatchUI .noteRow {
+    border-top:1px solid #eee;
+    border-bottom:1px solid #eee;
+    padding-top:5px;
+    padding-bottom:10px;
+    color:#444;
+}
+
+#createBatchUI .noteRow .fa-book-open {
+    color:#aaf;
+    margin-top:-10px;
+}
+
+#createBatchUI .bcComponentList .bcComponentRow {
+    padding-top:4px;
+    margin-bottom:20px;
+    border-bottom:1px solid #eee;
+}
+
+#createBatchUI .bcComponentList .bcComponentRow {
+    border-top:1px solid #aaa;
+    padding-top:10px;
+    /*background-color:#fafafa;    */
+}
+
+#createBatchUI .bcComponentList .bcComponentRow:nth-child(1){
+    border-top:none;
+}
+
+#createBatchUI .bcComponentList .bcComponentRow .gridHead {
+    display:none;
+}
+
+#createBatchUI .bcComponentList .gridHead {
+    display:flex;
+}
+
+#createBatchUI .bcComponentList .bcUnusedResolution {
+    opacity:0.3;
+}
+
+#createBatchUI  .bcComponentRow:hover .bcUnusedResolution {
+    opacity:1;
+}

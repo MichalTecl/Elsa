@@ -1,35 +1,41 @@
 ﻿<div id="createBatchUI">
     <div>
-        <div class="formRow">
-            <h1 data-bind="text:producingRecipe.MaterialName"></h1>
+        <div class="formRow stackLeft">
+            <h1 data-bind="text:producingRecipe.MaterialName"></h1><span>&nbsp;-&nbsp;</span><div data-bind="text:producingRecipe.RecipeName"></div>
         </div>
-        <div class="formRow">
-            <label>Šarže</label>
-            <input type="text" data-bind="value:producingRecipe.ProducingBatchNumber" event-bind="keyup:updatemodel(producingRecipe, 'ProducingBatchNumber', this.value)"/>
-        </div>
+        <div class="formRow bcHead stackLeft">
+            <div class="formRow">
+                <label>Šarže</label>
+                <input type="text" class="bcBatchNumber" data-bind="value:producingRecipe.ProducingBatchNumber" event-bind="change:updatemodel(producingRecipe, 'ProducingBatchNumber', this.value)"/>
+            </div>
 
-        <div class="formRow">
-            <label>Množství</label>
-            <div>
-                <input type="number" step="0.001" min="0" data-bind="value:producingRecipe.ProducingAmount" event-bind="keyup:updatemodel(producingRecipe, '#ProducingAmount', this.value)"/>
-                <div data-bind="text:producingRecipe.ProducingUnitSymbol"></div>
+            <div class="formRow">
+                <label>Množství</label>
+                <div class="stackLeft">
+                    <input type="number" class="bcAmount" step="0.001" min="0" data-bind="value:producingRecipe.ProducingAmount" event-bind="change:updatemodel(producingRecipe, '#ProducingAmount', this.value)"/>
+                    <div data-bind="text:producingRecipe.ProducingUnitSymbol"></div>
+                </div>
+            </div>
+
+            <div class="formRow">
+                <label>Cena práce</label>
+                <div class="stackLeft">
+                    <input type="number" step="0.001" min="0" data-bind="value:producingRecipe.ProducingPrice" event-bind="change:updatemodel(producingRecipe, '#ProducingPrice', this.value)"/>
+                    <span>CZK</span>
+                </div>
             </div>
         </div>
-
-        <div class="formRow">
-            <label>Cena práce</label>
-            <div>
-                <input type="number" step="0.001" min="0" data-bind="value:producingRecipe.ProducingPrice" event-bind="keyup:updatemodel(producingRecipe, '#ProducingPrice', this.value)"/>
-                <div data-bind="text:producingRecipe.ProducingUnitSymbol"></div>
-            </div>
-        </div>
-
-        <div class="formRow">
+        <div class="formRow messagesRow" data-bind="class.hidden:producingRecipe.IsValid">
             <div data-bind="itemsSource:producingRecipe.Messages" data-key="Text">
-                <div class="lt-template">
+                <div class="lt-template stackLeft errorItem">
+                    <i class="fas fa-exclamation-triangle"></i>
                     <div data-bind="text:Text"></div>
                 </div>
             </div>
+        </div>
+        <div class="formRow noteRow" data-bind="class!.hidden:producingRecipe.hasNote">
+            <i class="fas fa-book-open"></i>
+            <div data-bind="text:producingRecipe.RecipeNote"></div>
         </div>
     </div>
     
@@ -40,25 +46,34 @@
             <div class="cell10">Vytvořeno</div>
             <div class="cell10">Dostupné</div>
         </div>
-        <div data-bind="itemsSource:producingRecipe.Components" data-key="MaterialId">
-            <div class="lt-template">
-                <div class="stackLeft">
+        <div data-bind="itemsSource:producingRecipe.Components" class="bcComponentList" data-key="MaterialId">
+            <div class="lt-template bcComponentRow">
+                <div class="stackLeft bcComponentText">
                     <div data-bind="text:RequiredAmount"></div>
                     <div data-bind="text:UnitSymbol"></div>
                     <span>&nbsp;</span>
                     <div data-bind="text:MaterialName"></div>
                 </div>
 
-                <div data-bind="itemsSource:Messages" data-key="Text">
+                <div data-bind="itemsSource:Messages" class="messagesRow" data-key="Text">
                     <div class="lt-template">
-                        <div data-bind="text:Text"></div>
+                        <div class="stackLeft errorItem">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div data-bind="text:Text"></div>
+                        </div>
                     </div>
                 </div>
                 
                 <button data-bind="class.hidden:IsValid" event-bind="click:resetAllocations(MaterialId)"><i class="fas fa-recycle"></i></button>
-
+                
+                <div class="gridHead gridRow">
+                    <div class="cell20">Množství</div>
+                    <div class="cell10">Číslo šarže</div>
+                    <div class="cell10">Vytvořeno</div>
+                    <div class="cell10">Dostupné</div>
+                </div>
                 <div data-bind="itemsSource:Resolutions" data-key="Key">
-                    <div class="lt-template gridRow">
+                    <div class="lt-template gridRow" data-bind="class!.bcUnusedResolution:isUsed">
                         <div class="cell20">
                             <div class="stackLeft">
                                 <input type="number" class="hasUnit" step="0.001" min="0" data-bind="value:Amount" event-bind="keyup:updateAmount(Key, this.value)"/>
@@ -141,3 +156,5 @@
         };
     });
 </script>
+
+<link href="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/BatchCreationUI.css" rel="stylesheet" />

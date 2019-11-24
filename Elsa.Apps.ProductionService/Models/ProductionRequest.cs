@@ -10,6 +10,8 @@ namespace Elsa.Apps.ProductionService.Models
     {
         public int RecipeId { get; set; }
 
+        public string RecipeName { get; set; }
+
         public string MaterialName { get; set; }
 
         public string RecipeNote { get; set; }

@@ -154,6 +154,7 @@
     <Content Include="UI\Controls\Inventory\VirtualProducts.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesEdit.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesStyle.css" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchCreationUI.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchCreationUI.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchInput.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\RecipeList.css" />

@@ -25,6 +25,7 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
             context.Request.ProdPricePerUnit = recipe.ProductionPricePerUnit;
             context.Request.RecipeNote = recipe.Note;
             context.Recipe = recipe;
+            context.Request.RecipeName = recipe.RecipeName;
         }
     }
 }

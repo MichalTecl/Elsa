@@ -22,6 +22,17 @@ app.productionService.VM = app.productionService.VM || function() {
         lt.api("/productionService/ValidateProductionRequest").body(self.producingRecipe)
             .post(function(received) {
                 self.producingRecipe = received;
+                self.producingRecipe.hasNote = (received.RecipeNote || "").trim().length > 0;
+
+                for (var cid = 0; cid < self.producingRecipe.Components.length; cid++) {
+                    var component = self.producingRecipe.Components[cid];
+
+                    for (var rid = 0; rid < component.Resolutions.length; rid++) {
+                        var resolution = component.Resolutions[rid];
+                        resolution.isUsed = resolution.Amount > 0.00001;
+                    }
+                }
+
             });
     };
 
