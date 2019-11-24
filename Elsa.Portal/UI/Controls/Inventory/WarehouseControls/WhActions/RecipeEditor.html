@@ -2,31 +2,34 @@
     <div>
         <div class="formRow">
             <label>Receptura</label>
-            <input type="text" data-bind="value:RecipeName" event-bind="userinput:updateVm('RecipeName', this.value)">
+            <input type="text" data-bind="value:RecipeName" class="reRecipeName" event-bind="userinput:updateVm('RecipeName', this.value);">
         </div>
         <div class="formRow">
             <label>Pro výrobu</label>
-            <input type="text" data-bind="value:ProducedAmountText"  event-bind="userinput:updateVm('ProducedAmountText', this.value)">
-            <div data-bind="text:MaterialName"></div>
+            <div class="stackLeft">
+                <input type="text" data-bind="value:ProducedAmountText" class="reAmount" event-bind="userinput:updateVm('ProducedAmountText', this.value)">
+                <div data-bind="text:MaterialName" class="reMaterialName"></div>
+            </div>
         </div>
         <div class="formRow">
             <label>Cena práce</label>
             <div class="stackLeft">
-                <input type="number" data-bind="value:ProductionPrice" event-bind="userinput:updateVm('ProductionPrice', this.value)" /><span>CZK</span>
+                <input type="number" class="rePrice" data-bind="value:ProductionPrice" event-bind="userinput:updateVm('ProductionPrice', this.value)" /><span>CZK</span>
+                &nbsp;/<span data-bind="text:ProducedAmountText"></span>
             </div>
         </div>
         <div class="formRow">
             <label>Poznámka</label>
-            <textarea data-bind="value:Note;html:Note" event-bind="userinput:updateVm('Note', this.value)" ></textarea>
+            <textarea class="reNote" data-bind="value:Note;html:Note" event-bind="userinput:updateVm('Note', this.value)" ></textarea>
         </div>
-        <div class="formRow">
-            <h1>Složení</h1>
+        <div class="formRow reItemsRow">
+            <label>Složení</label>
 
             <div data-bind="itemsSource:Items" data-key="index" lt-name="componentListContainer">
                 <div class="lt-template">
-                    <div class="stackLeft">
+                    <div class="stackLeft reRecipeComponentRow">
                         <div>
-                            <i class="fas fa-crown crown" data-bind="class.crown-active:IsTransformationSource" event-bind="click:toggleTransformationSource(index)" title="Hlavní složka - má vždy stejné číslo šarže jako vyrobený produkt"></i>
+                            <i class="fas fa-bullseye crown" data-bind="class.crown-active:IsTransformationSource" event-bind="click:toggleTransformationSource(index)" title="Hlavní složka - má vždy stejné číslo šarže jako vyrobený produkt"></i>
                         </div>
                         <div>
                             <div class="autocomplete" lt-name="materialAutocompleteContainer">
@@ -34,7 +37,7 @@
                             </div>
                             <div lt-name="errorBox"></div>
                         </div>
-                        <div class="recipeComponentControls">
+                        <div class="recipeComponentControls stackLeft">
                             <i class="fas fa-minus faButton" event-bind="click:deleteComponent(index)"></i>
                             <div class="recipeComponentUpDown stackLeft" data-bind="class.hidden:IsTransformationSource">
                                 <i class="fas fa-caret-up faButton" event-bind="click:moveComponent(index, -1)"></i>
@@ -79,8 +82,9 @@
             },
             "toSearchExpression": function (inputExpression, context) { return context.materialName; },
             "applySelectedValue": function (selectedValue, inputElement, context) {
-
                 inputElement.value = context.amount + " " + context.unitName + " " + selectedValue;
+
+
             }
         };
 
@@ -95,7 +99,6 @@
             errorBox.innerHTML = parsed.error;
 
             vm.Text = componentMaterialInput.value;
-            lt.notify(this);
         };
 
         this.onMaterialInputFocus = function () { };
@@ -138,12 +141,18 @@
         };
 
         this.updateVm = function(propertyName, value) {
-
+            
             if (updateThrottle) {
                 clearTimeout(updateThrottle);
             }
 
             updates[propertyName] = value;
+
+            if (window.event.type === "change") {
+                sendUpdates();
+                lt.notify();
+            }
+            
             updateThrottle = setTimeout(sendUpdates, 100);
         };
 
@@ -160,3 +169,4 @@
 <script src="/Script/Apps/Inventory/WarehouseActions/WarehouseActions.VM.js"></script>
 <script src="/UI/Controls/Common/AutoSuggest.js"></script>
 <link href="/UI/Controls/Common/Autosuggest.css" rel="stylesheet" />
+<link href="/UI/Controls/Inventory/WarehouseControls/WhActions/RecipeEditor.css" rel="stylesheet" />

@@ -1,0 +1,150 @@
+#prodUiRoot > #recipesColumn {
+       
+    border-right: 1px solid #eee;
+    padding-bottom:1001px;
+    width:460px;
+    background-color:#fdfdff;
+}
+
+#expandRecipesList {
+    display:none;
+}
+
+#prodUiRoot.recipelistminimized > #recipesColumn {
+    width:23px;    
+    margin-right:40px;
+}
+
+#prodUiRoot.recipelistminimized > #recipesColumn > * {
+    display:none;
+}
+
+#prodUiRoot.recipelistminimized #expandRecipesList{
+    display:block;
+    font-size:1.6em;
+    padding:4px;
+    color:#a0a0f0;
+    cursor:pointer;
+}
+
+
+#recFilter {
+    padding:5px;
+    background-color:#fafaff;
+    border-bottom:1px solid #eee;
+}
+
+#recFilter input {
+    width:100%;
+    max-width:100%;
+}
+
+#recFilter div.stackLeft > div {
+    margin-top:8px;
+    margin-left:3px;
+    margin-right:15px;
+    font-size:1.1em
+}
+
+#recipesColumn #recFilter div.stackLeft .fa-cogs {
+    opacity:0.4;    
+}
+
+#recipesColumn.config-mode #recFilter div.stackLeft .fa-cogs {
+    opacity:1;
+}
+
+#recipesColumn .recipeEditControl {
+    display:none;
+}
+
+#recipesColumn.config-mode .recipeEditControl {
+    display:block;
+}
+
+#recipesColumn.config-mode .recipeEditDisabledControl {
+    display:none;
+}
+
+#recipesColumn .recipeEditDisabledControl {
+    display:block;    
+}
+
+#recipesListUi {
+    padding:5px;
+        
+}
+
+#recipesListUi .recipeListItemContainer .fa-heart {
+    display:none;    
+}
+
+#recipesListUi .recipeListItemContainer:hover .fa-heart {
+    display:block;    
+}
+
+
+#recipesListUi .recipeListItemContainer {
+    padding-left:5px;
+    padding-top:5px;
+    padding-bottom:15px;    
+}
+
+#recipesListUi .recipeListItemContainer:hover {
+    background-color:#f0f0ff;
+}
+
+#recipesListUi .recipeListItemContainer .recipeRow {
+    padding-top:5px;    
+    margin-left:10px;
+    color:#000066;    
+}
+
+#recipesListUi .recipeListItemContainer .recipeRow .recipeActions{
+    margin-left:10px;    
+}
+
+#recipesListUi .recipeListItemContainer .recipeRow .recipeActions > * {
+    margin-right:8px;
+}
+
+#recipesListUi .recipeListItemContainer .recipeRow .recipeItem {
+    cursor:pointer;
+}
+
+#recipesListUi .recipeListItemContainer .recipeRow:hover .recipeItem {    
+    text-decoration:underline;    
+}
+
+#recipesColumn.config-mode .recipeItem {
+    cursor:not-allowed;
+    text-decoration:none;
+    color:#000;
+    pointer-events:none;
+}
+
+#recipesColumn.config-mode .recipeRow:hover .recipeItem {    
+    text-decoration:none;    
+}
+
+#recipesColumn .recipeRow.deletedRecipe:hover .recipeItem {    
+    text-decoration:none;    
+}
+
+.recipeRow.deletedRecipe {
+    opacity:0.8;
+}
+
+.recipeRow.deletedRecipe .recipeItem {
+    opacity:0.5;
+    cursor:not-allowed;
+    text-decoration:none;
+    color:#000;
+    pointer-events:none;
+}
+
+
+.recipeListItemContainer .fa-plus {
+    margin-top:4px;
+    margin-left:8px;
+}

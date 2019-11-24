@@ -1,27 +1,28 @@
 ﻿<div id="recipesListUi">
     <div data-bind="itemsSource:recipes" data-key="MaterialId">
-        <div class="lt-template" data-bind="class!.hidden:Visible">
-            <div data-bind="text:MaterialName"></div>
-            <div data-bind="itemsSource:Recipes" data-key="RecipeId">
-                <div class="lt-template stackLeft" data-bind="class!.hidden:Visible" >
-                    <div data-bind="text:RecipeName" event-bind="click:onRecipeClick(RecipeId)"></div>
-                    
-                    <div class="stackLeft">
-                        <div>
+        <div class="lt-template recipeListItemContainer" data-bind="class!.hidden:Visible"> 
+            <div data-bind="text:MaterialName" class="recipeListMaterialNode"></div>
+            <div data-bind="itemsSource:Recipes" data-key="RecipeId" class="recipeListMaterialRecipesList">
+                <div class="lt-template stackLeft recipeRow" data-bind="class!.hidden:Visible;class!.deletedRecipe:IsActive">
+
+                    <div data-bind="text:RecipeName" class="recipeItem" event-bind="click:onRecipeClick(RecipeId)"></div>
+
+                    <div class="stackLeft recipeActions">
+                        <div class="recipeEditDisabledControl">
                             <i class="fas fa-heart faButton" data-bind="class!.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
                             <i class="far fa-heart faButton" data-bind="class.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
                         </div>
-                        <div>
+                        <div class="recipeEditControl">
                             <i class="far fa-eye-slash faButton" data-bind="class.hidden:IsActive" event-bind="click:toggleDeleted(RecipeId)"></i>
                             <i class="far fa-eye faButton" data-bind="class!.hidden:IsActive" event-bind="click:toggleDeleted(RecipeId)"></i>
                         </div>
-                        <i class="far fa-clone faButton" event-bind="click:cloneRecipe(MaterialId, RecipeId)"></i>
-                        <i class="fas fa-edit faButton" event-bind="click:editRecipe(MaterialId, RecipeId)"></i>
+                        <i class="far fa-clone faButton recipeEditControl" event-bind="click:cloneRecipe(MaterialId, RecipeId)"></i>
+                        <i class="fas fa-edit faButton recipeEditControl" event-bind="click:editRecipe(MaterialId, RecipeId)"></i>
                     </div>
                 </div>
             </div>
             <div>
-                <i class="fas fa-plus faButton" event-bind="click:editRecipe(MaterialId)"></i>
+                <i class="fas fa-plus faButton recipeEditControl" event-bind="click:editRecipe(MaterialId)"></i>
             </div>
         </div>
     </div>
@@ -50,3 +51,4 @@
         };
     });
 </script>
+<link href="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/RecipeList.css" rel="stylesheet" />

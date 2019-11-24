@@ -278,7 +278,7 @@ lanta.Markup.bindItemsSourceExpression = lanta.Markup.bindItemsSourceExpression 
 };
 
 lanta.Markup.multieventMacros = {
-    "userinput:":"keyup:changed:mouseup:"
+    "userinput:":"keyup:change:mouseup:"
 };
 
 lanta.Markup.bindEventExpression = lanta.Markup.bindEventExpression || function(owner, element, expression) {

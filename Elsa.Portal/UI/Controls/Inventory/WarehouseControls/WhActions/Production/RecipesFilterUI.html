@@ -1,7 +1,8 @@
 ﻿<div id="recFilter">
     <div >
+
         <input type="text" lt-name="inpFilter" event-bind="keyup:updateSearchText(this.value)"/>
-        
+
         <div class="stackLeft">
             <div title="Jen oblíbené receptury">
                 <i class="fas fa-heart faButton" data-bind="class!.hidden:onlyFavorite" event-bind="click:toggleFavorite"></i>
@@ -10,6 +11,9 @@
             <div title="Zobrazit skryté receptury">
                 <i class="far fa-eye-slash faButton" data-bind="class!.hidden:showDeleted" event-bind="click:toggleDeleted"></i>
                 <i class="far fa-eye faButton" data-bind="class.hidden:showDeleted" event-bind="click:toggleDeleted"></i>
+            </div>
+            <div title="Zobrazit nástroje pro konfiguraci">
+                <i class="fas fa-cogs faButton" event-bind="click:toggleConfigMode"></i>
             </div>
         </div>
 
@@ -39,6 +43,12 @@
 
         this.updateSearchText = function(filter) {
             vm.updateFilters(vm.onlyFavorite, vm.showDeleted, filter);
+        };
+
+        this.toggleConfigMode = function() {
+            var rcCol = document.getElementById("recipesColumn");
+
+            var classes = rcCol.classList.toggle("config-mode");
         };
 
     });

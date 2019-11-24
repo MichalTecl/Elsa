@@ -156,8 +156,10 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\BottomMaterialBatchesStyle.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchCreationUI.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\BatchInput.css" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\RecipeList.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\RecipesFilterUI.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\RecipesList.html" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\RecipeEditor.css" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\RecipeEditor.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\StockEventsEditor.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesList.html" />

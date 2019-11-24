@@ -2,6 +2,9 @@
 <script src="/Script/Apps/Production/RecipesEditorVM.js"></script>
 <div class="stackLeft" id="prodUiRoot" style="align-items: flex-start; flex-wrap: nowrap; height: 100%;">
     <div id="recipesColumn">
+        <div id="expandRecipesList" event-bind="click:expandRecipes">
+            <i class="far fa-caret-square-right"></i>
+        </div>
         <div fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/RecipesFilterUI.html"></div>
         <div fill-by="/UI/Controls/Inventory/WarehouseControls/WhActions/Production/RecipesList.html"></div>
     </div>
@@ -15,6 +18,8 @@
 
 <script>
     lt.element("prodUiRoot").attach(function(batchCreator, batchesListing, recipeEditor) {
+
+        var self = this;
 
         this.bind(function(producingRecipe, openRecipe) {
 
@@ -35,8 +40,10 @@
             }
 
             if (showReport) {
+                this.classList.remove("recipelistminimized");
                 batchesListing.style.display = 'block';
             } else {
+                this.classList.add("recipelistminimized");
                 batchesListing.style.display = 'none';
             }
         })
@@ -44,6 +51,10 @@
         .openRecipeCanBeNull()
         .producingRecipeRelativeToGlobal("app.productionService.vm")
         .openRecipeRelativeToGlobal("app.recipesEditor.vm");
+
+        this.expandRecipes = function() {
+            self.classList.remove("recipelistminimized");
+        };
     });
 </script>
 
