@@ -70,3 +70,8 @@
 #createBatchUI  .bcComponentRow:hover .bcUnusedResolution {
     opacity:1;
 }
+
+#createBatchUI .bcComponentText {
+    margin-bottom:5px;
+    margin-left:-30px;   
+}
