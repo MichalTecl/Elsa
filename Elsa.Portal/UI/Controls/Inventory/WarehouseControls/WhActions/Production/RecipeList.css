@@ -75,15 +75,6 @@
         
 }
 
-#recipesListUi .recipeListItemContainer .fa-heart {
-    display:none;    
-}
-
-#recipesListUi .recipeListItemContainer:hover .fa-heart {
-    display:block;    
-}
-
-
 #recipesListUi .recipeListItemContainer {
     padding-left:5px;
     padding-top:5px;

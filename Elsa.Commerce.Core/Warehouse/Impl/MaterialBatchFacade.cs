@@ -144,7 +144,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return m_cache.ReadThrough(GetBatchAmountCacheKey(batchId), TimeSpan.FromMinutes(10), () =>
             {
                 var result = ExecBatchAmountProcedure(batchId, null).FirstOrDefault();
-
+                
                 if (result != null)
                 {
                     return new Amount(result.Amount, m_unitRepository.GetUnit(result.UnitId));

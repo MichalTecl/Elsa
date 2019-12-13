@@ -177,7 +177,7 @@ BEGIN TRAN;
 /****************************/
 -- DEBUG:
 
-DECLARE @debugBatchId INT;-- = 672;
+DECLARE @debugBatchId INT;-- = 807;
 
 /*****************************/
 
@@ -201,6 +201,15 @@ BEGIN
 	SET @iColId = (SELECT TOP 1 Id FROM InvoiceFormCollection);
 	EXEC DeleteInvoiceFormCollection @iColId;
 END
+
+-- delete overallocated orders
+delete from OrderItemMaterialBatch where id in (
+select distinct oimb.Id
+  from PurchaseOrder po
+  join OrderItem oi on oi.PurchaseOrderId = po.id
+  left join OrderItem ki on ki.KitParentId = oi.Id
+  join OrderItemMaterialBatch oimb ON (oimb.OrderItemId = ISNULL(ki.Id, oi.Id))
+where po.OrderStatusId IN (6,7,8));
   
 -- 1. Create new materials
 DECLARE @prefixMap TABLE (StepName NVARCHAR(100), Prefix NVARCHAR(100));
@@ -241,40 +250,23 @@ END
 
  -- Record warehouse levels before the refactoring -------------------
 
-DECLARE @imlvls TABLE (MaterialId INT, CalculatedKey NVARCHAR(200), Volume DECIMAL(19,5), Orders DECIMAL(19, 5), Production DECIMAL(19, 5), Sales DECIMAL(19, 5), Events DECIMAL(19,5));
-INSERT INTO @imlvls
-SELECT mb.MaterialId,
-       mb.CalculatedKey,        
-	   SUM(ISNULL(steps.Amount, mb.Volume)) Volume,
-	   SUM(ISNULL(orders.Amount, 0))        Orders,
-	   SUM(ISNULL(production.Amount, 0))    Production,
-	   SUM(ISNULL(sales.Amount, 0))         Sales,
-	   SUM(ISNULL(stevents.Amount, 0))      Events
-  FROM MaterialBatch mb
-  
-  LEFT JOIN (SELECT ps.BatchId, SUM(ps.ProducedAmount)  as Amount
-               FROM BatchProductionStep ps
-			  GROUP BY ps.BatchId) steps ON steps.BatchId = mb.Id
-
-  LEFT JOIN (SELECT ob.MaterialBatchId, SUM(ob.Quantity) as Amount
-               FROM OrderItemMaterialBatch ob 
-			 GROUP BY ob.MaterialBatchId) orders ON orders.MaterialBatchId = mb.Id
-
-  LEFT JOIN (SELECT mbc.ComponentId, SUM(mbc.Volume) as Amount
-               FROM MaterialBatchComposition mbc
-			GROUP BY mbc.ComponentId) production ON production.ComponentId = mb.Id
-
-  LEFT JOIN (SELECT se.BatchId, SUM(se.Delta) as Amount
-               FROM MaterialStockEvent se
-			 GROUP BY se.BatchId) stevents ON stevents.BatchId = mb.Id
-
-  LEFT JOIN (SELECT sea.BatchId, SUM(sea.AllocatedQuantity - ISNULL(sea.ReturnedQuantity, 0)) as Amount
-               FROM SaleEventAllocation sea
-             GROUP BY sea.BatchId) sales ON sales.BatchId = mb.Id
-  WHERE mb.MaterialId IN (SELECT lg.FinalMaterialId FROM hlpMaterialRefactoringLog lg)
-    
-GROUP BY mb.MaterialId, mb.CalculatedKey; 
-
+ DECLARE @lvl1 TABLE (MaterialId INT, Material NVARCHAR(200), Vstup DECIMAL(19, 5), Vyrobeno DECIMAL(19,5));
+ INSERT INTO @lvl1
+ SELECT m.Id MaterialId, 
+       m.Name Material, 
+	   totalVolumes.total Vstup, 
+	   CASE WHEN mps.Id IS NULL THEN totalVolumes.total ELSE ISNULL(finalProduced.total, 0) END Vyrobeno
+  FROM Material m
+  LEFT JOIN (SELECT zmb.MaterialId, SUM(zmb.Volume) total
+               FROM MaterialBatch zmb
+			 GROUP BY zmb.MaterialId) totalVolumes ON (totalVolumes.MaterialId = m.Id)
+			 
+  LEFT JOIN (SELECT xmb.MaterialId, SUM(bps.ProducedAmount) total 
+               FROM BatchProductionStep bps
+			   JOIN MaterialBatch xmb ON (bps.BatchId = xmb.Id)
+              GROUP BY xmb.MaterialId) finalProduced ON (finalProduced.MaterialId = m.Id)
+  LEFT JOIN MaterialProductionStep mps ON (mps.MaterialId = m.Id)
+WHERE m.NominalUnitId = 3;
 
 ----------------------------------------------------------------------
 
@@ -363,74 +355,91 @@ GROUP BY mb.MaterialId, mb.CalculatedKey;
 		
 		PRINT ' Converting batchId=' + STR(@oldBatchId);
 
-		INSERT INTO MaterialBatch (MaterialId, Volume,     UnitId,   AuthorId,   BatchNumber,   Note,   Price,   ProjectId,   IsAvailable,   Produced,   Created,   InvoiceNr,   AllStepsDone, PriceConversionId, InvoiceVarSymbol,   SupplierId,   ProductionWorkPrice,    IsHiddenForAccounting) -- unfortunately we have no idea about the recipe; let's not forget about it
-		SELECT                 @newMaterialId, b.Volume, b.UnitId, b.AuthorId, b.BatchNumber, b.Note, b.Price, b.ProjectId, b.IsAvailable, b.Produced, b.Created, b.InvoiceNr,           1, b.PriceConversionId, b.InvoiceVarSymbol, b.SupplierId, b.ProductionWorkPrice, b.IsHiddenForAccounting
-		  FROM MaterialBatch b
-		 WHERE b.Id = @oldBatchId;
+		IF NOT EXISTS(SELECT TOP 1 1 FROM BatchProductionStep bps WHERE bps.BatchId = @oldBatchId)
+		BEGIN
+			PRINT '  Batch doesn`t have any prod steps - just updating to be of the new material';
 
-		 DECLARE @newSourceBatchId INT = SCOPE_IDENTITY();
+			UPDATE MaterialBatch
+			   SET MaterialId = @newMaterialId
+			 WHERE Id = @oldBatchId;
 
-		 -- move components from old to the new batch
-		 UPDATE MaterialBatchComposition
-		    SET CompositionId = @newSourceBatchId
-		  WHERE CompositionId = @oldBatchId;
+		END
+		ELSE
+		BEGIN
 
-         -- tjadadaaa, let's convert prod steps into normal production!
-		 WHILE EXISTS(SELECT TOP 1 1 FROM BatchProductionStep WHERE BatchId = @oldBatchId)
-		 BEGIN			
-			DECLARE @batchProductionStepId INT;
-			DECLARE @producedAmount DECIMAL(19,5);
-			DECLARE @price DECIMAL(19,5);
-			DECLARE @startDt DATETIME;
-			DECLARE @endDt DATETIME;
-			DECLARE @confirmUserId INT;
+			INSERT INTO MaterialBatch (MaterialId, Volume,     UnitId,   AuthorId,   BatchNumber,   Note,   Price,   ProjectId,   IsAvailable,   Produced,   Created,   InvoiceNr,   AllStepsDone, PriceConversionId, InvoiceVarSymbol,   SupplierId,   ProductionWorkPrice,    IsHiddenForAccounting) -- unfortunately we have no idea about the recipe; let's not forget about it
+			SELECT                 @newMaterialId, b.Volume, b.UnitId, b.AuthorId, b.BatchNumber, b.Note, b.Price, b.ProjectId, b.IsAvailable, b.Produced, b.Created, b.InvoiceNr,           1, b.PriceConversionId, b.InvoiceVarSymbol, b.SupplierId, b.ProductionWorkPrice, b.IsHiddenForAccounting
+			  FROM MaterialBatch b
+			 WHERE b.Id = @oldBatchId;
+
+			 DECLARE @newSourceBatchId INT = SCOPE_IDENTITY();
+		 
+			 DECLARE @intermMatName NVARCHAR(200) = (SELECT TOP 1 Name FROM Material WHERE Id = @newMaterialId);
+			 PRINT '  Batch created Material= ' + @intermMatName + ' BatchId=' + TRIM(STR(@newSourceBatchId));
+		 		 
+			 -- move components from old to the new batch
+			 UPDATE MaterialBatchComposition
+				SET CompositionId = @newSourceBatchId
+			  WHERE CompositionId = @oldBatchId;
+
+			 -- tjadadaaa, let's convert prod steps into normal production!
+			 WHILE EXISTS(SELECT TOP 1 1 FROM BatchProductionStep WHERE BatchId = @oldBatchId)
+			 BEGIN			
+				DECLARE @batchProductionStepId INT;
+				DECLARE @producedAmount DECIMAL(19,5);
+				DECLARE @price DECIMAL(19,5);
+				DECLARE @startDt DATETIME;
+				DECLARE @endDt DATETIME;
+				DECLARE @confirmUserId INT;
 						
-			SELECT TOP 1 
-					@batchProductionStepId = theStep.Id,
-					@producedAmount = theStep.ProducedAmount,
-					@price = theStep.Price,
-					@confirmUserId = theStep.ConfirmUserId,
-					@startDt = theStep.ConfirmDt,
-					@endDt =  ISNULL((SELECT TOP 1 ConfirmDt 
-                    FROM BatchProductionStep nxt
-				    WHERE nxt.BatchId = theStep.BatchId 
-					  AND nxt.ConfirmDt > theStep.ConfirmDt 
-					ORDER BY nxt.ConfirmDt), GETDATE())
-			  FROM BatchProductionStep theStep  
-			WHERE BatchId = @oldBatchId			
-			ORDER BY theStep.ConfirmDt;
+				SELECT TOP 1 
+						@batchProductionStepId = theStep.Id,
+						@producedAmount = theStep.ProducedAmount,
+						@price = theStep.Price,
+						@confirmUserId = theStep.ConfirmUserId,
+						@startDt = theStep.ConfirmDt,
+						@endDt =  ISNULL((SELECT TOP 1 ConfirmDt 
+						FROM BatchProductionStep nxt
+						WHERE nxt.BatchId = theStep.BatchId 
+						  AND nxt.ConfirmDt > theStep.ConfirmDt 
+						ORDER BY nxt.ConfirmDt), GETDATE())
+				  FROM BatchProductionStep theStep  
+				WHERE BatchId = @oldBatchId			
+				ORDER BY theStep.ConfirmDt;
 
-			PRINT '   Transforming production step: BatchProductionStepId=' + TRIM(STR(@batchProductionStepId)) + ' Amount=' + TRIM(STR(@producedAmount));
+				PRINT '   Transforming production step: BatchProductionStepId=' + TRIM(STR(@batchProductionStepId)) + ' Amount=' + TRIM(STR(@producedAmount));
 
-			-- create the batch instead of production step
-			INSERT INTO MaterialBatch (MaterialId,          Volume, UnitId,     AuthorId,     BatchNumber, Note, ProjectId,     Created, IsAvailable, Produced, ProductionWorkPrice, Price, IsHiddenForAccounting, RecipeId)
-			SELECT              @targetMaterialId, @producedAmount,    3, @confirmUserId, ob.BatchNumber,    '', ob.ProjectId, @startDt, 1,           @startDt,              @price,     0, ob.IsHiddenForAccounting, @newRecipeId
-			  FROM MaterialBatch ob
-			 WHERE ob.Id = @oldBatchId;
+				-- create the batch instead of production step
+				INSERT INTO MaterialBatch (MaterialId,          Volume, UnitId,     AuthorId,     BatchNumber, Note, ProjectId,     Created, IsAvailable, Produced, ProductionWorkPrice, Price, IsHiddenForAccounting, RecipeId)
+				SELECT              @targetMaterialId, @producedAmount,    3, @confirmUserId, ob.BatchNumber,    '', ob.ProjectId, @startDt, 1,           @startDt,              @price,     0, ob.IsHiddenForAccounting, @newRecipeId
+				  FROM MaterialBatch ob
+				 WHERE ob.Id = @oldBatchId;
 			
-			DECLARE @stepBatchId INT = SCOPE_IDENTITY();
+				DECLARE @stepBatchId INT = SCOPE_IDENTITY();
 
-			PRINT '      Created new batch ID=' + TRIM(STR(@stepBatchId));
+				PRINT '      Created new batch ID=' + TRIM(STR(@stepBatchId));
 
-			INSERT INTO hlpBatchSplit (originalBatchId, partialBatchId, PartialStartDt)
-			VALUES (@oldBatchId, @stepBatchId, @startDt);
+				INSERT INTO hlpBatchSplit (originalBatchId, partialBatchId, PartialStartDt)
+				VALUES (@oldBatchId, @stepBatchId, @startDt);
 
-			-- transform prod step material to components 
-			INSERT INTO MaterialBatchComposition (CompositionId, ComponentId, UnitId, Volume)
-			SELECT @stepBatchId, bsb.SourceBatchId, bsb.UnitId, bsb.UsedAmount
-			  FROM BatchProuctionStepSourceBatch bsb
-			 WHERE bsb.StepId = @batchProductionStepId;
+				-- transform prod step material to components 
+				INSERT INTO MaterialBatchComposition (CompositionId, ComponentId, UnitId, Volume)
+				SELECT @stepBatchId, bsb.SourceBatchId, bsb.UnitId, bsb.UsedAmount
+				  FROM BatchProuctionStepSourceBatch bsb
+				 WHERE bsb.StepId = @batchProductionStepId;
 
-			-- add the transformed batch
-			INSERT INTO MaterialBatchComposition (CompositionId, ComponentId, UnitId, Volume)
-			SELECT @stepBatchId, @newSourceBatchId, 3, @producedAmount;
+				-- add the transformed batch
+				INSERT INTO MaterialBatchComposition (CompositionId, ComponentId, UnitId, Volume)
+				SELECT @stepBatchId, @newSourceBatchId, 3, @producedAmount;
 
-			-- let's delete the batch step
-			DELETE FROM BatchProuctionStepSourceBatch WHERE StepId = @batchProductionStepId;
-			DELETE FROM BatchProductionStep WHERE Id = @batchProductionStepId;
-		 END
+				-- let's delete the batch step
+				DELETE FROM BatchProuctionStepSourceBatch WHERE StepId = @batchProductionStepId;
+				DELETE FROM BatchProductionStep WHERE Id = @batchProductionStepId;
+			 END
+		END
         -----------
 		DELETE FROM @batchesToConvert WHERE BatchId = @oldBatchId;
+				
 		PRINT 'Completed conversion of batchId=' + TRIM(STR(@oldBatchId));
 	END	
  END
@@ -643,81 +652,67 @@ WHERE Id IN (SELECT s.originalBatchId FROM hlpBatchSplit s);
 
  -- Check amounts didnt change  -------------------
 
-DECLARE @imlvls2 TABLE (MaterialId INT, CalculatedKey NVARCHAR(200), Volume DECIMAL(19,5), Orders DECIMAL(19, 5), Production DECIMAL(19, 5), Sales DECIMAL(19, 5), Events DECIMAL(19,5));
-INSERT INTO @imlvls2
-SELECT mb.MaterialId,
-       mb.CalculatedKey,        
-	   SUM(ISNULL(steps.Amount, mb.Volume)) Volume,
-	   SUM(ISNULL(orders.Amount, 0))        Orders,
-	   SUM(ISNULL(production.Amount, 0))    Production,
-	   SUM(ISNULL(sales.Amount, 0))         Sales,
-	   SUM(ISNULL(stevents.Amount, 0))      Events
-  FROM MaterialBatch mb
-  
-  LEFT JOIN (SELECT ps.BatchId, SUM(ps.ProducedAmount)  as Amount
-               FROM BatchProductionStep ps
-			  GROUP BY ps.BatchId) steps ON steps.BatchId = mb.Id
-
-  LEFT JOIN (SELECT ob.MaterialBatchId, SUM(ob.Quantity) as Amount
-               FROM OrderItemMaterialBatch ob 
-			 GROUP BY ob.MaterialBatchId) orders ON orders.MaterialBatchId = mb.Id
-
-  LEFT JOIN (SELECT mbc.ComponentId, SUM(mbc.Volume) as Amount
-               FROM MaterialBatchComposition mbc
-			GROUP BY mbc.ComponentId) production ON production.ComponentId = mb.Id
-
-  LEFT JOIN (SELECT se.BatchId, SUM(se.Delta) as Amount
-               FROM MaterialStockEvent se
-			 GROUP BY se.BatchId) stevents ON stevents.BatchId = mb.Id
-
-  LEFT JOIN (SELECT sea.BatchId, SUM(sea.AllocatedQuantity - ISNULL(sea.ReturnedQuantity, 0)) as Amount
-               FROM SaleEventAllocation sea
-             GROUP BY sea.BatchId) sales ON sales.BatchId = mb.Id
-  WHERE mb.MaterialId IN (SELECT lg.FinalMaterialId FROM hlpMaterialRefactoringLog lg)
-GROUP BY mb.MaterialId, mb.CalculatedKey; 
+DECLARE @lvl2 TABLE (MaterialId INT, Material NVARCHAR(200), Vstup DECIMAL(19, 5), Vyrobeno DECIMAL(19,5), Orimat NVARCHAR(200));
+INSERT INTO @lvl2
+SELECT m.Id MaterialId, 
+       m.Name Material, 
+	   CASE WHEN orimat.Name IS NULL THEN ISNULL(totalVolumes.total, 0) ELSE ISNULL(orimat.volume, 0) END Vstup,
+	   ISNULL(totalVolumes.total, 0) Vyrobeno,
+	   orimat.Name	   
+  FROM Material m
+  LEFT JOIN (SELECT zmb.MaterialId, SUM(zmb.Volume) total
+               FROM MaterialBatch zmb
+			 GROUP BY zmb.MaterialId) totalVolumes ON (totalVolumes.MaterialId = m.Id)
+   LEFT JOIN (
+		SELECT xm.Name, SUM(xb.Volume) volume
+		  FROM MaterialBatch xb
+		  JOIN Material xm ON (xm.Id = xb.MaterialId)
+		 WHERE xm.NominalUnitId = 3
+		 GROUP BY xm.Name) orimat ON (orimat.Name <> m.Name AND orimat.Name LIKE '%' + m.Name)
+WHERE m.NominalUnitId = 3
+  AND m.Id NOT IN (SELECT rlg.DerivedMaterialId FROM hlpMaterialRefactoringLog rlg);
+  --AND EXISTS(SELECT TOP 1 1 FROM RecipeComponent rc WHERE rc.MaterialId = m.Id);
 
 
 
-select mi.name, count(distinct m.Id) CountOfMaterials,  count(distinct r.Id) CountOfRecipes
- from MaterialInventory mi
- join material m on m.InventoryId = mi.id
- left join recipe r on r.ProducedMaterialId = m.Id
-group by mi.Name;
+SELECT allMat.MaterialId, masterMat.Name 'Master', a.*, b.*
+FROM ((SELECT DISTINCT a.MaterialId FROM @lvl1 a) UNION (SELECT DISTINCT b.MaterialId FROM @lvl2 b)) allMat 
+LEFT JOIN Material masterMat ON (allMat.MaterialId = masterMat.Id)
+LEFT JOIN @lvl1 a ON (allMat.MaterialId = a.MaterialId)
+LEFT JOIN @lvl2 b ON (allMat.MaterialId = b.MaterialId);
 
-select mi.name, m.Name Material,  r.RecipeName Recipe
- from MaterialInventory mi
- join material m on m.InventoryId = mi.id
- left join recipe r on r.ProducedMaterialId = m.Id
-ORDER BY mi.Id, m.Name, r.RecipeName;
-
+--SELECT m.Name, xm.Name
+--  FROM Material m
+--  LEFT JOIN Material xm ON (xm.Id <> m.Id AND xm.Name like '%'+m.Name)
+-- WHERE m.NominalUnitId = 3 AND xm.NominalUnitId = 3;
 
 
-
-----------------------------------------------------------------------
-
-IF EXISTS(SELECT TOP 1 1
-			  FROM @imlvls a
-			  LEFT JOIN @imlvls2 b ON (a.CalculatedKey = b.CalculatedKey)
-			  WHERE (b.CalculatedKey IS NULL)
-				 OR ((a.Orders - b.Orders) <> 0)
-				 OR ((a.Production - b.Production) <> 0)
-				 OR ((a.Sales - b.Sales) <> 0)
-				 OR ((a.Events - b.Events) <> 0)
-				 OR ((a.Volume - b.Volume) <> 0))
+IF EXISTS(SELECT TOP 1 1 
+            FROM @lvl1 a 
+			LEFT JOIN @lvl2 b ON (a.MaterialId = b.MaterialId)
+			WHERE (ISNULL(a.Vstup, 0) - ISNULL(b.Vstup, 0)) <> 0
+			   OR (ISNULL(a.Vyrobeno, 0) - ISNULL(b.Vyrobeno, 0)) <> 0)
 BEGIN
-	SELECT a.CalculatedKey, (a.Volume - b.Volume) Volume, (a.Orders - b.Orders) Orders, (a.Production - b.Production) Production, (a.Events - b.Events) Events
-			  FROM @imlvls a
-			  LEFT JOIN @imlvls2 b ON (a.CalculatedKey = b.CalculatedKey)
-			  WHERE (b.CalculatedKey IS NULL)
-				 OR ((a.Orders - b.Orders) <> 0)
-				 OR ((a.Production - b.Production) <> 0)
-				 OR ((a.Sales - b.Sales) <> 0)
-				 OR ((a.Events - b.Events) <> 0)
-				 OR ((a.Volume - b.Volume) <> 0);
+	SELECT *
+            FROM @lvl1 a 
+			LEFT JOIN @lvl2 b ON (a.MaterialId = b.MaterialId)
+			WHERE (ISNULL(a.Vstup, 0) - ISNULL(b.Vstup, 0)) <> 0
+			   OR (ISNULL(a.Vyrobeno, 0) - ISNULL(b.Vyrobeno, 0)) <> 0;
 
-
-	THROW 50001, '!!!!', 1;
+    THROW 50001, 'Levels dont match', 1;
 END
+
+IF EXISTS(SELECT * FROM @lvl1 a WHERE NOT EXISTS(SELECT TOP 1 1 FROM @lvl2 b WHERE a.MaterialId = b.MaterialId))
+BEGIN
+	THROW 50001, 'Levels dont match - more records before refactoring', 1;
+END
+
+IF EXISTS(SELECT * FROM @lvl2 a WHERE NOT EXISTS(SELECT TOP 1 1 FROM @lvl1 b WHERE a.MaterialId = b.MaterialId))
+BEGIN
+	THROW 50001, 'Levels dont match - more records after refactoring', 1;
+END
+
+
 ----------------------------------------------------------------------
 
 
@@ -727,11 +722,17 @@ BEGIN CATCH
 	PRINT ERROR_MESSAGE();
 END CATCH
 
--- COMMIT
+--COMMIT
 
-ROLLBACK
+--ROLLBACK
 
 
+/*
 
+SELECT * FROM MaterialBatch where BatchNumber = '19312'
+
+select * from material where name like '%Deodorant Neparfémovaný 15g'
+
+*/
 
  

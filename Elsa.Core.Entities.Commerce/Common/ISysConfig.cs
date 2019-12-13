@@ -33,5 +33,7 @@ namespace Elsa.Core.Entities.Commerce.Common
         int InsertUserId { get; set; }
 
         IUser InsertUser { get; }
+
+        bool? ClientSideVisible { get; set; }
     }
 }

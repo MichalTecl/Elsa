@@ -29,11 +29,7 @@
         });
 
         this.bind(function (missingPaymentsOverview) {
-            
-            missingPaymentsLink.innerHTML = missingPaymentsOverview.Count +
-                ' nezaplacených objednávek starších než ' +
-                missingPaymentsOverview.BusinessDaysTolerance +
-                ' pracovních dnů';
+            missingPaymentsLink.innerHTML = missingPaymentsOverview.Count + ' nezaplacených objednávek';
         });
 
     });

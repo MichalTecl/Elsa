@@ -441,7 +441,21 @@ END
 
 GO
 
+ALTER PROCEDURE [dbo].[sp_backup]
+AS
+BEGIN
 
+	DECLARE @fileName VARCHAR(100) = 'c:\DBBAK\Elsa_' + SUBSTRING(@@SERVERNAME, 0, CHARINDEX('\', @@SERVERNAME)) + '_' + convert(nvarchar(MAX), GETDATE(), 12) + '.bak';
+	PRINT @fileName;
+	
+	DECLARE @dbName VARCHAR(100);
+	SET @dbName = (SELECT DB_NAME());
+		
+	BACKUP DATABASE @dbName TO DISK = @fileName;
+
+	SELECT @fileName;
+END
+GO
 
 
 

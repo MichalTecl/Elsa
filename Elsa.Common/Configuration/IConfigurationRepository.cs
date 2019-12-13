@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Elsa.Common.Configuration
 {
@@ -9,5 +11,7 @@ namespace Elsa.Common.Configuration
         object Load(Type t, int? projectId, int? userId);
         
         void Save<T>(int projectId, int userId, T configSet) where T : new();
+
+        Dictionary<string, string> GetClientVisibleConfig();
     }
 }

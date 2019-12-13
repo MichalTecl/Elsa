@@ -201,12 +201,11 @@ namespace Elsa.Commerce.Core.Repositories
             const string sql = @"SELECT COUNT(Id)
                                   FROM PurchaseOrder po
                                  WHERE po.IsPayOnDelivery = 0                                    
-                                   AND po.OrderStatusId = 2 
-                                   AND dbo.GetBusinessDaysBetween(PurchaseDate, GETDATE()) > {0}  
-                                   AND po.ProjectId = {1} 
+                                   AND po.OrderStatusId = 2                                     
+                                   AND po.ProjectId = {0} 
                                 ";
 
-            return m_database.Sql().ExecuteWithParams(sql, businessDaysTolerance, m_session.Project.Id).Scalar<int?>() ?? 0;
+            return m_database.Sql().ExecuteWithParams(sql, m_session.Project.Id).Scalar<int?>() ?? 0;
         }
 
         public IEnumerable<IOrderItem> GetChildItemsByParentItemId(long parentItemId)

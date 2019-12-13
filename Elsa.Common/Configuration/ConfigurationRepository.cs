@@ -82,6 +82,21 @@ namespace Elsa.Common.Configuration
             throw new NotImplementedException();
         }
 
+        public Dictionary<string, string> GetClientVisibleConfig()
+        {
+            var entries = m_cache.ReadThrough("global_clivissettings", TimeSpan.FromDays(1),
+                () => m_database.SelectFrom<ISysConfig>().Where(c => c.ClientSideVisible == true).Execute()
+                    .ToList()).Where(e => e.ValidFrom < DateTime.Now && (e.ValidTo ?? DateTime.Now.AddDays(1)) > DateTime.Now).OrderBy(GetEntryPriority).ToList();
+
+            var result = new Dictionary<string, string>();
+            foreach (var entry in entries)
+            {
+                result[entry.Key] = entry.ValueJson;
+            }
+
+            return result;
+        }
+
         public void Save<T>(int? projectId, int? userId, T configSet) where T : new()
         {
             throw new NotImplementedException();
@@ -136,6 +151,21 @@ namespace Elsa.Common.Configuration
             return m_cache.ReadThrough($"All_sysConfig",
                 TimeSpan.FromHours(1),
                 () => m_database.SelectFrom<ISysConfig>().Execute().ToList());
+        }
+
+        private static int GetEntryPriority(ISysConfig entry)
+        {
+            if (entry.UserId != null)
+            {
+                return 3;
+            }
+
+            if (entry.ProjectId != null)
+            {
+                return 2;
+            }
+            
+            return 1;
         }
     }
 }

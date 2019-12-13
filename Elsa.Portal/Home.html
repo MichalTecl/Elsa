@@ -11,7 +11,7 @@
     <div id="appsPanel" class="content">
         <div id="appCardTemplate" data-bind="replace-by:WidgetUrl"></div>
     </div>
-    
+    <div id="fun"></div>
     <script src="Script/Apps/User/UserVM.js"></script>
     <script src="Script/Apps/WidgetsVM.js"></script>
     <script>
@@ -21,12 +21,36 @@
                 lt.generate(this, appCardTemplate, widgets, function(w) { return w.Id });
             });
 
+            var funContainer = document.getElementById("fun");
+            var today = new Date();
+            if ((today.getMonth() === 11) && (today.getDate() > 3) && (today.getDate() < 26)) {
+
+                lt.api("/userProfile/getClientConfig").get(function (r) { 
+
+                    if (r.IsSnowing !== "true") {
+                        return;
+                    }
+
+                    lt.fillBy(funContainer, "/UI/Controls/Common/wintersnow.html");
+
+                    var remover = function(evnt) {
+                        document.removeEventListener("click", remover);
+                        funContainer.innerHTML = '';
+                    };
+
+                    document.addEventListener("click", remover);
+                });
+
+            }
+
         });
     </script>
     <link href="Style/Layout.css" rel="stylesheet" />
     <link href="Style/Appearance.css" rel="stylesheet" />
     
     <div replace-by="/UI/Controls/Common/BusyOverlay.html"></div>
+    
+    
 
 </body>
 </html>
