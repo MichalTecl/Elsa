@@ -3,6 +3,7 @@
     border-right: 1px solid #eee;
     padding-bottom:1001px;
     width:460px;
+    min-width:460px;
     background-color:#fdfdff;
 }
 

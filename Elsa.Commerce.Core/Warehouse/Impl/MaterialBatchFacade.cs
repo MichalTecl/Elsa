@@ -483,7 +483,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 tx.Commit();
             }
         }
-
+        
         public void DeleteBatch(int batchId)
         {
             using (var tx = m_database.OpenTransaction())
@@ -518,6 +518,19 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 }
 
                 ReleaseBatchAmountCache(batchId);
+
+                tx.Commit();
+            }
+        }
+
+        public void DeleteBatch(BatchKey batchKey)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                foreach (var b in m_batchRepository.GetBatches(batchKey))
+                {
+                    DeleteBatch(b.Id);
+                }
 
                 tx.Commit();
             }

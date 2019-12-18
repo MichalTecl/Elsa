@@ -135,7 +135,7 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
     };
 
     self.deleteBatch = function(batchId, callback) {
-        lt.api("/materialBatches/deleteBatch").query({ "id": batchId }).get(callback);
+        lt.api("/materialBatches/deleteBatch").query({ "batchKey": batchId }).get(callback);
     };
 
     self.loadSingleBatch = function (batchModel, query, callback) {
