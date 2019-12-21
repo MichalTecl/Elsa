@@ -116,11 +116,7 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.showCustomField2 = toExtend.showCustomField2 || session.showCustomField2 || false;
                 toExtend.showCustomField3 = toExtend.showCustomField3 || session.showCustomField3 || false;
                 
-                toExtend.canExpand = toExtend.hasComponents ||
-                    toExtend.hasCompositions ||
-                    toExtend.hasOrders ||
-                    toExtend.hasSaleEvents ||
-                    toExtend.stockEvents.length > 0;
+                toExtend.canExpand = true;
             }
         }
     };

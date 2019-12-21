@@ -44,7 +44,7 @@ BEGIN
 	SELECT x.BatchNumber, x.MaterialId
 	FROM 
 	(
-		SELECT DISTINCT b.BatchNumber, b.MaterialId, MAX(b.Created) ctd
+		SELECT b.BatchNumber, b.MaterialId, MAX(b.Created) ctd
 		FROM MaterialBatch b
 		INNER JOIN Material m ON (b.MaterialId = m.Id)
 		WHERE b.ProjectId = @projectId
@@ -184,7 +184,7 @@ BEGIN
                 FROM MaterialBatch smb
 			  GROUP BY smb.CalculatedKey) segments ON (y.BatchId = segments.CalculatedKey)
 
-  ORDER BY y.BatchProductionDt DESC;
+  ORDER BY y.BatchCreateDt DESC;
 
 END
 
