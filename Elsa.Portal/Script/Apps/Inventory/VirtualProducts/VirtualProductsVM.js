@@ -282,6 +282,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             MaterialInventoryId: self.currentMaterialInventory.Id,
             AutomaticBatches: model.AutomaticBatches,
             RequiresPrice: model.RequiresPrice,
+            RequiresProductionPrice: model.RequiresProductionPrice,
             RequiresInvoice: model.RequiresInvoice,
             RequiresSupplierReference:model.RequiresSupplierReference,
             Materials: [],

@@ -1,5 +1,6 @@
 ﻿using System;
 using Elsa.Commerce.Core.Production.Recipes;
+using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common.Utils;
 
 namespace Elsa.Apps.ProductionService.Service.Process.Steps
@@ -7,10 +8,12 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
     internal class LoadRecipe : IProductionRequestProcessingStep
     {
         private readonly IRecipeRepository m_recipeRepository;
+        private readonly IMaterialRepository m_materialRepository;
 
-        public LoadRecipe(IRecipeRepository recipeRepository)
+        public LoadRecipe(IRecipeRepository recipeRepository, IMaterialRepository materialRepository)
         {
             m_recipeRepository = recipeRepository;
+            m_materialRepository = materialRepository;
         }
 
         public void Process(ProductionRequestContext context)
@@ -26,6 +29,7 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
             context.Request.RecipeNote = recipe.Note;
             context.Recipe = recipe;
             context.Request.RecipeName = recipe.RecipeName;
+            context.TargetMaterial = m_materialRepository.GetMaterialById(recipe.ProducedMaterialId)?.Adaptee;
         }
     }
 }

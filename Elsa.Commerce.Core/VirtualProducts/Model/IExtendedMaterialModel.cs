@@ -42,6 +42,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         bool RequiresPrice { get; }
 
+        bool RequiresProductionPrice { get; }
+
         bool RequiresInvoice { get; }
 
         bool RequiresSupplierReference { get; }

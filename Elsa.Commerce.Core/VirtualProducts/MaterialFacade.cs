@@ -41,14 +41,14 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_materialThresholdRepository = materialThresholdRepository;
         }
 
-        public IExtendedMaterialModel ProcessMaterialEditRequest(
-            int? materialId,
+        public IExtendedMaterialModel ProcessMaterialEditRequest(int? materialId,
             string name,
             string nominalAmountText,
             int materialInventoryId,
             bool automaticBatches,
             bool requiresPrice,
-            bool requiresIncvoice, 
+            bool requiresProductionPrice,
+            bool requiresIncvoice,
             bool requiresSupplierReference,
             IEnumerable<string> components,
             string thresholdText)
@@ -78,7 +78,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     nominalUnit.Id,
                     materialInventoryId,
                     automaticBatches,
-                    requiresPrice,
+                    requiresPrice, 
+                    requiresProductionPrice,
                     requiresIncvoice,
                     requiresSupplierReference);
                 

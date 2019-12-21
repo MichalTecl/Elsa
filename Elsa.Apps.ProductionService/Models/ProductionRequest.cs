@@ -26,6 +26,8 @@ namespace Elsa.Apps.ProductionService.Models
 
         public decimal? ProdPricePerUnit { get; set; }
 
+        public int? SourceSegmentId { get; set; }
+
         public bool IsValid { get; set; }
 
         public List<RequestValidationMessage> Messages { get; } = new List<RequestValidationMessage>();

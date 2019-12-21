@@ -29,6 +29,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             AutomaticBatches = adaptee.AutomaticBatches;
             RequiresInvoice = adaptee.RequiresInvoiceNr ?? false;
             RequiresPrice = adaptee.RequiresPrice ?? false;
+            RequiresProductionPrice = adaptee.RequiresProductionPrice ?? false;
             RequiresSupplierReference = adaptee.RequiresSupplierReference ?? false;
 
             var threshold = adaptee.Thresholds?.FirstOrDefault();
@@ -104,6 +105,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool AutomaticBatches { get; }
 
         public bool RequiresPrice { get; }
+        public bool RequiresProductionPrice { get; }
 
         public bool RequiresInvoice { get; }
 

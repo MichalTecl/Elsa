@@ -40,7 +40,14 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
             
             if ((context.Request.ProducingPrice ?? 0m) < 0.001m)
             {
-                context.InvalidateRequest("Je třeba zadat cenu práce");
+                if (context.TargetMaterial.RequiresProductionPrice != true)
+                {
+                    context.Request.ProducingPrice = 0m;
+                }
+                else
+                {
+                    context.InvalidateRequest("Je třeba zadat cenu práce");
+                }
             }
         }
     }

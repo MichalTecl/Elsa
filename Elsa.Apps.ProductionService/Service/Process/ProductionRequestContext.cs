@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Elsa.Apps.ProductionService.Models;
 using Elsa.Common;
+using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 
 namespace Elsa.Apps.ProductionService.Service.Process
@@ -28,6 +29,8 @@ namespace Elsa.Apps.ProductionService.Service.Process
         public Amount RequestedAmount { get; set; }
         public Amount NominalRecipeAmount { get; set; }
         public decimal ComponentMultiplier { get; set; }
+
+        public IMaterial TargetMaterial { get; set; }
 
         public void InvalidateRequest(string message)
         {

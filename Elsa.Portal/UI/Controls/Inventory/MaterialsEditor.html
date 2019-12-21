@@ -29,26 +29,30 @@
                             
                             <div class="materialEditFlags">
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked)" />
+                                    <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
                                     <label>Automaticky spravovat šarže</label>
                                 </div>
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbInvoice" data-bind="checked:RequiresInvoice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked)" />
+                                    <input type="checkbox" lt-name="cbInvoice" data-bind="checked:RequiresInvoice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
                                     <label>Sledovat čísla faktur</label>
                                 </div>
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbPrice" data-bind="checked:RequiresPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked)" />
+                                    <input type="checkbox" lt-name="cbPrice" data-bind="checked:RequiresPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
                                     <label>Sledovat nákupní cenu</label>
                                 </div>
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbSupplier" data-bind="checked:RequiresSupplierReference" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked)" />
+                                    <input type="checkbox" lt-name="cbProdPrice" data-bind="checked:RequiresProductionPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
+                                    <label>Sledovat výrobní cenu</label>
+                                </div>
+                                <div class="materialFlagEdit stackLeft">
+                                    <input type="checkbox" lt-name="cbSupplier" data-bind="checked:RequiresSupplierReference" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
                                     <label>Sledovat dodavatele</label>
                                 </div>
-                                
+
                                 <!-- threshold-->
                                 <div class="materialFlagEdit thresholdContainer">
                                     <div class="stackLeft">
-                                        <input type="checkbox" lt-name="cbHasThreshold" data-bind="checked:HasThreshold" event-bind="change:onThresholdChanged(VM, $cbHasThreshold.checked, $tbThreshold.value)"/>
+                                        <input type="checkbox" lt-name="cbHasThreshold" data-bind="checked:HasThreshold" event-bind="change:onThresholdChanged(VM, $cbHasThreshold.checked, $tbThreshold.value)" />
                                         <label>Varovat při minimálním množství</label>
                                     </div>
                                     <input data-bind="value:ThresholdText;class!.hidden:HasThreshold" lt-name="tbThreshold" event-bind="change:onThresholdChanged(VM, $cbHasThreshold.checked, $tbThreshold.value)" />
@@ -138,11 +142,12 @@
             lt.notify(this);
         };
 
-        this.onFlagChanged = function(model, autoBatches, invoices, price, supplier) {
+        this.onFlagChanged = function(model, autoBatches, invoices, price, supplier, prodPrice) {
             model.AutomaticBatches = autoBatches;
             model.RequiresInvoice = invoices;
             model.RequiresPrice = price;
             model.RequiresSupplierReference = supplier;
+            model.RequiresProductionPrice = prodPrice;
             lt.notify(this);
         };
         

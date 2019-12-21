@@ -32,6 +32,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         bool? RequiresPrice { get; set; }
 
+        bool? RequiresProductionPrice { get; set; }
+
         bool? RequiresSupplierReference { get; set; }
         
         IEnumerable<IMaterialThreshold> Thresholds { get; }
