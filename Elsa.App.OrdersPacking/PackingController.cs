@@ -82,7 +82,7 @@ namespace Elsa.App.OrdersPacking
                 var orderNumber = m_shipmentProvider.GetOrderNumberByPackageNumber(number);
                 if (string.IsNullOrWhiteSpace(orderNumber))
                 {
-                    throw new Exception("Objednávka nebyla nalezena");
+                    throw new Exception($"Objednávka {number} nebyla nalezena");
                 }
                 
                 var order = paid.FirstOrDefault(o => (o.PreInvoiceId == orderNumber) || (o.OrderNumber == orderNumber));

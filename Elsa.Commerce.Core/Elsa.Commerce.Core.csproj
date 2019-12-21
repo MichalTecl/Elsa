@@ -87,6 +87,8 @@
     <Compile Include="Model\BatchReporting\BatchReportModel.cs" />
     <Compile Include="Model\BatchReporting\BatchReportQuery.cs" />
     <Compile Include="Model\BatchReporting\BatchSaleEventsReportEntry.cs" />
+    <Compile Include="Model\BatchReporting\BatchSegmentModel.cs" />
+    <Compile Include="Model\BatchReporting\BatchSegmentsReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchStockEventSuggestion.cs" />
     <Compile Include="Model\BatchReporting\DeletedBatchReportEntry.cs" />
     <Compile Include="Model\BatchReporting\SaleEventAllocationModel.cs" />

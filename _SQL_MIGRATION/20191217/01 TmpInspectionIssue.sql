@@ -1,15 +1,13 @@
 IF NOT EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE name = 'InspectionIssueBuffer')
 BEGIN
 	CREATE TABLE [dbo].[InspectionIssueBuffer](
-		[Id] [int] IDENTITY(1,1) NOT NULL,
-		[InspectionType] [nvarchar](200) NOT NULL,
+		[Id] [Uniqueidentifier] NOT NULL,	
 		[IssueCode] [nvarchar](200) NOT NULL,
 		[Message] [nvarchar](1000) NOT NULL,
-		[Created] [datetime] NOT NULL,
-		[ProjectId] [int] NOT NULL);
-END
+		[Created] [datetime] NOT NULL);
+END 
 
-GO
+GO 
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE name = 'InspectionSession')
 BEGIN
@@ -95,6 +93,84 @@ BEGIN
 	      
 								  
 	TRUNCATE TABLE InspectionIssueBuffer;
-     
+    UPDATE InspectionSession SET Closed = GETDATE() WHERE Closed IS NULL AND Id = @sid; 
 END
 
+GO
+
+IF EXISTS(SELECT TOP 1 1 FROM sys.procedures WHERE name = 'inspfw_addIssue')
+BEGIN
+	DROP PROCEDURE inspfw_addIssue;
+END
+
+GO
+
+CREATE PROCEDURE inspfw_addIssue 
+(
+	@issueId UNIQUEIDENTIFIER,
+	@issueCode NVARCHAR(200),
+	@issueText NVARCHAR(1000)
+)
+AS
+BEGIN
+	
+	INSERT INTO InspectionIssueBuffer (Id, IssueCode, Message, Created)
+	VALUES (@issueId, @issueCode, @issueText, GETDATE());		
+END
+
+GO
+
+IF EXISTS(SELECT TOP 1 1 FROM sys.procedures WHERE name = 'inspfw_runInspections')
+BEGIN
+	DROP PROCEDURE inspfw_runInspections;
+END
+
+GO
+
+CREATE PROCEDURE inspfw_runInspections 
+(
+	@projectId INT
+)
+AS
+BEGIN
+	
+	DECLARE @procs TABLE (ProcName NVARCHAR(500));
+
+	INSERT INTO @procs
+	SELECT DISTINCT name FROM sys.procedures WHERE name LIKE 'insp[_]%'; 
+
+	WHILE(EXISTS(SELECT TOP 1 1 FROM @procs))
+	BEGIN
+		
+		DECLARE @pName NVARCHAR(500) = (SELECT TOP 1 ProcName FROM @procs);
+
+		PRINT 'Starting inspecton type = ' + @pName;
+
+		BEGIN TRAN;
+		BEGIN TRY
+
+			EXEC inspfw_openSession @projectId, @pName;
+			PRINT 'Session open';
+
+			DECLARE @sql NVARCHAR(1000) = N'EXEC ' + @pName + ' @p;'
+
+			EXEC sp_executesql @sql, N'@p INT', @p = @projectId; 
+
+			EXEC inspfw_closeSession;
+			PRINT 'Session closed';
+
+			COMMIT;
+			PRINT 'Transaction commited';
+		END TRY
+		BEGIN CATCH
+			PRINT 'ERROR';
+			declare @ErrorMessage nvarchar(max), @ErrorSeverity int, @ErrorState int;
+			select @ErrorMessage = ERROR_MESSAGE() + ' Line ' + cast(ERROR_LINE() as nvarchar(5)), @ErrorSeverity = ERROR_SEVERITY(), @ErrorState = ERROR_STATE();
+			ROLLBACK;
+			PRINT 'Transaction rolled back';
+			raiserror (@ErrorMessage, @ErrorSeverity, @ErrorState);
+		END CATCH	
+		
+		DELETE FROM @procs WHERE ProcName = @pName;
+	END
+END

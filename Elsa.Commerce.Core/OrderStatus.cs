@@ -37,7 +37,7 @@ namespace Elsa.Commerce.Core
             //for example a payment could initiate automatic sending etc
             return orderStatusId == ReadyToPack.Id;
         }
-
+        
         public static bool IsUnsuccessfullyClosed(int orderStatusId)
         {
             return orderStatusId > Sent.Id;

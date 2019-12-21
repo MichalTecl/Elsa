@@ -36,6 +36,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 
         public int? LoadSaleEventsPage { get; set; }
 
+        public int? LoadSegmentsPage { get; set; }
+
         public long? RelativeToOrderId { get; set; }
 
         public bool BlockedBatchesOnly { get; set; }

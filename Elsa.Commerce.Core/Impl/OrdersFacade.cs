@@ -66,27 +66,37 @@ namespace Elsa.Commerce.Core.Impl
                 }
             }
 
-            order.PaymentId = paymentId;
-            order.PaymentPairingUserId = m_session.User.Id;
-            order.PaymentPairingDt = DateTime.Now;
-
-            if (order.ErpId != null)
+            using (var tx = m_database.OpenTransaction())
             {
-                m_database.Save(order);
+                if (order.ErpId != null)
+                {
+                    order.PaymentId = paymentId;
+                    order.PaymentPairingUserId = m_session.User.Id;
+                    order.PaymentPairingDt = DateTime.Now;
+                    m_database.Save(order);
+                }
 
-                return PerformErpActionSafe(order, (e, ord) => e.MarkOrderPaid(ord),
-                    synced =>
+                if (order.OrderStatusId == OrderStatus.PendingPayment.Id)
+                {
+                    return PerformErpActionSafe(order, (e, ord) => e.MarkOrderPaid(ord),
+                        synced =>
                         {
                             if (!OrderStatus.IsPaid(synced.OrderStatusId))
                             {
-                                throw new InvalidOperationException($" Byl odeslan pozadavek na nastaveni platby objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
+                                throw new InvalidOperationException(
+                                    $" Byl odeslan pozadavek na nastaveni platby objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
                             }
                         });
+                }
+                
+                order.PaymentId = paymentId;
+                order.PaymentPairingUserId = m_session.User.Id;
+                order.PaymentPairingDt = DateTime.Now;
+                m_database.Save(order);
+
+                tx.Commit();
             }
-            
-            order.OrderStatusId = OrderStatus.ReadyToPack.Id;
-            m_database.Save(order);
-            
+
             return order;
         }
 

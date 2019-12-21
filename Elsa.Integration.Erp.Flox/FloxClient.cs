@@ -129,7 +129,7 @@ namespace Elsa.Integration.Erp.Flox
 
         public void MakeOrderSent(IPurchaseOrder po)
         {
-            m_log.Info($"Zacinam nastavovat objednavku {po.OrderNumber} jako zaplacenou");
+            m_log.Info($"Zacinam nastavovat objednavku {po.OrderNumber} jako odeslanou");
 
             if (!m_config.EnableWriteOperations)
             {

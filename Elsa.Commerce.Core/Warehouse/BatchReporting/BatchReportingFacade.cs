@@ -81,6 +81,10 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             {
                 return LoadSaleEvents(query.ToKey(), query.LoadSaleEventsPage.Value);
             }
+            else if (query.LoadSegmentsPage != null)
+            {
+                return LoadSegments(query.ToKey(), query.LoadSegmentsPage.Value);
+            }
 
             var pageSize = query.HasKey ? 1 : c_pageSize;
             var pageNumber = query.HasKey ? 0 : query.PageNumber;
@@ -277,7 +281,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                         NumberOfOrders = sourceRecord?.NumberOfOrders ?? 0,
                         Price = sourceRecord?.Price ?? string.Empty,
                         InvoiceNumber = sourceRecord?.InvoiceNumber ?? string.Empty,
-                        NumberOfSaleEvents = sourceRecord?.NumberOfSaleEvents ?? 0
+                        NumberOfSaleEvents = sourceRecord?.NumberOfSaleEvents ?? 0,
+                        NumberOfSegments = sourceRecord?.NumberOfSegments ?? 0
                     };
 
                     result.Add(reportRow);
@@ -345,6 +350,30 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
             var entry = new BatchSaleEventsReportEntry(key);
             entry.SaleEvents.AddRange(aggregatedAllocations.OrderByDescending(a => a.SortDt));
+
+            var result = new BatchReportModel();
+            result.Report.Add(entry);
+
+            return result;
+        }
+
+        private BatchReportModel LoadSegments(BatchKey key, int pageNumber)
+        {
+            var segments = m_batchRepository.GetBatches(key).OrderBy(b => b.Created).ToList();
+
+            var entry = new BatchSegmentsReportEntry(key);
+
+            foreach (var b in segments)
+            {
+                entry.Segments.Add(new BatchSegmentModel
+                {
+                    SegmentId = b.Id,
+                    Amount = new Amount(b.Volume, m_unitRepository.GetUnit(b.UnitId)).ToString(),
+                    Author = m_userRepository.GetUserNick(b.AuthorId),
+                    Date = StringUtil.FormatDate(b.Created),
+                    Price = $"{StringUtil.FormatPrice(b.ProductionWorkPrice ?? 0m)} CZK"
+                });
+            }
 
             var result = new BatchReportModel();
             result.Report.Add(entry);
@@ -446,6 +475,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             const int invoiceNr = 18;
             const int numberOfStockEvents = 19;
             const int numberOfSaleEvents = 20;
+            const int numberOfSegments = 21;
             #endregion
 
             var key = BatchKey.Parse(row.GetString(batchId));
@@ -467,7 +497,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 Price = row.IsDBNull(price) ? string.Empty : $"{StringUtil.FormatDecimal(row.GetDecimal(price))} CZK",
                 InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : string.Join(", ", row.GetString(invoiceNr).Split(';').Distinct()),
                 HasStockEvents = (!row.IsDBNull(numberOfStockEvents)) && (row.GetInt32(numberOfStockEvents) > 0),
-                NumberOfSaleEvents = row.GetInt32(numberOfSaleEvents)
+                NumberOfSaleEvents = row.GetInt32(numberOfSaleEvents),
+                NumberOfSegments = row.GetInt32(numberOfSegments)
             };
             
             return entry;

@@ -94,6 +94,7 @@ namespace Elsa.Jobs.PaymentPairing
                 }
                 catch (Exception ex)
                 {
+                    m_log.Error("Chyba:", ex);
                     Console.WriteLine($"Chyba: {ex}");
                 }
             }

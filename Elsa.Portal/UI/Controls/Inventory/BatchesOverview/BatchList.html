@@ -229,6 +229,45 @@
             </div>
         </div>
     </div>
+    
+<div class="bovLazyPanel bovSegments">
+    <div data-queryProperty="LoadSegmentsPage"
+         data-queryPropertyValue="0"
+         data-expandedFlag="segmentsExpanded"
+         data-loadedFlag="segmentsLoaded"
+         lt-name="butLoadSegments"
+         event-bind="click:toggleSub(VM, null, $butLoadSegments)">
+        <div class="bovLazPanelController">
+            <div class="subExpander">
+                <i data-bind="class.hidden:segmentsExpanded" class="far fa-plus-square faButton"></i>
+                <i data-bind="class!.hidden:segmentsExpanded" class="far fa-minus-square faButton"></i>
+            </div>
+            <span>Segmenty (</span><span data-bind="text:NumberOfSegments"></span><span>)</span>
+        </div>
+    </div>
+    <div class="bovSegments bovSubContent" data-bind="class!.hidden:segmentsExpanded">
+        <div class="bovSegmentsHead gridRow gridHead">
+            <div class="cell5">ID</div>
+            <div class="cell10">Datum</div>
+            <div class="cell5">Množství</div>
+            <div class="cell5">Vyrobil</div>
+            <div class="cell10">Cena Výroby</div>
+            <div class="cell1"></div>
+        </div>
+        <div data-bind="itemsSource:Segments" data-key="SegmentId">
+            <div class="lt-template">
+                <div class="bovSegmentRow gridRow">
+                    <div class="cell5" data-bind="text:SegmentId"></div>
+                    <div class="cell10" data-bind="text:Date"></div>
+                    <div class="cell5" data-bind="text:Amount"></div>
+                    <div class="cell5" data-bind="text:Author"></div>
+                    <div class="cell10" data-bind="text:Price"></div>
+                    <div class="cell1"><i class="far fa-trash-alt faButton" event-bind="click:deleteSegment(VM)"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 </div>
 </div>
@@ -414,6 +453,16 @@
             }
 
             app.batchesOverview.vm.deleteBatch(model.BatchId, function () {
+                self.refreshBatchView(1);
+            });
+        };
+
+        self.deleteSegment = function(model) {
+            if (!confirm("Smazat segment " + model.SegmentId + "?")) {
+                return;
+            }
+
+            app.batchesOverview.vm.deleteSegment(model.SegmentId, function () {
                 self.refreshBatchView(1);
             });
         };

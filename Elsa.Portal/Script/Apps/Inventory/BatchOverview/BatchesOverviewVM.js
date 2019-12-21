@@ -110,6 +110,7 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.composExpanded = toExtend.composExpanded || false;
                 toExtend.ordersExpanded = toExtend.ordersExpanded || false;
                 toExtend.saleEventsExpanded = toExtend.saleEventsExpanded || false;
+                toExtend.segmentsExpanded = toExtend.segmentsExpanded || false;
 
                 toExtend.showCustomField1 = toExtend.showCustomField1 || session.showCustomField1 || false;
                 toExtend.showCustomField2 = toExtend.showCustomField2 || session.showCustomField2 || false;
@@ -136,6 +137,10 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
 
     self.deleteBatch = function(batchId, callback) {
         lt.api("/materialBatches/deleteBatch").query({ "batchKey": batchId }).get(callback);
+    };
+
+    self.deleteSegment = function(segmentId, callback) {
+        lt.api("/materialBatches/deleteSegment").query({ "id": segmentId }).get(callback);
     };
 
     self.loadSingleBatch = function (batchModel, query, callback) {
