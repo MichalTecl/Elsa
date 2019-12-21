@@ -19,6 +19,8 @@ namespace Elsa.Apps.ProductionService.Service
     {
         private static readonly Type[] s_steps = new[]
         {
+            typeof(CheckSourceSegmentEditability),
+            typeof(ApplySourceSegmentId),
             typeof(LoadRecipe),
             typeof(SanitizeReceivedRequest),
             typeof(ApplyResultingMaterial),
@@ -99,7 +101,7 @@ namespace Elsa.Apps.ProductionService.Service
                     }
 
                     m_batchRepository.Value.CreateBatchWithComponents(request.RecipeId, context.RequestedAmount,
-                        request.ProducingBatchNumber.Trim(), request.ProducingPrice ?? 0, components);
+                        request.ProducingBatchNumber.Trim(), request.ProducingPrice ?? 0, components, request.SourceSegmentId);
 
                     tx.Commit();
                 }

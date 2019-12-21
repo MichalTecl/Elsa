@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -17,6 +18,18 @@ namespace Elsa.Common.Utils
             }
 
             return entity;
+        }
+
+        [DebuggerNonUserCode]
+        [DebuggerStepThrough]
+        public static T Ensure<T>(this Nullable<T> entity, string errorMessage = "Invalid entity reference") where T:struct
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(errorMessage);
+            }
+
+            return entity.Value;
         }
 
         public static void SetAndThrowIfReassign<TObj, TValue>(this TObj obj,
@@ -39,7 +52,7 @@ namespace Elsa.Common.Utils
 
             property.SetValue(obj, value);
         }
-
+        
         public static PropertyInfo GetPropertyFromExpression<TSource, TProperty>(Expression<Func<TSource, TProperty>> propertyLambda)
         {
             Type type = typeof(TSource);
@@ -57,6 +70,14 @@ namespace Elsa.Common.Utils
                     $"Expression '{propertyLambda.ToString()}' refers to a property that is not from type {type}.");
 
             return propInfo;
+        }
+
+        public static void AddRange<T>(this HashSet<T> hs, IEnumerable<T> items)
+        {
+            foreach (var t in items)
+            {
+                hs.Add(t);
+            }
         }
     }
 }

@@ -70,6 +70,8 @@ namespace Elsa.Commerce.Core.Warehouse
             Amount demand, 
             string batchNumberOrNull,
             bool batchNumberIsPreferrence, 
-            bool includeBatchesWithoutAllocation);
+            bool includeBatchesWithoutAllocation,
+            DateTime? batchesProducedBefore = null,
+            int? ignoreExistenceOfBatchId = null);
     }
 }

@@ -68,6 +68,6 @@ namespace Elsa.Commerce.Core.Warehouse
 
         IEnumerable<IMaterialBatch> GetBatchesByInvoiceNumber(string invoiceNumber, int supplierId);
 
-        IMaterialBatch CreateBatchWithComponents(int recipeId, Amount amount, string batchNumber, decimal productionPrice, List<Tuple<BatchKey, Amount>> components);
+        IMaterialBatch CreateBatchWithComponents(int recipeId, Amount amount, string batchNumber, decimal productionPrice, List<Tuple<BatchKey, Amount>> components, int? replaceBatchId);
     }
 }

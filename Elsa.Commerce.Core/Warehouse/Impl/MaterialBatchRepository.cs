@@ -11,6 +11,7 @@ using Elsa.Commerce.Core.Warehouse.Impl.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Commerce.SaleEvents;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Robowire;
@@ -475,16 +476,54 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 .Select(b => MapToModel(b).Batch);
         }
 
-        public IMaterialBatch CreateBatchWithComponents(int recipeId, Amount amount, string batchNumber, decimal productionPrice,
-            List<Tuple<BatchKey, Amount>> components)
+        public IMaterialBatch CreateBatchWithComponents(int recipeId, Amount amount, string batchNumber,
+            decimal productionPrice,
+            List<Tuple<BatchKey, Amount>> components, int? replaceBatchId)
         {
             var batchesToReleaseFromCache = new HashSet<int>();
             var newBatchId = -1;
 
             try
             {
+                var compositionsToMove = new List<IMaterialBatchComposition>();
+                var stockEventsToMove = new List<IMaterialStockEvent>();
+                var saleEventsToMove = new List<ISaleEventAllocation>();
+                var orderItemsToMove = new List<IOrderItemMaterialBatch>();
+                var componentsToDelete = new List<IMaterialBatchComposition>();
+
+                var createDt = DateTime.Now;
+                var note = string.Empty;
+
                 using (var tx = m_database.OpenTransaction())
                 {
+                    if (replaceBatchId != null)
+                    {
+                        batchesToReleaseFromCache.Add(replaceBatchId.Value);
+
+                        compositionsToMove.AddRange(m_database.SelectFrom<IMaterialBatchComposition>().Where(c => c.ComponentId == replaceBatchId.Value).Execute());
+                        stockEventsToMove.AddRange(m_database.SelectFrom<IMaterialStockEvent>().Where(se => se.BatchId == replaceBatchId.Value).Execute());
+                        saleEventsToMove.AddRange(m_database.SelectFrom<ISaleEventAllocation>().Where(se => se.BatchId == replaceBatchId.Value).Execute());
+                        orderItemsToMove.AddRange(m_database.SelectFrom<IOrderItemMaterialBatch>().Where(i => i.MaterialBatchId == replaceBatchId.Value).Execute());
+
+                        componentsToDelete.AddRange(m_database.SelectFrom<IMaterialBatchComposition>().Where(c => c.CompositionId == replaceBatchId.Value).Execute());
+
+                        batchesToReleaseFromCache.AddRange(compositionsToMove.Select(c => c.CompositionId));
+                        batchesToReleaseFromCache.AddRange(componentsToDelete.Select(c => c.ComponentId));
+
+                        var originalBatch = GetBatchById(replaceBatchId.Value).Ensure();
+
+                        var canChangeBatchNumber = saleEventsToMove.Count == 0 && orderItemsToMove.Count == 0;
+
+                        if ((!originalBatch.Batch.BatchNumber.Equals(batchNumber)) && (!canChangeBatchNumber))
+                        {
+                            throw new InvalidOperationException("Nelze změnit číslo šarže, protože již byl uskutečněn prodej");
+                        }
+
+                        createDt = originalBatch.Batch.Created;
+                        note =
+                            $"(originalBatch.Batch.Note ?? string.Empty) ! {DateTime.Now} Nahrazení původního segmentu {originalBatch.Batch.Id}";
+                    }
+                    
                     var recipe = m_recipeRepository.Value.GetRecipe(recipeId).Ensure("Recipe object expected");
 
                     var batch = m_database.New<IMaterialBatch>();
@@ -492,12 +531,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     batch.RecipeId = recipe.Id;
                     batch.AuthorId = m_session.User.Id;
                     batch.IsAvailable = true;
-                    batch.Produced = batch.Created = DateTime.Now;
+                    batch.Produced = batch.Created = createDt;
                     batch.ProjectId = m_session.Project.Id;
                     batch.ProductionWorkPrice = productionPrice;
                     batch.BatchNumber = batchNumber.Trim();
                     batch.Volume = amount.Value;
-                    batch.Note = string.Empty;
+                    batch.Note = note;
                     batch.UnitId = amount.Unit.Id;
 
                     m_database.Save(batch);
@@ -512,7 +551,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                             component.Item2,
                             component.Item1.GetBatchNumber(this),
                             false,
-                            false);
+                            false,
+                            createDt,
+                            replaceBatchId);
 
                         if (!assignments.CompletelyAllocated)
                         {
@@ -536,9 +577,42 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                             m_database.Save(composition);
                             batchesToReleaseFromCache.Add(composition.ComponentId);
                         }
+
+                        m_database.DeleteAll(componentsToDelete);
+
+                        foreach (var ctm in compositionsToMove)
+                        {
+                            ctm.ComponentId = newBatchId;
+                            m_database.Save(ctm);
+                        }
+
+                        foreach (var stm in stockEventsToMove)
+                        {
+                            stm.BatchId = newBatchId;
+                            m_database.Save(stm);
+                        }
+
+                        foreach (var sae in saleEventsToMove)
+                        {
+                            sae.BatchId = newBatchId;
+                            m_database.Save(sae);
+                        }
+
+                        foreach (var otm in orderItemsToMove)
+                        {
+                            otm.MaterialBatchId = newBatchId;
+                            m_database.Save(otm);
+                        }
+
+                        if (replaceBatchId != null)
+                        {
+                            var btd = m_database.SelectFrom<IMaterialBatch>().Where(b => b.Id == replaceBatchId.Value) 
+                                .Execute().Single();
+
+                            m_database.Delete(btd);
+                        }
                     }
-
-
+                    
                     tx.Commit();
                 }
             }

@@ -21,13 +21,15 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
         private readonly IUnitRepository m_unitRepository;
         private readonly AmountProcessor m_amountProcessor;
         private readonly IMaterialBatchFacade m_batchFacade;
+        private readonly IMaterialBatchRepository m_batchRepository;
 
-        public SetComponents(IMaterialRepository materialRepository, IUnitRepository unitRepository, AmountProcessor amountProcessor, IMaterialBatchFacade batchFacade)
+        public SetComponents(IMaterialRepository materialRepository, IUnitRepository unitRepository, AmountProcessor amountProcessor, IMaterialBatchFacade batchFacade, IMaterialBatchRepository batchRepository)
         {
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
             m_amountProcessor = amountProcessor;
             m_batchFacade = batchFacade;
+            m_batchRepository = batchRepository;
         }
 
         public void Process(ProductionRequestContext context)
@@ -43,6 +45,14 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
                 }
             }
 
+            var before = DateTime.Now;
+
+            if (context.Request.SourceSegmentId != null)
+            {
+                var batch = m_batchRepository.GetBatchById(context.Request.SourceSegmentId.Value).Ensure();
+                before = batch.Batch.Created;
+            }
+            
             foreach (var recipeComponent in recipeComponentList)
             {
                 var requestComponent =
@@ -63,14 +73,14 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
                 requestComponent.UnitSymbol = m_unitRepository.GetUnit(recipeComponent.UnitId).Symbol;
                 requestComponent.SortOrder = recipeComponent.SortOrder;
 
-                ProcessResolutions(context.Request, recipeComponent, requestComponent, context.ComponentMultiplier);
+                ProcessResolutions(context.Request, recipeComponent, requestComponent, context.ComponentMultiplier, before);
             }
 
             context.Request.Components.Sort(
                 new Comparison<ProductionComponent>((a, b) => a.SortOrder.CompareTo(b.SortOrder)));
         }
 
-        private void ProcessResolutions(ProductionRequest request, IRecipeComponent recipeComponent, ProductionComponent requestComponent, decimal multiplier)
+        private void ProcessResolutions(ProductionRequest request, IRecipeComponent recipeComponent, ProductionComponent requestComponent, decimal multiplier, DateTime sourceBatchesMadeBefore)
         {
             if (TryProcessTransformationInput(request, recipeComponent, requestComponent) && (!requestComponent.IsValid))
             {
@@ -87,7 +97,9 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
                 requiredAmount,
                 requiredBatchNr,
                 false, 
-                true);
+                true,
+                sourceBatchesMadeBefore,
+                request.SourceSegmentId);
             
             RemoveComponentsNotProposedBySystem(requestComponent, resolutions, requiredAmount);
             AddMissingComponents(requestComponent, resolutions, requiredAmount);

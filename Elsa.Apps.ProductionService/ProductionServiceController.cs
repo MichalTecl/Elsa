@@ -64,6 +64,7 @@ namespace Elsa.Apps.ProductionService
 
         public ProductionRequest ValidateProductionRequest(ProductionRequest request)
         {
+            request.SourceSegmentId = 1723;
             m_productionService.ValidateRequest(request.Ensure("Request object required"));
 
             return request;

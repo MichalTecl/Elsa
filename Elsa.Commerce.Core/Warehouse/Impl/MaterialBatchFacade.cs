@@ -1067,10 +1067,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         }
 
         public AllocationRequestResult ResolveMaterialDemand(int materialId,
-                                                            Amount demand,
-                                                            string batchNumberOrNull,
-                                                            bool batchNumberIsPreferrence,
-                                                            bool includeBatchesWithoutAllocation)
+            Amount demand,
+            string batchNumberOrNull,
+            bool batchNumberIsPreferrence,
+            bool includeBatchesWithoutAllocation, 
+            DateTime? batchesProducedBefore = null, 
+            int? ignoreExistenceOfBatchId = null)
         {
             var batchIdNumberAmount = new List<Tuple<int, string, Amount>>();
 
@@ -1079,6 +1081,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_database.Sql().Call("GetMaterialResolution")
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@materialId", materialId)
+                .WithParam("@createdBefore", batchesProducedBefore)
+                .WithParam("@ignoreExistenceOfThisBatch", ignoreExistenceOfBatchId)
                 .ReadRows<int, string, decimal, int, DateTime>(
                     (batchId, batchNumber, available, unitId, created) =>
                     {
