@@ -34,6 +34,8 @@ namespace Elsa.JobLauncher
             return PasswordHashHelper.Verify(password, hash);
         }
 
+        public string Release => DateTime.Now.ToString();
+
         public void Login(string user, string password)
         {
             var userRecord = m_database.SelectFrom<IUser>().Where(i => i.EMail == user).Join(u => u.Project).Execute().FirstOrDefault();

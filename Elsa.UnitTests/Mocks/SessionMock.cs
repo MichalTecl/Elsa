@@ -27,6 +27,8 @@ namespace Elsa.UnitTests.Mocks
         {
             throw new NotImplementedException();
         }
+
+        public string Release => Guid.NewGuid().ToString();
     }
 
     internal class ProjectMock : IProject

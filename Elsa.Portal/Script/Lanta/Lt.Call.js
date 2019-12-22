@@ -39,6 +39,8 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
 
         if (!useCache) {
             self.query({ "_nocache": new Date().getTime() });
+        } else {
+            self.query({ "_build": (window["__release"] || "?") });
         }
 
         var xmlHttp = new XMLHttpRequest();

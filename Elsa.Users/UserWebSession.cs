@@ -108,6 +108,8 @@ namespace Elsa.Users
             return PasswordHashHelper.Verify(password, hash);
         }
 
+        public string Release => ReleaseVersionInfo.Tag;
+
         public void Initialize(RequestContext context)
         {
             var sessionCookie = context.HttpContext.Request.Cookies[c_sessionCookieIdentifier];

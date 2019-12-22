@@ -12,5 +12,7 @@ namespace Elsa.Common
         long? SessionId { get; }
 
         bool VerifyPassword(string hash, string password, bool isDefault);
+
+        string Release { get; }
     }
 }
