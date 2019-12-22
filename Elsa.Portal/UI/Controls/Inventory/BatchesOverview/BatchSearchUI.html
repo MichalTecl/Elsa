@@ -1,70 +1,86 @@
 ﻿<div id="batchSearchPanel">
     <div class="batchesSearchSearchPanel" event-bind="keydown:onSearchPanelKeyDown(event)">
-        <div class="srchSegment text">
-            <label>Číslo šarže</label>
-            <input lt-name="tbBatchNumber" />
-        </div>
-        <div class="srchSegment text">
-            <label>Číslo objednávky</label>
-            <input lt-name="tbOrderNumber" />
-        </div>
-        <div class="srchSegment material">
-            <label>Materiál</label>
-            <div class="autocomplete" lt-name="materialAutocompleteContainer">
-                <input lt-name="tbMaterial" />
+        <div class="srchSegment stackLeft">
+            <div class="srchSegment text">
+                <label for="tbbn">Číslo šarže</label>
+                <input id="tbbn" lt-name="tbBatchNumber" />
+            </div>
+            <div class="srchSegment text">
+                <label for="tbon">Číslo objednávky</label>
+                <input id="tbon" lt-name="tbOrderNumber" />
+            </div>
+            <div class="srchSegment text">
+                <label for="tbsgid">ID segmentu</label>
+                <input id="tbsgid" lt-name="tbSegmentId" />
             </div>
         </div>
-
-        <div class="srchSegment fromto">
+        <div class="srchSegment stackLeft">
+            <div class="srchSegment material">
+                <label for="acmat">Materiál</label>
+                <div id="acmat" class="autocomplete" lt-name="materialAutocompleteContainer">
+                    <input lt-name="tbMaterial" />
+                </div>
+            </div>
             <div class="srchSegment date">
-                <label>Vytvořeno Od</label>
-                <input lt-name="tbFrom" type="date" />
+                <label for="calf">Vytvořeno Od</label>
+                <input id="calf" lt-name="tbFrom" type="date" />
             </div>
             <div class="srchSegment date">
-                <label>Vytvořeno Do</label>
-                <input lt-name="tbTo" type="date" />
+                <label for="calt">Vytvořeno Do</label>
+                <input id="calt" lt-name="tbTo" type="date" />
             </div>
         </div>
 
-        <div class="srchSegment btstatus" style="display: none">
-            <div class="srchCheck">
-                <label>Zamčené</label>
-                <input lt-name="cbLocked" type="checkbox" checked="checked" />
+            <div class="srchSegment btstatus" style="display: none">
+                <div class="srchCheck">
+                    <label>Zamčené</label>
+                    <input lt-name="cbLocked" type="checkbox" checked="checked" />
+                </div>
+                <div class="srchCheck">
+                    <label>Odemčné</label>
+                    <input lt-name="cbUnlocked" type="checkbox" checked="checked" />
+                </div>
+                <div class="srchCheck">
+                    <label>Uzavřené</label>
+                    <input lt-name="cbClosed" type="checkbox" checked="checked" />
+                </div>
+                <div class="srchCheck">
+                    <label>Otevřené</label>
+                    <input lt-name="cbOpen" type="checkbox" checked="checked" />
+                </div>
             </div>
-            <div class="srchCheck">
-                <label>Odemčné</label>
-                <input lt-name="cbUnlocked" type="checkbox" checked="checked" />
+
+            <div class="srchSegment">
+                <div class="srchCheck stackLeft">
+                    <input lt-name="cbBlocking" type="checkbox" />
+                    <label>Pouze blokované v neodeslaných objednávkách</label>
+                </div>
             </div>
-            <div class="srchCheck">
-                <label>Uzavřené</label>
-                <input lt-name="cbClosed" type="checkbox" checked="checked" />
-            </div>
-            <div class="srchCheck">
-                <label>Otevřené</label>
-                <input lt-name="cbOpen" type="checkbox" checked="checked" />
-            </div>
-        </div>
-        
-        <div class="srchSegment">
-            <div class="srchCheck">
-                <label>Pouze blokované v neodeslaných objednávkách</label>
-                <input lt-name="cbBlocking" type="checkbox" />
+
+            <div class="srchSubmit">
+                <button event-bind="click:doSearch"><i class="fas fa-search"></i></button>
+                <button event-bind="click:clean"><i class="fas fa-eraser"></i></button>
             </div>
         </div>
 
-        <div class="srchSubmit">
-            <button event-bind="click:doSearch"><i class="fas fa-search"></i></button>
-        </div>
+        <div lt-name="resultsPlaceholder"></div>
     </div>
-
-    <div lt-name="resultsPlaceholder"></div>
-</div>
 
 <!-- {"PageNumber":0,"MaterialId":null,"InventoryTypeId":null,"OrderNumber":null,"BatchNumberQuery":null,"From":null,"To":null,"ClosedBatches":null,"LockedBatches":null -->
 <script>
-    lt.element("batchSearchPanel").attach(function (tbBatchNumber, tbOrderNumber, tbFrom, tbTo, cbLocked, cbUnlocked, cbClosed, cbOpen, cbBlocking, materialAutocompleteContainer, tbMaterial, resultsPlaceholder) {
+    lt.element("batchSearchPanel").attach(function (tbBatchNumber, tbOrderNumber, tbFrom, tbTo, cbLocked, cbUnlocked, cbClosed, cbOpen, cbBlocking, materialAutocompleteContainer, tbMaterial, tbSegmentId, resultsPlaceholder) {
 
         var self = this;
+
+        self.clean = function() {
+            tbBatchNumber.value = "";
+            tbOrderNumber.value = "";
+            tbFrom.value = null;
+            tbTo.value = null;
+            cbBlocking.checked = false;
+            tbMaterial.value = "";
+            tbSegmentId.value = "";
+        };
 
         lt.replaceBy(resultsPlaceholder, "/UI/Controls/Inventory/BatchesOverview/BatchList.html", function(lst) {
             self.list = lst;
@@ -86,7 +102,7 @@
 
                     invokeSearch();
                    
-            });
+                });
         });
         
         var emptyToNull = function (input) {
@@ -118,6 +134,7 @@
             q.BatchNumberQuery = emptyToNull(tbBatchNumber);
             q.From = emptyToNull(tbFrom);
             q.To = emptyToNull(tbTo);
+            q.SegmentId = tbSegmentId.value;
             q.ClosedBatches = trufanu(cbClosed, cbOpen);
             q.LockedBatches = trufanu(cbLocked, cbUnlocked);
             q.BlockedBatchesOnly = cbBlocking.checked; 
@@ -135,10 +152,17 @@
             }
         };
 
-        this.onSearchPanelKeyDown = function(e) {
-            if ((e.code || e.key) === "Enter") {
+        this.onSearchPanelKeyDown = function (e) {
+
+            var key = (e.code || e.key);
+
+            if (key.indexOf("Enter") > -1) {
                 self.doSearch();
+            } else if (key.indexOf("Escape") > -1) {
+                self.clean();
             }
         };
     });
 </script>
+
+<link href="/UI/Controls/Inventory/BatchesOverview/BatchSearch.css" rel="stylesheet" />

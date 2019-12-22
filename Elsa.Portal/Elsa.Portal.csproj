@@ -148,6 +148,7 @@
     <Content Include="UI\Controls\Common\wintersnow.html" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.css" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.html" />
+    <Content Include="UI\Controls\Inventory\BatchesOverview\BatchSearch.css" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchSearchUI.html" />
     <Content Include="UI\Controls\Inventory\MaterialsEditor.html" />
     <Content Include="UI\Controls\Inventory\SaleEvents.html" />

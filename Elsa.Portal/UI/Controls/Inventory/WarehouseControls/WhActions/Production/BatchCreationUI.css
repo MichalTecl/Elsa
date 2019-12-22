@@ -11,8 +11,13 @@
     margin-bottom:1px;    
 }
 
-#createBatchUI .formRow > h1 {
+#createBatchUI .formRow h1 {
     font-weight:800;
+}
+
+#createBatchUI .formRow h2 {
+    font-weight:600;
+    color:red;
 }
 
 #createBatchUI .messagesRow .fa-exclamation-triangle {

@@ -253,6 +253,7 @@
             <div class="cell5">Vyrobil</div>
             <div class="cell10">Cena Výroby</div>
             <div class="cell1"></div>
+            <div class="cell1"></div>
         </div>
         <div data-bind="itemsSource:Segments" data-key="SegmentId">
             <div class="lt-template">
@@ -262,6 +263,9 @@
                     <div class="cell5" data-bind="text:Amount"></div>
                     <div class="cell5" data-bind="text:Author"></div>
                     <div class="cell10" data-bind="text:Price"></div>
+                    <div class="cell1">
+                        <i class="far fa-edit faButton" data-bind="class!.hidden:HasRecipe" event-bind="click:editSegment(VM)"></i>
+                    </div>
                     <div class="cell1"><i class="far fa-trash-alt faButton" event-bind="click:deleteSegment(VM)"></i></div>
                 </div>
             </div>
@@ -316,7 +320,17 @@
             }
         };
 
-        self.setQuery = function(query) {
+        var postponedQuery = null;
+        self.setQuery = function (query) {
+
+            query = query || postponedQuery;
+
+            if (!app || !app.batchesOverview) {
+                postponedQuery = query;
+                setTimeout(self.setQuery, 100);
+                return;
+            }
+
             var session = getSession();
             session.query = query;
             session.list.splice(0, session.list.length);
@@ -496,6 +510,10 @@
 
         self.invokeStockEvent = function(model) {
             app.urlBus.set("setStockEvent", model);
+        };
+
+        self.editSegment = function(model) {
+            app.urlBus.set("editSegment", model.SegmentId);
         };
 
         self.cutOrderAllocation = function(handle) {

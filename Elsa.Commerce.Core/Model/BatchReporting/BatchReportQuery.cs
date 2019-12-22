@@ -42,6 +42,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 
         public bool BlockedBatchesOnly { get; set; }
 
+        public int? SegmentId { get; set; }
+
         public bool HasKey => (!string.IsNullOrWhiteSpace(BatchNumberQuery) && MaterialId != null) || !string.IsNullOrWhiteSpace(BatchId);
 
         public BatchKey ToKey()

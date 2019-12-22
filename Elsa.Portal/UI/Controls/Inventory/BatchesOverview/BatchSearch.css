@@ -1,0 +1,16 @@
+#batchSearchPanel .batchesSearchSearchPanel {
+    padding: 10px;
+}
+
+#batchSearchPanel .srchSegment > * {
+    display:block;
+}
+
+#batchSearchPanel .srchSegment {
+    margin-right:15px;
+    margin-bottom:10px;
+}
+
+#batchSearchPanel .srchSegment.material input {
+    min-width:430px;
+}

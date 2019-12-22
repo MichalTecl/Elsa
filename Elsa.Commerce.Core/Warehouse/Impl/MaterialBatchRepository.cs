@@ -577,42 +577,42 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                             m_database.Save(composition);
                             batchesToReleaseFromCache.Add(composition.ComponentId);
                         }
-
-                        m_database.DeleteAll(componentsToDelete);
-
-                        foreach (var ctm in compositionsToMove)
-                        {
-                            ctm.ComponentId = newBatchId;
-                            m_database.Save(ctm);
-                        }
-
-                        foreach (var stm in stockEventsToMove)
-                        {
-                            stm.BatchId = newBatchId;
-                            m_database.Save(stm);
-                        }
-
-                        foreach (var sae in saleEventsToMove)
-                        {
-                            sae.BatchId = newBatchId;
-                            m_database.Save(sae);
-                        }
-
-                        foreach (var otm in orderItemsToMove)
-                        {
-                            otm.MaterialBatchId = newBatchId;
-                            m_database.Save(otm);
-                        }
-
-                        if (replaceBatchId != null)
-                        {
-                            var btd = m_database.SelectFrom<IMaterialBatch>().Where(b => b.Id == replaceBatchId.Value) 
-                                .Execute().Single();
-
-                            m_database.Delete(btd);
-                        }
                     }
-                    
+
+                    m_database.DeleteAll(componentsToDelete);
+
+                    foreach (var ctm in compositionsToMove)
+                    {
+                        ctm.ComponentId = newBatchId;
+                        m_database.Save(ctm);
+                    }
+
+                    foreach (var stm in stockEventsToMove)
+                    {
+                        stm.BatchId = newBatchId;
+                        m_database.Save(stm);
+                    }
+
+                    foreach (var sae in saleEventsToMove)
+                    {
+                        sae.BatchId = newBatchId;
+                        m_database.Save(sae);
+                    }
+
+                    foreach (var otm in orderItemsToMove)
+                    {
+                        otm.MaterialBatchId = newBatchId;
+                        m_database.Save(otm);
+                    }
+
+                    if (replaceBatchId != null)
+                    {
+                        var btd = m_database.SelectFrom<IMaterialBatch>().Where(b => b.Id == replaceBatchId.Value)
+                            .Execute().Single();
+
+                        m_database.Delete(btd);
+                    }
+
                     tx.Commit();
                 }
             }

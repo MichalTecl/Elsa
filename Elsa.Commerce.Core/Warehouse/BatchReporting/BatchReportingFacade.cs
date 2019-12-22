@@ -122,7 +122,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 .WithParam("@compositionId", query.CompositionId)
                 .WithParam("@componentId", query.ComponentId)
                 .WithParam("@orderId", query.RelativeToOrderId)
-                .WithParam("@onlyBlocking", query.BlockedBatchesOnly);
+                .WithParam("@onlyBlocking", query.BlockedBatchesOnly)
+                .WithParam("@segmentId", query.SegmentId);
 
             var result = new BatchReportModel { Query = query };
 
@@ -371,7 +372,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     Amount = new Amount(b.Volume, m_unitRepository.GetUnit(b.UnitId)).ToString(),
                     Author = m_userRepository.GetUserNick(b.AuthorId),
                     Date = StringUtil.FormatDate(b.Created),
-                    Price = $"{StringUtil.FormatPrice(b.ProductionWorkPrice ?? 0m)} CZK"
+                    Price = $"{StringUtil.FormatPrice(b.ProductionWorkPrice ?? 0m)} CZK",
+                    HasRecipe = b.RecipeId != null
                 });
             }
 

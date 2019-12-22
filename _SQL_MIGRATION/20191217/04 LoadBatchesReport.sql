@@ -27,7 +27,8 @@ ALTER PROCEDURE [dbo].[LoadBatchesReport] (
 	@componentId   NVARCHAR(100) = NULL,
 	@batchId NVARCHAR(100) = NULL,
 	@orderId BIGINT = NULL,
-	@onlyBlocking BIT = NULL)
+	@onlyBlocking BIT = NULL,
+	@segmentId INT = NULL)
 AS
 BEGIN
 	
@@ -48,6 +49,7 @@ BEGIN
 		FROM MaterialBatch b
 		INNER JOIN Material m ON (b.MaterialId = m.Id)
 		WHERE b.ProjectId = @projectId
+		  AND ((@segmentId IS NULL) OR (b.Id = @segmentId))
 		  AND ((@materialId IS NULL) OR (b.MaterialId = @materialId))
 		  AND ((@batchNumber IS NULL) OR (b.BatchNumber = @batchNumber))
 		  AND ((@dtFrom IS NULL) OR (b.Created >= @dtFrom))

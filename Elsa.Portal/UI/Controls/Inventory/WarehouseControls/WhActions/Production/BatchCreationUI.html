@@ -1,7 +1,13 @@
 ﻿<div id="createBatchUI">
     <div>
-        <div class="formRow stackLeft">
-            <h1 data-bind="text:producingRecipe.MaterialName"></h1><span>&nbsp;-&nbsp;</span><div data-bind="text:producingRecipe.RecipeName"></div>
+        <div class="formRow">
+            <div class="stackLeft">
+                <h1 data-bind="text:producingRecipe.MaterialName"></h1><span>&nbsp;-&nbsp;</span>
+                <div data-bind="text:producingRecipe.RecipeName"></div>
+            </div>
+            <div data-bind="class!.hidden:producingRecipe.isSegmentUpdate">
+                <h2 data-bind="text:producingRecipe.editMessage"></h2>
+            </div>
         </div>
         <div class="formRow bcHead stackLeft">
             <div class="formRow">

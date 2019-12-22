@@ -24,6 +24,13 @@ app.productionService.VM = app.productionService.VM || function() {
                 self.producingRecipe = received;
                 self.producingRecipe.hasNote = (received.RecipeNote || "").trim().length > 0;
 
+                received.isSegmentUpdate = false;
+                if (received.SourceSegmentId) {
+                    received.isSegmentUpdate = true;
+                    received.editMessage =
+                        "Změna šarže " + received.OriginalBatchNumber + " ID segmentu = " + received.SourceSegmentId;
+                }
+
                 for (var cid = 0; cid < self.producingRecipe.Components.length; cid++) {
                     var component = self.producingRecipe.Components[cid];
 
@@ -159,12 +166,22 @@ app.productionService.VM = app.productionService.VM || function() {
 
     this.cancelProducingRecipe = function() {
         self.producingRecipe = null;
-        lt.notify();
+        if (app.urlBus.get("editSegment")) {
+            app.urlBus.clear("editSegment");
+        } else {
+            lt.notify();
+        }
     };
 
     this.saveProducingRecipe = function() {
         lt.api("/productionService/ProcessProductionRequest").body(self.producingRecipe)
             .post(function (received) {
+
+                if (app.urlBus.get("editSegment")) {
+                    self.cancelProducingRecipe();
+                    return;
+                }
+
                 location.reload();
             });
     };
@@ -214,6 +231,11 @@ app.productionService.VM = app.productionService.VM || function() {
     };
 
     setTimeout(loadRecipes, 0);
+
+    app.urlBus.watch("editSegment", function (segmentId) {
+        self.producingRecipe = { "SourceSegmentId": segmentId };
+        self.uploadProducingRecipe();
+    });
 };
 
 app.productionService.vm = app.productionService.vm || new app.productionService.VM();

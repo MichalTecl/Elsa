@@ -11,5 +11,7 @@
         public string Author { get; set; }
 
         public string Price { get; set; }
+
+        public bool HasRecipe { get; set; }
     }
 }

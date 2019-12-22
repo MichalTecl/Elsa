@@ -12,8 +12,9 @@
 }
 
 #prodUiRoot.recipelistminimized > #recipesColumn {
-    width:23px;    
-    margin-right:40px;
+    width: 23px;
+    min-width: 23px;
+    margin-right: 40px;
 }
 
 #prodUiRoot.recipelistminimized > #recipesColumn > * {

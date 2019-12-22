@@ -30,8 +30,10 @@ namespace Elsa.Apps.ProductionService.Service.Process
         public Amount NominalRecipeAmount { get; set; }
         public decimal ComponentMultiplier { get; set; }
 
-        public IMaterial TargetMaterial { get; set; }
+        public Amount MinimalAmount { get; set; }
 
+        public IMaterial TargetMaterial { get; set; }
+        
         public void InvalidateRequest(string message)
         {
             Request.IsValid = false;

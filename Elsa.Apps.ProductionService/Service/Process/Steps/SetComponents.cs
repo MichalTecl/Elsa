@@ -102,7 +102,7 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
                 request.SourceSegmentId);
             
             RemoveComponentsNotProposedBySystem(requestComponent, resolutions, requiredAmount);
-            AddMissingComponents(requestComponent, resolutions, requiredAmount);
+            AddMissingComponents(requestComponent, resolutions, requiredAmount, request.SourceSegmentId != null && request.IsFirstRound);
 
             var userAllocatedAmount =
                 m_amountProcessor.Sum(requestComponent.Resolutions.Where(r => r.GetAmount(m_unitRepository) != null)
@@ -136,7 +136,7 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
         }
 
         private void AddMissingComponents(ProductionComponent requestComponent, AllocationRequestResult resolutions,
-            Amount requiredAmount)
+            Amount requiredAmount, bool isSegmentUpdateFirstRound)
         {
             var clientComponentsCount = requestComponent.Resolutions.Count;
             foreach (var resolution in resolutions.Allocations)
@@ -152,7 +152,7 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
 
                     requestComponent.Resolutions.Add(new ProductionComponentResolution
                     {
-                        Amount = convertedAllocatedAmount.Value,
+                        Amount = isSegmentUpdateFirstRound ? 0m : convertedAllocatedAmount.Value,
                         BatchAvailableAmount = convertedAvailableAmount.Value,
                         BatchAvailableAmountText = convertedAvailableAmount.ToString(),
                         UnitSymbol = convertedAllocatedAmount.Unit.Symbol,

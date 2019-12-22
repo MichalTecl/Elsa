@@ -18,14 +18,16 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
         private readonly IMaterialFacade m_materialFacade;
         private readonly IUnitRepository m_unitRepository;
         private readonly IUnitConversionHelper m_conversionHelper;
+        private readonly AmountProcessor m_amountProcessor;
 
         public ApplyResultingMaterial(IMaterialRepository materialRepository, IMaterialFacade materialFacade,
-            IUnitRepository unitRepository, IUnitConversionHelper conversionHelper)
+            IUnitRepository unitRepository, IUnitConversionHelper conversionHelper, AmountProcessor amountProcessor)
         {
             m_materialRepository = materialRepository;
             m_materialFacade = materialFacade;
             m_unitRepository = unitRepository;
             m_conversionHelper = conversionHelper;
+            m_amountProcessor = amountProcessor;
         }
 
         public void Process(ProductionRequestContext context)
@@ -78,13 +80,18 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
 
             context.RequestedAmount = new Amount(context.Request.ProducingAmount ?? 0m, m_unitRepository.GetUnitBySymbol(context.Request.ProducingUnitSymbol));
             context.NominalRecipeAmount = new Amount(context.Recipe.RecipeProducedAmount, m_unitRepository.GetUnit(context.Recipe.ProducedAmountUnitId));
-
+            
             var commonUnit = m_conversionHelper.GetSmallestCompatibleUnit(context.RequestedAmount.Unit);
 
             var convertedRequestedAmount = m_conversionHelper.ConvertAmount(context.RequestedAmount, commonUnit.Id);
             var convertedNominalAmount = m_conversionHelper.ConvertAmount(context.NominalRecipeAmount, commonUnit.Id);
 
             context.ComponentMultiplier = convertedRequestedAmount.Value / convertedNominalAmount.Value;
+
+            if (context.MinimalAmount != null && m_amountProcessor.GreaterThan(context.MinimalAmount, context.RequestedAmount))
+            {
+                context.InvalidateRequest($"Nové množství nesmí být méně než {context.MinimalAmount}, protože tolik již bylo spotřebováno");
+            }
         }
     }
 }

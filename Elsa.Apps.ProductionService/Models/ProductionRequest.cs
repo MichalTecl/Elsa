@@ -28,7 +28,11 @@ namespace Elsa.Apps.ProductionService.Models
 
         public int? SourceSegmentId { get; set; }
 
+        public string OriginalBatchNumber { get; set; }
+
         public bool IsValid { get; set; }
+
+        public bool IsFirstRound { get; set; } = true;
 
         public List<RequestValidationMessage> Messages { get; } = new List<RequestValidationMessage>();
 

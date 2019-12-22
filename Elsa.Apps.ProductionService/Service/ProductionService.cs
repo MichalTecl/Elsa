@@ -69,6 +69,7 @@ namespace Elsa.Apps.ProductionService.Service
                 step.Process(context);
             }
 
+            request.IsFirstRound = false;
             request.IsValid = request.IsValid && request.Components.All(c => c.IsValid);
 
             return context;

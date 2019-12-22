@@ -60,6 +60,11 @@
             tab.selectTab("discards");
         });
 
+        app.urlBus.watch("editSegment",
+            function() {
+                tab.selectTab("batchProduction");
+            });
+
     </script>
 
     <script src="/Script/Apps/Inventory/VirtualProducts/VirtualProductsVM.js"></script>
