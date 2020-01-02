@@ -32,6 +32,12 @@ namespace Elsa.Users
                 m_log.Info($"Login requested for user {user}");
 
                 WebSession.Login(user, password);
+
+                if (WebSession.User == null)
+                {
+                    m_log.Error($"Login failed for user {user}");
+                    return WebSession;
+                }
             }
             catch (Exception ex)
             {
