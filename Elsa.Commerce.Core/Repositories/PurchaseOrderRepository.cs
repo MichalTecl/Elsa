@@ -188,7 +188,7 @@ namespace Elsa.Commerce.Core.Repositories
                                           FROM PurchaseOrder po
                                     INNER JOIN ErpOrderStatusMapping mp ON (po.ErpStatusId = mp.ErpStatusId 
                                                                         AND po.ErpId = mp.ErpId)
-                                    WHERE mp.SetPaidInErp = 1").MapRows(r => r.GetInt64(0));
+                                    WHERE po.PaymentPairingDt IS NULL AND mp.SetPaidInErp = 1 AND po.ProjectId = @projectId").WithParam("@projectId", m_session.Project.Id).MapRows(r => r.GetInt64(0));
 
             foreach (var orderId in orderIds)
             {

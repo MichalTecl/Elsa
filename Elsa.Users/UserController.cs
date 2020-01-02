@@ -14,10 +14,12 @@ namespace Elsa.Users
     public class UserController : ElsaControllerBase
     {
         private readonly IDatabase m_database;
-        
+        private readonly ILog m_log;
+
         public UserController(IWebSession webSession, ILog log, IDatabase database)
             : base(webSession, log)
         {
+            m_log = log;
             m_database = database;
         }
 
@@ -25,7 +27,19 @@ namespace Elsa.Users
         [AllowAnonymous]
         public IWebSession Login(string user, string password)
         {
-            WebSession.Login(user, password);
+            try
+            {
+                m_log.Info($"Login requested for user {user}");
+
+                WebSession.Login(user, password);
+            }
+            catch (Exception ex)
+            {
+                m_log.Error($"Login failed for user {user}", ex);
+                throw;
+            }
+
+            m_log.Info($"{user} successfully logged in");
 
             return WebSession;
         }
