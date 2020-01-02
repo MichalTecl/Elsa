@@ -101,7 +101,7 @@ CREATE PROCEDURE GetBatchPriceComponents
 )
 AS
 BEGIN
-	DECLARE @result TABLE (Id INT IDENTITY(1,1), Txt NVARCHAR(1000), Val DECIMAL(19,5), IsWarn BIT);
+	DECLARE @result TABLE (Id INT IDENTITY(1,1), Txt NVARCHAR(1000), Val DECIMAL(19,5), IsWarn BIT, SourceBatchId INT);
 	DECLARE @batchTotal DECIMAL(19, 5);
 	DECLARE @batchCreationDt DATETIME;
 	DECLARE @cogsInventoryId INT;
@@ -116,7 +116,8 @@ BEGIN
 		   @batchCreationDt = ISNULL(Produced, Created),
 		   @cogsInventoryId = mi.Id,
 		   @sourceCurrencyPrice = cc.SourceValue,
-		   @sourceCurrencySymbol = srcu.Symbol
+		   @sourceCurrencySymbol = srcu.Symbol,
+		   @batchTotal = mb.Volume
 	 FROM MaterialBatch mb
 	 JOIN Material m ON (mb.MaterialId = m.Id)
 	 LEFT JOIN MaterialInventory mi ON (m.InventoryId = mi.Id AND ISNULL(mi.IncludesFixedCosts, 0) = 1)
@@ -125,13 +126,13 @@ BEGIN
 	WHERE mb.Id = @batchId;
 
 	INSERT INTO @result (Txt, Val)
-	SELECT N'Nákupní cena', @purchPrice WHERE @purchPrice > 0 AND @sourceCurrencyPrice IS NULL UNION
+	SELECT  N'Nákupní cena', @purchPrice WHERE @purchPrice > 0 AND @sourceCurrencyPrice IS NULL UNION
 	SELECT N'Nákupní cena (Konverze ' + FORMAT(ROUND(@sourceCurrencyPrice, 2) , 'N2', @culture) + ' ' + @sourceCurrencySymbol + N')', @purchPrice WHERE @sourceCurrencyPrice IS NOT NULL UNION
 	SELECT N'Cena práce', @workPrice    WHERE @workPrice > 0;
 
-	INSERT INTO @result (Txt, Val)
+	INSERT INTO @result (Txt, Val, SourceBatchId)
 	-- 33 kg Jedlá soda š. 123456
-	SELECT dbo.FormatAmount(mbc.Volume, mbc.UnitId, @culture) + ' ' + m.Name + N' šarže ' + mb.BatchNumber, dbo.GetBatchPrice(mb.Id, @projectId, mb.Volume, mb.UnitId)
+	SELECT dbo.FormatAmount(mbc.Volume, mbc.UnitId, @culture) + ' ' + m.Name + N' šarže ' + mb.BatchNumber, dbo.GetBatchPrice(mb.Id, @projectId, mbc.Volume, mbc.UnitId), mbc.ComponentId
 	  FROM MaterialBatchComposition mbc
 	  JOIN MaterialBatch mb ON (mbc.ComponentId = mb.Id)
 	  JOIN Material      m  ON (m.Id = mb.MaterialId)
@@ -147,6 +148,9 @@ BEGIN
 		WHERE mi.IncludesFixedCosts = 1
 		  AND YEAR(mb.Created) = YEAR(@batchCreationDt)
 		  AND MONTH(mb.Created) = MONTH(@batchCreationDt)), 1);
+
+		--INSERT INTO @result (txt, Val, IsWarn)
+		--	VALUES (N'Celkem vyrobeno vyrobku v ' + TRIM(STR(MONTH(@batchCreationDt))) + '/' + TRIM(STR(YEAR(@batchCreationDt))) + ' = ' + TRIM(ISNULL(STR(@totalProducedWithfixedCost), 'NULL')), 0, 0);
 
 		DECLARE @fixComponent DECIMAL(19, 5) = 	
 			((SELECT SUM((fcv.Value / 100 * fct.PercentToDistributeAmongProducts) / @totalProducedWithFixedCost)
@@ -167,7 +171,7 @@ BEGIN
 		END
 	END
 	
-	SELECT Txt, Val, ISNULL(IsWarn, 0) as IsWarn
+	SELECT Txt, Val, ISNULL(IsWarn, 0) as IsWarn, SourceBatchId
 	  FROM @result
     ORDER BY Id;	
 END

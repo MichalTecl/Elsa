@@ -85,6 +85,10 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             {
                 return LoadSegments(query.ToKey(), query.LoadSegmentsPage.Value);
             }
+            else if (query.LoadPriceComponentsPage != null)
+            {
+                return LoadPriceComponents(query.ToKey(), query.LoadPriceComponentsPage.Value);
+            }
 
             var pageSize = query.HasKey ? 1 : c_pageSize;
             var pageNumber = query.HasKey ? 0 : query.PageNumber;
@@ -376,6 +380,17 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     HasRecipe = b.RecipeId != null
                 });
             }
+
+            var result = new BatchReportModel();
+            result.Report.Add(entry);
+
+            return result;
+        }
+
+        private BatchReportModel LoadPriceComponents(BatchKey key, int queryLoadPriceComponentsPage)
+        {
+            var entry = new PriceComponentsReportEntry(key);
+            entry.PriceComponents.AddRange(m_batchFacade.GetPriceComponents(key));
 
             var result = new BatchReportModel();
             result.Report.Add(entry);

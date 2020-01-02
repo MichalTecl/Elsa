@@ -91,6 +91,7 @@
     <Compile Include="Model\BatchReporting\BatchSegmentsReportEntry.cs" />
     <Compile Include="Model\BatchReporting\BatchStockEventSuggestion.cs" />
     <Compile Include="Model\BatchReporting\DeletedBatchReportEntry.cs" />
+    <Compile Include="Model\BatchReporting\PriceComponentsReportEntry.cs" />
     <Compile Include="Model\BatchReporting\SaleEventAllocationModel.cs" />
     <Compile Include="Model\IErpCustomerModel.cs" />
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Model\MaterialBatchResolutionModel.cs" />
     <Compile Include="Model\MaterialLevelModel.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
+    <Compile Include="Model\PriceComponentModel.cs" />
     <Compile Include="Production\IProductionFacade.cs" />
     <Compile Include="Production\Model\ProductionBatchComponentModel.cs" />
     <Compile Include="Production\Model\SubBatchAssignmentModel.cs" />

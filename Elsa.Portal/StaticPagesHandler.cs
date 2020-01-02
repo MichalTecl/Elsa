@@ -18,7 +18,11 @@ namespace Elsa.Portal
         public void ProcessRequest(HttpContext context)
         {
             var mpath = context.Server.MapPath(context.Request.Path).ToLowerInvariant();
-            
+
+#if (DEBUG)
+            s_transformedPages.Clear();
+#endif
+
             var transformed = s_transformedPages.GetOrAdd(mpath, TransformScriptTags.Transform(File.ReadAllText(mpath)));
 
             context.Response.Write(transformed);

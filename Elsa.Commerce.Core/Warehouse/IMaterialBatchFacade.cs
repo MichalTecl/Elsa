@@ -19,9 +19,7 @@ namespace Elsa.Commerce.Core.Warehouse
         Amount GetAvailableAmount(BatchKey batchKey);
 
         void PreloadBatchAmountCache();
-
-        IMaterialBatchStatus GetBatchStatus(int batchId);
-
+        
         IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, BatchKey, decimal> orderItemBatchPreference = null);
 
         BatchKey FindBatchBySearchQuery(int materialId, string query);
@@ -73,5 +71,9 @@ namespace Elsa.Commerce.Core.Warehouse
             bool includeBatchesWithoutAllocation,
             DateTime? batchesProducedBefore = null,
             int? ignoreExistenceOfBatchId = null);
+
+        IEnumerable<PriceComponentModel> GetPriceComponents(int batchId, bool addSum = true);
+
+        IEnumerable<PriceComponentModel> GetPriceComponents(BatchKey key);
     }
 }

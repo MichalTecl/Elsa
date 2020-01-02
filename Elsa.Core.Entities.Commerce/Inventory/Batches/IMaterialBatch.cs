@@ -72,7 +72,5 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
   
         int? SupplierId { get; set; }
         ISupplier Supplier { get; }
-
-        DateTime? FinalAccountingDate { get; set; }
     }
 }

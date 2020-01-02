@@ -9,7 +9,6 @@
     <div class="cell5">Dostupné</div>
     <div class="cell5">Celkem</div>
     <div class="cell10">Vytvořeno</div>
-    <div class="cell5">Cena</div>
     <div class="cell10">Faktura</div>
     <div class="cell1"></div>
     <div class="cell1"></div>
@@ -33,7 +32,6 @@
     <div data-bind="text:AvailableAmount" class="bovBatchAmount cell5"></div>
     <div data-bind="text:BatchVolume" class="bovBatchAmount cell5"></div>
     <div data-bind="text:CreateDt" class="bovBatchDt cell10"></div>
-    <div data-bind="text:Price" class="cell5"></div>
     <div data-bind="text:InvoiceNumber" class="cell10"></div>
     <div class="cell1">
         <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt faButton" event-bind="click:deleteBatch(VM)"></i>
@@ -197,38 +195,69 @@
         </div>
     </div>
 
-    <div class="bovLazyPanel bovStockEvents">
-        <div data-key="type" data-bind="itemsSource:stockEvents">
-            <div class="lt-template">
-                <div class="stackLeft stockEventsTitle">
-                    <div class="subExpander">
-                        <i data-bind="class.hidden:expanded" class="far fa-plus-square faButton" event-bind="click:expandStockEvents(VM)"></i>
-                        <i data-bind="class!.hidden:expanded" class="far fa-minus-square faButton" event-bind="click:collapseStockEvents(VM)"></i>
+<div class="bovLazyPanel bovStockEvents">
+    <div data-key="type" data-bind="itemsSource:stockEvents">
+        <div class="lt-template">
+            <div class="stackLeft stockEventsTitle">
+                <div class="subExpander">
+                    <i data-bind="class.hidden:expanded" class="far fa-plus-square faButton" event-bind="click:expandStockEvents(VM)"></i>
+                    <i data-bind="class!.hidden:expanded" class="far fa-minus-square faButton" event-bind="click:collapseStockEvents(VM)"></i>
+                </div>
+                <span><span data-bind="text:type"></span> (</span><span data-bind="text:count"></span><span>)</span>
+                <div class="stockEventsListContainer" data-bind="class!.hidden:expanded">
+                    <div class="gridRow gridHead">
+                        <div class="cell5">Množství</div>
+                        <div class="cell5">Provedl</div>
+                        <div class="cell10">Důvod</div>
+                        <div class="cell1"></div>
                     </div>
-                    <span><span data-bind="text:type"></span> (</span><span data-bind="text:count"></span><span>)</span>
-                    <div class="stockEventsListContainer" data-bind="class!.hidden:expanded">
-                        <div class="gridRow gridHead">
-                            <div class="cell5">Množství</div>
-                            <div class="cell5">Provedl</div>
-                            <div class="cell10">Důvod</div>
-                            <div class="cell1"></div>
-                        </div>
-                        <div class="stockEventsList" data-key="EventId" data-bind="itemsSource:items">
-                            <div class="gridRow lt-template">
-                                <div class="cell5" data-bind="text:Amount"></div>
-                                <div class="cell5" data-bind="text:Author"></div>
-                                <div class="cell10" data-bind="text:Note"></div>
-                                <div class="cell1">
-                                    <i class="far fa-trash-alt faButton" event-bind="click:deleteStockEvent(EventId)"></i>
-                                </div>
+                    <div class="stockEventsList" data-key="EventId" data-bind="itemsSource:items">
+                        <div class="gridRow lt-template">
+                            <div class="cell5" data-bind="text:Amount"></div>
+                            <div class="cell5" data-bind="text:Author"></div>
+                            <div class="cell10" data-bind="text:Note"></div>
+                            <div class="cell1">
+                                <i class="far fa-trash-alt faButton" event-bind="click:deleteStockEvent(EventId)"></i>
                             </div>
                         </div>
                     </div>
+                </div>
 
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bovLazyPanel bovPriceComponents">
+    <div data-queryProperty="LoadPriceComponentsPage"
+         data-queryPropertyValue="0"
+         data-expandedFlag="priceComponentsExpanded"
+         data-loadedFlag="priceComponentsLoaded"
+         lt-name="butLoadPriceComponents"
+         event-bind="click:toggleSub(VM, null, $butLoadPriceComponents)">
+        <div class="bovLazPanelController">
+            <div class="subExpander">
+                <i data-bind="class.hidden:priceComponentsExpanded" class="far fa-plus-square faButton"></i>
+                <i data-bind="class!.hidden:priceComponentsExpanded" class="far fa-minus-square faButton"></i>
+            </div>
+            <span>Výpočet ceny</span>
+        </div>
+    </div>
+    <div class="bovPriceComponents bovSubContent" data-bind="class!.hidden:priceComponentsExpanded">
+        <div class="bovPriceComponentsHead gridRow gridHead">
+            <div class="cell40">Text</div>
+            <div class="cell10">Cena</div>
+        </div>
+        <div data-bind="itemsSource:PriceComponents" data-key="Text">
+            <div class="lt-template">
+                <div class="bovPriceComponentRow gridRow">
+                    <div class="cell40" data-bind="text:Text"></div>
+                    <div class="cell10" data-bind="text:Value"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>
     
 <div class="bovLazyPanel bovSegments">
     <div data-queryProperty="LoadSegmentsPage"

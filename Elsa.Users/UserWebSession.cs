@@ -109,6 +109,7 @@ namespace Elsa.Users
         }
 
         public string Release => ReleaseVersionInfo.Tag;
+        public string Culture => "cs-cz";
 
         public void Initialize(RequestContext context)
         {

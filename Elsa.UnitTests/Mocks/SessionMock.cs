@@ -29,6 +29,7 @@ namespace Elsa.UnitTests.Mocks
         }
 
         public string Release => Guid.NewGuid().ToString();
+        public string Culture => "cs-cz";
     }
 
     internal class ProjectMock : IProject

@@ -35,6 +35,7 @@ namespace Elsa.JobLauncher
         }
 
         public string Release => DateTime.Now.ToString();
+        public string Culture => "cs-cz";
 
         public void Login(string user, string password)
         {

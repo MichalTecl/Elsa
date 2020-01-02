@@ -111,7 +111,8 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 toExtend.ordersExpanded = toExtend.ordersExpanded || false;
                 toExtend.saleEventsExpanded = toExtend.saleEventsExpanded || false;
                 toExtend.segmentsExpanded = toExtend.segmentsExpanded || false;
-
+                toExtend.priceComponentsExpanded = toExtend.priceComponentsExpanded || false;
+                
                 toExtend.showCustomField1 = toExtend.showCustomField1 || session.showCustomField1 || false;
                 toExtend.showCustomField2 = toExtend.showCustomField2 || session.showCustomField2 || false;
                 toExtend.showCustomField3 = toExtend.showCustomField3 || session.showCustomField3 || false;

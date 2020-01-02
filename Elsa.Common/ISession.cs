@@ -14,5 +14,7 @@ namespace Elsa.Common
         bool VerifyPassword(string hash, string password, bool isDefault);
 
         string Release { get; }
+
+        string Culture { get; }
     }
 }

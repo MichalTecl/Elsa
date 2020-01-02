@@ -37,7 +37,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl.Model
         public string InvoiceNr { get => m_adaptee.InvoiceNr; set => m_adaptee.InvoiceNr = value; }
         public string InvoiceVarSymbol { get => m_adaptee.InvoiceVarSymbol; set => m_adaptee.InvoiceVarSymbol = value; }
         public int? SupplierId { get => m_adaptee.SupplierId; set => m_adaptee.SupplierId = value; }
-        public DateTime? FinalAccountingDate { get => m_adaptee.FinalAccountingDate; set => m_adaptee.FinalAccountingDate = value; }
         public int MaterialId { get => m_adaptee.MaterialId; set => m_adaptee.MaterialId = value; }
         public DateTime? CloseDt { get => m_adaptee.CloseDt; set => m_adaptee.CloseDt = value; }
         public DateTime? LockDt { get => m_adaptee.LockDt; set => m_adaptee.LockDt = value; }

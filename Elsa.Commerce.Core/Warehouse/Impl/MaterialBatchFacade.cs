@@ -673,9 +673,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 return null;
             }
-
-            var status = GetBatchStatus(batch.Batch.Id);
-
+            
             var available = GetAvailableAmount(batchId);
             
             var suggestion = new BatchEventAmountSuggestions(batchId, eventTypeId, available.Value, batch.ComponentUnit.IntegerOnly);
@@ -720,30 +718,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         
         public BatchAccountingDate GetBatchAccountingDate(IMaterialBatch batch)
         {
-            if (batch.FinalAccountingDate != null)
-            {
-                return new BatchAccountingDate(batch.FinalAccountingDate.Value);
-            }
-
-            var d = batch.Created;
-            var sb = new StringBuilder();
-
-            var batchAmount = new Amount(batch.Volume, m_unitRepository.GetUnit(batch.UnitId));
-
-            var events = m_stockEventRepository.GetBatchEvents(new BatchKey(batch.Id));
-            foreach(var evt in events)
-            {
-                batchAmount = m_amountProcessor.Subtract(batchAmount,
-                    new Amount(evt.Delta, evt.Unit ?? m_unitRepository.GetUnit(evt.UnitId)));
-            }
-            
-            if (sb.Length == 0)
-            {
-                m_batchRepository.UpdateBatch(batch.Id, b => b.FinalAccountingDate = d);
-                return new BatchAccountingDate(d);
-            }
-
-            return new BatchAccountingDate(d, false, sb.ToString());
+           return new BatchAccountingDate(batch.Created);
         }
         
         public IMaterialBatchStatus GetBatchStatus(int batchId)
@@ -755,7 +730,18 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public BatchPrice GetBatchPrice(int batchId)
         {
-            return GetBatchStatus(batchId).Ensure().BatchPrice;
+            var compos = GetPriceComponents(batchId, false);
+
+            var batch = m_batchRepository.GetBatchById(batchId).Ensure().Batch;
+
+            var bp = new BatchPrice(batch);
+
+            foreach (var c in compos)
+            {
+                bp.AddComponent(c.IsWarning, c.SourceBatchId, c.Text, c.RawValue);
+            }
+
+            return bp;
         }
 
         private string GetBatchStatusCacheKey(int batchId)
@@ -1140,6 +1126,82 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     thisBatchNrAllocations.Select(a => new Tuple<int, Amount>(a.Item1, a.Item4)).ToList()
                     , dt));
             }
+
+            return result;
+        }
+
+        public IEnumerable<PriceComponentModel> GetPriceComponents(int batchId, bool addSum = true)
+        {
+            var result = new List<PriceComponentModel>();
+
+            m_database.Sql().Call("GetBatchPriceComponents")
+                .WithParam("@batchId", batchId)
+                .WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@culture", m_session.Culture)
+                .ReadRows<string, decimal, bool, int?>((txt, val, wrn, sourceBatchId) => result.Add(new PriceComponentModel()
+                {
+                    IsWarning = wrn,
+                    RawValue = val,
+                    Text = txt,
+                    SourceBatchId = sourceBatchId
+                }));
+
+            if (addSum)
+            {
+                AddSumPriceComponent(result);
+            }
+
+            return result;
+        }
+
+        private static void AddSumPriceComponent(List<PriceComponentModel> result)
+        {
+            result.Add(new PriceComponentModel()
+            {
+                Text = "SUMA",
+                RawValue = result.Sum(r => r.RawValue)
+            });
+        }
+
+        public IEnumerable<PriceComponentModel> GetPriceComponents(BatchKey key)
+        {
+            var batches = m_batchRepository.GetBatches(key).Select(b => b.Id);
+
+            var result = new List<PriceComponentModel>();
+
+            foreach (var bid in batches)
+            {
+                var segmentComponents = GetPriceComponents(bid, false);
+
+                foreach (var sc in segmentComponents)
+                {
+                    var existing = result.FirstOrDefault(c =>
+                        c.Text.Equals(sc.Text, StringComparison.InvariantCultureIgnoreCase));
+                    if (existing != null)
+                    {
+                        existing.RawValue += sc.RawValue;
+                        existing.IsWarning = existing.IsWarning || sc.IsWarning;
+                        continue;
+                    }
+
+                    result.Add(sc);
+                }
+            }
+
+            var warnings = new List<PriceComponentModel>();
+
+            for (var i = result.Count - 1; i >= 0; i--)
+            {
+                if (result[i].IsWarning)
+                {
+                    warnings.Insert(0, result[i]);
+                    result.RemoveAt(i);
+                }
+            }
+
+            result.AddRange(warnings);
+
+            AddSumPriceComponent(result);
 
             return result;
         }
