@@ -54,9 +54,9 @@ namespace Elsa.Commerce.Core.Warehouse
         
         BatchAccountingDate GetBatchAccountingDate(IMaterialBatch batch);
 
-        Tuple<decimal, BatchPrice> GetPriceOfAmount(int batchId, Amount amount);
+        Tuple<decimal, BatchPrice> GetPriceOfAmount(IMaterialBatch batch, Amount amount, IBatchPriceBulkProvider provider);
 
-        BatchPrice GetBatchPrice(int batchId);
+        BatchPrice GetBatchPrice(IMaterialBatch batch, IBatchPriceBulkProvider provider);
 
         Amount GetNumberOfProducedProducts(int accountingDateYear, int accountingDateMonth, int inventoryId);
         void ReleaseUnsentOrdersAllocations();
@@ -75,5 +75,7 @@ namespace Elsa.Commerce.Core.Warehouse
         IEnumerable<PriceComponentModel> GetPriceComponents(int batchId, bool addSum = true);
 
         IEnumerable<PriceComponentModel> GetPriceComponents(BatchKey key);
+
+        IBatchPriceBulkProvider CreatPriceBulkProvider(DateTime from, DateTime to);
     }
 }

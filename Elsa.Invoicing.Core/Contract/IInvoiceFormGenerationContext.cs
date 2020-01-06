@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Elsa.Commerce.Core.Warehouse;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 namespace Elsa.Invoicing.Core.Contract
 {
-    public interface IInvoiceFormGenerationContext
+    public interface IInvoiceFormGenerationContext : IBatchPriceBulkProvider
     {
         bool HasErrors { get; }
 

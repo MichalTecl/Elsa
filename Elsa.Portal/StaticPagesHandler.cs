@@ -22,10 +22,17 @@ namespace Elsa.Portal
 #if (DEBUG)
             s_transformedPages.Clear();
 #endif
+            try
+            {
+                var transformed =
+                    s_transformedPages.GetOrAdd(mpath, TransformScriptTags.Transform(File.ReadAllText(mpath)));
 
-            var transformed = s_transformedPages.GetOrAdd(mpath, TransformScriptTags.Transform(File.ReadAllText(mpath)));
-
-            context.Response.Write(transformed);
+                context.Response.Write(transformed);
+            }
+            catch (FileNotFoundException)
+            {
+                throw new HttpException(404, "Not found");
+            }
         }
 
         

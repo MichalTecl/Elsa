@@ -72,7 +72,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
 
                 var explanation = GetFormExplanation(group).Limit(1000);
 
-                var priceIndex = group.ToDictionary(b => b.Id, b => m_batchFacade.GetBatchPrice(b.Id));
+                var priceIndex = group.ToDictionary(b => b.Id, b => m_batchFacade.GetBatchPrice(b, context));
 
                 var totalPrice = BatchPrice.Combine(priceIndex.Values);
 

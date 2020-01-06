@@ -48,7 +48,6 @@
     <Compile Include="MaterialController.cs" />
     <Compile Include="MaterialLevelController.cs" />
     <Compile Include="Model\BatchSetupRequest.cs" />
-    <Compile Include="Model\ProducedBatchModel.cs" />
     <Compile Include="Model\StockEventViewModel.cs" />
     <Compile Include="Model\MappableItemViewModel.cs" />
     <Compile Include="Model\MaterialBatchViewModel.cs" />

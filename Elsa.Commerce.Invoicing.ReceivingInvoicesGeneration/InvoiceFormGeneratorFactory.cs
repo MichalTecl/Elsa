@@ -26,6 +26,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
             s_types["SALES"] = typeof(EshopSalesGenerator);
             s_types["STOCK_EVENTS"] = typeof(StockEventsFormsGenerator);
             s_types["ESHOP_RETURNS"] = typeof(ReturnedOrdersFormGenerator);
+            s_types["DIRECT_SALES"] = typeof(DirectSalesGenerator);
         }
 
         public InvoiceFormGeneratorFactory(IServiceLocator serviceLocator)

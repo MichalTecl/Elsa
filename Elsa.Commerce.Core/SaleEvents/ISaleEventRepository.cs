@@ -16,6 +16,8 @@ namespace Elsa.Commerce.Core.SaleEvents
 
         IEnumerable<ISaleEvent> GetEvents(int pageNumber, int pageSize);
 
+        IEnumerable<ISaleEvent> GetEvents(DateTime from, DateTime to);
+
         ISaleEvent WriteEvent(int id, Action<ISaleEvent> entity, IEnumerable<SaleEventAllocationDto> allocations);
 
         IEnumerable<ISaleEventAllocation> GetAllocationsByBatch(BatchKey key);

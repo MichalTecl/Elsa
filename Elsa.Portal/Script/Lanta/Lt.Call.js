@@ -218,6 +218,17 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
         silent = true;
         return self;
     };
+
+    this.downloadFile = function() {
+        var lnk = document.createElement("a");
+        lnk.setAttribute("hidden", true);
+        lnk.setAttribute("download", true);
+        lnk.setAttribute("href", self.getUrl());
+
+        document.body.appendChild(lnk);
+
+        lnk.click();
+    };
 };
 
 lanta.ApiCallBuilder.isEnabled = lanta.ApiCallBuilder.isEnabled || true;

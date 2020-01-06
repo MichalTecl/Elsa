@@ -46,7 +46,6 @@ namespace Elsa.Commerce.Core
             setup.For<AmountProcessor>().Use<AmountProcessor>();
             setup.For<IPackingPreferredBatchRepository>().Use<PreferredBatchRepository>();
             setup.For<IProductionFacade>().Use<ProductionFacade>();
-            setup.For<IBatchStatusManager>().Use<BatchStatusManager>();
             setup.For<IBatchReportingFacade>().Use<BatchReportingFacade>();
             setup.For<IMaterialThresholdRepository>().Use<MaterialThresholdRepository>();
             setup.For<IStockEventRepository>().Use<StockEventRepository>();

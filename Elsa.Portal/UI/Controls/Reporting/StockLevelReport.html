@@ -1,0 +1,37 @@
+﻿<div id="slrContainer">
+    <div class="stackLeft">
+        <input lt-name="tbReportDate" type="date"/>
+        <span>&nbsp;23:59:59</span>
+    </div>
+    <div>
+        <div class="stackLeft" event-bind="click:download('getStockReport')">
+            <i class="fas fa-file-download"></i><a>Stav skladu</a>
+        </div>
+        <div class="stackLeft" event-bind="click:download('getBatchPricesReport')">
+            <i class="fas fa-file-download"></i><a>Výpočty cen</a>
+        </div>
+    </div>
+</div>
+<script>
+    lt.element("slrContainer").attach(function(tbReportDate) {
+
+        var d = new Date();
+        d.setDate(1);
+        d.setHours(-1);
+        tbReportDate.value = d.toISOString().substr(0, 10);
+
+        this.download = function(reportTypeName) {
+
+            var reportDate = new Date(Date.parse(tbReportDate.value));
+
+            var qry = {
+                "year": reportDate.getFullYear(),
+                "month": reportDate.getMonth() + 1,
+                "day": reportDate.getDate() 
+            };
+
+            lt.api("/commonReports/" + reportTypeName).query(qry).downloadFile();
+
+        };
+    });
+</script>

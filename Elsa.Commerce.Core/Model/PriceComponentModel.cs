@@ -6,6 +6,13 @@ namespace Elsa.Commerce.Core.Model
 {
     public class PriceComponentModel
     {
+        public PriceComponentModel(int batchId)
+        {
+            BatchId = batchId;
+        }
+
+        public int BatchId { get; }
+
         public string Text { get; set; }
 
         public string Value => StringUtil.FormatPrice(RawValue);

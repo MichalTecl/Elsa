@@ -70,32 +70,12 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators.Premanu
             IMaterialBatchFacade facade,
             IInvoiceFormGenerationContext context)
         {
-            var to = new DateTime(year, month, 1).AddMonths(1);
+            var startDate = new DateTime(year, month, 1).Date;
+            var endDate = startDate.AddMonths(1);
 
-            var batches = facade.FindNotClosedBatches(forInventory.Id,
-                new DateTime(year, month, 1).AddYears(-1),
-                to,
-                b =>
-                {
-                    var acod = facade.GetBatchAccountingDate(b);
+            context.Info($"Hledám šarže na skladu {forInventory.Name} od {startDate} do {endDate}");
 
-                    if ((acod.AccountingDate.Month != month) || (acod.AccountingDate.Year != year))
-                    {
-                        return false;
-                    }
-
-                    if (!acod.IsFinal)
-                    {
-                        if ((acod.AccountingDate.Year == year) && (acod.AccountingDate.Month == month))
-                        context.Warning($"Šarže {b.GetTextInfo()} má účetní datum {acod} ale datum nelze stanovit jako konečné: \"{acod.NotFinalReason}\". Příjemka nebude vytvořena.");
-
-                        return false;
-                    }
-
-                    return true;
-                });
-
-            return batches;
+            return facade.FindNotClosedBatches(forInventory.Id, startDate, endDate).ToList();
         }
     }
 }

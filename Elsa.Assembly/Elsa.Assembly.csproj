@@ -75,6 +75,10 @@
       <Project>{92898b3b-012f-43f0-9044-55d6de1a4afb}</Project>
       <Name>Elsa.App.Commerce</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.CommonReports\Elsa.App.CommonReports.csproj">
+      <Project>{241CF9BE-3BED-4155-9784-59C14EAF6515}</Project>
+      <Name>Elsa.App.CommonReports</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.Crm\Elsa.App.Crm.csproj">
       <Project>{00851e14-33be-4f64-91d1-e27fa48422bd}</Project>
       <Name>Elsa.App.Crm</Name>

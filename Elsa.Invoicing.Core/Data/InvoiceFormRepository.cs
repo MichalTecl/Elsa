@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Logging;
@@ -27,8 +27,9 @@ namespace Elsa.Invoicing.Core.Data
         private readonly ISysCountersManager m_countersManager;
         private readonly ILog m_log;
         private readonly IServiceLocator m_serviceLocator;
+        private readonly IMaterialBatchFacade m_batchFacade;
         
-        public InvoiceFormRepository(IDatabase database, ISession session, ICache cache, ISysCountersManager countersManager, ILog log, IServiceLocator serviceLocator)
+        public InvoiceFormRepository(IDatabase database, ISession session, ICache cache, ISysCountersManager countersManager, ILog log, IServiceLocator serviceLocator, IMaterialBatchFacade batchFacade)
         {
             m_database = database;
             m_session = session;
@@ -36,6 +37,7 @@ namespace Elsa.Invoicing.Core.Data
             m_countersManager = countersManager;
             m_log = log;
             m_serviceLocator = serviceLocator;
+            m_batchFacade = batchFacade;
         }
 
         public IEnumerable<IInvoiceFormType> GetInvoiceFormTypes()
@@ -263,7 +265,10 @@ namespace Elsa.Invoicing.Core.Data
 
             m_database.Save(collection);
 
-            return new InvoiceFormsGenerationContext(m_log, this,  collection.Id);
+            var toDt = new DateTime(year, month, 1).AddDays(35);
+            var fromDt = toDt.AddMonths(-3);
+
+            return new InvoiceFormsGenerationContext(m_log, this,  collection.Id, m_batchFacade.CreatPriceBulkProvider(fromDt, toDt));
         }
 
         public IInvoiceFormCollection GetCollectionByMaterialBatchId(int batchId, int invoiceFormTypeId)

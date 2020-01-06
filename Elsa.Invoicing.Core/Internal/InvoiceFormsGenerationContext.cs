@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-
+using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -17,12 +18,14 @@ namespace Elsa.Invoicing.Core.Internal
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
         private readonly int m_collectionId;
         private HashSet<string> m_preapprovedWarnings = new HashSet<string>();
+        private readonly IBatchPriceBulkProvider m_batchPriceBulkProvider;
         
-        public InvoiceFormsGenerationContext(ILog log, IInvoiceFormsRepository invoiceFormsRepository, int collectionId)
+        public InvoiceFormsGenerationContext(ILog log, IInvoiceFormsRepository invoiceFormsRepository, int collectionId, IBatchPriceBulkProvider batchPriceBulkProvider)
         {
             m_log = log;
             m_invoiceFormsRepository = invoiceFormsRepository;
             m_collectionId = collectionId;
+            m_batchPriceBulkProvider = batchPriceBulkProvider;
         }
 
         public bool HasErrors { get; private set; }
@@ -96,6 +99,11 @@ namespace Elsa.Invoicing.Core.Internal
             var coll = m_invoiceFormsRepository.GetCollectionById(m_collectionId);
 
             return coll?.Forms.Count() ?? 0;
+        }
+
+        public List<PriceComponentModel> GetBatchPriceComponents(int batchId)
+        {
+            return m_batchPriceBulkProvider.GetBatchPriceComponents(batchId);
         }
     }
 }

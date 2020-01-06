@@ -177,6 +177,7 @@
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\MonthSearchPanel.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\ReceivingInvoicesReport.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\ReleaseFormsReport.html" />
+    <Content Include="UI\Controls\Reporting\StockLevelReport.html" />
     <Content Include="UI\Pages\Inventory\MaterialLevels.css" />
     <Content Include="UI\Pages\Inventory\MaterialLevels.html" />
     <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />

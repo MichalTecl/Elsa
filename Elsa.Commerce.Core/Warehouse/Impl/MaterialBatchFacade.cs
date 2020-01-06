@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
@@ -19,7 +18,6 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
-using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
@@ -27,7 +25,7 @@ using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse.Impl
 {
-    public class MaterialBatchFacade : IMaterialBatchFacade
+    public class MaterialBatchFacade : IMaterialBatchFacade, IBatchPriceBulkProvider
     {
         private readonly ILog m_log;
         private readonly IVirtualProductFacade m_virtualProductFacade;
@@ -39,7 +37,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IPackingPreferredBatchRepository m_batchPreferrenceRepository;
         private readonly IKitProductRepository m_kitProductRepository;
         private readonly IUnitConversionHelper m_conversionHelper;
-        private readonly IBatchStatusManager m_batchStatusManager;
         private readonly IMaterialThresholdRepository m_materialThresholdRepository;
         private readonly IMaterialRepository m_materialRepository;
         private readonly IUnitRepository m_unitRepository;
@@ -58,7 +55,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             IPackingPreferredBatchRepository batchPreferrenceRepository,
             IKitProductRepository kitProductRepository,
             IUnitConversionHelper conversionHelper,
-            IBatchStatusManager batchStatusManager,
             IMaterialThresholdRepository materialThresholdRepository,
             IMaterialRepository materialRepository,
             IUnitRepository unitRepository,
@@ -76,7 +72,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_batchPreferrenceRepository = batchPreferrenceRepository;
             m_kitProductRepository = kitProductRepository;
             m_conversionHelper = conversionHelper;
-            m_batchStatusManager = batchStatusManager;
             m_materialThresholdRepository = materialThresholdRepository;
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
@@ -543,28 +538,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public IEnumerable<string> GetDeletionBlockReasons(int batchId)
         {
-            var batch = m_batchRepository.GetBatchById(batchId);
-            if (batch == null)
-            {
-                throw new InvalidOperationException("Invalid entity reference");
-            }
-
-            var status = GetBatchStatus(batchId);
-
-            if (status.UsedInOrderItems.Any())
-            {
-                yield return "Již bylo prodáno zboží z této šarže";
-            }
-
-            if (status.UsedInCompositions.Any())
-            {
-                yield return "Šarže je použita ve složení jiné šarže";
-            }
-
-            foreach (var evt in status.Events.Select(e => e.Type.Name).Distinct())
-            {
-                yield return $"Byla provedena akce typu \"{evt}\"";
-            }
+            throw new NotImplementedException();
         }
         
         public IEnumerable<MaterialLevelModel> GetMaterialLevels(bool includeUnwatched = false)
@@ -707,12 +681,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return ids.Select(id => m_batchRepository.GetBatchById(id).Batch);
         }
 
-        public IEnumerable<IMaterialBatch> FindNotClosedBatches(int inventoryId, DateTime @from, DateTime to, Func<IMaterialBatch, bool> filter = null)
+        public IEnumerable<IMaterialBatch> FindNotClosedBatches(int inventoryId, DateTime from, DateTime to, Func<IMaterialBatch, bool> filter = null)
         {
             return m_batchRepository
                 .QueryBatches(q =>
                     q.Join(b => b.Material).Where(b => b.Material.InventoryId == inventoryId)
-                        .Where(b => (b.Created >= @from) && (b.Created <= to)).Where(b => b.CloseDt == null)).Where(b => filter?.Invoke(b) != false)
+                        .Where(b => (b.Created >= from) && (b.Created < to)).Where(b => b.CloseDt == null)).Where(b => filter?.Invoke(b) != false)
                 .Select(b => m_batchRepository.GetBatchById(b.Id).Batch);
         }
         
@@ -721,19 +695,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
            return new BatchAccountingDate(batch.Created);
         }
         
-        public IMaterialBatchStatus GetBatchStatus(int batchId)
+        public BatchPrice GetBatchPrice(IMaterialBatch batch, IBatchPriceBulkProvider provider)
         {
-            return m_cache.ReadThrough(GetBatchStatusCacheKey(batchId),
-                TimeSpan.FromMinutes(10),
-                () => m_batchStatusManager.GetStatus(batchId));
-        }
-
-        public BatchPrice GetBatchPrice(int batchId)
-        {
-            var compos = GetPriceComponents(batchId, false);
-
-            var batch = m_batchRepository.GetBatchById(batchId).Ensure().Batch;
-
+            var compos = provider.GetBatchPriceComponents(batch.Id);
+            
             var bp = new BatchPrice(batch);
 
             foreach (var c in compos)
@@ -918,11 +883,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return result;
         }
 
-        public Tuple<decimal, BatchPrice> GetPriceOfAmount(int batchId, Amount amount)
+        public Tuple<decimal, BatchPrice> GetPriceOfAmount(IMaterialBatch batch, Amount amount, IBatchPriceBulkProvider provider)
         {
-            var batchPrice = GetBatchPrice(batchId);
+            var batchPrice = GetBatchPrice(batch, provider);
 
-            var totalAmount = m_conversionHelper.ConvertAmount(new Amount(batchPrice.Batch), amount.Unit.Id);
+            var totalAmount = m_conversionHelper.ConvertAmount(new Amount(batchPrice.Batch.Volume, m_unitRepository.GetUnit(batchPrice.Batch.UnitId)), amount.Unit.Id);
             var pricePerUnit = batchPrice.TotalPriceInPrimaryCurrency / totalAmount.Value;
 
             return new Tuple<decimal, BatchPrice>(pricePerUnit * amount.Value, batchPrice);
@@ -968,7 +933,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             if (OrderStatus.IsSent(order.OrderStatusId))
             {
-                throw new InvalidOperationException($"Tato objednávka již byla odeslána");
+                throw new InvalidOperationException("Tato objednávka již byla odeslána");
             }
 
             var assignmentsToCut = new List<IOrderItemMaterialBatch>();
@@ -1015,7 +980,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 var material = m_materialRepository.GetMaterialById(materialId).Ensure();
                 if (!material.AutomaticBatches)
                 {
-                    throw new InvalidOperationException($"Chybi cislo sarze");
+                    throw new InvalidOperationException("Chybi cislo sarze");
                 }
             }
             else
@@ -1138,7 +1103,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 .WithParam("@batchId", batchId)
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@culture", m_session.Culture)
-                .ReadRows<string, decimal, bool, int?>((txt, val, wrn, sourceBatchId) => result.Add(new PriceComponentModel()
+                .ReadRows<int, string, decimal, bool, int?>((bId, txt, val, wrn, sourceBatchId) => result.Add(new PriceComponentModel(bId)
                 {
                     IsWarning = wrn,
                     RawValue = val,
@@ -1154,13 +1119,22 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return result;
         }
 
+        public List<PriceComponentModel> GetBatchPriceComponents(int batchId)
+        {
+            return GetPriceComponents(batchId, false).ToList();
+        }
+
         private static void AddSumPriceComponent(List<PriceComponentModel> result)
         {
-            result.Add(new PriceComponentModel()
+            var fb = result.FirstOrDefault();
+            if (fb != null)
             {
-                Text = "SUMA",
-                RawValue = result.Sum(r => r.RawValue)
-            });
+                result.Add(new PriceComponentModel(fb.BatchId)
+                {
+                    Text = "SUMA",
+                    RawValue = result.Sum(r => r.RawValue)
+                });
+            }
         }
 
         public IEnumerable<PriceComponentModel> GetPriceComponents(BatchKey key)
@@ -1204,6 +1178,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             AddSumPriceComponent(result);
 
             return result;
+        }
+
+        public IBatchPriceBulkProvider CreatPriceBulkProvider(DateTime from, DateTime to)
+        {
+            return new BatchPriceBulkProvider(m_database, m_session, this, from, to);
         }
 
         private IList<BatchAmountProcedureResult> ExecBatchAmountProcedure(int? batchId, int? materialId)

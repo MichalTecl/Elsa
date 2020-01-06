@@ -62,7 +62,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                     index.Add(key, items);
                 }
 
-                item.Price = GetPrice(item);
+                item.Price = GetPrice(item, context);
 
                 if (item.Price.Item2.HasWarning)
                 {
@@ -122,9 +122,9 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
         protected virtual void OnAfterItemSaved(IInvoiceForm form, IInvoiceFormItem item, ItemReleaseModel releaseModel) { }
 
-        protected virtual Tuple<decimal, BatchPrice> GetPrice(ItemReleaseModel item)
+        protected virtual Tuple<decimal, BatchPrice> GetPrice(ItemReleaseModel item, IInvoiceFormGenerationContext context)
         {
-            return m_batchFacade.GetPriceOfAmount(item.TookFromBatch.Id, item.TookAmount);
+            return m_batchFacade.GetPriceOfAmount(item.TookFromBatch, item.TookAmount, context);
         }
 
         protected abstract void GenerateItems(IMaterialInventory forInventory, int year, int month,

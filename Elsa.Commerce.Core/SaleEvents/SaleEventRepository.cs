@@ -64,6 +64,14 @@ namespace Elsa.Commerce.Core.SaleEvents
             }
         }
 
+        public IEnumerable<ISaleEvent> GetEvents(DateTime @from, DateTime to)
+        {
+            return m_database.SelectFrom<ISaleEvent>()
+                .Where(e => e.ProjectId == m_session.Project.Id)
+                .Where(e => e.EventDt >= from && e.EventDt < to).Execute()
+                .Select(e => new SaleEventAdapter(m_serviceLocator, e));
+        }
+
         public ISaleEvent WriteEvent(int id, Action<ISaleEvent> entity, IEnumerable<SaleEventAllocationDto> allocations)
         {
             var aloList = allocations.ToList();
