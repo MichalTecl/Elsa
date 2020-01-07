@@ -48,6 +48,9 @@ namespace Elsa.Core.Entities.Commerce.Accounting
         int MaterialInventoryId { get; set; }
         IMaterialInventory MaterialInventory { get; }
 
+        [NVarchar(200, true)]
+        string SecondaryInventory { get; set; }
+
         IEnumerable<IInvoiceFormItem> Items { get; }
 
         int InvoiceFormCollectionId { get; set; }

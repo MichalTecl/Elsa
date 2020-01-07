@@ -68,17 +68,24 @@ namespace Elsa.Commerce.Core.Impl
 
             using (var tx = m_database.OpenTransaction())
             {
+                m_log.Info("Starting transaction for payment pairing orderId={orderId}, paymentId={paymentId}");
                 if (order.ErpId != null)
                 {
                     order.PaymentId = paymentId;
                     order.PaymentPairingUserId = m_session.User.Id;
                     order.PaymentPairingDt = DateTime.Now;
                     m_database.Save(order);
+                    
+                    m_log.Info($"Order saved to the database in transaction; paymentId={order.PaymentId}, pairngUserId={order.PaymentPairingUserId}, pairingDt={order.PaymentPairingDt}");
+                }
+                else
+                {
+                    m_log.Error("Order.ErpId == null");
                 }
 
                 if (order.OrderStatusId == OrderStatus.PendingPayment.Id)
                 {
-                    return PerformErpActionSafe(order, (e, ord) => e.MarkOrderPaid(ord),
+                    order = PerformErpActionSafe(order, (e, ord) => e.MarkOrderPaid(ord),
                         synced =>
                         {
                             if (!OrderStatus.IsPaid(synced.OrderStatusId))
@@ -86,15 +93,15 @@ namespace Elsa.Commerce.Core.Impl
                                 throw new InvalidOperationException(
                                     $" Byl odeslan pozadavek na nastaveni platby objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
                             }
-                        });
+                        }, "SetOrderPaid");
+                }
+                else
+                {
+                    m_log.Info($"Order sync skipped - statusId={order.OrderStatusId}");
                 }
                 
-                order.PaymentId = paymentId;
-                order.PaymentPairingUserId = m_session.User.Id;
-                order.PaymentPairingDt = DateTime.Now;
-                m_database.Save(order);
-
                 tx.Commit();
+                m_log.Info("Transaction commited");
             }
 
             return order;
@@ -156,7 +163,7 @@ namespace Elsa.Commerce.Core.Impl
                                     throw new InvalidOperationException(
                                               $" Byl odeslan pozadavek na dokonceni objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
                                 }
-                            });
+                            }, "SetOrderSent");
                 }
 
                 tx.Commit();
@@ -290,10 +297,13 @@ namespace Elsa.Commerce.Core.Impl
         private IPurchaseOrder PerformErpActionSafe(
             IPurchaseOrder order,
             Action<IErpClient, IPurchaseOrder> erpAction,
-            Action<IPurchaseOrder> validateSyncedOrder)
+            Action<IPurchaseOrder> validateSyncedOrder,
+            string actionLogDescription)
         {
-            m_database.Save(order);
+            m_log.Info($"PerformErpActionSafe started: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription} statusId={order.OrderStatusId} erpStatus={order.ErpStatusName}");
 
+            m_database.Save(order);
+            
             var orderId = order.Id;
 
             if (order.ErpId == null)
@@ -303,11 +313,24 @@ namespace Elsa.Commerce.Core.Impl
 
             var erp = m_clientFactory.GetErpClient(order.ErpId.Value);
 
-            erpAction(erp, order);
+            try
+            {
+                erpAction(erp, order);
+                m_log.Info($"PerformErpActionSafe - erpAction performed ok: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription}");
+            }
+            catch (Exception ex)
+            {
+                m_log.Error($"PerformErpActionSafe - erpAction failed: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription}", ex);
+                throw;
+            }
+
+            m_log.Info($"Downloading order from ERP by orderNumber={order.OrderNumber}");
 
             var erpOrder = erp.LoadOrder(order.OrderNumber);
             if (erpOrder == null)
             {
+                m_log.Error($"Downloading order from ERP by orderNumber={order.OrderNumber} failed!");
+
                 throw new InvalidOperationException(
                             $"Nepodarilo se stahnout objednavku '{order.OrderNumber}' ze systemu '{order.Erp?.Description}'");
             }
@@ -320,15 +343,18 @@ namespace Elsa.Commerce.Core.Impl
             }
 
             order = m_orderRepository.GetOrder(importedOrderId);
-
+            
             try
             {
                 validateSyncedOrder(order);
             }
             catch (Exception ex)
             {
+                m_log.Error($"Chyba pri pokusu o zpracovani objednavky '{order.OrderNumber}' po pozadavku na zmenu v systemu '{order.Erp?.Description}': {ex.Message}", ex);
                 throw new InvalidOperationException($"Chyba pri pokusu o zpracovani objednavky '{order.OrderNumber}' po pozadavku na zmenu v systemu '{order.Erp?.Description}': {ex.Message}");
             }
+
+            m_log.Info($"PerformErpActionSafe finished ok; order reloaded from database: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription} statusId={order.OrderStatusId} erpStatus={order.ErpStatusName}");
 
             return order;
         }

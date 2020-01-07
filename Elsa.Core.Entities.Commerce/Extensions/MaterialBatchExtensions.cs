@@ -11,6 +11,11 @@ namespace Elsa.Core.Entities.Commerce.Extensions
             return string.Join(" ", GetBatchInfo(batch));
         }
 
+        public static string GetUnid(this IMaterialBatch batch)
+        {
+            return $"{batch.BatchNumber}.{batch.Id}";
+        }
+
         private static IEnumerable<string> GetBatchInfo(IMaterialBatch b)
         {
             if (b == null)
@@ -20,7 +25,7 @@ namespace Elsa.Core.Entities.Commerce.Extensions
 
             if (!string.IsNullOrWhiteSpace(b.BatchNumber))
             {
-                yield return b.BatchNumber;
+                yield return b.GetUnid();
             }
             else
             {

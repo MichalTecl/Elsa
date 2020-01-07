@@ -291,39 +291,39 @@ BEGIN
 END
 
 GO
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE name = 'OnFixedCostsChanged')
-BEGIN
-	DROP PROCEDURE OnFixedCostsChanged;
-END
+--IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE name = 'OnFixedCostsChanged')
+--BEGIN
+--	DROP PROCEDURE OnFixedCostsChanged;
+--END
 
-GO 
+--GO 
 
-CREATE PROCEDURE OnFixedCostsChanged (@projectId INT, @year INT, @month INT)
-AS
-BEGIN
+--CREATE PROCEDURE OnFixedCostsChanged (@projectId INT, @year INT, @month INT)
+--AS
+--BEGIN
 	
-	WHILE(1=1)
-	BEGIN
-		DECLARE @bid INT = (SELECT TOP 1 b.Id
-		                      FROM MaterialBatch b
-							  JOIN Material m ON (m.Id = b.MaterialId)
-							  JOIN MaterialInventory mi ON (m.InventoryId = mi.Id)
-							  JOIN BatchPriceComponent bpc ON (b.Id = bpc.BatchId)
-							 WHERE b.ProjectId = @projectId
-							   AND mi.IncludesFixedCosts = 1
-							   AND YEAR(b.Created) = @year
-							   AND MONTH(b.Created) = @month); 
+--	WHILE(1=1)
+--	BEGIN
+--		DECLARE @bid INT = (SELECT TOP 1 b.Id
+--		                      FROM MaterialBatch b
+--							  JOIN Material m ON (m.Id = b.MaterialId)
+--							  JOIN MaterialInventory mi ON (m.InventoryId = mi.Id)
+--							  JOIN BatchPriceComponent bpc ON (b.Id = bpc.BatchId)
+--							 WHERE b.ProjectId = @projectId
+--							   AND mi.IncludesFixedCosts = 1
+--							   AND YEAR(b.Created) = @year
+--							   AND MONTH(b.Created) = @month); 
 		
-		IF (@bid IS NULL)
-		BEGIN
-			RETURN;
-		END
+--		IF (@bid IS NULL)
+--		BEGIN
+--			RETURN;
+--		END
 
-		EXEC OnBatchChanged @bid;
+--		EXEC OnBatchChanged @bid;
 
-	END
+--	END
 
-END
+--END
 
 GO
 
@@ -340,20 +340,7 @@ CREATE PROCEDURE OnBatchChanged
 )
 AS
 BEGIN
-  DELETE FROM BatchPriceComponent WHERE BatchId IN (SELECT BatchId FROM dbo.GetAllBatchesContainingProvidedBatch(@batchID));
-   
-  DECLARE @batchDt DATETIME;
-  DECLARE @projectId INT;
-  SELECT TOP 1 @batchDt = b.Created, @projectId = b.ProjectId
-        FROM MaterialBatch b
-		JOIN Material m ON (b.MaterialId = m.Id)
-		JOIN MaterialInventory i ON (m.InventoryId = i.Id AND ISNULL(i.IncludesFixedCosts, 0) = 1);
-  
-  IF (@batchDt IS NOT NULL)		
-  BEGIN
-	DECLARE @y INT = YEAR(@batchDt), @m INT = MONTH(@batchDt);
-    EXEC OnFixedCostsChanged @projectId, @y, @m; 
-  END		  
+  DELETE FROM BatchPriceComponent WHERE BatchId IN (SELECT BatchId FROM dbo.GetAllBatchesContainingProvidedBatch(@batchID));   
 END
 
 GO
@@ -383,36 +370,36 @@ END
 
 GO 
 
-IF EXISTS (SELECT * FROM sys.triggers WHERE object_id = OBJECT_ID(N'[dbo].[TRG_FixedCostChanged]'))
-	DROP TRIGGER [dbo].[TRG_FixedCostChanged];
+--IF EXISTS (SELECT * FROM sys.triggers WHERE object_id = OBJECT_ID(N'[dbo].[TRG_FixedCostChanged]'))
+--	DROP TRIGGER [dbo].[TRG_FixedCostChanged];
 
-GO
+--GO
 
-CREATE TRIGGER TRG_FixedCostChanged ON FixedCostValue FOR INSERT, UPDATE, DELETE 
-AS
-WHILE EXISTS(SELECT TOP 1 1 FROM inserted)
-BEGIN
-	DECLARE @processed TABLE (id INT);
-	DECLARE @id INT;
-	DECLARE @month INT;
-	DECLARE @year INT;
-	DECLARE @projectId INT;
+--CREATE TRIGGER TRG_FixedCostChanged ON FixedCostValue FOR INSERT, UPDATE, DELETE 
+--AS
+--WHILE EXISTS(SELECT TOP 1 1 FROM inserted)
+--BEGIN
+--	DECLARE @processed TABLE (id INT);
+--	DECLARE @id INT;
+--	DECLARE @month INT;
+--	DECLARE @year INT;
+--	DECLARE @projectId INT;
 
-	WHILE(1=1)
-	BEGIN
-		SET @id = NULL;
-		SELECT TOP 1 @id = i.Id, @month = i.Month, @year = i.Year, @projectId = i.ProjectId 
-		  FROM inserted i 
-		 WHERE i.Id NOT IN (SELECT p.id FROM @processed p);
+--	WHILE(1=1)
+--	BEGIN
+--		SET @id = NULL;
+--		SELECT TOP 1 @id = i.Id, @month = i.Month, @year = i.Year, @projectId = i.ProjectId 
+--		  FROM inserted i 
+--		 WHERE i.Id NOT IN (SELECT p.id FROM @processed p);
 
-		 IF (@id IS NULL)
-		 BEGIN
-			RETURN;
-		 END
+--		 IF (@id IS NULL)
+--		 BEGIN
+--			RETURN;
+--		 END
 
-		 INSERT INTO @processed VALUES (@id);
-	END
-END
+--		 INSERT INTO @processed VALUES (@id);
+--	END
+--END
 
 GO
 

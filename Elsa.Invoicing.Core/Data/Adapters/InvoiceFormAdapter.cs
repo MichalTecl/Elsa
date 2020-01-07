@@ -59,6 +59,12 @@ namespace Elsa.Invoicing.Core.Data.Adapters
         public IMaterialInventory MaterialInventory => Get<IMaterialRepository, IMaterialInventory>("MaterialInventory",
             r => r.GetMaterialInventories().FirstOrDefault(i => i.Id == MaterialInventoryId));
 
+        public string SecondaryInventory
+        {
+            get => Adaptee.SecondaryInventory;
+            set => Adaptee.SecondaryInventory = value;
+        }
+
         public IEnumerable<IInvoiceFormItem> Items =>
             Get<IInvoiceFormsRepository, IEnumerable<IInvoiceFormItem>>("Items", r => r.GetItemsByFormId(Id));
 

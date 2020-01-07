@@ -52,7 +52,7 @@ namespace Elsa.App.CommonReports
 
             var hs = new HashSet<string>();
 
-            m_database.Sql().Call("GetStockReport")
+            m_database.Sql().Call("GetBatchPricesReport")
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@culture", m_session.Culture)
                 .ReadRows<string, string, string, decimal>((material, batch, text, price) =>

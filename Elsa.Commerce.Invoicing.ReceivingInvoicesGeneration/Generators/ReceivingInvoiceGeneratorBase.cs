@@ -143,7 +143,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration.Generators
 
         protected virtual string GetFormItemNote(IMaterialBatch batch)
         {
-            return $"{batch.Material.Name} {batch.BatchNumber}";
+            return $"{batch.Material.Name} {batch.GetUnid()}";
         }
     }
 }

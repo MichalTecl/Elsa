@@ -9,6 +9,7 @@ using Elsa.Common;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
+using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Invoicing.Core.Contract;
@@ -42,7 +43,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                 notes = $" ({notes})";
             }
 
-            return $"{item[0].Descriptor.StockEventTypeName} ze šarže {item[0].Descriptor.Event.Batch.BatchNumber}{notes}";
+            return $"{item[0].Descriptor.StockEventTypeName} ze šarže {item[0].Descriptor.Event.Batch.GetUnid()}{notes}";
         }
 
         protected override void GenerateItems(IMaterialInventory forInventory, int year, int month, IInvoiceFormGenerationContext context,

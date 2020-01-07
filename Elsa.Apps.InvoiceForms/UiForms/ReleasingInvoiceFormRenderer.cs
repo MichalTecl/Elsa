@@ -4,6 +4,7 @@ using Elsa.Common.Noml.Core;
 using Elsa.Common.Noml.Forms;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting;
+using Elsa.Core.Entities.Commerce.Extensions;
 
 namespace Elsa.Apps.InvoiceForms.UiForms
 {
@@ -42,7 +43,7 @@ namespace Elsa.Apps.InvoiceForms.UiForms
                 NewTable().Head("Položka", "Množství", "Cena bez DPH").Rows(m_form.Items,
                     i =>
                     {
-                        var batchesString = string.Join(",", i.Batches.Select(b => b.MaterialBatch?.BatchNumber));
+                        var batchesString = string.Join(",", i.Batches.Select(b => b.MaterialBatch?.GetUnid()));
 
                         return new object[]
                         {
