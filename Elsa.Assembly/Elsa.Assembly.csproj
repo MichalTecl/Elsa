@@ -187,6 +187,10 @@
       <Project>{5ef07762-137b-4bf7-8199-5961768fcaec}</Project>
       <Name>Elsa.Jobs.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.DbBackup\Elsa.Jobs.DbBackup.csproj">
+      <Project>{AEBA83D2-BFAE-4A1D-B538-08F5460EC409}</Project>
+      <Name>Elsa.Jobs.DbBackup</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.GeocodeAddresses\Elsa.Jobs.GeocodeAddresses.csproj">
       <Project>{21605d9d-a85d-458a-9d38-0ef57ea7bf64}</Project>
       <Name>Elsa.Jobs.GeocodeAddresses</Name>

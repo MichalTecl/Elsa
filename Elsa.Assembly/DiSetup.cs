@@ -29,6 +29,7 @@ using Elsa.Integration.PaymentSystems.Fio;
 using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Jobs.Common;
+using Elsa.Jobs.DbBackup;
 using Elsa.Jobs.GeocodeAddresses;
 using Elsa.Jobs.ImportOrders;
 using Elsa.Jobs.LoadCurrencyRates;
@@ -93,6 +94,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(SaleEventsController).Assembly);
                     s.ScanAssembly(typeof(ProductionServiceController).Assembly);
                     s.ScanAssembly(typeof(CommonReportsController).Assembly);
+                    s.ScanAssembly(typeof(DbBackupJob).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });
