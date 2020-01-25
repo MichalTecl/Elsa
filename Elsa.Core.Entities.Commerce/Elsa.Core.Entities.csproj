@@ -47,8 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Accounting\IFixedCostType.cs" />
-    <Compile Include="Accounting\IFixedCostValue.cs" />
+    <Compile Include="Accounting\FixedCosts\IFixedCostBatchComponent.cs" />
+    <Compile Include="Accounting\FixedCosts\IFixedCostMonthCalculation.cs" />
+    <Compile Include="Accounting\FixedCosts\IFixedCostType.cs" />
+    <Compile Include="Accounting\FixedCosts\IFixedCostValue.cs" />
     <Compile Include="Accounting\IInvoiceForm.cs" />
     <Compile Include="Accounting\IInvoiceFormCollection.cs" />
     <Compile Include="Accounting\IInvoiceFormGenerationLog.cs" />

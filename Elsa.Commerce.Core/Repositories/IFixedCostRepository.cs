@@ -19,5 +19,7 @@ namespace Elsa.Commerce.Core.Repositories
         IEnumerable<IFixedCostValue> GetValues(int year, int month);
 
         void SetValue(int typeId, int year, int month, decimal value);
+
+        void CalculateFixedCostComponents(int year, int month);
     }
 }

@@ -25,7 +25,7 @@ namespace Elsa.App.CommonReports
         {
             var rd = new DateTime(year, month, day).AddHours(23).AddMinutes(59).AddSeconds(59);
 
-            var stockReport = m_stockReportLoader.LoadStockReport(rd).ToList();
+            var stockReport = m_stockReportLoader.LoadStockReport(rd);
 
             var bytes = XlsxSerializer.Instance.Serialize(stockReport);
 

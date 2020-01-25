@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Commerce.Core.Repositories.Automation;
+using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Accounting;
+using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {
@@ -11,9 +13,13 @@ namespace Elsa.Commerce.Core.Repositories
     {
         private readonly IRepository<IFixedCostType> m_costTypeRepository;
         private readonly IRepository<IFixedCostValue> m_costValueRepository;
+        private readonly IDatabase m_database;
+        private readonly ISession m_session;
 
-        public FixedCostRepository(IRepositoryFactory repositories)
+        public FixedCostRepository(IRepositoryFactory repositories, IDatabase database, ISession session)
         {
+            m_database = database;
+            m_session = session;
             var hStart = DateTime.Now.Year - 2;
 
             m_costTypeRepository = repositories.GetForSmallTable<IFixedCostType>();
@@ -64,6 +70,23 @@ namespace Elsa.Commerce.Core.Repositories
                     e.Year = year;
                     e.Value = value;
                 });
+        }
+
+        public void CalculateFixedCostComponents(int year, int month)
+        {
+            var rqDate = new DateTime(year, month, 1).AddMonths(1).AddSeconds(-1);
+
+            if (rqDate >= DateTime.Now)
+            {
+                throw new InvalidOperationException($"Není možné zpracovat nepřímé náklady před ukončením {month}/{year}");
+            }
+
+            m_database.Sql().Call("ApplyFixedCosts")
+                .WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@userId", m_session.User.Id)
+                .WithParam("@year", year)
+                .WithParam("@month", month)
+                .WithParam("@overwrite", false).NonQuery();
         }
     }
 }

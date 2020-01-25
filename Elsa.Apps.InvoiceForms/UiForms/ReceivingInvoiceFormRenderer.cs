@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,10 +16,12 @@ namespace Elsa.Apps.InvoiceForms.UiForms
     internal class ReceivingInvoiceFormRenderer : Form
     {
         private readonly IInvoiceForm m_form;
+        private readonly CultureInfo m_culture;
 
-        public ReceivingInvoiceFormRenderer(IInvoiceForm form)
+        public ReceivingInvoiceFormRenderer(IInvoiceForm form, CultureInfo culture)
         {
             m_form = form;
+            m_culture = culture;
         }
 
         protected override IEnumerable<IRenderable> Build()
@@ -31,6 +34,8 @@ namespace Elsa.Apps.InvoiceForms.UiForms
             yield return Frame(FrameStyle.All, Div(RenderHead(), RenderSupplierInfo()));
 
             yield return RenderItems();
+
+            yield return RenderSum();
         }
         
 
@@ -40,6 +45,12 @@ namespace Elsa.Apps.InvoiceForms.UiForms
 
             yield return TitleValue("Vystaveno:", StringUtil.FormatDate(m_form.IssueDate));
             yield return TitleValue("Faktura - V.S.:", m_form.InvoiceVarSymbol);
+        }
+
+        private IRenderable RenderSum()
+        {
+            return Frame(FrameStyle.Top, Div(Crlf(),  TitleValue("Celkem:",StringUtil.FormatPrice(m_form.Items.Sum(fi => fi.PrimaryCurrencyPrice), m_culture) + " Kč")));
+        
         }
 
         private IEnumerable<IRenderable> RenderSupplierInfo()
@@ -74,8 +85,8 @@ namespace Elsa.Apps.InvoiceForms.UiForms
                         return new object[]
                         {
                             HtmlLiteral($"{i.MaterialName}&nbsp;<span class=\"note\">({batchesString})</span>"),
-                            $"{StringUtil.FormatDecimal(i.Quantity)} {i.Unit.Symbol}",
-                            StringUtil.FormatPrice(i.SourceCurrencyPrice ?? i.PrimaryCurrencyPrice)
+                            $"{StringUtil.FormatDecimal(i.Quantity, m_culture)} {i.Unit.Symbol}",
+                            StringUtil.FormatPrice(i.SourceCurrencyPrice ?? i.PrimaryCurrencyPrice, m_culture)
                         };
                     })));
         }

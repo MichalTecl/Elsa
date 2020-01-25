@@ -9,8 +9,8 @@ namespace Elsa.App.CommonReports
 {
     public interface IStockReportLoader
     {
-        IEnumerable<StockReportItemModel> LoadStockReport(DateTime forDateTime);
+        StockReportModel LoadStockReport(DateTime forDateTime);
 
-        IList<BatchPriceComponentItemModel> LoadPriceComponentsReport();
+        List<BatchPriceComponentItemModel> LoadPriceComponentsReport();
     }
 }

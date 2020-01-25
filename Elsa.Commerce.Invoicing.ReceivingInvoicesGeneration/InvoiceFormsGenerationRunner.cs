@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Logging;
@@ -22,13 +22,14 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
         private readonly IInvoiceFormGeneratorFactory m_generatorFactory;
         private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
         private readonly ISession m_session;
+        private readonly IFixedCostRepository m_fixedCostRepository;
         
         public InvoiceFormsGenerationRunner(IDatabase database,
             ILog log,
             IMaterialRepository materialRepository,
             IInvoiceFormGeneratorFactory generatorFactory,
             IInvoiceFormsRepository invoiceFormsRepository,
-            ISession session)
+            ISession session, IFixedCostRepository fixedCostRepository)
         {
             m_database = database;
             m_log = log;
@@ -36,12 +37,15 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
             m_generatorFactory = generatorFactory;
             m_invoiceFormsRepository = invoiceFormsRepository;
             m_session = session;
+            m_fixedCostRepository = fixedCostRepository;
         }
 
         public IInvoiceFormGenerationContext RunReceivingInvoicesGeneration(int formTypeId, int year, int month)
         {
             m_log.Info($"Called for month={month}, year={year}");
-            
+
+            m_fixedCostRepository.CalculateFixedCostComponents(year, month);
+
             var context = PrepareContext(formTypeId, year, month);
 
             foreach (var inventory in m_materialRepository.GetMaterialInventories())
@@ -54,7 +58,6 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 
                 try
                 {
-
                     DoGeneration(inventory, context, year, month, null);
                 }
                 catch (Exception ex)
@@ -103,6 +106,8 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 
         public IInvoiceFormGenerationContext RunTasks(int year, int month)
         {
+            m_fixedCostRepository.CalculateFixedCostComponents(year, month);
+
             var invoiceFormType = m_invoiceFormsRepository.GetInvoiceFormTypes()
                 .FirstOrDefault(t => t.GeneratorName == "ReleasingForm");
             if (invoiceFormType == null)

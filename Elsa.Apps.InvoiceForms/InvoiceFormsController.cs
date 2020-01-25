@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -109,6 +110,35 @@ namespace Elsa.Apps.InvoiceForms
             var renderer = m_formRendererFactory.GetRenderer(invoiceForm);
             
             return new FileResult($"{invoiceForm.InvoiceFormNumber}.pdf", renderer.GetPdf(), "application/pdf", "inline");
+        }
+
+        public FileResult GetAllForms(int year, int month)
+        {
+            var formTypes = m_invoiceFormsRepository.GetInvoiceFormTypes().ToList();
+
+            var tempDir = Path.Combine($"C:\\Elsa\\Temp\\{Guid.NewGuid()}\\{month.ToString().PadLeft(2, '0')}-{year}");
+            Directory.CreateDirectory(tempDir);
+
+            foreach (var formType in formTypes)
+            {
+                var ftDir = Path.Combine(tempDir, formType.Name);
+                Directory.CreateDirectory(ftDir);
+
+                var collection = m_invoiceFormsRepository.FindCollection(formType.Id, year, month);
+                if (collection == null)
+                {
+                    continue;
+                }
+
+                foreach (var form in collection.Forms)
+                {
+                    var renderer = m_formRendererFactory.GetRenderer(form);
+                    var path = Path.Combine(ftDir, $"{form.InvoiceFormNumber}.pdf");
+                    File.WriteAllBytes(path, renderer.GetPdf());
+                }
+            }
+
+            return null;
         }
 
         public InvoiceFormsCollection<ReceivingInvoiceFormModel> GenerateReceivingInvoicesCollection(int type, int year, int month)

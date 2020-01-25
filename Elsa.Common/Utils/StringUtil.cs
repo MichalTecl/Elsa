@@ -139,9 +139,26 @@ namespace Elsa.Common.Utils
             return s.TrimEnd('.');
         }
 
+        public static string FormatDecimal(decimal n, CultureInfo culture)
+        {
+            var s = n.ToString(culture);
+
+            if (s.Contains(".") || s.Contains(","))
+            {
+                s = s.TrimEnd('0');
+            }
+
+            return s.TrimEnd(culture.NumberFormat.CurrencyDecimalSeparator[0]);
+        }
+
         public static string FormatPrice(decimal price)
         {
             return price.ToString("F");
+        }
+
+        public static string FormatPrice(decimal price, CultureInfo culture)
+        {
+            return price.ToString("F", culture);
         }
 
         public static string Display(this decimal value, string unit = null)

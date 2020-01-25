@@ -54,7 +54,10 @@
     <Compile Include="CommonReportsController.cs" />
     <Compile Include="IStockReportLoader.cs" />
     <Compile Include="Model\BatchPriceComponentItemModel.cs" />
+    <Compile Include="Model\FixedCostReportItemModel.cs" />
     <Compile Include="Model\StockReportItemModel.cs" />
+    <Compile Include="Model\StockReportModel.cs" />
+    <Compile Include="Model\InventorySummaryValueItemModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
     <Compile Include="StockReportLoader.cs" />

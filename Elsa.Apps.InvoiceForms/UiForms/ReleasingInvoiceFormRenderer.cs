@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Elsa.Common.Noml.Core;
 using Elsa.Common.Noml.Forms;
@@ -11,10 +12,12 @@ namespace Elsa.Apps.InvoiceForms.UiForms
     internal class ReleasingInvoiceFormRenderer : Form
     {
         private readonly IInvoiceForm m_form;
+        private readonly CultureInfo m_culture;
 
-        public ReleasingInvoiceFormRenderer(IInvoiceForm form)
+        public ReleasingInvoiceFormRenderer(IInvoiceForm form, CultureInfo culture)
         {
             m_form = form;
+            m_culture = culture;
         }
 
         protected override IEnumerable<IRenderable> Build()
@@ -25,8 +28,14 @@ namespace Elsa.Apps.InvoiceForms.UiForms
             yield return Crlf();
             yield return Frame(FrameStyle.All, Div(RenderHead()));
             yield return RenderItems();
+
+            yield return RenderSum();
         }
-        
+
+        private IRenderable RenderSum()
+        {
+            return Frame(FrameStyle.Top, Div(Crlf(), TitleValue("Celkem:", StringUtil.FormatPrice(m_form.Items.Sum(fi => fi.PrimaryCurrencyPrice), m_culture) + " Kč")));
+        }
 
         private IEnumerable<IRenderable> RenderHead()
         {
@@ -48,8 +57,8 @@ namespace Elsa.Apps.InvoiceForms.UiForms
                         return new object[]
                         {
                             HtmlLiteral($"{i.MaterialName}&nbsp;<span class=\"note\">({batchesString})</span>"),
-                            $"{StringUtil.FormatDecimal(i.Quantity)} {i.Unit.Symbol}",
-                            StringUtil.FormatPrice(i.SourceCurrencyPrice ?? i.PrimaryCurrencyPrice)
+                            $"{StringUtil.FormatDecimal(i.Quantity, m_culture)} {i.Unit.Symbol}",
+                            StringUtil.FormatPrice(i.SourceCurrencyPrice ?? i.PrimaryCurrencyPrice, m_culture)
                         };
                     })));
         }

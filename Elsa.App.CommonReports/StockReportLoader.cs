@@ -21,9 +21,10 @@ namespace Elsa.App.CommonReports
             m_session = session;
         }
 
-        public IEnumerable<StockReportItemModel> LoadStockReport(DateTime forDateTime)
+        public StockReportModel LoadStockReport(DateTime forDateTime)
         {
-            var result = new List<StockReportItemModel>(1000);
+            var report = new List<StockReportItemModel>(1000);
+            var summary = new List<InventorySummaryValueItemModel>();
 
             m_database.Sql().Call("GetStockReport")
                 .WithParam("@projectId", m_session.Project.Id)
@@ -32,7 +33,7 @@ namespace Elsa.App.CommonReports
                 .ReadRows<string, string, string, decimal, string, decimal>(
                     (inventory, material, batch, available, symbol, price) =>
                     {
-                        result.Add(new StockReportItemModel
+                        report.Add(new StockReportItemModel
                         {
                             InventoryName = inventory,
                             Amount = available,
@@ -41,21 +42,40 @@ namespace Elsa.App.CommonReports
                             UnitSymbol = symbol,
                             Price = price
                         });
+
+                        var sum = summary.FirstOrDefault(s =>
+                            s.InventoryName.Equals(inventory, StringComparison.InvariantCultureIgnoreCase));
+                        if (sum == null)
+                        {
+                            sum = new InventorySummaryValueItemModel()
+                            {
+                                InventoryName = inventory,
+                                Value = 0
+                            };
+
+                            summary.Add(sum);
+                        }
+
+                        sum.Value += price;
                     });
 
-            return result;
+            return new StockReportModel()
+            {
+                Details = report,
+                Summary = summary,
+                Prices = LoadPriceComponentsReport(),
+                FixedCosts = LoadFixedCostReport()
+            };
         }
 
-        public IList<BatchPriceComponentItemModel> LoadPriceComponentsReport()
+        public List<BatchPriceComponentItemModel> LoadPriceComponentsReport()
         {
             var result = new List<BatchPriceComponentItemModel>(10000);
-
-            var hs = new HashSet<string>();
-
+            
             m_database.Sql().Call("GetBatchPricesReport")
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@culture", m_session.Culture)
-                .ReadRows<string, string, string, decimal>((material, batch, text, price) =>
+                .ReadRows<string, string, string, decimal, string>((material, batch, text, price, month) =>
                 {
                     var item =  new BatchPriceComponentItemModel
                     {
@@ -64,12 +84,31 @@ namespace Elsa.App.CommonReports
                     };
 
                     result.Add(item);
+                    
+                    item.BatchIdentifier = batch;
+                    item.MaterialName = material;
+                    item.Month = month;
 
-                    if (hs.Add(batch))
+                });
+
+            return result;
+        }
+
+        private List<FixedCostReportItemModel> LoadFixedCostReport()
+        {
+            var result = new List<FixedCostReportItemModel>();
+
+            m_database.Sql().Call("GetFixedCostReport")
+                .WithParam("@projectId", m_session.Project.Id)
+                .ReadRows<string, string, decimal, int>((month, text, value, percent) =>
+                {
+                    result.Add(new FixedCostReportItemModel()
                     {
-                        item.BatchIdentifier = batch;
-                        item.MaterialName = material;
-                    }
+                        Month = month,
+                        TypeName = text,
+                        Value = value,
+                        Percent = ((decimal)percent) / 100m
+                    });
                 });
 
             return result;
