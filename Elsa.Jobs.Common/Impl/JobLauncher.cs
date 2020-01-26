@@ -22,10 +22,25 @@ namespace Elsa.Jobs.Common.Impl
 
         public void LaunchJob(IJobSchedule jobEntry)
         {
-            m_log.Info($"Vytvarim instanci {jobEntry.ScheduledJob.ModuleClass}");
-            var jobExecutable = m_serviceLocator.InstantiateNow<IExecutableJob>(jobEntry.ScheduledJob.ModuleClass);
+            IExecutableJob jobExecutable = null;
+            try
+            {
+                m_log.Info($"Vytvarim instanci {jobEntry.ScheduledJob.ModuleClass}");
+                jobExecutable = m_serviceLocator.InstantiateNow<IExecutableJob>(jobEntry.ScheduledJob.ModuleClass);
 
+                if (jobExecutable == null)
+                {
+                    throw new InvalidOperationException("Cannot instantiate the job");
+                }
 
+                m_log.Info($"Job instance created {jobExecutable}");
+            }
+            catch (Exception ex)
+            {
+                m_log.Error("Job instantiation failed", ex);
+                return;
+            }
+            
             m_scheduledJobs.MarkJobStarted(jobEntry);
 
             try

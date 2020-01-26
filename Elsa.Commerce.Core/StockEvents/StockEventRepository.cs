@@ -163,7 +163,7 @@ namespace Elsa.Commerce.Core.StockEvents
                 .Join(e => e.Batch.Material)
                 .Where(e => e.ProjectId == m_session.Project.Id)
                 .Where(e => e.Batch.Material.InventoryId == inventoryId)
-                .Where(e => e.EventDt >= from && e.EventDt <= to).Execute()
+                .Where(e => e.EventDt >= from && e.EventDt < to).Execute()
                 .Select(b => new MaterialStockEventAdapter(m_serviceLocator, b));
         }
 
@@ -250,7 +250,7 @@ namespace Elsa.Commerce.Core.StockEvents
                 .Join(e => e.Type)
                 .Where(e => e.ProjectId == m_session.Project.Id)
                 .Where(e => e.SourcePurchaseOrderId == sourcePurchaseOrderId)
-                .Where(e => e.EventDt >= from && e.EventDt <= to).Execute()
+                .Where(e => e.EventDt >= from && e.EventDt < to).Execute()
                 .Select(b => new MaterialStockEventAdapter(m_serviceLocator, b));
         }
     }

@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Automation;
 
 using Robowire.RobOrm.Core;
@@ -14,11 +15,13 @@ namespace Elsa.Jobs.Common.Impl
     {
         private readonly IDatabase m_database;
         private readonly ISession m_session;
+        private readonly ILog m_log;
 
-        public ScheduledJobsRepository(IDatabase database, ISession session)
+        public ScheduledJobsRepository(IDatabase database, ISession session, ILog log)
         {
             m_database = database;
             m_session = session;
+            m_log = log;
         }
 
         public IJobSchedule GetCurrentJob(int projectId)
@@ -91,24 +94,36 @@ namespace Elsa.Jobs.Common.Impl
 
         public void MarkJobStarted(IJobSchedule job)
         {
+            m_log.Info($"MarkJobStarted called {job?.Uid}");
+
             job.LastEndDt = null;
             job.LastStartDt = DateTime.Now;
-            
+         
             m_database.Save(job);
+
+            m_log.Info($"MarkJobStarted OK {job?.Uid}");
         }
 
         public void MarkJobSucceeded(IJobSchedule job)
         {
+            m_log.Info($"MarkJobSucceeded called {job?.Uid}");
+
             job.LastEndDt = DateTime.Now;
             job.LastRunFailed = false;
             m_database.Save(job);
+
+            m_log.Info($"MarkJobSucceeded OK {job?.Uid}");
         }
 
         public void MarkJobFailed(IJobSchedule job)
         {
+            m_log.Info($"MarkJobFailed called {job?.Uid}");
+
             job.LastEndDt = DateTime.Now;
             job.LastRunFailed = true;
             m_database.Save(job);
+
+            m_log.Info($"MarkJobSucceeded OK {job?.Uid}");
         }
 
         public IEnumerable<IJobSchedule> GetCompleteScheduler()
