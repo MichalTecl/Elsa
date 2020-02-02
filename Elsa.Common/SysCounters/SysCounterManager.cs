@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common.SystemCounters;
 
 using Robowire.RobOrm.Core;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Commerce;
 
 using Robowire.RobOrm.Core;

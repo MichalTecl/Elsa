@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Shipment;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 
 using Robowire.RoboApi;

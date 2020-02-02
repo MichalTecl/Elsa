@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
 

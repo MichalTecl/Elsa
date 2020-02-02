@@ -5,6 +5,7 @@ using Elsa.App.SaleEvents.Model;
 using Elsa.App.SaleEvents.Model.Xls;
 using Elsa.Commerce.Core.SaleEvents;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce.SaleEvents;

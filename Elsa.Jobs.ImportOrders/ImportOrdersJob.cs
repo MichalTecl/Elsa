@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Robowire.RobOrm.Core;

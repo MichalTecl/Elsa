@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Robowire.RoboApi;
 using Robowire.RobOrm.Core;

@@ -5,6 +5,7 @@ using Elsa.App.Commerce.Preview.Model;
 using Elsa.Apps.Common.ViewModels;
 using Elsa.Commerce.Core;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 
 using Robowire.RoboApi;

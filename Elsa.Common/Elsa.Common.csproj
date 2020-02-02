@@ -55,7 +55,6 @@
     <Compile Include="Caching\IPerProjectDbCache.cs" />
     <Compile Include="Caching\PerProjectDbCache.cs" />
     <Compile Include="CommonRegistry.cs" />
-    <Compile Include="CommonRights.cs" />
     <Compile Include="Communication\WebFormsClient.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -74,10 +73,7 @@
     <Compile Include="FileResult.cs" />
     <Compile Include="HtmlResult.cs" />
     <Compile Include="ICustomResult.cs" />
-    <Compile Include="ISession.cs" />
-    <Compile Include="IStartupJob.cs" />
     <Compile Include="IUnitConvertor.cs" />
-    <Compile Include="IWebSession.cs" />
     <Compile Include="Logging\AsyncLogger.cs" />
     <Compile Include="Logging\FileLogWriter.cs" />
     <Compile Include="Logging\ILog.cs" />
@@ -89,11 +85,6 @@
     <Compile Include="ReleaseVersionInfo.cs" />
     <Compile Include="SysCounters\ISysCountersManager.cs" />
     <Compile Include="SysCounters\SysCounterManager.cs" />
-    <Compile Include="UserRightsDefinitionAttribute.cs" />
-    <Compile Include="UserRightsInfrastructure\SyncUserRightsJob.cs" />
-    <Compile Include="UserRightsInfrastructure\UserRight.cs" />
-    <Compile Include="UserRightsInfrastructure\UserRightDefinitionCollector.cs" />
-    <Compile Include="UserRightsInfrastructure\UserRightInfo.cs" />
     <Compile Include="Utils\CsvGenerator.cs" />
     <Compile Include="Utils\DateUtil.cs" />
     <Compile Include="Utils\GenericComparer.cs" />
@@ -125,6 +116,10 @@
     <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
       <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
+      <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
+      <Name>Elsa.Common.Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Noml\Elsa.Common.Noml.csproj">
       <Project>{3C44767F-B6AB-4ADD-87F7-EF28051F5FD3}</Project>

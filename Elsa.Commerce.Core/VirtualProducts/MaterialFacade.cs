@@ -6,6 +6,7 @@ using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Commerce.Core.Warehouse.Thresholds;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;

@@ -3,6 +3,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 
 using Robowire.RoboApi;

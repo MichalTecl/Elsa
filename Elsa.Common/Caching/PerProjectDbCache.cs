@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Core;
 
 using Robowire.RobOrm.Core;

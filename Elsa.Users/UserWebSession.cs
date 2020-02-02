@@ -5,6 +5,7 @@ using System.Web.Routing;
 
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
@@ -18,15 +19,17 @@ namespace Elsa.Users
         private bool m_initialized;
         private Guid? m_sessionPublicId;
         private ICache m_cache;
+        private readonly IUserRepository m_userRepository;
 
         private readonly IDatabase m_database;
 
         private IUserSession m_session;
 
-        public UserWebSession(IDatabase database, ICache cache)
+        public UserWebSession(IDatabase database, ICache cache, IUserRepository userRepository)
         {
             m_database = database;
             m_cache = cache;
+            m_userRepository = userRepository;
         }
 
         public IUser User
@@ -110,6 +113,20 @@ namespace Elsa.Users
 
         public string Release => ReleaseVersionInfo.Tag;
         public string Culture => "cs-cz";
+        public bool HasUserRight(UserRight right)
+        {
+            return HasUserRight(right.Symbol);
+        }
+
+        public bool HasUserRight(string symbol)
+        {
+            if (User == null)
+            {
+                return false;
+            }
+
+            return m_userRepository.GetUserRights(User.Id).Contains(symbol);
+        }
 
         public void Initialize(RequestContext context)
         {

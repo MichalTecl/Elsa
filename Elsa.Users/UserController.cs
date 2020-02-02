@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common.Security;
 

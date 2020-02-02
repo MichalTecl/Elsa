@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elsa.Common
+namespace Elsa.Users
 {
-    public interface IStartupJob
+    public interface IUserRepository
     {
-        bool IsExceptionFatal { get; }
-
-        void Execute();
+        HashSet<string> GetUserRights(int userId);
     }
 }

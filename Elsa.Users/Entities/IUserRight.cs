@@ -1,7 +1,7 @@
 ﻿using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
 
-namespace Elsa.Core.Entities.Commerce.Common.Security
+namespace Elsa.Users.Entities
 {
     [Entity]
     public interface IUserRight
@@ -13,8 +13,5 @@ namespace Elsa.Core.Entities.Commerce.Common.Security
 
         [NVarchar(-1, false)]
         string Description { get; set; }
-
-        [NVarchar(1024, false)]
-        string FullPath { get; set; }
     }
 }

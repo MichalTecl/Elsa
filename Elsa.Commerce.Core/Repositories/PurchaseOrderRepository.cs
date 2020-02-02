@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 

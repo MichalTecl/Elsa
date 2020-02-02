@@ -4,6 +4,7 @@ using System.Linq;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Inventory;

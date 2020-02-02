@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common;
 

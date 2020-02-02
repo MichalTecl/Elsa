@@ -5,6 +5,7 @@ using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 using Robowire.RobOrm.Core;

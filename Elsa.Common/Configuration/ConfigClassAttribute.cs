@@ -1,5 +1,5 @@
 ﻿using System;
-
+using Elsa.Common.Interfaces;
 using Robowire;
 
 namespace Elsa.Common.Configuration

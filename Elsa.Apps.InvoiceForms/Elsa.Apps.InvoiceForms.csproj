@@ -92,6 +92,10 @@
       <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>
       <Name>Elsa.Commerce.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
+      <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
+      <Name>Elsa.Common.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Noml.Forms\Elsa.Common.Noml.Forms.csproj">
       <Project>{9FA823D4-27DA-4512-9C59-ECB1E03BAFA8}</Project>
       <Name>Elsa.Common.Noml.Forms</Name>

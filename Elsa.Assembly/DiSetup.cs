@@ -4,6 +4,7 @@ using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
 using Elsa.App.CommonReports;
 using Elsa.App.Crm;
+using Elsa.App.Inspector;
 using Elsa.App.OrdersPacking;
 using Elsa.App.SaleEvents;
 using Elsa.App.Shipment;
@@ -16,8 +17,8 @@ using Elsa.Apps.ScheduledJobs;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
-using Elsa.Common.UserRightsInfrastructure;
 using Elsa.Common.XTable;
 using Elsa.Core.Entities.Commerce;
 using Elsa.Integration.Erp.Elerp;
@@ -38,7 +39,7 @@ using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
 using Elsa.Jobs.SyncErpCustomers;
 using Elsa.Users;
-
+using Elsa.Users.Infrastructure;
 using Robowire;
 
 namespace Elsa.Assembly
@@ -95,6 +96,8 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(ProductionServiceController).Assembly);
                     s.ScanAssembly(typeof(CommonReportsController).Assembly);
                     s.ScanAssembly(typeof(DbBackupJob).Assembly);
+                    s.ScanAssembly(typeof(InspectorRegistry).Assembly);
+                    s.ScanAssembly(typeof(UserRightsRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });

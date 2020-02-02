@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Elsa.Commerce.Core;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Integration.Erp.Flox;
 

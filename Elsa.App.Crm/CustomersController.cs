@@ -8,6 +8,7 @@ using Elsa.App.Crm.Model;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 
 using Robowire.RoboApi;

@@ -1,7 +1,7 @@
 ﻿using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
-namespace Elsa.Common
+namespace Elsa.Common.Interfaces
 {
     public interface ISession
     {
@@ -16,5 +16,9 @@ namespace Elsa.Common
         string Release { get; }
 
         string Culture { get; }
+
+        bool HasUserRight(UserRight right);
+
+        bool HasUserRight(string symbol);
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 
 using Robowire.RoboApi;

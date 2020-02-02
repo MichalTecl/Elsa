@@ -1,6 +1,6 @@
 ﻿using System.Web.Routing;
 
-namespace Elsa.Common
+namespace Elsa.Common.Interfaces
 {
     public interface IWebSession : ISession
     {

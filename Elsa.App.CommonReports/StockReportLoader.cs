@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 using Elsa.App.CommonReports.Model;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.App.CommonReports

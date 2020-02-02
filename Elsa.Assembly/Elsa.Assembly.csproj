@@ -83,6 +83,10 @@
       <Project>{00851e14-33be-4f64-91d1-e27fa48422bd}</Project>
       <Name>Elsa.App.Crm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.Inspector\Elsa.App.Inspector.csproj">
+      <Project>{A5AE1E90-BF3D-4B74-9046-E932207AC709}</Project>
+      <Name>Elsa.App.Inspector</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.OrdersPacking\Elsa.App.OrdersPacking.csproj">
       <Project>{87d88b8d-17b5-4fb4-b7bd-aaa2d2ffb4a1}</Project>
       <Name>Elsa.App.OrdersPacking</Name>
@@ -138,6 +142,10 @@
     <ProjectReference Include="..\Elsa.Common.Excel\Elsa.Common.XTable.csproj">
       <Project>{65F8DF91-8593-4B33-BDBF-2DEBB43CEE2E}</Project>
       <Name>Elsa.Common.XTable</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
+      <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
+      <Name>Elsa.Common.Interfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>

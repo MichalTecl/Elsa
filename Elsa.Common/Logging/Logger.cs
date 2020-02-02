@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common.Logging;
 
 using Robowire.RobOrm.Core;

@@ -9,6 +9,7 @@ using Elsa.Commerce.Core.Crm.Model;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Crm;

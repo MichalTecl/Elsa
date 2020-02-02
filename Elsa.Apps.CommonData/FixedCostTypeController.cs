@@ -7,6 +7,7 @@ using Elsa.Apps.Common;
 using Elsa.Apps.CommonData.Model;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.EditorBuilder;
 using Elsa.EditorBuilder.Internal;

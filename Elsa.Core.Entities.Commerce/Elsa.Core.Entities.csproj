@@ -39,6 +39,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -84,9 +85,7 @@
     <Compile Include="Common\Widgets\IAppWidget.cs" />
     <Compile Include="Common\IProject.cs" />
     <Compile Include="Common\Security\IUser.cs" />
-    <Compile Include="Common\Security\IUserRight.cs" />
     <Compile Include="Common\Security\IUserSession.cs" />
-    <Compile Include="Common\Security\IUserUserRight.cs" />
     <Compile Include="ConnectionStringProvider.cs" />
     <Compile Include="Core\CurrencyConversions\ICurrencyRate.cs" />
     <Compile Include="Core\CurrencyConversions\IMoneyConversion.cs" />
@@ -97,8 +96,6 @@
     <Compile Include="ElsaDbInstaller.cs" />
     <Compile Include="Extensions\MappedToOrderItemExtensions.cs" />
     <Compile Include="Extensions\MaterialBatchExtensions.cs" />
-    <Compile Include="Inspections\IInspectionIssue.cs" />
-    <Compile Include="Inspections\IInspectionIssueAction.cs" />
     <Compile Include="Integration\IErp.cs" />
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IPaymentSource.cs" />
@@ -146,7 +143,9 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Inspections\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

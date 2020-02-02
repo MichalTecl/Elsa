@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.XTable.Generators;
 using Elsa.Common.XTable.Model;

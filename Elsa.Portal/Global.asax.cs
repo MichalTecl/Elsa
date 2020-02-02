@@ -6,6 +6,7 @@ using System.Web.Routing;
 using Elsa.App.Profile;
 using Elsa.Assembly;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Users;
 

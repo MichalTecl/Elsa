@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Web.Hosting;
 using Elsa.Core.Entities.Commerce.Common;
 
 using Robowire;
@@ -26,7 +26,8 @@ namespace Elsa.Core.Entities.Commerce
             migrator(container, new MigrationCustomizer
             {
                 BeforeMigrationScript = "IF EXISTS(SELECT * FROM sys.columns WHERE name = 'CalculatedKey') ALTER TABLE MaterialBatch DROP COLUMN CalculatedKey;",
-                AfterMigrationScript = "ALTER TABLE MaterialBatch ADD CalculatedKey AS BatchNumber + ':' + CAST(MaterialId AS NVARCHAR) PERSISTED;"
+                AfterMigrationScript = "ALTER TABLE MaterialBatch ADD CalculatedKey AS BatchNumber + ':' + CAST(MaterialId AS NVARCHAR) PERSISTED;",
+                ScriptsRoot = HostingEnvironment.MapPath("/SQL")
             });
         }
     }

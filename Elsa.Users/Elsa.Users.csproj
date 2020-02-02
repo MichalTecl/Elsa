@@ -44,7 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\UserRepository.cs" />
+    <Compile Include="Entities\IUserRight.cs" />
+    <Compile Include="Entities\IUserRole.cs" />
+    <Compile Include="Entities\IUserRoleMember.cs" />
+    <Compile Include="Infrastructure\SyncUserRightsJob.cs" />
+    <Compile Include="Infrastructure\UserRightDefinitionCollector.cs" />
+    <Compile Include="Infrastructure\UserRightsDefinitionAttribute.cs" />
+    <Compile Include="IUserRepository.cs" />
     <Compile Include="UserController.cs" />
+    <Compile Include="UsersRegistry.cs" />
     <Compile Include="UserWebSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -65,6 +74,10 @@
       <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
       <Name>Robowire</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
+      <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
+      <Name>Elsa.Common.Interfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{d4607e8c-a5d2-423a-8c78-56b188c567ed}</Project>
       <Name>Elsa.Common</Name>
@@ -76,6 +89,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="sencha.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SQL\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

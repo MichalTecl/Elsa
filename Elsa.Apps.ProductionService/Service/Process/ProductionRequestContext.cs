@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Elsa.Apps.ProductionService.Models;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 

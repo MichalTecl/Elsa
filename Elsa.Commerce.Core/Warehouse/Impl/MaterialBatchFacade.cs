@@ -13,6 +13,7 @@ using Elsa.Commerce.Core.Warehouse.Impl.Model;
 using Elsa.Commerce.Core.Warehouse.Thresholds;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;

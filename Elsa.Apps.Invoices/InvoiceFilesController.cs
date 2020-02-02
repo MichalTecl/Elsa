@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web.Routing;
 using Elsa.Apps.Invoices.Model;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Robowire.RoboApi;
 using XlsSerializer.Core;

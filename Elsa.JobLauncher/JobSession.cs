@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
@@ -36,6 +37,15 @@ namespace Elsa.JobLauncher
 
         public string Release => DateTime.Now.ToString();
         public string Culture => "cs-cz";
+        public bool HasUserRight(UserRight right)
+        {
+            return true;
+        }
+
+        public bool HasUserRight(string symbol)
+        {
+            return true;
+        }
 
         public void Login(string user, string password)
         {

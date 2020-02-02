@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Jobs.Common;
 
 using Robowire;

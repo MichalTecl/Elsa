@@ -1,10 +1,7 @@
 ﻿using System;
-
-using Elsa.Common.UserRightsInfrastructure;
-
 using Robowire;
 
-namespace Elsa.Common
+namespace Elsa.Users.Infrastructure
 {
     public class UserRightsDefinitionAttribute : Attribute, ISelfSetupAttribute
     {

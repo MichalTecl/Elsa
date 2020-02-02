@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
@@ -30,6 +31,15 @@ namespace Elsa.UnitTests.Mocks
 
         public string Release => Guid.NewGuid().ToString();
         public string Culture => "cs-cz";
+        public bool HasUserRight(UserRight right)
+        {
+            return true;
+        }
+
+        public bool HasUserRight(string symbol)
+        {
+            return true;
+        }
     }
 
     internal class ProjectMock : IProject

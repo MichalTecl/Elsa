@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse

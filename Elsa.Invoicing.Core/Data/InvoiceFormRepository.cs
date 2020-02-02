@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.SysCounters;
 using Elsa.Core.Entities.Commerce.Accounting;

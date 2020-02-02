@@ -7,6 +7,7 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 using Robowire.RobOrm.Core;

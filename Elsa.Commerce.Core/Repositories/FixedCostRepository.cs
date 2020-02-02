@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.Repositories.Automation;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Robowire.RobOrm.Core;
 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Elsa.Commerce.Core.Model.BatchReporting;
 using Elsa.Commerce.Core.Warehouse.BatchReporting;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 
 using Robowire.RoboApi;

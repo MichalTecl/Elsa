@@ -5,6 +5,7 @@ using System.Linq;
 using Elsa.App.Commerce.Payments.Models;
 using Elsa.Commerce.Core;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;

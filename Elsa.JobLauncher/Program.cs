@@ -4,6 +4,7 @@ using System.Threading;
 
 using Elsa.Assembly;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.JobLauncher.Scheduler;
 

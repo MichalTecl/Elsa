@@ -10,6 +10,7 @@ using Elsa.Commerce.Core.Production.Recipes;
 using Elsa.Commerce.Core.Production.Recipes.Model;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Robowire.RoboApi;

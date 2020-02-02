@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Integration;
 
 using Robowire;
