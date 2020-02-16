@@ -1,0 +1,11 @@
+﻿<ElsaBody>
+   
+    <div id="theTab"></div>
+    
+    <script>
+        var tab = new app.ui.TabControl(document.getElementById("theTab"));
+        tab.addTab("Role", "/UI/Controls/UserRolesEditor.html", null, null, "roles");
+        tab.addTab("Uživatelé", "/UI/Controls/UsersEditor.html", null, null, "users");
+    </script>
+
+</ElsaBody>

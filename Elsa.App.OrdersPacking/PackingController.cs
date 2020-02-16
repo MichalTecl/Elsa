@@ -53,9 +53,11 @@ namespace Elsa.App.OrdersPacking
             m_database = database;
             m_virtualProductFacade = virtualProductFacade;
         }
-
+        
         public PackingOrderModel FindOrder(string number)
         {
+            WebSession.EnsureUserRight(OrdersPackingUserRights.OpenOrderPackingApplication);
+
             number = number.Trim();
             if (number.Length < 3)
             {
@@ -137,6 +139,8 @@ namespace Elsa.App.OrdersPacking
         
         public void PackOrder(long orderId)
         {
+            WebSession.EnsureUserRight(OrdersPackingUserRights.MarkOrderPacked);
+
             using (var tx = m_database.OpenTransaction())
             {
                 var order = m_orderRepository.GetOrder(orderId);
@@ -169,6 +173,8 @@ namespace Elsa.App.OrdersPacking
 
         public PackingOrderModel SetItemBatchAllocation(BatchAllocationChangeRequest request)
         {
+            WebSession.EnsureUserRight(OrdersPackingUserRights.OrderBatchAssignment);
+
             PackingOrderModel result;
             using (var tx = m_database.OpenTransaction())
             {
@@ -218,6 +224,11 @@ namespace Elsa.App.OrdersPacking
 
         public IEnumerable<LightOrderInfo> GetOrdersToPack()
         {
+            if (!WebSession.HasUserRight(OrdersPackingUserRights.ViewOrdersPackingWidget))
+            {
+                return new LightOrderInfo[0];
+            }
+
             return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), true).Select(i => new LightOrderInfo(i));
         }
 

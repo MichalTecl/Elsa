@@ -108,16 +108,18 @@
                     </div>
                     <div id="packingControlPanel" class="stackRight">
                         
-                        <button style="margin-right: 100px; font-size: 9px"id="butReleaseAllocations" event-bind="click:releaseBatches" >Uvolnit šarže v neodeslaných zásilkách</button>
-
-                        <div id="butMarkPacked" 
-                             event-bind="mousedown:onPackButtonMouseDown(this); mouseup:onPackButtonMouseUp(this); mouseout:onPackButtonMouseUp(this); blur:onPackButtonMouseUp(this); mouseenter:onPackButtonHover(this); hover:onPackButtonHover(this)">
-                            <div id="progressContainer">
-                                <div id="progressBar"></div>
+                        <button style="margin-right: 100px; font-size: 9px" class="restricted-OrderBatchAssignment" id="butReleaseAllocations" event-bind="click:releaseBatches" >Uvolnit šarže v neodeslaných zásilkách</button>
+                        
+                        <span style="display:block">
+                            <div id="butMarkPacked" 
+                                 class="restricted-MarkOrderPacked"
+                                 event-bind="mousedown:onPackButtonMouseDown(this); mouseup:onPackButtonMouseUp(this); mouseout:onPackButtonMouseUp(this); blur:onPackButtonMouseUp(this); mouseenter:onPackButtonHover(this); hover:onPackButtonHover(this)">
+                                <div id="progressContainer">
+                                    <div id="progressBar"></div>
+                                </div>
+                                <div id="packingText">Zabaleno</div>
                             </div>
-                            <div id="packingText">Zabaleno</div>
-                        </div>
-
+                        </span>
                     </div>
                 </div>
             </div>

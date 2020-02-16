@@ -34,6 +34,16 @@ namespace Elsa.Common.Caching
             s_cache.TryRemove(key, out dummy);
         }
 
+        public void RemoveByPrefix(string prefix)
+        {
+            var keys = s_cache.Keys.Where(k => k.StartsWith(prefix));
+
+            foreach (var k in keys)
+            {
+                Remove(k);
+            }
+        }
+
         public IEnumerable<string> GetAllKeys()
         {
             return s_cache.Keys;

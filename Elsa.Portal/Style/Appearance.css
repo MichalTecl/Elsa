@@ -285,6 +285,7 @@ div.searchPanel {
 }
 
 .hiddenOverlay {
+    display: none;
     transition: opacity 20ms ease-in 0;
     visibility: hidden;
     opacity: 0;

@@ -1,4 +1,4 @@
-﻿html,body
+html,body
 {
     height: 100%;
     padding: 0;
@@ -242,13 +242,12 @@ div.kitSelectedItemContainer:hover > i.faButton {
     font-weight:bold;
     color:#406040;
     cursor:pointer;
-
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */            
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
 #butMarkPacked * {
@@ -364,9 +363,10 @@ div:last-child.batchItemTemplate {
     min-height:100%;
     display: flex;
     justify-content: center;
-    align-items: center; 
+    align-items: center;
 }
 
 .highlightErrors .batchItemTemplate .fa-question-circle {
     font-size:2em;
+}em;
 }

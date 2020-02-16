@@ -17,6 +17,11 @@ namespace Elsa.Common.Caching
         {
         }
 
+        public void RemoveByPrefix(string prefix)
+        {
+            
+        }
+
         public IEnumerable<string> GetAllKeys()
         {
             yield break;

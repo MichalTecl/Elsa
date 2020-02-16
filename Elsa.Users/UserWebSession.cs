@@ -19,13 +19,13 @@ namespace Elsa.Users
         private bool m_initialized;
         private Guid? m_sessionPublicId;
         private ICache m_cache;
-        private readonly IUserRepository m_userRepository;
+        private readonly Lazy<IUserRepository> m_userRepository;
 
         private readonly IDatabase m_database;
 
         private IUserSession m_session;
 
-        public UserWebSession(IDatabase database, ICache cache, IUserRepository userRepository)
+        public UserWebSession(IDatabase database, ICache cache, Lazy<IUserRepository> userRepository)
         {
             m_database = database;
             m_cache = cache;
@@ -125,7 +125,28 @@ namespace Elsa.Users
                 return false;
             }
 
-            return m_userRepository.GetUserRights(User.Id).Contains(symbol);
+            return m_userRepository.Value.GetUserRights(User.Id).Contains(symbol);
+        }
+
+        public void EnsureUserRight(UserRight right)
+        {
+            if (!HasUserRight(right))
+            {
+                throw new InvalidOperationException($"Uživatel nemá oprávnění provést požadovanou akci ({right.Description})");
+            }
+        }
+
+        public string[] UserRights
+        {
+            get
+            {
+                if (User == null)
+                {
+                    return new string[0];
+                }
+
+                return m_userRepository.Value.GetUserRights(User.Id).ToArray();
+            }
         }
 
         public void Initialize(RequestContext context)

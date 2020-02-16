@@ -20,7 +20,7 @@ app.user.ViewModel = app.user.ViewModel || function() {
 
         for (var i = 0; i < callbacks.length; i++) {
             var callback = callbacks[i];
-            callback();
+            callback(session);
         }
     };
     
@@ -37,7 +37,7 @@ app.user.ViewModel = app.user.ViewModel || function() {
             onUserChanged(null);
             window.location.reload(false);
         });
-    }
+    };
     
     this.subscribeUserChange = function(callback) {
         callbacks.push(callback);
@@ -54,7 +54,30 @@ app.user.ViewModel = app.user.ViewModel || function() {
         onUserChanged(session);
     });
 
+    this.subscribeUserChange(function(session) {
+        var restr = document.getElementById("restrstyle");
+        if (!restr) {
+            restr = document.createElement("style");
+            document.body.appendChild(restr);
+        }
+        
+        var stBuilder = [];
+        stBuilder.push("[class*='restricted-']{ display:none !important; }\n");
 
+        try {
+            if (session && session.UserRights) {
+                for (var i = 0; i < session.UserRights.length; i++) {
+                    stBuilder.push(".restricted-");
+                    stBuilder.push(session.UserRights[i]);
+                    stBuilder.push("{ display:inherit !important;}\n");
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
+        restr.innerHTML = stBuilder.join("");
+    });
 };
 
 app.user.vm = app.user.vm || new app.user.ViewModel();

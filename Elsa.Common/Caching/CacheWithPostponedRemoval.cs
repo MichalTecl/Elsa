@@ -24,6 +24,11 @@ namespace Elsa.Common.Caching
             m_keysToRemove.Add(key);
         }
 
+        public void RemoveByPrefix(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<string> GetAllKeys()
         {
             throw new NotImplementedException();

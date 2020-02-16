@@ -40,6 +40,11 @@ namespace Elsa.UnitTests.Mocks
         {
             return true;
         }
+
+        public void EnsureUserRight(UserRight right)
+        {
+            
+        }
     }
 
     internal class ProjectMock : IProject

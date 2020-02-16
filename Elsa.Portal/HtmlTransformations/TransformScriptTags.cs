@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
+using System.Web.Hosting;
 using Elsa.Common;
 using HtmlAgilityPack;
 
@@ -9,10 +12,25 @@ namespace Elsa.Portal.HtmlTransformations
 {
     public class TransformScriptTags
     {
+        private static readonly Dictionary<string, string> s_replacements;
+
+        static TransformScriptTags()
+        {
+            s_replacements = new Dictionary<string, string>();
+
+            s_replacements["<ElsaBody>"] = File.ReadAllText(HostingEnvironment.MapPath("/UI/Shared/ElsaBodyOpen.html"));
+            s_replacements["</ElsaBody>"] = File.ReadAllText(HostingEnvironment.MapPath("/UI/Shared/ElsaBodyClose.html"));
+        }
+
         public static string Transform(string html)
         {
             try
             {
+                foreach (var repl in s_replacements)
+                {
+                    html = html.Replace(repl.Key, repl.Value);
+                }
+
                 var doc = new HtmlDocument();
                 doc.LoadHtml(html);
 

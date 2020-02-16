@@ -47,6 +47,10 @@ namespace Elsa.JobLauncher
             return true;
         }
 
+        public void EnsureUserRight(UserRight right)
+        {
+        }
+
         public void Login(string user, string password)
         {
             var userRecord = m_database.SelectFrom<IUser>().Where(i => i.EMail == user).Join(u => u.Project).Execute().FirstOrDefault();

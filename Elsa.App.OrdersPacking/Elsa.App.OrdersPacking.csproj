@@ -51,6 +51,7 @@
     <Compile Include="Model\LightOrderInfo.cs" />
     <Compile Include="PackingController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="OrdersPackingUserRights.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">

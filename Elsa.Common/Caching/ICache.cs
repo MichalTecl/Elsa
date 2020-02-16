@@ -9,6 +9,8 @@ namespace Elsa.Common.Caching
 
         void Remove(string key);
 
+        void RemoveByPrefix(string prefix);
+
         IEnumerable<string> GetAllKeys();
 
         void Clear();

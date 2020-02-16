@@ -221,6 +221,8 @@
     <Content Include="Style\Appearance.css" />
     <Content Include="Style\Layout.css" />
     <Content Include="UI\Pages\SysData\SysDataPage.html" />
+    <Content Include="UI\Shared\ElsaBodyClose.html" />
+    <Content Include="UI\Shared\ElsaBodyOpen.html" />
     <Content Include="UI\Widgets\Jobs\ScheduledJobsWidget.html" />
     <Content Include="UI\Widgets\OrderProcessing\OrdersProcessingWidget.html" />
     <Content Include="UI\Widgets\Orders\OrdersOverviewWidget.html" />
@@ -412,7 +414,11 @@
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.3.1.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.3.1.1\build\Microsoft.Net.Compilers.props'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>sencha "$(ProjectPath)"</PreBuildEvent>
+    <PreBuildEvent>if $(ConfigurationName) == Debug (
+  sencha "$(ProjectPath)" worker
+) ELSE (
+   sencha "$(ProjectPath)"
+)</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

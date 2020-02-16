@@ -20,5 +20,7 @@ namespace Elsa.Common.Interfaces
         bool HasUserRight(UserRight right);
 
         bool HasUserRight(string symbol);
+
+        void EnsureUserRight(UserRight right);
     }
 }
