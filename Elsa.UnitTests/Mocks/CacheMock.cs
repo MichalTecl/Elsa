@@ -16,6 +16,11 @@ namespace Elsa.UnitTests.Mocks
         {
         }
 
+        public void RemoveByPrefix(string prefix)
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerable<string> GetAllKeys()
         {
             throw new NotImplementedException();

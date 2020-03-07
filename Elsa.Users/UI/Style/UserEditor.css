@@ -1,0 +1,8 @@
+﻿.role-subtree
+{
+    margin-left: 15px;
+}
+
+.roleTreeItemSelected {
+    background-color: yellowgreen;
+}

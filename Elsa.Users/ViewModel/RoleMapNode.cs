@@ -31,7 +31,7 @@ namespace Elsa.Users.ViewModel
 
             foreach (var child in ChildRoles)
             {
-                ChildRoles.Add(child.Clone());
+                clone.ChildRoles.Add(child.Clone());
             }
 
             return clone;

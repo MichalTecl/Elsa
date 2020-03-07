@@ -97,7 +97,7 @@ lanta.CoreOps.seekClosestElement = lanta.CoreOps.seekClosestElement || function 
     return null;
 };
 
-lanta.CoreOps.attachController = lanta.CoreOps.attachController || function (element, controllerFunction) {
+lanta.CoreOps.attachController = lanta.CoreOps.attachController || function (element, controllerFunction, viewModel) {
 
     try {
 
@@ -125,6 +125,10 @@ lanta.CoreOps.attachController = lanta.CoreOps.attachController || function (ele
 
         var bindingProcessor = element["lt_element_binding_processor"];
         if (!!bindingProcessor) {
+            if (viewModel) {
+                lt.setViewModel(element, viewModel);
+            }
+
             bindingProcessor.activate();
         }
     } catch (e) {

@@ -38,7 +38,7 @@ namespace Elsa.Users.Components
 
         public RoleMap GetProjectRoles()
         {
-            return m_cache.ReadThrough($"rolemap_{m_session.Project.Id}", TimeSpan.MaxValue, () =>
+            return m_cache.ReadThrough($"rolemap_{m_session.Project.Id}", TimeSpan.FromHours(24), () =>
             {
                 var allRoles = new List<RoleMapNode>();
 
@@ -64,7 +64,7 @@ namespace Elsa.Users.Components
 
         public RoleMap GetRolesVisibleForUser(int userId)
         {
-            return m_cache.ReadThrough($"rolemap_{m_session.Project.Id}_rolesvisiblefor_{userId}", TimeSpan.MaxValue, () =>
+            return m_cache.ReadThrough($"rolemap_{m_session.Project.Id}_rolesvisiblefor_{userId}", TimeSpan.FromHours(24), () =>
             {
                 var allRoles = GetProjectRoles();
                 var userRoles = GetRoleIdsOfUser(userId);
@@ -91,7 +91,7 @@ namespace Elsa.Users.Components
 
         public IEnumerable<int> GetRoleIdsOfUser(int userId)
         {
-            return m_cache.ReadThrough($"usroles_{userId}", TimeSpan.MaxValue, () =>
+            return m_cache.ReadThrough($"usroles_{userId}", TimeSpan.FromHours(1), () =>
             {
                 var result = new List<int>();
                 m_database.Sql().ExecuteWithParams("SELECT RoleId FROM UserRoleMember WHERE MemberId = {0}", userId).ReadRows<int>(
@@ -146,7 +146,7 @@ namespace Elsa.Users.Components
                 .Where(r => r.ProjectId == m_session.Project.Id && r.Name == newName).Take(1).Execute()
                 .FirstOrDefault();
 
-            if (roleId != (existingRole?.Id ?? -1))
+            if ((existingRole != null) && (roleId != (existingRole?.Id ?? -1)))
             {
                 throw new InvalidOperationException($"Role \"{newName}\" již existuje");
             }

@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\UserRepository.cs" />
+    <Compile Include="Controllers\UserRolesController.cs" />
     <Compile Include="Entities\IUserRight.cs" />
     <Compile Include="Entities\IUserRole.cs" />
     <Compile Include="Entities\IUserRoleMember.cs" />
@@ -97,11 +98,14 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Script\Apps\UserRoles\UserRoles.VM.js" />
     <Content Include="SQL\20200202-001 GetUserRights.sql" />
     <Content Include="SQL\20200204-001 DropFullPath.sql" />
     <Content Include="UI\Controls\UserRolesEditor.html" />
+    <Content Include="UI\Controls\UserRoleTreeItem.html" />
     <Content Include="UI\Controls\UsersEditor.html" />
     <Content Include="UI\Pages\Users.html" />
+    <Content Include="UI\Style\UserEditor.css" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

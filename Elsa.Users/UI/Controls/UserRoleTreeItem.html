@@ -1,0 +1,16 @@
+﻿<div class="roleTreeItem">
+    <div class="stackLeft roleItemHead" data-bind="class.roleTreeItemSelected:selected">
+        <div data-bind="text:Name;class.roleTreeItemSelected:selected" event-bind="click:selectRole(Id)"></div>
+        <div class="stackLeft role-actions">
+            <i class="fas fa-plus-circle faButton" title="Přidat podřízenou roli" event-bind="click:addChildRole(Id)"></i>
+            
+            <div class="stackLeft role-edit-actions" data-bind="class!.hidden:CanEdit">
+                <i class="far fa-edit faButton" title="Přejmenovat" event-bind="click:renameRole(Id, Name)"></i>
+                <i class="far fa-trash-alt faButton" data-bind="class!.hidden:canDelete" title="Vymazat"event-bind="click:deleteRole(Id, Name)"></i>
+            </div>
+        </div>
+    </div>
+    <div class="role-subtree">
+        <div class="role-subtree" data-bind="itemsSource:ChildRoles" data-key="Id" template-url="/UI/Controls/UserRoleTreeItem.html"></div>
+    </div>
+</div>

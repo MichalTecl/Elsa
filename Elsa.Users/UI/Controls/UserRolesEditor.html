@@ -1,3 +1,55 @@
 ﻿<div>
-    ROLES
+    <div id="roleTree" data-bind="itemsSource:ChildRoles" data-key="Id" template-url="/UI/Controls/UserRoleTreeItem.html">
+    </div>
+    
 </div>
+<script>
+
+    lt.element("roleTree").withModel("app.userRoles.vm").attach(function () {
+
+        this.selectRole = function(roleId) {
+            app.userRoles.vm.selectRole(roleId);
+        };
+
+        this.addChildRole = function(parentRoleId) {
+            var result = prompt("Název nové role");
+            if (!result) {
+                return;
+            }
+
+            result = result.trim();
+            if (result.length < 1) {
+                alert("Název nemůže být prázdný");
+                return;
+            }
+
+            app.userRoles.vm.addChildRole(parentRoleId, result);
+        };
+
+        this.renameRole = function(roleId, oldName) {
+            var result = prompt("Nový název", oldName);
+            if (!result) {
+                return;
+            }
+
+            result = result.trim();
+            if (result.length < 1) {
+                alert("Název nemůže být prázdný");
+                return;
+            }
+
+            app.userRoles.vm.renameRole(roleId, result);
+        };
+
+        this.deleteRole = function(id, name) {
+            if (!confirm("Opravdu chcete vymazat roli '" + name + "'?")) {
+                return;
+            }
+
+            app.userRoles.vm.deleteRole(id);
+        };
+
+    });
+
+</script>
+<link href="/UI/Style/UserEditor.css" rel="stylesheet" />

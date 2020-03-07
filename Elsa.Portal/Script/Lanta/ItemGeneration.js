@@ -95,10 +95,10 @@ lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
 
                         for (var tcindex = 0; tcindex < templateControllers.length; tcindex++) {
                             var templateController = templateControllers[tcindex];
-                            lanta.CoreOps.attachController(child, templateController);
+                            lanta.CoreOps.attachController(child, templateController, dataItem);
                         }
 
-                        lanta.CoreOps.attachController(child, controller);
+                        lanta.CoreOps.attachController(child, controller, dataItem);
                     }
 
                     lanta.BindingCore.setViewModel(child, dataItem);
