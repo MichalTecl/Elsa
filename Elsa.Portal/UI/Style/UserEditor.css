@@ -6,3 +6,24 @@
 .roleTreeItemSelected {
     background-color: yellowgreen;
 }
+
+.userRightDisabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.roleTreeItemMyOwn {
+    font-weight: bold;
+}
+
+.pnlUserRoles {
+    width: 30%;
+    min-width: 300px;
+    height: 100%;
+}
+
+.pnlUserRights {
+    width: 30%;
+    min-width: 300px;
+    height: 100%;
+}

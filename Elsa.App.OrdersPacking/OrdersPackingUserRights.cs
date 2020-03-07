@@ -1,7 +1,9 @@
 ﻿using Elsa.Common.Interfaces;
+using Elsa.Users.Infrastructure;
 
 namespace Elsa.App.OrdersPacking
 {
+    [UserRights]
     public static class OrdersPackingUserRights
     {
         public static readonly UserRight ViewOrdersPackingWidget = new UserRight(nameof(ViewOrdersPackingWidget), "Zobrazení panelu \"Zpracování objednávek\"");

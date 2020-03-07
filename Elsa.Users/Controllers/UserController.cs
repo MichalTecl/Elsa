@@ -108,7 +108,5 @@ namespace Elsa.Users
         {
             WebSession.Logout();
         }
-
-
     }
 }

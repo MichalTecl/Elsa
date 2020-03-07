@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Elsa.Users.ViewModel
 {
@@ -35,6 +36,16 @@ namespace Elsa.Users.ViewModel
             }
 
             return clone;
+        }
+
+        public void Visit(Action<RoleMapNode> visitor)
+        {
+            visitor(this);
+
+            foreach (var ch in ChildRoles)
+            {
+                ch.Visit(visitor);
+            }
         }
     }
 }

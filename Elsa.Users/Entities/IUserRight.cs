@@ -10,8 +10,5 @@ namespace Elsa.Users.Entities
 
         [NVarchar(255, false)]
         string Symbol { get; set; }
-
-        [NVarchar(-1, false)]
-        string Description { get; set; }
     }
 }

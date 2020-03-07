@@ -9,7 +9,12 @@ app.user.ViewModel = app.user.ViewModel || function() {
     this.currentSession = null;
 
     var onUserChanged = function (session) {
-        
+
+        if (!document.body) {
+            setTimeout(onUserChanged, 100);
+            return;
+        }
+
         self.currentSession = session;
 
         if ((!!session) && (!!session.User)) {

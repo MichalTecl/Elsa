@@ -50,17 +50,20 @@
     <Compile Include="Entities\IUserRole.cs" />
     <Compile Include="Entities\IUserRoleMember.cs" />
     <Compile Include="Entities\IUserRoleRight.cs" />
-    <Compile Include="Infrastructure\SyncUserRightsJob.cs" />
-    <Compile Include="Infrastructure\UserRightDefinitionCollector.cs" />
-    <Compile Include="Infrastructure\UserRightsDefinitionAttribute.cs" />
+    <Compile Include="Infrastructure\UserRights.cs" />
+    <Compile Include="Infrastructure\UserRightsAttribute.cs" />
     <Compile Include="IUserRepository.cs" />
+    <Compile Include="IUserRightsDefinition.cs" />
     <Compile Include="IUserRoleRepository.cs" />
-    <Compile Include="UserController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="UsersRegistry.cs" />
     <Compile Include="UserWebSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModel\RoleMap.cs" />
     <Compile Include="ViewModel\RoleMapNode.cs" />
+    <Compile Include="ViewModel\RoleUserViewModel.cs" />
+    <Compile Include="ViewModel\UserRightMap.cs" />
+    <Compile Include="ViewModel\UserRightViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
@@ -99,8 +102,11 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Script\Apps\UserRoles\UserRoles.VM.js" />
+    <Content Include="SQL\20200307-001 GetRoleRights - Copy.sql" />
+    <Content Include="SQL\20200307-002 SyncUserRights.sql" />
     <Content Include="SQL\20200202-001 GetUserRights.sql" />
     <Content Include="SQL\20200204-001 DropFullPath.sql" />
+    <Content Include="UI\Controls\UserRightTreeItem.html" />
     <Content Include="UI\Controls\UserRolesEditor.html" />
     <Content Include="UI\Controls\UserRoleTreeItem.html" />
     <Content Include="UI\Controls\UsersEditor.html" />

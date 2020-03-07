@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Users.ViewModel;
 
 namespace Elsa.Users
@@ -20,5 +17,15 @@ namespace Elsa.Users
         void RenameRole(int roleId, string newName);
 
         void DeleteRole(int roleId);
+
+        IEnumerable<string> GetRoleRights(int roleId);
+
+        IEnumerable<UserRightViewModel> GetEditableUserRights(int roleId);
+
+        void AssignRoleRight(int roleId, string rightSymbol);
+
+        void RemoveRoleRight(int roleId, string rightSymbol);
+
+        IEnumerable<IUser> GetRoleMembers(int roleId);
     }
 }

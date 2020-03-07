@@ -1,11 +1,22 @@
-﻿<div>
-    <div id="roleTree" data-bind="itemsSource:ChildRoles" data-key="Id" template-url="/UI/Controls/UserRoleTreeItem.html">
+﻿<div id="roleEditor">
+    <div class="stackLeft childrenTop">
+        <div class="pnlUserRoles">
+            <div data-bind="itemsSource:userRoles" data-key="Id" template-url="/UI/Controls/UserRoleTreeItem.html"></div>
+        </div>
+        <div class="pnlUserRights">
+            <div data-bind="itemsSource:roleRights" data-key="Symbol" template-url="/UI/Controls/UserRightTreeItem.html"></div>
+        </div>
+        <div class="pnlUserRights">
+            <div data-bind="itemsSource:roleUsers" data-key="Id">
+                <div class="lt-template">
+                    <div data-bind="text:Name"></div>
+                </div>
+            </div>
+        </div>
     </div>
-    
-</div>
 <script>
 
-    lt.element("roleTree").withModel("app.userRoles.vm").attach(function () {
+    lt.element("roleEditor").withModel("app.userRoles.vm").attach(function () {
 
         this.selectRole = function(roleId) {
             app.userRoles.vm.selectRole(roleId);
@@ -47,6 +58,12 @@
             }
 
             app.userRoles.vm.deleteRole(id);
+        };
+
+        this.onRightAssignmentChange = function(symbol, currentValue) {
+
+            app.userRoles.vm.changeRoleRightAssignment(symbol, !currentValue);
+
         };
 
     });

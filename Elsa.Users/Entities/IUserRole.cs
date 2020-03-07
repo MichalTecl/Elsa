@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
 using Robowire.RobOrm.Core;
@@ -18,5 +14,7 @@ namespace Elsa.Users.Entities
 
         int? ParentRoleId { get; set; }
         IUserRole ParentRole { get; }
+
+        IEnumerable<IUserRoleRight> AssignedRights { get; }
     }
 }

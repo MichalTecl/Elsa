@@ -1,0 +1,10 @@
+﻿<div>
+    <div class="stackLeft" data-bind="class!.userRightDisabled:canAssign" event-bind="click:onRightAssignmentChange(Symbol, Assigned)">
+        <input lt-name="urcb" type="checkbox" data-bind="checked:Assigned"  style="pointer-events: none;" /><label data-bind="text:Description"></label>
+    </div>
+    
+    <div class="role-subtree">
+        <div data-bind="itemsSource:ChildRights" data-key="Symbol" template-url="/UI/Controls/UserRightTreeItem.html"></div>
+    </div>
+
+</div>

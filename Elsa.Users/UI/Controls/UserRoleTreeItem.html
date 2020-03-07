@@ -1,6 +1,6 @@
 ﻿<div class="roleTreeItem">
     <div class="stackLeft roleItemHead" data-bind="class.roleTreeItemSelected:selected">
-        <div data-bind="text:Name;class.roleTreeItemSelected:selected" event-bind="click:selectRole(Id)"></div>
+        <div data-bind="text:Name;class.roleTreeItemSelected:selected;class!.roleTreeItemMyOwn:CanEdit" event-bind="click:selectRole(Id)"></div>
         <div class="stackLeft role-actions">
             <i class="fas fa-plus-circle faButton" title="Přidat podřízenou roli" event-bind="click:addChildRole(Id)"></i>
             

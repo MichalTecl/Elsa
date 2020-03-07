@@ -1,4 +1,5 @@
-﻿using Elsa.Common;
+﻿using System.Collections.Generic;
+using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Users.ViewModel;
@@ -39,6 +40,44 @@ namespace Elsa.Users.Controllers
         {
             m_userRoleRepository.DeleteRole(roleId);
             return GetRoles();
+        }
+
+        public IEnumerable<UserRightViewModel> GetRoleRightsEditor(int roleId)
+        {
+            return m_userRoleRepository.GetEditableUserRights(roleId);
+        }
+
+        public IEnumerable<UserRightViewModel> ChangeRoleRightAssignment(int roleId, string rightSymbol, bool assign)
+        {
+            if (assign)
+            {
+                m_userRoleRepository.AssignRoleRight(roleId, rightSymbol);
+            }
+            else
+            {
+                m_userRoleRepository.RemoveRoleRight(roleId, rightSymbol);
+            }
+
+            return GetRoleRightsEditor(roleId);
+        }
+
+        public IEnumerable<UserViewModel> GetRoleMembers(int roleId)
+        {
+            var allUsers = m_userRoleRepository.GetRoleMembers(roleId);
+
+            foreach (var u in allUsers)
+            {
+                if (u.Id == m_session.User.Id)
+                {
+                    continue;
+                }
+
+                yield return new UserViewModel()
+                {
+                    Id = u.Id,
+                    Name = u.EMail
+                };
+            }
         }
     }
 }

@@ -39,7 +39,6 @@ using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
 using Elsa.Jobs.SyncErpCustomers;
 using Elsa.Users;
-using Elsa.Users.Infrastructure;
 using Robowire;
 
 namespace Elsa.Assembly
@@ -60,7 +59,7 @@ namespace Elsa.Assembly
             container.Setup(s => s.For<IWebSession>().Use<UserWebSession>());
             container.Setup(s => s.For<ISession>().Import.FromFactory(l => l.Get<IWebSession>()));
             container.Setup(s => s.Collect<IStartupJob>());
-            container.Setup(s => s.For<SyncUserRightsJob>().Use<SyncUserRightsJob>());
+            
             container.Setup(
                 s =>
                 {
