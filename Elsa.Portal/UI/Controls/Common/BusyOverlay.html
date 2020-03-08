@@ -15,6 +15,17 @@
                 var ovrly = document.getElementById("busyOverlay");
 
                 if (isBusy) {
+                    if (document.body) {
+                        var body = document.body,
+                            html = document.documentElement;
+
+                        var height = Math.max( body.scrollHeight, body.offsetHeight, 
+                            html.clientHeight, html.scrollHeight, html.offsetHeight);
+
+                        ovrly.style.minHeight = height + "px";
+                        ovrly.style.height = height + "px";
+                    }
+
                     ovrly.setAttribute("class", "shownOverlay");
                 } else {
                     ovrly.setAttribute("class", "hiddenOverlay");

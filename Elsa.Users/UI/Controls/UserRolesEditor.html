@@ -1,12 +1,15 @@
 ﻿<div id="roleEditor">
-    <div class="stackLeft childrenTop">
-        <div class="pnlUserRoles">
+    <div class="stackLeft">
+        <div class="pnlUserRoles urPanel">
+            <div class="urPnlTitle">Uživatelské role</div>
             <div data-bind="itemsSource:userRoles" data-key="Id" template-url="/UI/Controls/UserRoleTreeItem.html"></div>
         </div>
-        <div class="pnlUserRights">
+        <div class="pnlUserRights urPanel">
+            <div class="urPnlTitle" data-bind="text:roleRightsPanelTitle">Uživatelské role</div>
             <div data-bind="itemsSource:roleRights" data-key="Symbol" template-url="/UI/Controls/UserRightTreeItem.html"></div>
         </div>
-        <div class="pnlUserRights">
+        <div class="pnlRoleUsers urPanel">
+            <div class="urPnlTitle" data-bind="text:roleUsersPanelTitle">Uživatelské role</div>
             <div data-bind="itemsSource:roleUsers" data-key="Id">
                 <div class="lt-template">
                     <div data-bind="text:Name"></div>
@@ -14,6 +17,7 @@
             </div>
         </div>
     </div>
+</div>
 <script>
 
     lt.element("roleEditor").withModel("app.userRoles.vm").attach(function () {

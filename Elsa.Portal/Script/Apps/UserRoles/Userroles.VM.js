@@ -8,6 +8,9 @@ app.userRoles.VM = app.userRoles.VM || function() {
     self.roleRights = [];
     self.roleUsers = [];
 
+    self.roleRightsPanelTitle = "Není vybrána žádná role";
+    self.roleUsersPanelTitle = "Není vybrána žádná role";
+
     var visitRoles = function(roles, visitor) {
         for (var i = 0; i < roles.length; i++) {
             var role = roles[i];
@@ -38,22 +41,27 @@ app.userRoles.VM = app.userRoles.VM || function() {
 
         var canSelect = false;
 
+        self.roleRightsPanelTitle = "Není vybrána žádná role";
+        self.roleUsersPanelTitle = "Není vybrána žádná role";
+
         visitRoles(self.userRoles, function(role) {
             if (role.Id === roleId && role.CanEdit) {
                 canSelect = true;
-                return;
+                self.roleRightsPanelTitle = "Oprávnění přiřazená k roli " + role.Name;
+                self.roleUsersPanelTitle = "Uživatelé v roli " + role.Name;
             }
+
+            role.canDelete = (!role.ChildRoles) || role.ChildRoles.length === 0;
         });
 
         if (!canSelect) {
             return;
         }
-
+        
         selectedRoleId = roleId;
 
         visitRoles(self.userRoles, function (role) {
             role.selected = role.Id === selectedRoleId;
-            role.canDelete = (!role.ChildRoles) || role.ChildRoles.length === 0;
         });
 
         self.roleUsers = [];
