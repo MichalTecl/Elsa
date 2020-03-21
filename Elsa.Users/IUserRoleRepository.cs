@@ -11,7 +11,7 @@ namespace Elsa.Users
         RoleMap GetRolesVisibleForUser(int userId);
 
         IEnumerable<int> GetRoleIdsOfUser(int userId);
-
+        
         void CreateRole(string name, int parentRoleId);
 
         void RenameRole(int roleId, string newName);
@@ -27,5 +27,9 @@ namespace Elsa.Users
         void RemoveRoleRight(int roleId, string rightSymbol);
 
         IEnumerable<IUser> GetRoleMembers(int roleId);
+
+        void AssignUserToRole(int roleId, int userId);
+
+        void UnassignUserFromRole(int roleId, int userId);
     }
 }

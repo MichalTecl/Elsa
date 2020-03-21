@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Elsa.Common.Utils;
 
 namespace Elsa.Users.ViewModel
 {
@@ -19,6 +20,8 @@ namespace Elsa.Users.ViewModel
             set => m_canEdit = value;
         }
         
+        public HashSet<int> MemberUserIds { get; } = new HashSet<int>();
+
         public List<RoleMapNode> ChildRoles { get; } = new List<RoleMapNode>();
 
         internal RoleMapNode Clone()
@@ -35,6 +38,8 @@ namespace Elsa.Users.ViewModel
                 clone.ChildRoles.Add(child.Clone());
             }
 
+            clone.MemberUserIds.AddRange(MemberUserIds);
+
             return clone;
         }
 
@@ -46,6 +51,24 @@ namespace Elsa.Users.ViewModel
             {
                 ch.Visit(visitor);
             }
+        }
+
+        public bool IsAncestorOf(int roleId)
+        {
+            foreach (var child in ChildRoles)
+            {
+                if (child.Id == roleId)
+                {
+                    return true;
+                }
+
+                if (child.IsAncestorOf(roleId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

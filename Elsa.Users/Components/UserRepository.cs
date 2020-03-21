@@ -41,25 +41,35 @@ namespace Elsa.Users.Components
             });
         }
 
+        public IEnumerable<IUser> GetAllUsers()
+        {
+            return m_cache.ReadThrough($"allusers_{m_session.Project.Id}", TimeSpan.FromMinutes(5),
+                () => m_database.SelectFrom<IUser>().Where(u => u.ProjectId == m_session.Project.Id).Execute());
+        }
+
         public RoleMap GetProjectRoles()
         {
             return m_cache.ReadThrough($"rolemap_{m_session.Project.Id}", TimeSpan.FromHours(24), () =>
             {
                 var allRoles = new List<RoleMapNode>();
 
-                m_database.Sql().ExecuteWithParams("SELECT Id, Name, ParentRoleId FROM UserRole WHERE ProjectId={0}", m_session.Project.Id)
-                    .ReadRows<int, string, int?>((id, name, parentId) =>
+                var roles = m_database.SelectFrom<IUserRole>().Join(ur => ur.Members)
+                    .Where(ur => ur.ProjectId == m_session.Project.Id).Execute();
+
+                foreach (var role in roles)
+                {
+                    var model = new RoleMapNode
                     {
-                        var model = new RoleMapNode()
-                        {
-                            Id = id,
-                            Name = name,
-                            ParentRoleId = parentId
-                        };
+                        Id = role.Id,
+                        Name = role.Name,
+                        ParentRoleId = role.ParentRoleId
+                    };
 
-                        allRoles.Add(model);
-                    });
+                    model.MemberUserIds.AddRange(role.Members.Select(m => m.MemberId));
 
+                    allRoles.Add(model);
+                }
+                
                 var map = new RoleMap();
                 map.Import(allRoles);
 
@@ -346,6 +356,95 @@ namespace Elsa.Users.Components
                     return m_database.SelectFrom<IUserRoleMember>().Join(m => m.Member)
                         .Where(m => m.ProjectId == m_session.Project.Id).Where(m => m.RoleId == roleId).Execute().Select(r => r.Member).OrderBy(u => u.EMail);
                 });
+        }
+
+        public void AssignUserToRole(int roleId, int userId)
+        {
+            var allRoles = GetRolesVisibleForUser(m_session.User.Id); 
+
+            var desiredRole = allRoles.FindRole(roleId).Ensure(r => r.CanEdit, "Nepovoleno");
+            if (desiredRole.MemberUserIds.Contains(userId))
+            {
+                // is already a member
+                return;
+            }
+
+            var allUserRoles = allRoles.FindRolesByUserId(userId).ToList();
+
+            // Check if user doesn't have any higher role
+            foreach (var userRole in allUserRoles)
+            {
+                if (userRole.IsAncestorOf(roleId))
+                {
+                    throw new InvalidOperationException($"Uživatel již má roli {userRole.Name}, která je v hierarchii výše než požadovaná role {desiredRole.Name}. Pokud je toto snížení oprávnění požadováno, je třeba nejdříve odstranit uživatele z role {userRole.Name}");
+                }
+            }
+
+            var toDelete = new HashSet<int>();
+
+            //Find all user's lower roles which have to be upgraded to the desired one
+            void CollectUpgrades(IEnumerable<RoleMapNode> level)
+            {
+                foreach (var r in level)
+                {
+                    if (r.MemberUserIds.Contains(userId))
+                    {
+                        toDelete.Add(r.Id);
+                    }
+
+                    CollectUpgrades(r.ChildRoles);
+                }
+            }
+
+            CollectUpgrades(desiredRole.ChildRoles);
+
+            using (var tx = m_database.OpenTransaction())
+            {
+                var assignmentsToDelete = new List<IUserRoleMember>(toDelete.Count);
+
+                foreach (var roletoUnassignId in toDelete)
+                {
+                    m_cache.Remove($"roleMembers_{roletoUnassignId}");
+                    assignmentsToDelete.AddRange(m_database.SelectFrom<IUserRoleMember>().Where(m =>
+                        m.RoleId == roletoUnassignId && m.MemberId == userId && m.ProjectId == m_session.Project.Id).Execute());
+                }
+
+                m_database.DeleteAll(assignmentsToDelete);
+
+                var newBridge = m_database.New<IUserRoleMember>();
+                newBridge.MemberId = userId;
+                newBridge.RoleId = desiredRole.Id;
+                newBridge.IncludedById = m_session.User.Id;
+                newBridge.ProjectId = m_session.Project.Id;
+                newBridge.ValidFrom = DateTime.Now;
+                
+                m_database.Save(newBridge);
+
+                tx.Commit();
+            }
+
+            m_cache.Remove($"roleMembers_{roleId}");
+            m_cache.Remove($"usrightsf_{userId}");
+        }
+
+        public void UnassignUserFromRole(int roleId, int userId)
+        {
+            var allRoles = GetRolesVisibleForUser(m_session.User.Id);
+
+            var desiredRole = allRoles.FindRole(roleId).Ensure(r => r.CanEdit, "Nepovoleno");
+            if (!desiredRole.MemberUserIds.Contains(userId))
+            {
+                // already not a member
+                return;
+            }
+
+            var ett = m_database.SelectFrom<IUserRoleMember>().Where(urm => urm.ProjectId == m_session.Project.Id)
+                .Where(urm => urm.MemberId == userId && urm.RoleId == roleId).Execute().FirstOrDefault().Ensure();
+
+            m_database.Delete(ett);
+
+            m_cache.Remove($"roleMembers_{roleId}");
+            m_cache.Remove($"usrightsf_{userId}");
         }
 
         private UserRightViewModel FindRight(IEnumerable<UserRightViewModel> source, string symbol)

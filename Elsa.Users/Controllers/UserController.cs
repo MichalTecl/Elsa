@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.Common;
@@ -16,12 +17,16 @@ namespace Elsa.Users
     {
         private readonly IDatabase m_database;
         private readonly ILog m_log;
+        private readonly IUserRepository m_repository;
+        private readonly ISession m_session;
 
-        public UserController(IWebSession webSession, ILog log, IDatabase database)
+        public UserController(IWebSession webSession, ILog log, IDatabase database, IUserRepository repository)
             : base(webSession, log)
         {
+            m_session = webSession;
             m_log = log;
             m_database = database;
+            m_repository = repository;
         }
 
         [DoNotLogParams]
@@ -107,6 +112,13 @@ namespace Elsa.Users
         public void Logout()
         {
             WebSession.Logout();
+        }
+
+
+        public IEnumerable<string> GetAllUserNamesExceptMe()
+        {
+            return m_repository.GetAllUsers().Where(u => u.Id != m_session.User.Id).Select(u => u.EMail)
+                .OrderBy(u => u);
         }
     }
 }

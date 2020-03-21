@@ -3,6 +3,8 @@ app.userRoles = app.userRoles || {};
 app.userRoles.VM = app.userRoles.VM || function() {
     var self = this;
     var selectedRoleId = -1;
+    var allUsersCallbacks = [];
+    var allUserNames = null;
 
     self.userRoles = [];
     self.roleRights = [];
@@ -10,6 +12,7 @@ app.userRoles.VM = app.userRoles.VM || function() {
 
     self.roleRightsPanelTitle = "Není vybrána žádná role";
     self.roleUsersPanelTitle = "Není vybrána žádná role";
+    self.roleSelected = false;
 
     var visitRoles = function(roles, visitor) {
         for (var i = 0; i < roles.length; i++) {
@@ -43,12 +46,14 @@ app.userRoles.VM = app.userRoles.VM || function() {
 
         self.roleRightsPanelTitle = "Není vybrána žádná role";
         self.roleUsersPanelTitle = "Není vybrána žádná role";
+        self.roleSelected = false;
 
         visitRoles(self.userRoles, function(role) {
             if (role.Id === roleId && role.CanEdit) {
                 canSelect = true;
                 self.roleRightsPanelTitle = "Oprávnění přiřazená k roli " + role.Name;
                 self.roleUsersPanelTitle = "Uživatelé v roli " + role.Name;
+                self.roleSelected = true;
             }
 
             role.canDelete = (!role.ChildRoles) || role.ChildRoles.length === 0;
@@ -101,10 +106,65 @@ app.userRoles.VM = app.userRoles.VM || function() {
         lt.api("/UserRoles/DeleteRole").query({ "roleId": id }).get(receiveRoleMap);
     };
 
-    var loadRoles = function() {
-        lt.api("/userroles/getroles").get(receiveRoleMap);
+    self.searchUsers = function (query, callback) {
+        
+        if (allUserNames) {
+            callback(allUserNames);
+            return;
+        }
+
+        allUsersCallbacks.push(callback);
     };
 
+    var receiveUserNames = function(userNames) {
+        allUserNames = userNames;
+
+        while (allUsersCallbacks.length > 0) {
+            var cbk = allUsersCallbacks.pop();
+            cbk(allUserNames);
+        }
+    };
+
+    self.validateUserName = function(userName) {
+
+        for (var i = 0; i < allUserNames.length; i++) {
+            if (allUserNames[i] === userName) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    self.addUserToRole = function(userName, callback) {
+        if (selectedRoleId === -1) {
+            return;
+        }
+
+        lt.api("/userroles/assignUser").query({ "roleId": selectedRoleId, "userName": userName })
+            .get(function(usersInRole) {
+                self.roleUsers = usersInRole;
+                callback();
+            });
+    };
+
+    self.unassignUserFromRole = function(userId) {
+        if (selectedRoleId === -1) {
+            return;
+        }
+
+        lt.api("/userroles/unassignUser").query({ "roleId": selectedRoleId, "userId": userId }).get(
+            function(usersInRole) {
+                self.roleUsers = usersInRole;
+            });
+    };
+
+    var loadRoles = function() {
+        lt.api("/userroles/getroles").get(receiveRoleMap);
+        lt.api("/user/getAllUserNamesExceptMe").get(receiveUserNames);
+    };
+
+    
     setTimeout(loadRoles, 100);
 };
 

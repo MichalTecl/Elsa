@@ -10,23 +10,39 @@
         </div>
         <div class="pnlRoleUsers urPanel">
             <div class="urPnlTitle" data-bind="text:roleUsersPanelTitle">Uživatelské role</div>
-            <div data-bind="itemsSource:roleUsers" data-key="Id">
-                <div class="lt-template">
-                    <div data-bind="text:Name"></div>
+            <div data-bind="class!.hidden:roleSelected">
+                <div data-bind="itemsSource:roleUsers" data-key="Id">
+                    <div class="lt-template stackLeft urMeberItemCont">
+                        <div data-bind="text:Name"></div>
+                        <i class="fas fa-minus-square faButton" event-bind="click:unassignUser(Id)"></i>
+                    </div>
+                </div>
+                <div id="urAddUserContent">
+                    <label>Přidat uživatele</label>
+                    <div class="stackLeft">
+                        <div class="autocomplete" lt-name="roleUserAutocompleteContainer">
+                            <input type="text" lt-name="tbUserName" event-bind="change:keyup:onSelectedUserChanged(this, $butAddUser)"/>
+                        </div>
+                        <button lt-name="butAddUser" style="display: none" event-bind="click:assignUser($tbUserName, $butAddUser)"><i class="fas fa-plus-circle"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script src="/UI/Controls/Common/AutoSuggest.js"></script>
+
 <script>
 
-    lt.element("roleEditor").withModel("app.userRoles.vm").attach(function () {
+    lt.element("roleEditor").withModel("app.userRoles.vm").attach(function (roleUserAutocompleteContainer) {
 
-        this.selectRole = function(roleId) {
+        var self = this;
+
+        this.selectRole = function (roleId) {
             app.userRoles.vm.selectRole(roleId);
         };
 
-        this.addChildRole = function(parentRoleId) {
+        this.addChildRole = function (parentRoleId) {
             var result = prompt("Název nové role");
             if (!result) {
                 return;
@@ -41,7 +57,7 @@
             app.userRoles.vm.addChildRole(parentRoleId, result);
         };
 
-        this.renameRole = function(roleId, oldName) {
+        this.renameRole = function (roleId, oldName) {
             var result = prompt("Nový název", oldName);
             if (!result) {
                 return;
@@ -56,7 +72,7 @@
             app.userRoles.vm.renameRole(roleId, result);
         };
 
-        this.deleteRole = function(id, name) {
+        this.deleteRole = function (id, name) {
             if (!confirm("Opravdu chcete vymazat roli '" + name + "'?")) {
                 return;
             }
@@ -64,13 +80,36 @@
             app.userRoles.vm.deleteRole(id);
         };
 
-        this.onRightAssignmentChange = function(symbol, currentValue) {
+        this.onRightAssignmentChange = function (symbol, currentValue) {
 
             app.userRoles.vm.changeRoleRightAssignment(symbol, !currentValue);
 
         };
 
+        this.onSelectedUserChanged = function(tbUser, butAdd) {
+
+            if (app.userRoles.vm.validateUserName(tbUser.value)) {
+                butAdd.style.display = 'flex';
+            } else {
+                butAdd.style.display = 'none';
+            }
+            
+        };
+
+        this.assignUser = function(tbUserName, button) {
+            app.userRoles.vm.addUserToRole(tbUserName.value, function () {
+                tbUserName.value = '';
+                self.onSelectedUserChanged(tbUserName, button);
+            });
+        };
+
+        this.unassignUser = function(userId) {
+            app.userRoles.vm.unassignUserFromRole(userId);
+        };
+
+        app.ui.autosuggest(roleUserAutocompleteContainer, app.userRoles.vm.searchUsers, null, null);
     });
 
 </script>
 <link href="/UI/Style/UserEditor.css" rel="stylesheet" />
+<link href="/UI/Controls/Common/Autosuggest.css" rel="stylesheet" />

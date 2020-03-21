@@ -27,6 +27,14 @@ namespace Elsa.Users.ViewModel
             return res.FirstOrDefault();
         }
 
+        public IEnumerable<RoleMapNode> FindRolesByUserId(int userId)
+        {
+            var res = new List<RoleMapNode>();
+            FindRoles(this, r => r.MemberUserIds.Contains(userId), res);
+
+            return res;
+        }
+        
         public Dictionary<int, RoleMapNode> GetIndex()
         {
             var res = new Dictionary<int, RoleMapNode>(Count);

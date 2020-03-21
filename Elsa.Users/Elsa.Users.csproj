@@ -102,7 +102,7 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Script\Apps\UserRoles\UserRoles.VM.js" />
-    <Content Include="SQL\20200307-001 GetRoleRights - Copy.sql" />
+    <Content Include="SQL\20200307-001 GetRoleRights.sql" />
     <Content Include="SQL\20200307-002 SyncUserRights.sql" />
     <Content Include="SQL\20200202-001 GetUserRights.sql" />
     <Content Include="SQL\20200204-001 DropFullPath.sql" />

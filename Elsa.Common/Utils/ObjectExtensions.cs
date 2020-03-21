@@ -8,6 +8,16 @@ namespace Elsa.Common.Utils
 {
     public static class ObjectExtensions
     {
+        public static T Ensure<T>(this T entity, Func<T, bool> predicate, string errorMessage = "Invalid entity reference")
+        {
+            if (entity == null || !predicate(entity))
+            {
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            return entity;
+        }
+
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
         public static T Ensure<T>(this T entity, string errorMessage = "Invalid entity reference") where T : class
@@ -22,7 +32,7 @@ namespace Elsa.Common.Utils
 
         [DebuggerNonUserCode]
         [DebuggerStepThrough]
-        public static T Ensure<T>(this Nullable<T> entity, string errorMessage = "Invalid entity reference") where T:struct
+        public static T Ensure<T>(this T? entity, string errorMessage = "Invalid entity reference") where T:struct
         {
             if (entity == null)
             {

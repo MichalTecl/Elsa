@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Users.ViewModel;
 using Robowire.RoboApi;
 
@@ -11,11 +14,13 @@ namespace Elsa.Users.Controllers
     public class UserRolesController : ElsaControllerBase
     {
         private readonly IUserRoleRepository m_userRoleRepository;
+        private readonly IUserRepository m_userRepository;
         private readonly ISession m_session;
 
-        public UserRolesController(IWebSession webSession, ILog log, IUserRoleRepository userRoleRepository) : base(webSession, log)
+        public UserRolesController(IWebSession webSession, ILog log, IUserRoleRepository userRoleRepository, IUserRepository userRepository) : base(webSession, log)
         {
             m_userRoleRepository = userRoleRepository;
+            m_userRepository = userRepository;
             m_session = webSession;
         }
 
@@ -78,6 +83,24 @@ namespace Elsa.Users.Controllers
                     Name = u.EMail
                 };
             }
+        }
+
+        public IEnumerable<UserViewModel> AssignUser(int roleId, string userName)
+        {
+            var urid = m_userRepository.GetAllUsers()
+                .FirstOrDefault(u => u.EMail.Equals(userName, StringComparison.InvariantCultureIgnoreCase))
+                .Ensure("Uzivatel neexistuje").Id;
+
+            m_userRoleRepository.AssignUserToRole(roleId, urid);
+
+            return GetRoleMembers(roleId);
+        }
+
+        public IEnumerable<UserViewModel> UnassignUser(int roleId, int userId)
+        {
+            m_userRoleRepository.UnassignUserFromRole(roleId, userId);
+
+            return GetRoleMembers(roleId);
         }
     }
 }
