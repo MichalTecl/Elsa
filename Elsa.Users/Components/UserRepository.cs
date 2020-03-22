@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
@@ -20,14 +18,12 @@ namespace Elsa.Users.Components
         private readonly ICache m_cache;
         private readonly IDatabase m_database;
         private readonly ISession m_session;
-        private readonly IServiceLocator m_serviceLocator;
 
-        public UserRepository(ICache cache, IDatabase database, ISession session, IServiceLocator serviceLocator)
+        public UserRepository(ICache cache, IDatabase database, ISession session)
         {
             m_cache = cache;
             m_database = database;
             m_session = session;
-            m_serviceLocator = serviceLocator;
         }
 
         public HashSet<string> GetUserRights(int userId)
@@ -137,7 +133,7 @@ namespace Elsa.Users.Components
 
             m_database.Save(role);
 
-            InvalidateCache(true);
+            InvalidateCache();
         }
 
         public void RenameRole(int roleId, string newName)
@@ -161,7 +157,7 @@ namespace Elsa.Users.Components
                 .Where(r => r.ProjectId == m_session.Project.Id && r.Name == newName).Take(1).Execute()
                 .FirstOrDefault();
 
-            if ((existingRole != null) && (roleId != (existingRole?.Id ?? -1)))
+            if ((existingRole != null) && (roleId != existingRole.Id))
             {
                 throw new InvalidOperationException($"Role \"{newName}\" již existuje");
             }
@@ -172,7 +168,7 @@ namespace Elsa.Users.Components
             role.Name = newName;
             m_database.Save(role);
 
-            InvalidateCache(true);
+            InvalidateCache();
         }
 
         public void DeleteRole(int roleId)
@@ -213,13 +209,13 @@ namespace Elsa.Users.Components
                 tx.Commit();
             }
             
-            InvalidateCache(true);
+            InvalidateCache(roleId);
         }
 
         public IEnumerable<string> GetRoleRights(int roleId)
         {
             return m_database.Sql().Call("GetRoleRights").WithParam("@projectId", m_session.Project.Id).WithParam("@roleId", roleId)
-                .MapRows<string>(r => r.GetString(0));
+                .MapRows(r => r.GetString(0));
         }
 
         public IEnumerable<UserRightViewModel> GetEditableUserRights(int roleId)
@@ -243,7 +239,7 @@ namespace Elsa.Users.Components
 
             var userVisibleRoles = GetRolesVisibleForUser(m_session.User.Id);
 
-            var role = userVisibleRoles.FindRole(roleId).Ensure($"Uživatel nemá potřebná oprávnění ke správě zvolené role");
+            var role = userVisibleRoles.FindRole(roleId).Ensure("Uživatel nemá potřebná oprávnění ke správě zvolené role");
 
             var parentRole = role.ParentRoleId == null
                 ? role
@@ -301,8 +297,8 @@ namespace Elsa.Users.Components
             entity.RightId = editableRight.Id;
             
             m_database.Save(entity);
-
-            InvalidateUserRightsCache(roleId);
+            
+            InvalidateCache();
         }
         
         public void RemoveRoleRight(int roleId, string rightSymbol)
@@ -342,11 +338,8 @@ namespace Elsa.Users.Components
 
                 tx.Commit();
             }
-
-            foreach (var r in rolesToUnassign)
-            {
-                InvalidateUserRightsCache(r);
-            }
+            
+            InvalidateCache();
         }
 
         public IEnumerable<IUser> GetRoleMembers(int roleId)
@@ -423,8 +416,7 @@ namespace Elsa.Users.Components
                 tx.Commit();
             }
 
-            m_cache.Remove($"roleMembers_{roleId}");
-            m_cache.Remove($"usrightsf_{userId}");
+            InvalidateCache(roleId, userId);
         }
 
         public void UnassignUserFromRole(int roleId, int userId)
@@ -443,8 +435,7 @@ namespace Elsa.Users.Components
 
             m_database.Delete(ett);
 
-            m_cache.Remove($"roleMembers_{roleId}");
-            m_cache.Remove($"usrightsf_{userId}");
+            InvalidateCache(roleId, userId);
         }
 
         private UserRightViewModel FindRight(IEnumerable<UserRightViewModel> source, string symbol)
@@ -465,21 +456,29 @@ namespace Elsa.Users.Components
 
             return null;
         }
-
-        private void InvalidateUserRightsCache(int roleId)
+        
+        private void InvalidateCache(int? roleId = null, int? userId = null)
         {
-            var assignedUsers = m_database.SelectFrom<IUserRoleMember>().Where(rm => rm.RoleId == roleId).Execute();
-            foreach (var au in assignedUsers)
+            m_cache.RemoveByPrefix($"rolemap_{ m_session.Project.Id}");
+
+            if (roleId != null)
             {
-                m_cache.Remove($"usrightsf_{au.MemberId}");
+                m_cache.Remove($"roleMembers_{roleId}");
             }
-        }
 
-        private void InvalidateCache(bool roles)
-        {
-            if (roles)
+            if (userId != null)
             {
-                m_cache.RemoveByPrefix($"rolemap_{ m_session.Project.Id}");
+                m_cache.Remove($"usrightsf_{userId}");
+
+                if (roleId == null)
+                {
+                    var assignedUsers = m_database.SelectFrom<IUserRoleMember>().Where(rm => rm.RoleId == roleId)
+                        .Execute();
+                    foreach (var au in assignedUsers)
+                    {
+                        m_cache.Remove($"usrightsf_{au.MemberId}");
+                    }
+                }
             }
         }
     }

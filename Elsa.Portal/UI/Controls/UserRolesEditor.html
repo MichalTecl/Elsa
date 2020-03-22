@@ -11,19 +11,24 @@
         <div class="pnlRoleUsers urPanel">
             <div class="urPnlTitle" data-bind="text:roleUsersPanelTitle">Uživatelské role</div>
             <div data-bind="class!.hidden:roleSelected">
-                <div data-bind="itemsSource:roleUsers" data-key="Id">
-                    <div class="lt-template stackLeft urMeberItemCont">
-                        <div data-bind="text:Name"></div>
-                        <i class="fas fa-minus-square faButton" event-bind="click:unassignUser(Id)"></i>
+                <div id="urAddUserContent" class="hasHoverDetail">
+                    <div class="stackLeft">
+                        <i class="fas fa-plus-circle faButton" ></i>
+                        <label>Přidat uživatele</label>
+                    </div>
+                    <div class="hoverDetail">
+                        <div class="stackLeft">
+                            <div class="autocomplete" lt-name="roleUserAutocompleteContainer">
+                                <input type="text" lt-name="tbUserName" event-bind="change:keyup:onSelectedUserChanged(this, $butAddUser)" />
+                            </div>
+                            <button lt-name="butAddUser" style="display: none" event-bind="click:assignUser($tbUserName, $butAddUser)"><i class="fas fa-plus-circle"></i></button>
+                        </div>
                     </div>
                 </div>
-                <div id="urAddUserContent">
-                    <label>Přidat uživatele</label>
-                    <div class="stackLeft">
-                        <div class="autocomplete" lt-name="roleUserAutocompleteContainer">
-                            <input type="text" lt-name="tbUserName" event-bind="change:keyup:onSelectedUserChanged(this, $butAddUser)"/>
-                        </div>
-                        <button lt-name="butAddUser" style="display: none" event-bind="click:assignUser($tbUserName, $butAddUser)"><i class="fas fa-plus-circle"></i></button>
+                <div data-bind="itemsSource:roleUsers" data-key="Id">
+                    <div class="lt-template stackLeft urMeberItemCont">
+                        <i class="fas fa-minus-square faButton" event-bind="click:unassignUser(Id)"></i>
+                        <div data-bind="text:Name"></div>
                     </div>
                 </div>
             </div>

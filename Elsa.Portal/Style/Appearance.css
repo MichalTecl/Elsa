@@ -581,3 +581,11 @@ input.readonly {
   min-width:22px;
   color:#88C;
 }
+
+.hoverDetail {
+    display: none;
+}
+
+.hasHoverDetail:hover .hoverDetail {
+    display: block;
+}
