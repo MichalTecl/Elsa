@@ -18,7 +18,7 @@ namespace Elsa.Users
         private const string c_sessionCookieIdentifier = "elsa_sid";
         private bool m_initialized;
         private Guid? m_sessionPublicId;
-        private ICache m_cache;
+        private readonly ICache m_cache;
         private readonly Lazy<IUserRepository> m_userRepository;
 
         private readonly IDatabase m_database;
@@ -68,6 +68,11 @@ namespace Elsa.Users
             if (userRecord == null)
             {
                 return;
+            }
+
+            if (userRecord.LockDt != null)
+            {
+                throw new InvalidOperationException("Uživatelský účet byl zablokován");
             }
 
             if (!VerifyPassword(userRecord.PasswordHash, password, userRecord.UsesDefaultPassword))
@@ -192,7 +197,7 @@ namespace Elsa.Users
                                     };
             }
 
-            sessionCookie.Expires = DateTime.Now.AddDays(1);
+            sessionCookie.Expires = DateTime.Now.AddDays(30);
             context.HttpContext.Response.Cookies.Add(sessionCookie);
             
             m_initialized = true;

@@ -38,6 +38,7 @@ using Elsa.Jobs.PaymentPairing;
 using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
 using Elsa.Jobs.SyncErpCustomers;
+using Elsa.Smtp.Core;
 using Elsa.Users;
 using Robowire;
 
@@ -97,6 +98,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(DbBackupJob).Assembly);
                     s.ScanAssembly(typeof(InspectorRegistry).Assembly);
                     s.ScanAssembly(typeof(UserRightsRegistry).Assembly);
+                    s.ScanAssembly(typeof(SmtpRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });

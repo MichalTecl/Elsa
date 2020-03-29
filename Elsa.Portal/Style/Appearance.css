@@ -264,6 +264,10 @@ div.searchPanel {
     display: none !important;
 }
 
+.strike {
+    text-decoration: line-through;
+}
+
 .lt-template {
     display: none;
 }

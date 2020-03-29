@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\UserManagementFacade.cs" />
     <Compile Include="Components\UserRepository.cs" />
     <Compile Include="Controllers\UserRolesController.cs" />
     <Compile Include="Entities\IUserRight.cs" />
@@ -52,6 +53,7 @@
     <Compile Include="Entities\IUserRoleRight.cs" />
     <Compile Include="Infrastructure\UserRights.cs" />
     <Compile Include="Infrastructure\UserRightsAttribute.cs" />
+    <Compile Include="IUserManagementFacade.cs" />
     <Compile Include="IUserRepository.cs" />
     <Compile Include="IUserRightsDefinition.cs" />
     <Compile Include="IUserRoleRepository.cs" />
@@ -94,6 +96,10 @@
       <Project>{91481b08-e437-474d-9793-a135f1db465c}</Project>
       <Name>Elsa.Core.Entities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Smtp.Core\Elsa.Smtp.Core.csproj">
+      <Project>{5DABFCE6-02A6-428C-BB67-0A2C23B0A189}</Project>
+      <Name>Elsa.Smtp.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -101,6 +107,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Script\Apps\UserRoles\UserManager.VM.js" />
     <Content Include="Script\Apps\UserRoles\UserRoles.VM.js" />
     <Content Include="SQL\20200307-001 GetRoleRights.sql" />
     <Content Include="SQL\20200307-002 SyncUserRights.sql" />

@@ -13,5 +13,11 @@ namespace Elsa.Users
         HashSet<string> GetUserRights(int userId);
 
         IEnumerable<IUser> GetAllUsers();
+
+        void CreateUserAccount(string email, string plainPassword);
+
+        void UpdateUser(int userId, Action<IUser> update);
+
+        bool GetCanManage(int managerId, int managedId);
     }
 }

@@ -43,6 +43,79 @@ namespace Elsa.Users.Components
                 () => m_database.SelectFrom<IUser>().Where(u => u.ProjectId == m_session.Project.Id).Execute());
         }
 
+        public void CreateUserAccount(string email, string plainPassword)
+        {
+            using (var tx = m_database.OpenTransaction())
+            {
+                var existingUser = m_database.SelectFrom<IUser>()
+                    .Where(u => u.ProjectId == m_session.Project.Id && u.EMail == email).Execute().FirstOrDefault();
+
+                if (existingUser != null)
+                {
+                    throw new InvalidOperationException($"Uživatel již existuje");
+                }
+
+                var nuser = m_database.New<IUser>();
+
+                nuser.EMail = email;
+                nuser.ParentId = m_session.User.Id;
+                nuser.PasswordHash = plainPassword;
+                nuser.UsesDefaultPassword = true;
+                nuser.ProjectId = m_session.Project.Id;
+                nuser.Salt = string.Empty;
+                nuser.VerificationCode = string.Empty;
+
+                m_database.Save(nuser);
+
+                tx.Commit();
+            }
+
+            m_cache.Remove($"allusers_{m_session.Project.Id}");
+        }
+
+        public void UpdateUser(int userId, Action<IUser> update)
+        {
+            if (!GetCanManage(m_session.User.Id, userId))
+            {
+                throw new InvalidOperationException("unauthorized");
+            }
+
+            using (var tx = m_database.OpenTransaction())
+            {
+                var user = m_database.SelectFrom<IUser>().Where(u => u.ProjectId == m_session.Project.Id)
+                    .Where(u => u.Id == userId).Take(1).Execute().FirstOrDefault().Ensure();
+
+                update(user);
+
+                m_database.Save(user);
+
+                LogoutUser(userId);
+
+                tx.Commit();
+            }
+
+            InvalidateCache(userId: userId);
+        }
+
+        public bool GetCanManage(int managerId, int managedId)
+        {
+            var rolesVisibleForManager = GetRolesVisibleForUser(managerId);
+
+            var allRolesOfManagedUser = GetRoleIdsOfUser(managedId);
+
+            // Manager cannot manage account which has a role invisible for the manager
+
+            foreach (var managedRoleId in allRolesOfManagedUser)
+            {
+                if (rolesVisibleForManager.FindRole(managedRoleId) == null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public RoleMap GetProjectRoles()
         {
             return m_cache.ReadThrough($"rolemap_{m_session.Project.Id}", TimeSpan.FromHours(24), () =>
@@ -464,13 +537,8 @@ namespace Elsa.Users.Components
             if (roleId != null)
             {
                 m_cache.Remove($"roleMembers_{roleId}");
-            }
 
-            if (userId != null)
-            {
-                m_cache.Remove($"usrightsf_{userId}");
-
-                if (roleId == null)
+                if (userId == null)
                 {
                     var assignedUsers = m_database.SelectFrom<IUserRoleMember>().Where(rm => rm.RoleId == roleId)
                         .Execute();
@@ -479,6 +547,26 @@ namespace Elsa.Users.Components
                         m_cache.Remove($"usrightsf_{au.MemberId}");
                     }
                 }
+            }
+
+            if (userId != null)
+            {
+                m_cache.Remove($"usrightsf_{userId}");
+            }
+
+            m_cache.Remove($"allusers_{m_session.Project.Id}");
+        }
+
+        private void LogoutUser(int userId)
+        {
+            var openSessions = m_database.SelectFrom<IUserSession>().Where(us => us.ProjectId == m_session.Project.Id)
+                .Where(us => us.EndDt == null).Where(us => us.UserId == userId).Execute().ToList();
+
+            foreach (var openSession in openSessions)
+            {
+                openSession.EndDt = DateTime.Now;
+                m_cache.Remove($"usix_{openSession.PublicId}");
+                m_database.Save(openSession);
             }
         }
     }

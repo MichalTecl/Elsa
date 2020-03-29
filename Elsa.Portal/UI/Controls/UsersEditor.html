@@ -1,3 +1,49 @@
-﻿<div>
-    USERS
+﻿<script src="/Script/Apps/UserRoles/UserManager.VM.js"></script>
+
+<div id="usersManagerUi">
+    <div id="inviteUser" class="stackLeft" event-bind="click:invite()">
+        <i class="fas fa-plus-circle faButton"></i>
+        <div>Pozvat nového uživatele</div>
+    </div>
+    <div id="userAccountsList" data-bind="itemsSource:users" data-key="Id">
+        <div class="lt-template userAccountItemContainer hasHoverDetail">
+            <div class="stackLeft">
+                <div data-bind="text:Name; class.strike:IsLocked"></div>
+                <i class="fas fa-user-clock userAccountIcon" data-bind="class.hidden:IsActive" title="Uživatel musí změnit své dočasné heslo a tím aktivovat svůj účet"></i>
+                <div event-bind="click:toggleUserLock(Id)" class="hoverDetail userAccountIcon">
+                    <i class="fas fa-lock faButton" title="Zablokovat uživatele" data-bind="class.hidden:IsLocked"></i>
+                    <i class="fas fa-lock-open faButton" title="Odblokovat uživatele" data-bind="class!.hidden:IsLocked"></i>
+                </div>
+                <i class="fas fa-recycle faButton userAccountIcon hoverDetail" event-bind="click:rePass(Id)" title="Reset hesla"></i>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+
+
+<script>
+    lt.element("usersManagerUi").withModel("app.UserManager.vm").attach(function() {
+        var self = this;
+
+        this.toggleUserLock = function(userId) {
+            app.UserManager.vm.toggleAccountLock(userId);
+        };
+
+        this.rePass = function(userId) {
+            app.UserManager.vm.resetPassword(userId, function() {
+                alert("Hotovo. Uživatel dostane e-mail s instrukcemi.");
+            });
+        };
+
+        this.invite = function() {
+            var mail = prompt("E-Mail nového uživatele");
+            if (!mail) {
+                return;
+            }
+
+            app.UserManager.vm.inviteUser(mail);
+        };
+    });
+</script>

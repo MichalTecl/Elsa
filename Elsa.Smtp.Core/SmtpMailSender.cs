@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
 
 using Elsa.Common.Logging;
+using MailKit.Net.Smtp;
+using MimeKit;
 
 namespace Elsa.Smtp.Core
 {
@@ -27,27 +23,23 @@ namespace Elsa.Smtp.Core
 
             try
             {
-                var fromAddress = new MailAddress(m_settings.SenderAddress, m_settings.SenderName);
-                var toAddress = new MailAddress(to);
-
-                var smtp = new SmtpClient
+                var mailMessage = new MimeMessage();
+                mailMessage.From.Add(new MailboxAddress(m_settings.SenderName, m_settings.SenderAddress));
+                mailMessage.To.Add(new MailboxAddress(to, to));
+                mailMessage.Subject = subject;
+                mailMessage.Body = new TextPart("plain")
                 {
-                    Host = m_settings.SmtpHost,
-                    Port = m_settings.SmtpPort,
-                    EnableSsl = m_settings.EnableSsl,
-                    DeliveryMethod = m_settings.DeliveryMethod,
-                    UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(fromAddress.Address, m_settings.SenderPassword)
+                    Text = body
                 };
-                using (var message = new MailMessage(fromAddress, toAddress)
-                {
-                    Subject = subject,
-                    Body = body
-                })
-                {
-                    smtp.Send(message);
-                }
 
+                using (var smtpClient = new SmtpClient())
+                {
+                    smtpClient.Connect(m_settings.SmtpHost, m_settings.SmtpPort, true);
+                    smtpClient.Authenticate(m_settings.SenderAddress, m_settings.SenderPassword);
+                    smtpClient.Send(mailMessage);
+                    smtpClient.Disconnect(true);
+                }
+                
                 m_log.Info("Sent");
             }
             catch (Exception ex)

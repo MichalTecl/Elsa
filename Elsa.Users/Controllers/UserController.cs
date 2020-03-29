@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common.Security;
-
+using Elsa.Users.ViewModel;
 using Robowire.RoboApi;
 using Robowire.RobOrm.Core;
 
-namespace Elsa.Users
+namespace Elsa.Users.Controllers
 {
     [Controller("user")]
     public class UserController : ElsaControllerBase
@@ -19,14 +19,18 @@ namespace Elsa.Users
         private readonly ILog m_log;
         private readonly IUserRepository m_repository;
         private readonly ISession m_session;
+        private readonly IUserManagementFacade m_managementFacade;
+        private readonly ICache m_cache;
 
-        public UserController(IWebSession webSession, ILog log, IDatabase database, IUserRepository repository)
+        public UserController(IWebSession webSession, ILog log, IDatabase database, IUserRepository repository, IUserManagementFacade managementFacade, ICache cache)
             : base(webSession, log)
         {
             m_session = webSession;
             m_log = log;
             m_database = database;
             m_repository = repository;
+            m_managementFacade = managementFacade;
+            m_cache = cache;
         }
 
         [DoNotLogParams]
@@ -96,7 +100,7 @@ namespace Elsa.Users
                 user.UsesDefaultPassword = false;
 
                 m_database.Save(user);
-
+                
                 WebSession.Logout();
                 WebSession.Login(user.EMail, newPassword);
 
@@ -117,8 +121,43 @@ namespace Elsa.Users
 
         public IEnumerable<string> GetAllUserNamesExceptMe()
         {
-            return m_repository.GetAllUsers().Where(u => u.Id != m_session.User.Id).Select(u => u.EMail)
-                .OrderBy(u => u);
+            return GetAllUsersExceptMe().Select(u => u.Name);
+        }
+
+        public IEnumerable<UserViewModel> GetAllUsersExceptMe()
+        {
+            var users = m_repository.GetAllUsers().Where(u => u.Id != m_session.User.Id)
+                .Where(u => m_repository.GetCanManage(m_session.User.Id, u.Id)).OrderBy(u => u.LockDt == null ? 0 : 1).ThenBy(u => u.EMail).Select(u =>
+                    new UserViewModel()
+                    {
+                        Id = u.Id,
+                        Name = u.EMail,
+                        IsActive = !u.UsesDefaultPassword,
+                        IsLocked = u.LockDt != null
+                    });
+
+            return users;
+        }
+        
+        public IEnumerable<UserViewModel> InviteUser(string email)
+        {
+            m_managementFacade.InviteUser(email);
+
+            return GetAllUsersExceptMe();
+        }
+
+        public IEnumerable<UserViewModel> ResetPassword(int userId)
+        {
+            m_managementFacade.ResetPassword(userId);
+
+            return GetAllUsersExceptMe();
+        }
+
+        public IEnumerable<UserViewModel> ToggleAccountLock(int userId, bool locked)
+        {
+            m_managementFacade.SetAccountLocked(userId, locked);
+
+            return GetAllUsersExceptMe();
         }
     }
 }

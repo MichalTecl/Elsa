@@ -227,6 +227,10 @@
       <Project>{ee3bf5ce-f5dd-4d3b-b696-12c5a1ef1af4}</Project>
       <Name>Elsa.Jobs.SyncErpCustomers</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Smtp.Core\Elsa.Smtp.Core.csproj">
+      <Project>{5DABFCE6-02A6-428C-BB67-0A2C23B0A189}</Project>
+      <Name>Elsa.Smtp.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{a9148d58-0f0e-43e7-8a11-a9f9bb04333c}</Project>
       <Name>Elsa.Users</Name>

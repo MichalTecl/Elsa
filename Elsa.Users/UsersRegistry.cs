@@ -9,8 +9,7 @@ namespace Elsa.Users
         {
             setup.For<IUserRepository>().Use<UserRepository>();
             setup.For<IUserRoleRepository>().Use<UserRepository>();
+            setup.For<IUserManagementFacade>().Use<UserManagementFacade>();
         }
     }
-
-    
 }

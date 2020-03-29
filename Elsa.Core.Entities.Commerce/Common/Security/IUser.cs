@@ -39,5 +39,14 @@ namespace Elsa.Core.Entities.Commerce.Common.Security
 
         [JsonIgnore]
         DateTime? Verified { get; set; }
+
+        [JsonIgnore]
+        DateTime? LockDt { get; set; }
+
+        [JsonIgnore]
+        int? LockUserId { get; set; }
+
+        [JsonIgnore]
+        IUser LockUser { get; }
     }
 }
