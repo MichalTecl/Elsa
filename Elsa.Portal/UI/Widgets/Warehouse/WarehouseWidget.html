@@ -16,8 +16,10 @@
 
         <div class="actionTile">
             <div class="stackLeft">
+                <i class="far fa-bell-slash actionTileIcon" lt-name="icoDisabled" title="Nesledujete žádné sklady" style="display:none" ></i>
+                <img lt-name="icoLoading" src="/UI/Controls/Common/CustomerView/ajax-loader.gif" style="display: inline-block;">
                 <i class="fas fa-exclamation-triangle lowMaterialLevelExcl" lt-name="icoLowMaterial"></i>
-                <i class="fas fa-check-double actionTileIcon" style="color:#009922" lt-name="icoOk" ></i>
+                <i class="fas fa-check-double actionTileIcon" style="color: #009922" lt-name="icoOk"></i>
                 <a href="/UI/Pages/Inventory/MaterialLevels.html">Přehled zásob</a>
             </div>
         </div>
@@ -25,22 +27,42 @@
     </div>
 
 </div>
+<script src="/Script/MaterialLevels/MaterialLevels.VM.js"></script>
 <script>
-    lt.element("whWidget").attach(function (icoLowMaterial, icoOk) {
+    lt.element("whWidget").withModel("app.MaterialLevels.vm").attach(function (icoLowMaterial, icoOk, icoLoading, icoDisabled) {
 
-        this.bind(function(currentWarning) {
-                
-                if (currentWarning == null) {
-                    icoLowMaterial.style.display = 'none';
-                    icoOk.style.display = 'inline-block';
-                } else {
-                    icoLowMaterial.style.display = 'inline-block';
-                    icoOk.style.display = 'none';
-                    icoLowMaterial.setAttribute("title", currentWarning);
-                }
-            })
-            .currentWarningCanBeNull()
-            .currentWarningRelativeToGlobal("app.MaterialLevels.vm");
+        this.bind(function(isLoading, hasWarnings, warnings, isDisabled) {
+
+            setTimeout(function () {
+
+                    if (isDisabled) {
+                        icoDisabled.style.display = 'inline-block';
+                        icoLoading.style.display = 'none';
+                        icoLowMaterial.style.display = 'none';
+                        icoOk.style.display = 'none';
+                        return;
+                    } else {
+                        icoDisabled.style.display = 'none';
+                    }
+                    
+
+                    if (isLoading) {
+                        icoLoading.style.display = 'inline-block';
+                        icoLowMaterial.style.display = 'none';
+                        icoOk.style.display = 'none';
+                    } else {
+                        icoLoading.style.display = 'none';
+                        if (!hasWarnings) {
+                            icoLowMaterial.style.display = 'none';
+                            icoOk.style.display = 'inline-block';
+                        } else {
+                            icoLowMaterial.style.display = 'inline-block';
+                            icoOk.style.display = 'none';
+                            icoLowMaterial.setAttribute("title", warnings);
+                        }
+                    }
+                },
+                100);
+        });
     });
 </script>
-<script src="/Script/Apps/Inventory/Material/MaterialLevels.VM.js"></script>

@@ -8,10 +8,12 @@ namespace Elsa.Common.Caching
         T ReadThrough<T>(string key, TimeSpan timeout, Func<T> factory);
 
         void Remove(string key);
-
+        
         void RemoveByPrefix(string prefix);
 
         IEnumerable<string> GetAllKeys();
+
+        bool KeyExists(string key);
 
         void Clear();
     }

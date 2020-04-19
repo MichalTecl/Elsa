@@ -24,8 +24,17 @@
 
         this.bind(function(ordersOverview) {
 
-            elsa.ui.buildGrid(ordersOverview, grid);
+            var build = function () {
 
+                if (!window.elsa) {
+                    setTimeout(build, 100);
+                    return;
+                }
+
+                elsa.ui.buildGrid(ordersOverview, grid);
+            };
+
+            build();
         });
 
         this.bind(function (missingPaymentsOverview) {

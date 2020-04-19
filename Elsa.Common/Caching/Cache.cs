@@ -49,6 +49,11 @@ namespace Elsa.Common.Caching
             return s_cache.Keys;
         }
 
+        public bool KeyExists(string key)
+        {
+            return s_cache.Keys.Any(k => k.Equals(key));
+        }
+
         public void Clear()
         {
             s_cache.Clear();

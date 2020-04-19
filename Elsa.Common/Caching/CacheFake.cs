@@ -27,6 +27,11 @@ namespace Elsa.Common.Caching
             yield break;
         }
 
+        public bool KeyExists(string key)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Clear()
         {
         }

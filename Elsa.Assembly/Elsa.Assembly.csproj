@@ -87,6 +87,10 @@
       <Project>{A5AE1E90-BF3D-4B74-9046-E932207AC709}</Project>
       <Name>Elsa.App.Inspector</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.MaterialLevels\Elsa.App.MaterialLevels.csproj">
+      <Project>{52f39ec0-1dbb-4d9c-b9d2-53bd254e66df}</Project>
+      <Name>Elsa.App.MaterialLevels</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.OrdersPacking\Elsa.App.OrdersPacking.csproj">
       <Project>{87d88b8d-17b5-4fb4-b7bd-aaa2d2ffb4a1}</Project>
       <Name>Elsa.App.OrdersPacking</Name>

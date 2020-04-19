@@ -5,6 +5,7 @@ using Elsa.App.Commerce.Preview;
 using Elsa.App.CommonReports;
 using Elsa.App.Crm;
 using Elsa.App.Inspector;
+using Elsa.App.MaterialLevels;
 using Elsa.App.OrdersPacking;
 using Elsa.App.SaleEvents;
 using Elsa.App.Shipment;
@@ -99,6 +100,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(InspectorRegistry).Assembly);
                     s.ScanAssembly(typeof(UserRightsRegistry).Assembly);
                     s.ScanAssembly(typeof(SmtpRegistry).Assembly);
+                    s.ScanAssembly(typeof(MaterialLevelsRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });

@@ -70,6 +70,8 @@ namespace Elsa.Users.Controllers
         [AllowWithDefaultPassword]
         public IWebSession ChangePassword(string oldPassword, string newPassword)
         {
+            var userId = m_session.User.Id;
+
             oldPassword = oldPassword.Trim();
             newPassword = newPassword.Trim();
 
@@ -108,6 +110,8 @@ namespace Elsa.Users.Controllers
 
                 tran.Commit();
             }
+
+            m_repository.InvalidateUserCache(userId);
 
             return WebSession;
         }

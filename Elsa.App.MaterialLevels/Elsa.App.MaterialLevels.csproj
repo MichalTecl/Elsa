@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{52F39EC0-1DBB-4D9C-B9D2-53BD254E66DF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Elsa.App.MaterialLevels</RootNamespace>
+    <AssemblyName>Elsa.App.MaterialLevels</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Components\IInventoryWatchRepository.cs" />
+    <Compile Include="Components\IMaterialLevelsLoader.cs" />
+    <Compile Include="Components\InventoryWatchRepository.cs" />
+    <Compile Include="Components\MaterialLevelsLoader.cs" />
+    <Compile Include="Components\Model\InventoryModel.cs" />
+    <Compile Include="Components\Model\MaterialLevelEntryModel.cs" />
+    <Compile Include="Controllers\MaterialAmountReportController.cs" />
+    <Compile Include="Entities\IUserWatchedInventory.cs" />
+    <Compile Include="MaterialLevelsRegistry.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="sencha.json" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
+      <Project>{895E4A3C-99D4-4E2E-872C-7479140D0CF5}</Project>
+      <Name>Robowire.RoboApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+      <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
+      <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
+      <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
+      <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
+      <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>
+      <Name>Elsa.Commerce.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
+      <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
+      <Name>Elsa.Common.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
+      <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
+      <Name>Elsa.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj">
+      <Project>{91481B08-E437-474D-9793-A135F1DB465C}</Project>
+      <Name>Elsa.Core.Entities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Script\MaterialLevels\MaterialLevels.VM.js" />
+    <Content Include="SQL\20200412-002 CalculateBatchUsages.sql" />
+    <Content Include="SQL\20200412-004 GetThresholdsState.sql" />
+    <Content Include="SQL\20200412-003 GetMaterialLevelsReport.sql" />
+    <Content Include="UI\Controls\MaterialLevels\MaterialLevels.css" />
+    <Content Include="UI\Controls\MaterialLevels\MaterialLevelsDetail.html" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

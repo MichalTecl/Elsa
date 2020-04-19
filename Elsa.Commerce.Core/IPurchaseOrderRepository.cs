@@ -20,6 +20,8 @@ namespace Elsa.Commerce.Core
 
         IEnumerable<IPurchaseOrder> GetOrdersByStatus(IOrderStatus status, DateTime from, DateTime to);
 
+        int CountOrdersToPack();
+
         IEnumerable<IPurchaseOrder> GetOrdersByStatus(IOrderStatus status);
 
         IEnumerable<IPurchaseOrder> GetOrders(Action<IQueryBuilder<IPurchaseOrder>> query);

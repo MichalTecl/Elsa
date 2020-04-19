@@ -1,0 +1,96 @@
+﻿.matlvlWarningRow > div {
+    background-color: #ffe0e0;
+}
+
+.matlvlWarningRow:hover > div {
+    background-color: #ffe0e0 !important;
+}
+
+.matlvlInventoryTabHead {
+    display: flex;
+}
+
+.matlvlInventoryTabHeadName {
+    flex-grow: 1;
+}
+
+.matlvlInventoryTabHeadIcons {
+    display: flex;
+}
+
+.matlvlInventoryTabHeadWarning {
+    font-size: 0.7em;
+    background-color: red;
+    color: white;
+    border-radius: 1000px;
+    border: 2px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+    height: 1.4em;
+    width: 1.4em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -15px;
+}
+
+.matlvlInventoryTabHeadUnwatch {
+    font-size: 0.7em;
+}
+
+.matlvlUnwatchedInventoryItem {
+    background-color: #dde;
+    margin-left: 15px;
+    margin-bottom: 3px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+    vertical-align: middle;
+    align-items: center;
+    opacity: 0.8;
+}
+
+.matlvlUnwatchedInventoryItem:hover {
+    opacity: 1;
+}
+
+.matlvlUnwatchedInventoryItem > div {
+    margin-left: 5px;
+}
+
+
+.matlvlThresholdCont {
+    display: flex;
+    width: 100%;
+    min-width: 100px;
+}
+
+.matlvlThresholdView {
+    flex-grow: 1;
+}
+
+.matlvlThresholdEditIcons {
+    display: none;
+}
+
+.cell5:hover .matlvlThresholdEditIcons {
+    display: flex;
+}
+
+.matlvlThresholdEditIcons > i {
+    margin-right: 4px;
+}
+
+.matlvlSearchPanel {
+    padding-top:15px;
+    padding-bottom:10px;
+}
+
+.matlvlSearchPanel .fa-search {
+    font-size:1.5em;
+    opacity:0.7;
+    margin-right:4px;
+}

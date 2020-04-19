@@ -34,6 +34,11 @@ namespace Elsa.Common.Caching
             throw new NotImplementedException();
         }
 
+        public bool KeyExists(string key)
+        {
+            return m_underlyingCache.KeyExists(key);
+        }
+
         public void Clear()
         {
             throw new NotImplementedException();

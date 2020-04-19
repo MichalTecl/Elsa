@@ -1,0 +1,105 @@
+﻿<div id="mlUi">
+    <div>
+        <div class="tabPanelHeadersContainer">
+            <div class="stackLeft" data-bind="itemsSource:inventories" data-key="Id">
+                <div class="lt-template tabControlTabHead matlvlInventoryTabHead" event-bind="click:onTabClick(Id)" data-bind="active-tab:isSelectedNu">
+                    <div data-bind="text:Name" class="matlvlInventoryTabHeadName"></div>
+                    <div class="matlvlInventoryTabHeadIcons">
+                        <div data-bind="text:WarningsCount;class!.hidden:hasWarning" class="matlvlInventoryTabHeadWarning"></div>
+                        <i class="far fa-bell-slash faButton matlvlInventoryTabHeadUnwatch" title="Přestat sledovat" event-bind="click:onUnwatchClick(Id)" data-bind="class.hidden:isAggregation"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stackLeft" data-bind="itemsSource:unwatchedInventories" data-key="Id">
+                <div class="lt-template stackLeft matlvlUnwatchedInventoryItem" event-bind="click:onWatchClick(Id)">
+                    <i class="fas fa-plus faButton"></i>
+                    <div data-bind="text:Name"></div>
+                </div>
+            </div>
+        </div>
+        <div data-bind="class.hidden:isDisabled">
+            <div>
+                <div class="stackLeft matlvlSearchPanel">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="tbFilter" event-bind="keyup:change:onFilterChange(this.value)" />
+                </div>
+            </div>
+            <div class="gridRow gridHead">
+                <div class="cell20">Materiál</div>
+                <div class="cell5">Dostupné</div>
+                <div class="cell5">Minimum</div>
+                <div class="cell40">Šarže</div>
+            </div>
+            <div data-bind="itemsSource:report" data-key="MaterialId">
+                <div class="lt-template gridRow" data-bind="class.matlvlWarningRow:HasWarning;class.hidden:hidden">
+                    <div class="cell20">
+                        <a target="_blank" data-bind="text:MaterialName;href:materialLink"></a>
+                    </div>
+                    <div class="cell5" data-bind="text:TotalFormatted"></div>
+                    <div class="cell5">
+                        <div class="matlvlThresholdCont">
+                            <div class="matlvlThresholdView" data-bind="text:ThresholdFormatted"></div>
+                            <div class="matlvlThresholdEditIcons">
+                                <i class="far fa-edit faButton" event-bind="click:onThresholdEditClick(MaterialId, MaterialName, ThresholdFormatted, UnitSymbol)"></i>
+                                <i class="far fa-trash-alt" data-bind="class!.hidden:hasThreshold" event-bind="click:onThresholdDeleteClick(MaterialId, MaterialName)"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cell40">
+                        <div class="stackLeft matlvlBatchesList" data-bind="itemsSource:Batches" data-key="BatchNumber">
+                            <div class="lt-template stackLeft  matlvlBatchesListItem">
+                                <a target="_blank" data-bind="text:BatchNumber;href:batchLink"></a>
+                                <span>&nbsp;</span>
+                                <span data-bind="text:AmountFormatted"></span>
+                                <span>,&nbsp;</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("mlUi").withModel("app.MaterialLevels.vm").attach(function() {
+
+        this.onTabClick = function(id) {
+            app.MaterialLevels.vm.onInventorySelected(id);
+        };
+
+        this.onWatchClick = function(id) {
+            app.MaterialLevels.vm.watchInventory(id);
+        };
+
+        this.onUnwatchClick = function (id) {
+            app.MaterialLevels.vm.unwatchInventory(id);
+        };
+
+        this.onThresholdDeleteClick = function(materialId, materialName) {
+            if (!confirm("Opravdu chcete zrušit nastavené minimální množství pro " + materialName + "? ")) {
+                return;
+            }
+
+            app.MaterialLevels.vm.setThreshold(materialId, null);
+        };
+
+        // click:onThresholdEditClick(MaterialId, MaterialName, ThresholdFormatted)
+        this.onThresholdEditClick = function (materialId, materialName, currentThreshold, defaultUnit) {
+            currentThreshold = currentThreshold || "0 " + defaultUnit;
+            var val = prompt("Zadejte minimální množství pro " + materialName, currentThreshold);
+
+            if ((val || '').trim().length < 1) {
+                return;
+            }
+
+            app.MaterialLevels.vm.setThreshold(materialId, val);
+        };
+
+        this.onFilterChange = function(value, butClear) {
+            app.MaterialLevels.vm.setFilter(value);
+        };
+
+        app.MaterialLevels.vm.onInventorySelected(null);
+    });
+</script>

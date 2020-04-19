@@ -26,6 +26,11 @@ namespace Elsa.UnitTests.Mocks
             throw new NotImplementedException();
         }
 
+        public bool KeyExists(string key)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Clear()
         {
             throw new NotImplementedException();

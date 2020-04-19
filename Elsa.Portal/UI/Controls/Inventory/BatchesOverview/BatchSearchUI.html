@@ -89,7 +89,13 @@
 
             app.urlBus.watch("findBatches",
                 function (qry) {
-                    tbMaterial.value = qry.materialName;
+                    if (qry.materialName) {
+                        tbMaterial.value = qry.materialName;
+                    }
+
+                    if (qry.batchNumber) {
+                        tbBatchNumber.value = qry.batchNumber;
+                    }
 
                     var invokeSearch = function() {
                         if ((!self.list) || (!self.list.setQuery) || (!app) || (!app.batchesOverview) || (!app.batchesOverview.vm)) 

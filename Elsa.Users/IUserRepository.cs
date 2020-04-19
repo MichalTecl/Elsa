@@ -19,5 +19,7 @@ namespace Elsa.Users
         void UpdateUser(int userId, Action<IUser> update);
 
         bool GetCanManage(int managerId, int managedId);
+
+        void InvalidateUserCache(int userId);
     }
 }

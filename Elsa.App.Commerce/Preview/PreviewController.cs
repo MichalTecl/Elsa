@@ -5,6 +5,7 @@ using Elsa.App.Commerce.Preview.Model;
 using Elsa.Apps.Common.ViewModels;
 using Elsa.Commerce.Core;
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 
@@ -18,27 +19,34 @@ namespace Elsa.App.Commerce.Preview
         private readonly IPurchaseOrderRepository m_purchaseOrderRepository;
         private readonly IOrderStatusTranslator m_statusTranslator;
         private readonly OverviewsConfig m_config;
+        private readonly ICache m_cache;
+        private readonly ISession m_session;
 
-        public PreviewController(IWebSession webSession, ILog log, IPurchaseOrderRepository purchaseOrderRepository, IOrderStatusTranslator statusTranslator, OverviewsConfig config)
+        public PreviewController(IWebSession webSession, ILog log, IPurchaseOrderRepository purchaseOrderRepository, IOrderStatusTranslator statusTranslator, OverviewsConfig config, ICache cache)
             : base(webSession, log)
         {
             m_purchaseOrderRepository = purchaseOrderRepository;
             m_statusTranslator = statusTranslator;
             m_config = config;
+            m_cache = cache;
+            m_session = webSession;
         }
 
         [DoNotLog]
         public ReportTableViewModel GetOrdersOverview()
         {
-            var report = new ReportTableViewModel();
+            return m_cache.ReadThrough($"ordersOverview_{m_session.Project.Id}", TimeSpan.FromMinutes(10),() => {
+                var report = new ReportTableViewModel();
 
-            foreach (var row in m_purchaseOrderRepository.GetOrdersOverview(DateTime.Now.AddMonths(-1), DateTime.Now))
-            {
-                report[row.ErpName, "ERP"] = row.ErpName;
-                report[row.ErpName, m_statusTranslator.Translate(row.StatusId)] = row.Count.ToString();
-            }
+                foreach (var row in m_purchaseOrderRepository.GetOrdersOverview(DateTime.Now.AddMonths(-1),
+                    DateTime.Now))
+                {
+                    report[row.ErpName, "ERP"] = row.ErpName;
+                    report[row.ErpName, m_statusTranslator.Translate(row.StatusId)] = row.Count.ToString();
+                }
 
-            return report;
+                return report;
+            });
         }
 
         [DoNotLog]
@@ -53,10 +61,7 @@ namespace Elsa.App.Commerce.Preview
         public int GetReadyToPackCount()
         {
             return
-                m_purchaseOrderRepository.GetOrdersByStatus(
-                    OrderStatus.ReadyToPack,
-                    DateTime.Now.AddDays(-365),
-                    DateTime.Now.AddDays(1)).Count();
+                m_purchaseOrderRepository.CountOrdersToPack();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Media3D;
 using Elsa.App.CommonReports.Model;
+using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Robowire.RobOrm.Core;
@@ -15,11 +16,13 @@ namespace Elsa.App.CommonReports
     {
         private readonly IDatabase m_database;
         private readonly ISession m_session;
+        private readonly IUnitRepository m_unitRepository;
 
-        public StockReportLoader(IDatabase database, ISession session)
+        public StockReportLoader(IDatabase database, ISession session, IUnitRepository unitRepository)
         {
             m_database = database;
             m_session = session;
+            m_unitRepository = unitRepository;
         }
 
         public StockReportModel LoadStockReport(DateTime forDateTime)
@@ -31,6 +34,7 @@ namespace Elsa.App.CommonReports
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@culture", m_session.Culture)
                 .WithParam("@reportDate", forDateTime)
+                .SetupCommand(c => c.CommandTimeout = 120000)
                 .ReadRows<string, string, string, decimal, string, decimal>(
                     (inventory, material, batch, available, symbol, price) =>
                     {
@@ -76,7 +80,7 @@ namespace Elsa.App.CommonReports
             m_database.Sql().Call("GetBatchPricesReport")
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@culture", m_session.Culture)
-                .ReadRows<string, string, string, decimal, string>((material, batch, text, price, month) =>
+                .ReadRows<string, string, string, decimal, string, int, decimal>((material, batch, text, price, month, unitId, unitPrice) =>
                 {
                     var item =  new BatchPriceComponentItemModel
                     {
@@ -90,6 +94,7 @@ namespace Elsa.App.CommonReports
                     item.MaterialName = material;
                     item.Month = month;
 
+                    AssignUnitAndUnitPrice(item, unitId, unitPrice);
                 });
 
             return result;
@@ -113,6 +118,14 @@ namespace Elsa.App.CommonReports
                 });
 
             return result;
+        }
+
+        private void AssignUnitAndUnitPrice(BatchPriceComponentItemModel model, int unitId, decimal unitPrice)
+        {
+            var unit = m_unitRepository.GetUnit(unitId);
+
+            model.UnitText = $"1 {unit.Symbol}";
+            model.UnitPrice = unitPrice;
         }
     }
 }

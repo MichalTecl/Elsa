@@ -19,5 +19,11 @@ namespace Elsa.App.CommonReports.Model
 
         [XlsColumn("E", "Hodnota", "0.00")]
         public decimal Price { get; set; }
+
+        [XlsColumn("F", "Jednotka", "@")]
+        public string UnitText { get; set; }
+
+        [XlsColumn("G", "Jednotková cena", "0.00")]
+        public decimal UnitPrice { get; set; }
     }
 }

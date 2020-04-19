@@ -116,6 +116,11 @@ namespace Elsa.Users.Components
             return true;
         }
 
+        public void InvalidateUserCache(int userId)
+        {
+            InvalidateCache(userId: userId);
+        }
+
         public RoleMap GetProjectRoles()
         {
             return m_cache.ReadThrough($"rolemap_{m_session.Project.Id}", TimeSpan.FromHours(24), () =>

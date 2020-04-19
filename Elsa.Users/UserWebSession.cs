@@ -129,7 +129,7 @@ namespace Elsa.Users
             {
                 return false;
             }
-
+            
             return m_userRepository.Value.GetUserRights(User.Id).Contains(symbol);
         }
 

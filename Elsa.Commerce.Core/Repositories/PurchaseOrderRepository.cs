@@ -165,6 +165,15 @@ namespace Elsa.Commerce.Core.Repositories
                     .Execute();
         }
 
+        public int CountOrdersToPack()
+        {
+            return m_database.Sql()
+                .ExecuteWithParams("SELECT COUNT(Id) FROM PurchaseOrder WHERE ProjectId={0} AND OrderStatusId = {1}",
+                    m_session.Project.Id, 
+                    OrderStatus.ReadyToPack.Id)
+                .Scalar<int>();
+        }
+
         public IEnumerable<IPurchaseOrder> GetOrdersByStatus(IOrderStatus status)
         {
             return GetOrdersByStatus(status, DateTime.Now.AddYears(-50), DateTime.Now.AddDays(1));

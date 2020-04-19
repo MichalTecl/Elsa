@@ -246,6 +246,7 @@ div.searchPanel {
     margin-right:4px;
     margin-left:4px;    
     min-width:140px;
+    align-self:flex-end;
 }
 
 .tabControlTabHead[active-tab="1"]{
@@ -257,7 +258,7 @@ div.searchPanel {
     padding:7px;
     padding-left:15px;
     padding-right:15px;
-    cursor:pointer;
+    cursor:pointer;    
 }
 
 .hidden {
