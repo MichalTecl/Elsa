@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,6 +35,56 @@ namespace Elsa.App.Shipment
 
             var data = m_shipmentProvider.GenerateShipmentRequestDocument(orders);
             return new FileResult($"zasilkovna_{DateTime.Now:ddMMyyyy}.csv", data);
+        }
+
+        public MappingDocModel GetShipmentMapping()
+        {
+            var mapping = m_shipmentProvider.GetShipmentMethodsMapping();
+
+            var sb = new StringBuilder();
+            foreach (var map in mapping)
+            {
+                sb.AppendLine($"{map.Key} : {map.Value}");
+            }
+
+            return new MappingDocModel {Mapping = sb.ToString()};
+        }
+
+        public MappingDocModel SetShipmentMapping(MappingDocModel mapping)
+        {
+            var lines = mapping.Mapping.Split(new char[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+
+            var map = new Dictionary<string,string>(lines.Length);
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                var parts = line.Split(':').Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).ToArray();
+                if (parts.Length != 2)
+                {
+                    throw new InvalidOperationException($"Neplatné pravidlo \"{line}\" Pravidlo musí být ve tvaru \"název_v_eshopu : název_v_zásilkovně\"");
+                }
+
+                if (map.ContainsKey(parts[0]))
+                {
+                    throw new InvalidOperationException($"Více než jedno pravidlo pro název v eshopu \"{parts[0]}\"");
+                }
+
+                map[parts[0]] = parts[1];
+            }
+
+            m_shipmentProvider.SetShipmentMethodsMapping(map);
+
+            return GetShipmentMapping();
+        }
+
+        public class MappingDocModel
+        {
+            public string Mapping { get; set; }
         }
     }
 }

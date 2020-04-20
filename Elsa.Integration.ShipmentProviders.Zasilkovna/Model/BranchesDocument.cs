@@ -12,26 +12,30 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.Model
     [XmlRoot("export", Namespace = "http://www.zasilkovna.cz/api/v3/branch")]
     public class BranchesDocument
     {
-        private static readonly Dictionary<string, string> s_poboNameMapping = new Dictionary<string, string>();
+        //private static readonly Dictionary<string, string> s_poboNameMapping = new Dictionary<string, string>();
 
-        static BranchesDocument()
-        {
-            s_poboNameMapping.Add("Česká pošta - BALÍK DO RUKY", "Česká pošta");
-            s_poboNameMapping.Add("Česká republika - KURÝR (DPD)", "Česká republika DPD");
-            s_poboNameMapping.Add("SLOVENSKO - Kurýr", "Slovensko GLS");
-            s_poboNameMapping.Add("SLOVENSKO - Slovenská pošta", "Slovenská pošta");
-        }
+        //static BranchesDocument()
+        //{
+        //    s_poboNameMapping.Add("Česká pošta - BALÍK DO RUKY", "Česká pošta");
+        //    s_poboNameMapping.Add("Česká republika - KURÝR (DPD)", "Česká republika DPD");
+        //    s_poboNameMapping.Add("SLOVENSKO - Kurýr", "Slovensko GLS");
+        //    s_poboNameMapping.Add("SLOVENSKO - Slovenská pošta", "Slovenská pošta");
+        //}
 
         [XmlElement("branches")]
         public BranchesList BranchesList { get; set; }
 
-        public string GetPobockaId(string deliveryName)
+        public string GetPobockaId(string deliveryName, IDictionary<string, string> shipmentMethodsMapping)
         {
             string mapped;
-            if (!s_poboNameMapping.TryGetValue(deliveryName, out mapped))
+            if (!shipmentMethodsMapping.TryGetValue(deliveryName, out mapped))
             {
                 mapped = deliveryName;
             }
+            //if (!s_poboNameMapping.TryGetValue(deliveryName, out mapped))
+            //{
+            //    mapped = deliveryName;
+            //}
 
             var record = BranchesList.Branches.FirstOrDefault(i => i.Name.Equals(mapped, StringComparison.InvariantCultureIgnoreCase))
                       ?? BranchesList.Branches.FirstOrDefault(i => i.LabelName.Equals(mapped, StringComparison.InvariantCultureIgnoreCase));

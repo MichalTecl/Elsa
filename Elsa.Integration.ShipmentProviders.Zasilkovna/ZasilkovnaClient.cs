@@ -6,12 +6,16 @@ using System.Text;
 
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Shipment;
+using Elsa.Common.Caching;
 using Elsa.Common.Communication;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.ShipmentProviders.Zasilkovna.Model;
+using Robowire.RobOrm.Core;
 
 namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 {
@@ -46,12 +50,18 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 
         private readonly ILog m_log;
         private readonly ZasilkovnaClientConfig m_config;
+        private readonly IDatabase m_database;
+        private readonly ICache m_cache;
+        private readonly ISession m_session;
 
-        public ZasilkovnaClient(ILog log, ZasilkovnaClientConfig config, IErpClientFactory erpClientFactory)
+        public ZasilkovnaClient(ILog log, ZasilkovnaClientConfig config, IErpClientFactory erpClientFactory, IDatabase database, ICache cache, ISession session)
         {
             m_log = log;
             m_config = config;
             m_erpClientFactory = erpClientFactory;
+            m_database = database;
+            m_cache = cache;
+            m_session = session;
         }
 
         public byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders)
@@ -96,7 +106,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                         {
                             externalDeliveryProvider = true;
 
-                            pobockaId = GetBranches().GetPobockaId(shipmentTitle);
+                            pobockaId = GetBranches().GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
                         }
 
                         if (order.ErpId == null)
@@ -184,6 +194,43 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             html = html.Substring(0, cIndex).Trim();
 
             return html;
+        }
+
+        public void SetShipmentMethodsMapping(Dictionary<string, string> mapping)
+        {
+            try
+            {
+                using (var tx = m_database.OpenTransaction())
+                {
+                    m_database.DeleteFrom<IShipmentMethodMapping>(q => q.Where(m => m.ProjectId == m_session.Project.Id));
+
+                    foreach (var map in mapping)
+                    {
+                        var entity = m_database.New<IShipmentMethodMapping>();
+                        entity.Source = map.Key.Trim();
+                        entity.Target = map.Value.Trim();
+                        entity.ProjectId = m_session.Project.Id;
+
+                        m_database.Save(entity);
+                    }
+
+                    tx.Commit();
+                }
+                
+            }
+            finally
+            {
+                m_cache.Remove($"shipmentMethodsMap_{m_session.Project.Id}");
+            }
+        }
+
+        public Dictionary<string, string> GetShipmentMethodsMapping()
+        {
+            return m_cache.ReadThrough($"shipmentMethodsMap_{m_session.Project.Id}", TimeSpan.FromHours(1), () =>
+            {
+                return m_database.SelectFrom<IShipmentMethodMapping>()
+                    .Where(m => m.ProjectId == m_session.Project.Id).Execute().ToDictionary(m => m.Source, m => m.Target);
+            });
         }
 
         private BranchesDocument GetBranches()

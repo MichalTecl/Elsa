@@ -220,6 +220,7 @@
     <Content Include="Script\Lanta\ViewsLoader.js" />
     <Content Include="Style\Appearance.css" />
     <Content Include="Style\Layout.css" />
+    <Content Include="UI\Pages\Settings\SettingsPage.html" />
     <Content Include="UI\Pages\SysData\SysDataPage.html" />
     <Content Include="UI\Shared\ElsaBodyClose.html" />
     <Content Include="UI\Shared\ElsaBodyOpen.html" />

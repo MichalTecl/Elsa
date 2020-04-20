@@ -1,0 +1,21 @@
+﻿<div id="shipmentMethodsEditor">
+    <textarea style="width:100%;min-height:500px" id="tbText"></textarea>
+    <button event-bind="click:save">Uložit</button>
+</div>
+<script>
+    lt.element("shipmentMethodsEditor").attach(function(tbText) {
+
+        var receiveMapping = function(mapping) {
+            tbText.value = mapping.Mapping;
+        };
+
+        this.save = function() {
+            lt.api("/shipment/setShipmentMapping").body({"Mapping": tbText.value}).post(function(mapping) {
+                receiveMapping(mapping);
+                alert("Uloženo");
+            });
+        };
+
+        lt.api("/shipment/getShipmentMapping").get(receiveMapping);
+    });
+</script>

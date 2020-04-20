@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 using Elsa.Core.Entities.Commerce.Commerce;
@@ -10,5 +11,9 @@ namespace Elsa.Commerce.Core.Shipment
         byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders);
 
         string GetOrderNumberByPackageNumber(string packageNumber);
+
+        void SetShipmentMethodsMapping(Dictionary<string, string> mapping);
+
+        Dictionary<string, string> GetShipmentMethodsMapping();
     }
 }

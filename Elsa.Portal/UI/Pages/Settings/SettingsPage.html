@@ -1,0 +1,13 @@
+﻿<ElsaBody>
+    <script src="/UI/Controls/Common/TabControl.js"></script>
+
+    <div class="panel w4" id="mainTab">
+
+    </div>
+
+    <script>
+        var tab = new app.ui.TabControl(document.getElementById("mainTab"));
+        tab.addTab("Způsoby dopravy", "/UI/Controls/Settings/ShipmentMethodsMappingEditor.html", null, null, "shipMethods");        
+    </script>
+
+</ElsaBody>
