@@ -93,8 +93,14 @@
   <ItemGroup>
     <Content Include="Script\MaterialLevels\MaterialLevels.VM.js" />
     <Content Include="SQL\20200412-002 CalculateBatchUsages.sql" />
+    <Content Include="SQL\20200422-005 GetMaterialLevelsReport.sql" />
+    <Content Include="SQL\20200422-004 GetThresholdsState.sql" />
     <Content Include="SQL\20200412-004 GetThresholdsState.sql" />
     <Content Include="SQL\20200412-003 GetMaterialLevelsReport.sql" />
+    <Content Include="SQL\20200421-001 CalculateBatchUsages.sql" />
+    <Content Include="SQL\20200422-001 vwBatchEvent.sql" />
+    <Content Include="SQL\20200422-002 vwUnitConversion.sql" />
+    <Content Include="SQL\20200422-003 vwBatchAvailableAmount.sql" />
     <Content Include="UI\Controls\MaterialLevels\MaterialLevels.css" />
     <Content Include="UI\Controls\MaterialLevels\MaterialLevelsDetail.html" />
   </ItemGroup>
