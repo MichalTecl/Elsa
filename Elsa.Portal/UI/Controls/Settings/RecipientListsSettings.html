@@ -1,0 +1,53 @@
+﻿<div id="recListsSettingsUi">
+    <div lt-name="theList" data-bind="itemsSource:lists" data-key="GroupName">
+        <div class="lt-template">
+            <div style="border-bottom: 1px solid #eee">
+                <div data-bind="text:GroupName"></div>
+                <textarea lt-name="txt" data-bind="value:Addresses" style="min-height: 50px;min-width:500px"></textarea>
+                <button event-bind="click:save(GroupName, $txt.value)">Uložit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var app = app || {};
+    app.RecipientListsSettings = app.RecipientListsSettings || {};
+    app.RecipientListsSettings.VM = app.RecipientListsSettings.VM || function() {
+        var self = this;
+
+        self.lists = [];
+
+        var receive = function(recips) {
+            for (var list of recips) {
+                list.isSelected = false;
+            }
+
+            self.lists = recips;
+        };
+
+        self.save = function(groupName, addresses) {
+            self.lists = [];
+            lt.notify();
+            lt.api("/recipientListsSettings/updateGroup").body({
+                "GroupName": groupName,
+                "Addresses": addresses
+            }).post(receive);
+        };
+
+        lt.api("/recipientListsSettings/getLists").get(receive);
+    };
+
+    app.RecipientListsSettings.vm = app.RecipientListsSettings.vm || new app.RecipientListsSettings.VM();
+</script>
+<script>
+    lt.element("recListsSettingsUi")
+        .withModel("app.RecipientListsSettings.vm")
+        .attach(function() {
+
+            this.save = function(groupName, addresses) {
+                app.RecipientListsSettings.vm.save(groupName, addresses);
+            };
+
+        });
+</script>

@@ -1,20 +1,23 @@
 ﻿using Elsa.Commerce.Core.Model.BatchPriceExpl;
+using XlsSerializer.Core.Attributes;
 
 namespace Elsa.Apps.InvoiceForms.Model
 {
-    public class InvoiceFormModelBase
+    public abstract class InvoiceFormModelBase
     {
         public int InvoiceFormId { get; set; }
-
+        
         public string IssueDate { get; set; }
-
+        
         public string InvoiceFormNumber { get; set; }
-
+        
         public decimal PrimaryCurrencyPriceWithoutVat { get; set; }
 
         public string FormattedPrimaryCurrencyPriceWithoutVat { get; set; }
 
         public PriceCalculationLog PriceCalculationLog { get; set; } = PriceCalculationLog.Empty;
+
+        public decimal? OriginalCurrencyPriceValue { get; set; }
 
         public string OriginalCurrencyPrice { get; set; }
 
@@ -22,6 +25,7 @@ namespace Elsa.Apps.InvoiceForms.Model
 
         public string ConversionRateLink { get; set; }
 
+        public decimal? ConversionRateValue { get; set; }
         public string ConversionRate { get; set; }
 
         public string CancelReason { get; set; }
@@ -33,5 +37,7 @@ namespace Elsa.Apps.InvoiceForms.Model
         public string DetailUrl { get; set; }
 
         public string Explanation { get; set; }
+
+        public abstract TXlsModel ToExcelModel<TXlsModel>() where TXlsModel : class;
     }
 }

@@ -9,5 +9,7 @@ namespace Elsa.Smtp.Core
     public interface IMailSender
     {
         void Send(string to, string subject, string body);
+
+        void SendToGroup(string groupName, string subject, string body);
     }
 }

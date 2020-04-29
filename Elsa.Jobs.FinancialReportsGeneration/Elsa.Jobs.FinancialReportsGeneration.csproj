@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="XlsSerializer.Core" Version="1.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Elsa.App.CommonReports\Elsa.App.CommonReports.csproj" />
+    <ProjectReference Include="..\Elsa.Apps.InvoiceForms\Elsa.Apps.InvoiceForms.csproj" />
+    <ProjectReference Include="..\Elsa.Invoicing.Core\Elsa.Invoicing.Core.csproj" />
+    <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj" />
+  </ItemGroup>
+
+</Project>

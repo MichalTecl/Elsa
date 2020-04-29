@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
 using Elsa.Common.Noml.Core;
 using Elsa.Common.Noml.Forms.Tables;
-
+using Elsa.Common.Utils;
 using IElement = Elsa.Common.Noml.Core.IElement;
 
 namespace Elsa.Common.Noml.Forms
@@ -144,7 +145,13 @@ namespace Elsa.Common.Noml.Forms
                 Render(writer);
             }
 
-            var cssText = File.ReadAllText(HttpContext.Current.Server.MapPath("/Style/PaperForms.css"));
+            string cssText;
+            using (var reader =
+                new StreamReader(
+                    typeof(Form).Assembly.GetManifestResourceStream("Elsa.Common.Noml.Forms.Resources.PaperForms.css").Ensure("Resource not found")))
+            {
+                cssText = reader.ReadToEnd();
+            }
 
             return PdfGenerator.Generate(htmlText.ToString(), cssText);
         }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Elsa.Apps.InvoiceForms.Model
 {
-    public class InvoiceFormsCollection<T>
+    public class InvoiceFormsCollection<T> where T:InvoiceFormModelBase
     {
         public int? Id { get; set; }
 
@@ -39,5 +39,10 @@ namespace Elsa.Apps.InvoiceForms.Model
         public bool HasErrors { get; set; }
 
         public bool HasWarnings { get; set; }
+
+        public IEnumerable<TXlsModel> GetExcelModel<TXlsModel>() where TXlsModel : class
+        {
+            return Forms.Select(f => f.ToExcelModel<TXlsModel>());
+        }
     }
 }

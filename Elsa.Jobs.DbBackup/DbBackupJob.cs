@@ -56,7 +56,7 @@ namespace Elsa.Jobs.DbBackup
 
             m_log.Info($"Backup file generated: {fileName}");
 
-            var zipFile = $"{Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName))}_{DateTime.Now.Hour:00}{DateTime.Now.Minute:00}";
+            var zipFile = $"{Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName))}_{DateTime.Now.Hour:00}{DateTime.Now.Minute:00}.zip";
 
             m_log.Info($"Starting Zip file generation: {fileName}");
 
@@ -64,7 +64,7 @@ namespace Elsa.Jobs.DbBackup
             {
                 using (var zip = new ZipFile())
                 {
-                    zip.Password = m_backupConfig.ZipPassword;
+                    //zip.Password = m_backupConfig.ZipPassword;
                     zip.AddFile(fileName);
                     zip.Save(zipFile);
                 }

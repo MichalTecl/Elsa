@@ -32,6 +32,7 @@ using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.DbBackup;
+using Elsa.Jobs.FinancialReportsGeneration;
 using Elsa.Jobs.GeocodeAddresses;
 using Elsa.Jobs.ImportOrders;
 using Elsa.Jobs.LoadCurrencyRates;
@@ -101,6 +102,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(UserRightsRegistry).Assembly);
                     s.ScanAssembly(typeof(SmtpRegistry).Assembly);
                     s.ScanAssembly(typeof(MaterialLevelsRegistry).Assembly);
+                    s.ScanAssembly(typeof(FinDataGenerationRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });

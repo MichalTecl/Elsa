@@ -19,6 +19,7 @@ using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
 
 using Robowire.RoboApi;
+using Robowire.RobOrm.Core;
 using SelectPdf;
 
 namespace Elsa.Apps.InvoiceForms
@@ -32,13 +33,14 @@ namespace Elsa.Apps.InvoiceForms
         private readonly IInvoiceFormsGenerationRunner m_generationRunner;
         private readonly ISession m_session;
         private readonly IInvoiceFormRendererFactory m_formRendererFactory;
+        private readonly IDatabase m_database;
 
         public InvoiceFormsController(IWebSession webSession,
             ILog log,
             InvoiceFormsQueryingFacade facade,
             IInvoiceFormsRepository invoiceFormsRepository,
             IInvoiceFormsGenerationRunner generationRunner, 
-            IInvoiceFormRendererFactory formRendererFactory)
+            IInvoiceFormRendererFactory formRendererFactory, IDatabase database)
             : base(webSession, log)
         {
             m_log = log;
@@ -46,6 +48,7 @@ namespace Elsa.Apps.InvoiceForms
             m_invoiceFormsRepository = invoiceFormsRepository;
             m_generationRunner = generationRunner;
             m_formRendererFactory = formRendererFactory;
+            m_database = database;
             m_session = webSession;
         }
 
@@ -171,6 +174,21 @@ namespace Elsa.Apps.InvoiceForms
         public void ApproveCollection(int id)
         {
             m_invoiceFormsRepository.ApproveCollection(id);
+        }
+
+        public FileResult GetPackage(string cid)
+        {
+            var file = m_database.Sql()
+                .ExecuteWithParams(
+                    "SELECT TOP 1 PackagePath FROM FinDataGenerationClosure WHERE ProjectId = {0} AND PublicUid = {1}", m_session.Project.Id, cid)
+                .Scalar<string>();
+
+            if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
+            {
+                throw new InvalidOperationException("Neplatny pozadavek");
+            }
+
+            return new FileResult(Path.GetFileName(file), File.ReadAllBytes(file));
         }
 
         private InvoiceFormsCollection<T> GetFormsCollection<T>(int month, int year, string generatorName,

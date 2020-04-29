@@ -176,7 +176,9 @@ namespace Elsa.Apps.InvoiceForms.Facade
 
             var sum = form.Items.Sum(i => i.SourceCurrencyPrice ?? 0);
 
+            itemModel.OriginalCurrencyPriceValue = sum;
             itemModel.OriginalCurrencyPrice = StringUtil.FormatDecimal(sum);
+            itemModel.ConversionRateValue = rateInfo.Rate;
             itemModel.ConversionRate = StringUtil.FormatDecimal(rateInfo.Rate);
             itemModel.ConversionRateLink = rateInfo.SourceLink;
             itemModel.OriginalCurrencySymbol = sourceCurrency.Symbol;

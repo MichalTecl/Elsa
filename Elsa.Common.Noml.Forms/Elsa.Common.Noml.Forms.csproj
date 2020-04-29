@@ -75,10 +75,15 @@
       <Project>{3C44767F-B6AB-4ADD-87F7-EF28051F5FD3}</Project>
       <Name>Elsa.Common.Noml</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
+      <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
+      <Name>Elsa.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\A4Layout.css" />
     <Content Include="Resources\A4Layout.html" />
+    <EmbeddedResource Include="Resources\PaperForms.css" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

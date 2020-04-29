@@ -159,6 +159,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Common.Interfaces", "E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.App.MaterialLevels", "Elsa.App.MaterialLevels\Elsa.App.MaterialLevels.csproj", "{52F39EC0-1DBB-4D9C-B9D2-53BD254E66DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.FinancialReportsGeneration", "Elsa.Jobs.FinancialReportsGeneration\Elsa.Jobs.FinancialReportsGeneration.csproj", "{4586C0D0-A123-4049-84DF-6A050A78D60B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -401,6 +403,10 @@ Global
 		{52F39EC0-1DBB-4D9C-B9D2-53BD254E66DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52F39EC0-1DBB-4D9C-B9D2-53BD254E66DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52F39EC0-1DBB-4D9C-B9D2-53BD254E66DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4586C0D0-A123-4049-84DF-6A050A78D60B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4586C0D0-A123-4049-84DF-6A050A78D60B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4586C0D0-A123-4049-84DF-6A050A78D60B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4586C0D0-A123-4049-84DF-6A050A78D60B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -475,6 +481,7 @@ Global
 		{A5AE1E90-BF3D-4B74-9046-E932207AC709} = {456527A3-2BE8-4010-8AC6-187539CE484D}
 		{736FC43F-5A58-4C27-B194-37E40301CFBC} = {326F0792-00AF-4D82-B170-4CE248D4A975}
 		{52F39EC0-1DBB-4D9C-B9D2-53BD254E66DF} = {456527A3-2BE8-4010-8AC6-187539CE484D}
+		{4586C0D0-A123-4049-84DF-6A050A78D60B} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}
