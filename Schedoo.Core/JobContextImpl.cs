@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Schedoo.Core
 {
@@ -7,50 +9,76 @@ namespace Schedoo.Core
         private readonly IDataRepository m_data;
         private readonly IJob m_job;
         private readonly JobStatus m_status;
+        private readonly StringBuilder m_log = new StringBuilder();
 
         public JobContextImpl(IDataRepository data, IJob job)
         {
             m_data = data;
             m_job = job;
-
+            
             m_status = new JobStatus(data.GetLastJobStarted(job), m_data.GetLastJobSucceeded(job), m_data.GetLastJobFailed(job));
+
+            m_log.Append($"Created context for {job.Uid}: ");
         }
 
         public bool NowIsBetween(int minHour, int maxHour)
         {
+            m_log.Append($"cond.NowIsBetween({minHour}, {maxHour})=");
+
             if (maxHour < minHour)
             {
                 return !NowIsBetween(maxHour, minHour);
             }
 
-            return (m_data.Now.Hour >= minHour) && (m_data.Now.Hour <= maxHour);
+            var res = (m_data.Now.Hour >= minHour) && (m_data.Now.Hour <= maxHour);
+
+            m_log.Append($"{res} ");
+
+            return res;
         }
 
         public bool DidntRunMoreThan(int hours, int minutes, int seconds)
         {
+            m_log.Append($"cond.DidntRunMoreThan({hours}:{minutes}:{seconds})=");
+
             if (m_status.IsNowRunning)
             {
+                m_log.Append("false (is running now) ");
                 return false;
             }
 
             var lastEnd = m_data.Now - m_status.LastEndDateTime;
 
-            return lastEnd >= new TimeSpan(0, hours, minutes, seconds);
+            var res = lastEnd >= new TimeSpan(0, hours, minutes, seconds);
+            m_log.Append($"{res} (last={lastEnd}) ");
+
+            return res;
         }
 
         public bool LastTimeFailed()
         {
-            return m_status.CurrentStatusIsSucceeded == false;
+            var res =  m_status.CurrentStatusIsSucceeded == false;
+            m_log.Append($"cond.LastTimeFailed={res} ");
+            return res;
         }
 
         public bool LastTimeSucceded()
         {
-            return m_status.CurrentStatusIsSucceeded == true;
+            var res = m_status.CurrentStatusIsSucceeded == true;
+            m_log.Append($"cond.LastTimeSucceeded={res} ");
+            return res;
         }
 
         public bool IsNowRunning()
         {
-            return m_status.IsNowRunning;
+            var res = m_status.IsNowRunning;
+            m_log.Append($"cond.IsNowRunning={res} ");
+            return res;
+        }
+
+        public override string ToString()
+        {
+            return m_log.ToString();
         }
 
         private class JobStatus
@@ -107,7 +135,7 @@ namespace Schedoo.Core
                 {
                     if (m_lastStart == null)
                     {
-                        return DateTime.MaxValue;
+                        return DateTime.MinValue;
                     }
 
                     if (IsNowRunning)

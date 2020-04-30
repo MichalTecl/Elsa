@@ -10,7 +10,7 @@ namespace Schedoo.Core
         private readonly IDataRepository m_dataRepository;
 
         private readonly TimeSpan m_tick;
-
+        
         protected SchedulerBase(IDataRepository dataRepository, TimeSpan tick)
         {
             m_dataRepository = dataRepository;
@@ -28,7 +28,7 @@ namespace Schedoo.Core
                     foreach (var job in jobs)
                     {
                         var context = CreateContext(job);
-
+                        
                         try
                         {
                             if (context.IsNowRunning())
@@ -42,7 +42,9 @@ namespace Schedoo.Core
                                 continue;
                             }
 
-                            if (!EvalPreconditions(job, context))
+                            var preconditons = EvalPreconditions(job, context);
+                            WriteContextLog(context, preconditons);
+                            if (!preconditons)
                             {
                                 continue;
                             }
@@ -138,5 +140,7 @@ namespace Schedoo.Core
         protected virtual void OnJobSucceeded(IJob job)
         {
         }
+
+        protected abstract void WriteContextLog(IJobContext context, bool preconditonsEvaluationResult);
     }
 }

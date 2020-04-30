@@ -56,6 +56,11 @@ namespace Elsa.JobLauncher.Scheduler
             m_log.Info($"Job {job} finished ok");
         }
 
+        protected override void WriteContextLog(IJobContext context, bool preconditonsEvaluationResult)
+        {
+            m_log.Info($"{context} (preconditionsEvalResult={preconditonsEvaluationResult})");
+        }
+
         protected override void OnJobFailed(IJob job, Exception ex)
         {
             m_log.Error($"Job {job} failed", ex);
