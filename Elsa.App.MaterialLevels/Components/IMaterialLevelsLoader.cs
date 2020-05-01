@@ -7,6 +7,6 @@ namespace Elsa.App.MaterialLevels.Components
     {
         IEnumerable<MaterialLevelEntryModel> Load(int inventoryId);
 
-        IEnumerable<InventoryModel> GetInventories(bool quick);
+        IEnumerable<InventoryModel> GetInventories();
     }
 }

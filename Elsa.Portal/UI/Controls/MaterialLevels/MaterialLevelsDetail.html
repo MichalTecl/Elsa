@@ -22,12 +22,20 @@
                 <div class="stackLeft matlvlSearchPanel">
                     <i class="fas fa-search"></i>
                     <input type="text" id="tbFilter" event-bind="keyup:change:onFilterChange(this.value)" />
+                    <div class="matlvlFilterCleanCont">
+                        <i class="fas fa-times faButton" id="butCleanFilter" event-bind="click:onCleanFilterClick()"></i>
+                    </div>
+                    <div class="supplierInfoPanel stackLeft">
+                        <div class="supInf_email"><a data-bind="text:supplierMail;href:supplierMailto"></a></div>
+                        <div class="supInf_phone" data-bind="text:supplierPhone"></div>
+                    </div>
                 </div>
             </div>
             <div class="gridRow gridHead">
                 <div class="cell20">Materiál</div>
                 <div class="cell5">Dostupné</div>
                 <div class="cell5">Minimum</div>
+                <div class="cell10" data-bind="class!.hidden:showSupplier">Dodavatel</div>
                 <div class="cell40">Šarže</div>
             </div>
             <div data-bind="itemsSource:report" data-key="MaterialId">
@@ -45,6 +53,7 @@
                             </div>
                         </div>
                     </div>
+                    <div class="cell10 matlevSupplierCell"  data-bind="class!.hidden:displaySupplier" event-bind="click:onSupplierClick(SupplierName, SupplierEmail, SupplierPhone)"><a data-bind="text:SupplierName"></a></div>
                     <div class="cell40">
                         <div class="stackLeft matlvlBatchesList" data-bind="itemsSource:Batches" data-key="BatchNumber">
                             <div class="lt-template stackLeft  matlvlBatchesListItem">
@@ -62,7 +71,7 @@
 </div>
 
 <script>
-    lt.element("mlUi").withModel("app.MaterialLevels.vm").attach(function() {
+    lt.element("mlUi").withModel("app.MaterialLevels.vm").attach(function(tbFilter) {
 
         this.onTabClick = function(id) {
             app.MaterialLevels.vm.onInventorySelected(id);
@@ -98,6 +107,17 @@
 
         this.onFilterChange = function(value, butClear) {
             app.MaterialLevels.vm.setFilter(value);
+        };
+
+        this.onSupplierClick = function (supplierName, supplierEmail, supplierPhone) {
+            tbFilter.value = supplierName;
+            app.MaterialLevels.vm.setFilter(supplierName);
+            app.MaterialLevels.vm.displaySupplier(supplierEmail, supplierPhone);
+        };
+
+        this.onCleanFilterClick = function() {
+            tbFilter.value = "";
+            app.MaterialLevels.vm.setFilter("");
         };
 
         app.MaterialLevels.vm.onInventorySelected(null);

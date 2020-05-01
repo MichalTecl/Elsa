@@ -41,7 +41,7 @@ namespace Elsa.App.MaterialLevels.Controllers
 
         public IEnumerable<InventoryModel> GetInventories(bool quick)
         {
-            return m_levelsLoader.GetInventories(quick);
+            return m_levelsLoader.GetInventories();
         }
 
         public IEnumerable<InventoryModel> GetUnwatchedInventories()

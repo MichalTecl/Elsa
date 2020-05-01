@@ -14,12 +14,16 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
     self.inventories = [];
     self.report = [];
     self.unwatchedInventories = [];
+    self.showSupplier = false;
+    self.supplierMail = "";
+    self.supplierMailto = "";
+    self.supplierPhone = "";
 
     var applyFilter = function() {
         var matcher = new TextMatcher(filter);
         var changed = false;
         for (var i = 0; i < self.report.length; i++) {
-            var hide = !matcher.match(self.report[i].MaterialName, true);
+            var hide = !matcher.match(self.report[i].MaterialName + self.report[i].SupplierName, true);
             if (self.report[i].hidden !== hide) {
                 changed = true;
                 self.report[i].hidden = hide;
@@ -38,6 +42,15 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
 
     var receiveReport = function (data) {
 
+        self.showSupplier = false;
+
+        for (let row of data) {
+            if (row.SupplierName) {
+                self.showSupplier = true;
+                break;
+            }
+        }
+
         for (var i = 0; i < data.length; i++) {
             var model = data[i];
 
@@ -49,13 +62,29 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
                 b.batchLink = getBatchSearchLink(model.MaterialName, b.BatchNumber);
             }
 
+            model.showSupplier = self.displaySupplier;
         }
 
         self.report = data;
         applyFilter();
     };
+
+    self.displaySupplier = function (mail, phone) {
+        if (mail) {
+            self.supplierMailto = "mailto:" + mail;
+        } else {
+            self.supplierMailto = "";
+        }
+
+        self.supplierMail = mail || "";
+        self.supplierPhone = phone || "";
+
+        lt.notify();
+    };
     
     self.onInventorySelected = function (inventoryId) {
+
+        self.displaySupplier(null, null);
 
         if (self.inventories.length === 0) {
             setTimeout(function () { self.onInventorySelected(inventoryId); }, 100);
@@ -236,6 +265,8 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
         
         filter = value;
         applyFilter();
+
+        self.displaySupplier(null, null);
     };
 };
 

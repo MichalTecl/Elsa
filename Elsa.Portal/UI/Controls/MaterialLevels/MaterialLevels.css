@@ -94,3 +94,28 @@
     opacity:0.7;
     margin-right:4px;
 }
+
+.supplierInfoPanel {
+    font-size: 0.9em;
+    margin-left: 40px;
+}
+
+.supplierInfoPanel > .supInf_phone {
+    margin-left: 15px;
+}
+
+.matlevSupplierCell {
+    cursor: pointer;
+}
+
+.matlevSupplierCell:hover {
+    color: blue;
+}
+
+.matlvlFilterCleanCont > .faButton {
+    align-self: flex-start;
+    margin-left: 4px;
+    opacity: .7;
+    color: #555;
+    font-size: 13px;
+}

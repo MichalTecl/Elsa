@@ -44,7 +44,7 @@ namespace Elsa.App.MaterialLevels.Components
             var result = new List<MaterialLevelEntryModel>();
 
             m_database.Sql().Call("GetMaterialLevelsReport").WithParam("@inventoryId", inventoryId).WithParam("@projectId", m_session.Project.Id)
-                .ReadRows<int,string, string, int, decimal>((materialId, materialName, batchNumber, unitId, available)=>
+                .ReadRows<int,string, string, int, decimal, string, string, string>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone)=>
                 {
                     var entry = result.FirstOrDefault(r => r.MaterialId == materialId);
                     if (entry == null)
@@ -54,8 +54,9 @@ namespace Elsa.App.MaterialLevels.Components
 
                         entry.MaterialId = materialId;
                         entry.MaterialName = materialName;
-
-                        
+                        entry.SupplierName = supName;
+                        entry.SupplierEmail = supMail;
+                        entry.SupplierPhone = supPhone;
                     }
 
                     if (available == 0)
@@ -109,26 +110,18 @@ namespace Elsa.App.MaterialLevels.Components
             return result.OrderBy(r => r.HasWarning ? 0 : 1).ThenBy(r => r.MaterialName);
         }
 
-        public IEnumerable<InventoryModel> GetInventories(bool quick)
+        public IEnumerable<InventoryModel> GetInventories()
         {
             var cacheKey = $"matLevelInventories_{m_session.Project.Id}";
             
-            if (m_cache.KeyExists(cacheKey) || (!quick)) //we want to load the full report or it is already cached
+            return m_cache.ReadThrough(cacheKey, TimeSpan.FromMinutes(5), () =>
             {
-                return m_cache.ReadThrough(cacheKey, TimeSpan.FromMinutes(5), () =>
-                {
-                    var res = GetInventory();
+                var res = GetInventory();
 
-                    LoadWarnings(res);
+                LoadWarnings(res);
 
-                    return res;
-                });
-            }
-            else
-            {
-                return m_cache.ReadThrough($"matLevQuickInventories_{m_session.Project.Id}", TimeSpan.FromHours(24),
-                    GetInventory);
-            }
+                return res;
+            });
         }
 
         private List<InventoryModel> GetInventory()

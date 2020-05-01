@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
 
 using Robowire.RobOrm.Core;
@@ -49,5 +50,9 @@ namespace Elsa.Core.Entities.Commerce.Commerce
 
         int CurrencyId { get; set; }
         ICurrency Currency { get; }
+
+        DateTime? DisableDt { get; set; }
+        int? DisableUserId { get; set; }
+        IUser DisableUser { get; }
     }
 }

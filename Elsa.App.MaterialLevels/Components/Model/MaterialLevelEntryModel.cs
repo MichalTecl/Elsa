@@ -28,6 +28,12 @@ namespace Elsa.App.MaterialLevels.Components.Model
         public bool HasWarning { get; set; }
 
         public string UnitSymbol => Threshold?.Unit.Symbol ?? Total?.Unit.Symbol ?? DefaultUnitSymbol;
+
+        public string SupplierName { get; set; }
+
+        public string SupplierEmail { get; set; }
+
+        public string SupplierPhone { get; set; }
     }
 
     public class BatchAmountModel
