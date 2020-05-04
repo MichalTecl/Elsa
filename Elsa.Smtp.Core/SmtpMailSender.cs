@@ -21,12 +21,12 @@ namespace Elsa.Smtp.Core
             m_recipientListsRepository = recipientListsRepository;
         }
 
-        public void Send(string to, string subject, string body)
+        public void Send(string to, string subject, string body, params string[] attachmentFiles)
         {
-            Send(new[] {to}, subject, body);
+            Send(new[] {to}, subject, body, attachmentFiles);
         }
 
-        public void SendToGroup(string groupName, string subject, string body)
+        public void SendToGroup(string groupName, string subject, string body, params string[] attachmentFiles)
         {
             var recipients = m_recipientListsRepository.GetRecipients(groupName).ToList();
 
@@ -36,10 +36,10 @@ namespace Elsa.Smtp.Core
                 return;
             }
             
-            Send(recipients, subject, body);
+            Send(recipients, subject, body, attachmentFiles);
         }
 
-        private void Send(IEnumerable<string> to, string subject, string body)
+        private void Send(IEnumerable<string> to, string subject, string body, string[] attachemntFiles)
         {
             var addresses = to.ToList();
 
@@ -51,10 +51,15 @@ namespace Elsa.Smtp.Core
                 mailMessage.From.Add(new MailboxAddress(m_settings.SenderName, m_settings.SenderAddress));
                 mailMessage.To.AddRange(addresses.Select(t => new MailboxAddress(t, t)) );
                 mailMessage.Subject = subject;
-                mailMessage.Body = new TextPart("plain")
+
+                var builder = new BodyBuilder {TextBody = body};
+
+                foreach (var atf in attachemntFiles)
                 {
-                    Text = body
-                };
+                    builder.Attachments.Add(atf);
+                }
+
+                mailMessage.Body = builder.ToMessageBody();
 
                 using (var smtpClient = new SmtpClient())
                 {

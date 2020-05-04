@@ -195,6 +195,10 @@
       <Project>{680A0E79-828B-4284-9AF8-32BCF09D62CF}</Project>
       <Name>Elsa.Invoicing.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.AutomaticQueries\Elsa.Jobs.AutomaticQueries.csproj">
+      <Project>{A3DA3672-1F5A-44EB-8001-A19C7C97FE73}</Project>
+      <Name>Elsa.Jobs.AutomaticQueries</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
       <Project>{5ef07762-137b-4bf7-8199-5961768fcaec}</Project>
       <Name>Elsa.Jobs.Common</Name>

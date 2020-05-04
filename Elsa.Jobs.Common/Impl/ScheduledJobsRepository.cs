@@ -139,7 +139,13 @@ namespace Elsa.Jobs.Common.Impl
 
         public IJobSchedule GetJobByUid(string uid)
         {
-            return GetCompleteScheduler().FirstOrDefault(j => j.Uid == uid);
+            var schedule = GetCompleteScheduler().FirstOrDefault(j => j.Uid == uid);
+            if (schedule == null)
+            {
+                m_log.Error($"Schedule for job \"{uid}\" not found");
+            }
+
+            return schedule;
         }
 
         private static DateTime GetLastHhMmTime(string hhMm)

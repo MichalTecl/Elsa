@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -315,6 +316,31 @@ namespace Elsa.Common.Utils
                     lastWasUnderscore = true;
                 }
             }
+        }
+
+        public static string SanitizeFileName(string inp)
+        {
+            if (string.IsNullOrWhiteSpace(inp))
+            {
+                return "BezNazvu";
+            }
+
+            inp = string.Join("_",
+                inp.Trim().Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
+
+            while (inp.Contains("__"))
+            {
+                inp = inp.Replace("__", "_");
+            }
+
+            inp = inp.Trim('_');
+
+            if (string.IsNullOrWhiteSpace(inp))
+            {
+                inp = "BezNazvu";
+            }
+
+            return inp;
         }
     }
 }

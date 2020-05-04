@@ -30,6 +30,7 @@ using Elsa.Integration.PaymentSystems.Common;
 using Elsa.Integration.PaymentSystems.Fio;
 using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Invoicing.Core.Contract;
+using Elsa.Jobs.AutomaticQueries;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.DbBackup;
 using Elsa.Jobs.FinancialReportsGeneration;
@@ -103,6 +104,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(SmtpRegistry).Assembly);
                     s.ScanAssembly(typeof(MaterialLevelsRegistry).Assembly);
                     s.ScanAssembly(typeof(FinDataGenerationRegistry).Assembly);
+                    s.ScanAssembly(typeof(AutoQueriesRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
                 });
