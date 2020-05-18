@@ -214,7 +214,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
 
                 var paymentText = GetElementValue("payment");
 
-                return paymentText.Contains("dobírka");
+                return paymentText.ToLowerInvariant().Contains("dobírka");
              }
         }
 
