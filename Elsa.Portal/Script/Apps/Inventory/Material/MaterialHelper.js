@@ -11,7 +11,7 @@ app.MaterialHelper = app.MaterialHelper || function() {
 
     var loadMaterials = function() {
 
-        lt.api("/material/GetAllMaterialInfo").get(function(info) {
+        lt.api("/material/  GetAllMaterialInfo").get(function(info) {
             for (var i = 0; i < info.length; i++) {
                 var entity = info[i];
 

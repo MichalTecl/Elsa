@@ -13,6 +13,10 @@
                 <label for="tbsgid">ID segmentu</label>
                 <input id="tbsgid" lt-name="tbSegmentId" />
             </div>
+            <div class="srchSegment text">
+                <label for="tbinvnr">Č. Faktury</label>
+                <input id="tbinvnr" lt-name="tbInvnr" />
+            </div>
         </div>
         <div class="srchSegment stackLeft">
             <div class="srchSegment material">
@@ -68,7 +72,7 @@
 
 <!-- {"PageNumber":0,"MaterialId":null,"InventoryTypeId":null,"OrderNumber":null,"BatchNumberQuery":null,"From":null,"To":null,"ClosedBatches":null,"LockedBatches":null -->
 <script>
-    lt.element("batchSearchPanel").attach(function (tbBatchNumber, tbOrderNumber, tbFrom, tbTo, cbLocked, cbUnlocked, cbClosed, cbOpen, cbBlocking, materialAutocompleteContainer, tbMaterial, tbSegmentId, resultsPlaceholder) {
+    lt.element("batchSearchPanel").attach(function (tbBatchNumber, tbOrderNumber, tbFrom, tbTo, cbLocked, cbUnlocked, cbClosed, cbOpen, cbBlocking, materialAutocompleteContainer, tbMaterial, tbSegmentId, tbInvnr, resultsPlaceholder) {
 
         var self = this;
 
@@ -80,6 +84,7 @@
             cbBlocking.checked = false;
             tbMaterial.value = "";
             tbSegmentId.value = "";
+            tbInvnr.value = "";
         };
 
         lt.replaceBy(resultsPlaceholder, "/UI/Controls/Inventory/BatchesOverview/BatchList.html", function(lst) {
@@ -143,7 +148,8 @@
             q.SegmentId = tbSegmentId.value;
             q.ClosedBatches = trufanu(cbClosed, cbOpen);
             q.LockedBatches = trufanu(cbLocked, cbUnlocked);
-            q.BlockedBatchesOnly = cbBlocking.checked; 
+            q.BlockedBatchesOnly = cbBlocking.checked;
+            q.InvoiceNr = tbInvnr.value;
 
             var materialName = emptyToNull(tbMaterial);
             if (materialName != null) {

@@ -14,6 +14,8 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
 
         public string OrderNumber { get; set; }
 
+        public string InvoiceNr { get; set; }
+
         public string BatchNumberQuery { get; set; }
 
         public DateTime? From { get; set; }

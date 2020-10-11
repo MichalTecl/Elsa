@@ -522,7 +522,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                         createDt = originalBatch.Batch.Created;
                         note =
-                            $"(originalBatch.Batch.Note ?? string.Empty) ! {DateTime.Now} Nahrazení původního segmentu {originalBatch.Batch.Id}";
+                            $"({originalBatch.Batch.Note ?? string.Empty}) ! {DateTime.Now} Nahrazení původního segmentu {originalBatch.Batch.Id}";
                     }
                     
                     var recipe = m_recipeRepository.Value.GetRecipe(recipeId).Ensure("Recipe object expected");

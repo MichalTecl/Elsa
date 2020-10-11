@@ -40,7 +40,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private readonly IUserRepository m_userRepository;
         private readonly IStockEventRepository m_stockEventRepository;
         private readonly ISaleEventRepository m_saleEventRepository;
-
+        
         public BatchReportingFacade(ISession session,
             IDatabase database,
             IMaterialBatchFacade batchFacade,
@@ -115,8 +115,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 .WithParam("@pageNumber", pageNumber)
                 .WithParam("@batchId", query.HasKey ? query.ToKey().UnsafeToString() : null) 
                 .WithParam("@materialId", query.MaterialId)
-                .WithParam("@orderNumber", query.OrderNumber)
-                .WithParam("@batchNumber", query.BatchNumberQuery?.Replace("*", "%"))
+                .WithParam("@orderNumber", ToProperNull(query.OrderNumber))
+                .WithParam("@batchNumber",  ToProperNull(query.BatchNumberQuery?.Replace("*", "%")))
                 .WithParam("@dtFrom", query.From)
                 .WithParam("@dtTo", query.To)
                 .WithParam("@closed", query.ClosedBatches)
@@ -128,7 +128,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 .WithParam("@componentId", query.ComponentId)
                 .WithParam("@orderId", query.RelativeToOrderId)
                 .WithParam("@onlyBlocking", query.BlockedBatchesOnly)
-                .WithParam("@segmentId", query.SegmentId);
+                .WithParam("@segmentId", query.SegmentId)
+                .WithParam("@invoiceNr", ToProperNull(query.InvoiceNr));
 
             var result = new BatchReportModel { Query = query };
 
@@ -139,16 +140,31 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
             foreach (var b in result.Report.OfType<BatchReportEntry>())
             {
+                var material = m_materialRepository.GetMaterialById(b.MaterialId);
+
                 if (b.IsClosed)
                 {
                     b.AvailableAmount = "0";
                 }
                 else
                 {
+                    /*
                     var available = m_batchFacade.GetAvailableAmount(b.BatchKey);
                     b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
                     b.Available = available;
+                    */
+                    var available = new Amount(b.AvailableAmountValue, m_unitRepository.GetUnit(b.AvailableAmountUnitId));
+                    
+                    available = m_amountProcessor.Convert(available, material.NominalUnit);
+                    b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
+                    b.Available = available;
                 }
+
+                var totalUnit = m_unitRepository.GetUnitBySymbol(b.TotalAmountUnitName);
+                var totalAmount = new Amount(b.TotalAmountValue, totalUnit);
+                totalAmount = m_amountProcessor.Convert(totalAmount, material.NominalUnit);
+
+                b.BatchVolume = $"{StringUtil.FormatDecimal(totalAmount.Value)} {totalAmount.Unit.Symbol}";
 
                 //b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
                 b.CanDelete = !(b.HasStockEvents || b.NumberOfCompositions > 0 || b.NumberOfOrders > 0 || b.NumberOfSaleEvents > 0);
@@ -494,6 +510,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             const int numberOfStockEvents = 19;
             const int numberOfSaleEvents = 20;
             const int numberOfSegments = 21;
+            const int availableAmountValue = 22;
+            const int availableAmountUnitId = 23;
             #endregion
 
             var key = BatchKey.Parse(row.GetString(batchId));
@@ -504,7 +522,6 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 BatchNumber = row.IsDBNull(batchNumber) ? "?" : row.GetString(batchNumber),
                 MaterialName = row.GetString(materialName),
                 MaterialId = row.GetInt32(materialId),
-                BatchVolume = $"{StringUtil.FormatDecimal(row.GetDecimal(batchVolume))} {row.GetString(unit)}",
                 CreateDt = StringUtil.FormatDateTime(row.GetDateTime(batchCreateDt)),
                 IsClosed = !row.IsDBNull(batchCloseDt),
                 IsLocked = !row.IsDBNull(batchLockDt),
@@ -516,10 +533,22 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 InvoiceNumber = row.IsDBNull(invoiceNr) ? string.Empty : string.Join(", ", row.GetString(invoiceNr).Split(';').Distinct()),
                 HasStockEvents = (!row.IsDBNull(numberOfStockEvents)) && (row.GetInt32(numberOfStockEvents) > 0),
                 NumberOfSaleEvents = row.GetInt32(numberOfSaleEvents),
-                NumberOfSegments = row.GetInt32(numberOfSegments)
+                NumberOfSegments = row.GetInt32(numberOfSegments),
+                AvailableAmountValue = row.GetDecimal(availableAmountValue),
+                AvailableAmountUnitId = row.GetInt32(availableAmountUnitId),
+                TotalAmountValue = row.GetDecimal(batchVolume),
+                TotalAmountUnitName = row.GetString(unit)
             };
             
             return entry;
+        }
+
+        private static object ToProperNull(string val)
+        {
+            if (string.IsNullOrWhiteSpace(val))
+                return null;
+
+            return val;
         }
     }
 }

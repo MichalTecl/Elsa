@@ -134,6 +134,10 @@
     <Content Include="Script\Lanta\AttributeBinding.js" />
     <Content Include="Script\Lanta\UpdateModelByForm.js" />
     <Content Include="SQL\20200430-001 vwSmallestUnit.sql" />
+    <Content Include="SQL\20201011-001 vwOrderItems.sql" />
+    <Content Include="SQL\20201011-003 indexes.sql" />
+    <Content Include="SQL\20201011-099 LoadBatchesReport.sql" />
+    <Content Include="SQL\20201011-002 vwBatchKeyAvailableAmount.sql" />
     <Content Include="Style\PaperForms.css" />
     <Content Include="UI\Controls\Common\Autosuggest.css" />
     <Content Include="UI\Controls\Common\AutoSuggest.js" />

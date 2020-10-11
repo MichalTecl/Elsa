@@ -162,6 +162,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             return m_amountProcessor.Sum(batches.Select(b => GetAvailableAmount(b.Id)));
         }
 
+
+
         private static readonly object s_preloadLock = new object();
         public void PreloadBatchAmountCache()
         {

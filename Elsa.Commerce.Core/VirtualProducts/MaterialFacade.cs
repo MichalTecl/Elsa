@@ -139,7 +139,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             return MapMaterialInfo(material);
         }
 
-        private MaterialSetupInfo MapMaterialInfo(IExtendedMaterialModel material)
+        private MaterialSetupInfo MapMaterialInfo(IExtendedMaterialModel material, List<string> takenNames = null)
         {
             var model = new MaterialSetupInfo
                         {
@@ -158,23 +158,32 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 var baseName = $"{StringUtil.ConvertToBaseText(material.Name, '_', '_', 3)}_{DateTime.Now:yyyyMMdd}";
                 var versionedName = baseName;
 
-                for (var i = 1;; i++)
+                if (takenNames != null && !takenNames.Contains(versionedName))
                 {
-                    var e =
-                        m_database.SelectFrom<IMaterialBatch>()
-                            .Where(b => b.BatchNumber == versionedName)
-                            .Take(1)
-                            .Execute()
-                            .FirstOrDefault();
-                    if (e == null)
+                    model.AutoBatchNr = versionedName;
+                }
+                else
+                {
+                    for (var i = 1;; i++)
                     {
-                        break;
+                        var e =
+                            m_database.SelectFrom<IMaterialBatch>()
+                                .Where(b => b.BatchNumber == versionedName)
+                                .Take(1)
+                                .Execute()
+                                .FirstOrDefault();
+                        if (e == null)
+                        {
+                            break;
+                        }
+
+                        versionedName = $"{baseName}.{i}";
                     }
 
-                    versionedName = $"{baseName}.{i}";
+                    model.AutoBatchNr = versionedName;
                 }
 
-                model.AutoBatchNr = versionedName;
+                takenNames?.Add(versionedName);
             }
 
             return model;
@@ -182,10 +191,34 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IEnumerable<MaterialSetupInfo> GetAllMaterialInfo()
         {
-            foreach (var material in m_materialRepository.GetAllMaterials(null))
+            var allMaterials = m_materialRepository.GetAllMaterials(null).ToList();
+
+            var basenames = new HashSet<string>(allMaterials.Where(m => m.AutomaticBatches).Select(m => $"{StringUtil.ConvertToBaseText(m.Name, '_', '_', 3)}_{DateTime.Now:yyyyMMdd}"));
+
+            var mapped = new List<MaterialSetupInfo>(allMaterials.Count);
+
+            using (var tx = m_database.OpenTransaction())
             {
-                yield return MapMaterialInfo(material);
+                var takenNames = m_database.SelectFrom<IMaterialBatch>()
+                    .Where(mb => mb.ProjectId == m_session.Project.Id).Where(mb => mb.BatchNumber.InCsv(basenames))
+                    .Execute()
+                    .Select(n => n.BatchNumber)
+                    .ToList();
+
+                foreach (var src in allMaterials)
+                {
+                    mapped.Add(MapMaterialInfo(src, takenNames));
+                }
+
+                tx.Commit();
             }
+
+            return mapped;
+
+            //foreach (var material in m_materialRepository.GetAllMaterials(null))
+            //{
+            //    yield return MapMaterialInfo(material);
+            //}
         }
 
         private IMaterialUnit ValidateAmountUnit(MaterialEntry nominalAmountEntry)

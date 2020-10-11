@@ -39,7 +39,14 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public int NumberOfSaleEvents { get; set; }
         public int NumberOfSegments { get; set; }
 
+        public decimal AvailableAmountValue { get; set; }
+
+        public int AvailableAmountUnitId { get; set; }
+
         public List<BatchStockEventSuggestion> EventSuggestions { get; } = new List<BatchStockEventSuggestion>();
+        public decimal TotalAmountValue { get; set; }
+        public string TotalAmountUnitName { get; set; }
+
         public BatchReportEntry(BatchKey batchKey) : base(batchKey)
         {
         }
