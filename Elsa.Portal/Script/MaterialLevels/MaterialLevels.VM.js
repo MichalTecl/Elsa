@@ -56,6 +56,7 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
 
             model.materialLink = getBatchSearchLink(model.MaterialName, null);
             model.hasThreshold = model.ThresholdFormatted !== null;
+            model.displaySupplier = self.showSupplier;
 
             for (var j = 0; j < model.Batches.length; j++) {
                 var b = model.Batches[j];
