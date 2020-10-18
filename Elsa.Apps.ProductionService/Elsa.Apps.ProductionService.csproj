@@ -55,6 +55,7 @@
     <Compile Include="Service\IProductionService.cs" />
     <Compile Include="Service\Process\IProductionRequestProcessingStep.cs" />
     <Compile Include="Service\Process\ProductionRequestContext.cs" />
+    <Compile Include="Service\Process\Steps\AddBatchChangeWarning.cs" />
     <Compile Include="Service\Process\Steps\ApplyResultingMaterial.cs" />
     <Compile Include="Service\Process\Steps\ApplySourceSegmentId.cs" />
     <Compile Include="Service\Process\Steps\CheckSourceSegmentEditability.cs" />

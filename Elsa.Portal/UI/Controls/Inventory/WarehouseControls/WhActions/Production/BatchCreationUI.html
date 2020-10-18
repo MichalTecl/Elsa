@@ -59,6 +59,10 @@
                     <div data-bind="text:UnitSymbol"></div>
                     <span>&nbsp;</span>
                     <div data-bind="text:MaterialName"></div>
+                    <div class="stackLeft bcBatchChangeWarning" data-bind="class!.hidden:HasBatchChangeWarning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>Pozor - změna šarže!</div>
+                    </div>
                 </div>
 
                 <div data-bind="itemsSource:Messages" class="messagesRow" data-key="Text">

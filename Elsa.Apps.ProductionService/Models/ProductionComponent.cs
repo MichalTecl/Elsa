@@ -25,6 +25,7 @@ namespace Elsa.Apps.ProductionService.Models
         public List<ProductionComponentResolution> Resolutions { get; } = new List<ProductionComponentResolution>();
         public int SortOrder { get; set; }
         public string LastClientAmount { get; set; }
+        public bool HasBatchChangeWarning { get; set; }
 
         public void Invalidate(string message)
         {

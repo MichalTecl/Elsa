@@ -26,7 +26,8 @@ namespace Elsa.Apps.ProductionService.Service
             typeof(SanitizeReceivedRequest),
             typeof(ApplyResultingMaterial),
             typeof(ValidateAmountAndPrice),
-            typeof(SetComponents)
+            typeof(SetComponents),
+            typeof(AddBatchChangeWarning)
         };
 
         private static readonly object s_lock = new object();
