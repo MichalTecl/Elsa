@@ -31,9 +31,9 @@ GO
 IF NOT EXISTS(SELECT TOP 1 1 FROM sys.indexes WHERE name='INX_MaterialBatch_BatchNumber')
 	CREATE INDEX INX_MaterialBatch_BatchNumber	ON MaterialBatch	(BatchNumber);
 GO
-IF NOT EXISTS(SELECT TOP 1 1 FROM sys.indexes WHERE name='INX_MaterialBatch_CalculatedKey')
+/*IF NOT EXISTS(SELECT TOP 1 1 FROM sys.indexes WHERE name='INX_MaterialBatch_CalculatedKey')
 	CREATE INDEX INX_MaterialBatch_CalculatedKey	ON MaterialBatch	(CalculatedKey);
-GO
+GO*/
 IF NOT EXISTS(SELECT TOP 1 1 FROM sys.indexes WHERE name='INX_MaterialBatch_InvoiceNr')
 	CREATE INDEX INX_MaterialBatch_InvoiceNr	ON MaterialBatch	(InvoiceNr);
 GO

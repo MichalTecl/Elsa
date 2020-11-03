@@ -25,7 +25,7 @@ namespace Elsa.Common.Logging
         {
             var severity = entry.IsError ? "ERR" : "INF";
             var timeInfo = entry.IsStopWatch ? $"\tTIME_MS:{entry.MeasuredTime}" : string.Empty;
-            var sEntry = $"{entry.EventDt: HH:mm:ss}\t{severity}\t{entry.SessionId}\t{entry.Method}\t{entry.Message}\t{timeInfo}";
+            var sEntry = $"{(char)1}{entry.EventDt: HH:mm:ss}\t{severity}\t{entry.SessionId}\t{entry.Method}\t{entry.Message}\t{timeInfo}";
 
             lock (m_queueLock)
             {

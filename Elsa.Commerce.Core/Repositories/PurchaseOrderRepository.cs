@@ -91,6 +91,14 @@ namespace Elsa.Commerce.Core.Repositories
 
                 foreach (var delId in host.OrderItemsToDelete)
                 {
+                    var kitChildren = m_database.SelectFrom<IOrderItem>().Where(i => i.KitParentId == delId).Execute()
+                        .ToList();
+
+                    if (kitChildren.Any())
+                    {
+                        m_database.DeleteAll(kitChildren);
+                    }
+
                     var item = m_database.SelectFrom<IOrderItem>().Where(i => i.Id == delId).Execute().FirstOrDefault();
                     if (item != null)
                     {

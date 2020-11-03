@@ -9,9 +9,25 @@
             <i class="fas fa-file-invoice-dollar actionTileIcon"></i>
             <a href="/UI/Pages/Invoicing/InvoicingPage.html">Účetní sestavy</a>
         </div>
-       
-
+        
+    <div class="actionTile stackLeft" id="inspectorRow">
+        <i class="fas fa-meh-blank" data-bind="class!.hidden:isLoading"></i>
+        <i class="fas fa-frown" data-bind="class!.hidden:isMad"></i>
+        <i class="far fa-smile" data-bind="class!.hidden:isHappy"></i>
+        <div data-bind="text:totalIssues"></div>
+        <a href="/UI/Inspector/Inspector.html">Inspektor</a>
     </div>
 
+    </div>
+    <script src="/UI/Inspector/Inspector.vm.js"></script>
+    <script>
+        lt.element("inspectorRow").withModel("app.Inspector.vm").attach(function () {
+            setTimeout(function() {
+                    app.Inspector.vm.init(true);
+                },
+                1000);
+        });
+    </script>
 </div>
+
 

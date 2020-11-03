@@ -1,0 +1,30 @@
+﻿<span>
+    <button id="butSet_{%GENERATE%}" event-bind="click:onClick(issueId, data, callback)">Zadat</button>
+    <script>
+        lt.element("butSet_{%GENERATE%}").attach(function() {
+            this.onClick = function (issueId, data, callback) {
+
+                var valu = window.prompt("Hodnota pro " + data.Month + '/' + data.Year + " ?");
+                if (!valu) {
+                    return;
+                }
+
+                var intval = parseInt(valu);
+                if (isNaN(intval)) {
+                    alert("Je třeba zadat celé číslo");
+                    return;
+                }
+
+                lt.api("/fixedCostTypes/setValue").body({
+                    "TypeId": data.FixedcostTypeId,
+                    "Value": intval,
+                    "Month": data.Month,
+                    "Year": data.Year
+                }).post(function() {
+                    callback();
+                });
+            }
+        });
+    </script>
+    
+</span>

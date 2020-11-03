@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
@@ -10,8 +11,13 @@ namespace Elsa.App.Inspector.Database
     [Entity]
     public interface IInspectionIssue : IIntIdEntity, IProjectRelatedEntity
     {
-        [NVarchar(200, false)]
-        string InspectionType { get; set; }
+        DateTime? PostponedTill { get; set; }
+
+        int? PostponeUserId { get; set; }
+        IUser PostponeUser { get; }
+
+        int InspectionTypeId { get; set; }
+        IInspectionType InspectionType { get; }
 
         [NVarchar(200, false)]
         string IssueCode { get; set; }
@@ -19,11 +25,22 @@ namespace Elsa.App.Inspector.Database
         [NVarchar(1000, false)]
         string Message { get; set; }
 
-        DateTime Created { get; set; }
+        DateTime FirstDetectDt { get; set; }
 
-        DateTime? PostponeTo { get; set; }
+        DateTime LastDetectDt { get; set; }
 
-        int? PostponeUserId { get; set; }
-        IUser PostponeUser { get; }
+        int LastSessionId { get; set; }
+        IInspectionSession LastSession { get; }
+
+        DateTime? ResolveDt { get; set; }
+
+        [NVarchar(200, false)]
+        string ProcName { get; set; }
+
+        [ForeignKey(nameof(IInspectionIssueActionMenu.IssueId))]
+        IEnumerable<IInspectionIssueActionMenu> Actions { get; }
+
+        [ForeignKey(nameof(IInspectionIssueData.IssueId))]
+        IEnumerable<IInspectionIssueData> Data { get; }
     }
 }
