@@ -50,9 +50,11 @@
     <Compile Include="Database\IInspectionResponsibilityMatrix.cs" />
     <Compile Include="Database\IInspectionSession.cs" />
     <Compile Include="Database\IInspectionType.cs" />
+    <Compile Include="Database\ILogReaderScanHistory.cs" />
     <Compile Include="InspectionsSyncSession.cs" />
     <Compile Include="InspectorRegistry.cs" />
     <Compile Include="Jobs\InspectorJob.cs" />
+    <Compile Include="Jobs\LogReaderJob.cs" />
     <Compile Include="Model\InspectionIssuesCollection.cs" />
     <Compile Include="Model\InspectionIssueViewModel.cs" />
     <Compile Include="Model\IssuesSummaryItemModel.cs" />
@@ -103,6 +105,7 @@
     <None Include="sencha.json" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SQL\20200811_002_insp_abandonedBatchRemains.sql" />
     <Content Include="SQL\20201029_000_vwIssueTypeResponsibleUser.sql" />
     <Content Include="SQL\20201029_002_ordersWithMissingBatches.sql" />
     <Content Include="SQL\20201029_001_inspfw.sql" />
@@ -110,6 +113,7 @@
     <Content Include="SQL\20201031_002_MissingFixedCostValue.sql" />
     <Content Include="SQL\20201031_003_registerJobs.sql" />
     <Content Include="SQL\20201102_001_inspfw_getIssuesToMail.sql" />
+    <Content Include="SQL\20201108_001_vwBatchKeyAvailableAmount.sql" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneWeek.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneDay.html" />
     <Content Include="UI\Inspector\Inspector.css" />

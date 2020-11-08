@@ -1,0 +1,27 @@
+﻿<span>
+    <button id="butGoStockEvent_{%GENERATE%}" event-bind="click:onClick(VM)" data-bind="text:data.PrefStEventTypeName"></button>
+    <script>
+        lt.element("butGoStockEvent_{%GENERATE%}").attach(function() {
+            this.onClick = function (vm) {
+
+                var data = vm.data;
+
+                var reason = window.prompt("Zadejte důvod a potvrďte akci \"" + data.StockEventText + "\"");
+                if (!reason) {
+                    return;
+                }
+                
+                lt.api("/stockEvents/saveEvent").query({
+                    eventTypeId: data.PrefStEventTypeId,
+                    materialId: data.MaterialId,
+                    batchNumber: data.BatchNumber,
+                    quantity: parseFloat(data.Amount),
+                    reason: reason,
+                    unitSymbol: data.AmtUnitSymbol
+                }).post(function() {
+                    vm.callback();
+                });
+            }
+        });
+    </script>
+</span>

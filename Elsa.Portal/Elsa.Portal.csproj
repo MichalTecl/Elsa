@@ -178,6 +178,7 @@
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesList.html" />
     <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\Production\ProductionBatchesUI.html" />
     <Content Include="UI\Controls\Accounting\FixedCostValuesEditor.html" />
+    <Content Include="UI\Controls\Inventory\WarehouseControls\WhActions\StockEventThrashActionButton.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\InvoiceFormReports.css" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\GenerateButton.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\Parts\GenerationLogUi.html" />
