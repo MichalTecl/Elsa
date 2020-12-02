@@ -105,7 +105,7 @@ function() {
             }
 
             if (found) {
-                break;
+                continue;
             }
 
             self.summary.push(sum);

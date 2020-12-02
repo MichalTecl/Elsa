@@ -114,6 +114,8 @@
     <Content Include="SQL\20201031_003_registerJobs.sql" />
     <Content Include="SQL\20201102_001_inspfw_getIssuesToMail.sql" />
     <Content Include="SQL\20201108_001_vwBatchKeyAvailableAmount.sql" />
+    <Content Include="SQL\20201115_001_inspInvalidVarSymbol.sql" />
+    <Content Include="UI\Inspector\ActionControls\Ignore.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneWeek.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneDay.html" />
     <Content Include="UI\Inspector\Inspector.css" />

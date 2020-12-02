@@ -18,10 +18,12 @@ BEGIN
 	SELECT DISTINCT po.Id
 	  FROM PurchaseOrder po
 	  INNER JOIN vwOrderItems oi ON (po.Id = oi.OrderId)
+	  INNER JOIN OrderItem oitm ON (oi.OrderItemId = oitm.Id)
 	 WHERE po.ProjectId = @projectId
 	   AND ((@retryOrderId IS NULL) OR (po.Id = @retryOrderId))
 	   AND po.BuyDate > (GETDATE() - 100)
 	   AND po.OrderStatusId = 5
+	   AND oitm.PlacedName NOT IN (SELECT ItemName FROM KitDefinition WHERE ProjectId = @projectId)
 	   AND NOT EXISTS(SELECT TOP 1 1 
 	                    FROM OrderItemMaterialBatch oimb
 					   WHERE oimb.OrderItemId = oi.OrderItemId);

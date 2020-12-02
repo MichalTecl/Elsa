@@ -40,7 +40,7 @@ BEGIN
 		 GROUP BY poh.Id, poh.OrderStatusId) statChanges
 	   INNER JOIN PurchaseOrder po ON (po.Id = statChanges.Id AND po.OrderStatusId = statChanges.OrderStatusId)
 	   INNER JOIN OrderStatusWarnAge owa ON (statChanges.OrderStatusId = owa.OrderStatusId)
-	 WHERE owa.MaxDaysBeforeWarn > DATEDIFF(day, statChanges.SetDt, GETDATE());
+	 WHERE owa.MaxDaysBeforeWarn <= DATEDIFF(day, statChanges.SetDt, GETDATE());
 	
      WHILE(EXISTS(SELECT TOP 1 1 FROM @ordids))
 	 BEGIN

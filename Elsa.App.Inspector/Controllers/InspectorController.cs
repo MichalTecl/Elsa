@@ -32,7 +32,7 @@ namespace Elsa.App.Inspector.Controllers
             var result = new InspectionIssuesCollection()
             {
                 InspectionTypeId = inspectionTypeId,
-                NextPageIndex = (issues.Count < 1) ? -1 : pageIndex+1
+                NextPageIndex = (issues.Count < 10) ? -1 : pageIndex+1
             };
 
             result.Issues.AddRange(issues.Select(i => new InspectionIssueViewModel(i)));

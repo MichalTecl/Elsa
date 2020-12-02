@@ -310,6 +310,23 @@ namespace Elsa.Commerce.Core.Repositories
             }
         }
 
+        public long? SearchOrder(string orderNumberEndsWith, int orderStatusId)
+        {
+            var x = m_database.Sql().ExecuteWithParams(
+                "SELECT TOP 2 Id FROM PurchaseOrder po WHERE po.ProjectId = {0} AND po.OrderStatusId = {1} AND po.OrderNumber LIKE {2}",
+                m_session.Project.Id,
+                orderStatusId,
+                $"%{orderNumberEndsWith}"
+            ).MapRows(reader => reader.GetInt64(0));
+
+            if (x.Count > 1)
+            {
+                throw new ArgumentException($"Objednávku nelze jednoznačně určit, použijte celé číslo objednávky.");
+            }
+
+            return x.SingleOrDefault();
+        }
+
         private IQueryBuilder<IPurchaseOrder> BuildOrdersQuery()
         {
             return

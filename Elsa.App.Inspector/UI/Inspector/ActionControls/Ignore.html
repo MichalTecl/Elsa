@@ -1,0 +1,12 @@
+﻿<span>
+    <button id="butManiana_{%GENERATE%}" event-bind="click:postponeTmr(issueId, callback)">Ignorovat</button>
+    <script>
+        lt.element("butManiana_{%GENERATE%}").attach(function() {
+            this.postponeTmr = function(issueId, callback) {
+                lt.api("/inspector/postponeIssue").query({ "issueId": issueId, "days": 100*365 }).post(function() {
+                    callback();
+                });
+            }
+        });
+    </script>
+</span>

@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.App.OrdersPacking.Model;
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Core.Configuration;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Shipment;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -30,6 +31,7 @@ namespace Elsa.App.OrdersPacking
         private readonly IMaterialBatchFacade m_batchFacade;
         private readonly IVirtualProductFacade m_virtualProductFacade;
         private readonly IDatabase m_database;
+        private readonly PackingPreferredBatchesConfig m_config;
 
         public PackingController(
             IWebSession webSession,
@@ -41,7 +43,7 @@ namespace Elsa.App.OrdersPacking
             IErpClientFactory erpClientFactory,
             IMaterialBatchFacade batchFacade,
             IDatabase database,
-            IVirtualProductFacade virtualProductFacade)
+            IVirtualProductFacade virtualProductFacade, PackingPreferredBatchesConfig config)
             : base(webSession, log)
         {
             m_orderRepository = orderRepository;
@@ -52,6 +54,7 @@ namespace Elsa.App.OrdersPacking
             m_batchFacade = batchFacade;
             m_database = database;
             m_virtualProductFacade = virtualProductFacade;
+            m_config = config;
         }
         
         public PackingOrderModel FindOrder(string number)
@@ -64,6 +67,7 @@ namespace Elsa.App.OrdersPacking
                 throw new Exception("Musí být alespoň tři čísla");
             }
 
+            /*
             m_orderRepository.PreloadOrders(DateTime.Now.AddDays(-30), DateTime.Now.AddDays(1));
 
             var paid =
@@ -76,9 +80,17 @@ namespace Elsa.App.OrdersPacking
             if (filtered.Count > 1)
             {
                 throw new Exception("Objednávku nelze jednoznačně určit, použijte celé číslo nebo trasovací číslo Zásilkovny");
+            }*/
+
+            var seek = m_orderRepository.SearchOrder(number, OrderStatus.ReadyToPack.Id);
+
+            IPurchaseOrder filtered = null;
+            if (seek != null)
+            {
+                filtered = m_orderRepository.GetOrder(seek.Value);
             }
 
-            if (filtered.Count == 0)
+            if (filtered == null)
             {
                 Log.Info("Číslo objednávky nenalezeno");
                 Log.Info("Spojuji se se Zásilkovnou...");
@@ -87,7 +99,13 @@ namespace Elsa.App.OrdersPacking
                 {
                     throw new Exception($"Objednávka {number} nebyla nalezena");
                 }
-                
+
+                var paid =
+                    m_orderRepository.GetOrdersByStatus(
+                        OrderStatus.ReadyToPack,
+                        DateTime.Now.AddDays(-90),
+                        DateTime.Now.AddDays(1)).ToList();
+
                 var order = paid.FirstOrDefault(o => (o.PreInvoiceId == orderNumber) || (o.OrderNumber == orderNumber));
                 if (order == null)
                 {
@@ -108,7 +126,7 @@ namespace Elsa.App.OrdersPacking
                 return MapOrder(order);
             }
 
-            return MapOrder(filtered.Single());
+            return MapOrder(filtered);
         }
 
         public PackingOrderModel SelectKitItem(long orderId, long orderItemId, int kitItemId, int kitItemIndex)
@@ -164,8 +182,15 @@ namespace Elsa.App.OrdersPacking
 
                     ValidateItemBatches(item);
                 }
-                
-                m_ordersFacade.SetOrderSent(orderId);
+
+                if (m_config.MarkOrdersSentAsync)
+                {
+                    m_ordersFacade.SetOrderSentAsync(orderId);
+                }
+                else
+                {
+                    m_ordersFacade.SetOrderSent(orderId);
+                }
 
                 tx.Commit();
             }

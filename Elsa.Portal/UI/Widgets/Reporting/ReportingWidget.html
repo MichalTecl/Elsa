@@ -11,11 +11,12 @@
         </div>
         
     <div class="actionTile stackLeft" id="inspectorRow">
-        <i class="fas fa-meh-blank" data-bind="class!.hidden:isLoading"></i>
-        <i class="fas fa-frown" data-bind="class!.hidden:isMad"></i>
-        <i class="far fa-smile" data-bind="class!.hidden:isHappy"></i>
-        <div data-bind="text:totalIssues"></div>
+        <i class="far fa-meh-blank  actionTileIcon" data-bind="class!.hidden:isLoading"></i>
+        <i class="far fa-frown inspbouncer animate__animated  actionTileIcon" id="inspbouncer" data-bind="class!.hidden:isMad"></i>
+        <i class="far fa-smile  actionTileIcon" data-bind="class!.hidden:isHappy"></i>
         <a href="/UI/Inspector/Inspector.html">Inspektor</a>
+        <div class="inspbouncer inspIssuesCount" data-bind="text:totalIssues;class!.hidden:isMad"></div>
+        
     </div>
 
     </div>
@@ -29,5 +30,37 @@
         });
     </script>
 </div>
+<link href="/UI/Inspector/Inspector.css" rel="stylesheet" />
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+/>
+<style>
+    .inspbouncer {
+        display: inline-block;
+        animation-duration: 2s; /* don't forget to set a duration! */
+    }
+</style>
+<script>
+    var shakes = ['animate__bounce', 'animate__flash', 'animate__pulse', 'animate__swing', 'animate__rubberBand', 'animate__headShake'];
 
+    var doShake = function () {
 
+        var bouncers = document.getElementsByClassName("inspbouncer");
+
+        for (var bouncer of bouncers) {
+
+            for (var toRem of shakes) {
+                bouncer.classList.remove(toRem);
+            }
+
+            var ef = shakes[Math.floor(Math.random() * shakes.length)];
+            bouncer.classList.add(ef);
+        }
+
+        setTimeout(doShake, Math.random() * 3000 + 3000);
+    }
+
+    doShake();
+
+</script>

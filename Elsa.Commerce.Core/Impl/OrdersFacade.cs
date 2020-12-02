@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
@@ -139,12 +140,6 @@ namespace Elsa.Commerce.Core.Impl
                     {
                         throw new InvalidOperationException($"Invalid assignment quantity - OrderItemId={item.Id}, diff={Math.Abs(sum - item.Quantity)}");
                     }
-
-                    // why we are duplicating assignments here? I cannot understand what I tried to do here :(
-                    //foreach (var assignment in assignments)
-                    //{
-                    //    m_batchFacade.AssignOrderItemToBatch(assignment.MaterialBatchId, order, item.Id, assignment.Quantity);
-                    //}
                 }
 
                 if (order.ErpId == null)
@@ -170,6 +165,66 @@ namespace Elsa.Commerce.Core.Impl
                 tx.Commit();
 
                 return order;
+            }
+        }
+
+        public void SetOrderSentAsync(long orderId)
+        {
+            var order = m_orderRepository.GetOrder(orderId);
+            if (order == null)
+            {
+                throw new InvalidOperationException("Order not found");
+            }
+
+            using (var tx = m_database.OpenTransaction())
+            {
+                order.PackingDt = DateTime.Now;
+                order.PackingUserId = m_session.User.Id;
+
+                foreach (var item in GetAllConcreteOrderItems(order))
+                {
+                    var assignments = GetAssignedBatches(item.Id).ToList();
+                    if (assignments.Count == 0)
+                    {
+                        if (item.KitChildren.Any())
+                        {
+                            continue;
+                        }
+
+                        throw new InvalidOperationException($"Batch assignment missing - OrderItemId = {item.Id}");
+                    }
+
+                    var sum = assignments.Sum(a => a.Quantity);
+                    if (Math.Abs(sum - item.Quantity) > 0.0001m)
+                    {
+                        throw new InvalidOperationException($"Invalid assignment quantity - OrderItemId={item.Id}, diff={Math.Abs(sum - item.Quantity)}");
+                    }
+                }
+
+                if (order.ErpId == null)
+                {
+                    order.OrderStatusId = OrderStatus.Sent.Id;
+                    m_database.Save(order);
+                }
+                else
+                {
+                    Task.Run(() =>
+                    {
+                        order = PerformErpActionSafe(
+                            order,
+                            (e, o) => e.MakeOrderSent(o),
+                            synced =>
+                            {
+                                if (synced.OrderStatusId != OrderStatus.Sent.Id)
+                                {
+                                    throw new InvalidOperationException(
+                                        $" Byl odeslan pozadavek na dokonceni objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
+                                }
+                            }, "SetOrderSent");
+                    });
+                }
+
+                tx.Commit();
             }
         }
 

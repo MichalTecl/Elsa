@@ -11,8 +11,8 @@
                         <i data-bind="class.hidden:isExpanded" class="far fa-plus-square faButton" event-bind="click:toggleExpansion(VM)"></i>
                         <i data-bind="class!.hidden:isExpanded" class="far fa-minus-square faButton hidden" event-bind="click:toggleExpansion(VM)"></i>
                         
-                        <div data-bind="text:IssuesCount" class="inspTypeRowIssuCount"></div>
                         <div data-bind="text:TypeName" class="inspTypeRowTitle"></div>
+                        <div data-bind="text:IssuesCount" class="inspTypeRowIssuCount"></div>
                     </div>
                     <div class="inspTypeRowContent" data-bind="class!.hidden:isExpanded">
                         <div data-bind="itemsSource:issues" data-key="IssueId" class="inspIssuesList">
@@ -27,8 +27,8 @@
                                     <div class="inspIssueRowTitle" data-bind="text:Message"></div>
                                 </div>
                                 <div class="inspIssueActions" data-bind="class!.hidden:isExpanded">
-                                    <div data-bind="itemsSource:actions" data-key="control">
-                                        <div class="lt-template" data-bind="fill-by:control"></div>
+                                    <div data-bind="itemsSource:actions" data-key="control" class="stackLeft inspIssueActionsList">
+                                        <div class="lt-template inspIsuActionPlaceholder" data-bind="fill-by:control"></div>
                                     </div>
                                 </div>
                                 

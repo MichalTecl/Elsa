@@ -39,5 +39,7 @@ namespace Elsa.Commerce.Core
         void UpdateOrderItemBatch(IOrderItem orderItem, int batchId, decimal quantity);
 
         IEnumerable<IPurchaseOrder> GetReturns(int month, int year);
+
+        long? SearchOrder(string orderNumberEndsWith, int orderStatusId);
     }
 }

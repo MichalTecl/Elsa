@@ -65,6 +65,8 @@ BEGIN
 					materialId INT,
 					amount DECIMAL,
 					amountUnitId INT);
+
+					select * from vwBatchEvent
  
  */
 
@@ -83,7 +85,7 @@ BEGIN
 	  JOIN (SELECT beb.MaterialId, beb.BatchNumber, MAX(be.EventDt) LastEvent
 			  FROM vwBatchEvent be
 			  JOIN MaterialBatch beb ON (be.BatchId = beb.Id)
-			 WHERE be.EventName <> 'STOCK_EVENT'
+			 WHERE be.EventName IN ( 'USED_AS_COMPONENT', 'ESHOP_SALE', 'DIRECT_SALE_ALLOCATION')
 			GROUP BY  beb.MaterialId, beb.BatchNumber
 			  ) materialLastEvent ON (c.MaterialId = materialLastEvent.MaterialId)  
 	  JOIN MaterialUnit mu ON (c.UnitId = mu.Id)
@@ -142,3 +144,4 @@ BEGIN
 
 END
 GO
+
