@@ -29,24 +29,28 @@
                             
                             <div class="materialEditFlags">
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
+                                    <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked)" />
                                     <label>Automaticky spravovat šarže</label>
                                 </div>
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbInvoice" data-bind="checked:RequiresInvoice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
+                                    <input type="checkbox" lt-name="cbInvoice" data-bind="checked:RequiresInvoice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked)" />
                                     <label>Sledovat čísla faktur</label>
                                 </div>
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbPrice" data-bind="checked:RequiresPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
+                                    <input type="checkbox" lt-name="cbPrice" data-bind="checked:RequiresPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked)" />
                                     <label>Sledovat nákupní cenu</label>
                                 </div>
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbProdPrice" data-bind="checked:RequiresProductionPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
+                                    <input type="checkbox" lt-name="cbProdPrice" data-bind="checked:RequiresProductionPrice" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked)" />
                                     <label>Sledovat výrobní cenu</label>
                                 </div>
                                 <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbSupplier" data-bind="checked:RequiresSupplierReference" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked)" />
+                                    <input type="checkbox" lt-name="cbSupplier" data-bind="checked:RequiresSupplierReference" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked)" />
                                     <label>Sledovat dodavatele</label>
+                                </div>
+                                <div class="materialFlagEdit stackLeft">
+                                    <input type="checkbox" lt-name="cbAutofinalize" data-bind="checked:Autofinalization" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked)" />
+                                    <label>Automatický odpad</label>
                                 </div>
 
                                 <!-- threshold-->
@@ -142,12 +146,13 @@
             lt.notify(this);
         };
 
-        this.onFlagChanged = function(model, autoBatches, invoices, price, supplier, prodPrice) {
+        this.onFlagChanged = function(model, autoBatches, invoices, price, supplier, prodPrice, autofinalize) {
             model.AutomaticBatches = autoBatches;
             model.RequiresInvoice = invoices;
             model.RequiresPrice = price;
             model.RequiresSupplierReference = supplier;
             model.RequiresProductionPrice = prodPrice;
+            model.Autofinalize = autofinalize;
             lt.notify(this);
         };
         

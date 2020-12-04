@@ -1,5 +1,5 @@
-﻿IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE Name = 'insp_invalidVarSymbol')
-	DROP PROCEDURE insp_invalidVarSymbol;
+﻿IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE Name = 'inspDisabled_invalidVarSymbol')
+	DROP PROCEDURE inspDisabled_invalidVarSymbol;
 
 GO
 

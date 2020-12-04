@@ -31,7 +31,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             RequiresPrice = adaptee.RequiresPrice ?? false;
             RequiresProductionPrice = adaptee.RequiresProductionPrice ?? false;
             RequiresSupplierReference = adaptee.RequiresSupplierReference ?? false;
-
+            Autofinalization = adaptee.UseAutofinalization ?? false;
+            
             var threshold = adaptee.Thresholds?.FirstOrDefault();
             if (threshold != null)
             {
@@ -110,6 +111,6 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool RequiresInvoice { get; }
 
         public bool RequiresSupplierReference { get; }
-
+        public bool Autofinalization { get; }
     }
 }

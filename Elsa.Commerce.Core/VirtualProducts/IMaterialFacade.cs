@@ -7,8 +7,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 {
     public interface IMaterialFacade
     {
-        IExtendedMaterialModel ProcessMaterialEditRequest(
-            int? materialId,
+        IExtendedMaterialModel ProcessMaterialEditRequest(int? materialId,
             string name,
             string nominalAmountText,
             int materialInventoryId,
@@ -17,6 +16,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool requiresProductionPrice,
             bool requiresInvoice,
             bool requiresSupplierReference,
+            bool autofinalize,
             IEnumerable<string> components,
             string thresholdText);
         

@@ -30,5 +30,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
         ISystemCounter InvoiceFormNumberCounter { get; }
 
         bool? GenerateForReturnedOrders { get; set; }
+
+        bool? GenerateForAutofinalization { get; set; }
     }
 }

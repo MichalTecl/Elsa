@@ -25,5 +25,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool AutomaticBatches { get; set; }
 
         public bool RequiresSupplierReference { get; set; }
+
+        public bool Autofinalization { get; set; }
     }
 }

@@ -287,7 +287,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             RequiresSupplierReference:model.RequiresSupplierReference,
             Materials: [],
             HasThreshold: model.HasThreshold,
-            ThresholdText: model.ThresholdText
+            ThresholdText: model.ThresholdText,
+            Autofinalization: model.Autofinalize
         };
 
         for (var i = 0; i < model.materials.length; i++) {

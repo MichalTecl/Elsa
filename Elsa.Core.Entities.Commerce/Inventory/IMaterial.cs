@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Core;
-
+using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
 
@@ -35,7 +35,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         bool? RequiresProductionPrice { get; set; }
 
         bool? RequiresSupplierReference { get; set; }
-        
         IEnumerable<IMaterialThreshold> Thresholds { get; }
+
+        bool? UseAutofinalization { get; set; }
     }
 }

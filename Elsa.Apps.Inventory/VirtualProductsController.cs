@@ -227,10 +227,10 @@ namespace Elsa.Apps.Inventory
                     request.NominalAmountText,
                     request.MaterialInventoryId,
                     request.AutomaticBatches,
-                    request.RequiresPrice, 
+                    request.RequiresPrice,
                     request.RequiresProductionPrice,
                     request.RequiresInvoice,
-                    request.RequiresSupplierReference,
+                    request.RequiresSupplierReference, request.Autofinalization,
                     request.Materials.Select(s => s.DisplayText),
                     thresholdText);
                 

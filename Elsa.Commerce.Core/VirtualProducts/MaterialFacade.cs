@@ -51,6 +51,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool requiresProductionPrice,
             bool requiresIncvoice,
             bool requiresSupplierReference,
+            bool autofinalize,
             IEnumerable<string> components,
             string thresholdText)
         {
@@ -82,7 +83,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     requiresPrice, 
                     requiresProductionPrice,
                     requiresIncvoice,
-                    requiresSupplierReference);
+                    requiresSupplierReference, autofinalize);
                 
                 if (thresholdText == null)
                 {
@@ -150,7 +151,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                             RequiresInvoice = material.RequiresInvoice,
                             RequiresPrice = material.RequiresInvoice,
                             AutomaticBatches = material.AutomaticBatches,
-                            RequiresSupplierReference = material.RequiresSupplierReference
+                            RequiresSupplierReference = material.RequiresSupplierReference,
+                            Autofinalization = material.Autofinalization
                         };
 
             if (material.AutomaticBatches)

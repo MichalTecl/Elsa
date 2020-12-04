@@ -28,5 +28,7 @@ namespace Elsa.Apps.Inventory.Model
         public List<VirtualProductEditRequestModel.VpMaterialEditRequestModel> Materials { get; set; }
         
         public bool RequiresSupplierReference { get; set; }
+
+        public bool Autofinalization { get; set; }
     }
 }
