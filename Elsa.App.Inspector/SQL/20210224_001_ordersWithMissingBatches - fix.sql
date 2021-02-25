@@ -19,11 +19,16 @@ BEGIN
 	  FROM PurchaseOrder po
 	  INNER JOIN vwOrderItems oi ON (po.Id = oi.OrderId)
 	  INNER JOIN OrderItem oitm ON (oi.OrderItemId = oitm.Id)
-	 WHERE po.ProjectId = @projectId
+	  INNER JOIN VirtualProductOrderItemMapping oim ON (oim.ProjectId = @projectId AND oim.ItemName = oitm.PlacedName)
+	  INNER JOIN VirtualProductMaterial vp ON (oim.VirtualProductId = vp.VirtualProductId)
+	  INNER JOIN Material m ON (vp.ComponentId = m.Id)
+	 WHERE 1=1
+	   AND po.ProjectId = @projectId
 	   AND ((@retryOrderId IS NULL) OR (po.Id = @retryOrderId))
 	   AND po.BuyDate > (GETDATE() - 100)
 	   AND po.OrderStatusId = 5
 	   AND oitm.PlacedName NOT IN (SELECT ItemName FROM KitDefinition WHERE ProjectId = @projectId)
+	   AND ISNULL(m.CanBeDigitalOnly, 0) = 0 
 	   AND NOT EXISTS(SELECT TOP 1 1 
 	                    FROM OrderItemMaterialBatch oimb
 					   WHERE oimb.OrderItemId = oi.OrderItemId);

@@ -91,7 +91,9 @@
     <None Include="packages.config" />
     <None Include="sencha.json" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UI\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\20201202_001_setAsyncPackingDefaultconf.sql" />
   </ItemGroup>

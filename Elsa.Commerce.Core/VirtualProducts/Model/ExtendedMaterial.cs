@@ -32,6 +32,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             RequiresProductionPrice = adaptee.RequiresProductionPrice ?? false;
             RequiresSupplierReference = adaptee.RequiresSupplierReference ?? false;
             Autofinalization = adaptee.UseAutofinalization ?? false;
+            CanBeDigital = adaptee.CanBeDigitalOnly ?? false;
             
             var threshold = adaptee.Thresholds?.FirstOrDefault();
             if (threshold != null)
@@ -112,5 +113,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public bool RequiresSupplierReference { get; }
         public bool Autofinalization { get; }
+
+        public bool CanBeDigital { get; }
     }
 }

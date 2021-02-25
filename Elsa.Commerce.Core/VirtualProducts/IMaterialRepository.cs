@@ -30,7 +30,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool requiresPrice,
             bool requiresProductionPrice,
             bool requiresInvoice,
-            bool requiresSupplierReference, bool autofinalize);
+            bool requiresSupplierReference, bool autofinalize, bool canBeDigital);
         
         void CleanCache();
         

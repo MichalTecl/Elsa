@@ -107,7 +107,7 @@
   <ItemGroup>
     <Content Include="SQL\20200811_002_insp_abandonedBatchRemains.sql" />
     <Content Include="SQL\20201029_000_vwIssueTypeResponsibleUser.sql" />
-    <Content Include="SQL\20201029_002_ordersWithMissingBatches.sql" />
+    <Content Include="SQL\20210224_001_ordersWithMissingBatches - fix.sql" />
     <Content Include="SQL\20201029_001_inspfw.sql" />
     <Content Include="SQL\20201031_001_ordersStuckInStatus.sql" />
     <Content Include="SQL\20201031_002_MissingFixedCostValue.sql" />

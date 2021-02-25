@@ -42,6 +42,7 @@ namespace Elsa.JobLauncher.Scheduler
 
                 yield return AutoQueries;
                 yield return Inspector;
+                yield return LogReader;
             }
         }
     }

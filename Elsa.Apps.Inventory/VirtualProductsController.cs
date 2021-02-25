@@ -230,7 +230,7 @@ namespace Elsa.Apps.Inventory
                     request.RequiresPrice,
                     request.RequiresProductionPrice,
                     request.RequiresInvoice,
-                    request.RequiresSupplierReference, request.Autofinalization,
+                    request.RequiresSupplierReference, request.Autofinalization, request.CanBeDigital,
                     request.Materials.Select(s => s.DisplayText),
                     thresholdText);
                 

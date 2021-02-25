@@ -200,7 +200,7 @@ namespace Elsa.Integration.Erp.Flox
             EnsureSession();
             
             var timeStamp = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
-            var url = ActionUrl($"/erp/orders/invoices/finalize/{orderNum}?_dc={timeStamp}");
+            var url = ActionUrl($"/erp/orders/invoices/finalize/{orderNum}?arf={m_csrfToken}&_dc={timeStamp}");
             m_log.Info($"Incializuji generovani faktury ve Floxu: {url}");
 
             var result = m_client.Get<DefaultResponse>(url);
@@ -218,7 +218,7 @@ namespace Elsa.Integration.Erp.Flox
             EnsureSession();
 
             var timeStamp = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
-            var url = ActionUrl($"/erp/orders/invoices/sendEmail/{orderId}?_dc={timeStamp}");
+            var url = ActionUrl($"/erp/orders/invoices/sendEmail/{orderId}?arf={m_csrfToken}&_dc={timeStamp}");
             m_log.Info($"Posilam pozadavek na odeslani e-mailu klientovi: {url}");
 
             var result = m_client.Get<DefaultResponse>(url);

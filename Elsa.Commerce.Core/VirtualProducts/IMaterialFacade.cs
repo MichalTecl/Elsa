@@ -17,6 +17,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool requiresInvoice,
             bool requiresSupplierReference,
             bool autofinalize,
+            bool canBeDigital,
             IEnumerable<string> components,
             string thresholdText);
         

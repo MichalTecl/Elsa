@@ -27,5 +27,6 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool RequiresSupplierReference { get; set; }
 
         public bool Autofinalization { get; set; }
+        public bool CanBeDigital { get; set; }
     }
 }

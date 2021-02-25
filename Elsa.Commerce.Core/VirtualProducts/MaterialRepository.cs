@@ -166,7 +166,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount,
             int nominalUnitId, int materialInventoryId, bool automaticBatches, bool requiresPrice,
-            bool requiresProductionPrice, bool requiresInvoice, bool requiresSupplierReference, bool autofinalize)
+            bool requiresProductionPrice, bool requiresInvoice, bool requiresSupplierReference, bool autofinalize, bool canBeDigital)
         {
             IMaterial material;
             if (materialId != null)
@@ -186,7 +186,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     && (material.RequiresProductionPrice == requiresProductionPrice)
                     && (material.RequiresInvoiceNr == requiresInvoice)
                     && (material.RequiresSupplierReference == requiresSupplierReference)
-                    && (material.UseAutofinalization ?? false == autofinalize))
+                    && (material.UseAutofinalization ?? false == autofinalize)
+                    && (material.CanBeDigitalOnly ?? false == canBeDigital))
                 {
                     return GetAllMaterials(null).Single(m => m.Id == materialId);
                 }
@@ -240,6 +241,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             material.RequiresInvoiceNr = requiresInvoice;
             material.RequiresSupplierReference = requiresSupplierReference;
             material.UseAutofinalization = autofinalize;
+            material.CanBeDigitalOnly = canBeDigital;
 
             m_database.Save(material);
 

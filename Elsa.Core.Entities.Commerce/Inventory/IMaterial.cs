@@ -38,5 +38,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         IEnumerable<IMaterialThreshold> Thresholds { get; }
 
         bool? UseAutofinalization { get; set; }
+
+        bool? CanBeDigitalOnly { get; set; }
     }
 }

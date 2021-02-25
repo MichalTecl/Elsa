@@ -288,7 +288,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             Materials: [],
             HasThreshold: model.HasThreshold,
             ThresholdText: model.ThresholdText,
-            Autofinalization: model.Autofinalize
+            Autofinalization: model.Autofinalize,
+            CanBeDigital: model.CanBeDigital
         };
 
         for (var i = 0; i < model.materials.length; i++) {
