@@ -23,14 +23,16 @@ namespace Elsa.Jobs.AutomaticQueries
         private readonly ILog m_log;
         private readonly IParametersResolver m_paramResolver;
         private readonly IMailSender m_mailSender;
+        private readonly AutoProceduresJob m_proceduresJob;
 
-        public RunAutoqueriesJob(ISession session, IDatabase database, ILog log, IParametersResolver paramResolver, IMailSender mailSender)
+        public RunAutoqueriesJob(ISession session, IDatabase database, ILog log, IParametersResolver paramResolver, IMailSender mailSender, AutoProceduresJob proceduresJob)
         {
             m_session = session;
             m_database = database;
             m_log = log;
             m_paramResolver = paramResolver;
             m_mailSender = mailSender;
+            m_proceduresJob = proceduresJob;
         }
 
         public void Run(string customDataJson)
@@ -80,6 +82,8 @@ namespace Elsa.Jobs.AutomaticQueries
                     m_log.Error($"AutoQuery {automaticQuery.TitlePattern} execution failed", ex);
                 }
             }
+
+            m_proceduresJob.Run();
         }
 
         private DataTable Execute(string procedureName, Dictionary<string, object> parameters)

@@ -2,7 +2,7 @@
 
 namespace Elsa.Jobs.SqlJobs
 {
-    public class SqlJobsLauncher
+    public class SqlJobsLauncher : 
     {
     }
 }

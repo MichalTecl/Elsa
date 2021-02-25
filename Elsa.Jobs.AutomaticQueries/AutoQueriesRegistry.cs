@@ -8,6 +8,7 @@ namespace Elsa.Jobs.AutomaticQueries
         public void Setup(IContainerSetup setup)
         {
             setup.For<IParametersResolver>().Use<ParametersResolver>();
+            setup.For<AutoProceduresJob>().Use<AutoProceduresJob>();
         }
     }
 }
