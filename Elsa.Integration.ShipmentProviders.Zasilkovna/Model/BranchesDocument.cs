@@ -27,6 +27,8 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.Model
 
         public string GetPobockaId(string deliveryName, IDictionary<string, string> shipmentMethodsMapping)
         {
+            deliveryName = deliveryName.Trim();
+
             string mapped;
             if (!shipmentMethodsMapping.TryGetValue(deliveryName, out mapped))
             {

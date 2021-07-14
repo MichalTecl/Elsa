@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Elsa.Commerce.Core;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.PaymentSystems.Common;
@@ -13,11 +14,13 @@ namespace Elsa.Integration.PaymentSystems.Fio
     {
         private readonly FioClientConfig m_config;
         private readonly ICurrencyRepository m_currencyRepository;
+        private readonly ILog m_log;
 
-        public FioClient(FioClientConfig config, ICurrencyRepository currencyRepository)
+        public FioClient(FioClientConfig config, ICurrencyRepository currencyRepository, ILog log)
         {
             m_config = config;
             m_currencyRepository = currencyRepository;
+            m_log = log;
         }
 
         public IPaymentSource Entity { get; set; }
@@ -32,7 +35,7 @@ namespace Elsa.Integration.PaymentSystems.Fio
                 throw new InvalidOperationException($"Konfigurace FIO.Tokens neni nastavena nebo neobsahuje hodnotu pojmenovanou \"{Entity.Description}\"");
             }
 
-            var client = new FioApiClient();
+            var client = new FioApiClient(m_log);
 
             foreach (var p in client.LoadPayments(token, from, to))
             {

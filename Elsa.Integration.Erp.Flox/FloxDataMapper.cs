@@ -34,12 +34,12 @@ namespace Elsa.Integration.Erp.Flox
 
         protected override string MapShippingMethodName(IErpOrderModel source)
         {
-            return source.ErpShippingName;
+            return source.ErpShippingName?.Trim();
         }
 
         protected override string MapPaymentMethodName(IErpOrderModel source)
         {
-            return source.ErpPaymentName;
+            return source.ErpPaymentName?.Trim();
         }
         
         protected override decimal ParseMoney(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName)

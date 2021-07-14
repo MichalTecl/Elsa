@@ -55,6 +55,7 @@ namespace Elsa.Jobs.PaymentPairing
             
             foreach (var order in ordersToBePaired)
             {
+                m_log.Info($"Zacinam parovat objednavku OrderNo={order.OrderNumber} OrderId={order.Id}");
                 try
                 {
                     if (string.IsNullOrWhiteSpace(order.VarSymbol))
@@ -90,12 +91,11 @@ namespace Elsa.Jobs.PaymentPairing
 
                     m_orders.SetOrderPaid(order.Id, payment.Id);
 
-                    m_log.Info("Sparovano");
+                    m_log.Info($"Sparovano: Objednavka OrderNo={order.OrderNumber} OrderId={order.Id}");
                 }
                 catch (Exception ex)
                 {
                     m_log.Error("Chyba:", ex);
-                    Console.WriteLine($"Chyba: {ex}");
                 }
             }
         }

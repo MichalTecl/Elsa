@@ -53,7 +53,7 @@ namespace Elsa.App.Inspector.Jobs
             m_log.Info($"Log files contain {rawEntries.Count} of entries logged after last check");
 
             var entries = rawEntries.Where(e => e.Severity == "ERR").OrderBy(e => e.Dt).ToList();
-            m_log.Info($"{entries.Count} of ERR entries");
+            m_log.Info($"{entries.Count} of ER entries");
 
             if (entries.Any())
             {
@@ -73,7 +73,7 @@ namespace Elsa.App.Inspector.Jobs
             }
             else
             {
-                m_log.Info($"No err entries");
+                m_log.Info($"No ER entries");
             }
 
             var checkEntry = m_database.New<ILogReaderScanHistory>();
