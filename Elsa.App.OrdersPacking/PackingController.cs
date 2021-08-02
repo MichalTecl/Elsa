@@ -31,7 +31,7 @@ namespace Elsa.App.OrdersPacking
         private readonly IMaterialBatchFacade m_batchFacade;
         private readonly IVirtualProductFacade m_virtualProductFacade;
         private readonly IDatabase m_database;
-        private readonly PackingPreferredBatchesConfig m_config;
+        private readonly OrdersSystemConfig m_config;
 
         public PackingController(
             IWebSession webSession,
@@ -43,7 +43,7 @@ namespace Elsa.App.OrdersPacking
             IErpClientFactory erpClientFactory,
             IMaterialBatchFacade batchFacade,
             IDatabase database,
-            IVirtualProductFacade virtualProductFacade, PackingPreferredBatchesConfig config)
+            IVirtualProductFacade virtualProductFacade, OrdersSystemConfig config)
             : base(webSession, log)
         {
             m_orderRepository = orderRepository;

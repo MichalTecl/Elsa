@@ -46,7 +46,7 @@
     <Compile Include="Adapters\MaterialStockEventAdapter.cs" />
     <Compile Include="Adapters\SaleEventAdapter.cs" />
     <Compile Include="Adapters\SaleEventAllocationAdapter.cs" />
-    <Compile Include="Configuration\PackingPreferredBatchesConfig.cs" />
+    <Compile Include="Configuration\OrdersSystemConfig.cs" />
     <Compile Include="Crm\ICustomerRepository.cs" />
     <Compile Include="Crm\Model\CustomerOverview.cs" />
     <Compile Include="Crm\Model\ICommonCustomerInfo.cs" />
@@ -67,6 +67,7 @@
     <Compile Include="IOrderStatusMappingRepository.cs" />
     <Compile Include="IOrderStatusRepository.cs" />
     <Compile Include="IOrderStatusTranslator.cs" />
+    <Compile Include="IOrderWeightCalculator.cs" />
     <Compile Include="IPackingPreferredBatchRepository.cs" />
     <Compile Include="IPaymentRepository.cs" />
     <Compile Include="IProductRepository.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Model\MaterialLevelModel.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
     <Compile Include="Model\PriceComponentModel.cs" />
+    <Compile Include="OrderWeightCalculator.cs" />
     <Compile Include="Production\IProductionFacade.cs" />
     <Compile Include="Production\Model\ProductionBatchComponentModel.cs" />
     <Compile Include="Production\Model\SubBatchAssignmentModel.cs" />

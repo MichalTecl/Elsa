@@ -24,6 +24,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
         private readonly WebFormsClient m_formsClient = new WebFormsClient();
 
         private readonly IErpClientFactory m_erpClientFactory;
+        private readonly IOrderWeightCalculator m_orderWeightCalculator;
 
         public static readonly string[] ZasilkovnaColIndex = new[] {  "Vyhrazeno",
                                                                         "Číslo objednávky",
@@ -54,7 +55,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
         private readonly ICache m_cache;
         private readonly ISession m_session;
 
-        public ZasilkovnaClient(ILog log, ZasilkovnaClientConfig config, IErpClientFactory erpClientFactory, IDatabase database, ICache cache, ISession session)
+        public ZasilkovnaClient(ILog log, ZasilkovnaClientConfig config, IErpClientFactory erpClientFactory, IDatabase database, ICache cache, ISession session, IOrderWeightCalculator orderWeightCalculator)
         {
             m_log = log;
             m_config = config;
@@ -62,6 +63,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             m_database = database;
             m_cache = cache;
             m_session = session;
+            m_orderWeightCalculator = orderWeightCalculator;
         }
 
         public byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders)
@@ -117,27 +119,39 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                         var erpClient = m_erpClientFactory.GetErpClient(order.ErpId.Value);
                         var trackingNumber = erpClient.GetPackingReferenceNumber(order);
 
-                        generator.CellOpt(null) //1
-                            .CellMan(trackingNumber) //2
-                            .CellMan(order.DeliveryAddress?.FirstName, order.InvoiceAddress?.FirstName) //3
-                            .CellMan(order.DeliveryAddress?.LastName, order.InvoiceAddress?.LastName) //4
+                        decimal? weight = null;
+
+                        try
+                        {
+                            weight = m_orderWeightCalculator.GetWeight(order);
+                        }
+                        catch (Exception e)
+                        {
+                            m_log.Error($"Weight calc failed", e);
+                        }
+
+                        // not sure about Version 4 used by Elsa, but ver. 6 is documented here: https://docs.packetery.com/03-creating-packets/01-csv-import.html
+                        generator.CellOpt(null) //1 Vyhrazeno
+                            .CellMan(trackingNumber) //2 Číslo objednávky
+                            .CellMan(order.DeliveryAddress?.FirstName, order.InvoiceAddress?.FirstName) //3 Jméno
+                            .CellMan(order.DeliveryAddress?.LastName, order.InvoiceAddress?.LastName) //4 Příjmení
                             .CellOpt(
                                 externalDeliveryProvider
                                     ? (string.IsNullOrWhiteSpace(order.DeliveryAddress?.CompanyName)
                                            ? order.InvoiceAddress?.CompanyName
                                            : order.DeliveryAddress?.CompanyName)
-                                    : string.Empty) //5
-                            .CellOpt(order.CustomerEmail) //6
-                            .CellOpt(order.DeliveryAddress?.Phone, order.InvoiceAddress?.Phone) //7
-                            .CellOpt(dobirkovaCastka) //8
-                            .CellMan(order.Currency.Symbol) //9
-                            .CellMan(StringUtil.FormatDecimal(order.PriceWithVat)) //10
-                            .CellOpt() //11
-                            .CellMan(pobockaId) //12
-                            .CellMan( /*"biorythme.cz"*/m_config.ClientName) //13
-                            .CellMan(0) //14
-                            .CellOpt(null) //15
-                            ;
+                                    : string.Empty) //5 Firma
+                            .CellOpt(order.CustomerEmail) //6 E-mail
+                            .CellOpt(order.DeliveryAddress?.Phone, order.InvoiceAddress?.Phone) //7 Mobil
+                            .CellOpt(dobirkovaCastka) //8 Dobírková částka
+                            .CellMan(order.Currency.Symbol) //9 Měna
+                            .CellMan(StringUtil.FormatDecimal(order.PriceWithVat)) //10 Hodnota zásilky
+                            .CellOpt(StringUtil.FormatDecimal(weight)) //11 Hmotnost zásilky
+                            .CellMan(pobockaId) //12 Cílová pobočka
+                            .CellMan( /*"biorythme.cz"*/m_config.ClientName) //13 Odesilatel
+                            .CellMan(0) //14 Obsah 18+
+                            .CellOpt(null) //15 Zpožděný výdej
+                            ; 
 
                         if (externalDeliveryProvider)
                         {

@@ -24,5 +24,6 @@ namespace Elsa.Integration.Erp.Fler.Model
         public string PriceWithoutTax => m_item.price;
 
         public string TaxPercent => string.Empty;
+        public string ProductItemWeight => string.Empty;
     }
 }

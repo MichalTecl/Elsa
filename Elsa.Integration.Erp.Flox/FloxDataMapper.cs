@@ -2,11 +2,19 @@
 
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
+using Elsa.Common.Logging;
 
 namespace Elsa.Integration.Erp.Flox
 {
     public class FloxDataMapper : ErpDataMapperBase
     {
+        private readonly ILog m_log;
+
+        public FloxDataMapper(ILog log)
+        {
+            m_log = log;
+        }
+
         protected override bool HasDeliveryAddress(IErpOrderModel source)
         {
             return !string.IsNullOrWhiteSpace(source.DeliveryName);
@@ -50,6 +58,22 @@ namespace Elsa.Integration.Erp.Flox
                 return d;
             }
             return 0;
+        }
+
+        protected override decimal? TryParseWeight(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem)
+        {
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                return null;
+            }
+
+            if (decimal.TryParse(source, out var parsed))
+            {
+                return parsed;
+            }
+
+            m_log.Error($"Cannot parse input string \"{source}\" as decimal. OrderNo={sourceRecord.OrderNumber}");
+            return null;
         }
 
         protected override DateTime ParseDt(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName)

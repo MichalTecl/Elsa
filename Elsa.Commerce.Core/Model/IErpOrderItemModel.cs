@@ -15,5 +15,7 @@
         string PriceWithoutTax { get; }
 
         string TaxPercent { get; }
+
+        string ProductItemWeight { get; }
     }
 }

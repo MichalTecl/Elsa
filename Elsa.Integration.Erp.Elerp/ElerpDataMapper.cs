@@ -52,6 +52,11 @@ namespace Elsa.Integration.Erp.Elerp
             return decimal.Parse(source);
         }
 
+        protected override decimal? TryParseWeight(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem)
+        {
+            return null;
+        }
+
         protected override DateTime ParseDt(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName)
         {
             return DateTime.Parse(source);

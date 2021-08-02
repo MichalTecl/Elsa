@@ -40,8 +40,19 @@ namespace Elsa.Commerce.Core
                 targetItem.ErpProductId = sourceItem.ErpProductId;
                 targetItem.PlacedName = sourceItem.ProductName;
                 targetItem.Quantity = sourceItem.Quantity;
-                targetItem.TaxPercent = ParseMoney(sourceItem.TaxPercent, source, sourceItem, nameof(sourceItem.Quantity));
+                targetItem.TaxPercent = ParseMoney(sourceItem.TaxPercent, source, sourceItem, nameof(sourceItem.TaxPercent));
                 targetItem.TaxedPrice = ParseMoney(sourceItem.TaxedPrice, source, sourceItem, nameof(sourceItem.TaxedPrice));
+
+                var parsedItemWeight = TryParseWeight(sourceItem.ProductItemWeight, source, sourceItem) ;
+
+                if (parsedItemWeight != null)
+                {
+                    targetItem.Weight = targetItem.Quantity * parsedItemWeight;
+                }
+                else
+                {
+                    targetItem.Weight = null;
+                }
 
                 var product = productRepository.GetProduct(
                     source.ErpSystemId,
@@ -163,6 +174,9 @@ namespace Elsa.Commerce.Core
         
         protected abstract decimal ParseMoney(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName);
 
+        protected abstract decimal? TryParseWeight(string source, IErpOrderModel sourceRecord,
+            IErpOrderItemModel sourceItem);
+
         protected abstract DateTime ParseDt(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName);
 
         protected virtual string GetUniqueOrderNumber(IErpOrderModel order)
@@ -179,7 +193,7 @@ namespace Elsa.Commerce.Core
         {
             if (s.Length > len)
             {
-                return s.Substring(0, 16);
+                return s.Substring(0, len);
             }
 
             return s;

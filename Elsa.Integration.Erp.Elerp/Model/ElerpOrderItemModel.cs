@@ -23,5 +23,6 @@ namespace Elsa.Integration.Erp.Elerp.Model
         public string PriceWithoutTax { get; set; }
 
         public string TaxPercent { get; set; }
+        public string ProductItemWeight { get; set; }
     }
 }

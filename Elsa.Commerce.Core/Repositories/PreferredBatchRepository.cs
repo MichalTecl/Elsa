@@ -19,10 +19,10 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly ISession m_session;
         private readonly IDatabase m_database;
         private readonly ICache m_cache;
-        private readonly PackingPreferredBatchesConfig m_config;
+        private readonly OrdersSystemConfig m_config;
         private readonly IMaterialBatchRepository m_batchRepository;
 
-        public PreferredBatchRepository(ISession session, IDatabase database, ICache cache, PackingPreferredBatchesConfig config, IMaterialBatchRepository batchRepository)
+        public PreferredBatchRepository(ISession session, IDatabase database, ICache cache, OrdersSystemConfig config, IMaterialBatchRepository batchRepository)
         {
             m_session = session;
             m_database = database;

@@ -140,6 +140,16 @@ namespace Elsa.Common.Utils
             return s.TrimEnd('.');
         }
 
+        public static string FormatDecimal(decimal? n)
+        {
+            if (n == null)
+            {
+                return null;
+            }
+
+            return FormatDecimal(n.Value);
+        }
+
         public static string FormatDecimal(decimal n, CultureInfo culture)
         {
             var s = n.ToString(culture);

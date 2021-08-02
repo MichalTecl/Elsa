@@ -55,6 +55,7 @@ namespace Elsa.Commerce.Core
             setup.For<IFixedCostRepository>().Use<FixedCostRepository>();
             setup.For<ISaleEventRepository>().Use<SaleEventRepository>();
             setup.For<IRecipeRepository>().Use<RecipeRepository>();
+            setup.For<IOrderWeightCalculator>().Use<OrderWeightCalculator>();
         }
     }
 }

@@ -23,6 +23,7 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         decimal Quantity { get; set; }
         decimal TaxedPrice { get; set; }
         decimal TaxPercent { get; set; }
+        decimal? Weight { get; set; }
 
         [NotFk]
         [NVarchar(255, true)]
