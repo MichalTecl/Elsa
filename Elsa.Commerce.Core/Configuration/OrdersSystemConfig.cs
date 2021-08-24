@@ -1,4 +1,5 @@
 ﻿using Elsa.Common.Configuration;
+using System.Collections.Generic;
 
 namespace Elsa.Commerce.Core.Configuration
 {
@@ -13,5 +14,11 @@ namespace Elsa.Commerce.Core.Configuration
 
         [ConfigEntry("OrderProcessing.UseWeight", "false", ConfigEntryScope.User, ConfigEntryScope.Project, ConfigEntryScope.Global)]
         public bool UseOrderWeight { get; set; }
+
+        [ConfigEntry("OrderProcessing.OrderWeightAddition", "0", ConfigEntryScope.Project, ConfigEntryScope.Global)]
+        public decimal? OrderWeightAddition { get; set; }
+
+        [ConfigEntry("OrderProcessing.PaymentMethodsToSetPaidAuto", "[]", ConfigEntryScope.Project, ConfigEntryScope.Global)]
+        public List<string> PaymentMethodsToSetPaidAuto { get; set; }
     }
 }

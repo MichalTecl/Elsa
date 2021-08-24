@@ -56,7 +56,7 @@ namespace Elsa.Commerce.Core
                 sum += weight * i.Item2;
             }
             
-            return isValid ? sum : (decimal?)null;
+            return isValid ? (sum + (m_ordersConfig.OrderWeightAddition ?? 0)) : (decimal?)null;
         }
 
         /// <returns>Product|Qty|SavedWeight</returns>
