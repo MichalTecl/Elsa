@@ -90,9 +90,19 @@ namespace Elsa.Commerce.Core.Repositories
                 }
 
                 foreach (var delId in host.OrderItemsToDelete)
-                {
+                {                    
                     var kitChildren = m_database.SelectFrom<IOrderItem>().Where(i => i.KitParentId == delId).Execute()
                         .ToList();
+
+                    var orderItemIds = new List<long>(1 + kitChildren.Count);
+                    orderItemIds.Add(delId);
+                    orderItemIds.AddRange(kitChildren.Select(ch => ch.Id));
+
+                    var oimbs = m_database.SelectFrom<IOrderItemMaterialBatch>().Where(ob => ob.OrderItemId.InCsv(orderItemIds)).Execute().ToList();
+                    if (oimbs.Any())
+                    {
+                        m_database.DeleteAll(oimbs);
+                    }
 
                     if (kitChildren.Any())
                     {
