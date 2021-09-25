@@ -39,7 +39,7 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         [NVarchar(250, false)]
         string TaxIdentificationNumber { get; set; }
 
-        [NVarchar(20, true)]
+        [NVarchar(50, true)]
         string ContactPhone { get; set; }
 
         [NVarchar(64, true)]

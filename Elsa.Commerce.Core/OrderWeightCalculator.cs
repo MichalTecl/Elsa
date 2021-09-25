@@ -53,7 +53,7 @@ namespace Elsa.Commerce.Core
                     weight = i.Item3.Value;
                 }
 
-                sum += weight * i.Item2;
+                sum += weight; // * i.Item2;
             }
             
             return isValid ? (sum + (m_ordersConfig.OrderWeightAddition ?? 0)) : (decimal?)null;
