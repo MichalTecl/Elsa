@@ -66,22 +66,7 @@ namespace Elsa.App.OrdersPacking
             {
                 throw new Exception("Musí být alespoň tři čísla");
             }
-
-            /*
-            m_orderRepository.PreloadOrders(DateTime.Now.AddDays(-30), DateTime.Now.AddDays(1));
-
-            var paid =
-                m_orderRepository.GetOrdersByStatus(
-                    OrderStatus.ReadyToPack,
-                    DateTime.Now.AddDays(-90),
-                    DateTime.Now.AddDays(1)).ToList();
-
-            var filtered = paid.Where(o => GetTrackingNumber(o).EndsWith(number)).ToList();
-            if (filtered.Count > 1)
-            {
-                throw new Exception("Objednávku nelze jednoznačně určit, použijte celé číslo nebo trasovací číslo Zásilkovny");
-            }*/
-
+                       
             var seek = m_orderRepository.SearchOrder(number, OrderStatus.ReadyToPack.Id);
 
             IPurchaseOrder filtered = null;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
@@ -29,6 +30,10 @@ namespace Elsa.Commerce.Core.VirtualProducts
         void CleanCache();
 
         void DeleteVirtualProduct(int vpId);
+
+        List<ErpProductMapping> ExportErpProductMappings();
+
+        void ImportErpProductMappings(List<ErpProductMapping> mappings);
     }
 
     public interface IDisposableVirtualProductsRepository : IVirtualProductRepository, IDisposable
