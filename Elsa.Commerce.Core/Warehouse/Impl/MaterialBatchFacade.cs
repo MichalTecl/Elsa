@@ -205,7 +205,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         public BatchKey FindBatchBySearchQuery(int materialId, string query)
         {
             var batches = m_batchRepository.GetMaterialBatches(
-                DateTime.Now.AddDays(-365),
+                DateTime.Now.AddDays(-9999),
                 DateTime.Now.AddDays(365),
                 false,
                 materialId);
