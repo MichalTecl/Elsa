@@ -537,6 +537,12 @@ namespace Elsa.Users.Components
         
         private void InvalidateCache(int? roleId = null, int? userId = null)
         {
+            if (m_session?.Project == null)
+            {
+                m_cache.Clear();
+                return;
+            }
+
             m_cache.RemoveByPrefix($"rolemap_{ m_session.Project.Id}");
 
             if (roleId != null)
