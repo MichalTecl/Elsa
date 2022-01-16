@@ -224,6 +224,7 @@
     <None Include="sencha.json" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SQL\20220116_001_GetAvailableBatchesByNrLike.sql" />
     <Content Include="SQL\20211109_001_sp_assignEshopItemToMaterial.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

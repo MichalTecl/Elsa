@@ -204,13 +204,14 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public BatchKey FindBatchBySearchQuery(int materialId, string query)
         {
-            var batches = m_batchRepository.GetMaterialBatches(
-                DateTime.Now.AddDays(-9999),
-                DateTime.Now.AddDays(365),
-                false,
-                materialId);
-
-            var found = batches.Where(b => b.Batch.BatchNumber.EndsWith(query)).Select(b => b.Batch.BatchNumber).Distinct().ToList();
+            var found = m_database.Sql()
+                .Call("GetAvailableBatchesByNrLike")
+                .WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@materialId", materialId)
+                .WithParam("@batchNrLike", $"%{query}")
+                .MapRows<string>(r => r.GetString(0))
+                .Distinct()
+                .ToList();
 
             if (found.Count == 1)
             {
