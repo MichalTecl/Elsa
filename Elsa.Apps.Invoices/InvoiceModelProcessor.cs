@@ -43,6 +43,10 @@ namespace Elsa.Apps.Invoices
                 throw new InvalidOperationException("Invalid model");
             }
 
+            var now = DateTime.Now;
+            if (!(model.Date.Year == now.Year && model.Date.Month == now.Month))
+                throw new Exception("Lze naskladnit pouze v aktuálním měsíci");
+
             var supplier = m_supplierRepository.GetSupplier(model.SupplierName ?? string.Empty).Ensure($"Neexistující dodavatel \"{model.SupplierName}\"");
             var currency = m_currencyRepository.GetCurrency(model.Currency).Ensure($"Neexistující symbol měny \"{model.Currency}\"");
             

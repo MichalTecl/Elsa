@@ -35,7 +35,7 @@ namespace Elsa.Commerce.Core.Repositories
         public IProduct GetProduct(int erpId, string erpProductId, DateTime orderDt, string productName)
         {
             var product =  m_index.FirstOrDefault(p => (p.ErpId == erpId) && (p.ErpProductId == erpProductId))
-                        ?? GetProductFromDatabase(erpId, erpProductId);
+                        ?? GetProductFromDatabase(erpId, erpProductId, productName);
 
             if (product == null)
             {
@@ -62,8 +62,17 @@ namespace Elsa.Commerce.Core.Repositories
             return product;
         }
 
-        private IProduct GetProductFromDatabase(int erpId, string erpProductId)
-        {
+        private IProduct GetProductFromDatabase(int erpId, string erpProductId, string erpProductName)
+        {           
+            if (string.IsNullOrWhiteSpace(erpProductId))
+            {
+                return m_database.SelectFrom<IProduct>()
+                    .Where(p => p.ErpId == erpId)
+                    .Where(p => p.Name == erpProductName)
+                    .Execute()
+                    .FirstOrDefault();
+            }
+
             return
                 m_database.SelectFrom<IProduct>()
                     .Where(p => p.ErpId == erpId)

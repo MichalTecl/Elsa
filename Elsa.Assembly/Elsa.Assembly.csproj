@@ -131,6 +131,10 @@
       <Project>{4ECA9E43-64D4-49CD-B9C2-205316C0E7B1}</Project>
       <Name>Elsa.Apps.ProductionService</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Apps.Reporting\Elsa.Apps.Reporting.csproj">
+      <Project>{AF048602-B9A5-4464-9F6D-3D3A4FDF55FE}</Project>
+      <Name>Elsa.Apps.Reporting</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Apps.ScheduledJobs\Elsa.Apps.ScheduledJobs.csproj">
       <Project>{55482891-37c2-4c35-83be-68100012ae25}</Project>
       <Name>Elsa.Apps.ScheduledJobs</Name>

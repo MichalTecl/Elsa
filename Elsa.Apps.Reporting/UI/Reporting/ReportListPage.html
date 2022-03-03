@@ -1,0 +1,45 @@
+﻿<ElsaBody>
+
+    <div class="panel w4">
+        <div class="panelHead">
+            <div class="panelTitle">Reporty</div>
+        </div>
+        <div id="reportListUi" class="panelContent">
+            <div id="reportList" data-bind="itemsSource:reports" data-key="Code">
+                <div class="lt-template">
+                    <a data-bind="text:Title;href:link"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var app = app || {};
+        app.Reporting = app.Reporting || {};
+        app.Reporting.VM = app.Reporting.VM ||
+            function () {
+
+                var self = this;
+                this.reports = [];
+
+                lt.api("/reporting/getReportTypes")
+                    .get(function (reps) {
+                        self.reports = [];
+
+                        for (var i = 0; i < reps.length; i++) {
+                            var r = reps[i];
+                            r.link = '/reporting/getreport?code=' + r.Code;
+                            self.reports.push(r);
+                        }                        
+                    });
+            };
+
+        app.Reporting.vm = app.Reporting.vm || new app.Reporting.VM();
+
+        lt.element("reportListUi").withModel("app.Reporting.vm").attach(function() { });
+    </script>
+
+
+    <link href="/UI/Inspector/Inspector.css" rel="stylesheet" />
+
+
+</ElsaBody>

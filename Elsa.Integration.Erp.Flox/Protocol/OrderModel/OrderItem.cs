@@ -9,7 +9,12 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
         private string m_productName = string.Empty;
 
         [XmlElement("item_id")]
-        public string ErpOrderItemId { get; set; }
+        //[XmlElement("link")]
+        public string ErpOrderItemId 
+        { 
+            get; 
+            set; 
+        }
 
         [XmlElement("prod_name")]
         public string ProductName
