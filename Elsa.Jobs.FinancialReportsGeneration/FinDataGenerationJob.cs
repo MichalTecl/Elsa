@@ -53,28 +53,58 @@ namespace Elsa.Jobs.FinancialReportsGeneration
         {
             try
             {
-                var now = DateTime.Now.AddMonths(-1);
-                var year = now.Year;
-                var month = now.Month;
-                m_log.Info($"Starting FinDataGeneration job for Year={year} Month={month}");
+                DateTime lastExisting = DateTime.Now.AddMonths(-2);
 
-                var messages = new List<string>();
+                m_log.Info("Checking for last existing findata");
 
-                StartGeneration(year, month, m =>
-                {
-                    if (!messages.Contains(m))
+                m_database.Sql()
+                    .ExecuteWithParams("SELECT TOP 1 [Year], [Month] FROM FinDataGenerationClosure WHERE ProjectId={0} ORDER BY closeDt DESC", m_session.Project.Id)
+                    .ReadRows<int, int>((lyear, lmonth) =>
                     {
-                        messages.Add(m);
-                    }
-                }, () => SendNotification(messages, month, year));
+                        lastExisting = new DateTime(lyear, lmonth, 1);
+                        m_log.Info($"In DB last existing findata generation = {lastExisting}");
+                    });
 
-                SendNotification(messages, month, year);
+                m_log.Info($"Last existing findat considered to be from {lastExisting}");
+
+                var now = DateTime.Now;
+                var generateFor = lastExisting.AddMonths(1);
+
+                while (!((generateFor.Year == now.Year) && (generateFor.Month == now.Month)))
+                {
+                    m_log.Info($"Starting generation of findata for {generateFor.Year}/{generateFor.Month:00}");
+
+                    Generate(generateFor);
+
+                    generateFor = generateFor.AddMonths(1);
+                }
+
+                m_log.Info("Last generated findata are for prev month - done");
             }
             catch (Exception ex)
             {
                 m_log.Error("Run failed", ex);
                 throw;
             }
+        }
+
+        private void Generate(DateTime now)
+        {
+            var year = now.Year;
+            var month = now.Month;
+            m_log.Info($"Starting FinDataGeneration job for Year={year} Month={month}");
+
+            var messages = new List<string>();
+
+            StartGeneration(year, month, m =>
+            {
+                if (!messages.Contains(m))
+                {
+                    messages.Add(m);
+                }
+            }, () => SendNotification(messages, month, year));
+
+            SendNotification(messages, month, year);
         }
 
         private void SendNotification(List<string> messages, int month, int year)
@@ -186,6 +216,13 @@ namespace Elsa.Jobs.FinancialReportsGeneration
                 m_log.Info($"{i} files generated");
 
                 var zipTarget = $"{ftDir}.zip";
+
+                if (File.Exists(zipTarget))
+                {
+                    m_log.Info($"Zip archive {zipTarget} already exists - deleting");
+                    File.Delete(zipTarget);
+                }
+
                 m_log.Info($"Creating archive {zipTarget}");
                 ZipFile.CreateFromDirectory(ftDir, zipTarget);
                 m_log.Info("Archive created");
