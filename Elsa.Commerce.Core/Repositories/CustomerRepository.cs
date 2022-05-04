@@ -10,6 +10,7 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Crm;
@@ -22,11 +23,13 @@ namespace Elsa.Commerce.Core.Repositories
     {
         private readonly IDatabase m_database;
         private readonly ISession m_session;
+        private readonly ILog m_log;
 
-        public CustomerRepository(IDatabase database, ISession session)
+        public CustomerRepository(IDatabase database, ISession session, ILog log)
         {
             m_database = database;
             m_session = session;
+            m_log = log;
         }
 
         public void SyncCustomers(IEnumerable<IErpCustomerModel> source)
@@ -299,6 +302,43 @@ namespace Elsa.Commerce.Core.Repositories
         private string GetSearchTag(IErpCustomerModel cm)
         {
             return StringUtil.NormalizeSearchText(1000, cm.Name, cm.Email, cm.Surname, cm.Phone);
+        }
+
+        public void UpdateNewsletterSubscribersList(string sourceName, List<string> actualSubscriers)
+        {
+            var currentList = m_database.SelectFrom<INewsletterSubscriber>().Where(s => s.ProjectId == m_session.Project.Id && s.SourceName == sourceName).Execute().ToList();
+
+            // 1. delete removed
+            foreach(var aliveInDb in currentList.Where(i => i.UnsubscribeDt == null))
+            {
+                if (actualSubscriers.Contains(aliveInDb.Email, StringComparer.InvariantCultureIgnoreCase))
+                {
+                    continue;
+                }
+
+                m_log.Info($"{aliveInDb.Email} was not recevied in subscribers list - ending subscription in the DB");
+
+                aliveInDb.UnsubscribeDt = DateTime.Now;
+                m_database.Save(aliveInDb);
+            }
+
+            // 2. add missing
+            foreach(var newSubscriber in actualSubscriers)
+            {
+                var localRecord = currentList.FirstOrDefault(s => s.Email.Equals(newSubscriber, StringComparison.InvariantCultureIgnoreCase));
+
+                if (localRecord == null || localRecord.UnsubscribeDt != null)
+                {
+                    m_log.Info($"{newSubscriber} was not found in local db - saving");
+                    localRecord = localRecord ?? m_database.New<INewsletterSubscriber>();
+                    localRecord.Email = newSubscriber;
+                    localRecord.ProjectId = m_session.Project.Id;
+                    localRecord.SourceName = sourceName;
+                    localRecord.UnsubscribeDt = null;
+                    localRecord.SubscribeDt = DateTime.Now;
+                    m_database.Save(localRecord);
+                }
+            }            
         }
     }
 }

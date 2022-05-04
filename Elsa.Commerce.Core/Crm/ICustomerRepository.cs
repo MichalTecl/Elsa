@@ -20,5 +20,7 @@ namespace Elsa.Commerce.Core.Crm
         CustomerOverview GetOverview(string email);
 
         IEnumerable<CustomerOverview> GetOverviews(IEnumerable<string> emails);
+
+        void UpdateNewsletterSubscribersList(string sourceName, List<string> actualSubscriers);
     }
 }
