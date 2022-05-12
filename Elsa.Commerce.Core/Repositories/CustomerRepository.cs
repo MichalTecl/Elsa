@@ -340,5 +340,20 @@ namespace Elsa.Commerce.Core.Repositories
                 }
             }            
         }
+
+        public List<string> GetSubscribersToSync(string sourceName)
+        {
+            var sql = @"SELECT cus.Email
+                          FROM Customer cus
+                         WHERE cus.ProjectId = @projectId
+                           AND cus.NewsletterSubscriber = 1
+                           AND cus.Email NOT IN (SELECT sub.Email 
+                                                   FROM NewsletterSubscriber sub 
+						                          WHERE sub.ProjectId = {0}
+						                            AND sub.SourceName = {1})";
+
+            var missingSubscribers = m_database.Sql().ExecuteWithParams(sql, m_session.Project.Id, sourceName).MapRows(r => r.GetString(0));
+            return missingSubscribers.ToList();
+        }
     }
 }

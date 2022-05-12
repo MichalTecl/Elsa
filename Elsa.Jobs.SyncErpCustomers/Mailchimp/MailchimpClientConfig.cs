@@ -13,7 +13,7 @@ namespace Elsa.Jobs.SyncErpCustomers.Mailchimp
         [ConfigEntry("MailchimpClient.ApiKey", ConfigEntryScope.Project)]
         public string ApiKey { get; set; }
 
-        [ConfigEntry("MailchimpClient.ListName")]
+        [ConfigEntry("MailchimpClient.ListName", ConfigEntryScope.Project)]
         public string ListName { get; set; }
     }
 }

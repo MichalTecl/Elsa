@@ -12,7 +12,7 @@ namespace Elsa.Core.Entities.Commerce.Crm
     [Entity]
     public interface INewsletterSubscriber : IProjectRelatedEntity
     {
-        int Id { get; set; }
+        int Id { get; }
 
         [NVarchar(200, false)]
         string SourceName { get; set; }
