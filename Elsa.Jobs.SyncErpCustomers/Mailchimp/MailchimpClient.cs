@@ -11,7 +11,7 @@ namespace Elsa.Jobs.SyncErpCustomers.Mailchimp
 {
     public class MailchimpClient
     {        
-        public async Task<List<string>> GetSubscribedMembers(MailchimpClientConfig cfg, ILog log)
+        public async Task<Dictionary<string, bool>> GetMembersSubscriptionStatus(MailchimpClientConfig cfg, ILog log)
         {
             var manager = new MailChimpManager(cfg.ApiKey);
 
@@ -25,7 +25,7 @@ namespace Elsa.Jobs.SyncErpCustomers.Mailchimp
 
             log.Info($"Found list Name='{list.Name}' Id='{list.Id}'");
 
-            var result = new List<string>();
+            var result = new Dictionary<string, bool>();
 
             const int limit = 500;
             int offset = 0;
@@ -34,7 +34,6 @@ namespace Elsa.Jobs.SyncErpCustomers.Mailchimp
             {
                 var mr = new MemberRequest
                 {
-                    Status = MailChimp.Net.Models.Status.Subscribed,
                     Limit = limit,
                     Offset = offset
                 };
@@ -47,7 +46,11 @@ namespace Elsa.Jobs.SyncErpCustomers.Mailchimp
 
                 log.Info($"Received {receivedCount} subscribers");
 
-                result.AddRange(members.Select(m => m.EmailAddress));
+                foreach(var mcMember in members)
+                {
+                    var mail = mcMember.EmailAddress.Trim().ToLowerInvariant();
+                    result[mail] = mcMember.Status == MailChimp.Net.Models.Status.Subscribed;                    
+                }
 
             } while (receivedCount == limit);
 

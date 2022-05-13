@@ -12,6 +12,7 @@ BEGIN
     FROM Customer cus
     WHERE cus.ProjectId = @projectId
     AND cus.NewsletterSubscriber = 1
+	AND cus.NewsletterUnsubscribeDt IS NULL
     AND cus.Email NOT IN (SELECT sub.Email 
                             FROM NewsletterSubscriber sub 
 						    WHERE sub.ProjectId = @projectId

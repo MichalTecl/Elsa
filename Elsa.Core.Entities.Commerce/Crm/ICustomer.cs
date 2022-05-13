@@ -43,6 +43,8 @@ namespace Elsa.Core.Entities.Commerce.Crm
 
         DateTime? NewsletterSubscriptionDt { get; set; }
 
+        DateTime? NewsletterUnsubscribeDt { get; set; }
+
         bool IsDistributor { get; set; }
 
         bool IsRegistered { get; set; }

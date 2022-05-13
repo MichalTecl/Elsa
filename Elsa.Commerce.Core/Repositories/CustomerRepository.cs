@@ -224,13 +224,21 @@ namespace Elsa.Commerce.Core.Repositories
 
             if (trg.NewsletterSubscriber != src.IsNewsletterSubscriber)
             {
-                trg.NewsletterSubscriber = src.IsNewsletterSubscriber;
-                if (src.IsNewsletterSubscriber)
+                if (trg.NewsletterUnsubscribeDt == null) // If someone unsubscribed in Mailchimp, they cannot subscribe from ERP anymore
+                                                         // (bcs currently there is no way how to tell ERP that they unsubscribed from Mailchimp)
                 {
-                    trg.NewsletterSubscriptionDt = DateTime.Now;
-                }
+                    trg.NewsletterSubscriber = src.IsNewsletterSubscriber;
+                    if (src.IsNewsletterSubscriber)
+                    {
+                        trg.NewsletterSubscriptionDt = DateTime.Now;
+                    }
+                    else
+                    {
+                        trg.NewsletterUnsubscribeDt = DateTime.Now;
+                    }
 
-                changed = true;
+                    changed = true;
+                }
             }
 
             var nick = GetNick(trg);
@@ -304,41 +312,97 @@ namespace Elsa.Commerce.Core.Repositories
             return StringUtil.NormalizeSearchText(1000, cm.Name, cm.Email, cm.Surname, cm.Phone);
         }
 
-        public void UpdateNewsletterSubscribersList(string sourceName, List<string> actualSubscriers)
+        public void UpdateNewsletterSubscribersList(string sourceName, Dictionary<string, bool> actualSubscriers)
         {
-            var currentList = m_database.SelectFrom<INewsletterSubscriber>().Where(s => s.ProjectId == m_session.Project.Id && s.SourceName == sourceName).Execute().ToList();
+            var localSubscribers = m_database.SelectFrom<INewsletterSubscriber>().Where(s => s.ProjectId == m_session.Project.Id && s.SourceName == sourceName).Execute().ToList();
+            var customers = m_database
+                .SelectFrom<ICustomer>().Where(c => c.ProjectId == m_session.Project.Id)
+                .Execute()
+                .ToList();
 
-            // 1. delete removed
-            foreach(var aliveInDb in currentList.Where(i => i.UnsubscribeDt == null))
+            void update(string email, bool status, bool updateCustomerTable) 
             {
-                if (actualSubscriers.Contains(aliveInDb.Email, StringComparer.InvariantCultureIgnoreCase))
+                email = email.Trim().ToLowerInvariant();
+
+                var localRecord = localSubscribers.FirstOrDefault(local => local.Email.Equals(email));
+                
+                if ((localRecord != null) && (status == (localRecord.UnsubscribeDt == null)))
+                    return;
+
+                m_log.Info($"Newsletter list member update received: {email} = {(status ? "SUBSCRIBED" : "UNSUBSCRIBED")}");
+
+                localRecord = localRecord ?? m_database.New<INewsletterSubscriber>();
+                localRecord.Email = email;
+                localRecord.ProjectId = m_session.Project.Id;
+                localRecord.SourceName = sourceName;
+
+                if (status)
                 {
-                    continue;
-                }
-
-                m_log.Info($"{aliveInDb.Email} was not recevied in subscribers list - ending subscription in the DB");
-
-                aliveInDb.UnsubscribeDt = DateTime.Now;
-                m_database.Save(aliveInDb);
-            }
-
-            // 2. add missing
-            foreach(var newSubscriber in actualSubscriers)
-            {
-                var localRecord = currentList.FirstOrDefault(s => s.Email.Equals(newSubscriber, StringComparison.InvariantCultureIgnoreCase));
-
-                if (localRecord == null || localRecord.UnsubscribeDt != null)
-                {
-                    m_log.Info($"{newSubscriber} was not found in local db - saving");
-                    localRecord = localRecord ?? m_database.New<INewsletterSubscriber>();
-                    localRecord.Email = newSubscriber;
-                    localRecord.ProjectId = m_session.Project.Id;
-                    localRecord.SourceName = sourceName;
                     localRecord.UnsubscribeDt = null;
                     localRecord.SubscribeDt = DateTime.Now;
-                    m_database.Save(localRecord);
                 }
-            }            
+                else
+                {
+                    localRecord.UnsubscribeDt = DateTime.Now;
+                }
+
+                m_database.Save(localRecord);
+
+                if (updateCustomerTable)
+                {
+                    var localCustomer = customers.FirstOrDefault(lc => lc.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase)) ?? m_database.New<ICustomer>();
+
+                    if (status)
+                    {
+                        if (localCustomer.NewsletterSubscriber && (localCustomer.NewsletterSubscriptionDt != null))
+                            return;
+                    }
+                    else
+                    {
+                        if ((!localCustomer.NewsletterSubscriber) && (localCustomer.NewsletterUnsubscribeDt != null))
+                            return;
+                    }
+
+                    localCustomer.ProjectId = m_session.Project.Id;
+                    localCustomer.Email = email;
+                    
+                    if(localCustomer.Id < 1)
+                    {
+                        localCustomer.FirstContactDt = DateTime.Now;
+                        localCustomer.Nick = GetNick(localCustomer);
+                        localCustomer.SearchTag = StringUtil.NormalizeSearchText(1000, email);
+                    }
+
+                    localCustomer.NewsletterSubscriber = status;
+                    if (status)
+                    {                     
+                        localCustomer.NewsletterSubscriptionDt = DateTime.Now;
+                        localCustomer.NewsletterUnsubscribeDt = null;
+                    }
+                    else 
+                    {                        
+                        localCustomer.NewsletterUnsubscribeDt = DateTime.Now;
+                    }
+
+                    m_database.Save(localCustomer);
+                }
+            }
+
+            // 1. save received data to db
+            foreach (var actual in actualSubscriers)
+            {
+                update(actual.Key, actual.Value, true);
+            }
+
+            var notReceived = localSubscribers
+                .Where(l => l.UnsubscribeDt == null)
+                .Select(l => l.Email.Trim().ToLowerInvariant())
+                .Where(local => !actualSubscriers.ContainsKey(local)).ToList();
+            
+            foreach(var nr in notReceived)
+            {
+                update(nr, false, false);
+            }           
         }
 
         public List<string> GetSubscribersToSync(string sourceName)

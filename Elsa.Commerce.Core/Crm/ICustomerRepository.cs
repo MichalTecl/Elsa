@@ -21,7 +21,7 @@ namespace Elsa.Commerce.Core.Crm
 
         IEnumerable<CustomerOverview> GetOverviews(IEnumerable<string> emails);
 
-        void UpdateNewsletterSubscribersList(string sourceName, List<string> actualSubscriers);
+        void UpdateNewsletterSubscribersList(string sourceName, Dictionary<string, bool> actualSubscriers);
 
         List<string> GetSubscribersToSync(string sourceName);
     }

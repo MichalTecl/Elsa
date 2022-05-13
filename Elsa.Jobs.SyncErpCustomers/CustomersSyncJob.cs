@@ -47,9 +47,9 @@ namespace Elsa.Jobs.SyncErpCustomers
 
             var mc = new MailchimpClient();
 
-            var subscribers = Task.Run(() => mc.GetSubscribedMembers(m_mcConfig, m_log)).Result;
+            var subscribers = Task.Run(() => mc.GetMembersSubscriptionStatus(m_mcConfig, m_log)).Result;
 
-            m_log.Info($"Received {subscribers.Count} of newsletter subscribers");
+            m_log.Info($"Received {subscribers.Count} of newsletter subscribers info");
             m_customerRepository.UpdateNewsletterSubscribersList("Mailchimp", subscribers);
             
             //m_log.Info($"Obtaining subscribers missing in the Mailchimp but subscribed on web:");
