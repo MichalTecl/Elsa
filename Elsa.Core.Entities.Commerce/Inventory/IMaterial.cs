@@ -40,5 +40,10 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         bool? UseAutofinalization { get; set; }
 
         bool? CanBeDigitalOnly { get; set; }
+
+        int? DaysBeforeWarnForUnused { get; set; }
+
+        [NVarchar(256, true)]
+        string UnusedWarnMaterialType { get; set; }
     }
 }

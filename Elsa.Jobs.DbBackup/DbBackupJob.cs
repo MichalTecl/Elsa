@@ -31,12 +31,13 @@ namespace Elsa.Jobs.DbBackup
             try
             {
                 using (var conn = m_database.OpenUnmanagedConnection())
-                {
+                {                    
                     conn.Open();
 
                     using (var cmd = new SqlCommand("sp_backup", conn)
                     {
-                        CommandType = CommandType.StoredProcedure
+                        CommandType = CommandType.StoredProcedure,
+                        CommandTimeout = 0
                     })
                     {
                         fileName = cmd.ExecuteScalar() as string;
