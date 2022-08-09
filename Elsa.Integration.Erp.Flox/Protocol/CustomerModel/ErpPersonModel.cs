@@ -34,7 +34,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 
         public bool IsActive { get; }
 
-        public bool IsNewsletterSubscriber { get; }
+        public bool IsNewsletterSubscriber { get; set; }
 
         public bool IsDistributor { get; }
 

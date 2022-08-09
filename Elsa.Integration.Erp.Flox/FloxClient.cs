@@ -27,8 +27,7 @@ namespace Elsa.Integration.Erp.Flox
 
         private DateTime m_lastAccess = DateTime.MinValue;
 
-        private readonly WebFormsClient m_client = new WebFormsClient();
-
+        private readonly WebFormsClient m_client;
         public FloxClient(
             FloxClientConfig config,
             FloxDataMapper mapper,
@@ -39,6 +38,8 @@ namespace Elsa.Integration.Erp.Flox
             Mapper = mapper;
             m_log = log;
             m_statusMappingRepository = statusMappingRepository;
+            m_client = new WebFormsClient(m_log);
+
         }
 
         public IErp Erp { get; set; }
@@ -153,9 +154,10 @@ namespace Elsa.Integration.Erp.Flox
         {
             EnsureSession();
 
+            m_log.Info("Starting 'Persons' export");
+            
             var url = ActionUrl("/erp/impexp/export/index/persons/xml");
-
-            var dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+            
             var exportString =
                 m_client.Post(url)
                     .Field(
@@ -163,15 +165,18 @@ namespace Elsa.Integration.Erp.Flox
                         "a:9:{s:10:\"xcol_email\";s:2:\"on\";s:9:\"xcol_name\";s:2:\"on\";s:12:\"xcol_surname\";s:2:\"on\";s:11:\"xcol_active\";s:2:\"on\";s:15:\"xcol_newsletter\";s:2:\"on\";s:17:\"xcol_address_name\";s:2:\"on\";s:20:\"xcol_address_surname\";s:2:\"on\";s:18:\"xcol_address_phone\";s:2:\"on\";s:11:\"xcol_groups\";s:2:\"on\";}")
                     .Field("data", string.Empty)
                     .Field("massFilter", string.Empty)
-                    .Field("downloadToken", dlToken)
+                    .Field("downloadToken", CalcDownloadToken())
                     .Call();
             
             var result = new List<IErpCustomerModel>();
 
             var parsed = PersonsDoc.Parse(exportString);
+                        
             result.AddRange(parsed.Select(i => new ErpPersonModel(i)));
 
-            dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+            m_log.Info($"Received {result.Count} of 'Persons'");
+
+            m_log.Info("Requesting 'Companies' export");
             exportString =
                 m_client.Post(ActionUrl("/erp/impexp/export/index/companies/xml"))
                     .Field(
@@ -179,13 +184,47 @@ namespace Elsa.Integration.Erp.Flox
                         "a:4:{s:9:\"xcol_name\";s:2:\"on\";s:10:\"xcol_email\";s:2:\"on\";s:18:\"xcol_address_phone\";s:2:\"on\";s:11:\"xcol_groups\";s:2:\"on\";}")
                     .Field("data", string.Empty)
                     .Field("massFilter", string.Empty)
-                    .Field("downloadToken", dlToken)
+                    .Field("downloadToken", CalcDownloadToken())
                     .Call();
 
             exportString = exportString.Replace("<companies>", "<persons>").Replace("</companies>", "</persons>");
 
             parsed = PersonsDoc.Parse(exportString);
             result.AddRange(parsed.Select(i => new ErpPersonModel(i)));
+
+            m_log.Info($"Collected {result.Count} of Persons + Companies records");
+
+            m_log.Info("Requesting newsletter subscribers export");
+            var newsletterReceivers = LoadNewsletterReceivers().ToList();
+
+            m_log.Info($"Received {newsletterReceivers.Count} of newsletter subscribers");
+
+            foreach(var subscriber in newsletterReceivers)
+            {
+                var customer = result.FirstOrDefault(r => r.Email.Equals(subscriber, StringComparison.InvariantCultureIgnoreCase));
+                
+                if (customer != null)
+                {
+                    if (!customer.IsNewsletterSubscriber)
+                    {
+                        customer.IsNewsletterSubscriber = true;
+                        m_log.Info($"Setting existing customer {subscriber} to be Newsletter subscriber");
+                    }
+                }
+                else
+                {
+                    m_log.Info($"Adding customer {subscriber} based on newsletter subscription");
+
+                    customer = new ErpPersonModel(new PersonModel 
+                    {
+                        Email = subscriber,
+                        Active = 1,
+                        Newsletter = 1
+                    });
+
+                    result.Add(customer);
+                }
+            }
 
             return result;
         }
@@ -365,6 +404,28 @@ namespace Elsa.Integration.Erp.Flox
         private static void RenderField(string field, StringBuilder sb)
         {
             sb.Append("s:").Append(field.Length).Append(":\"").Append(field).Append("\";");
+        }
+
+        private static string CalcDownloadToken()
+        {
+            return ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
+        }
+
+        private List<string> LoadNewsletterReceivers()
+        {
+            var exportString =
+                m_client.Post(ActionUrl("/erp/impexp/export/index/newsletterReceivers/xml"))
+                    .Field(
+                        "dataSubset",
+                        "a:0:{}")
+                    .Field("data", string.Empty)
+                    .Field("massFilter", string.Empty)
+                    .Field("downloadToken", CalcDownloadToken())
+                    .Call();
+
+            var parsed = NewsletterSubscriptionsModel.Parse(exportString);
+
+            return parsed.Select(i => i.Email).ToList();
         }
     }
 }

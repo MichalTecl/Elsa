@@ -29,6 +29,17 @@ namespace Elsa.Common.Utils
                                                                                     { '0', 'o' }
                                                                             };
 
+        internal static string AddNumberToFileName(string path, int number)
+        {
+            var directory = Path.GetDirectoryName(path);
+            var extension = Path.GetExtension(path);
+            var fn = Path.GetFileNameWithoutExtension(path);
+
+            fn = $"{fn}_{number}{extension}";
+
+            return Path.Combine(directory, fn);
+        }
+
         private static readonly Dictionary<char, char> s_seoStringReplacements = new Dictionary<char, char>()
                                                                                      {
                                                                                              { 'á', 'a' },
@@ -328,22 +339,24 @@ namespace Elsa.Common.Utils
             }
         }
 
-        public static string SanitizeFileName(string inp)
+        public static string SanitizeFileName(string inp, char replacer = '_')
         {
             if (string.IsNullOrWhiteSpace(inp))
             {
                 return "BezNazvu";
             }
 
-            inp = string.Join("_",
+            inp = string.Join(replacer.ToString(),
                 inp.Trim().Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
 
-            while (inp.Contains("__"))
+            var doubleReplacer = $"{replacer}{replacer}";
+
+            while (inp.Contains(doubleReplacer))
             {
-                inp = inp.Replace("__", "_");
+                inp = inp.Replace(doubleReplacer, replacer.ToString());
             }
 
-            inp = inp.Trim('_');
+            inp = inp.Trim(replacer);
 
             if (string.IsNullOrWhiteSpace(inp))
             {

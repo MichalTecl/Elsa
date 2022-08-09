@@ -21,7 +21,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 {
     public class ZasilkovnaClient : IShipmentProvider
     {
-        private readonly WebFormsClient m_formsClient = new WebFormsClient();
+        private readonly WebFormsClient m_formsClient;
 
         private readonly IErpClientFactory m_erpClientFactory;
         private readonly IOrderWeightCalculator m_orderWeightCalculator;
@@ -64,6 +64,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             m_cache = cache;
             m_session = session;
             m_orderWeightCalculator = orderWeightCalculator;
+            m_formsClient = new WebFormsClient(log);
         }
 
         public byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders)

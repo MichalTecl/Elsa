@@ -20,7 +20,7 @@ namespace Elsa.Commerce.Core.Model
 
         bool IsActive { get; }
 
-        bool IsNewsletterSubscriber { get; }
+        bool IsNewsletterSubscriber { get; set; }
 
         bool IsDistributor { get; }
     }

@@ -29,6 +29,6 @@ namespace Elsa.Commerce.Core
 
         IEnumerable<IErpCustomerModel> LoadCustomers();
 
-        string GetPackingReferenceNumber(IPurchaseOrder po);
+        string GetPackingReferenceNumber(IPurchaseOrder po);        
     }
 }

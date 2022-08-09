@@ -79,6 +79,7 @@
     <Compile Include="Logging\FileLogWriter.cs" />
     <Compile Include="Logging\ILog.cs" />
     <Compile Include="Logging\ILogWriter.cs" />
+    <Compile Include="Logging\LogExtensions.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\NoActionLogWriter.cs" />
     <Compile Include="PasswordHashHelper.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="SysCounters\SysCounterManager.cs" />
     <Compile Include="Utils\CsvGenerator.cs" />
     <Compile Include="Utils\DateUtil.cs" />
+    <Compile Include="Utils\DirectorySizeKeeper.cs" />
     <Compile Include="Utils\PropEqualityComparer.cs" />
     <Compile Include="Utils\GenericComparer.cs" />
     <Compile Include="Utils\ObjectExtensions.cs" />
