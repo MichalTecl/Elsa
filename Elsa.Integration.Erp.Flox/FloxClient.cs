@@ -212,9 +212,7 @@ namespace Elsa.Integration.Erp.Flox
                     }
                 }
                 else
-                {
-                    m_log.Info($"Adding customer {subscriber} based on newsletter subscription");
-
+                {                    
                     customer = new ErpPersonModel(new PersonModel 
                     {
                         Email = subscriber,
