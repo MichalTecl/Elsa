@@ -594,3 +594,10 @@ input.readonly {
 .hasHoverDetail:hover .hoverDetail {
     display: block;
 }
+
+.syswarnhigh {
+    background-color: red;
+    color: white;
+    font-size: 2em;
+    padding: 10px;
+}

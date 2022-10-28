@@ -6,6 +6,7 @@ using Elsa.Assembly;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.JobLauncher.Scheduler;
 
 using Schedoo.Core;
@@ -16,7 +17,11 @@ namespace Elsa.JobLauncher
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Checking for another instances...");
+            SingleInstanceBlock.EnsureSignleInstance("elsa_job_launcher");
             Console.WriteLine("Starting...");
+
+            SharedFilesUtil.SetSharedValue("JobHeartbeat", DateTime.Now.Ticks.ToString());
 
             var container = DiSetup.GetContainer(new FileLogWriter("Jobs"));
             container.Setup(s => s.For<ISession>().Use<JobSession>());

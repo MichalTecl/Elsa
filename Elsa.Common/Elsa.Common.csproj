@@ -93,6 +93,8 @@
     <Compile Include="Utils\PropEqualityComparer.cs" />
     <Compile Include="Utils\GenericComparer.cs" />
     <Compile Include="Utils\ObjectExtensions.cs" />
+    <Compile Include="Utils\SharedFilesUtil.cs" />
+    <Compile Include="Utils\SingleInstanceBlock.cs" />
     <Compile Include="Utils\StringUtil.cs" />
     <Compile Include="WidgetsController.cs" />
   </ItemGroup>

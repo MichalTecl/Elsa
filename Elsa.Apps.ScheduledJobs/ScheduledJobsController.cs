@@ -23,6 +23,7 @@ namespace Elsa.Apps.ScheduledJobs
         private readonly IJobExecutor m_executor;
         private readonly ICache m_cache;
         private readonly ISession m_session;
+        private readonly ILog m_log;
 
         public ScheduledJobsController(IWebSession webSession, ILog log, IScheduledJobsRepository jobsRepository, IJobExecutor executor, ICache cache, ISession session)
             : base(webSession, log)
@@ -31,6 +32,7 @@ namespace Elsa.Apps.ScheduledJobs
             m_executor = executor;
             m_cache = cache;
             m_session = session;
+            m_log = log;
         }
 
         [DoNotLog]
@@ -62,6 +64,23 @@ namespace Elsa.Apps.ScheduledJobs
 
                     return result;
                 });
+        }
+
+        [DoNotLog]
+        public bool CheckJobsHeartbeat() 
+        {
+            try
+            {
+                var lastTimeStamp = long.Parse(SharedFilesUtil.GetSharedValue("JobHeartbeat", DateTime.MinValue.Ticks.ToString()));
+                var lastDt = new DateTime(lastTimeStamp);
+
+                return (DateTime.Now - lastDt).TotalMinutes < 60;
+            }
+            catch (Exception ex)
+            {
+                m_log.Error("scheduledJobsController.CheckJobsHeartbeat failed", ex);
+                return false;
+            }            
         }
 
         public IEnumerable<ScheduledJobStatus> Launch(int scheduleId)
