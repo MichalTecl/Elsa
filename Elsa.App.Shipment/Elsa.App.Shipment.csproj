@@ -63,6 +63,10 @@
       <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
       <Name>Elsa.Common.Interfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Noml\Elsa.Common.Noml.csproj">
+      <Project>{3C44767F-B6AB-4ADD-87F7-EF28051F5FD3}</Project>
+      <Name>Elsa.Common.Noml</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
       <Name>Elsa.Common</Name>

@@ -3,7 +3,7 @@
 
 namespace Elsa.Common.Noml.Core
 {
-    internal class Literal : IRenderable
+    public class Literal : IRenderable
     {
         private readonly string m_html;
 

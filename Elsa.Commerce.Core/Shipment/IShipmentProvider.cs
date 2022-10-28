@@ -15,5 +15,6 @@ namespace Elsa.Commerce.Core.Shipment
         void SetShipmentMethodsMapping(Dictionary<string, string> mapping);
 
         Dictionary<string, string> GetShipmentMethodsMapping();
+        IEnumerable<string> GetShipmentMethodsList();
     }
 }

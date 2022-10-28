@@ -14,6 +14,7 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Integration;
+using Elsa.Integration.ShipmentProviders.Zasilkovna.Entities;
 using Elsa.Integration.ShipmentProviders.Zasilkovna.Model;
 using Robowire.RobOrm.Core;
 
@@ -109,7 +110,8 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                         {
                             externalDeliveryProvider = true;
 
-                            pobockaId = GetBranches().GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
+                            //pobockaId = GetBranches().GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
+                            pobockaId = GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
                         }
 
                         if (order.ErpId == null)
@@ -179,6 +181,101 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 
                 streamWriter.Flush();
                 return stream.ToArray();
+            }
+        }
+
+        private string GetPobockaId(string deliveryName, IDictionary<string, string> shipmentMethodsMapping) 
+        {
+            var originalDeliveryName = deliveryName;
+
+            deliveryName = deliveryName.Trim();
+
+            while (true) 
+            {
+                string mapped;
+                if (!shipmentMethodsMapping.TryGetValue(deliveryName, out mapped))
+                    break;
+
+                if (deliveryName == mapped) 
+                {
+                    m_log.Error($"Shipment method mapping loop '{deliveryName}'");
+                    break;
+                }
+
+                m_log.Info($"Appplied shipment method mapping: '{deliveryName}' -> '{mapped}'");
+                deliveryName = mapped;
+            }
+
+            var index = GetShipMethodIdIndex();
+            
+            var key = deliveryName.ToLowerInvariant().Trim();
+            if (!index.TryGetValue(key, out var id)) 
+            {
+                m_log.Error($"Delivery name was '{originalDeliveryName}', mapped by rules to '{deliveryName}'. Not found in the index by '{key}'. Index.Count={index.Count}");
+
+                throw new Exception(string.Format("Neexistující způsob dopravy \"{0}\"", originalDeliveryName));
+            }
+
+            return id;
+        }
+
+        private Dictionary<string, string> GetShipMethodIdIndex() 
+        {
+            return m_cache.ReadThrough("zasilkovnaShipMethodIndex", TimeSpan.FromSeconds(10), () => {
+
+                var fromDatabase = m_database.SelectFrom<IZasilkovnaShipMapping>().Execute();
+                var result = new Dictionary<string, string>();
+
+                foreach (var dbRecord in fromDatabase)
+                    result[dbRecord.Name.ToLowerInvariant().Trim()] = dbRecord.ZasilkovnaId;
+
+                var goldSrc = GetBranchIndexFromZasilkovna();
+
+                foreach(var srcRec in goldSrc)
+                {
+                    if(result.TryGetValue(srcRec.Item1, out var idInDatabase) && (idInDatabase == srcRec.Item1)) 
+                    {
+                        continue;
+                    }
+
+                    SaveShipMethod(srcRec);
+                    result[srcRec.Item1] = srcRec.Item2;
+                }
+
+                return result;
+            });
+        }
+
+        private void SaveShipMethod(Tuple<string, string> srcRec)
+        {
+            var matchingRecs = m_database.SelectFrom<IZasilkovnaShipMapping>().Where(m => m.Name == srcRec.Item1).Execute().ToList();
+            foreach(var mrec in matchingRecs) 
+            {
+                m_log.Error($"WARN - Detected shipmentId change - '{mrec.Name}' [{mrec.ZasilkovnaId}] -> [{srcRec.Item1}]");
+                m_database.Delete(mrec);
+            }
+
+            var newMap = m_database.New<IZasilkovnaShipMapping>();
+            newMap.ZasilkovnaId = srcRec.Item2;
+            newMap.Name = srcRec.Item1;
+
+            m_database.Save(newMap);
+
+            m_log.Info($"Zasilkova Shipment Method index added: {newMap.ZasilkovnaId} : {newMap.Name}");
+        }
+
+        private IEnumerable<Tuple<string, string>> GetBranchIndexFromZasilkovna() 
+        {            
+            var branches = GetBranches().BranchesList.Branches;
+            foreach(var branch in branches) 
+            {
+                var n = branch.Name.Trim().ToLowerInvariant();
+                var l = branch.LabelName.Trim().ToLowerInvariant();
+
+                yield return new Tuple<string, string>(n, branch.Id);
+
+                if (n != l)
+                    yield return new Tuple<string, string>(l, branch.Id);
             }
         }
 
@@ -306,6 +403,18 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             }
 
             return $"{descriptive}/{orientation}";
+        }
+
+        public IEnumerable<string> GetShipmentMethodsList()
+        {
+            var branches = GetBranches();
+            foreach(var branch in branches.BranchesList.Branches)
+            {
+                yield return branch.Name;
+
+                if (branch.Name != branch.LabelName)
+                    yield return branch.LabelName;
+            }
         }
     }
 }

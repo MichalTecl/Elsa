@@ -37,6 +37,17 @@ namespace Elsa.App.Shipment
             return new FileResult($"zasilkovna_{DateTime.Now:ddMMyyyy}.csv", data);
         }
 
+        public HtmlResult GetShipmentMethodNamesList() 
+        {
+            var methods = m_shipmentProvider.GetShipmentMethodsList();
+            var sb = new StringBuilder();
+                        
+            foreach (var sm in methods.OrderBy(m => m).Distinct())
+                sb.Append($"{sm}<br>");
+
+            return new HtmlResult(sb.ToString());
+        }
+
         public MappingDocModel GetShipmentMapping()
         {
             var mapping = m_shipmentProvider.GetShipmentMethodsMapping();

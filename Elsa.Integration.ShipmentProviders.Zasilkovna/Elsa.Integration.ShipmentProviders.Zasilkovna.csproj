@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\IZasilkovnaShipMapping.cs" />
     <Compile Include="Model\BranchesDocument.cs" />
     <Compile Include="Registry.cs" />
     <Compile Include="ZasilkovnaClient.cs" />
@@ -53,6 +54,10 @@
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
       <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
       <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj">
+      <Project>{F2986071-08CD-42DE-98FA-57E6FCE729C5}</Project>
+      <Name>Robowire.RobOrm.SqlServer</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
@@ -77,6 +82,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="sencha.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SQL\20221028_001_zasilkovnaShipMethodMapping.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

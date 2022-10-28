@@ -18,6 +18,8 @@ namespace Elsa.Common
             m_renderable = renderable;
         }
 
+        public HtmlResult(string content) : this(new Literal(content)) { }
+
         public void WriteResponse(HttpContextBase context)
         {
             context.Response.Clear();

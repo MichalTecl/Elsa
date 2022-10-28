@@ -1,6 +1,7 @@
 ﻿<div id="shipmentMethodsEditor">
     <textarea style="width:100%;min-height:500px" id="tbText"></textarea>
     <button event-bind="click:save">Uložit</button>
+    <a href="/shipment/getShipmentMethodNamesList" target="_blank" style="margin-left:20px;opacity:0.6">Seznam podporovaných způsobů dopravy</a>
 </div>
 <script>
     lt.element("shipmentMethodsEditor").attach(function(tbText) {

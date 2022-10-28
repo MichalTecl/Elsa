@@ -25,31 +25,35 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.Model
         [XmlElement("branches")]
         public BranchesList BranchesList { get; set; }
 
-        public string GetPobockaId(string deliveryName, IDictionary<string, string> shipmentMethodsMapping)
-        {
-            deliveryName = deliveryName.Trim();
+        //public string GetPobockaId(string deliveryName, IDictionary<string, string> shipmentMethodsMapping)
+        //{
+        //    deliveryName = deliveryName.Trim();
 
-            string mapped;
-            if (!shipmentMethodsMapping.TryGetValue(deliveryName, out mapped))
-            {
-                mapped = deliveryName;
-            }
-            //if (!s_poboNameMapping.TryGetValue(deliveryName, out mapped))
-            //{
-            //    mapped = deliveryName;
-            //}
+        //    string mapped;
+        //    if (!shipmentMethodsMapping.TryGetValue(deliveryName, out mapped))
+        //    {
+        //        mapped = deliveryName;
+        //    }
+        //    //if (!s_poboNameMapping.TryGetValue(deliveryName, out mapped))
+        //    //{
+        //    //    mapped = deliveryName;
+        //    //}
 
-            var record = BranchesList.Branches.FirstOrDefault(i => i.Name.Equals(mapped, StringComparison.InvariantCultureIgnoreCase))
-                      ?? BranchesList.Branches.FirstOrDefault(i => i.LabelName.Equals(mapped, StringComparison.InvariantCultureIgnoreCase));
+            
 
-            if (record == null)
-            {
-                throw new Exception(string.Format("Neexistující způsob dopravy \"{0}\"", mapped));
-            }
+        //    var record = BranchesList.Branches.FirstOrDefault(i => i.Name.Equals(mapped, StringComparison.InvariantCultureIgnoreCase))
+        //              ?? BranchesList.Branches.FirstOrDefault(i => i.LabelName.Equals(mapped, StringComparison.InvariantCultureIgnoreCase));
 
-            return record.Id;
-        }
+        //    if (record == null)
+        //    {
+        //        throw new Exception(string.Format("Neexistující způsob dopravy \"{0}\"", mapped));
+        //    }
 
+        //    return record.Id;
+        //}
+
+
+                
         public static BranchesDocument Download(string apiToken)
         {
             var request = WebRequest.CreateHttp($"http://www.zasilkovna.cz/api/v3/{apiToken}/branch.xml?type=address-delivery");
