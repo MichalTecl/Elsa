@@ -51,6 +51,8 @@ namespace Elsa.Apps.Reporting.Controllers
             using (var report = m_database.Sql().Call(rt.Code).WithParam("@projectId", m_session.Project.Id)
                 .Table())
             {
+                DynamicColumnNamesProcessor.SetDynamicColumnNames(report);
+
                 bytes = GetXlsData(rt.Code, report);
             }
 
