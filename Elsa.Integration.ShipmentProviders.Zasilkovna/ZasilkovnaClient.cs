@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 using Elsa.Commerce.Core;
@@ -233,7 +234,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 
                 foreach(var srcRec in goldSrc)
                 {
-                    if(result.TryGetValue(srcRec.Item1, out var idInDatabase) && (idInDatabase == srcRec.Item1)) 
+                    if(result.TryGetValue(srcRec.Item1, out var idInDatabase) && (idInDatabase == srcRec.Item2)) 
                     {
                         continue;
                     }
@@ -290,22 +291,30 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 						<td>1800529</td>
 					*/
 
-            var html = m_formsClient.GetString(url);
-
-            var thIndex = html.IndexOf(orderNoHeader, StringComparison.Ordinal);
-            if (thIndex < 0)
+            try
             {
+                var html = m_formsClient.GetString(url);
+
+                var thIndex = html.IndexOf(orderNoHeader, StringComparison.Ordinal);
+                if (thIndex < 0)
+                {
+                    return null;
+                }
+
+                html = html.Substring(thIndex + orderNoHeader.Length + 1).Trim();
+                html = html.Substring(0, 100);
+                html = html.Replace("<td>", string.Empty);
+
+                var cIndex = html.IndexOf("</td>", StringComparison.Ordinal);
+                html = html.Substring(0, cIndex).Trim();
+
+                return html;
+            }
+            catch(WebException ex)
+            {                
+                m_log.Error("Chyba při hledání čísla zásilky v Zásilkovně", ex);
                 return null;
             }
-
-            html = html.Substring(thIndex + orderNoHeader.Length + 1).Trim();
-            html = html.Substring(0, 100);
-            html = html.Replace("<td>", string.Empty);
-
-            var cIndex = html.IndexOf("</td>", StringComparison.Ordinal);
-            html = html.Substring(0, cIndex).Trim();
-
-            return html;
         }
 
         public void SetShipmentMethodsMapping(Dictionary<string, string> mapping)

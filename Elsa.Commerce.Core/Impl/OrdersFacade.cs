@@ -11,6 +11,7 @@ using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.Kits;
+using Elsa.Smtp.Core;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Impl
@@ -25,6 +26,7 @@ namespace Elsa.Commerce.Core.Impl
         private readonly ILog m_log;
         private readonly IMaterialBatchFacade m_batchFacade;
         private readonly IKitProductRepository m_kitProductRepository;
+        private readonly IMailSender m_mailSender;
 
         public OrdersFacade(
             IPurchaseOrderRepository orderRepository,
@@ -33,7 +35,7 @@ namespace Elsa.Commerce.Core.Impl
             ISession session,
             IPaymentRepository paymentRepository,
             ILog log,
-            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository)
+            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository, IMailSender mailSender)
         {
             m_orderRepository = orderRepository;
             m_database = database;
@@ -43,6 +45,7 @@ namespace Elsa.Commerce.Core.Impl
             m_log = log;
             m_batchFacade = batchFacade;
             m_kitProductRepository = kitProductRepository;
+            m_mailSender = mailSender;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
@@ -210,17 +213,29 @@ namespace Elsa.Commerce.Core.Impl
                 {
                     Task.Run(() =>
                     {
-                        order = PerformErpActionSafe(
-                            order,
-                            (e, o) => e.MakeOrderSent(o),
-                            synced =>
-                            {
-                                if (synced.OrderStatusId != OrderStatus.Sent.Id)
+                        try
+                        {
+
+                            order = PerformErpActionSafe(
+                                order,
+                                (e, o) => e.MakeOrderSent(o),
+                                synced =>
                                 {
-                                    throw new InvalidOperationException(
-                                        $" Byl odeslan pozadavek na dokonceni objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
-                                }
-                            }, "SetOrderSent");
+                                    if (synced.OrderStatusId != OrderStatus.Sent.Id)
+                                    {
+                                        throw new InvalidOperationException(
+                                            $" Byl odeslan pozadavek na dokonceni objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
+                                    }
+                                }, "SetOrderSent");
+                        }
+                        catch(Exception ex) 
+                        {
+                            m_log.Error($"Chyba pri posilani zabalene objednavky", ex);
+                            m_mailSender.Send(order.PackingUser?.EMail ?? m_session.User.EMail, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
+                                $"Pozor - při dokončení balení objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: '{ex.Message}'\r\nZkontrolujte objednávku ručně.");
+
+
+                        }
                     });
                 }
 
