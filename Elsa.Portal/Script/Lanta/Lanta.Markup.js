@@ -220,14 +220,19 @@ if (lanta.Markup.attributeSetters.length === 0) {
 
 };
 
+lanta.Markup.createElementUid = lanta.Markup.createElementUid || function () {
+    return ("mrk_"+[1e7]+[1e3]+[4e3]+[8e3]+[1e11]).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+};
+
 lanta.Markup.getElementMarker = lanta.Markup.getElementMarker || function(element) {
     var marker = element["lt-autobind-marker"];
 	if (!!marker) {
 	    return marker;
 	}
-
-    lanta.Markup.elementMarkerCounter++;
-    marker = "mrk_" + lanta.Markup.elementMarkerCounter;
+       
+    marker = "mrk_" + lanta.Markup.createElementUid();
 
     element["lt-autobind-marker"] = marker;
 

@@ -11,7 +11,7 @@
             </div>
             <div class="srchSegment text">
                 <label for="tbsgid">ID segmentu</label>
-                <input id="tbsgid" lt-name="tbSegmentId" />
+                <input id="tbsgid" lt-name="tbSegmentId" type="number"/>
             </div>
             <div class="srchSegment text">
                 <label for="tbinvnr">Č. Faktury</label>
@@ -167,6 +167,8 @@
         this.onSearchPanelKeyDown = function (e) {
 
             var key = (e.code || e.key);
+            if (!key)
+                return;
 
             if (key.indexOf("Enter") > -1) {
                 self.doSearch();
