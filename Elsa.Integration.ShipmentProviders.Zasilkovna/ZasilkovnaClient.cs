@@ -47,7 +47,10 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                                                                         "Dodání poštou - Číslo domu",
                                                                         "Dodání poštou - Obec",
                                                                         "Dodání poštou - PSČ",
-                                                                        "Expedovat zboží"};
+                                                                        //"Expedovat zboží",
+                                                                        "Dodání poštou - Země",
+                                                                        "MobilBP",
+                                                                        "MobilP" };
 
         private BranchesDocument m_branches;
 
@@ -69,7 +72,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             m_formsClient = new WebFormsClient(log);
         }
 
-        public byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders)
+        public byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders, bool uniFormat = false)
         {
             var orderList = orders.ToList();
             m_log.Info($"Zacinam vytvareni dokumentu pro Zasilkovnu, zdroj = {orderList.Count} objednavek");
@@ -77,7 +80,13 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             using (var stream = new MemoryStream())
             using (var streamWriter = new StreamWriter(stream, Encoding.UTF8))
             {
-                var generator = new CsvGenerator(streamWriter, ZasilkovnaColIndex);
+                if (!uniFormat)
+                {
+                    streamWriter.WriteLine("\"verze 4\"");
+                    streamWriter.WriteLine();
+                }
+
+                var generator = new CsvGenerator(streamWriter, ZasilkovnaColIndex, uniFormat);
 
                 foreach (var order in orderList)
                 {
@@ -97,22 +106,26 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             dobirkovaCastka = string.Empty;
                         }
 
-                        var pobockaId = GetPobockaId(order);
-
                         if (string.IsNullOrWhiteSpace(order.CustomerEmail)
-                            && string.IsNullOrWhiteSpace(order.DeliveryAddress?.Phone)
-                            && string.IsNullOrWhiteSpace(order.InvoiceAddress?.Phone))
+                                && string.IsNullOrWhiteSpace(order.DeliveryAddress?.Phone)
+                                && string.IsNullOrWhiteSpace(order.InvoiceAddress?.Phone))
                         {
                             throw new Exception("Musi byt telefon nebo e-mail");
                         }
 
+                        string pobockaId = null;
                         var externalDeliveryProvider = false;
-                        if (string.IsNullOrWhiteSpace(pobockaId))
+                        if (!uniFormat)
                         {
-                            externalDeliveryProvider = true;
+                            pobockaId = GetPobockaId(order);
+                                                                                    
+                            if (string.IsNullOrWhiteSpace(pobockaId))
+                            {
+                                externalDeliveryProvider = true;
 
-                            //pobockaId = GetBranches().GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
-                            pobockaId = GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
+                                //pobockaId = GetBranches().GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
+                                pobockaId = GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
+                            }
                         }
 
                         if (order.ErpId == null)
@@ -133,7 +146,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                         {
                             m_log.Error($"Weight calc failed", e);
                         }
-
+                                                
                         // not sure about Version 4 used by Elsa, but ver. 6 is documented here: https://docs.packetery.com/03-creating-packets/01-csv-import.html
                         generator.CellOpt(null) //1 Vyhrazeno
                             .CellMan(trackingNumber) //2 Číslo objednávky
@@ -151,13 +164,13 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             .CellMan(order.Currency.Symbol) //9 Měna
                             .CellMan(StringUtil.FormatDecimal(order.PriceWithVat)) //10 Hodnota zásilky
                             .CellOpt(StringUtil.FormatDecimal(weight)) //11 Hmotnost zásilky
-                            .CellMan(pobockaId) //12 Cílová pobočka
-                            .CellMan( /*"biorythme.cz"*/m_config.ClientName) //13 Odesilatel
+                            .Cell(!uniFormat, pobockaId) //12 Cílová pobočka
+                            .CellMan(/*"biorythme.cz"*/m_config.ClientName) //13 Odesilatel
                             .CellMan(0) //14 Obsah 18+
-                            .CellOpt(null) //15 Zpožděný výdej
+                            .CellOpt(null) //15 Zpožděný výdej                            
                             ; 
 
-                        if (externalDeliveryProvider)
+                        if (externalDeliveryProvider || uniFormat)
                         {
 
                             generator.CellMan(order.DeliveryAddress?.Street, order.InvoiceAddress?.Street) //16
@@ -166,7 +179,18 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                                     GetFormattedHouseNumber(order.InvoiceAddress)) //17
                                 .CellMan(order.DeliveryAddress?.City, order.InvoiceAddress?.City) //18
                                 .CellMan(order.DeliveryAddress?.Zip, order.InvoiceAddress?.Zip) //19
+                                .ConditionalCellMan(uniFormat, order.DeliveryAddress?.Country, order.InvoiceAddress?.Country, "cz")
                                 ;
+                        }
+
+                        //generator.CellOpt(null); //20 Expedovat zbozi
+
+                        if (uniFormat) 
+                        {
+                            var phone = order.DeliveryAddress?.Phone ?? order.InvoiceAddress?.Phone;
+                            var pp = SplitPhonePrefixBody(phone);
+
+                            generator.CellOpt(pp.Item2).CellOpt(pp.Item1);
                         }
 
                         generator.CommitRow();
@@ -184,7 +208,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                 return stream.ToArray();
             }
         }
-
+                
         private string GetPobockaId(string deliveryName, IDictionary<string, string> shipmentMethodsMapping) 
         {
             var originalDeliveryName = deliveryName;
@@ -424,6 +448,30 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                 if (branch.Name != branch.LabelName)
                     yield return branch.LabelName;
             }
+        }
+
+        private static Tuple<string, string> SplitPhonePrefixBody(string phone) 
+        {
+            // +420775154809
+            var prefix = string.Empty;
+            var body = string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(phone)) 
+            {
+                phone = phone.Replace(" ", string.Empty).Replace("-", string.Empty).Replace("/", string.Empty);
+
+                body = phone;
+                if (body.Length >= 9) 
+                {
+                    body = body.Substring(body.Length - 9);
+                    prefix = phone.Substring(0, phone.Length - 9);
+                }
+            }
+
+            if (prefix.Length > 4 && prefix.StartsWith("00"))
+                prefix = $"+{prefix.Substring(2)}";
+
+            return new Tuple<string, string>(prefix, body);
         }
     }
 }

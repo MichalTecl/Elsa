@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.Kits;
 using Elsa.Smtp.Core;
@@ -27,6 +30,7 @@ namespace Elsa.Commerce.Core.Impl
         private readonly IMaterialBatchFacade m_batchFacade;
         private readonly IKitProductRepository m_kitProductRepository;
         private readonly IMailSender m_mailSender;
+        private readonly ICache m_cache;
 
         public OrdersFacade(
             IPurchaseOrderRepository orderRepository,
@@ -35,7 +39,7 @@ namespace Elsa.Commerce.Core.Impl
             ISession session,
             IPaymentRepository paymentRepository,
             ILog log,
-            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository, IMailSender mailSender)
+            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository, IMailSender mailSender, ICache cache)
         {
             m_orderRepository = orderRepository;
             m_database = database;
@@ -46,6 +50,7 @@ namespace Elsa.Commerce.Core.Impl
             m_batchFacade = batchFacade;
             m_kitProductRepository = kitProductRepository;
             m_mailSender = mailSender;
+            m_cache = cache;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
@@ -243,7 +248,7 @@ namespace Elsa.Commerce.Core.Impl
             }
         }
 
-        public IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, bool skipErp = false)
+        public IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, string shipProvider, bool skipErp = false)
         {
             m_log.Info($"Nacitam zaplacene objednavky od {historyDepth}");
 
@@ -251,6 +256,9 @@ namespace Elsa.Commerce.Core.Impl
             {
                 foreach (var rpo in m_orderRepository.GetOrdersByStatus(OrderStatus.ReadyToPack))
                 {
+                    if (!MatchShipmentProvider(rpo, shipProvider))
+                        continue;
+
                     yield return rpo;
                 }
 
@@ -277,7 +285,12 @@ namespace Elsa.Commerce.Core.Impl
                 foreach (var paidOrder in paidOrders)
                 {
                     var importedId = m_orderRepository.ImportErpOrder(paidOrder);
-                    yield return m_orderRepository.GetOrder(importedId);
+                    var order = m_orderRepository.GetOrder(importedId);
+
+                    if (!MatchShipmentProvider(order, shipProvider))
+                        continue;
+
+                    yield return order;
                 }
             }
 
@@ -437,6 +450,26 @@ namespace Elsa.Commerce.Core.Impl
                 .Where(ib => ib.OrderItemId == orderItemId);
 
             return qry.Execute();
+        }
+
+        private bool MatchShipmentProvider(IPurchaseOrder order, string shipmentProviderName) 
+        {
+            if (shipmentProviderName == null)
+                return true;
+
+            var lookup = m_cache.ReadThrough($"shipmentProviderLookup_{m_session.Project.Id}", TimeSpan.FromSeconds(10), () => {
+                return m_database.SelectFrom<IShipmentProviderLookup>().Where(p => p.ProjectId == m_session.Project.Id).Execute().ToList();
+            });
+
+            var matching = lookup.Where(lkp => StringUtil.MatchStarWildcard(lkp.ShipMethodWildcardPattern, order.ShippingMethodName))
+                .Select(l => l.ProviderName)
+                .Distinct()
+                .ToList();
+
+            if (matching.Count != 1)
+                throw new Exception($"U objednávky {order.OrderNumber} nelze určit dopravce. ShippingMethodName=\"{order.ShippingMethodName}\"; Nalezení dopravci:[{string.Join(",", matching)}]");
+
+            return string.Equals(matching[0], shipmentProviderName, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

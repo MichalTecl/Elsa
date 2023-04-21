@@ -15,19 +15,37 @@ namespace Elsa.Common.Utils
         private int m_cellIndex;
 
         public CsvGenerator(StreamWriter writer, string[] columnIndex, bool printHeader = true)
-        {
-            if (printHeader)
-            {
-                writer.WriteLine("\"verze 4\"");
-                writer.WriteLine();
-            }
+        {            
             m_writer = writer;
             m_columnIndex = columnIndex;
+
+            if (printHeader) 
+            {
+                WriteHeader();
+            }
+        }
+
+        public CsvGenerator ConditionalCellMan(bool condition, params object[] values)
+        {
+            if (condition) 
+            {
+                CellMan(values);
+            }
+            return this;
+        }
+
+        public CsvGenerator ConditionalCellOpt(bool condition, params object[] values)
+        {
+            if (condition)
+            {
+                CellOpt(values);
+            }
+            return this;
         }
 
         public CsvGenerator CellOpt(params object[] values)
         {
-            return NewCol(false, values);
+            return Cell(false, values);
         }
 
         public void WriteHeader()
@@ -41,10 +59,10 @@ namespace Elsa.Common.Utils
 
         public CsvGenerator CellMan(params object[] values)
         {
-            return NewCol(true, values);
+            return Cell(true, values);
         }
 
-        private CsvGenerator NewCol(bool mandatory, params object[] values)
+        public CsvGenerator Cell(bool mandatory, params object[] values)
         {
             values = values ?? new object[0];
 

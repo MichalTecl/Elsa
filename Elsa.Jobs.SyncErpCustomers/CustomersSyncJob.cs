@@ -44,33 +44,33 @@ namespace Elsa.Jobs.SyncErpCustomers
                 m_customerRepository.SyncCustomers(erpCustomerModels);
             }
 
-            for (var i = 0; i <= 10; i++)
-            {
-                try
-                {
-                    m_log.Info("Newsletter subscribers sync from MailChimp:");
+            //for (var i = 0; i <= 10; i++)
+            //{
+            //    try
+            //    {
+            //        m_log.Info("Newsletter subscribers sync from MailChimp:");
 
-                    var mc = new MailchimpClient();
+            //        var mc = new MailchimpClient();
 
-                    var subscribers = Task.Run(() => mc.GetMembersSubscriptionStatus(m_mcConfig, m_log)).Result;
+            //        var subscribers = Task.Run(() => mc.GetMembersSubscriptionStatus(m_mcConfig, m_log)).Result;
 
-                    m_log.Info($"Received {subscribers.Count} of newsletter subscribers info");
-                    m_customerRepository.UpdateNewsletterSubscribersList("Mailchimp", subscribers);
+            //        m_log.Info($"Received {subscribers.Count} of newsletter subscribers info");
+            //        m_customerRepository.UpdateNewsletterSubscribersList("Mailchimp", subscribers);
 
-                    break;
-                }
-                catch(Exception ex)
-                {
-                    if (i == 10)
-                    {
-                        m_log.Error("Mailchimp sync failed", ex);
-                        throw;
-                    }
+            //        break;
+            //    }
+            //    catch(Exception ex)
+            //    {
+            //        if (i == 10)
+            //        {
+            //            m_log.Error("Mailchimp sync failed", ex);
+            //            throw;
+            //        }
 
-                    m_log.Info($"Mailchimp sync attempt {i} failed, waiting 10s to retry. Error: {ex}");
-                    Thread.Sleep(10000);
-                }
-            }
+            //        m_log.Info($"Mailchimp sync attempt {i} failed, waiting 10s to retry. Error: {ex}");
+            //        Thread.Sleep(10000);
+            //    }
+            //}
             //m_log.Info($"Obtaining subscribers missing in the Mailchimp but subscribed on web:");
             //var toSubscribe = m_customerRepository.GetSubscribersToSync("Mailchimp");
             

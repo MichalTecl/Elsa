@@ -85,6 +85,7 @@
     <None Include="sencha.json" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SQL\20221028_001_ShippingProviderLookupDefaults.sql" />
     <Content Include="SQL\20221028_001_zasilkovnaShipMethodMapping.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

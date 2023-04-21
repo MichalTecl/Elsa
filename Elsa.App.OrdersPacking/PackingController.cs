@@ -96,7 +96,7 @@ namespace Elsa.App.OrdersPacking
                 {
                     Log.Info("Aplikace nemá načtenu tuto zásilku, je třeba aktualizovat seznam zásilek z Floxu...");
 
-                    paid = m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30)).ToList();
+                    paid = m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), shipProvider: null).ToList();
 
                     order = paid.FirstOrDefault(o => (o.PreInvoiceId == orderNumber) || (o.OrderNumber == orderNumber));
                     if (order == null)
@@ -239,7 +239,7 @@ namespace Elsa.App.OrdersPacking
                 return new LightOrderInfo[0];
             }
 
-            return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), true).Select(i => new LightOrderInfo(i));
+            return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), shipProvider: null, true).Select(i => new LightOrderInfo(i));
         }
 
         private PackingOrderModel MapOrder(IPurchaseOrder entity, Tuple<long, BatchKey, decimal> orderItemBatchPreference = null)

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Elsa.Common.Utils
 {
@@ -364,6 +365,16 @@ namespace Elsa.Common.Utils
             }
 
             return inp;
+        }
+
+        public static bool MatchStarWildcard(string pattern, string input)
+        {
+            pattern = pattern?.ToLowerInvariant() ?? string.Empty;
+            input = input?.ToLowerInvariant() ?? string.Empty;
+
+            string regexPattern = "^" + Regex.Escape(pattern)
+                .Replace("\\*", ".*") + "$";
+            return Regex.IsMatch(input, regexPattern);
         }
     }
 }

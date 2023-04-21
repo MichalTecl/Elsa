@@ -101,6 +101,7 @@
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IPaymentSource.cs" />
     <Compile Include="Integration\IShipmentMethodMapping.cs" />
+    <Compile Include="Integration\IShipmentProviderLookup.cs" />
     <Compile Include="Inventory\Batches\IMaterialBatchComposition.cs" />
     <Compile Include="Accounting\InvoiceFormItemBridges\IMaterialBatchCompositionFormItem.cs" />
     <Compile Include="Inventory\Batches\IMaterialStockEvent.cs" />

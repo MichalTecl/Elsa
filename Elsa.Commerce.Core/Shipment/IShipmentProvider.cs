@@ -8,7 +8,7 @@ namespace Elsa.Commerce.Core.Shipment
 {
     public interface IShipmentProvider
     {
-        byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders);
+        byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders, bool uniFormat = false);
 
         string GetOrderNumberByPackageNumber(string packageNumber);
 

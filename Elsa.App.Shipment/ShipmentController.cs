@@ -29,12 +29,18 @@ namespace Elsa.App.Shipment
             m_shipmentProvider = shipmentProvider;
         }
 
-        public FileResult GetShipmentRequestDocument()
+        public FileResult GetShipmentRequestDocument(bool uniFormat, string provider)
         {
-            var orders = m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30)).ToList();
+            if (string.IsNullOrWhiteSpace(provider))
+                throw new ArgumentNullException(nameof(provider));
 
-            var data = m_shipmentProvider.GenerateShipmentRequestDocument(orders);
-            return new FileResult($"zasilkovna_{DateTime.Now:ddMMyyyy}.csv", data);
+            var orders = m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), provider).ToList();
+
+            var data = m_shipmentProvider.GenerateShipmentRequestDocument(orders, uniFormat);
+
+            var xname = uniFormat ? "DPD" : "zasilkovna";
+
+            return new FileResult($"{xname}_{DateTime.Now:ddMMyyyy}.csv", data);
         }
 
         public HtmlResult GetShipmentMethodNamesList() 
