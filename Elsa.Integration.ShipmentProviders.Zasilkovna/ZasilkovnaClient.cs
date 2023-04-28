@@ -435,6 +435,12 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                 return orientation;
             }
 
+            if (descriptive.Contains("/"))
+                return descriptive;
+
+            if (orientation.Contains("/"))
+                return orientation;
+
             return $"{descriptive}/{orientation}";
         }
 
