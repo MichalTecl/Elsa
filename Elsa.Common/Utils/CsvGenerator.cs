@@ -7,17 +7,18 @@ namespace Elsa.Common.Utils
     public class CsvGenerator
     {
         private readonly StreamWriter m_writer;
-
+        private readonly char m_separator;
         private readonly StringBuilder m_row = new StringBuilder();
 
         private readonly string[] m_columnIndex;
 
         private int m_cellIndex;
 
-        public CsvGenerator(StreamWriter writer, string[] columnIndex, bool printHeader = true)
+        public CsvGenerator(StreamWriter writer, string[] columnIndex, bool printHeader = true, char separator = ',')
         {            
             m_writer = writer;
             m_columnIndex = columnIndex;
+            m_separator = separator;
 
             if (printHeader) 
             {
@@ -84,7 +85,7 @@ namespace Elsa.Common.Utils
 
             if (m_cellIndex > 0)
             {
-                m_row.Append(",");
+                m_row.Append(m_separator);
             }
 
             var strValue = string.Empty;

@@ -23,6 +23,9 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 {
     public class ZasilkovnaClient : IShipmentProvider
     {
+        const string DPD_PICKUP_CODE = "50101";
+        const string DPD_PRIVATE_CODE = "40054";
+
         private readonly WebFormsClient m_formsClient;
 
         private readonly IErpClientFactory m_erpClientFactory;
@@ -50,7 +53,11 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                                                                         //"Expedovat zboží",
                                                                         "Dodání poštou - Země",
                                                                         "MobilBP",
-                                                                        "MobilP" };
+                                                                        "MobilP",
+                                                                        "KontaktniOs",
+                                                                        "Dobírka",
+                                                                        "DPD_Služba",
+                                                                        "DPD_VýdejníMísto"   };
 
         private BranchesDocument m_branches;
 
@@ -86,7 +93,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                     streamWriter.WriteLine();
                 }
 
-                var generator = new CsvGenerator(streamWriter, ZasilkovnaColIndex, uniFormat);
+                var generator = new CsvGenerator(streamWriter, ZasilkovnaColIndex, uniFormat, uniFormat ? ';' : ',');
 
                 foreach (var order in orderList)
                 {
@@ -191,6 +198,14 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             var pp = SplitPhonePrefixBody(phone);
 
                             generator.CellOpt(pp.Item2).CellOpt(pp.Item1);
+                            generator.CellMan(order.CustomerName);
+
+                            generator.CellMan(order.IsPayOnDelivery ? "1" : "0");
+
+                            var pickupRef = ParseDpdPickupRef(order.ShippingMethodName);
+                                                        
+                            generator.CellMan(string.IsNullOrWhiteSpace(pickupRef) ? DPD_PRIVATE_CODE : DPD_PICKUP_CODE);
+                            generator.CellOpt(pickupRef);
                         }
 
                         generator.CommitRow();
@@ -208,7 +223,35 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                 return stream.ToArray();
             }
         }
-                
+
+        private string ParseDpdPickupRef(string shippingMethodName)
+        {
+            if (string.IsNullOrWhiteSpace(shippingMethodName))
+                return null;
+
+            // Česká republika - DPD výdejní místo - (CZ21961) AlzaBox Chrudim (Billa), Rooseveltova 47, 53701, Chr
+            var lbr = shippingMethodName.IndexOf('(');
+            if (lbr < 0)
+                return null;
+
+            shippingMethodName = shippingMethodName.Substring(lbr);
+            // (CZ21961) AlzaBox Chrudim (Billa), Rooseveltova 47, 53701, Chr
+
+            var rbr = shippingMethodName.IndexOf(')');
+            if (rbr < 1)
+                return null;
+
+            shippingMethodName = shippingMethodName.Substring(0, rbr);
+            // (CZ21961)
+
+            shippingMethodName = shippingMethodName.Trim(' ', '(', ')');
+
+            if (string.IsNullOrWhiteSpace(shippingMethodName))
+                return null;
+
+            return shippingMethodName;
+        }
+
         private string GetPobockaId(string deliveryName, IDictionary<string, string> shipmentMethodsMapping) 
         {
             var originalDeliveryName = deliveryName;
