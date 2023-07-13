@@ -35,13 +35,19 @@ namespace Elsa.Commerce.Core.Repositories
         public void SyncCustomers(IEnumerable<IErpCustomerModel> source)
         {
             var allDbCustomers =
-                m_database.SelectFrom<ICustomer>().Where(c => c.ProjectId == m_session.Project.Id).Execute().ToList();
+                m_database.SelectFrom<ICustomer>().Where(c => c.ProjectId == m_session.Project.Id).Execute().OrderByDescending(i => i.Id).ToList();
 
             foreach (var src in source)
             {
+                var sourceduplicities = source.Where(s => s.Email == src.Email).ToList();
+                if (sourceduplicities.Count > 1) 
+                {
+                    m_log.Info($"Duplicitni zaznamy stazeny z ERP - email: {src.Email}");                    
+                }
+
                 var trg =
-                    allDbCustomers.FirstOrDefault(
-                        s => s.Email.Equals(src.Email, StringComparison.InvariantCultureIgnoreCase))
+                    allDbCustomers.FirstOrDefault(dbc => dbc.ErpUid == src.ErpCustomerId) ??
+                    allDbCustomers.FirstOrDefault(s => s.Email.Equals(src.Email, StringComparison.InvariantCultureIgnoreCase) && string.IsNullOrEmpty(s.ErpUid))
                     ?? m_database.New<ICustomer>();
 
                 SyncCustomer(src, trg);
@@ -178,9 +184,22 @@ namespace Elsa.Commerce.Core.Repositories
                 changed = true;
                 trg.FirstContactDt = GetFirstContact(src.Email);
             }
+            
+            if (!src.Email.Equals(trg.Email, StringComparison.InvariantCultureIgnoreCase))
+            {                
+                if (!string.IsNullOrEmpty(trg.Email)) 
+                {
+                    var changeRecord = m_database.New<ICustomerEmailChange>(ch =>
+                    {
+                        ch.ChangeDt = DateTime.Now;
+                        ch.OldEmail = trg.Email;
+                        ch.NewEmail = src.Email;
+                        ch.ErpUid = src.ErpCustomerId;
+                        ch.ProjectId = m_session.Project.Id;
+                    });
+                    m_database.Save(changeRecord);
+                }
 
-            if (string.IsNullOrWhiteSpace(trg.Email))
-            {
                 trg.Email = src.Email;
                 changed = true;
             }
@@ -190,13 +209,7 @@ namespace Elsa.Commerce.Core.Repositories
                 trg.Phone = src.Phone;
                 changed = true;
             }
-
-            if (trg.IsDistributor != src.IsDistributor)
-            {
-                trg.IsDistributor = src.IsDistributor;
-                changed = true;
-            }
-
+                        
             if ((trg.LastActivationDt == null) && src.IsActive)
             {
                 trg.LastActivationDt = DateTime.Now;
@@ -252,6 +265,18 @@ namespace Elsa.Commerce.Core.Repositories
             if (trg.SearchTag != searchTag)
             {
                 trg.SearchTag = searchTag;
+                changed = true;
+            }
+
+            if (trg.Groups != src.Groups) 
+            {
+                trg.Groups = src.Groups;
+                changed = true;
+            }
+
+            if (trg.ErpUid != src.ErpCustomerId) 
+            {
+                trg.ErpUid = src.ErpCustomerId;
                 changed = true;
             }
 

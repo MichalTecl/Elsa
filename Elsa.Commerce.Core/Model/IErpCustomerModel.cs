@@ -23,5 +23,7 @@ namespace Elsa.Commerce.Core.Model
         bool IsNewsletterSubscriber { get; set; }
 
         bool IsDistributor { get; }
+
+        string Groups { get; }
     }
 }

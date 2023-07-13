@@ -9,7 +9,10 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
     public class PersonModel
     {
         [XmlElement("user_id")]
-        public string UserId { get; set; }
+        public string PersonId { get; set; }
+
+        [XmlElement("cid")]
+        public string CompanyId { get; set; }
 
         [XmlElement("email")]
         public string Email { get; set; }

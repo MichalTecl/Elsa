@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -375,6 +376,17 @@ namespace Elsa.Common.Utils
             string regexPattern = "^" + Regex.Escape(pattern)
                 .Replace("\\*", ".*") + "$";
             return Regex.IsMatch(input, regexPattern);
+        }
+
+        public static string GetHash(string input) 
+        {
+            var oData = Encoding.UTF8.GetBytes(input);
+
+            using (var md5 = new MD5CryptoServiceProvider())
+            {
+                var hash = md5.ComputeHash(oData);
+                return Convert.ToBase64String(hash);
+            }
         }
     }
 }

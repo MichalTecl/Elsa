@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
+using Elsa.Common.Utils;
 
 namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 {
@@ -12,14 +8,15 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
     {
         public ErpPersonModel(PersonModel src)
         {
-            ErpCustomerId = src.UserId;
+            ErpCustomerId = CustomerUidCalculator.GetCustomerUid(src.CompanyId, src.PersonId, src.Email);
             Email = src.Email?.Trim();
             Phone = NormalizePhoneNumber(src.Phone);
             Name = src.FirstName?.Trim();
             Surname = src.LastName?.Trim();
             IsActive = src.Active != 0;
             IsNewsletterSubscriber = src.Newsletter != 0;
-            IsDistributor = src.Groups?.ToLowerInvariant().Contains("velkoo") ?? false;
+            IsDistributor = (!string.IsNullOrEmpty(src.CompanyId)) || (src.Groups?.ToLowerInvariant().Contains("velkoo") ?? false);
+            Groups = src.Groups;
         }
         
         public string ErpCustomerId { get; }
@@ -37,6 +34,8 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         public bool IsNewsletterSubscriber { get; set; }
 
         public bool IsDistributor { get; }
+
+        public string Groups { get; }
 
         private static string NormalizePhoneNumber(string srcPhone)
         {
@@ -58,5 +57,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 
             return srcPhone;
         }
+
+        
     }
 }

@@ -62,6 +62,7 @@
     <Compile Include="Crm\Model\ICommonCustomerInfo.cs" />
     <Compile Include="CurrencyRates\CurrencyConversionHelper.cs" />
     <Compile Include="CurrencyRates\ICurrencyConversionHelper.cs" />
+    <Compile Include="CustomerUidCalculator.cs" />
     <Compile Include="ErpDataMapperBase.cs" />
     <Compile Include="ICurrencyRepository.cs" />
     <Compile Include="IErpClient.cs" />
