@@ -15,6 +15,7 @@ namespace Elsa.Commerce.Core
             IErpOrderModel source,
             Func<OrderIdentifier, IPurchaseOrder> orderObjectFactory,
             Func<string, IOrderItem> orderItemByErpOrderItemId,
+            Func<string, IOrderPriceElement> priceElementFactory,
             Func<OrderIdentifier, IAddress> invoiceAddressFactory,
             Func<OrderIdentifier, IAddress> deliveryAddressFactory,
             Func<string, ICurrency> currencyByCurrencySymbol,
@@ -66,6 +67,19 @@ namespace Elsa.Commerce.Core
                 }
 
                 targetItem.ProductId = product.Id;
+            }
+
+            foreach(var sourcePriceElement in source.OrderPriceElements) 
+            {
+                var erpElementId = GetUniqueErpPriceElementId(source, sourcePriceElement);
+
+                var targetPriceElement = priceElementFactory(erpElementId);
+
+                targetPriceElement.ExternalId = long.Parse(sourcePriceElement.ErpPriceElementId);
+                targetPriceElement.TypeName = sourcePriceElement.TypeErpName;
+                targetPriceElement.Title = sourcePriceElement.Title;
+                targetPriceElement.Tax = ParseMoneyOrNull(sourcePriceElement.TaxPercent, null, null, nameof(sourcePriceElement.TaxPercent));
+                targetPriceElement.Price = ParseMoneyOrNull(sourcePriceElement.Price, null, null, nameof(sourcePriceElement.Price));
             }
 
             var invoiceAddress = invoiceAddressFactory(ordid);
@@ -175,6 +189,8 @@ namespace Elsa.Commerce.Core
         
         protected abstract decimal ParseMoney(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName);
 
+        protected abstract decimal? ParseMoneyOrNull(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName);
+
         protected abstract decimal? TryParseWeight(string source, IErpOrderModel sourceRecord,
             IErpOrderItemModel sourceItem);
 
@@ -188,6 +204,11 @@ namespace Elsa.Commerce.Core
         protected virtual string GetUniqueErpItemId(IErpOrderModel order, IErpOrderItemModel item)
         {
             return item.ErpOrderItemId;
+        }
+
+        protected virtual string GetUniqueErpPriceElementId(IErpOrderModel order, IErpPriceElementModel element) 
+        {
+            return element.ErpPriceElementId;
         }
 
         protected static string Limit(string s, int len)

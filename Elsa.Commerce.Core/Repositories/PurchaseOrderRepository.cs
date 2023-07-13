@@ -89,6 +89,12 @@ namespace Elsa.Commerce.Core.Repositories
                     m_database.Save(item);
                 }
 
+                foreach(var priceElement in host.PriceElements) 
+                {
+                    priceElement.PurchaseOrderId = host.Order.Id;
+                    m_database.Save(priceElement);
+                }
+
                 foreach (var delId in host.OrderItemsToDelete)
                 {                    
                     var kitChildren = m_database.SelectFrom<IOrderItem>().Where(i => i.KitParentId == delId).Execute()
@@ -111,6 +117,15 @@ namespace Elsa.Commerce.Core.Repositories
 
                     var item = m_database.SelectFrom<IOrderItem>().Where(i => i.Id == delId).Execute().FirstOrDefault();
                     if (item != null)
+                    {
+                        m_database.Delete(item);
+                    }
+                }
+
+                foreach(var pelmDelId in host.PriceElementsToDelete) 
+                {
+                    var item = m_database.SelectFrom<IOrderPriceElement>().Where(i => i.Id == pelmDelId).Execute().FirstOrDefault();
+                    if (item != null) 
                     {
                         m_database.Delete(item);
                     }
@@ -356,6 +371,7 @@ namespace Elsa.Commerce.Core.Repositories
                     .Join(o => o.Items.Each().KitChildren.Each().AssignedBatches)
                     .Join(o => o.Items.Each().KitChildren.Each().AssignedBatches.Each().MaterialBatch)
                     .Join(o => o.Payment)
+                    .Join(o => o.PriceElements)
                     .Where(o => o.ProjectId == m_session.Project.Id);
         }
         

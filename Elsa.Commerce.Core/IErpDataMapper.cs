@@ -14,6 +14,7 @@ namespace Elsa.Commerce.Core
             IErpOrderModel source,
             Func<OrderIdentifier, IPurchaseOrder> orderObjectFactory,
             Func<string, IOrderItem> orderItemByErpOrderItemId,
+            Func<string, IOrderPriceElement> priceElementFactory,
             Func<OrderIdentifier, IAddress> invoiceAddressFactory,
             Func<OrderIdentifier, IAddress> deliveryAddressFactory,
             Func<string, ICurrency> currencyByCurrencySymbol,

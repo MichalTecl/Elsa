@@ -46,11 +46,15 @@ namespace Elsa.Commerce.Core.Repositories
 
         public List<IOrderItem> Items { get; } = new List<IOrderItem>();
 
+        public List<IOrderPriceElement> PriceElements { get; } = new List<IOrderPriceElement>();
+
         public IAddress InvoiceAddress { get; private set; }
 
         public IAddress DeliveryAddress { get; private set; }
         
         public List<long> OrderItemsToDelete { get; } = new List<long>();
+
+        public List<long> PriceElementsToDelete { get; } = new List<long>();
         
         public ICurrency Currency { get; private set; } 
 
@@ -71,6 +75,7 @@ namespace Elsa.Commerce.Core.Repositories
                 m_erpOrder,
                 GetOrder,
                 GetOrderItem,
+                GetPriceElement,
                 i => GetAddress(i.ErpOrderId, true),
                 i => GetAddress(i.ErpOrderId, false),
                 GetCurrency,
@@ -78,6 +83,25 @@ namespace Elsa.Commerce.Core.Repositories
                 m_productRepository);
 
             return !m_stopMapping;
+        }
+
+        private IOrderPriceElement GetPriceElement(string arg)
+        {
+            var xid = long.Parse(arg);
+
+            var priceElement = Order.PriceElements.FirstOrDefault(e => e.ExternalId == xid);
+            if (priceElement != null) 
+            {
+                PriceElementsToDelete.Remove(priceElement.Id);
+            }
+            else 
+            {
+                priceElement = m_database.New<IOrderPriceElement>(i => i.ExternalId = xid);
+            }
+
+            PriceElements.Add(priceElement);
+
+            return priceElement;
         }
 
         private IPurchaseOrder GetOrder(OrderIdentifier identifier)
@@ -97,6 +121,7 @@ namespace Elsa.Commerce.Core.Repositories
             {
                 Order = order;
                 OrderItemsToDelete.AddRange(Order.Items.Select(i => i.Id));
+                PriceElementsToDelete.AddRange(Order.PriceElements.Select(i => i.Id));
             }
 
             order.OrderNumber = identifier.ErpOrderId;

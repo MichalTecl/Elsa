@@ -11,5 +11,7 @@
         string Value { get; }
 
         string TaxPercent { get; }
+
+        string Price { get; }
     }
 }

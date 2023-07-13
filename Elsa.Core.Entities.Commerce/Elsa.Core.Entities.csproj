@@ -65,6 +65,7 @@
     <Compile Include="Automation\IJobSchedule.cs" />
     <Compile Include="Automation\IScheduledJob.cs" />
     <Compile Include="Commerce\IOrderItem.cs" />
+    <Compile Include="Commerce\IOrderPriceElement.cs" />
     <Compile Include="Commerce\IOrderStatus.cs" />
     <Compile Include="Commerce\IProduct.cs" />
     <Compile Include="Commerce\IPurchaseOrder.cs" />

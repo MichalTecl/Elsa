@@ -86,6 +86,8 @@ namespace Elsa.Core.Entities.Commerce.Commerce
 
         IEnumerable<IOrderItem> Items { get; }
 
+        IEnumerable<IOrderPriceElement> PriceElements { get; }
+
         int InsertUserId { get; set; }
         IUser InsertUser { get; }
         DateTime InsertDt { get; set; }

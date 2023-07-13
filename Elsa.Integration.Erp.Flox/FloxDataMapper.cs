@@ -60,6 +60,15 @@ namespace Elsa.Integration.Erp.Flox
             return 0;
         }
 
+
+        protected override decimal? ParseMoneyOrNull(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem, string sourcePropertyName)
+        {
+            if (string.IsNullOrEmpty(source))
+                return null;
+
+            return ParseMoney(source, sourceRecord, sourceItem, sourcePropertyName);
+        }
+
         protected override decimal? TryParseWeight(string source, IErpOrderModel sourceRecord, IErpOrderItemModel sourceItem)
         {
             if (string.IsNullOrWhiteSpace(source))

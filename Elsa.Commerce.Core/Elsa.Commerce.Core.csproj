@@ -231,6 +231,8 @@
   <ItemGroup>
     <Content Include="SQL\20220116_001_GetAvailableBatchesByNrLike.sql" />
     <Content Include="SQL\20211109_001_sp_assignEshopItemToMaterial.sql" />
+    <Content Include="SQL\20230713_002_vwOrderCustomer.sql" />
+    <Content Include="SQL\20230713_003_vwPriceElements.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
