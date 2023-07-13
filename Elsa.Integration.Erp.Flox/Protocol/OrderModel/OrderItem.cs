@@ -36,7 +36,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
         public string PriceWithoutTax { get; set; }
 
         [XmlElement("tax")]
-        public string TaxPercent { get; set; }
+        public decimal TaxPercent { get; set; }
 
         [XmlElement("weight")]
         public string ProductItemWeight { get; set; }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
-
+using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 
 using Newtonsoft.Json;
@@ -136,10 +136,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
         public string Customer { get; set; }
 
         [XmlElement("u_email")]
-        public string Email { get; set; }
-
-        [XmlElement("user_id")]
-        public string UserId { get; set; }
+        public string Email { get; set; }        
 
         [XmlElement("pay_date ")]
         public string PayDate { get; set; }
@@ -167,7 +164,22 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
 
         [XmlElement("inv_id")]
         public string InvoiceId { get; set; }
-        
+
+        [XmlElement("user_id")]
+        public string CustomerUserId { get; set; }
+
+        [XmlElement("cid")]
+        public string CustomerCompanyId { get; set; }
+
+        [XmlIgnore]
+        public string CustomerErpUid
+        {
+            get
+            {
+                return CustomerUidCalculator.GetCustomerUid(CustomerCompanyId, CustomerUserId, Email);
+            }
+        }
+
         [XmlIgnore]
         public string PreviewText => $"{OrderNumber} {InvoiceFirstName} {InvoiceSurname} {InternalNote}";
 
@@ -271,6 +283,8 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
             get { return m_source ?? "Flox"; }
             set { m_source = value; }
         }
+
+        
 
         public override string ToString()
         {

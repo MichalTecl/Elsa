@@ -153,5 +153,7 @@ namespace Elsa.Integration.Erp.Elerp.Model
                 return DateTime.Parse(PurchaseDate);
             }
         }
+
+        public string CustomerErpUid => throw new NotImplementedException();
     }
 }

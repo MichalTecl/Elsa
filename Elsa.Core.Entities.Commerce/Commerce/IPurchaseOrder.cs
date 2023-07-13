@@ -118,5 +118,8 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         string DiscountsText { get; set; }
 
         DateTime? ReturnDt { get; set; }
+
+        [NVarchar(100, true)]
+        string CustomerErpUid { get; set; }
     }
 }

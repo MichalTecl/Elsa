@@ -71,7 +71,7 @@ namespace Elsa.Assembly
                 {
                     s.ScanAssembly(typeof(IInvoiceFormGeneratorFactory).Assembly);
                     s.ScanAssembly(typeof(FloxClient).Assembly);
-                    s.ScanAssembly(typeof(FlerClient).Assembly);
+                    //s.ScanAssembly(typeof(FlerClient).Assembly);
                     s.ScanAssembly(typeof(FioClient).Assembly);
                     s.ScanAssembly(typeof(ScheduledJobsController).Assembly);
                     s.ScanAssembly(typeof(IScheduledJobsRepository).Assembly);
@@ -87,7 +87,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(ZasilkovnaClient).Assembly);
                     s.ScanAssembly(typeof(ShipmentController).Assembly);
                     s.ScanAssembly(typeof(PackingController).Assembly);
-                    s.ScanAssembly(typeof(ElerpClient).Assembly);
+                    //s.ScanAssembly(typeof(ElerpClient).Assembly);
                     s.ScanAssembly(typeof(CustomersSyncJob).Assembly);
                     s.ScanAssembly(typeof(CustomersController).Assembly);
                     s.ScanAssembly(typeof(ImportRatesJob).Assembly);

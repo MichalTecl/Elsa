@@ -18,7 +18,7 @@ namespace Elsa.Commerce.Core
                 return $"C{companyId.Trim()}";
 
             if(!string.IsNullOrWhiteSpace(email))
-                return $"X{StringUtil.GetHash(email.ToLowerInvariant().Trim())}";
+                return $"X{email.ToLowerInvariant().Trim()}";
 
             return "???UID_N/A";
         }

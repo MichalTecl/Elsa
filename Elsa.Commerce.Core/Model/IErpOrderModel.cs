@@ -58,8 +58,6 @@ namespace Elsa.Commerce.Core.Model
 
         string Email { get; }
 
-        string UserId { get; }
-
         string PayDate { get; }
 
         string Paid { get; }
@@ -81,6 +79,8 @@ namespace Elsa.Commerce.Core.Model
         string FormattedHouseNumber { get; }
 
         bool IsPayOnDelivery { get; }
+
+        string CustomerErpUid { get; }
         
         IEnumerable<IErpPriceElementModel> OrderPriceElements { get; }
 

@@ -1,0 +1,1 @@
+﻿ALTER TABLE [dbo].[PurchaseOrder] DISABLE TRIGGER [TRG_OrdersAudit];

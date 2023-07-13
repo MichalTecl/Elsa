@@ -143,6 +143,8 @@ namespace Elsa.Integration.Erp.Fler.Model
             }
         }
 
+        public string CustomerErpUid => throw new NotImplementedException();
+
         public void SetDebugNumber(string nnum)
         {
             throw new NotImplementedException();

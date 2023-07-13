@@ -40,7 +40,7 @@ namespace Elsa.Commerce.Core
                 targetItem.ErpProductId = sourceItem.ErpProductId;
                 targetItem.PlacedName = sourceItem.ProductName;
                 targetItem.Quantity = sourceItem.Quantity;
-                targetItem.TaxPercent = ParseMoney(sourceItem.TaxPercent, source, sourceItem, nameof(sourceItem.TaxPercent));
+                targetItem.TaxPercent = sourceItem.TaxPercent;
                 targetItem.TaxedPrice = ParseMoney(sourceItem.TaxedPrice, source, sourceItem, nameof(sourceItem.TaxedPrice));
 
                 var parsedItemWeight = TryParseWeight(sourceItem.ProductItemWeight, source, sourceItem) ;
@@ -128,6 +128,7 @@ namespace Elsa.Commerce.Core
             target.DueDate = ParseDt(source.BuyDate, source, null, nameof(source.BuyDate));
             target.IsPayOnDelivery = source.IsPayOnDelivery;
             target.DiscountsText = source.DiscountsText;
+            target.CustomerErpUid = source.CustomerErpUid;
         }
 
         protected abstract bool HasDeliveryAddress(IErpOrderModel source);
