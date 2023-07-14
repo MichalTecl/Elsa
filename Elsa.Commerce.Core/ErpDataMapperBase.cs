@@ -136,6 +136,8 @@ namespace Elsa.Commerce.Core
             target.TaxedPaymentCost = ObtainTaxedPaymentCost(source);
             target.ShippingTaxPercent = ObtainShippingTaxPercent(source);
             target.PaymentTaxPercent = ObtainPaymentTaxPercent(source);
+            target.PercentDiscountText = ObtainPercentDiscountText(source);
+            target.PercentDiscountValue = ObtainPercentDiscountValue(source);
 
             target.PurchaseDate = ParseDt(source.PurchaseDate, source, null, nameof(source.PurchaseDate));
             target.BuyDate = ParseDt(source.BuyDate, source, null, nameof(source.BuyDate));
@@ -144,6 +146,9 @@ namespace Elsa.Commerce.Core
             target.DiscountsText = source.DiscountsText;
             target.CustomerErpUid = source.CustomerErpUid;
         }
+
+        protected abstract decimal? ObtainPercentDiscountValue(IErpOrderModel source);
+        protected abstract string ObtainPercentDiscountText(IErpOrderModel source);
 
         protected abstract bool HasDeliveryAddress(IErpOrderModel source);
 

@@ -120,6 +120,7 @@
     <Compile Include="Inventory\IMaterialInventory.cs" />
     <Compile Include="Inventory\IMaterialThreshold.cs" />
     <Compile Include="Inventory\IMaterialUnit.cs" />
+    <Compile Include="Inventory\IReportingMaterialGroup.cs" />
     <Compile Include="Inventory\IUnitConversion.cs" />
     <Compile Include="Inventory\IVirtualProduct.cs" />
     <Compile Include="Inventory\IVirtualProductMaterial.cs" />

@@ -123,5 +123,10 @@ namespace Elsa.Core.Entities.Commerce.Commerce
 
         [NVarchar(100, true)]
         string CustomerErpUid { get; set; }
+        
+        [NVarchar(255, true)]
+        string PercentDiscountText { get; set; }
+
+        decimal? PercentDiscountValue { get; set; }
     }
 }

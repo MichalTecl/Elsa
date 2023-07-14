@@ -36,9 +36,20 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
         public string PriceWithoutTax { get; set; }
 
         [XmlElement("tax")]
-        public decimal TaxPercent { get; set; }
+        public string TaxPercentValue { get; set; }
 
         [XmlElement("weight")]
         public string ProductItemWeight { get; set; }
+
+        public decimal TaxPercent 
+        {
+            get 
+            {
+                if (string.IsNullOrWhiteSpace(TaxPercentValue) || !decimal.TryParse(TaxPercentValue, out var val))
+                    return 21;
+
+                return val;
+            }
+        }
     }
 }
