@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Robowire.RobOrm.Core;
+using System.Collections.Generic;
 
 namespace Elsa.Commerce.Core.Model
 {
@@ -89,6 +90,10 @@ namespace Elsa.Commerce.Core.Model
         string DiscountsText { get; set; }
 
         string OrderHash { get; }
+
+        [NotFk]
+        string VatId { get; }
+        string CompanyRegistrationId { get; }
 
         void SetDebugNumber(string nnum);
     }

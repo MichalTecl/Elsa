@@ -145,6 +145,9 @@ namespace Elsa.Commerce.Core
             target.IsPayOnDelivery = source.IsPayOnDelivery;
             target.DiscountsText = source.DiscountsText;
             target.CustomerErpUid = source.CustomerErpUid;
+
+            target.VatId = source.VatId;
+            target.CompanyRegId = source.CompanyRegistrationId;
         }
 
         protected abstract decimal? ObtainPercentDiscountValue(IErpOrderModel source);

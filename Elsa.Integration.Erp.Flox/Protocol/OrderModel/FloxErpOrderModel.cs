@@ -284,7 +284,11 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
             set { m_source = value; }
         }
 
-        
+        [XmlElement("u_vat_id")]
+        public string VatId { get; set; }
+
+        [XmlElement("u_company_id")]
+        public string CompanyRegistrationId { get; set; }
 
         public override string ToString()
         {

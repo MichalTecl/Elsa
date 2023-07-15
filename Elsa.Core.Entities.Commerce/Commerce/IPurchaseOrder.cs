@@ -128,5 +128,13 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         string PercentDiscountText { get; set; }
 
         decimal? PercentDiscountValue { get; set; }
+
+        [NotFk]
+        [NVarchar(64, true)]
+        string VatId { get; set; }
+
+        [NotFk]
+        [NVarchar(64, true)]
+        string CompanyRegId { get; set; }
     }
 }

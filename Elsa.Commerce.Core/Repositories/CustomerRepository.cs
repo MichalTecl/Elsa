@@ -267,13 +267,7 @@ namespace Elsa.Commerce.Core.Repositories
                 trg.SearchTag = searchTag;
                 changed = true;
             }
-
-            if (trg.Groups != src.Groups) 
-            {
-                trg.Groups = src.Groups;
-                changed = true;
-            }
-
+                        
             if (trg.ErpUid != src.ErpCustomerId) 
             {
                 trg.ErpUid = src.ErpCustomerId;
@@ -284,6 +278,31 @@ namespace Elsa.Commerce.Core.Repositories
             {
                 trg.LastImportDt = DateTime.Now;
                 SaveCustomer(trg);
+            }
+
+            var importedGroups = (src.Groups ?? string.Empty).Split(',').Select(g => g.Trim()).Where(g => !string.IsNullOrWhiteSpace(g)).Distinct().ToList();
+            var existingGroups = m_database.SelectFrom<ICustomerGroup>().Where(g => g.CustomerId == trg.Id).Execute().ToList();
+
+            foreach(var importedGroup in importedGroups) 
+            {
+                if (existingGroups.Any(eg => eg.ErpGroupName.Equals(importedGroup, StringComparison.InvariantCultureIgnoreCase)))
+                    continue;
+
+                var ng = m_database.New<ICustomerGroup>();
+                ng.CustomerId = trg.Id;
+                ng.ErpGroupName = importedGroup;
+                m_database.Save(ng);
+                existingGroups.Add(ng);
+                m_log.Info($"Customer {trg.Name} added to group {ng.ErpGroupName}");
+            }
+
+            foreach(var toDelete in existingGroups) 
+            {                
+                if (importedGroups.Any(ig => ig.Equals(toDelete.ErpGroupName, StringComparison.CurrentCultureIgnoreCase)))
+                    continue;
+
+                m_database.Delete(toDelete);
+                m_log.Info($"Customer {trg.Name} removed from group {toDelete.ErpGroupName}");
             }
         }
 

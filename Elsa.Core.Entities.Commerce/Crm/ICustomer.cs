@@ -55,8 +55,5 @@ namespace Elsa.Core.Entities.Commerce.Crm
 
         [NVarchar(100, true)]
         string ErpUid { get; set; }
-
-        [NVarchar(1000, true)]
-        string Groups { get; set; }
     }
 }
