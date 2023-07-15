@@ -30,11 +30,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EPPlus, Version=4.5.3.2, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.4.5.3.2\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -44,12 +51,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomersController.cs" />
+    <Compile Include="DataReporting\DatasetLoader.cs" />
     <Compile Include="Entities\ICustomerGroupMapping.cs" />
     <Compile Include="Entities\ISalesRepCustomer.cs" />
     <Compile Include="Entities\ISalesRepresentative.cs" />
     <Compile Include="Model\CustomerRelatedItem.cs" />
     <Compile Include="Model\CustomerViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CrmRegistry.cs" />
+    <Compile Include="CrmReportingController.cs" />
+    <Compile Include="ReportBuilder\ReportPackage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
@@ -88,6 +99,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

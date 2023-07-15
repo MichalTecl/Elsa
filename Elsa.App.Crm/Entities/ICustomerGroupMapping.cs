@@ -16,5 +16,7 @@ namespace Elsa.App.Crm.Entities
 
         [NVarchar(500, false)]
         string MarginText { get; set; }
+
+        int MarginPriority { get; set; }
     }
 }

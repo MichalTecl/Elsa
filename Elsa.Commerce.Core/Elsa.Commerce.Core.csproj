@@ -234,6 +234,7 @@
     <Content Include="SQL\20230713_002_vwOrderCustomer.sql" />
     <Content Include="SQL\20230713_003_vwPriceElements.sql" />
     <Content Include="SQL\20230714_001_vwOrderDiscount.sql" />
+    <Content Include="SQL\20230715_001_vwOrderItemProduct.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
