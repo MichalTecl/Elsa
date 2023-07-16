@@ -1,5 +1,7 @@
 ﻿using Elsa.App.Crm.DataReporting;
+using Elsa.App.Crm.Model;
 using Elsa.App.Crm.ReportBuilder;
+using Elsa.App.Crm.Repositories;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -17,15 +19,17 @@ namespace Elsa.App.Crm
     public class CrmReportingController : ElsaControllerBase
     {
         private readonly DatasetLoader _datasetLoader;
+        private readonly SalesRepRepository _salesReps;
 
-        public CrmReportingController(IWebSession webSession, ILog log, DatasetLoader datasetLoader) : base(webSession, log)
+        public CrmReportingController(IWebSession webSession, ILog log, DatasetLoader datasetLoader, SalesRepRepository salesReps) : base(webSession, log)
         {
             _datasetLoader = datasetLoader;
+            _salesReps = salesReps;
         }
 
-        public FileResult GetReport() 
+        public FileResult getDistributorReport(int distributorId) 
         {
-            var ds = _datasetLoader.Execute("CRM_GetDistributorReport", new Dictionary<string, object> { { "@customerId", 27771 } });
+            var ds = _datasetLoader.Execute("CRM_GetDistributorReport", new Dictionary<string, object> { { "@customerId", distributorId} });
 
             using (var report = new ReportPackage(@"C:\Elsa\ReportTemplates\DistributorsReportTemplate.xlsx"))
             {
@@ -39,13 +43,16 @@ namespace Elsa.App.Crm
             }            
         }
 
-        public FileResult GetSalesRepReport() 
+        public FileResult GetSalesRepReport(int? salesRepId, string dtFrom, string dtTo) 
         {
+            var from = DateTime.Parse(dtFrom);
+            var to = DateTime.Parse(dtTo);
+
             // CRM_GetSalesRepresentativeReport(@salesRepId INT, @startDt DATETIME, @endDt DATETIME)
             var ds = _datasetLoader.Execute("CRM_GetSalesRepresentativeReport", new Dictionary<string, object> {
-                { "@salesRepId", 1 },
-                {"@startDt", new DateTime(2023, 5, 1) },
-                {"@endDt", new DateTime(2023, 7, 31) }});
+                { "@salesRepId", salesRepId },
+                {"@startDt", from },
+                {"@endDt", to }});
 
             using (var report = new ReportPackage(@"C:\Elsa\ReportTemplates\SalesRepresentativeReportTemplate.xlsx"))
             {
@@ -58,6 +65,34 @@ namespace Elsa.App.Crm
                 .Insert(1, "A8", ds.Tables[3], headers: true, copyStyle: true);
 
                 return new FileResult($"{Guid.NewGuid()}.xlsx", report.GetBytes());
+            }
+        }
+
+        public IEnumerable<SalesRepresentativeModel> GetSalesReps() 
+        {
+            return _salesReps.GetSalesRepresentatives(null).Select(i => new SalesRepresentativeModel
+            {
+                Id = i.Id,
+                Name = i.PublicName
+            });
+        }
+
+        public IEnumerable<DistributorViewModel> GetDistributors() 
+        {
+            var reps = _salesReps.GetSrCustomers();
+
+            foreach(var d in _salesReps.GetDistributors(null).ToList()) 
+            {
+                var sr = reps.FirstOrDefault(r => r.CustomerId == d.Id);
+                if (sr == null)
+                    continue;
+
+                yield return new DistributorViewModel
+                {
+                    Id = d.Id,
+                    Name = d.Name ?? d.Email,
+                    SalesRepId = sr.SalesRepId
+                };
             }
         }
     }

@@ -1,0 +1,67 @@
+﻿<ElsaBody>
+    <script src="/UI/CrmReporting/CrmReporting.vm.js"></script>
+    <link href="/UI/CrmReporting/CrmReporting.css" rel="stylesheet" />
+    <div class="panel w4">
+        <div class="panelHead">
+            <div class="panelTitle">CRM Reporty</div>
+        </div>
+
+        <div id="crmRepUi" class="panelContent">
+            <div id="reportParams">
+                <div id="srPickerCont" class="autocomplete">
+                    <label for="srPickerInput">OZ</label>
+                    <input id="srPickerInput" event-bind="change:onSrChanged($srPickerInput.value)" />
+                </div>
+                <div id="distributorPickerCont" class="autocomplete">
+                    <label for="distributorPickerInput">VO Partner</label>
+                    <input id="distributorPickerInput" event-bind="change:onDistributorChanged($distributorPickerInput.value)" data-bind="value:selectedDistributorName" />
+                </div>
+
+                <div id="periodSelPanel">
+                    <input type="date" id="dtFrom" data-bind="valueAsDate:dateFrom" event-bind="change:onDtChange($dtFrom.valueAsDate, $dtTo.valueAsDate)" />
+                    <input type="date" id="dtTo" data-bind="valueAsDate:dateTo" event-bind="change:onDtChange($dtFrom.valueAsDate, $dtTo.valueAsDate)" />
+
+                    <div class="presetList stackLeft" data-bind="itemsSource:periodPresets" data-key="text">
+                        <div class="lt-template">
+                            <button data-bind="class:cssClass;text:text" event-bind="click:onPresetClick(VM)"></button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div id="reportList" data-bind="itemsSource:reportLinks" data-key="url">
+                <div class="lt-template stackLeft" data-bind="class.invalidSelection:hasError">
+                    <i class="fas fa-table" data-bind="class.hidden:hasError"></i>
+                    <i class="fas fa-exclamation-triangle" data-bind="class!.hidden:hasError"></i>
+                    <a data-bind="href:url; text:title"></a>
+                    <div class="linkErrbox" data-bind="text:error"></div>
+                </div>
+            </div>
+        </div>
+        <script>
+            lt.element("crmRepUi").withModel("app.CrmReporting.vm").attach(function (srPickerCont, distributorPickerCont) {
+                app.ui.autosuggest(srPickerCont, app.CrmReporting.vm.getSalesReps);
+                app.ui.autosuggest(distributorPickerCont, app.CrmReporting.vm.getDistributors);
+
+                var model = app.CrmReporting.vm;
+
+                this.onSrChanged = function (srName) {
+                    model.selectSalesRepByName(srName);
+                };
+
+                this.onDistributorChanged = function (distributorName) {
+                    model.selectDistributorByName(distributorName);
+                };
+
+                this.onPresetClick = function (data) {
+                    model.selectPeriod(data.from, data.to);
+                };
+
+                this.onDtChange = function (df, dt) {
+                    model.selectPeriod(df, dt);
+                }
+
+            });
+        </script>
+    </div>
+</ElsaBody>

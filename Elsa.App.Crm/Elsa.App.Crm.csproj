@@ -57,10 +57,13 @@
     <Compile Include="Entities\ISalesRepresentative.cs" />
     <Compile Include="Model\CustomerRelatedItem.cs" />
     <Compile Include="Model\CustomerViewModel.cs" />
+    <Compile Include="Model\DistributorViewModel.cs" />
+    <Compile Include="Model\SalesRepresentativeModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CrmRegistry.cs" />
     <Compile Include="CrmReportingController.cs" />
     <Compile Include="ReportBuilder\ReportPackage.cs" />
+    <Compile Include="Repositories\SalesRepRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
@@ -105,10 +108,13 @@
     <Content Include="SQL\20230715_CRM_GetDistributorReport.sql" />
     <Content Include="SQL\20230716_001_vwCustomerGroupsCsv.sql" />
     <Content Include="SQL\20230716_002_CRM_GetSalesRepresentativeReport.sql" />
+    <Content Include="SQL\20230716_003_RegisterCrmWidget.sql" />
+    <Content Include="UI\CrmReporting\CrmReporting.css" />
+    <Content Include="UI\CrmReporting\CrmReporting.html" />
+    <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
+    <Content Include="UI\CrmReporting\CrmWidget.html" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UI\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

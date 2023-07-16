@@ -1,4 +1,5 @@
 ﻿using Elsa.App.Crm.DataReporting;
+using Elsa.App.Crm.Repositories;
 using Robowire;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Elsa.App.Crm
         public void Setup(IContainerSetup setup)
         {
             setup.For<DatasetLoader>().Use<DatasetLoader>();
+            setup.For<SalesRepRepository>().Use<SalesRepRepository>();
         }
     }
 }

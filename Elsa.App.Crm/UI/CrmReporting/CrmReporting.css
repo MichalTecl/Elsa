@@ -1,0 +1,64 @@
+﻿#crmRepUi label {
+    font-weight: bold;
+}
+
+#reportParams input {
+    width: 236px;
+}
+
+#reportParams .autocomplete label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.periodPresetButton {
+    font-size: 0.8em;
+}
+
+    .periodPresetButton.periodPartiallyInFuture {
+        background-color: #F7D7D7;
+    }
+
+    .periodPresetButton.firstOfItsKind {
+        margin-left: 8px;
+    }
+
+#reportParams #periodSelPanel {
+    margin-top: 15px;
+}
+
+#reportParams .presetList {
+    margin-top: 5px;
+}
+
+#reportList {
+    margin-top: 10px;
+    border-top: 1px solid #999;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+    #reportList > div {
+        margin-top: 10px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #ccc;
+        padding-left: 15px;
+    }
+
+    #reportList i.fas {
+        margin-right: 10px;
+        color: #777;
+    }
+
+
+    #reportList div.linkErrbox {
+        margin-left: 5px;
+        color: red;
+    }
+
+    #reportList .invalidSelection a {
+        opacity: 0.6;
+        pointer-events: none;
+        cursor: default;
+        color: black;
+    }
