@@ -24,9 +24,9 @@ namespace Elsa.App.Crm.ReportBuilder
             _excelPackage?.Dispose();
         }
 
-        public ReportPackage Insert(string sheetName, string startCell, DataTable table, bool headers = true, bool copyStyle = false) 
-        {
-            var sheet = _excelPackage.Workbook.Worksheets.FirstOrDefault(s => s.Name == sheetName);
+        public ReportPackage Insert(int sheetIndex, string startCell, DataTable table, bool headers = true, bool copyStyle = false) 
+        {            
+            var sheet = _excelPackage.Workbook.Worksheets[sheetIndex + 1];
 
             var dataRowOffset = headers ? 1 : 0;
 

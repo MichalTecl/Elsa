@@ -99,9 +99,15 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="ReportTemplates\CrmReport1Template.xlsx" />
+    <None Include="sencha.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\20230715_CRM_GetDistributorReport.sql" />
+    <Content Include="SQL\20230716_001_vwCustomerGroupsCsv.sql" />
+    <Content Include="SQL\20230716_002_CRM_GetSalesRepresentativeReport.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="UI\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
