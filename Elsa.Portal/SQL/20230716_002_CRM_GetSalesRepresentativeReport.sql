@@ -46,8 +46,8 @@ BEGIN
 
 	DECLARE @monthsdiff INT = DATEDIFF(month, @startDt, @endDt);
 
-	DECLARE @prevPeriodStartDt DATETIME = DATEADD(month, @monthsDiff, @startDt);
-	DECLARE @prevPeriodEndDt DATETIME = DATEADD(month, @monthsDiff, @endDt);
+	DECLARE @prevPeriodStartDt DATETIME = DATEADD(month, -1 * (@monthsDiff + 1), @startDt);
+	DECLARE @prevPeriodEndDt DATETIME = DATEADD(month, -1 * (@monthsDiff + 1), @endDt);
 
 	DECLARE @prevYearPerStart DATETIME = DATEADD(year, -1, @startDt);
 	DECLARE @prevYearPerEnd   DATETIME = DATEADD(year, -1, @endDt);
@@ -120,23 +120,30 @@ BEGIN
 		/****** DATASET 4 - prehled objednavek dle SKUPIN produktu ***************/
 
 	SET @sql = '
-	SELECT *
+	WITH cte
+	AS
+	(
+	SELECT *	
 	FROM (
-		SELECT M, ISNULL(Skupina, '''') Skupina, Qty
+		SELECT M, Skupina, Qty
 		FROM (
-				SELECT CONVERT(varchar(7), po.PurchaseDate, 111) AS M, rmg.Name AS Skupina, oi.Quantity AS Qty
+				SELECT CONVERT(varchar(7), po.PurchaseDate, 111) AS M, ISNULL(rmg.Name, N''NEZAŘAZENO'') AS Skupina, oi.Quantity AS Qty
 				FROM #custOrders co
 				JOIN PurchaseOrder po ON co.id = po.Id
 				JOIN OrderItem oi ON co.id = oi.PurchaseOrderId
 				JOIN vwOrderItemProduct oip ON oi.Id = oip.OrderItemId
 				LEFT JOIN ReportingMaterialGroupMaterial rmgm ON (oip.MaterialId = rmgm.MaterialId)
 				LEFT JOIN ReportingMaterialGroup rmg ON (rmgm.GroupId = rmg.Id)
-				) x
+				) x				
 	 ) src
 	 PIVOT (
 		SUM(Qty)
 		FOR M IN ('+@monthTitles +')
-	) pvt;';
+	) pvt)
+	SELECT cte.* 
+	  FROM cte
+	  LEFT JOIN ReportingMaterialGroup rmg ON (cte.Skupina = rmg.Name)
+	  ORDER BY rmg.DisplayOrder;';
 
 	EXEC(@sql);
 

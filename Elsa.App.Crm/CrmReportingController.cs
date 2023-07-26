@@ -20,31 +20,37 @@ namespace Elsa.App.Crm
     {
         private readonly DatasetLoader _datasetLoader;
         private readonly SalesRepRepository _salesReps;
-
+        
         public CrmReportingController(IWebSession webSession, ILog log, DatasetLoader datasetLoader, SalesRepRepository salesReps) : base(webSession, log)
         {
             _datasetLoader = datasetLoader;
             _salesReps = salesReps;
         }
 
-        public FileResult getDistributorReport(int distributorId) 
+        public FileResult GetDistributorReport(int distributorId) 
         {
             var ds = _datasetLoader.Execute("CRM_GetDistributorReport", new Dictionary<string, object> { { "@customerId", distributorId} });
+
+            var distributorName = GetDistributors().FirstOrDefault(d => d.Id == distributorId)?.Name ?? "_?_";
 
             using (var report = new ReportPackage(@"C:\Elsa\ReportTemplates\DistributorsReportTemplate.xlsx"))
             {
                 report
-                .Insert(0, "A3", ds.Tables[0], headers: false, copyStyle: true)
-                .Insert(1, "A4", ds.Tables[1], headers: false, copyStyle: true)
-                .Insert(2, "A4", ds.Tables[2], headers: true, copyStyle: true)
-                .Insert(3, "A4", ds.Tables[3], headers: true, copyStyle: true);
+                .Insert(0, "A4", ds.Tables[0], headers: false, copyStyle: true)
+                .Insert(1, "A5", ds.Tables[1], headers: false, copyStyle: true)
+                .Insert(2, "A5", ds.Tables[2], headers: true, copyStyle: true)
+                .Insert(3, "A5", ds.Tables[3], headers: true, copyStyle: true);
 
-                return new FileResult($"{Guid.NewGuid()}.xlsx", report.GetBytes());
+                return new FileResult($"Přehled {distributorName}.xlsx", report.GetBytes());
             }            
         }
 
         public FileResult GetSalesRepReport(int? salesRepId, string dtFrom, string dtTo) 
         {
+            var salesRepName = "Všichni OZ";
+            if (salesRepId != null)
+                salesRepName = $"OZ {_salesReps.GetSalesRepresentatives(null).FirstOrDefault(sr => sr.Id == salesRepId)?.PublicName}";
+
             var from = DateTime.Parse(dtFrom);
             var to = DateTime.Parse(dtTo);
 
@@ -57,14 +63,14 @@ namespace Elsa.App.Crm
             using (var report = new ReportPackage(@"C:\Elsa\ReportTemplates\SalesRepresentativeReportTemplate.xlsx"))
             {
                 report.
-                 Insert(0, "A3", ds.Tables[0], headers: false, copyStyle: false)
-                .Insert(0, "A7", ds.Tables[1], headers: false, copyStyle: false)
-                .Insert(0, "A13", ds.Tables[2], headers: false, copyStyle: true)
+                 Insert(0, "A4", ds.Tables[0], headers: false, copyStyle: false)
+                .Insert(0, "A8", ds.Tables[1], headers: false, copyStyle: false)
+                .Insert(0, "A14", ds.Tables[2], headers: false, copyStyle: true)
 
-                .Insert(1, "A3", ds.Tables[0], headers: false, copyStyle: false)
-                .Insert(1, "A8", ds.Tables[3], headers: true, copyStyle: true);
-
-                return new FileResult($"{Guid.NewGuid()}.xlsx", report.GetBytes());
+                .Insert(1, "A4", ds.Tables[0], headers: false, copyStyle: false)
+                .Insert(1, "A9", ds.Tables[3], headers: true, copyStyle: true);
+                                
+                return new FileResult($"Všichni VO - {salesRepName} - {from:dd.MM.yyyy}-{to:dd.MM.yyyy}.xlsx", report.GetBytes());
             }
         }
 

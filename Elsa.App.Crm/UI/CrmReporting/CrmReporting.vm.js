@@ -20,7 +20,7 @@ function () {
     self.reportLinks = [];
 
     var buildLinks = function () {
-
+        buildPresets();
         var distributorId = null;
         if (!!allDistributors) {
 
@@ -133,6 +133,13 @@ function () {
 
     self.periodPresets = [];
 
+    var compareDates = function (a, b) {
+        var da = (a || new Date()).toDateString();
+        var db = (b || new Date()).toDateString();
+
+        return da === db;
+    };
+
     var preset = function (text, from, to) {
 
         if (from > new Date())
@@ -149,38 +156,47 @@ function () {
         if (self.periodPresets.length > 0 && self.periodPresets[self.periodPresets.length - 1].mlen !== monthsDiff)
             classesList.push('firstOfItsKind');
 
+        if (compareDates(from, self.dateFrom) && compareDates(to, self.dateTo))
+            classesList.push('selectedPerPreset');
+
         self.periodPresets.push({ "text": text, "from": from, "to": to, "mlen": monthsDiff, "cssClass": classesList.join(" ") });
     };
+        
+    var buildPresets = function () {
 
-    const currentYear = new Date().getUTCFullYear();
-    var rim = ['0', 'I', 'II', 'III', 'IV'];
+        self.periodPresets = [];
 
-    // Cely letosni rok
-    const fromThisYear = new Date(Date.UTC(currentYear, 0, 1));
-    const toThisYear = new Date(Date.UTC(currentYear, 11, 31));
-    preset(currentYear.toString(), fromThisYear, toThisYear);
+        const currentYear = new Date().getUTCFullYear();
+        var rim = ['0', 'I', 'II', 'III', 'IV'];
 
-    // Cely minuly rok
-    const fromLastYear = new Date(Date.UTC(currentYear - 1, 0, 1));
-    const toLastYear = new Date(Date.UTC(currentYear - 1, 11, 31));
-    preset((currentYear - 1).toString(), fromLastYear, toLastYear);
+        // Cely letosni rok
+        const fromThisYear = new Date(Date.UTC(currentYear, 0, 1));
+        const toThisYear = new Date(Date.UTC(currentYear, 11, 31));
+        preset(currentYear.toString(), fromThisYear, toThisYear);
 
-    // Vsechna ctvrtleti tohoto roku
-    for (let quarter = 1; quarter <= 4; quarter++) {
-        const fromQuarter = new Date(Date.UTC(currentYear, (quarter - 1) * 3, 1));
-        const toQuarter = new Date(Date.UTC(currentYear, quarter * 3, 0));
-        preset("Q " + rim[quarter] + '/' + currentYear.toString(), fromQuarter, toQuarter);
-    }
+        // Cely minuly rok
+        const fromLastYear = new Date(Date.UTC(currentYear - 1, 0, 1));
+        const toLastYear = new Date(Date.UTC(currentYear - 1, 11, 31));
+        preset((currentYear - 1).toString(), fromLastYear, toLastYear);
 
-    // Pololetí tohoto a minulého roku
-    for (let year = currentYear - 1; year <= currentYear; year++) {
-        for (let half = 1; half <= 2; half++) {
-            const fromHalf = new Date(Date.UTC(year, (half - 1) * 6, 1));
-            const toHalf = new Date(Date.UTC(year, half * 6, 0));
-            preset(`${half}. pololetí ${year}`, fromHalf, toHalf);
+        // Vsechna ctvrtleti tohoto roku
+        for (let quarter = 1; quarter <= 4; quarter++) {
+            const fromQuarter = new Date(Date.UTC(currentYear, (quarter - 1) * 3, 1));
+            const toQuarter = new Date(Date.UTC(currentYear, quarter * 3, 0));
+            preset("Q " + rim[quarter] + '/' + currentYear.toString(), fromQuarter, toQuarter);
         }
-    }
 
+        // Pololetí tohoto a minulého roku
+        for (let year = currentYear - 1; year <= currentYear; year++) {
+            for (let half = 1; half <= 2; half++) {
+                const fromHalf = new Date(Date.UTC(year, (half - 1) * 6, 1));
+                const toHalf = new Date(Date.UTC(year, half * 6, 0));
+                preset(`${half}. pololetí ${year}`, fromHalf, toHalf);
+            }
+        }
+    };
+
+    buildPresets();
 };
 
 app.CrmReporting.vm = app.CrmReporting.vm || new app.CrmReporting.VM();

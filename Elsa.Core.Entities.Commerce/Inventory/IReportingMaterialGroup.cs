@@ -10,6 +10,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory
     {        
         [NVarchar(255, false)]
         string Name { get; set; }
+
+        int? DisplayOrder { get; set; }
     }
 
     [Entity]
@@ -19,7 +21,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         IMaterial Material { get; }
 
         int GroupId { get; set; }
-        IReportingMaterialGroup Group { get; }
+        IReportingMaterialGroup Group { get; }        
     }
 
 }

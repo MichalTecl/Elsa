@@ -89,10 +89,6 @@
       <Project>{91481b08-e437-474d-9793-a135f1db465c}</Project>
       <Name>Elsa.Core.Entities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Elsa.Integration.Erp.Fler\Elsa.Integration.Erp.Fler.csproj">
-      <Project>{af0625b5-6811-4393-bd3c-3c9c0fc30d8c}</Project>
-      <Name>Elsa.Integration.Erp.Fler</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Elsa.Integration.Erp.Flox\Elsa.Integration.Erp.Flox.csproj">
       <Project>{dc38d50d-1f5f-44c8-a273-6c57cf26974c}</Project>
       <Name>Elsa.Integration.Erp.Flox</Name>
