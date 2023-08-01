@@ -17,5 +17,8 @@ namespace Elsa.Core.Entities.Commerce.Common.Widgets
 
         [NVarchar(256, false)]
         string WidgetUrl { get; set; }
+
+        [NVarchar(255, true)]
+        string UserRightSymbol { get; set; }
     }
 }

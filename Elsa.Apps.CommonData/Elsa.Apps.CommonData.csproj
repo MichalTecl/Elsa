@@ -54,6 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommonDataUserRights.cs" />
     <Compile Include="CurrencyController.cs" />
     <Compile Include="ExcelInterop\ElsaExcelModelBase.cs" />
     <Compile Include="ExcelInterop\ElsaExcelModelFactory.cs" />
@@ -103,6 +104,10 @@
     <ProjectReference Include="..\Elsa.EditorBuilder\Elsa.EditorBuilder.csproj">
       <Project>{9C5C1039-A135-4D87-9E41-70BBEE4D6E1A}</Project>
       <Name>Elsa.EditorBuilder</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
+      <Project>{A9148D58-0F0E-43E7-8A11-A9F9BB04333C}</Project>
+      <Name>Elsa.Users</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

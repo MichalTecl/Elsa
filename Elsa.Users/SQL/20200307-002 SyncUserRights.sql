@@ -12,20 +12,31 @@ GO
 CREATE PROCEDURE SyncUserRights(@rights StringTable READONLY)
 AS
 BEGIN
-    INSERT INTO UserRight (Symbol, Description)
-	SELECT src.Val, src.Val
-	  FROM @rights src
-	 WHERE src.Val NOT IN (SELECT Symbol FROM UserRight);
+    -- Update existing symbols and insert new ones
+    MERGE INTO UserRight AS target
+    USING (
+        SELECT DISTINCT src.Val AS Symbol, src.Val AS Description
+        FROM @rights src
+    ) AS source ON target.Symbol = source.Symbol
+    WHEN MATCHED THEN
+        UPDATE SET Description = source.Description
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (Symbol, Description)
+        VALUES (source.Symbol, source.Description);
 
-	 DELETE FROM UserRoleRight 
-	 WHERE RightId IN (
-		SELECT r.Id
-		  FROM UserRight r
-		 WHERE r.Symbol NOT IN (SELECT Val FROM @rights));
-	 
-	 DELETE FROM UserRight 
-	   WHERE Symbol NOT IN (SELECT Val FROM @rights);
+    -- Delete UserRoleRight for rights that no longer exist
+    DELETE ur
+    FROM UserRoleRight ur
+    LEFT JOIN UserRight r ON ur.RightId = r.Id
+    WHERE r.Id IS NULL;
 
-	 SELECT Id, Symbol
-	   FROM UserRight;
+    -- Delete UserRight for rights that no longer exist
+    DELETE ur
+    FROM UserRight ur
+    LEFT JOIN @rights r ON ur.Symbol = r.Val
+    WHERE r.Val IS NULL;
+
+    -- Return the updated UserRight table
+    SELECT Id, Symbol
+    FROM UserRight;
 END

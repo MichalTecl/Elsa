@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OrdersOverviewUserRights.cs" />
     <Compile Include="Payments\Models\OrderViewModel.cs" />
     <Compile Include="Payments\Models\PaymentViewModel.cs" />
     <Compile Include="Payments\Models\SuggestedPairModel.cs" />

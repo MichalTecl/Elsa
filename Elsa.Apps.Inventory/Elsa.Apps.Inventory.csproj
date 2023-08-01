@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BatchReportingController.cs" />
+    <Compile Include="InventoryUserRights.cs" />
     <Compile Include="MaterialBatchesController.cs" />
     <Compile Include="MaterialController.cs" />
     <Compile Include="MaterialLevelController.cs" />

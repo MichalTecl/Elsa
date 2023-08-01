@@ -30,14 +30,27 @@ namespace Elsa.Common
         {
             var widgets = GetAllWidgets().OrderBy(w => w.ViewOrder);
 
-            if ((WebSession?.User == null) || WebSession.User.UsesDefaultPassword)
+            foreach(var widget in widgets) 
             {
-                return widgets.Where(w => w.IsAnonymous);
+                if (WebSession?.User == null || WebSession.User.UsesDefaultPassword) 
+                {
+                    if (widget.IsAnonymous)
+                    {
+                        yield return widget;
+                        continue;
+                    }    
+                }
+
+                if(!string.IsNullOrWhiteSpace(widget.UserRightSymbol))
+                {
+                    if (!WebSession.HasUserRight(widget.UserRightSymbol))
+                        continue;
+                }
+
+                yield return widget;
             }
-
-            return widgets;
         }
-
+                
         private List<IAppWidget> GetAllWidgets()
         {
             return m_cache.ReadThrough("all_widgets",

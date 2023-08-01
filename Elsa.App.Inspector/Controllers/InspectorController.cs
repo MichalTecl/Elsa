@@ -2,6 +2,7 @@
 using System.Linq;
 using Elsa.App.Inspector.Model;
 using Elsa.App.Inspector.Repo;
+using Elsa.Apps.Reporting;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -27,6 +28,8 @@ namespace Elsa.App.Inspector.Controllers
 
         public InspectionIssuesCollection GetIssues(int inspectionTypeId, int pageIndex)
         {
+            EnsureUserRight(ReportingUserRights.InspectorApp);
+
             var issues = m_inspectionsRepository.LoadIssues(inspectionTypeId, pageIndex, 10);
 
             var result = new InspectionIssuesCollection()
@@ -42,6 +45,8 @@ namespace Elsa.App.Inspector.Controllers
 
         public InspectionIssuesCollection LoadIssue(int issueId)
         {
+            EnsureUserRight(ReportingUserRights.InspectorApp);
+
             var issue = m_inspectionsRepository.LoadIssue(issueId, false);
 
             if (issue == null)
@@ -62,6 +67,8 @@ namespace Elsa.App.Inspector.Controllers
 
         public InspectionIssuesCollection ReevalIssue(int issueId, string actionText)
         {
+            EnsureUserRight(ReportingUserRights.InspectorActions);
+
             using (var session = m_inspectionsRepository.OpenSession())
             {
                 m_inspectionsRepository.RunInspectionAndCloseSession(session, issueId);
@@ -74,6 +81,8 @@ namespace Elsa.App.Inspector.Controllers
 
         public void PostponeIssue(int issueId, int days)
         {
+            EnsureUserRight(ReportingUserRights.InspectorActions);
+
             m_inspectionsRepository.PostponeIssue(issueId, days);
         }
     }

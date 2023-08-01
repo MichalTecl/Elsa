@@ -139,6 +139,7 @@
     <Content Include="SQL\20201011-002 vwBatchKeyAvailableAmount.sql" />
     <Content Include="SQL\20201017-001 GetMaterialResolution.sql" />
     <Content Include="SQL\20230713_001_DisableOrderHistoryTrigger.sql" />
+    <Content Include="SQL\20230801_001_SetupWidgetsUserRights.sql" />
     <Content Include="Style\PaperForms.css" />
     <Content Include="UI\Controls\Accounting\FixedCostIssueActionButton.html" />
     <Content Include="UI\Controls\Common\Autosuggest.css" />

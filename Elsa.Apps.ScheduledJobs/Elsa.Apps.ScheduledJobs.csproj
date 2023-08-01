@@ -48,6 +48,7 @@
     <Compile Include="Model\ScheduledJobStatus.cs" />
     <Compile Include="ScheduledJobsController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScheduledJobsUserRights.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
@@ -77,6 +78,10 @@
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
       <Project>{5EF07762-137B-4BF7-8199-5961768FCAEC}</Project>
       <Name>Elsa.Jobs.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
+      <Project>{A9148D58-0F0E-43E7-8A11-A9F9BB04333C}</Project>
+      <Name>Elsa.Users</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

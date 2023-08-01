@@ -147,5 +147,10 @@ namespace Elsa.Common
             public int StatusCode { get; }
             public string ExecutionError { get; }
         }
+
+        protected void EnsureUserRight(UserRight right) 
+        {
+            WebSession.EnsureUserRight(right);
+        }
     }
 }

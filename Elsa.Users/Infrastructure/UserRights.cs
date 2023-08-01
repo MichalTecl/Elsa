@@ -11,6 +11,7 @@ namespace Elsa.Users.Infrastructure
     {
         private static readonly ReaderWriterLockSlim s_lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         private static readonly IList<UserRight> s_rights = new List<UserRight>();
+        private static readonly List<Type> s_registeredTypes = new List<Type>(); 
 
         public static IEnumerable<UserRight> All
         {
@@ -35,6 +36,10 @@ namespace Elsa.Users.Infrastructure
             {
                 s_lock.EnterWriteLock();
 
+                if (s_registeredTypes.Contains(t))
+                    return;
+                s_registeredTypes.Add(t);
+
                 foreach (var field in t.GetFields(BindingFlags.Static | BindingFlags.Public)
                     .Where(fi => fi.FieldType == typeof(UserRight)))
                 {
@@ -43,6 +48,9 @@ namespace Elsa.Users.Infrastructure
                     {
                         continue;
                     }
+
+                    if (s_rights.Any(old => old.Symbol.Equals(right.Symbol, StringComparison.InvariantCultureIgnoreCase)))
+                        throw new ArgumentException($"User right with symbol \"{right.Symbol}\" is defined more than once");
 
                     s_rights.Add(right);
                 }
