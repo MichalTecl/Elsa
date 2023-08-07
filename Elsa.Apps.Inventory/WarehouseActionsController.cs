@@ -62,6 +62,8 @@ namespace Elsa.Apps.Inventory
 
         public MaterialBatchViewModel SaveBottomMaterialBatch(MaterialBatchViewModel model)
         {
+            EnsureUserRight(InventoryUserRights.MaterialBatchEdits);
+
             var material = m_materialRepository.GetMaterialByName(model.MaterialName);
             if (material == null)
             {
@@ -95,9 +97,9 @@ namespace Elsa.Apps.Inventory
 
         public void DeleteMaterialBatch(int batchId)
         {
+            EnsureUserRight(InventoryUserRights.MaterialBatchEdits);
+
             m_batchFacade.DeleteBatch(batchId);
         }
-
-
     }
 }

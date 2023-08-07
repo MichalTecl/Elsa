@@ -7,7 +7,7 @@
 
                     <div data-bind="text:RecipeName" class="recipeItem" event-bind="click:onRecipeClick(RecipeId)"></div>
 
-                    <div class="stackLeft recipeActions">
+                    <div class="stackLeft recipeActions restricted-ReceptureEdits">
                         <div class="recipeEditDisabledControl">
                             <i class="fas fa-heart faButton" data-bind="class!.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
                             <i class="far fa-heart faButton" data-bind="class.hidden:IsFavorite" event-bind="click:toggleFavoriteRecipe(RecipeId)"></i>
@@ -21,7 +21,7 @@
                     </div>
                 </div>
             </div>
-            <div>
+            <div class="restricted-ReceptureEdits">
                 <i class="fas fa-plus faButton recipeEditControl" event-bind="click:editRecipe(MaterialId)"></i>
             </div>
         </div>

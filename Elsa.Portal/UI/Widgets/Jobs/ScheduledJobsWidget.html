@@ -1,34 +1,36 @@
 ﻿<script src="/Script/Apps/Jobs/ScheduledJobs.VM.js"></script>
-<div class="panel w2">
-    <div class="panelHead">
-        <div class="panelTitle">Automatické úlohy</div>
-    </div>
+<div class="panel w2" style="background-color:transparent">
+    
 
     <div class="panelContent" id="jobsPanel" style="">
         
         <div class="syswarnhigh" data-bind="class.hidden:jobsHeartBeat">POZOR! Automatické úlohy jsou zastaveny</div>
         
-        <table class="jobsTable" id="jobsTable">
-            <thead>
-            <tr>
-                <th>Název</th>
-                <th>Naposledy</th>
-                <th>Stav</th>
-                <th>Start</th>
-                <th></th>
-            </tr>
-            </thead>
-            <tbody lt-name="jobRow">
-                <tr>
-                    <td data-bind="text:Name" style="font-weight: bold"></td>
-                    <td data-bind="text:LastRun"></td>
-                    <td data-bind="text:CurrentStatus"></td>
-                    <td data-bind="text:StartMode"></td>
-                    <td><button event-bind="click:launchJob(ScheduleId)">Spustit</button></td>
-                </tr>
-            </tbody>
-        </table>
-
+        <div class="restricted-ViewScheduledJobsAdminGrid">
+            <div class="panelHead">
+                <div class="panelTitle">Automatické úlohy</div>
+            </div>
+            <table class="jobsTable" id="jobsTable">
+                <thead>
+                    <tr>
+                        <th>Název</th>
+                        <th>Naposledy</th>
+                        <th>Stav</th>
+                        <th>Start</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody lt-name="jobRow">
+                    <tr>
+                        <td data-bind="text:Name" style="font-weight: bold"></td>
+                        <td data-bind="text:LastRun"></td>
+                        <td data-bind="text:CurrentStatus"></td>
+                        <td data-bind="text:StartMode"></td>
+                        <td><button event-bind="click:launchJob(ScheduleId)">Spustit</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>

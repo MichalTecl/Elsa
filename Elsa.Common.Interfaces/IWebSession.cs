@@ -1,4 +1,5 @@
-﻿using System.Web.Routing;
+﻿using System.Web;
+using System.Web.Routing;
 
 namespace Elsa.Common.Interfaces
 {
@@ -6,7 +7,9 @@ namespace Elsa.Common.Interfaces
     {
         string[] UserRights { get; }
 
-        void Initialize(RequestContext context);
+        void Initialize(HttpContextBase context);
+
+        void Initialize(HttpContext context);
 
         void Login(string user, string password);
 

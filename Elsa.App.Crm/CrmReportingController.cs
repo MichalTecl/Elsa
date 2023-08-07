@@ -29,6 +29,8 @@ namespace Elsa.App.Crm
 
         public FileResult GetDistributorReport(int distributorId) 
         {
+            EnsureUserRight(CrmUserRights.ViewCrmWidget);
+
             var ds = _datasetLoader.Execute("CRM_GetDistributorReport", new Dictionary<string, object> { { "@customerId", distributorId} });
 
             var distributorName = GetDistributors().FirstOrDefault(d => d.Id == distributorId)?.Name ?? "_?_";
@@ -47,6 +49,8 @@ namespace Elsa.App.Crm
 
         public FileResult GetSalesRepReport(int? salesRepId, string dtFrom, string dtTo) 
         {
+            EnsureUserRight(CrmUserRights.ViewCrmWidget);
+
             var salesRepName = "Všichni OZ";
             if (salesRepId != null)
                 salesRepName = $"OZ {_salesReps.GetSalesRepresentatives(null).FirstOrDefault(sr => sr.Id == salesRepId)?.PublicName}";
@@ -76,6 +80,8 @@ namespace Elsa.App.Crm
 
         public IEnumerable<SalesRepresentativeModel> GetSalesReps() 
         {
+            EnsureUserRight(CrmUserRights.ViewCrmWidget);
+
             return _salesReps.GetSalesRepresentatives(null).Select(i => new SalesRepresentativeModel
             {
                 Id = i.Id,
@@ -85,6 +91,8 @@ namespace Elsa.App.Crm
 
         public IEnumerable<DistributorViewModel> GetDistributors() 
         {
+            EnsureUserRight(CrmUserRights.ViewCrmWidget);
+
             var reps = _salesReps.GetSrCustomers();
 
             foreach(var d in _salesReps.GetDistributors(null).ToList()) 

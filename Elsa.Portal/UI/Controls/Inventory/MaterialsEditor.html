@@ -7,7 +7,7 @@
             </div>
         </div>
         <div class="materialsListContainer">
-            <button event-bind="click:createNewMaterial" class="addMaterialProductBut"><i class="fas fa-plus"></i></button>
+            <button event-bind="click:createNewMaterial" class="addMaterialProductBut restricted-MaterialEdits"><i class="fas fa-plus"></i></button>
             <div id="materialsList" class="listContainer">
 
                 <div lt-name="materialItemTemplate" class="materialItemContainer lt-template">
@@ -72,8 +72,8 @@
 
                         </div>
 
-                        <div class="itemEditFoot">
-                            <i class="far fa-trash-alt faButton" event-bind="click:deleteMaterial(VM)"></i>
+                        <div class="itemEditFoot restricted-MaterialEdits">
+                            <i class="far fa-trash-alt faButton " event-bind="click:deleteMaterial(VM)"></i>
                             <button event-bind="click:save(VM)"><i class="fas fa-check"></i></button>
                             <button event-bind="click:cancelEdit"><i class="fas fa-times"></i></button>
                         </div>

@@ -9,7 +9,7 @@ IF EXISTS(SELECT * FROM sys.procedures WHERE name = 'SyncUserRights')
 
 GO
 
-CREATE PROCEDURE SyncUserRights(@rights StringTable READONLY)
+CREATE PROCEDURE [dbo].[SyncUserRights](@rights StringTable READONLY)
 AS
 BEGIN
     -- Update existing symbols and insert new ones
@@ -27,8 +27,8 @@ BEGIN
     -- Delete UserRoleRight for rights that no longer exist
     DELETE ur
     FROM UserRoleRight ur
-    LEFT JOIN UserRight r ON ur.RightId = r.Id
-    WHERE r.Id IS NULL;
+	JOIN UserRight r ON (ur.RightId = r.Id)
+    WHERE r.Symbol NOT IN (SELECT Val FROM @rights);
 
     -- Delete UserRight for rights that no longer exist
     DELETE ur

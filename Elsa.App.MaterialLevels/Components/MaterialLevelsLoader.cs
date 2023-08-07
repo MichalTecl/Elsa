@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Elsa.App.MaterialLevels.Components.Model;
 using Elsa.App.MaterialLevels.Entities;
+using Elsa.Apps.Inventory;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -54,6 +55,12 @@ namespace Elsa.App.MaterialLevels.Components
 
                         entry.MaterialId = materialId;
                         entry.MaterialName = materialName;
+
+                        if (!m_session.HasUserRight(InventoryUserRights.ViewSuppliers)) 
+                        {
+                            supName = supMail = supPhone = string.Empty;
+                        }
+
                         entry.SupplierName = supName;
                         entry.SupplierEmail = supMail;
                         entry.SupplierPhone = supPhone;

@@ -26,6 +26,8 @@ namespace Elsa.Apps.Inventory
 
         public BatchReportModel Get(BatchReportQuery query)
         {
+            EnsureUserRight(InventoryUserRights.MaterialBatchesViewer);
+
             if (query == null)
             {
                 query = new BatchReportQuery

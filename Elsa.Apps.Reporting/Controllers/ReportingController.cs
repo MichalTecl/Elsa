@@ -31,6 +31,8 @@ namespace Elsa.Apps.Reporting.Controllers
 
         public List<ReportTypeModel> GetReportTypes()
         {
+            EnsureUserRight(ReportingUserRights.ReportingApp);
+
             var result = new List<ReportTypeModel>();
 
             m_database
@@ -43,6 +45,8 @@ namespace Elsa.Apps.Reporting.Controllers
 
         public FileResult GetReport(string code)
         {
+            EnsureUserRight(ReportingUserRights.ReportingApp);
+
             var rt = GetReportTypes().FirstOrDefault(r => r.Code == code);
             if (rt == null)
                 throw new ArgumentException("Neznámý kód reportu");

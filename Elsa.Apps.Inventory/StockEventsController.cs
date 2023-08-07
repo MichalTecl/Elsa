@@ -53,6 +53,8 @@ namespace Elsa.Apps.Inventory
 
         public void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason, string unitSymbol)
         {
+            EnsureUserRight(InventoryUserRights.StockEventsCreation);
+
             m_eventRepository.SaveEvent(eventTypeId, materialId, batchNumber, quantity, reason, unitSymbol);
         }
 
@@ -86,6 +88,8 @@ namespace Elsa.Apps.Inventory
 
         public void DeleteStockEvent(int eventId)
         {
+            EnsureUserRight(InventoryUserRights.StockEventsCreation);
+
             m_eventRepository.DeleteStockEvent(eventId, true);
         }
     }

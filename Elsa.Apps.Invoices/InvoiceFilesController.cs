@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Routing;
+using Elsa.Apps.Inventory;
 using Elsa.Apps.Invoices.Model;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
@@ -28,11 +29,15 @@ namespace Elsa.Apps.Invoices
 
         public FileResult GetTemplate()
         {
+            EnsureUserRight(InventoryUserRights.MaterialStockInApp);
+
             return new FileResult("sablona_faktura.xlsx", XlsxSerializer.Instance.Serialize(m_invoiceModelFactory.Create()));
         }
 
         public void UploadInvoiceFile(RequestContext context)
         {
+            EnsureUserRight(InventoryUserRights.MaterialStockInApp);
+
             var file = context.HttpContext.Request.Files[0];
             
             var deserializedModel = XlsxSerializer.Instance.Deserialize<InvoiceModel>(file.InputStream);

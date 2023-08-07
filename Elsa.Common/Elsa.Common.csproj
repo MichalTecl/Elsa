@@ -85,6 +85,7 @@
     <Compile Include="PasswordHashHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReleaseVersionInfo.cs" />
+    <Compile Include="TextResult.cs" />
     <Compile Include="SysCounters\ISysCountersManager.cs" />
     <Compile Include="SysCounters\SysCounterManager.cs" />
     <Compile Include="Utils\CsvGenerator.cs" />

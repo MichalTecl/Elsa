@@ -23,6 +23,9 @@ namespace Elsa.App.Inspector.Controllers
         [DoNotLog]
         public List<IssuesSummaryItemModel> GetSummary()
         {
+            if(!WebSession.HasUserRight(ReportingUserRights.InspectorApp))
+                return new List<IssuesSummaryItemModel>(0);
+
             return m_inspectionsRepository.GetActiveIssuesSummary();
         }
 

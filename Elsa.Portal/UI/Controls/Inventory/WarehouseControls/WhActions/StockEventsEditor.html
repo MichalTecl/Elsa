@@ -33,7 +33,7 @@
         
         <div class="formActions">
             <button class="butCancel" event-bind="click:cancel"></button>
-            <button class="butSubmit" event-bind="click:save($tbMaterialName.value, $tbBatchNr.value, $tbAmount.value, $tbNote.value)"></button>
+            <button class="butSubmit restricted-StockEventsCreation" event-bind="click:save($tbMaterialName.value, $tbBatchNr.value, $tbAmount.value, $tbNote.value)"></button>
         </div>
 
     </div>
@@ -63,7 +63,8 @@
 
             if (!!currentEventType) {
                 eventTypesTab.selectTab(currentEventType.Id);
-            }            
+            }
+            
         }).currentEventTypeCanBeNull();
 
         this.bind(function (currentEventType) {

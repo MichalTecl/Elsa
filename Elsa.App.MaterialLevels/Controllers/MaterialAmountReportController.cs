@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Elsa.App.MaterialLevels.Components;
 using Elsa.App.MaterialLevels.Components.Model;
+using Elsa.Apps.Inventory;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
@@ -36,16 +37,25 @@ namespace Elsa.App.MaterialLevels.Controllers
 
         public IEnumerable<MaterialLevelEntryModel> GetLevels(int inventoryId)
         {
+            if (!HasUserRight(InventoryUserRights.MaterialLevels))
+                return new List<MaterialLevelEntryModel>(0);
+
             return m_levelsLoader.Load(inventoryId);
         }
 
         public IEnumerable<InventoryModel> GetInventories(bool quick)
         {
+            if (!HasUserRight(InventoryUserRights.MaterialLevels))
+                return new List<InventoryModel>(0);
+
             return m_levelsLoader.GetInventories();
         }
 
         public IEnumerable<InventoryModel> GetUnwatchedInventories()
         {
+            if (!HasUserRight(InventoryUserRights.MaterialLevels))
+                return new List<InventoryModel>(0);
+
             return m_inventoryWatchRepository.GetUnwatchedInventories().Select(i => new InventoryModel(null)
             {
                 Id = i.Id,
@@ -55,6 +65,8 @@ namespace Elsa.App.MaterialLevels.Controllers
 
         public IEnumerable<InventoryModel> WatchInventory(int inventoryId)
         {
+            EnsureUserRight(InventoryUserRights.MaterialLevels);
+
             m_inventoryWatchRepository.WatchInventory(inventoryId);
 
             return GetInventories(false);
@@ -62,12 +74,16 @@ namespace Elsa.App.MaterialLevels.Controllers
 
         public IEnumerable<InventoryModel> UnwatchInventory(int inventoryId)
         {
+            EnsureUserRight(InventoryUserRights.MaterialLevels);
+
             m_inventoryWatchRepository.UnwatchInventory(inventoryId);
             return GetInventories(false);
         }
 
         public void SetThreshold(int materialId, string thresholdText)
         {
+            EnsureUserRight(InventoryUserRights.MaterialLevelsChangeThresholds);
+
             if (string.IsNullOrEmpty(thresholdText))
             {
                 m_materialThresholdRepository.DeleteThreshold(materialId);

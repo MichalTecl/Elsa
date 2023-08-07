@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Elsa.Apps.Inventory;
 using Elsa.Apps.ProductionService.Models;
 using Elsa.Apps.ProductionService.Recipes;
 using Elsa.Apps.ProductionService.Service;
@@ -36,6 +37,8 @@ namespace Elsa.Apps.ProductionService
 
         public IEnumerable<RecipeInfo> GetRecipes()
         {
+            EnsureUserRight(InventoryUserRights.ProductionApp);
+
             var result = new List<RecipeInfo>();
             result.AddRange(m_recipeRepository.GetRecipes());
 
@@ -65,6 +68,8 @@ namespace Elsa.Apps.ProductionService
 
         public ProductionRequest ValidateProductionRequest(ProductionRequest request)
         {
+            EnsureUserRight(InventoryUserRights.ProductionApp);
+
             m_productionService.ValidateRequest(request.Ensure("Request object required"));
 
             return request;
@@ -72,16 +77,22 @@ namespace Elsa.Apps.ProductionService
 
         public void ProcessProductionRequest(ProductionRequest request)
         {
+            EnsureUserRight(InventoryUserRights.ProductionApp);
+
             m_productionService.ProcessRequest(request.Ensure("Request object required"));
         }
 
         public RecipeEditRequest LoadRecipe(int materialId, int? recipeId)
         {
+            EnsureUserRight(InventoryUserRights.ProductionApp);
+
             return m_recipeService.GetRecipe(materialId, recipeId ?? 0);
         }
 
         public void SaveRecipe(RecipeEditRequest request)
         {
+            EnsureUserRight(InventoryUserRights.ReceptureEdits);
+
             m_recipeService.SaveRecipe(request);
         }
     }

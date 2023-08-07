@@ -564,6 +564,10 @@ namespace Elsa.Users.Components
             {
                 m_cache.Remove($"usrightsf_{userId}");
             }
+            else
+            {
+                m_cache.RemoveByPrefix("usrightsf_");
+            }
 
             m_cache.Remove($"allusers_{m_session.Project.Id}");
         }

@@ -9,6 +9,7 @@ using System.Web;
 using Elsa.Apps.InvoiceForms.Facade;
 using Elsa.Apps.InvoiceForms.Model;
 using Elsa.Apps.InvoiceForms.UiForms;
+using Elsa.Apps.Reporting;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -178,6 +179,8 @@ namespace Elsa.Apps.InvoiceForms
 
         public FileResult GetPackage(string cid)
         {
+            EnsureUserRight(ReportingUserRights.DownloadInvoicingFormPackages);
+
             var file = m_database.Sql()
                 .ExecuteWithParams(
                     "SELECT TOP 1 PackagePath FROM FinDataGenerationClosure WHERE ProjectId = {0} AND PublicUid = {1}", m_session.Project.Id, cid)

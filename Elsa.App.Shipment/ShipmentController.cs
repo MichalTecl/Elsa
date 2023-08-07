@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-
+using Elsa.App.OrdersPacking;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Shipment;
 using Elsa.Common;
@@ -31,6 +31,8 @@ namespace Elsa.App.Shipment
 
         public FileResult GetShipmentRequestDocument(bool uniFormat, string provider)
         {
+            EnsureUserRight(OrdersPackingUserRights.DownloadTrackingDocument);
+
             if (string.IsNullOrWhiteSpace(provider))
                 throw new ArgumentNullException(nameof(provider));
 

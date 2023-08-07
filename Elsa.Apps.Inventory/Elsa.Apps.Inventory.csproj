@@ -83,6 +83,14 @@
       <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
       <Name>Robowire</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.Commerce\Elsa.App.Commerce.csproj">
+      <Project>{92898B3B-012F-43F0-9044-55D6DE1A4AFB}</Project>
+      <Name>Elsa.App.Commerce</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.OrdersPacking\Elsa.App.OrdersPacking.csproj">
+      <Project>{87D88B8D-17B5-4FB4-B7BD-AAA2D2FFB4A1}</Project>
+      <Name>Elsa.App.OrdersPacking</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
       <Project>{61dd96b7-bf13-4c48-9353-08f2f907048e}</Project>
       <Name>Elsa.Commerce.Core</Name>

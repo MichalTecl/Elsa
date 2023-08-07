@@ -154,9 +154,19 @@ namespace Elsa.Users
             }
         }
 
-        public void Initialize(RequestContext context)
+        public void Initialize(HttpContext rq) 
         {
-            var sessionCookie = context.HttpContext.Request.Cookies[c_sessionCookieIdentifier];
+            Initialize(ck => rq.Request.Cookies[ck], c => rq.Response.Cookies.Add(c));
+        }
+
+        public void Initialize(HttpContextBase rq) 
+        {
+            Initialize(ck => rq.Request.Cookies[ck], c => rq.Response.Cookies.Add(c));
+        }
+
+        private void Initialize(Func<string, HttpCookie> getCookie, Action<HttpCookie> setCookie)
+        {
+            var sessionCookie = getCookie(c_sessionCookieIdentifier);
             if (sessionCookie != null)
             {
                 Guid sid;
@@ -198,7 +208,7 @@ namespace Elsa.Users
             }
 
             sessionCookie.Expires = DateTime.Now.AddDays(30);
-            context.HttpContext.Response.Cookies.Add(sessionCookie);
+            setCookie(sessionCookie);
             
             m_initialized = true;
         }

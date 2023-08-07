@@ -55,6 +55,10 @@
       <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
       <Name>Robowire</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.OrdersPacking\Elsa.App.OrdersPacking.csproj">
+      <Project>{87D88B8D-17B5-4FB4-B7BD-AAA2D2FFB4A1}</Project>
+      <Name>Elsa.App.OrdersPacking</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
       <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>
       <Name>Elsa.Commerce.Core</Name>

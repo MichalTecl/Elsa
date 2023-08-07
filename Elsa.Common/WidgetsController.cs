@@ -28,6 +28,8 @@ namespace Elsa.Common
         [AllowAnonymous]
         public IEnumerable<IAppWidget> GetWidgets()
         {
+            //yield return FakeWidget.Inst;
+
             var widgets = GetAllWidgets().OrderBy(w => w.ViewOrder);
 
             foreach(var widget in widgets) 
@@ -36,9 +38,10 @@ namespace Elsa.Common
                 {
                     if (widget.IsAnonymous)
                     {
-                        yield return widget;
-                        continue;
-                    }    
+                        yield return widget;                    
+                    }
+
+                    continue;
                 }
 
                 if(!string.IsNullOrWhiteSpace(widget.UserRightSymbol))
@@ -57,6 +60,6 @@ namespace Elsa.Common
                 TimeSpan.FromHours(1),
                 () => m_database.SelectFrom<IAppWidget>().Execute().ToList()
             );
-        }
+        }        
     }
 }

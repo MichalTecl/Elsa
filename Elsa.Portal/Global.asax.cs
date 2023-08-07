@@ -17,7 +17,7 @@ namespace Elsa.Portal
 {
     public class Global : System.Web.HttpApplication
     {
-        private readonly Container m_container = new Container();
+        public static readonly Container Container = new Container();
 
         protected void Application_Start(object sender, EventArgs e)
         {
@@ -33,26 +33,23 @@ namespace Elsa.Portal
             Debug.WriteLine("Routes registration done");
 
             Debug.WriteLine("Setting up the container");
-            DiSetup.SetupContainer(m_container, new FileLogWriter("Frontend"));
+            DiSetup.SetupContainer(Container, new FileLogWriter("Frontend"));
             Debug.WriteLine("Container set up");
 
             Debug.WriteLine("Initializing RoboApi");
             var installer = new RoboApiInstaller();
             installer.Install(
                 ControllerBuilder.Current,
-                m_container,
+                Container,
                 (context, locator) =>
                     {
                         var session = locator.Get<IWebSession>();
-                        session.Initialize(context);
-                    }/*,
-                typeof(ElsaControllerBase).Assembly,
-                typeof(ProfileController).Assembly,
-                typeof(UserController).Assembly*/);
+                        session.Initialize(context.HttpContext);
+                    });
             Debug.WriteLine("RoboApi initialized");
 
             Debug.WriteLine("Loading startup jobs");
-            using (var startupJobsLocator = m_container.GetLocator())
+            using (var startupJobsLocator = Container.GetLocator())
             {
                 var jobs = startupJobsLocator.GetCollection<IStartupJob>();
                 var logger = startupJobsLocator.Get<ILog>();

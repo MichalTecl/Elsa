@@ -29,7 +29,7 @@ namespace Elsa.App.Crm
         }
 
         public CustomerViewModel GetCustomer(string email)
-        {
+        {            
             var customer = m_customerRepository.GetOverview(email);
             if (customer == null)
             {
@@ -40,7 +40,7 @@ namespace Elsa.App.Crm
         }
 
         public IEnumerable<CustomerViewModel> GetCustomers(List<string> emails)
-        {
+        {            
             return m_customerRepository.GetOverviews(emails).Select(o => new CustomerViewModel(o, WebSession.Project, m_userRepository));
         }
 

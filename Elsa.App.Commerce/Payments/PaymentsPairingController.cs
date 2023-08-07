@@ -32,6 +32,8 @@ namespace Elsa.App.Commerce.Payments
 
         public IEnumerable<SuggestedPairModel> GetUnpaidOrders()
         {
+            EnsureUserRight(OrdersOverviewUserRights.OpenPaymentPairingApp);
+
             var orders =
                 m_orderRepository.GetOrdersByStatus(OrderStatus.PendingPayment)
                     .Where(o => !o.IsPayOnDelivery)
@@ -63,6 +65,8 @@ namespace Elsa.App.Commerce.Payments
 
         public IEnumerable<SuggestedPairModel> Pair(int orderId, long paymentId)
         {
+            EnsureUserRight(OrdersOverviewUserRights.AllowManualPaymentPairing);
+
             m_ordersFacade.SetOrderPaid(orderId, paymentId);
             
             return GetUnpaidOrders();

@@ -34,8 +34,10 @@
     <div data-bind="text:CreateDt" class="bovBatchDt cell10"></div>
     <div data-bind="text:InvoiceNumber" class="cell10"></div>
     <div class="cell1">
-        <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt faButton" event-bind="click:deleteBatch(VM)"></i>
-        <i class="far fa-trash-alt" style="opacity: 0.2; cursor:no-drop" data-bind="class.hidden:CanDelete;title:NoDelReason" ></i>
+        <span class="restricted-MaterialBatchEdits">
+            <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt faButton" event-bind="click:deleteBatch(VM)"></i>
+            <i class="far fa-trash-alt" style="opacity: 0.2; cursor:no-drop" data-bind="class.hidden:CanDelete;title:NoDelReason"></i>
+        </span>
     </div>
     <div class="cell1">
         <i class="fas fa-bars faButton" event-bind="click:showContextMenu($mnuBatchActions, this)"></i>
@@ -44,14 +46,14 @@
 
 <div class="menu" lt-name="mnuBatchActions">
     <ul class="menu-options">
-        <li class="menu-option" data-bind="class!.disabled:CanDelete;title:NoDelReason" event-bind="click:deleteBatch(VM)">
+        <li class="menu-option restricted-MaterialBatchEdits" data-bind="class!.disabled:CanDelete;title:NoDelReason" event-bind="click:deleteBatch(VM)">
             <div class="stackLeft" >
                 <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt menuItemIcon" ></i>
                 <div class="menuItemTitle">Smazat</div>
             </div>
         </li>
         <li>
-            <ul data-key="Id" data-bind="itemsSource:EventSuggestions">
+            <ul data-key="Id" data-bind="itemsSource:EventSuggestions" class="restricted-StockEventsCreation">
                 <li class="lt-template menu-option" event-bind="click:invokeStockEvent(VM)">
                     <div class="stackLeft">
                         <i class="fas fa-cut menuItemIcon"></i>
@@ -293,9 +295,9 @@
                     <div class="cell5" data-bind="text:Author"></div>
                     <div class="cell10" data-bind="text:Price"></div>
                     <div class="cell1">
-                        <i class="far fa-edit faButton" data-bind="class!.hidden:HasRecipe" event-bind="click:editSegment(VM)"></i>
+                        <i class="far fa-edit faButton restricted-MaterialBatchEdits" data-bind="class!.hidden:HasRecipe" event-bind="click:editSegment(VM)"></i>
                     </div>
-                    <div class="cell1"><i class="far fa-trash-alt faButton" event-bind="click:deleteSegment(VM)"></i></div>
+                    <div class="cell1"><i class="far fa-trash-alt faButton restricted-MaterialBatchEdits" event-bind="click:deleteSegment(VM)"></i></div>
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@
 <html>
 <head>
     <script>
+        var can = {%this_user_stuff%};
         var __release = "%releasetag%";
     </script>
     <title>ELSA</title>
@@ -44,7 +45,7 @@
                         <td class="divTableCell" data-bind="text:Payment.Message">-</td>
                     </tr>
                     <tr class="divTableRow" style="text-align: right">
-                        <td colspan="99" style="border:none"><button style="margin-top: 5px; margin-bottom: 20px; " data-bind="disabled:noPayment" event-bind="click:setPair(Order.OrderId)">Přijmout</button></td>
+                        <td colspan="99" style="border:none"><button class="restricted-AllowManualPaymentPairing" style="margin-top: 5px; margin-bottom: 20px; " data-bind="disabled:noPayment" event-bind="click:setPair(Order.OrderId)">Přijmout</button></td>
                     </tr>
                 </tbody>      
 

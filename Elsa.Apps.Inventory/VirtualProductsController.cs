@@ -91,6 +91,8 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<MappableItemViewModel> GetMappableItems(string searchQuery)
         {
+            EnsureUserRight(InventoryUserRights.ProductsAndTags);
+
             var allMappables = GetAllMappablesThroughCache();
 
             if (string.IsNullOrWhiteSpace(searchQuery))
@@ -111,6 +113,8 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<MappableItemViewModel> MapOrderItemToProduct(int virtualProductId, MappableItemViewModel.MappableItemId mappableItemId, string activeSearchQuery)
         {
+            EnsureUserRight(InventoryUserRights.ProductsAndTags);
+
             try
             {
                 var orderItemId = JsonConvert.SerializeObject(mappableItemId);
@@ -133,6 +137,8 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<MappableItemViewModel> RemoveVirtualProductMapping(int virtualProductId, MappableItemViewModel.MappableItemId mappableItemId, string activeSearchQuery)
         {
+            EnsureUserRight(InventoryUserRights.ProductsAndTags);
+
             try
             {
                 var orderItemId = JsonConvert.SerializeObject(mappableItemId);
@@ -160,6 +166,8 @@ namespace Elsa.Apps.Inventory
 
         public VirtualProductViewModel GetVirtualProductById(int id)
         {
+            EnsureUserRight(InventoryUserRights.ProductsAndTags);
+
             var vp = m_virtualProductRepository.GetVirtualProductById(id);
             if (vp == null)
             {
@@ -171,6 +179,8 @@ namespace Elsa.Apps.Inventory
 
         public VirtualProductViewModel SaveVirtualProduct(VirtualProductEditRequestModel request)
         {
+            EnsureUserRight(InventoryUserRights.ProductsAndTags);
+
             try
             {
                 var vp = m_virtualProductFacade.ProcessVirtualProductEditRequest(request.VirtualProductId, request.UnhashedName, request.Materials.Select(m => m.DisplayText).ToArray());
@@ -185,6 +195,8 @@ namespace Elsa.Apps.Inventory
 
         public void DeleteVirtualProduct(int vpId)
         {
+            EnsureUserRight(InventoryUserRights.ProductsAndTags);
+
             m_virtualProductRepository.DeleteVirtualProduct(vpId);
             m_materialRepository.CleanCache();
         }
@@ -217,6 +229,8 @@ namespace Elsa.Apps.Inventory
 
         public IExtendedMaterialModel SaveMaterial(MaterialEditRequestModel request)
         {
+            EnsureUserRight(InventoryUserRights.MaterialEdits);
+
             var thresholdText = request.HasThreshold ? (request.ThresholdText ?? string.Empty) : null;
 
             using (var tx = m_database.OpenTransaction())
@@ -268,6 +282,8 @@ namespace Elsa.Apps.Inventory
 
         public void DeleteMaterial(int id)
         {
+            EnsureUserRight(InventoryUserRights.MaterialEdits);
+
             m_materialRepository.DeleteMaterial(id);
 
             m_cache.Remove(GetMappablesCacheKey());

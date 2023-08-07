@@ -47,10 +47,12 @@
                     <div class="cell5">
                         <div class="matlvlThresholdCont">
                             <div class="matlvlThresholdView" data-bind="text:ThresholdFormatted"></div>
-                            <div class="matlvlThresholdEditIcons">
-                                <i class="far fa-edit faButton" event-bind="click:onThresholdEditClick(MaterialId, MaterialName, ThresholdFormatted, UnitSymbol)"></i>
-                                <i class="far fa-trash-alt" data-bind="class!.hidden:hasThreshold" event-bind="click:onThresholdDeleteClick(MaterialId, MaterialName)"></i>
-                            </div>
+                            <span class="restricted-MaterialLevelsChangeThresholds">
+                                <div class="matlvlThresholdEditIcons">
+                                    <i class="far fa-edit faButton" event-bind="click:onThresholdEditClick(MaterialId, MaterialName, ThresholdFormatted, UnitSymbol)"></i>
+                                    <i class="far fa-trash-alt" data-bind="class!.hidden:hasThreshold" event-bind="click:onThresholdDeleteClick(MaterialId, MaterialName)"></i>
+                                </div>
+                            </span>
                         </div>
                     </div>
                     <div class="cell10 matlevSupplierCell"  data-bind="class!.hidden:displaySupplier" event-bind="click:onSupplierClick(SupplierName, SupplierEmail, SupplierPhone)"><a data-bind="text:SupplierName"></a></div>

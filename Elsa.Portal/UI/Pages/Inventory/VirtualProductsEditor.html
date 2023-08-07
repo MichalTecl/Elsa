@@ -2,6 +2,7 @@
 <html>
 <head>
     <script>
+        var can = {%this_user_stuff%};
         var __release = "%releasetag%";
     </script>
     <title>ELSA</title>
@@ -27,20 +28,23 @@
 
     <script>
         var tab = new app.ui.TabControl(document.getElementById("mainTab"));
-        tab.addTab("Produkty", "/UI/Controls/Inventory/TaggingEditor.html");
-        tab.addTab("Tagy", "/UI/Controls/Inventory/VirtualProducts.html");
-        //tab.addTab("Materiály", "/UI/Controls/Inventory/MaterialsEditor.html");
 
-        app.virtualProductsEditor.vm.getMaterialInventories(function (inventories) {
+        if (can.ProductsAndTags) {
+            tab.addTab("Produkty", "/UI/Controls/Inventory/TaggingEditor.html");
+            tab.addTab("Tagy", "/UI/Controls/Inventory/VirtualProducts.html");
+        }
 
-            for (var i = 0; i < inventories.length; i++) {
-                var inventory = inventories[i];
-                tab.addTab(inventory.Name, "/UI/Controls/Inventory/MaterialsEditor.html", inventory, function (i) {
-                    app.virtualProductsEditor.vm.setCurrentMaterialInventory(i.Id);
-                });
-            }
+        if (can.Materials) {
+            app.virtualProductsEditor.vm.getMaterialInventories(function (inventories) {
 
-        });
+                for (var i = 0; i < inventories.length; i++) {
+                    var inventory = inventories[i];
+                    tab.addTab(inventory.Name, "/UI/Controls/Inventory/MaterialsEditor.html", inventory, function (i) {
+                        app.virtualProductsEditor.vm.setCurrentMaterialInventory(i.Id);
+                    });
+                }
+            });
+        }
 
     </script>
 

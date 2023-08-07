@@ -28,12 +28,18 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<MaterialLevelModel> GetLevels()
         {
+            if (!HasUserRight(InventoryUserRights.MaterialLevels))
+                return new List<MaterialLevelModel>(0);
+
             return m_batchFacade.GetMaterialLevels(true).OrderBy(m => m.PercentLevel);
         }
 
         [DoNotLog]
         public LevelWarningBucket GetCurrentWarning()
         {
+            if (!HasUserRight(InventoryUserRights.MaterialLevels))
+                return new LevelWarningBucket(false, "");
+
             var sb = new StringBuilder();
 
             foreach (var lowMaterial in m_batchFacade.GetMaterialLevels().OrderBy(m => m.PercentLevel).Where(l => l.ActualValue < l.MinValue))

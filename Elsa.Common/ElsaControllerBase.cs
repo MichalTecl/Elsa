@@ -152,5 +152,10 @@ namespace Elsa.Common
         {
             WebSession.EnsureUserRight(right);
         }
+
+        protected bool HasUserRight(UserRight right)
+        {
+            return WebSession?.HasUserRight(right) == true; 
+        }
     }
 }

@@ -2,6 +2,8 @@
 app.user = app.user || {};
 app.user.ViewModel = app.user.ViewModel || function() {
 
+    console.log("Created new app.User.ViewModel");
+
     var self = this;
     var callbacks = [];
 
@@ -10,12 +12,16 @@ app.user.ViewModel = app.user.ViewModel || function() {
 
     var onUserChanged = function (session) {
 
-        if (!document.body) {
-            setTimeout(onUserChanged, 100);
-            return;
-        }
+        console.log("onUserChanged");
 
         self.currentSession = session;
+
+        if (!document.body) {
+            console.log("But document.body is not ready yet");
+            setTimeout(function () { onUserChanged(self.currentSession); }, 100);
+            return;
+        }
+            
 
         if ((!!session) && (!!session.User)) {
             lt.api.enable();
