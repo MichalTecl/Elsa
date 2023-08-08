@@ -33,7 +33,7 @@ namespace Elsa.Users.Components
             m_log = log;
             m_cache = cache;
         }
-
+               
         public void InviteUser(string email)
         {
             email = (email ?? string.Empty).Trim();
@@ -71,7 +71,7 @@ namespace Elsa.Users.Components
             {
                 user.UsesDefaultPassword = true;
                 user.PasswordHash = newPass;
-
+                                
                 m_mailSender.Send(user.EMail, "Reset hesla do systému ELSA",
                     $"Vaše dočasné heslo je: {newPass}\r\nPozor! Dočasné heslo je třeba po přihlášení změnit (kliknutím na link '{user.EMail}' v pravém horním rohu), do té doby nebudete moci Elsu používat.");
             });
@@ -110,7 +110,5 @@ namespace Elsa.Users.Components
 
             return sb.ToString();
         }
-
-        
     }
 }

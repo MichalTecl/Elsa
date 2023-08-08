@@ -83,6 +83,7 @@
     <Compile Include="Common\Logging\ISysLog.cs" />
     <Compile Include="Common\IPayment.cs" />
     <Compile Include="Common\ISysConfig.cs" />
+    <Compile Include="Common\Security\IUserPasswordHistory.cs" />
     <Compile Include="Common\SystemCounters\ISystemCounter.cs" />
     <Compile Include="Common\Widgets\IAppWidget.cs" />
     <Compile Include="Common\IProject.cs" />

@@ -21,5 +21,7 @@ namespace Elsa.Users
         bool GetCanManage(int managerId, int managedId);
 
         void InvalidateUserCache(int userId);
+
+        IEnumerable<IUserPasswordHistory> GetPasswordHistory(int userId);
     }
 }

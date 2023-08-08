@@ -85,7 +85,18 @@ namespace Elsa.Users.Components
                 var user = m_database.SelectFrom<IUser>().Where(u => u.ProjectId == m_session.Project.Id)
                     .Where(u => u.Id == userId).Take(1).Execute().FirstOrDefault().Ensure();
 
+                var oldPass = user.PasswordHash;
+
                 update(user);
+
+                if (user.PasswordHash != oldPass) 
+                {                   
+                    var hist = m_database.New<IUserPasswordHistory>();
+                    hist.InsertDt = DateTime.Now;
+                    hist.UserId = userId;
+                    hist.PasswordHash = user.PasswordHash;
+                    m_database.Save(hist);
+                }
 
                 m_database.Save(user);
 
@@ -583,6 +594,11 @@ namespace Elsa.Users.Components
                 m_cache.Remove($"usix_{openSession.PublicId}");
                 m_database.Save(openSession);
             }
+        }
+
+        public IEnumerable<IUserPasswordHistory> GetPasswordHistory(int userId)
+        {
+            return m_database.SelectFrom<IUserPasswordHistory>().Where(h => h.UserId == userId).OrderByDesc(u => u.InsertDt).Take(100).Execute();
         }
     }
 }

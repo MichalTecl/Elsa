@@ -77,7 +77,7 @@ namespace Elsa.Users.Controllers
 
             if (oldPassword == newPassword)
             {
-                return null;
+                throw new InvalidOperationException("Nové heslo nesmí být stejné jako staré");
             }
 
             if (newPassword.Length < 6)
@@ -97,12 +97,16 @@ namespace Elsa.Users.Controllers
                 {
                     throw new InvalidOperationException("Staré heslo není platné");
                 }
-                
-                user.PasswordHash = PasswordHashHelper.Hash(newPassword);
-                user.UsesDefaultPassword = false;
 
-                m_database.Save(user);
-                
+                var history = m_repository.GetPasswordHistory(user.Id);
+                if (history.Any(h => PasswordHashHelper.Verify(newPassword, h.PasswordHash)))
+                    throw new InvalidOperationException("Toto heslo již bylo používáno, zvolte prosím jiné");
+
+                m_repository.UpdateUser(user.Id, u => {
+                    u.PasswordHash = PasswordHashHelper.Hash(newPassword);
+                    u.UsesDefaultPassword = false;
+                });
+                                                                
                 WebSession.Logout();
                 WebSession.Login(user.EMail, newPassword);
 
