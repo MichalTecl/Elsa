@@ -108,6 +108,8 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(ReportingRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
+
+                    s.Collect<IStartupJob>();
                 });
 
             Debug.WriteLine("Container set up");

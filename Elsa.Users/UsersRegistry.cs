@@ -1,4 +1,5 @@
 ﻿using Elsa.Users.Components;
+using Elsa.Users.SyncJob;
 using Robowire;
 
 namespace Elsa.Users
@@ -10,6 +11,8 @@ namespace Elsa.Users
             setup.For<IUserRepository>().Use<UserRepository>();
             setup.For<IUserRoleRepository>().Use<UserRepository>();
             setup.For<IUserManagementFacade>().Use<UserManagementFacade>();
+
+            setup.For<SyncUserRightTypesStartupJob>().Use<SyncUserRightTypesStartupJob>();            
         }
     }
 }

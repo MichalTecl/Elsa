@@ -58,6 +58,7 @@
     <Compile Include="IUserRightsDefinition.cs" />
     <Compile Include="IUserRoleRepository.cs" />
     <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="SyncJob\SyncUserRightTypesStartupJob.cs" />
     <Compile Include="UsersRegistry.cs" />
     <Compile Include="UserWebSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

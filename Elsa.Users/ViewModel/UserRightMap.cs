@@ -78,5 +78,23 @@ namespace Elsa.Users.ViewModel
             Visit(clone.m_models, isAssigned);
             return clone.m_models;
         }
+
+        private IEnumerable<string> Unwrap(IEnumerable<UserRightViewModel> models) 
+        {
+            foreach(var m in models) 
+            {
+                yield return m.Symbol;
+
+                foreach(var ch in Unwrap(m.ChildRights))
+                {
+                    yield return ch;
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return string.Join(", ", Unwrap(m_models));
+        }
     }
 }

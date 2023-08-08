@@ -309,22 +309,7 @@ namespace Elsa.Users.Components
 
         public IEnumerable<UserRightViewModel> GetEditableUserRights(int roleId)
         {
-            var allRights = m_cache.ReadThrough("allUserRights", TimeSpan.FromDays(1), () =>
-            {
-                var sysRights = UserRights.All.ToList();
-
-                var index = new Dictionary<string, int>(sysRights.Count);
-
-                m_database.Sql().Call("SyncUserRights")
-                    .WithStructuredParam("@rights", 
-                        "dbo.StringTable", 
-                        sysRights.Select(r => r.Symbol), 
-                        new[] {"Val"},
-                        s => new object[] {s})
-                    .ReadRows<int, string>((id, symbol) => { index.Add(symbol, id); });
-
-                return new UserRightMap(UserRights.All, index);
-            });
+            var allRights = GetAllUserRights();
 
             var userVisibleRoles = GetRolesVisibleForUser(m_session.User.Id);
 
@@ -599,6 +584,26 @@ namespace Elsa.Users.Components
         public IEnumerable<IUserPasswordHistory> GetPasswordHistory(int userId)
         {
             return m_database.SelectFrom<IUserPasswordHistory>().Where(h => h.UserId == userId).OrderByDesc(u => u.InsertDt).Take(100).Execute();
+        }
+
+        public UserRightMap GetAllUserRights()
+        {
+            return m_cache.ReadThrough("allUserRights", TimeSpan.FromDays(1), () =>
+            {
+                var sysRights = UserRights.All.ToList();
+
+                var index = new Dictionary<string, int>(sysRights.Count);
+
+                m_database.Sql().Call("SyncUserRights")
+                    .WithStructuredParam("@rights",
+                        "dbo.StringTable",
+                        sysRights.Select(r => r.Symbol),
+                        new[] { "Val" },
+                        s => new object[] { s })
+                    .ReadRows<int, string>((id, symbol) => { index.Add(symbol, id); });
+
+                return new UserRightMap(UserRights.All, index);
+            });
         }
     }
 }

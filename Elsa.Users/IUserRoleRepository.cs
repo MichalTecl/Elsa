@@ -31,5 +31,7 @@ namespace Elsa.Users
         void AssignUserToRole(int roleId, int userId);
 
         void UnassignUserFromRole(int roleId, int userId);
+
+        UserRightMap GetAllUserRights();
     }
 }
