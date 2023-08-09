@@ -110,12 +110,15 @@ namespace Elsa.Users.Components
 
         public bool GetCanManage(int managerId, int managedId)
         {
+            if (managerId == managedId)
+                return true;
+
             var allRoles = GetProjectRoles();
 
             foreach(var managerRole in allRoles.FindRolesByUserId(managerId))
                 if (managerRole.ParentRoleId == null)
                 {
-                    return managerId != managedId;
+                    return true;
                 }
 
             var rolesVisibleForManager = GetRolesVisibleForUser(managerId);

@@ -72,7 +72,7 @@ namespace Elsa.Common
             //check hash
             if (!IsHashSupported(hashedPassword))
             {
-                throw new NotSupportedException("The hashtype is not supported");
+                return password == hashedPassword;
             }
 
             //extract iteration and Base64 string

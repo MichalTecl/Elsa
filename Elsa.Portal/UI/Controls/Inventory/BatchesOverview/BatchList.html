@@ -66,7 +66,7 @@
 </div>
 
 <div class="bovRowDetail">
-    <div class="bovLazyPanel bovBatchComponents">
+    <div class="bovLazyPanel bovBatchComponents restricted-MaterialBatchComponentsView">
         <div data-bind="class!.hidden:hasComponents"
              data-queryProperty="CompositionId"
              data-expandedFlag="componentsExpanded"
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <div class="bovLazyPanel bovBatchCompos">
+    <div class="bovLazyPanel bovBatchCompos  restricted-MaterialBatchComponentsView">
         <div data-bind="class!.hidden:hasCompositions"
              data-queryProperty="ComponentId"
              data-expandedFlag="composExpanded"
@@ -230,7 +230,7 @@
     </div>
 </div>
 
-<div class="bovLazyPanel bovPriceComponents">
+<div class="bovLazyPanel bovPriceComponents restricted-MaterialBatchPriceCalculationView">
     <div data-queryProperty="LoadPriceComponentsPage"
          data-queryPropertyValue="0"
          data-expandedFlag="priceComponentsExpanded"

@@ -8,6 +8,8 @@ namespace Elsa.Apps.Inventory
     {
         public static readonly UserRight ViewWarehouseWidget = new UserRight(nameof(ViewWarehouseWidget), "Sklady");
         public static readonly UserRight MaterialBatchesViewer = new UserRight(nameof(MaterialBatchesViewer), "Procházení šarží", ViewWarehouseWidget);
+        public static readonly UserRight MaterialBatchComponentsView = new UserRight(nameof(MaterialBatchComponentsView), "Zobrazení složení šarží", MaterialBatchesViewer);
+        public static readonly UserRight MaterialBatchPriceCalculationView = new UserRight(nameof(MaterialBatchPriceCalculationView), "Zobrazení výpočtu ceny", MaterialBatchComponentsView);
         public static readonly UserRight MaterialBatchEdits = new UserRight(nameof(MaterialBatchEdits), "Vytváření, úpravy a mazání šarží", MaterialBatchesViewer);
         public static readonly UserRight StockEventsView = new UserRight(nameof(StockEventsView), "Karta Odpisy", MaterialBatchesViewer);
         public static readonly UserRight StockEventsCreation = new UserRight(nameof(StockEventsCreation), "Smí vytvářet Odpad/Propagace", StockEventsView);
