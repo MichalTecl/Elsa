@@ -25,5 +25,7 @@ namespace Elsa.Commerce.Core.Model
         bool IsDistributor { get; }
 
         string Groups { get; }
+
+        string VatId { get; }
     }
 }

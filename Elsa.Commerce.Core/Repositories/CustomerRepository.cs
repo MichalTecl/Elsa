@@ -235,6 +235,12 @@ namespace Elsa.Commerce.Core.Repositories
                 changed = true;
             }
 
+            if (trg.VatId != src.VatId) 
+            {
+                trg.VatId = src.VatId;
+                changed = true;
+            }
+
             if (trg.NewsletterSubscriber != src.IsNewsletterSubscriber)
             {
                 if (trg.NewsletterUnsubscribeDt == null) // If someone unsubscribed in Mailchimp, they cannot subscribe from ERP anymore

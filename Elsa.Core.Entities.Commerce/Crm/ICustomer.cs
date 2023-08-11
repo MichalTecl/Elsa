@@ -55,5 +55,9 @@ namespace Elsa.Core.Entities.Commerce.Crm
 
         [NVarchar(100, true)]
         string ErpUid { get; set; }
+
+        [NotFk]
+        [NVarchar(100, true)]
+        string VatId { get; set; }
     }
 }

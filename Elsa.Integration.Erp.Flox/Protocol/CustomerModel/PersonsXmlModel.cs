@@ -34,6 +34,9 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 
         [XmlElement("newsletter")]
         public int Newsletter { get; set; }
+
+        [XmlElement("vat_id")]
+        public string VatId { get; set; }
     }
 
     [XmlRoot("persons")]
