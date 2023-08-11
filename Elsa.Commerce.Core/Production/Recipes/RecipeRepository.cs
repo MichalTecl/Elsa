@@ -12,6 +12,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
+using Elsa.Users;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Production.Recipes
@@ -24,8 +25,9 @@ namespace Elsa.Commerce.Core.Production.Recipes
         private readonly IMaterialRepository m_materialRepository;
         private readonly IUnitRepository m_unitRepository;
         private readonly IUnitConversionHelper m_conversionHelper;
-        
-        public RecipeRepository(IDatabase database, ICache cache, ISession session, IMaterialRepository materialRepository, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper)
+        private readonly IUserRoleRepository m_userRepository;
+
+        public RecipeRepository(IDatabase database, ICache cache, ISession session, IMaterialRepository materialRepository, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper, IUserRoleRepository userRepository)
         {
             m_database = database;
             m_cache = cache;
@@ -33,6 +35,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
             m_materialRepository = materialRepository;
             m_unitRepository = unitRepository;
             m_conversionHelper = conversionHelper;
+            m_userRepository = userRepository;
         }
 
         public IEnumerable<IRecipe> GetRecipesByMaterialId(int materialId)
@@ -52,28 +55,42 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
         public IList<RecipeInfo> GetRecipes()
         {
-            return m_cache.ReadThrough($"recipes{m_session.User.Id}", TimeSpan.FromMinutes(20), () =>
+            return m_cache.ReadThrough($"recipes{m_session.User.Id}", TimeSpan.FromSeconds(10), () =>
             {
                 var favorites = new HashSet<int>(m_database.SelectFrom<IUserFavoriteRecipe>()
                     .Where(r => r.UserId == m_session.User.Id).Transform(r => r.RecipeId).Execute());
 
-                var dbRecipes = m_database.SelectFrom<IRecipe>().Where(r => r.ProjectId == m_session.Project.Id)
+                var dbRecipes = m_database.SelectFrom<IRecipe>().Where(r => r.ProjectId == m_session.Project.Id)                    
                     .Execute();
 
                 var materials = m_materialRepository.GetAllMaterials(null).ToArray();
 
-                var result = new List<RecipeInfo>(dbRecipes.Select(e => new RecipeInfo
+                var result = new List<RecipeInfo>(dbRecipes.Where(FilterByUserRoleVisibility).Select(e => new RecipeInfo
                 {
                     IsActive = e.DeleteUserId == null,
                     IsFavorite = favorites.Contains(e.Id),
                     MaterialId = e.ProducedMaterialId,
                     MaterialName = materials.FirstOrDefault(mm => mm.Id == e.ProducedMaterialId)?.Name,
                     RecipeId = e.Id,
-                    RecipeName = e.RecipeName
+                    RecipeName = e.RecipeName                   
                 }).OrderBy(r => r.MaterialName).ThenBy(r => r.IsActive ? 0 : 1).ThenBy(r => r.IsFavorite ? 0 : 1).ThenBy(r => r.RecipeName));
 
                 return result;
             });
+        }
+
+        private bool FilterByUserRoleVisibility(IRecipe arg)
+        {
+            if (m_session.HasUserRight("ViewAllReceptures"))
+                return true;
+
+            if (string.IsNullOrWhiteSpace(arg.VisibleForUserRole))
+                return false;
+
+            var roleMap = m_userRepository.GetProjectRoles();
+            var usersRoles = roleMap.FindRolesByUserId(m_session.User.Id);
+
+            return usersRoles.Any(ur => ur.Name == arg.VisibleForUserRole);
         }
 
         public RecipeInfo SetRecipeFavorite(int recipeId, bool isFavorite)
@@ -123,6 +140,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 Amount = entity.RecipeProducedAmount,
                 ProductionPrice = entity.ProductionPricePerUnit ?? 0,
                 AmountUnit = m_unitRepository.GetUnit(entity.ProducedAmountUnitId).Symbol,
+                VisibleForUserRole = entity.VisibleForUserRole,
                 Note = entity.Note
             };
 
@@ -176,7 +194,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
         public RecipeInfo SaveRecipe(int materialId, int recipeId, string recipeName, decimal productionPrice,
             Amount producedAmount,
-            string note, IEnumerable<RecipeComponentModel> components)
+            string note, string visibleForUserRole, IEnumerable<RecipeComponentModel> components)
         {
             using (var tx = m_database.OpenTransaction())
             {
@@ -229,6 +247,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 entity.ProducedAmountUnitId = producedAmount.Unit.Id;
                 entity.ProductionPricePerUnit = productionPrice > 0 ? (decimal?)productionPrice : null;
                 entity.Note = note;
+                entity.VisibleForUserRole = visibleForUserRole;
 
                 m_database.Save(entity);
 

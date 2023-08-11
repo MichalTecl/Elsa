@@ -49,6 +49,14 @@ namespace Elsa.Apps.ProductionService
                 MaterialName = m.Name
             }));
 
+
+            if (!HasUserRight(InventoryUserRights.ReceptureEdits))
+            {
+                var visibleMaterials = new HashSet<int>(result.Where(r => !string.IsNullOrEmpty(r.RecipeName)).Select(r => r.MaterialId).Distinct());
+
+                return result.Where(r => visibleMaterials.Contains(r.MaterialId));
+            }
+
             return result;
         }
 

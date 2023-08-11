@@ -181,7 +181,7 @@ namespace Elsa.Integration.Erp.Flox
                 m_client.Post(ActionUrl("/erp/impexp/export/index/companies/xml"))
                     .Field(
                         "dataSubset",
-                        "a:4:{s:9:\"xcol_name\";s:2:\"on\";s:10:\"xcol_email\";s:2:\"on\";s:18:\"xcol_address_phone\";s:2:\"on\";s:11:\"xcol_groups\";s:2:\"on\";}")
+                        "a:4:{s:9:\"xcol_name\";s:2:\"on\";s:10:\"xcol_email\";s:2:\"on\";s:18:\"xcol_address_phone\";s:2:\"on\";s:11:\"xcol_groups\";s:2:\"on\";s:11:\"xcol_vat_id\"}")
                     .Field("data", string.Empty)
                     .Field("massFilter", string.Empty)
                     .Field("downloadToken", CalcDownloadToken())

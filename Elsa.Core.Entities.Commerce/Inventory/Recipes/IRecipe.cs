@@ -37,6 +37,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Recipes
         [NVarchar(0, true)]
         string Note { get; set; }
 
+        [NVarchar(1000, true)]
+        string VisibleForUserRole { get; set; }
+
         IEnumerable<IRecipeComponent> Components { get; }
     }
 }

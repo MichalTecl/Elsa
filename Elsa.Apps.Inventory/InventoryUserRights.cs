@@ -15,7 +15,8 @@ namespace Elsa.Apps.Inventory
         public static readonly UserRight StockEventsCreation = new UserRight(nameof(StockEventsCreation), "Smí vytvářet Odpad/Propagace", StockEventsView);
         public static readonly UserRight MaterialStockInApp = new UserRight(nameof(MaterialStockInApp), "Karta Naskladnění", MaterialBatchesViewer);
         public static readonly UserRight ProductionApp = new UserRight(nameof(ProductionApp), "Karta Výroba", MaterialBatchesViewer);
-        public static readonly UserRight ReceptureEdits = new UserRight(nameof(ReceptureEdits), "Vytváření, změny a mazání receptur", ProductionApp);
+        public static readonly UserRight ViewAllReceptures = new UserRight(nameof(ViewAllReceptures), "Zobrazení VŠECH receptur", ProductionApp);
+        public static readonly UserRight ReceptureEdits = new UserRight(nameof(ReceptureEdits), "Vytváření, změny a mazání receptur", ViewAllReceptures);
         public static readonly UserRight DirectSalesApp = new UserRight(nameof(DirectSalesApp), "Karta Prodejní akce", MaterialBatchesViewer);
         public static readonly UserRight WhConfiguration = new UserRight(nameof(WhConfiguration), "Sklady - Konfigurace", ViewWarehouseWidget);
         public static readonly UserRight ProductsAndTags = new UserRight(nameof(ProductsAndTags), "Produkty & Tagy", WhConfiguration);

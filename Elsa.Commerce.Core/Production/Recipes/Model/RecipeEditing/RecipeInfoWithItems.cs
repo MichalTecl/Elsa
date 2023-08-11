@@ -11,7 +11,7 @@ namespace Elsa.Commerce.Core.Production.Recipes.Model.RecipeEditing
         public decimal ProductionPrice { get; set; }
 
         public string AmountUnit { get; set; }
-
+                
         public List<RecipeItem> Items { get; } = new List<RecipeItem>();
     }
 }
