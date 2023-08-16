@@ -241,6 +241,48 @@ namespace Elsa.Commerce.Core.Repositories
                 changed = true;
             }
 
+            if (trg.CompanyName != src.CompanyName)
+            {
+                trg.CompanyName = src.CompanyName;
+                changed = true;
+            }
+
+            if (trg.Street != src.Street)
+            {
+                trg.Street = src.Street;
+                changed = true;
+            }
+
+            if (trg.DescriptiveNumber != src.DescriptiveNumber)
+            {
+                trg.DescriptiveNumber = src.DescriptiveNumber;
+                changed = true;
+            }
+
+            if (trg.OrientationNumber != src.OrientationNumber)
+            {
+                trg.OrientationNumber = src.OrientationNumber;
+                changed = true;
+            }
+
+            if (trg.City != src.City)
+            {
+                trg.City = src.City;
+                changed = true;
+            }
+
+            if (trg.Zip != src.Zip)
+            {
+                trg.Zip = src.Zip;
+                changed = true;
+            }
+
+            if (trg.Country != src.Country)
+            {
+                trg.Country = src.Country;
+                changed = true;
+            }
+
             if (trg.NewsletterSubscriber != src.IsNewsletterSubscriber)
             {
                 if (trg.NewsletterUnsubscribeDt == null) // If someone unsubscribed in Mailchimp, they cannot subscribe from ERP anymore

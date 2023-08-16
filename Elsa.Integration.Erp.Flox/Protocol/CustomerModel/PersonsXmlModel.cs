@@ -37,6 +37,27 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 
         [XmlElement("vat_id")]
         public string VatId { get; set; }
+
+        [XmlElement("address_company_name")]
+        public string CompanyName { get; set; }
+
+        [XmlElement("address_street")]
+        public string Street { get; set; }
+
+        [XmlElement("address_descriptive_number")]
+        public string DescriptiveNumber { get; set; }
+
+        [XmlElement("address_orientation_number")]
+        public string OrientationNumber { get; set; }
+
+        [XmlElement("address_city")]
+        public string City { get; set; }
+
+        [XmlElement("address_zip")]
+        public string Zip { get; set; }
+
+        [XmlElement("address_country")]
+        public string Country { get; set; }
     }
 
     [XmlRoot("persons")]

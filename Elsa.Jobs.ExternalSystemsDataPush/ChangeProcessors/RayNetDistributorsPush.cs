@@ -1,7 +1,10 @@
 ﻿using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Crm;
+using Elsa.Integration.Crm.Raynet;
+using Elsa.Integration.Crm.Raynet.Model;
 using Elsa.Jobs.Common.EntityChangeProcessing;
 using Elsa.Jobs.Common.EntityChangeProcessing.Helpers;
+using Elsa.Jobs.ExternalSystemsDataPush.Mappers;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
@@ -12,7 +15,14 @@ using System.Threading.Tasks;
 namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
 {
     public class RayNetDistributorsPush : IEntityChangeProcessor<ICustomer>
-    {        
+    {
+        private readonly IRaynetClient _raynet;
+        
+        public RayNetDistributorsPush(IRaynetClient raynet)
+        {
+            _raynet = raynet;
+        }
+
         public string ProcessorUniqueName { get; } = "Raynet_Customers_Push";
 
         public IEnumerable<object> GetComparedValues(ICustomer e)
@@ -23,11 +33,39 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             yield return e.NewsletterSubscriber;
             yield return e.IsDistributor;
             yield return e.VatId;
+            yield return e.CompanyName;
+            yield return e.Street;
+            yield return e.DescriptiveNumber;
+            yield return e.OrientationNumber;
+            yield return e.City;
+            yield return e.Zip;
+            yield return e.Country;
         }
 
         public long GetEntityId(ICustomer ett)
         {
             return ett.Id;
+        }
+
+        private List<Contact> _rncontacts = null;
+        private List<Contact> GetRnContacts()
+        {
+            if (_rncontacts == null) 
+            {
+                var lst = new List<Contact>();
+                while (true)
+                {
+                    var resp = _raynet.GetContacts(lst.Count, 100);
+                    lst.AddRange(resp.Data);
+
+                    if (resp.Data.Count < 100)
+                        break;
+                }
+
+                _rncontacts = lst;
+            }
+
+            return _rncontacts;
         }
 
         public EntityChunk<ICustomer> LoadChunkToCompare(IDatabase db, int projectId, EntityChunk<ICustomer> previousChunk, int alreadyProcessedRowsCount)
@@ -38,19 +76,65 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                 .OrderBy(c => c.Id)
                 .Skip(alreadyProcessedRowsCount)
                 .Take(100)
-                .Execute()
+                .Execute()                
                 .ToList();
 
-            return new EntityChunk<ICustomer>(data, data.Count < 100);
+            return new EntityChunk<ICustomer>(data.Where(c => c.ErpUid?.StartsWith("C") == true).ToList(), data.Count < 100);
         }
 
         public void Process(IEnumerable<EntityChangeEvent<ICustomer>> changedEntities, IEntityProcessCallback<ICustomer> callback, ILog log)
         {
             foreach (var e in changedEntities) 
             {
-                log.Info($"Processing: {(e.IsNew ? "INSERT" : "UPDATE")} {e.Entity.Email}");
-                callback.OnProcessed(e.Entity, $"extId{e.Entity.Email}", "cudata");
-            }
+                log.Info($"Processing changed Customer Id={e.Entity.Id}, Name={e.Entity.Name ?? e.Entity.Email}");
+
+                try 
+                {
+                    if (e.IsNew) 
+                    {
+                        InsertRnContact(e, log, callback);
+                    }
+                    else 
+                    {
+                        if(!long.TryParse(e.ExternalId, out var srcId))
+                        {
+                            log.Error($"Cannot parse ExternalId=\"{e.ExternalId}\" as long - considering inserting the contact instead of UPDATE");
+                            InsertRnContact(e, log, callback);
+                            continue;
+                        }
+
+                        var source = GetRnContacts().FirstOrDefault(c => c.Id == srcId);
+                        if (source == null) 
+                        {
+                            _rncontacts = null;
+                            source = GetRnContacts().FirstOrDefault(c => c.Id == srcId);
+
+                            if (source == null) 
+                            {
+                                log.Error($"Cannot find source Contact by RayNet_ID={srcId} - considering inserting the contact instead of UPDATE");
+                                InsertRnContact(e, log, callback);
+                                continue;
+                            }                            
+                        }
+
+                        var updated = CustomerMapper.ToRaynetContact(e.Entity, source);
+                        _raynet.UpdateContact(srcId, updated);
+                        log.Info($"{e.Entity.Name} updated in RayNet");
+                        callback.OnProcessed(e.Entity, srcId.ToString(), null);
+                    }                    
+                }
+                catch(Exception ex) 
+                {
+                    log.Error($"Attempt to push a client to RayNet failed: {ex.Message}", ex);                        
+                }                   
+            }            
+        }
+
+        private void InsertRnContact(EntityChangeEvent<ICustomer> e,  ILog log, IEntityProcessCallback<ICustomer> callback)
+        {
+            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity));
+            log.Info($"{e.Entity.Name} inserted to RayNet");
+            callback.OnProcessed(e.Entity, resp.Data.Id.ToString(), null);
         }
     }
 }

@@ -18,6 +18,13 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
             IsDistributor = (!string.IsNullOrEmpty(src.CompanyId)) || (src.Groups?.ToLowerInvariant().Contains("velkoo") ?? false);
             Groups = src.Groups;
             VatId = src.VatId;
+            CompanyName = src.CompanyName;
+            Street = src.Street;
+            DescriptiveNumber = src.DescriptiveNumber;
+            OrientationNumber = src.OrientationNumber;
+            City = src.City;
+            Zip = src.Zip;
+            Country = src.Country;
         }
         
         public string ErpCustomerId { get; }
@@ -39,6 +46,20 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         public string Groups { get; }
 
         public string VatId { get; set; }
+
+        public string CompanyName { get; }
+
+        public string Street { get; }
+
+        public string DescriptiveNumber { get; }
+
+        public string OrientationNumber { get; }
+
+        public string City { get; }
+
+        public string Zip { get; }
+
+        public string Country { get; }
 
         private static string NormalizePhoneNumber(string srcPhone)
         {

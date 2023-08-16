@@ -24,6 +24,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.XTable;
 using Elsa.Core.Entities.Commerce;
+using Elsa.Integration.Crm.Raynet;
 using Elsa.Integration.Erp.Flox;
 using Elsa.Integration.PaymentSystems.Common;
 using Elsa.Integration.PaymentSystems.Fio;
@@ -70,7 +71,6 @@ namespace Elsa.Assembly
                 {
                     s.ScanAssembly(typeof(IInvoiceFormGeneratorFactory).Assembly);
                     s.ScanAssembly(typeof(FloxClient).Assembly);
-                    //s.ScanAssembly(typeof(FlerClient).Assembly);
                     s.ScanAssembly(typeof(FioClient).Assembly);
                     s.ScanAssembly(typeof(ScheduledJobsController).Assembly);
                     s.ScanAssembly(typeof(IScheduledJobsRepository).Assembly);
@@ -86,7 +86,6 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(ZasilkovnaClient).Assembly);
                     s.ScanAssembly(typeof(ShipmentController).Assembly);
                     s.ScanAssembly(typeof(PackingController).Assembly);
-                    //s.ScanAssembly(typeof(ElerpClient).Assembly);
                     s.ScanAssembly(typeof(CustomersSyncJob).Assembly);
                     s.ScanAssembly(typeof(CustomersController).Assembly);
                     s.ScanAssembly(typeof(ImportRatesJob).Assembly);
@@ -110,6 +109,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(ReportingRegistry).Assembly);
                     s.ScanAssembly(typeof(DataPushRegistry).Assembly);
                     s.ScanAssembly(typeof(EntityChangeProcessingRegistry).Assembly);
+                    s.ScanAssembly(typeof(RaynetClientRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 

@@ -59,5 +59,26 @@ namespace Elsa.Core.Entities.Commerce.Crm
         [NotFk]
         [NVarchar(100, true)]
         string VatId { get; set; }
+
+        [NVarchar(128, true)]
+        string CompanyName { get; set; }
+                
+        [NVarchar(128, true)]
+        string Street { get; set; }
+
+        [NVarchar(64, true)]
+        string DescriptiveNumber { get; set; }
+
+        [NVarchar(64, true)]
+        string OrientationNumber { get; set; }
+
+        [NVarchar(128, true)]
+        string City { get; set; }
+
+        [NVarchar(16, true)]
+        string Zip { get; set; }
+
+        [NVarchar(128, true)]
+        string Country { get; set; }
     }
 }

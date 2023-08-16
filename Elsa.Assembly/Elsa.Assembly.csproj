@@ -163,6 +163,10 @@
       <Project>{91481B08-E437-474D-9793-A135F1DB465C}</Project>
       <Name>Elsa.Core.Entities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.Crm.Raynet\Elsa.Integration.Crm.Raynet.csproj">
+      <Project>{B3CA26E9-83BA-4752-AA9C-274FEFF325F6}</Project>
+      <Name>Elsa.Integration.Crm.Raynet</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Integration.Erp.Flox\Elsa.Integration.Erp.Flox.csproj">
       <Project>{dc38d50d-1f5f-44c8-a273-6c57cf26974c}</Project>
       <Name>Elsa.Integration.Erp.Flox</Name>

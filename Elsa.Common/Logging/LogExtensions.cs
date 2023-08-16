@@ -60,7 +60,7 @@ namespace Elsa.Common.Logging
 
                 File.WriteAllText(path, sb.ToString());
 
-                log.Info($"Communication protocol saved as {path}");
+                //log.Info($"Communication protocol saved as {path}");
 
                 DirectorySizeKeeper.KeepSize(dir.FullName, (int)5e+8, (int)2e+8, log);
 

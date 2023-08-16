@@ -23,7 +23,6 @@ namespace Elsa.Common.Utils
                         
             if (totalSize < maxSize)
             {
-                log.Info($"Directory {directoryPath} has total size {totalSize}B lower than threshold {maxSize}B");
                 return;
             }
 

@@ -27,5 +27,13 @@ namespace Elsa.Commerce.Core.Model
         string Groups { get; }
 
         string VatId { get; }
+
+        string CompanyName { get; }
+        string Street { get; }
+        string DescriptiveNumber { get; }
+        string OrientationNumber { get; }
+        string City { get; }
+        string Zip { get; }
+        string Country { get; }
     }
 }
