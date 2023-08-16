@@ -91,6 +91,7 @@
     <Compile Include="Utils\CsvGenerator.cs" />
     <Compile Include="Utils\DateUtil.cs" />
     <Compile Include="Utils\DirectorySizeKeeper.cs" />
+    <Compile Include="Utils\EnumerableExtensions.cs" />
     <Compile Include="Utils\PropEqualityComparer.cs" />
     <Compile Include="Utils\GenericComparer.cs" />
     <Compile Include="Utils\ObjectExtensions.cs" />

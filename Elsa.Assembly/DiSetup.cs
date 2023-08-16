@@ -31,7 +31,9 @@ using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Jobs.AutomaticQueries;
 using Elsa.Jobs.Common;
+using Elsa.Jobs.Common.EntityChangeProcessing;
 using Elsa.Jobs.DbBackup;
+using Elsa.Jobs.ExternalSystemsDataPush;
 using Elsa.Jobs.FinancialReportsGeneration;
 using Elsa.Jobs.GeocodeAddresses;
 using Elsa.Jobs.ImportOrders;
@@ -106,6 +108,8 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(AutoQueriesRegistry).Assembly);
                     s.ScanAssembly(typeof(ProfileController).Assembly);
                     s.ScanAssembly(typeof(ReportingRegistry).Assembly);
+                    s.ScanAssembly(typeof(DataPushRegistry).Assembly);
+                    s.ScanAssembly(typeof(EntityChangeProcessingRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 

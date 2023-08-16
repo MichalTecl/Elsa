@@ -25,6 +25,8 @@ namespace Elsa.JobLauncher.Scheduler
         public static readonly ElsaJob LogReader =
             new ElsaJob("Log_Reader", 3, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(4, 0, 0) && eval.NowIsBetween(5, 22));
 
+        public static readonly ElsaJob DataPush = new ElsaJob("DATA_PUSH", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 7));
+
         public static IEnumerable<ElsaJob> All
         {
             get
@@ -43,6 +45,7 @@ namespace Elsa.JobLauncher.Scheduler
                 yield return AutoQueries;
                 yield return Inspector;
                 yield return LogReader;
+                yield return DataPush;
             }
         }
     }

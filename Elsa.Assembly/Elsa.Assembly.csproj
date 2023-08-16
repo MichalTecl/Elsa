@@ -195,6 +195,10 @@
       <Project>{A3DA3672-1F5A-44EB-8001-A19C7C97FE73}</Project>
       <Name>Elsa.Jobs.AutomaticQueries</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.Common.EntityChangeProcessing\Elsa.Jobs.Common.EntityChangeProcessing.csproj">
+      <Project>{7096841A-6EC7-4D85-9313-BA57A6660E49}</Project>
+      <Name>Elsa.Jobs.Common.EntityChangeProcessing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
       <Project>{5ef07762-137b-4bf7-8199-5961768fcaec}</Project>
       <Name>Elsa.Jobs.Common</Name>
@@ -202,6 +206,10 @@
     <ProjectReference Include="..\Elsa.Jobs.DbBackup\Elsa.Jobs.DbBackup.csproj">
       <Project>{AEBA83D2-BFAE-4A1D-B538-08F5460EC409}</Project>
       <Name>Elsa.Jobs.DbBackup</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.ExternalSystemsDataPush\Elsa.Jobs.ExternalSystemsDataPush.csproj">
+      <Project>{A8267D1B-E60A-4473-90FF-8346B9E3D0B8}</Project>
+      <Name>Elsa.Jobs.ExternalSystemsDataPush</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.FinancialReportsGeneration\Elsa.Jobs.FinancialReportsGeneration.csproj">
       <Project>{4586C0D0-A123-4049-84DF-6A050A78D60B}</Project>
