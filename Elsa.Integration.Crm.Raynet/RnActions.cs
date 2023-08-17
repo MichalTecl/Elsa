@@ -35,5 +35,10 @@ namespace Elsa.Integration.Crm.Raynet
         {
             return _protocol.Call<RnResponse<List<Contact>>>(HttpMethod.Get, $"https://app.raynet.cz/api/v2/company/?offset={offset}&limit={limit}");
         }
+
+        public RnResponse<List<CompanyCategory>> GetCompanyCategories()
+        {
+            return _protocol.Call<RnResponse<List<CompanyCategory>>>(HttpMethod.Get, "https://app.raynet.cz/api/v2/companyCategory/");
+        }
     }
 }

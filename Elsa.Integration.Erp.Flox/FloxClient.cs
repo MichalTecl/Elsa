@@ -170,7 +170,7 @@ namespace Elsa.Integration.Erp.Flox
             
             var result = new List<IErpCustomerModel>();
 
-            var parsed = PersonsDoc.Parse(exportString);
+            var parsed = PersonsDoc.Parse(exportString, false);
                         
             result.AddRange(parsed.Select(i => new ErpPersonModel(i)));
 
@@ -189,7 +189,7 @@ namespace Elsa.Integration.Erp.Flox
 
             exportString = exportString.Replace("<companies>", "<persons>").Replace("</companies>", "</persons>");
 
-            parsed = PersonsDoc.Parse(exportString);
+            parsed = PersonsDoc.Parse(exportString, true);
             result.AddRange(parsed.Select(i => new ErpPersonModel(i)));
 
             m_log.Info($"Collected {result.Count} of Persons + Companies records");

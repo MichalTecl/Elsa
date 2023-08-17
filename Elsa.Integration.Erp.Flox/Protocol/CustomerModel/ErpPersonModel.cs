@@ -25,6 +25,8 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
             City = src.City;
             Zip = src.Zip;
             Country = src.Country;
+            MainUserEmail = src.MainUserEmail;
+            IsCompany = src.IsCompany;
         }
         
         public string ErpCustomerId { get; }
@@ -60,6 +62,9 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         public string Zip { get; }
 
         public string Country { get; }
+        public string MainUserEmail { get; }
+
+        public bool IsCompany { get; }
 
         private static string NormalizePhoneNumber(string srcPhone)
         {

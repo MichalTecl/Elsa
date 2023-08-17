@@ -53,7 +53,7 @@
         public string State { get; set; } = "B_ACTUAL";
         public string Role { get; set; } = "A_SUBSCRIBER";
         public string Notice { get; set; }
-        public int? Category { get; set; }
+        public IdContainer Category { get; set; }
         public int? ContactSource { get; set; }
         public int? EmployeesNumber { get; set; }
         public int? LegalForm { get; set; }

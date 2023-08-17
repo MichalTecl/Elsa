@@ -39,12 +39,6 @@ namespace Elsa.Commerce.Core.Repositories
 
             foreach (var src in source)
             {
-                var sourceduplicities = source.Where(s => s.Email == src.Email).ToList();
-                if (sourceduplicities.Count > 1) 
-                {
-                    m_log.Info($"Duplicitni zaznamy stazeny z ERP - email: {src.Email}");                    
-                }
-
                 var trg =
                     allDbCustomers.FirstOrDefault(dbc => dbc.ErpUid == src.ErpCustomerId) ??
                     allDbCustomers.FirstOrDefault(s => s.Email.Equals(src.Email, StringComparison.InvariantCultureIgnoreCase) && string.IsNullOrEmpty(s.ErpUid))
@@ -280,6 +274,18 @@ namespace Elsa.Commerce.Core.Repositories
             if (trg.Country != src.Country)
             {
                 trg.Country = src.Country;
+                changed = true;
+            }
+
+            if (trg.MainUserEmail != src.MainUserEmail) 
+            {
+                trg.MainUserEmail = src.MainUserEmail;
+                changed = true;
+            }
+
+            if (trg.IsCompany != src.IsCompany)
+            {
+                trg.IsCompany = src.IsCompany;
                 changed = true;
             }
 

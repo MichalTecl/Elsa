@@ -1,5 +1,7 @@
-﻿using Elsa.Common.Logging;
+﻿using Elsa.Common.Interfaces;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Crm;
+using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Integration.Crm.Raynet;
 using Elsa.Integration.Crm.Raynet.Model;
 using Elsa.Jobs.Common.EntityChangeProcessing;
@@ -17,10 +19,14 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
     public class RayNetDistributorsPush : IEntityChangeProcessor<ICustomer>
     {
         private readonly IRaynetClient _raynet;
-        
-        public RayNetDistributorsPush(IRaynetClient raynet)
+        private readonly IDatabase _db;
+        private readonly ISession _session;
+
+        public RayNetDistributorsPush(IRaynetClient raynet, IDatabase db, ISession session)
         {
             _raynet = raynet;
+            _db = db;
+            this._session = session;
         }
 
         public string ProcessorUniqueName { get; } = "Raynet_Customers_Push";
@@ -40,6 +46,10 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             yield return e.City;
             yield return e.Zip;
             yield return e.Country;
+            yield return e.GetFormattedStreetAndHouseNr();
+
+            foreach (var c in GetCustomerGroups(e.Id))
+                yield return c;            
         }
 
         public long GetEntityId(ICustomer ett)
@@ -66,6 +76,50 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             }
 
             return _rncontacts;
+        }
+
+
+        private List<CompanyCategory> _rnCategories = null;
+        private List<CompanyCategory> GetRnCompanyCategories() 
+        {
+            if (_rnCategories == null)
+            {
+                _rnCategories = _raynet.GetCompanyCategories().Data;
+            }
+
+            return _rnCategories;
+        }
+
+        private Dictionary<int, HashSet<string>> _customerGroups = null;
+        private HashSet<string> GetCustomerGroups(int customerId) 
+        {
+            if (_customerGroups == null) 
+            {
+                var grps = _db.SelectFrom<ICustomerGroup>()
+                    .Join(cg => cg.Customer)
+                    .Where(cg => cg.Customer.ProjectId == _session.Project.Id)
+                    .Execute();
+
+                _customerGroups = new Dictionary<int, HashSet<string>>();
+
+                foreach(var record in grps) 
+                {
+                    if (!_customerGroups.TryGetValue(record.CustomerId, out var groupNames)) 
+                    {
+                        groupNames = new HashSet<string>();
+                        _customerGroups.Add(record.CustomerId, groupNames);
+                    }
+
+                    groupNames.Add(record.ErpGroupName);
+                }
+            }
+
+            if(!_customerGroups.TryGetValue(customerId, out var found)) 
+            {
+                found = new HashSet<string>();
+            }
+
+            return found;
         }
 
         public EntityChunk<ICustomer> LoadChunkToCompare(IDatabase db, int projectId, EntityChunk<ICustomer> previousChunk, int alreadyProcessedRowsCount)
@@ -117,7 +171,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                             }                            
                         }
 
-                        var updated = CustomerMapper.ToRaynetContact(e.Entity, source);
+                        var updated = CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), source);
                         _raynet.UpdateContact(srcId, updated);
                         log.Info($"{e.Entity.Name} updated in RayNet");
                         callback.OnProcessed(e.Entity, srcId.ToString(), null);
@@ -132,7 +186,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
 
         private void InsertRnContact(EntityChangeEvent<ICustomer> e,  ILog log, IEntityProcessCallback<ICustomer> callback)
         {
-            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity));
+            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories()));
             log.Info($"{e.Entity.Name} inserted to RayNet");
             callback.OnProcessed(e.Entity, resp.Data.Id.ToString(), null);
         }

@@ -58,6 +58,10 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 
         [XmlElement("address_country")]
         public string Country { get; set; }
+
+        [XmlElement("main_user")]
+        public string MainUserEmail { get; set; }
+        public bool IsCompany { get; set; }
     }
 
     [XmlRoot("persons")]
@@ -73,7 +77,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         [XmlElement("persons")]
         public PersonsList Persons { get; set; }
 
-        public static IEnumerable<PersonModel> Parse(string xml)
+        public static IEnumerable<PersonModel> Parse(string xml, bool isCompany)
         {
             var s = new XmlSerializer(typeof(PersonsDoc));
 
@@ -85,6 +89,9 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
                 {
                     throw new InvalidOperationException("Neocekavany format odpovedi z Floxu");
                 }
+
+                foreach (var p in doc.Persons.Items)
+                    p.IsCompany = isCompany;
 
                 return doc.Persons.Items;
             }

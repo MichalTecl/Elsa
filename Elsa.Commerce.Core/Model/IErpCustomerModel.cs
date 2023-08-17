@@ -35,5 +35,7 @@ namespace Elsa.Commerce.Core.Model
         string City { get; }
         string Zip { get; }
         string Country { get; }
+        string MainUserEmail { get; }
+        bool IsCompany { get; }
     }
 }

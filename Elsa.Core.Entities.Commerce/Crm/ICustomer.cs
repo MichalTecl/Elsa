@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
 
 using Robowire.RobOrm.Core;
@@ -12,7 +12,7 @@ using Robowire.RobOrm.SqlServer.Attributes;
 namespace Elsa.Core.Entities.Commerce.Crm
 {
     [Entity]
-    public interface ICustomer : IProjectRelatedEntity
+    public interface ICustomer : IProjectRelatedEntity, IPostalAddress
     {
         int Id { get; }
 
@@ -62,23 +62,13 @@ namespace Elsa.Core.Entities.Commerce.Crm
 
         [NVarchar(128, true)]
         string CompanyName { get; set; }
-                
-        [NVarchar(128, true)]
-        string Street { get; set; }
-
-        [NVarchar(64, true)]
-        string DescriptiveNumber { get; set; }
-
-        [NVarchar(64, true)]
-        string OrientationNumber { get; set; }
-
-        [NVarchar(128, true)]
-        string City { get; set; }
-
-        [NVarchar(16, true)]
-        string Zip { get; set; }
 
         [NVarchar(128, true)]
         string Country { get; set; }
+
+        [NVarchar(255, true)]
+        string MainUserEmail { get; set; }
+                
+        bool? IsCompany { get; set; } 
     }
 }

@@ -79,6 +79,7 @@
     <Compile Include="Common\ICurrency.cs" />
     <Compile Include="Common\ICurrencyConversion.cs" />
     <Compile Include="Common\IIntIdEntity.cs" />
+    <Compile Include="Common\IPostalAddress.cs" />
     <Compile Include="Common\IVolumeAndUnit.cs" />
     <Compile Include="Common\Logging\ISysLog.cs" />
     <Compile Include="Common\IPayment.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Crm\ICustomerRelatedNote.cs" />
     <Compile Include="Crm\INewsletterSubscriber.cs" />
     <Compile Include="ElsaDbInstaller.cs" />
+    <Compile Include="Extensions\AddressExtensions.cs" />
     <Compile Include="Extensions\MappedToOrderItemExtensions.cs" />
     <Compile Include="Extensions\MaterialBatchExtensions.cs" />
     <Compile Include="Integration\IErp.cs" />
