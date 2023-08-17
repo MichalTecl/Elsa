@@ -4,6 +4,7 @@ using Elsa.Jobs.Common;
 using Elsa.Jobs.Common.EntityChangeProcessing;
 using Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors;
 using Robowire;
+using Elsa.Jobs.ExternalSystemsDataPush.Model;
 
 namespace Elsa.Jobs.ExternalSystemsDataPush
 {
@@ -20,7 +21,8 @@ namespace Elsa.Jobs.ExternalSystemsDataPush
 
         public void Run(string customDataJson)
         {
-            Run<ICustomer, RayNetDistributorsPush>();                        
+            Run<ICustomer, RayNetDistributorsPush>();
+            Run<OrderExportModel, RayNetOrdersPush>();
         }
 
         private void Run<TEntity, TProcessor>() where TProcessor : IEntityChangeProcessor<TEntity>

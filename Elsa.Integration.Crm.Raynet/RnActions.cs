@@ -40,5 +40,15 @@ namespace Elsa.Integration.Crm.Raynet
         {
             return _protocol.Call<RnResponse<List<CompanyCategory>>>(HttpMethod.Get, "https://app.raynet.cz/api/v2/companyCategory/");
         }
+
+        public RnResponse<IdResponse> CreateBusinessCase(BusinessCaseModel bc)
+        {
+            return _protocol.Call<RnResponse<IdResponse>>(HttpMethod.Put, "https://app.raynet.cz/api/v2/businessCase/createWithItems/", payload: bc);
+        }
+
+        public RnResponse ChangeBcValidity(long businessCaseId, bool isValid)
+        {
+            return _protocol.Call<RnResponse>(HttpMethod.Post, $"https://app.raynet.cz/api/v2/businessCase/{businessCaseId}/{(isValid ? "valid" : "invalid")}");
+        }
     }
 }

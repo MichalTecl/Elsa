@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
+using Elsa.Jobs.ExternalSystemsDataPush.Mappers;
 
 namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
 {
@@ -21,12 +22,11 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
         private readonly IDatabase _db;
         private readonly ISession _session;
                 
-        public RayNetOrdersPush(IRaynetClient raynet, IDatabase db, ISession session, string processorUniqueName)
+        public RayNetOrdersPush(IRaynetClient raynet, IDatabase db, ISession session)
         {
             _raynet = raynet;
             _db = db;
             _session = session;
-            ProcessorUniqueName = processorUniqueName;
         }
 
         public string ProcessorUniqueName { get; } = "Raynet_Orders_Push";
@@ -46,10 +46,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
 
         public IEnumerable<object> GetComparedValues(OrderExportModel e)
         {
-            yield return e.StatusId;
-
-            foreach (var i in e.Items)
-                yield return i.ItemTaxedPrice;
+            yield return e.OrderStatusId;
         }
 
         public long GetEntityId(OrderExportModel ett)
@@ -92,8 +89,26 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
         {
             foreach(var orderEvent in changedEntities) 
             {
-                if (orderEvent.IsNew && orderEvent.Entity.OrderStatusId != 5)
-                    continue; // shouldnt send unsuccessful orders 
+                if (orderEvent.IsNew) 
+                {
+                    if (orderEvent.Entity.OrderStatusId != 5)
+                    {
+                        log.Info($"Order {orderEvent.Entity.OrderNr} is not sent to RN due to unsuccessful status");
+                        continue; // shouldnt send unsuccessful orders
+                    }
+
+                    log.Info($"Order {orderEvent.Entity.OrderNr} is successfuly finished -> sending to RN");
+
+                    var businessCase = OrderMapper.ToBcModel(orderEvent.Entity);
+                    var response = _raynet.CreateBusinessCase(businessCase);
+                    callback.OnProcessed(orderEvent.Entity, response.Data.Id.ToString(), null);
+                }
+                else 
+                {
+                    log.Info($"Order {orderEvent.Entity.OrderNr} has changed -> sending to RN");
+                    _raynet.ChangeBcValidity(long.Parse(orderEvent.ExternalId), orderEvent.Entity.OrderStatusId == 5);
+                    callback.OnProcessed(orderEvent.Entity, orderEvent.ExternalId, null);
+                }
             }
         }
     }

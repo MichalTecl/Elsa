@@ -22,7 +22,17 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Model
 
         public decimal OrderVoc { get; set; }
 
+        public DateTime BuyDate { get; set; }
+
         public List<OrderItemExportModel> Items { get; } = new List<OrderItemExportModel>(20);
+
+        public decimal DiscountPercent
+        {
+            get
+            {
+                return Math.Round((1m - (OrderVoc / OrderMoc)) * 100m, 0);
+            }
+        }
     }
 
     public class OrderItemExportModel 
