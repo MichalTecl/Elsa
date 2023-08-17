@@ -88,6 +88,7 @@
     <Compile Include="TextResult.cs" />
     <Compile Include="SysCounters\ISysCountersManager.cs" />
     <Compile Include="SysCounters\SysCounterManager.cs" />
+    <Compile Include="Utils\AppEnvironment.cs" />
     <Compile Include="Utils\CsvGenerator.cs" />
     <Compile Include="Utils\DateUtil.cs" />
     <Compile Include="Utils\DirectorySizeKeeper.cs" />

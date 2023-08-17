@@ -72,7 +72,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
 
                     var orderItem = orderItemParser(row);
 
-                    if(orders.TryGetValue(orderItem.OrderId, out var order)) 
+                    if(!orders.TryGetValue(orderItem.OrderId, out var order)) 
                     {
                         orderParser = orderParser ?? row.GetRowParser<OrderExportModel>(typeof(OrderExportModel));
                         order = orderParser(row);
@@ -89,25 +89,32 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
         {
             foreach(var orderEvent in changedEntities) 
             {
-                if (orderEvent.IsNew) 
+                try
                 {
-                    if (orderEvent.Entity.OrderStatusId != 5)
+                    if (orderEvent.IsNew)
                     {
-                        log.Info($"Order {orderEvent.Entity.OrderNr} is not sent to RN due to unsuccessful status");
-                        continue; // shouldnt send unsuccessful orders
+                        if (orderEvent.Entity.OrderStatusId != 5)
+                        {
+                            log.Info($"Order {orderEvent.Entity.OrderNr} is not sent to RN due to unsuccessful status");
+                            continue; // shouldnt send unsuccessful orders
+                        }
+
+                        log.Info($"Order {orderEvent.Entity.OrderNr} is successfuly finished -> sending to RN");
+
+                        var businessCase = OrderMapper.ToBcModel(orderEvent.Entity);
+                        var response = _raynet.CreateBusinessCase(businessCase);
+                        callback.OnProcessed(orderEvent.Entity, response.Data.Id.ToString(), null);
                     }
-
-                    log.Info($"Order {orderEvent.Entity.OrderNr} is successfuly finished -> sending to RN");
-
-                    var businessCase = OrderMapper.ToBcModel(orderEvent.Entity);
-                    var response = _raynet.CreateBusinessCase(businessCase);
-                    callback.OnProcessed(orderEvent.Entity, response.Data.Id.ToString(), null);
+                    else
+                    {
+                        log.Info($"Order {orderEvent.Entity.OrderNr} has changed -> sending to RN");
+                        _raynet.ChangeBcValidity(long.Parse(orderEvent.ExternalId), orderEvent.Entity.OrderStatusId == 5);
+                        callback.OnProcessed(orderEvent.Entity, orderEvent.ExternalId, null);
+                    }
                 }
-                else 
+                catch(Exception ex) 
                 {
-                    log.Info($"Order {orderEvent.Entity.OrderNr} has changed -> sending to RN");
-                    _raynet.ChangeBcValidity(long.Parse(orderEvent.ExternalId), orderEvent.Entity.OrderStatusId == 5);
-                    callback.OnProcessed(orderEvent.Entity, orderEvent.ExternalId, null);
+                    log.Error($"Cannot sync order {orderEvent.Entity.OrderNr} to RN", ex);
                 }
             }
         }

@@ -6,6 +6,7 @@ using Elsa.App.Inspector.Database;
 using Elsa.App.Inspector.Repo;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Jobs.Common;
 using Elsa.Smtp.Core;
@@ -55,6 +56,17 @@ namespace Elsa.App.Inspector.Jobs
                 .WithParam("@projectId", m_session.Project.Id)
                 .ReadRows<int, string, string, string>((issueId, message, email, typeName) =>
                     mailList.Add(new MailListItem(issueId, message, email, typeName)));
+
+            if (AppEnvironment.IsDev) 
+            {
+                m_log.Info("DEV environment - removing all recipients except mtecl.prg@gmail.com");
+
+                var itemToKeep = mailList.FirstOrDefault(m => m.Email == "mtecl.prg@gmail.com");
+                mailList.Clear();
+
+                if (itemToKeep != null)
+                    mailList.Add(itemToKeep);
+            }
 
             foreach (var recipient in mailList.Select(m => m.Email).Distinct())
             {
