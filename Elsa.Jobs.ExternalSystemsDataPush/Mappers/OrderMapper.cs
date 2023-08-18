@@ -28,7 +28,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
                 {
                     ProductCode = item.ProductUid,
                     Name = item.ProductName,
-                    Price = item.ItemTaxedPrice / (1 + (item.ItemTaxPercent / 100m)),
+                    Price = (item.ItemTaxedPrice / item.ItemQuantity) / (1 + (item.ItemTaxPercent / 100m)),
                     TaxRate = item.ItemTaxPercent,
                     Count = item.ItemQuantity,
                     DiscountPercent = order.DiscountPercent                    
