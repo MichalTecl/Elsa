@@ -28,8 +28,8 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
                 {
                     ProductCode = item.ProductUid,
                     Name = item.ProductName,
-                    Price = (item.ItemTaxedPrice / item.ItemQuantity) / (1 + (item.ItemTaxPercent / 100m)),
-                    TaxRate = item.ItemTaxPercent,
+                    Price = (item.ItemTaxedPrice / item.ItemQuantity) / (1 + (item.ProductTaxPercent / 100m)),
+                    TaxRate = item.ProductTaxPercent,
                     Count = item.ItemQuantity,
                     DiscountPercent = order.DiscountPercent                    
                 });

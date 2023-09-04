@@ -37,6 +37,8 @@ namespace Elsa.Users
             get
             {
                 EnsureInitialized();
+                m_cache.ReadThrough<DateTime?>($"userOnline_{m_session?.UserId}", TimeSpan.FromMinutes(10), () => DateTime.Now);
+
                 return m_session?.User;
             }
         }
@@ -99,6 +101,7 @@ namespace Elsa.Users
 
             if (User != null)
             {
+                m_cache.Remove($"userOnline_{m_session?.UserId}");
                 m_cache.Remove(GetCacheKey(m_session.PublicId));
                 m_session.EndDt = DateTime.Now;
                 m_database.Save(m_session);

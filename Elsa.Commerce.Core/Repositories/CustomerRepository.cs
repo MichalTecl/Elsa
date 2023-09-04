@@ -172,7 +172,7 @@ namespace Elsa.Commerce.Core.Repositories
         private void SyncCustomer(IErpCustomerModel src, ICustomer trg)
         {
             var changed = false;
-
+                        
             if (trg.Id == 0)
             {
                 changed = true;
@@ -222,7 +222,7 @@ namespace Elsa.Commerce.Core.Repositories
                 trg.RegistrationDt = DateTime.Now;
                 changed = true;
             }
-
+                        
             if (trg.IsDistributor != src.IsDistributor)
             {
                 trg.IsDistributor = src.IsDistributor;
@@ -232,6 +232,12 @@ namespace Elsa.Commerce.Core.Repositories
             if (trg.VatId != src.VatId) 
             {
                 trg.VatId = src.VatId;
+                changed = true;
+            }
+
+            if(trg.CompanyRegistrationId != src.CompanyRegistrationId) 
+            {
+                trg.CompanyRegistrationId = src.CompanyRegistrationId;
                 changed = true;
             }
 
@@ -286,6 +292,12 @@ namespace Elsa.Commerce.Core.Repositories
             if (trg.IsCompany != src.IsCompany)
             {
                 trg.IsCompany = src.IsCompany;
+                changed = true;
+            }
+
+            if ((trg.DisabledDt != null) != src.IsDisabled) 
+            {
+                trg.DisabledDt = src.IsDisabled ? DateTime.Now : (DateTime?)null;
                 changed = true;
             }
 
@@ -516,6 +528,11 @@ namespace Elsa.Commerce.Core.Repositories
 
             var missingSubscribers = m_database.Sql().ExecuteWithParams(sql, m_session.Project.Id, sourceName).MapRows(r => r.GetString(0));
             return missingSubscribers.ToList();
+        }
+
+        public Dictionary<string, ICustomerGroupType> GetCustomerGroupTypes()
+        {
+            return m_database.SelectFrom<ICustomerGroupType>().Where(c => c.ProjectId == m_session.Project.Id).Execute().ToDictionary(g => g.ErpGroupName, g => g);
         }
     }
 }

@@ -9,6 +9,7 @@
         <div class="lt-template userAccountItemContainer hasHoverDetail">
             <div class="stackLeft">
                 <div data-bind="text:Name; class.strike:IsLocked"></div>
+                <span class="user_online_dot" data-bind="class!.hidden:IsOnline" title="Uživatel je právě online"></span>
                 <i class="fas fa-user-clock userAccountIcon" data-bind="class.hidden:IsActive" title="Uživatel musí změnit své dočasné heslo a tím aktivovat svůj účet"></i>
                 <div event-bind="click:toggleUserLock(Id)" class="hoverDetail userAccountIcon">
                     <i class="fas fa-lock faButton" title="Zablokovat uživatele" data-bind="class.hidden:IsLocked"></i>

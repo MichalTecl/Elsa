@@ -289,7 +289,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
 
         [XmlElement("u_company_id")]
         public string CompanyRegistrationId { get; set; }
-
+                
         public override string ToString()
         {
             return

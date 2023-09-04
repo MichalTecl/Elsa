@@ -98,6 +98,7 @@
     <Compile Include="Crm\ICustomer.cs" />
     <Compile Include="Crm\ICustomerEmailChange.cs" />
     <Compile Include="Crm\ICustomerGroup.cs" />
+    <Compile Include="Crm\ICustomerGroupType.cs" />
     <Compile Include="Crm\ICustomerRelatedNote.cs" />
     <Compile Include="Crm\INewsletterSubscriber.cs" />
     <Compile Include="ElsaDbInstaller.cs" />

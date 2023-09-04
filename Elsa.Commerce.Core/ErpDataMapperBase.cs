@@ -39,6 +39,13 @@ namespace Elsa.Commerce.Core
 
                 targetItem.ErpOrderItemId = erpItemId;
                 targetItem.ErpProductId = sourceItem.ErpProductId;
+
+                if (!string.IsNullOrWhiteSpace(sourceItem.ErpWarehouseItemCode)) 
+                {
+                    targetItem.ErpWarehouseItemCode = sourceItem.ErpWarehouseItemCode;
+                }
+
+                targetItem.ErpWarehouseItemId = string.IsNullOrWhiteSpace(sourceItem.ErpWarehouseItemId) ? null : sourceItem.ErpWarehouseItemId;
                 targetItem.PlacedName = sourceItem.ProductName;
                 targetItem.Quantity = sourceItem.Quantity;
                 targetItem.TaxPercent = sourceItem.TaxPercent;

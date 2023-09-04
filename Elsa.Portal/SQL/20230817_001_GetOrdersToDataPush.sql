@@ -17,7 +17,7 @@ BEGIN
 	SELECT x.*,
 		   itemsPrice.price OrderMOC,  
 			x.OrderPrice - ISNULL(priceElements.ttl, 0) OrderVOC,
-		   'Flox_' + oi.ErpProductId [ProductUid],
+		   'Flox_' + ISNULL(oi.ErpWarehouseItemCode, oi.ErpProductId) [ProductUid],
 		   oi.PlacedName ProductName,
 		   oi.Quantity ItemQuantity,
 		   oi.TaxPercent ProductTaxPercent,

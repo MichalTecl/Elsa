@@ -1,6 +1,5 @@
-﻿using System.Xml.Serialization;
-
-using Elsa.Commerce.Core.Model;
+﻿using Elsa.Commerce.Core.Model;
+using System.Xml.Serialization;
 
 namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
 {
@@ -10,10 +9,10 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
 
         [XmlElement("item_id")]
         //[XmlElement("link")]
-        public string ErpOrderItemId 
-        { 
-            get; 
-            set; 
+        public string ErpOrderItemId
+        {
+            get;
+            set;
         }
 
         [XmlElement("prod_name")]
@@ -41,9 +40,9 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
         [XmlElement("weight")]
         public string ProductItemWeight { get; set; }
 
-        public decimal TaxPercent 
+        public decimal TaxPercent
         {
-            get 
+            get
             {
                 if (string.IsNullOrWhiteSpace(TaxPercentValue) || !decimal.TryParse(TaxPercentValue, out var val))
                     return 21;
@@ -51,5 +50,11 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
                 return val;
             }
         }
+
+        [XmlElement("warehouse_item")]
+        public string ErpWarehouseItemCode { get; set; }
+
+        [XmlElement("warehouse_item_id")]
+        public string ErpWarehouseItemId { get; set; }
     }
 }

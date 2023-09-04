@@ -1,12 +1,15 @@
 ﻿using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Crm;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 {
     internal class ErpPersonModel : IErpCustomerModel
     {
-        public ErpPersonModel(PersonModel src)
+        public ErpPersonModel(PersonModel src, Dictionary<string, ICustomerGroupType> groupIndex)
         {
             ErpCustomerId = CustomerUidCalculator.GetCustomerUid(src.CompanyId, src.PersonId, src.Email);
             Email = src.Email?.Trim();
@@ -15,7 +18,6 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
             Surname = src.LastName?.Trim();
             IsActive = src.Active != 0;
             IsNewsletterSubscriber = src.Newsletter != 0;
-            IsDistributor = (!string.IsNullOrEmpty(src.CompanyId)) || (src.Groups?.ToLowerInvariant().Contains("velkoo") ?? false);
             Groups = src.Groups;
             VatId = src.VatId;
             CompanyName = src.CompanyName;
@@ -27,6 +29,20 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
             Country = src.Country;
             MainUserEmail = src.MainUserEmail;
             IsCompany = src.IsCompany;
+            CompanyRegistrationId = src.CompanyId;
+
+            if (groupIndex != null)
+                foreach(var g in (src.Groups ?? "").Split(',', ';').Select(g => g.Trim()).Where(g => !string.IsNullOrEmpty(g)).Distinct()) 
+                {
+                    if (!groupIndex.TryGetValue(g, out var groupType))
+                        continue;
+
+                    if (groupType.IsDistributor)
+                        IsDistributor = true;
+
+                    if (groupType.IsDisabled)
+                        IsDisabled = true;
+                }
         }
         
         public string ErpCustomerId { get; }
@@ -65,6 +81,9 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         public string MainUserEmail { get; }
 
         public bool IsCompany { get; }
+
+        public bool IsDisabled { get; }
+        public string CompanyRegistrationId { get; }
 
         private static string NormalizePhoneNumber(string srcPhone)
         {

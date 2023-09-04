@@ -28,6 +28,8 @@ namespace Elsa.Commerce.Core.Model
 
         string VatId { get; }
 
+        string CompanyRegistrationId { get; }
+
         string CompanyName { get; }
         string Street { get; }
         string DescriptiveNumber { get; }
@@ -37,5 +39,7 @@ namespace Elsa.Commerce.Core.Model
         string Country { get; }
         string MainUserEmail { get; }
         bool IsCompany { get; }
+
+        bool IsDisabled { get; }
     }
 }

@@ -17,7 +17,8 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
 
             target.Name = new[] { customer.Name, customer.Email, customer.CompanyName }.FirstOrDefault(n => !string.IsNullOrWhiteSpace(n)) ?? $"NEMÁ_JMÉNO_ElsaId_{customer.Id}";
             target.Role = target.Role ?? "A_SUBSCRIBER";
-            target.RegNumber = customer.VatId;
+            target.RegNumber = customer.CompanyRegistrationId;
+            
             target.Category = new IdContainer { Id = FindCategory(customerGroups, categories) };            
 
             target.Addresses = target.Addresses ?? new List<AddressBucket>();

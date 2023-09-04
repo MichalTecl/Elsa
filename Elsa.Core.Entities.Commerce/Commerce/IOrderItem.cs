@@ -44,5 +44,12 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         
         [ForeignKey(nameof(IOrderItemMaterialBatch.OrderItemId))]
         IEnumerable<IOrderItemMaterialBatch> AssignedBatches { get; }
+
+        [NVarchar(255, true)]
+        string ErpWarehouseItemCode { get; set; }
+
+        [NotFk]
+        [NVarchar(255, true)]
+        string ErpWarehouseItemId { get; set; }
     }
 }

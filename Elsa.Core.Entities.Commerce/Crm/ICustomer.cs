@@ -60,6 +60,10 @@ namespace Elsa.Core.Entities.Commerce.Crm
         [NVarchar(100, true)]
         string VatId { get; set; }
 
+        [NotFk]
+        [NVarchar(100, true)]
+        string CompanyRegistrationId { get; set; }
+
         [NVarchar(128, true)]
         string CompanyName { get; set; }
 
@@ -69,6 +73,8 @@ namespace Elsa.Core.Entities.Commerce.Crm
         [NVarchar(255, true)]
         string MainUserEmail { get; set; }
                 
-        bool? IsCompany { get; set; } 
+        bool? IsCompany { get; set; }
+        
+        DateTime? DisabledDt { get; set; }
     }
 }

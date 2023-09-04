@@ -141,12 +141,28 @@ namespace Elsa.Users.Controllers
                         Id = u.Id,
                         Name = u.EMail,
                         IsActive = !u.UsesDefaultPassword,
-                        IsLocked = u.LockDt != null
+                        IsLocked = u.LockDt != null,
+                        IsOnline = GetIsUserOnline(u.Id)
                     });
 
             return users;
         }
-        
+
+        private bool GetIsUserOnline(int id)
+        {
+            var kkey = $"userOnline_{id}";
+            if (!m_cache.KeyExists(kkey))
+                return false;
+
+            if (m_cache.ReadThrough<DateTime?>(kkey, TimeSpan.FromMinutes(10), () => null) == null) 
+            {
+                m_cache.Remove(kkey);
+                return false;
+            }
+
+            return true;
+        }
+
         public IEnumerable<UserViewModel> InviteUser(string email)
         {
             m_managementFacade.InviteUser(email);

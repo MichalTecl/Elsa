@@ -127,6 +127,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             var data = db.SelectFrom<ICustomer>()
                 .Where(c => c.ProjectId == projectId)
                 .Where(c => c.IsDistributor)
+                .Where(c => c.DisabledDt == null)
                 .OrderBy(c => c.Id)
                 .Skip(alreadyProcessedRowsCount)
                 .Take(100)

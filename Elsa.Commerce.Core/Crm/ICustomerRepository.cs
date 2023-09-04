@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Crm.Model;
 using Elsa.Commerce.Core.Model;
+using Elsa.Core.Entities.Commerce.Crm;
 
 namespace Elsa.Commerce.Core.Crm
 {
@@ -24,5 +25,7 @@ namespace Elsa.Commerce.Core.Crm
         void UpdateNewsletterSubscribersList(string sourceName, Dictionary<string, bool> actualSubscriers);
 
         List<string> GetSubscribersToSync(string sourceName);
+
+        Dictionary<string, ICustomerGroupType> GetCustomerGroupTypes();
     }
 }

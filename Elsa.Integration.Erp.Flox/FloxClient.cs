@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common.Communication;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
@@ -28,18 +30,22 @@ namespace Elsa.Integration.Erp.Flox
         private DateTime m_lastAccess = DateTime.MinValue;
 
         private readonly WebFormsClient m_client;
+
+        private readonly ICustomerRepository m_customerRepository;
+
+
         public FloxClient(
             FloxClientConfig config,
             FloxDataMapper mapper,
             ILog log,
-            IOrderStatusMappingRepository statusMappingRepository)
+            IOrderStatusMappingRepository statusMappingRepository, ICustomerRepository customerRepository)
         {
             m_config = config;
             Mapper = mapper;
             m_log = log;
             m_statusMappingRepository = statusMappingRepository;
             m_client = new WebFormsClient(m_log);
-
+            m_customerRepository = customerRepository;
         }
 
         public IErp Erp { get; set; }
@@ -171,8 +177,10 @@ namespace Elsa.Integration.Erp.Flox
             var result = new List<IErpCustomerModel>();
 
             var parsed = PersonsDoc.Parse(exportString, false);
+
+            var cgIndex = m_customerRepository.GetCustomerGroupTypes();
                         
-            result.AddRange(parsed.Select(i => new ErpPersonModel(i)));
+            result.AddRange(parsed.Select(i => new ErpPersonModel(i, cgIndex)));
 
             m_log.Info($"Received {result.Count} of 'Persons'");
 
@@ -190,7 +198,7 @@ namespace Elsa.Integration.Erp.Flox
             exportString = exportString.Replace("<companies>", "<persons>").Replace("</companies>", "</persons>");
 
             parsed = PersonsDoc.Parse(exportString, true);
-            result.AddRange(parsed.Select(i => new ErpPersonModel(i)));
+            result.AddRange(parsed.Select(i => new ErpPersonModel(i, cgIndex)));
 
             m_log.Info($"Collected {result.Count} of Persons + Companies records");
 
@@ -218,7 +226,7 @@ namespace Elsa.Integration.Erp.Flox
                         Email = subscriber,
                         Active = 1,
                         Newsletter = 1
-                    });
+                    }, null);
 
                     result.Add(customer);
                 }

@@ -46,6 +46,6 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Model
 
         public decimal ItemTaxedPrice { get; set; }
 
-        public decimal ItemTaxPercent { get; set; }
+        public decimal ProductTaxPercent { get; set; }
     }
 }

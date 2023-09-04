@@ -94,7 +94,7 @@ namespace Elsa.Commerce.Core.Model
         [NotFk]
         string VatId { get; }
         string CompanyRegistrationId { get; }
-
+        
         void SetDebugNumber(string nnum);
     }
 }

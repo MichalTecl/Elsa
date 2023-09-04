@@ -17,5 +17,7 @@
         decimal TaxPercent { get; }
 
         string ProductItemWeight { get; }
+        string ErpWarehouseItemCode { get; }
+        string ErpWarehouseItemId { get; }
     }
 }
