@@ -99,6 +99,7 @@
     <Compile Include="Utils\SharedFilesUtil.cs" />
     <Compile Include="Utils\SingleInstanceBlock.cs" />
     <Compile Include="Utils\StringUtil.cs" />
+    <Compile Include="Utils\TlsSetter.cs" />
     <Compile Include="WidgetsController.cs" />
   </ItemGroup>
   <ItemGroup>

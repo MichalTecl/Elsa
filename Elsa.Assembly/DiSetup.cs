@@ -22,6 +22,7 @@ using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Common.XTable;
 using Elsa.Core.Entities.Commerce;
 using Elsa.Integration.Crm.Raynet;
@@ -121,6 +122,8 @@ namespace Elsa.Assembly
             Debug.WriteLine("Initializing ElsaDb");
             ElsaDbInstaller.Initialize(container);
             Debug.WriteLine("ElsaDb initialized");
+
+            TlsSetter.Setup();
         }
     }    
 }
