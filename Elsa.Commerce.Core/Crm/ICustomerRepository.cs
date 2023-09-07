@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Elsa.Commerce.Core.Crm.Model;
 using Elsa.Commerce.Core.Model;
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Crm;
 
 namespace Elsa.Commerce.Core.Crm
@@ -27,5 +28,7 @@ namespace Elsa.Commerce.Core.Crm
         List<string> GetSubscribersToSync(string sourceName);
 
         Dictionary<string, ICustomerGroupType> GetCustomerGroupTypes();
+
+        Dictionary<int, IAddress> GetDistributorDeliveryAddressesIndex();
     }
 }

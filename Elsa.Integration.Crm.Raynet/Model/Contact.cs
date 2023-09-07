@@ -58,11 +58,11 @@
         public int? EmployeesNumber { get; set; }
         public int? LegalForm { get; set; }
         //public string PaymentTerm { get; set; }
-        public int? Turnover { get; set; }
-        public int? EconomyActivity { get; set; }
-        public int? CompanyClassification1 { get; set; }
-        public int? CompanyClassification2 { get; set; }
-        public int? CompanyClassification3 { get; set; }
+        //public int? Turnover { get; set; }
+        //public int? EconomyActivity { get; set; }
+        //public int? CompanyClassification1 { get; set; }
+        //public int? CompanyClassification2 { get; set; }
+        //public int? CompanyClassification3 { get; set; }
         public string RegNumber { get; set; }
         public string TaxNumber { get; set; }
         public string TaxPayer { get; set; }

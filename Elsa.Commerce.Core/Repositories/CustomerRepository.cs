@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Dapper;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Commerce.Core.Crm.Model;
 using Elsa.Commerce.Core.Model;
@@ -13,6 +14,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Crm;
 
 using Robowire.RobOrm.Core;
@@ -533,6 +535,46 @@ namespace Elsa.Commerce.Core.Repositories
         public Dictionary<string, ICustomerGroupType> GetCustomerGroupTypes()
         {
             return m_database.SelectFrom<ICustomerGroupType>().Where(c => c.ProjectId == m_session.Project.Id).Execute().ToDictionary(g => g.ErpGroupName, g => g);
+        }
+
+        public Dictionary<int, IAddress> GetDistributorDeliveryAddressesIndex()
+        {            
+            var result = new Dictionary<int, IAddress>();
+
+            Func<DbDataReader, AddressModel> addressParser = null;
+            m_database.Sql().Call("GetDeliveryAddressesIndex")
+                .WithParam("@projectId", m_session.Project.Id)
+                .ReadRows(reader => {
+                    addressParser = addressParser ?? reader.GetRowParser<AddressModel>(typeof(AddressModel));
+                    var parsed = addressParser(reader);
+
+                    result[parsed.CustomerId] = parsed;
+                });
+
+            return result;
+        }
+
+        private class AddressModel : IAddress
+        {
+            public int CustomerId { get; set; }
+
+            public int Id { get; set; }
+
+            public string CompanyName { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string Country { get; set; }
+            public string Phone { get; set; }
+            public string Note { get; set; }
+            public string Lat { get; set; }
+            public string Lon { get; set; }
+            public string GeoInfo { get; set; }
+            public string GeoQuery { get; set; }
+            public string Street { get; set; }
+            public string DescriptiveNumber { get; set; }
+            public string OrientationNumber { get; set; }
+            public string City { get; set; }
+            public string Zip { get; set; }
         }
     }
 }

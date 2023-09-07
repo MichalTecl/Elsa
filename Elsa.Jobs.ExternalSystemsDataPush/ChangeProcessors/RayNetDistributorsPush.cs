@@ -1,5 +1,7 @@
-﻿using Elsa.Common.Interfaces;
+﻿using Elsa.Commerce.Core.Crm;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Crm;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Integration.Crm.Raynet;
@@ -21,12 +23,14 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
         private readonly IRaynetClient _raynet;
         private readonly IDatabase _db;
         private readonly ISession _session;
+        private readonly ICustomerRepository _customerRepository;
 
-        public RayNetDistributorsPush(IRaynetClient raynet, IDatabase db, ISession session)
+        public RayNetDistributorsPush(IRaynetClient raynet, IDatabase db, ISession session, ICustomerRepository customerRepository)
         {
             _raynet = raynet;
             _db = db;
             this._session = session;
+            _customerRepository = customerRepository;
         }
 
         public string ProcessorUniqueName { get; } = "Raynet_Customers_Push";
@@ -48,8 +52,21 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             yield return e.Country;
             yield return e.GetFormattedStreetAndHouseNr();
 
-            foreach (var c in GetCustomerGroups(e.Id))
-                yield return c;            
+            var rnCats = GetRnCompanyCategories();
+
+            foreach (var c in GetCustomerGroups(e.Id).Where(cg => rnCats.Any(rnCat => cg.Equals(rnCat.Code01, StringComparison.InvariantCultureIgnoreCase))))
+                yield return c;
+
+            var dadr = GetDeliveryAddress(e.Id);
+            if (dadr != null) 
+            {
+                yield return dadr.Street;
+                yield return dadr.DescriptiveNumber;
+                yield return dadr.OrientationNumber;
+                yield return dadr.City;
+                yield return dadr.Zip;
+                yield return dadr.Phone;
+            }
         }
 
         public long GetEntityId(ICustomer ett)
@@ -122,12 +139,23 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             return found;
         }
 
+        private Dictionary<int, IAddress> _deliveryAddresses = null;
+        private IAddress GetDeliveryAddress(int customerId) 
+        {
+            _deliveryAddresses = _deliveryAddresses ?? _customerRepository.GetDistributorDeliveryAddressesIndex();
+
+            if (_deliveryAddresses.TryGetValue(customerId, out var address))
+                return address;
+
+            return null;
+        }
+
         public EntityChunk<ICustomer> LoadChunkToCompare(IDatabase db, int projectId, EntityChunk<ICustomer> previousChunk, int alreadyProcessedRowsCount)
         {
             var data = db.SelectFrom<ICustomer>()
                 .Where(c => c.ProjectId == projectId)
                 .Where(c => c.IsDistributor)
-                .Where(c => c.DisabledDt == null)
+                //.Where(c => c.DisabledDt == null)
                 .OrderBy(c => c.Id)
                 .Skip(alreadyProcessedRowsCount)
                 .Take(100)
@@ -172,7 +200,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                             }                            
                         }
 
-                        var updated = CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), source);
+                        var updated = CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), source);
                         _raynet.UpdateContact(srcId, updated);
                         log.Info($"{e.Entity.Name} updated in RayNet");
                         callback.OnProcessed(e.Entity, srcId.ToString(), null);
@@ -187,7 +215,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
 
         private void InsertRnContact(EntityChangeEvent<ICustomer> e,  ILog log, IEntityProcessCallback<ICustomer> callback)
         {
-            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories()));
+            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id)));
             log.Info($"{e.Entity.Name} inserted to RayNet");
             callback.OnProcessed(e.Entity, resp.Data.Id.ToString(), null);
         }
