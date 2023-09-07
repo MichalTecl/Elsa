@@ -29,7 +29,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
             Country = src.Country;
             MainUserEmail = src.MainUserEmail;
             IsCompany = src.IsCompany;
-            CompanyRegistrationId = src.CompanyId;
+            CompanyRegistrationId = src.CompanyRegId;
 
             if (groupIndex != null)
                 foreach(var g in (src.Groups ?? "").Split(',', ';').Select(g => g.Trim()).Where(g => !string.IsNullOrEmpty(g)).Distinct()) 

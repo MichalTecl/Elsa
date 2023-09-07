@@ -327,7 +327,7 @@ namespace Elsa.Integration.Erp.Flox
             }
             catch (Exception ex)
             {
-                m_log.Error("Proihlaseni k Floxu selhalo", ex);
+                m_log.Error("Prihlaseni k Floxu selhalo", ex);
                 throw;
             }
         }

@@ -27,9 +27,9 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
                 bc.Items.Add(new BcItemModel
                 {
                     ProductCode = item.ProductUid,
-                    Name = item.ProductName,
+                    // Name = item.ProductName,
                     Price = (item.ItemTaxedPrice / item.ItemQuantity) / (1 + (item.ProductTaxPercent / 100m)),
-                    TaxRate = item.ProductTaxPercent,
+                    // TaxRate = item.ProductTaxPercent,
                     Count = item.ItemQuantity,
                     DiscountPercent = order.DiscountPercent                    
                 });

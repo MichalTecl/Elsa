@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
 using Elsa.Common.Logging;
@@ -40,7 +42,13 @@ namespace Elsa.Integration.Crm.Raynet
 
         private HttpClient GetClient()
         {
-            var client = new HttpClient();
+            var client = new HttpClient(new HttpClientHandler { SslProtocols = SslProtocols.Tls12 });
+
+            _log.Info($"ServicePointManager.SecurityProtocol = {ServicePointManager.SecurityProtocol}");
+
+            ServicePointManager.Expect100Continue = true;
+            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
             string authValue = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($"{_userName}:{_apiKey}"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
 

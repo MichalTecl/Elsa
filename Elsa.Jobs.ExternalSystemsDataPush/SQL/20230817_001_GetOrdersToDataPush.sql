@@ -29,14 +29,14 @@ BEGIN
 				   po.OrderStatusId OrderStatusId,	
 				   po.Price OrderPrice,
 				   po.BuyDate,
-				   MAX(COALESCE(c1.RayNetCustomerId, c2.RayNetCustomerId, c3.RayNetCustomerId)) CustomerRayNetId
+				   MAX(/*COALESCE(*/c1.RayNetCustomerId/*, c2.RayNetCustomerId, c3.RayNetCustomerId)*/) CustomerRayNetId
 			  FROM PurchaseOrder po
 			  LEFT JOIN rnCustomers c1 ON (po.CustomerErpUid = c1.ErpUid)
-			  LEFT JOIN rnCustomers c2 ON (LEN(ISNULL(po.VatId, '')) > 0 AND po.VatId = c2.VatId)
-			  LEFT JOIN rnCustomers c3 ON (po.CustomerEmail = c3.Email)
+			  --LEFT JOIN rnCustomers c2 ON (LEN(ISNULL(po.VatId, '')) > 0 AND po.VatId = c2.VatId)
+			  --LEFT JOIN rnCustomers c3 ON (po.CustomerEmail = c3.Email)
 			 WHERE po.OrderStatusId >= 5	   
 			 GROUP BY po.Id, po.OrderNumber, po.OrderStatusId, po.Price, po.BuyDate
-			 HAVING MAX(COALESCE(c1.RayNetCustomerId, c2.RayNetCustomerId, c3.RayNetCustomerId)) IS NOT NULL
+			 HAVING MAX(/*COALESCE(*/c1.RayNetCustomerId/*, c2.RayNetCustomerId, c3.RayNetCustomerId)*/) IS NOT NULL
 			 ORDER BY po.Id
 			 OFFSET @skip ROWS
 			 FETCH NEXT @take ROWS ONLY

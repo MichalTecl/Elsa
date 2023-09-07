@@ -14,6 +14,9 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         [XmlElement("cid")]
         public string CompanyId { get; set; }
 
+        [XmlElement("company_id")]
+        public string CompanyRegId { get; set; }
+
         [XmlElement("email")]
         public string Email { get; set; }
 
