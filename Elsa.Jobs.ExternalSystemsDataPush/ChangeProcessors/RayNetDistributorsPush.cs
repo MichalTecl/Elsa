@@ -73,29 +73,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
         {
             return ett.Id;
         }
-
-        private List<Contact> _rncontacts = null;
-        private List<Contact> GetRnContacts()
-        {
-            if (_rncontacts == null) 
-            {
-                var lst = new List<Contact>();
-                while (true)
-                {
-                    var resp = _raynet.GetContacts(lst.Count, 100);
-                    lst.AddRange(resp.Data);
-
-                    if (resp.Data.Count < 100)
-                        break;
-                }
-
-                _rncontacts = lst;
-            }
-
-            return _rncontacts;
-        }
-
-
+                
         private List<CompanyCategory> _rnCategories = null;
         private List<CompanyCategory> GetRnCompanyCategories() 
         {

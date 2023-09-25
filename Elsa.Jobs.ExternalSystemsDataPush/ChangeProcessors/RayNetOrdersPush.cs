@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using Elsa.Jobs.ExternalSystemsDataPush.Mappers;
+using Elsa.Integration.Crm.Raynet.Model;
 
 namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
 {
@@ -21,7 +22,18 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
         private readonly IRaynetClient _raynet;
         private readonly IDatabase _db;
         private readonly ISession _session;
-                
+
+        private List<ProductListItem> _productList = null;
+        public List<ProductListItem> GetProductList()
+        {
+            if (_productList == null)
+            {
+                _productList = _raynet.GetProductList().Data;
+            }
+
+            return _productList;
+        }
+
         public RayNetOrdersPush(IRaynetClient raynet, IDatabase db, ISession session)
         {
             _raynet = raynet;
@@ -30,20 +42,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
         }
 
         public string ProcessorUniqueName { get; } = "Raynet_Orders_Push";
-
-        public IEnumerable<object> GetComparedValues(IPurchaseOrder e)
-        {
-            yield return e.OrderStatusId;
-            yield return e.PriceWithVat;
-
-            foreach(var i in e.Items)
-            {
-                yield return i.ErpProductId;
-                yield return i.Quantity;
-                yield return i.TaxedPrice;
-            }
-        }
-
+                
         public IEnumerable<object> GetComparedValues(OrderExportModel e)
         {
             yield return e.OrderStatusId;
@@ -98,10 +97,17 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                             log.Info($"Order {orderEvent.Entity.OrderNr} is not sent to RN due to unsuccessful status");
                             continue; // shouldnt send unsuccessful orders
                         }
-
+                                                
                         log.Info($"Order {orderEvent.Entity.OrderNr} is successfuly finished -> sending to RN");
 
-                        var businessCase = OrderMapper.ToBcModel(orderEvent.Entity);
+                        var businessCase = OrderMapper.ToBcModel(orderEvent.Entity, GetProductList(), log);
+                        if (businessCase == null) 
+                        {
+                            log.Info($"It was not possible to map {orderEvent.Entity.OrderNr} -> skipping sending to RN");
+                            continue;
+                        }
+
+
                         var response = _raynet.CreateBusinessCase(businessCase);
                         callback.OnProcessed(orderEvent.Entity, response.Data.Id.ToString(), null);
                     }
