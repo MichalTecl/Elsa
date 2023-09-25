@@ -186,22 +186,19 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                             continue;
                         }
 
-                        var source = GetRnContacts().FirstOrDefault(c => c.Id == srcId);
+                        var source = _raynet.GetContactDetail(srcId)?.Data;
                         if (source == null) 
                         {
-                            _rncontacts = null;
-                            source = GetRnContacts().FirstOrDefault(c => c.Id == srcId);
-
-                            if (source == null) 
-                            {
-                                log.Error($"Cannot find source Contact by RayNet_ID={srcId} - considering inserting the contact instead of UPDATE");
-                                InsertRnContact(e, log, callback);
-                                continue;
-                            }                            
-                        }
+                            log.Error($"Cannot find source Contact by RayNet_ID={srcId} - considering inserting the contact instead of UPDATE");
+                            InsertRnContact(e, log, callback);
+                            continue;
+                        }                            
 
                         var updated = CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), source);
                         _raynet.UpdateContact(srcId, updated);
+
+                        UpdateClientAddresses(updated, log);
+
                         log.Info($"{e.Entity.Name} updated in RayNet");
                         callback.OnProcessed(e.Entity, srcId.ToString(), null);
                     }                    
@@ -211,6 +208,28 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                     log.Error($"Attempt to push a client to RayNet failed: {ex.Message}", ex);                        
                 }                   
             }            
+        }
+
+        private void UpdateClientAddresses(Contact updated, ILog log)
+        {
+            var current = _raynet.GetContactDetail(updated.Id.Value);
+
+            foreach(var addressToSave in updated.Addresses.Where(a => a.Address.Name == CustomerMapper.DELIVERY_ADDRESS_NAME || a.Address.Name == CustomerMapper.PRIMARY_ADDRESS_NAME)) 
+            {
+                var existingAddress = current.Data.Addresses.FirstOrDefault(a => a.Address.Name == addressToSave.Address.Name);
+                if (existingAddress == null) 
+                {
+                    log.Info($"Adding address {addressToSave.Address.Name} to customer {updated.Id} {updated.Name}");
+                    _raynet.AddContactAddress(updated.Id.Value, addressToSave);
+                    log.Info($"Added address {addressToSave.Address.Name} to customer {updated.Id} {updated.Name}");
+                }
+                else if(!existingAddress.IsSameAs(addressToSave))
+                {
+                    log.Info($"Updating address {addressToSave.Address.Name} for customer {updated.Id} {updated.Name}");
+                    _raynet.UpdateContactAddress(updated.Id.Value, existingAddress.Id.Value, existingAddress);
+                    log.Info($"Updated address {addressToSave.Address.Name} for customer {updated.Id} {updated.Name}");
+                }
+            }
         }
 
         private void InsertRnContact(EntityChangeEvent<ICustomer> e,  ILog log, IEntityProcessCallback<ICustomer> callback)

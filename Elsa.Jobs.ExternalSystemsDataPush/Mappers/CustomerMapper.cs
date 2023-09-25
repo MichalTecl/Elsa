@@ -9,9 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
-{
+{    
     internal static class CustomerMapper
     {
+        public const string PRIMARY_ADDRESS_NAME = "Sídlo klienta";
+        public const string DELIVERY_ADDRESS_NAME = "Poslední doručovací adresa";
+
         public static Contact ToRaynetContact(ICustomer customer, IEnumerable<string> customerGroups, IEnumerable<CompanyCategory> categories, IAddress deliveryAddress, Contact target = null) 
         {
             target = target ?? new Contact();
@@ -25,20 +28,21 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
 
             target.Addresses = new List<AddressBucket>();
 
-            target.Addresses.Add(ToAddressBucket(string.IsNullOrWhiteSpace(customer.CompanyName) ? target.Name : customer.CompanyName, customer, customer.Phone, customer.Email));
+            target.Addresses.Add(ToAddressBucket(PRIMARY_ADDRESS_NAME, customer, customer.Phone, customer.Email, isPrimary: true));
                         
             if (deliveryAddress != null) 
             {
-                target.Addresses.Add(ToAddressBucket("Poslední doručovací adresa", deliveryAddress, deliveryAddress.Phone, customer.MainUserEmail));
+                target.Addresses.Add(ToAddressBucket(DELIVERY_ADDRESS_NAME, deliveryAddress, deliveryAddress.Phone, customer.MainUserEmail, isPrimary: false));
             }
                         
             return target;
         }
 
-        private static AddressBucket ToAddressBucket(string name, IPostalAddress src, string phone, string email) 
+        private static AddressBucket ToAddressBucket(string name, IPostalAddress src, string phone, string email, bool isPrimary) 
         {
             var bucket = new AddressBucket
             {
+                Primary = isPrimary,
                 Address = new Address
                 {
                     Name = name,

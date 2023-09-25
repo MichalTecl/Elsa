@@ -50,5 +50,26 @@ namespace Elsa.Integration.Crm.Raynet
         {
             return _protocol.Call<RnResponse>(HttpMethod.Post, $"https://app.raynet.cz/api/v2/businessCase/{businessCaseId}/{(isValid ? "valid" : "invalid")}");
         }
+
+        public RnResponse<Contact> GetContactDetail(long contactId)
+        {
+            return _protocol.Call<RnResponse<Contact>>(HttpMethod.Get, $"https://app.raynet.cz/api/v2/company/{contactId}/");
+        }
+
+        public RnResponse<IdResponse> AddContactAddress(long contactId, AddressBucket address)
+        {
+            return _protocol.Call<RnResponse<IdResponse>>(HttpMethod.Put, $"https://app.raynet.cz/api/v2/company/{contactId}/address/", payload: address);
+        }
+
+        public RnResponse<IdResponse> UpdateContactAddress(long contactId, long addressId, AddressBucket address)
+        {
+            address.Id = addressId;
+            return _protocol.Call<RnResponse<IdResponse>>(HttpMethod.Post, $"https://app.raynet.cz/api/v2/company/{contactId}/address/{addressId}/", payload: address);
+        }
+
+        public RnResponse<List<ProductListItem>> GetProductList()
+        {
+            return _protocol.Call<RnResponse<List<ProductListItem>>>(HttpMethod.Get, "https://app.raynet.cz/api/v2/product/");
+        }
     }
 }

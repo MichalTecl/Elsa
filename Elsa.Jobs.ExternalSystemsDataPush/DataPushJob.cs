@@ -22,7 +22,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush
         public void Run(string customDataJson)
         {
             Run<ICustomer, RayNetDistributorsPush>();
-            Run<OrderExportModel, RayNetOrdersPush>();
+            //Run<OrderExportModel, RayNetOrdersPush>();
         }
 
         private void Run<TEntity, TProcessor>() where TProcessor : IEntityChangeProcessor<TEntity>

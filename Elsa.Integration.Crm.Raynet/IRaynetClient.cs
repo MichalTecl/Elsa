@@ -11,5 +11,9 @@ namespace Elsa.Integration.Crm.Raynet
         RnResponse<List<CompanyCategory>> GetCompanyCategories();
         RnResponse<IdResponse> CreateBusinessCase(BusinessCaseModel bc);
         RnResponse ChangeBcValidity(long bcId, bool isValid);
+        RnResponse<Contact> GetContactDetail(long contactId);
+        RnResponse<IdResponse> AddContactAddress(long contactId, AddressBucket address);
+        RnResponse<IdResponse> UpdateContactAddress(long contactId, long addressId, AddressBucket address);
+        RnResponse<List<ProductListItem>> GetProductList();
     }
 }

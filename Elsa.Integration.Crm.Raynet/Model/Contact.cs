@@ -9,9 +9,27 @@
     {
         public long? Id { get; set; }
 
+        public bool? Primary { get; set; }
+
         public Address Address { get; set; }
 
         public ContactInfo ContactInfo { get; set; }
+
+        public bool IsSameAs(AddressBucket addressToSave)
+        {
+            return (addressToSave != null)
+                && (addressToSave.Primary == Primary)
+                && (addressToSave.ContactInfo?.Email == ContactInfo?.Email)
+                && (addressToSave.ContactInfo?.Tel1 == ContactInfo?.Tel1)
+                && (addressToSave.Address != null)
+                && (Address != null)
+                && (addressToSave.Address.Name == Address.Name)
+                && (addressToSave.Address.Street == Address.Street)
+                && (addressToSave.Address.City == Address.City)
+                && (addressToSave.Address.Province == Address.Province)
+                && (addressToSave.Address.ZipCode == Address.ZipCode)
+                && (addressToSave.Address.Country == Address.Country);
+        }
     }
 
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
