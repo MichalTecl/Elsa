@@ -14,6 +14,7 @@ using Elsa.Apps.CommonData;
 using Elsa.Apps.Inventory;
 using Elsa.Apps.InvoiceForms;
 using Elsa.Apps.Invoices;
+using Elsa.Apps.ProductionPlanner;
 using Elsa.Apps.ProductionService;
 using Elsa.Apps.Reporting;
 using Elsa.Apps.ScheduledJobs;
@@ -111,6 +112,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(DataPushRegistry).Assembly);
                     s.ScanAssembly(typeof(EntityChangeProcessingRegistry).Assembly);
                     s.ScanAssembly(typeof(RaynetClientRegistry).Assembly);
+                    s.ScanAssembly(typeof(ProductionPlannerRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 

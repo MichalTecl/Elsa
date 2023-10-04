@@ -26,12 +26,14 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly IDatabase m_database;
         private readonly ISession m_session;
         private readonly ILog m_log;
+        private readonly ICache m_cache;
 
-        public CustomerRepository(IDatabase database, ISession session, ILog log)
+        public CustomerRepository(IDatabase database, ISession session, ILog log, ICache cache)
         {
             m_database = database;
             m_session = session;
             m_log = log;
+            m_cache = cache;
         }
 
         public void SyncCustomers(IEnumerable<IErpCustomerModel> source)
@@ -341,7 +343,7 @@ namespace Elsa.Commerce.Core.Repositories
                 trg.ErpUid = src.ErpCustomerId;
                 changed = true;
             }
-
+                        
             if (changed)
             {
                 trg.LastImportDt = DateTime.Now;
@@ -372,6 +374,8 @@ namespace Elsa.Commerce.Core.Repositories
                 m_database.Delete(toDelete);
                 m_log.Info($"Customer {trg.Name} removed from group {toDelete.ErpGroupName}");
             }
+
+            SaveCustomerSalesRep(trg.Id, src.SalesRepresentativeEmail);
         }
 
         private string GetNick(ICustomer trg)
@@ -554,6 +558,59 @@ namespace Elsa.Commerce.Core.Repositories
             return result;
         }
 
+        public Dictionary<int, string> GetCustomerSalesRepresentativeEmailIndex()
+        {
+            return m_cache.ReadThrough(GetSalesRepIndexCacheKey(), TimeSpan.FromMinutes(10), () =>
+            {
+                var result = new Dictionary<int, string>();
+
+                m_database.Sql().ExecuteWithParams(@"SELECT c.Id CustomerId, sr.NameInErp
+                                              FROM Customer c
+                                              JOIN SalesRepCustomer src ON (c.Id = src.CustomerId)
+                                              JOIN SalesRepresentative   sr ON (src.SalesRepId = sr.Id)
+                                             WHERE src.ValidFrom < GETDATE()
+                                               AND ((src.ValidTo IS NULL) OR (src.ValidTo > GETDATE()))
+                                               AND c.ProjectId = {0}", m_session.Project.Id)
+                    .ReadRows<int, string>(
+                    (cid, email) => result[cid] = email);
+
+                return result;
+            });
+        }
+
+        public void SaveCustomerSalesRep(int customerId, string salesRepEmail)
+        {
+            if (string.IsNullOrWhiteSpace(salesRepEmail))
+                salesRepEmail = null;
+
+            var index = GetCustomerSalesRepresentativeEmailIndex();
+
+            if (index.TryGetValue(customerId, out var existingSrep)) 
+            {
+                if (existingSrep.Equals(salesRepEmail, StringComparison.InvariantCultureIgnoreCase))
+                    return;
+            }
+            else if (salesRepEmail == null) 
+            {
+                return;
+            }
+                                    
+            //SaveCustomerSalesRep(@projectId INT, @userId INT, @customerId INT, @salesRepEmail nvarchar(100))
+            var existing = m_database.Sql().Call("SaveCustomerSalesRep")
+                .WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@userId", m_session.User.Id)
+                .WithParam("@customerId", customerId)
+                .WithParam("@salesRepEmail", salesRepEmail)
+                .NonQuery();
+
+            m_cache.Remove(GetSalesRepIndexCacheKey());
+        }
+
+        private string GetSalesRepIndexCacheKey() 
+        {
+            return $"customerSRepIndex_{m_session.Project.Id}";
+        }
+                
         private class AddressModel : IAddress
         {
             public int CustomerId { get; set; }
@@ -575,6 +632,7 @@ namespace Elsa.Commerce.Core.Repositories
             public string OrientationNumber { get; set; }
             public string City { get; set; }
             public string Zip { get; set; }
-        }
+        }       
+
     }
 }

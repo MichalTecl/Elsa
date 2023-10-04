@@ -30,5 +30,9 @@ namespace Elsa.Commerce.Core.Crm
         Dictionary<string, ICustomerGroupType> GetCustomerGroupTypes();
 
         Dictionary<int, IAddress> GetDistributorDeliveryAddressesIndex();
+
+        Dictionary<int, string> GetCustomerSalesRepresentativeEmailIndex();
+
+        void SaveCustomerSalesRep(int customerId, string salesRepEmail);
     }
 }

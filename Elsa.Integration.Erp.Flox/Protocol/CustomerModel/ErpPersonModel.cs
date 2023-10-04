@@ -30,6 +30,8 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
             MainUserEmail = src.MainUserEmail;
             IsCompany = src.IsCompany;
             CompanyRegistrationId = src.CompanyRegId;
+            SalesRepresentativeEmail = src.SalesRepresentativeEmail;
+            
 
             if (groupIndex != null)
                 foreach(var g in (src.Groups ?? "").Split(',', ';').Select(g => g.Trim()).Where(g => !string.IsNullOrEmpty(g)).Distinct()) 
@@ -84,6 +86,8 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 
         public bool IsDisabled { get; }
         public string CompanyRegistrationId { get; }
+
+        public string SalesRepresentativeEmail { get; }
 
         private static string NormalizePhoneNumber(string srcPhone)
         {

@@ -41,5 +41,7 @@ namespace Elsa.Commerce.Core.Model
         bool IsCompany { get; }
 
         bool IsDisabled { get; }
+
+        string SalesRepresentativeEmail { get; }
     }
 }

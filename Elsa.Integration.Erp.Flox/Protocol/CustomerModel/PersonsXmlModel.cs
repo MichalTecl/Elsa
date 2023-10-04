@@ -65,6 +65,9 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         [XmlElement("main_user")]
         public string MainUserEmail { get; set; }
         public bool IsCompany { get; set; }
+
+        [XmlElement("main_salesrep")]
+        public string SalesRepresentativeEmail { get; set; }
     }
 
     [XmlRoot("persons")]

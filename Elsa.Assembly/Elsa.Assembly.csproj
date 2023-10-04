@@ -131,6 +131,10 @@
       <Project>{6FCEA8AB-D629-468E-B0D2-C7F006AF41A0}</Project>
       <Name>Elsa.Apps.Invoices</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Apps.ProductionPlanner\Elsa.Apps.ProductionPlanner.csproj">
+      <Project>{138776EF-39A5-422D-BCA2-8BAA59691BA7}</Project>
+      <Name>Elsa.Apps.ProductionPlanner</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Apps.ProductionService\Elsa.Apps.ProductionService.csproj">
       <Project>{4ECA9E43-64D4-49CD-B9C2-205316C0E7B1}</Project>
       <Name>Elsa.Apps.ProductionService</Name>

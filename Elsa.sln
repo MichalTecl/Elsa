@@ -163,13 +163,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Jobs.DbMaintenance", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Apps.Reporting", "Elsa.Apps.Reporting\Elsa.Apps.Reporting.csproj", "{AF048602-B9A5-4464-9F6D-3D3A4FDF55FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.ExternalSystemsDataPush", "Elsa.Jobs.ExternalSystemsDataPush\Elsa.Jobs.ExternalSystemsDataPush.csproj", "{A8267D1B-E60A-4473-90FF-8346B9E3D0B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Jobs.ExternalSystemsDataPush", "Elsa.Jobs.ExternalSystemsDataPush\Elsa.Jobs.ExternalSystemsDataPush.csproj", "{A8267D1B-E60A-4473-90FF-8346B9E3D0B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.Common.EntityChangeProcessing", "Elsa.Jobs.Common.EntityChangeProcessing\Elsa.Jobs.Common.EntityChangeProcessing.csproj", "{7096841A-6EC7-4D85-9313-BA57A6660E49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Jobs.Common.EntityChangeProcessing", "Elsa.Jobs.Common.EntityChangeProcessing\Elsa.Jobs.Common.EntityChangeProcessing.csproj", "{7096841A-6EC7-4D85-9313-BA57A6660E49}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Crm", "Crm", "{E27209BE-4BCF-45AD-BE00-9F96215DCEA4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Integration.Crm.Raynet", "Elsa.Integration.Crm.Raynet\Elsa.Integration.Crm.Raynet.csproj", "{B3CA26E9-83BA-4752-AA9C-274FEFF325F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Integration.Crm.Raynet", "Elsa.Integration.Crm.Raynet\Elsa.Integration.Crm.Raynet.csproj", "{B3CA26E9-83BA-4752-AA9C-274FEFF325F6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Apps.ProductionPlanner", "Elsa.Apps.ProductionPlanner\Elsa.Apps.ProductionPlanner.csproj", "{138776EF-39A5-422D-BCA2-8BAA59691BA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.ProductionPlannerDataGeneration", "Elsa.Jobs.ProductionPlannerDataGeneration\Elsa.Jobs.ProductionPlannerDataGeneration.csproj", "{2F3B5FD7-40C1-44DA-B641-5A6966CEB896}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiClientBuilder", "ApiClientBuilder", "{E1D68FD5-5D39-4E6F-AF6B-5015BFB1BD77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mtecl.ApiClientBuilder", "Mtecl.ApiClientBuilder\Mtecl.ApiClientBuilder.csproj", "{077E228B-BB51-48E8-B2D9-36FB0C2A31CB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Marketing", "Marketing", "{E812F077-3E95-4C82-BB55-EA4AE8889491}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Integration.SmartEmailing", "Elsa.Integration.SmartEmailing\Elsa.Integration.SmartEmailing.csproj", "{862BA13B-C84C-41A9-AC91-61C49DAF0A9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -433,6 +445,22 @@ Global
 		{B3CA26E9-83BA-4752-AA9C-274FEFF325F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3CA26E9-83BA-4752-AA9C-274FEFF325F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3CA26E9-83BA-4752-AA9C-274FEFF325F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{138776EF-39A5-422D-BCA2-8BAA59691BA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{138776EF-39A5-422D-BCA2-8BAA59691BA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{138776EF-39A5-422D-BCA2-8BAA59691BA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{138776EF-39A5-422D-BCA2-8BAA59691BA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F3B5FD7-40C1-44DA-B641-5A6966CEB896}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F3B5FD7-40C1-44DA-B641-5A6966CEB896}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F3B5FD7-40C1-44DA-B641-5A6966CEB896}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F3B5FD7-40C1-44DA-B641-5A6966CEB896}.Release|Any CPU.Build.0 = Release|Any CPU
+		{077E228B-BB51-48E8-B2D9-36FB0C2A31CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{077E228B-BB51-48E8-B2D9-36FB0C2A31CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{077E228B-BB51-48E8-B2D9-36FB0C2A31CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{077E228B-BB51-48E8-B2D9-36FB0C2A31CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{862BA13B-C84C-41A9-AC91-61C49DAF0A9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{862BA13B-C84C-41A9-AC91-61C49DAF0A9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{862BA13B-C84C-41A9-AC91-61C49DAF0A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{862BA13B-C84C-41A9-AC91-61C49DAF0A9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -513,6 +541,12 @@ Global
 		{7096841A-6EC7-4D85-9313-BA57A6660E49} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
 		{E27209BE-4BCF-45AD-BE00-9F96215DCEA4} = {A188EE1B-B81C-4698-B872-CB072E73525D}
 		{B3CA26E9-83BA-4752-AA9C-274FEFF325F6} = {E27209BE-4BCF-45AD-BE00-9F96215DCEA4}
+		{138776EF-39A5-422D-BCA2-8BAA59691BA7} = {456527A3-2BE8-4010-8AC6-187539CE484D}
+		{2F3B5FD7-40C1-44DA-B641-5A6966CEB896} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
+		{E1D68FD5-5D39-4E6F-AF6B-5015BFB1BD77} = {9A3EA0C7-2DD3-4A32-ADED-527F45DC0526}
+		{077E228B-BB51-48E8-B2D9-36FB0C2A31CB} = {E1D68FD5-5D39-4E6F-AF6B-5015BFB1BD77}
+		{E812F077-3E95-4C82-BB55-EA4AE8889491} = {A188EE1B-B81C-4698-B872-CB072E73525D}
+		{862BA13B-C84C-41A9-AC91-61C49DAF0A9D} = {E812F077-3E95-4C82-BB55-EA4AE8889491}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}
