@@ -72,9 +72,9 @@
         public string Role { get; set; } = "A_SUBSCRIBER";
         public string Notice { get; set; }
         public IdContainer Category { get; set; }
-        public int? ContactSource { get; set; }
-        public int? EmployeesNumber { get; set; }
-        public int? LegalForm { get; set; }
+        //public int? ContactSource { get; set; }
+        //public int? EmployeesNumber { get; set; }
+        //public int? LegalForm { get; set; }
         //public string PaymentTerm { get; set; }
         //public int? Turnover { get; set; }
         //public int? EconomyActivity { get; set; }
@@ -89,6 +89,7 @@
         //public List<string> Tags { get; set; }
         //public CustomFields CustomFields { get; set; }
     }
+    
 
 }
 

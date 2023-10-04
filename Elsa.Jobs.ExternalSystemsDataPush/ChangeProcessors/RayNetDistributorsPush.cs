@@ -1,4 +1,5 @@
 ﻿using Elsa.Commerce.Core.Crm;
+using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common;
@@ -24,13 +25,17 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
         private readonly IDatabase _db;
         private readonly ISession _session;
         private readonly ICustomerRepository _customerRepository;
+        private readonly ILog _log;
+        private readonly ICache _cache;
 
-        public RayNetDistributorsPush(IRaynetClient raynet, IDatabase db, ISession session, ICustomerRepository customerRepository)
+        public RayNetDistributorsPush(IRaynetClient raynet, IDatabase db, ISession session, ICustomerRepository customerRepository, ILog log, ICache cache)
         {
             _raynet = raynet;
             _db = db;
             this._session = session;
             _customerRepository = customerRepository;
+            _log = log;
+            _cache = cache;
         }
 
         public string ProcessorUniqueName { get; } = "Raynet_Customers_Push";
@@ -67,6 +72,10 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                 yield return dadr.Zip;
                 yield return dadr.Phone;
             }
+
+            var srepIndex = _customerRepository.GetCustomerSalesRepresentativeEmailIndex();
+            if (srepIndex.TryGetValue(e.Id, out var srepEmail))
+                yield return srepEmail;
         }
 
         public long GetEntityId(ICustomer ett)
@@ -172,7 +181,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                             continue;
                         }                            
 
-                        var updated = CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), source);
+                        var updated = CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), GetOwnerId(e.Entity.Id), source);
                         _raynet.UpdateContact(srcId, updated);
 
                         UpdateClientAddresses(updated, log);
@@ -212,9 +221,41 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
 
         private void InsertRnContact(EntityChangeEvent<ICustomer> e,  ILog log, IEntityProcessCallback<ICustomer> callback)
         {
-            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id)));
+            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), GetOwnerId(e.Entity.Id)));
             log.Info($"{e.Entity.Name} inserted to RayNet");
             callback.OnProcessed(e.Entity, resp.Data.Id.ToString(), null);
+        }
+
+        private long? GetOwnerId(int elsaCustomerId) 
+        {
+            var index = _customerRepository.GetCustomerSalesRepresentativeEmailIndex();
+
+            if(!index.TryGetValue(elsaCustomerId, out var srepEmail) || string.IsNullOrWhiteSpace(srepEmail))
+            {
+                _log.Info($"No SalesRepresentative found for userId={elsaCustomerId}");
+                return null;
+            }
+
+            var rnPerson = _cache.ReadThrough($"raynet_person{_session.Project.Id}{srepEmail}", TimeSpan.FromMinutes(1), () => 
+            {
+                var persons = _raynet.GetPersons(srepEmail).Data;
+                
+                if (persons.Count == 0) 
+                {
+                    _log.Error($"V RayNetu není osoba s e-mailem '{srepEmail}'");
+                    return null;
+                }
+
+                var sr = persons.OrderBy(p => p.Id).First();
+                if (persons.Count > 1) 
+                {
+                    _log.Error($"V RayNetu je {persons.Count} osob s e-mailem '{srepEmail}'. Jako OZ zvolen zaznam s ID={sr.Id}");                    
+                }
+
+                return sr;
+            });
+
+            return rnPerson?.Id;
         }
     }
 }

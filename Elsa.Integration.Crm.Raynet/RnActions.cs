@@ -71,5 +71,10 @@ namespace Elsa.Integration.Crm.Raynet
         {
             return _protocol.Call<RnResponse<List<ProductListItem>>>(HttpMethod.Get, "https://app.raynet.cz/api/v2/product/");
         }
+
+        public RnResponse<List<PersonInfo>> GetPersons(string email)
+        {
+            return _protocol.Call<RnResponse<List<PersonInfo>>>(HttpMethod.Get, $"https://app.raynet.cz/api/v2/person/?contactInfo.email[LIKE_NOCASE]={email}%");
+        }
     }
 }

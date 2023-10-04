@@ -15,5 +15,6 @@ namespace Elsa.Integration.Crm.Raynet
         RnResponse<IdResponse> AddContactAddress(long contactId, AddressBucket address);
         RnResponse<IdResponse> UpdateContactAddress(long contactId, long addressId, AddressBucket address);
         RnResponse<List<ProductListItem>> GetProductList();
+        RnResponse<List<PersonInfo>> GetPersons(string email);
     }
 }
