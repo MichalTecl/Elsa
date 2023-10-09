@@ -43,10 +43,10 @@
         public string Province { get; set; }
         public string ZipCode { get; set; }
         public string Country { get; set; }
-        //public double Lat { get; set; }
-        //public double Lng { get; set; }
+        public double? Lat { get; set; }
+        public double? Lng { get; set; }
         public ContactInfo ContactInfo { get; set; }
-        //public int Territory { get; set; }
+        public int Territory { get; set; }
     }
 
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
@@ -54,42 +54,58 @@
     {
         public string Email { get; set; }
         public string Tel1 { get; set; }
-        //public string Tel1Type { get; set; }
-        //public string Www { get; set; }
-        //public bool DoNotSendMM { get; set; }
+        public string Tel1Type { get; set; }
+        public string Www { get; set; }
+        public bool DoNotSendMM { get; set; }
+    }
+
+    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
+    public class ContactDetail : Contact
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string TitleBefore { get; set; }
+        public string TitleAfter { get; set; }
+        public string Salutation { get; set; }
+        public IdContainer EmployeesNumber { get; set; }
+        public IdContainer LegalForm { get; set; }
+        public IdContainer PaymentTerm { get; set; }
+        public IdContainer Turnover { get; set; }
+        public IdContainer EconomyActivity { get; set; }
+        public IdContainer CompanyClassification1 { get; set; }
+        public IdContainer CompanyClassification2 { get; set; }
+        public IdContainer CompanyClassification3 { get; set; }
+        public string BankAccount { get; set; }
+        public string Databox { get; set; }
+        public string Court { get; set; }
+        public string Birthday { get; set; }
+        public List<AddressBucket> Addresses { get; set; }
+        public List<string> Tags { get; set; }
+        public Dictionary<string, object> CustomFields { get; set; }
+        public Dictionary<string, string> SocialNetworkContact { get; set; }
+        public IdContainer SecurityLevel { get; set; }
+        public IdContainer OriginLead { get; set; }
     }
 
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public class Contact
     {
         public long? Id { get; set; }
-
-        public bool Person { get; set; } = false;
         public string Name { get; set; }
+        public bool Person { get; set; } = false;
         public IdContainer Owner { get; set; }
         public string Rating { get; set; } = "A";
         public string State { get; set; } = "B_ACTUAL";
         public string Role { get; set; } = "A_SUBSCRIBER";
         public string Notice { get; set; }
         public IdContainer Category { get; set; }
-        //public int? ContactSource { get; set; }
-        //public int? EmployeesNumber { get; set; }
-        //public int? LegalForm { get; set; }
-        //public string PaymentTerm { get; set; }
-        //public int? Turnover { get; set; }
-        //public int? EconomyActivity { get; set; }
-        //public int? CompanyClassification1 { get; set; }
-        //public int? CompanyClassification2 { get; set; }
-        //public int? CompanyClassification3 { get; set; }
+        public IdContainer ContactSource { get; set; }
         public string RegNumber { get; set; }
         public string TaxNumber { get; set; }
+        public string TaxNumber2 { get; set; }
         public string TaxPayer { get; set; }
-        public string BankAccount { get; set; }
-        public List<AddressBucket> Addresses { get; set; }
-        //public List<string> Tags { get; set; }
-        //public CustomFields CustomFields { get; set; }
     }
-    
+
 
 }
 

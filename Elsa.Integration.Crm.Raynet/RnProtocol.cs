@@ -43,9 +43,7 @@ namespace Elsa.Integration.Crm.Raynet
         private HttpClient GetClient()
         {
             var client = new HttpClient(new HttpClientHandler { SslProtocols = SslProtocols.Tls12 });
-
-            _log.Info($"ServicePointManager.SecurityProtocol = {ServicePointManager.SecurityProtocol}");
-
+                        
             ServicePointManager.Expect100Continue = true;
             //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -99,7 +97,7 @@ namespace Elsa.Integration.Crm.Raynet
 
                                 _log.SaveRequestProtocol($"ERROR {method.Method}", url, payloadJson ?? "", responseJson ?? "");
 
-                                throw new Exception(errMessage);
+                                throw new RaynetException(errMessage);
                             }
 
                             Console.WriteLine($"RESPONSE: {responseJson}");

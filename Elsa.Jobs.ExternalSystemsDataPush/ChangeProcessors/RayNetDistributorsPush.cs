@@ -62,6 +62,10 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             foreach (var c in GetCustomerGroups(e.Id).Where(cg => rnCats.Any(rnCat => cg.Equals(rnCat.Code01, StringComparison.InvariantCultureIgnoreCase))))
                 yield return c;
 
+            var srepIndex = _customerRepository.GetCustomerSalesRepresentativeEmailIndex();
+            if (srepIndex.TryGetValue(e.Id, out var srepEmail))
+                yield return srepEmail;
+
             var dadr = GetDeliveryAddress(e.Id);
             if (dadr != null) 
             {
@@ -71,11 +75,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                 yield return dadr.City;
                 yield return dadr.Zip;
                 yield return dadr.Phone;
-            }
-
-            var srepIndex = _customerRepository.GetCustomerSalesRepresentativeEmailIndex();
-            if (srepIndex.TryGetValue(e.Id, out var srepEmail))
-                yield return srepEmail;
+            }            
         }
 
         public long GetEntityId(ICustomer ett)
@@ -158,37 +158,29 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             {
                 log.Info($"Processing changed Customer Id={e.Entity.Id}, Name={e.Entity.Name ?? e.Entity.Email}");
 
+                string extId = null;
+
                 try 
                 {
-                    if (e.IsNew) 
+                    var existing = TryLoadExistingCustomer(e);
+
+                    if (existing == null)
                     {
-                        InsertRnContact(e, log, callback);
+                        extId = InsertRnContact(e, log, callback);
+                        log.Info($"{e.Entity.Name} inserted to RayNet");
                     }
-                    else 
+                    else
                     {
-                        if(!long.TryParse(e.ExternalId, out var srcId))
-                        {
-                            log.Error($"Cannot parse ExternalId=\"{e.ExternalId}\" as long - considering inserting the contact instead of UPDATE");
-                            InsertRnContact(e, log, callback);
-                            continue;
-                        }
-
-                        var source = _raynet.GetContactDetail(srcId)?.Data;
-                        if (source == null) 
-                        {
-                            log.Error($"Cannot find source Contact by RayNet_ID={srcId} - considering inserting the contact instead of UPDATE");
-                            InsertRnContact(e, log, callback);
-                            continue;
-                        }                            
-
-                        var updated = CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), GetOwnerId(e.Entity.Id), source);
-                        _raynet.UpdateContact(srcId, updated);
+                        var updated = CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), GetContactSourceId(e.Entity.Id), existing);
+                        _raynet.UpdateContact(existing.Id.Value, updated);
 
                         UpdateClientAddresses(updated, log);
 
                         log.Info($"{e.Entity.Name} updated in RayNet");
-                        callback.OnProcessed(e.Entity, srcId.ToString(), null);
-                    }                    
+                        extId = existing.Id.ToString();
+                    }
+
+                    callback.OnProcessed(e.Entity, extId, null);                                        
                 }
                 catch(Exception ex) 
                 {
@@ -197,7 +189,69 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             }            
         }
 
-        private void UpdateClientAddresses(Contact updated, ILog log)
+        private ContactDetail TryLoadExistingCustomer(EntityChangeEvent<ICustomer> e)
+        {
+            if (!e.IsNew)
+            {
+                if (!long.TryParse(e.ExternalId, out var srcId))
+                {
+                    _log.Error($"Cannot parse ExternalId=\"{e.ExternalId}\" as long");
+                }
+                else
+                {
+                    try
+                    {
+                        var byId = _raynet.GetContactDetail(srcId);
+                        if (byId.Data != null)
+                            return byId.Data;
+                    }
+                    catch (RaynetException ex)
+                    {
+                        _log.Error($"Failed to get Raynet contact by Id={srcId}", ex);
+                    }
+                }          
+            }
+
+            var ids = new List<long>();
+
+            ids.AddRange(_raynet.GetContacts(regNumber: e.Entity.CompanyRegistrationId).Data.Select(d => d.Id.Value));
+            
+            if (!ids.Any())
+                ids.AddRange(_raynet.GetContacts(name: e.Entity.Name).Data.Select(d => d.Id.Value));
+
+            if(!ids.Any())
+                ids.AddRange(_raynet.GetContacts(fulltext: e.Entity.Name).Data.Select(d => d.Id.Value));
+
+            if (ids.Any())
+            {
+                _log.Error($"Unexpectedly found client in Raynet which was assumed to be new ({e.Entity.Name ?? e.Entity.Email})");
+
+                var loadedDetails = new List<ContactDetail>();
+
+                foreach (var id in ids.Distinct())
+                {
+                    var detail = _raynet.GetContactDetail(id);
+                    if (detail.Data.Addresses.Any(a => a.ContactInfo?.Email?.Equals(e.Entity.Email, StringComparison.InvariantCultureIgnoreCase) == true))
+                        return detail.Data;
+
+                    loadedDetails.Add(detail.Data);
+                }
+
+                var byName = loadedDetails.FirstOrDefault(d => d.Name.Equals(e.Entity.Name, StringComparison.InvariantCultureIgnoreCase));
+                if (byName != null)
+                    return byName;
+
+                var byReg = loadedDetails.FirstOrDefault(d => d.RegNumber == e.Entity.CompanyRegistrationId);
+                if (byReg != null)
+                    return byReg;
+
+                _log.Error("No RN record matched detailed check - check weird case!");
+            }
+
+            return null;
+        }
+
+        private void UpdateClientAddresses(ContactDetail updated, ILog log)
         {
             var current = _raynet.GetContactDetail(updated.Id.Value);
 
@@ -219,14 +273,14 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             }
         }
 
-        private void InsertRnContact(EntityChangeEvent<ICustomer> e,  ILog log, IEntityProcessCallback<ICustomer> callback)
+        private string InsertRnContact(EntityChangeEvent<ICustomer> e,  ILog log, IEntityProcessCallback<ICustomer> callback)
         {
-            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), GetOwnerId(e.Entity.Id)));
+            var resp = _raynet.InsertContact(CustomerMapper.ToRaynetContact(e.Entity, GetCustomerGroups(e.Entity.Id), GetRnCompanyCategories(), GetDeliveryAddress(e.Entity.Id), GetContactSourceId(e.Entity.Id)));
             log.Info($"{e.Entity.Name} inserted to RayNet");
-            callback.OnProcessed(e.Entity, resp.Data.Id.ToString(), null);
+            return resp.Data.Id.ToString();
         }
 
-        private long? GetOwnerId(int elsaCustomerId) 
+        private long? GetContactSourceId(int elsaCustomerId) 
         {
             var index = _customerRepository.GetCustomerSalesRepresentativeEmailIndex();
 
@@ -236,26 +290,17 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                 return null;
             }
 
-            var rnPerson = _cache.ReadThrough($"raynet_person{_session.Project.Id}{srepEmail}", TimeSpan.FromMinutes(1), () => 
+            return _cache.ReadThrough<long>($"raynet_csrc{_session.Project.Id}{srepEmail}", TimeSpan.FromMinutes(1), () => 
             {
-                var persons = _raynet.GetPersons(srepEmail).Data;
-                
-                if (persons.Count == 0) 
-                {
-                    _log.Error($"V RayNetu není osoba s e-mailem '{srepEmail}'");
-                    return null;
-                }
+                var sources = _raynet.GetContactSources().Data;
 
-                var sr = persons.OrderBy(p => p.Id).First();
-                if (persons.Count > 1) 
-                {
-                    _log.Error($"V RayNetu je {persons.Count} osob s e-mailem '{srepEmail}'. Jako OZ zvolen zaznam s ID={sr.Id}");                    
-                }
+                var csrc = sources.FirstOrDefault(s => s.Code01.Equals(srepEmail, StringComparison.InvariantCultureIgnoreCase));
+                if (csrc != null)
+                    return csrc.Id;
 
-                return sr;
+                _log.Info($"Contact source \"{srepEmail}\" does not exist in RayNet - creating");
+                return _raynet.CreateContactSource(srepEmail).Data;
             });
-
-            return rnPerson?.Id;
         }
     }
 }

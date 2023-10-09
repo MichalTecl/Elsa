@@ -15,25 +15,20 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
         public const string PRIMARY_ADDRESS_NAME = "Sídlo klienta";
         public const string DELIVERY_ADDRESS_NAME = "Poslední doručovací adresa";
 
-        public static Contact ToRaynetContact(ICustomer customer, IEnumerable<string> customerGroups, IEnumerable<CompanyCategory> categories, IAddress deliveryAddress, long? ownerId, Contact target = null) 
+        public static ContactDetail ToRaynetContact(ICustomer customer, IEnumerable<string> customerGroups, IEnumerable<CompanyCategory> categories, IAddress deliveryAddress, long? contactSourceId, ContactDetail target = null) 
         {
-            target = target ?? new Contact();
+            target = target ?? new ContactDetail();
 
             target.Name = new[] { customer.Name, customer.Email, customer.CompanyName }.FirstOrDefault(n => !string.IsNullOrWhiteSpace(n)) ?? $"NEMÁ_JMÉNO_ElsaId_{customer.Id}";
             target.Role = target.Role ?? "A_SUBSCRIBER";
             target.RegNumber = customer.CompanyRegistrationId;
             target.TaxNumber = customer.VatId;
+                                                
+            if (contactSourceId != null) 
+            {
+                target.ContactSource = new IdContainer { Id = contactSourceId };
+            }
 
-            if (ownerId == null) 
-            {
-                target.Owner = null;
-            }
-            else 
-            {
-                target.Owner = target.Owner ?? new IdContainer();
-                target.Owner.Id = ownerId;
-            }
-                        
             target.Category = new IdContainer { Id = FindCategory(customerGroups, categories) };            
 
             target.Addresses = new List<AddressBucket>();

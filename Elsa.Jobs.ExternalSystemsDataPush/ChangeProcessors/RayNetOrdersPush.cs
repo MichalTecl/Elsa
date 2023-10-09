@@ -89,7 +89,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             foreach(var orderEvent in changedEntities) 
             {
                 try
-                {
+                {                    
                     if (orderEvent.IsNew)
                     {
                         if (orderEvent.Entity.OrderStatusId != 5)
@@ -106,7 +106,6 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                             log.Info($"It was not possible to map {orderEvent.Entity.OrderNr} -> skipping sending to RN");
                             continue;
                         }
-
 
                         var response = _raynet.CreateBusinessCase(businessCase);
                         callback.OnProcessed(orderEvent.Entity, response.Data.Id.ToString(), null);
