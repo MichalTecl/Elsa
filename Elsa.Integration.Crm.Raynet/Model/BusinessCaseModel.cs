@@ -10,7 +10,7 @@ namespace Elsa.Integration.Crm.Raynet.Model
     {
         public string Name { get; set; }
 
-        public long Company { get; set; }
+        public IdContainer Company { get; set; }
 
         public decimal TotalAmount { get; set; }
 
@@ -18,6 +18,6 @@ namespace Elsa.Integration.Crm.Raynet.Model
 
         public List<BcItemModel> Items { get; } = new List<BcItemModel>();
         public string Status { get; set; }
-        public long? BusinessCasePhase { get; set; }
+        public IdContainer BusinessCasePhase { get; set; }
     }
 }

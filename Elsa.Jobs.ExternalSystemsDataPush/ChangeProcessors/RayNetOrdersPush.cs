@@ -107,6 +107,18 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                             continue;
                         }
 
+                        var existingCase = _raynet.GetBusinessCases(businessCase.Name).Data.FirstOrDefault();
+                        if (existingCase != null) 
+                        {
+                            log.Info($"BusinessCase with Name={businessCase.Name} already exists in RN");
+                            if (existingCase.Company?.Id != businessCase.Company.Id) 
+                            {
+                                log.Error($"Case {businessCase.Name} in RN belongs to companyId={existingCase.Company?.Id} but in Elsa it belongs to RN Company.id={businessCase.Company?.Id}");
+                            }
+
+                            continue;
+                        }
+
                         var response = _raynet.CreateBusinessCase(businessCase);
                         callback.OnProcessed(orderEvent.Entity, response.Data.Id.ToString(), null);
                     }

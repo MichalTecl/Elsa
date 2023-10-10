@@ -113,5 +113,15 @@ namespace Elsa.Integration.Crm.Raynet
         {
             return _protocol.Call<RnResponse<long>>(HttpMethod.Put, "https://app.raynet.cz/api/v2/contactSource/", payload: new { code01 = code });
         }
+
+        public RnResponse<List<BusinessCaseModel>> GetBusinessCases(string name = null)
+        {
+            var url = "https://app.raynet.cz/api/v2/businessCase/";
+
+            if (!string.IsNullOrWhiteSpace(name))
+                url = $"{url}?name[LIKE_NOCASE]={HttpUtility.UrlEncode(name)}";
+
+            return _protocol.Call<RnResponse<List<BusinessCaseModel>>>(HttpMethod.Get, url);
+        }
     }
 }

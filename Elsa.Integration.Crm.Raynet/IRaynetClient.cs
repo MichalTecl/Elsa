@@ -21,5 +21,6 @@ namespace Elsa.Integration.Crm.Raynet
         RnResponse DeleteContact(long companyId);
         RnResponse<List<ContactSource>> GetContactSources();
         RnResponse<long> CreateContactSource(string code);
+        RnResponse<List<BusinessCaseModel>> GetBusinessCases(string name = null);
     }
 }

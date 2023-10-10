@@ -9,5 +9,13 @@ namespace Elsa.Integration.Crm.Raynet.Model
     public class IdContainer
     {
         public long? Id { get; set; }
+
+        public static IdContainer Get(long? id) 
+        {
+            if (id == null)
+                return null;
+
+            return new IdContainer { Id = id };
+        }
     }
 }

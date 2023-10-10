@@ -15,11 +15,11 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
             var bc = new BusinessCaseModel
             {
                 Name = order.OrderNr,
-                Company = long.Parse(order.CustomerRayNetId),
+                Company = IdContainer.Get(long.Parse(order.CustomerRayNetId)),
                 TotalAmount = order.OrderPrice,
                 ValidFrom = order.BuyDate.ToString("yyyy-MM-dd"),
                 Status = "E_WIN",
-                BusinessCasePhase = 5
+                BusinessCasePhase = IdContainer.Get(5)
             };
 
             foreach(var item in order.Items) 
