@@ -8,6 +8,7 @@ using Elsa.App.CommonReports.Model;
 using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
+using Elsa.Core.Entities.Commerce.Inventory;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.App.CommonReports
@@ -75,6 +76,7 @@ namespace Elsa.App.CommonReports
 
         public List<BatchPriceComponentItemModel> LoadPriceComponentsReport()
         {
+            var unitIndex = m_unitRepository.GetAllUnits().ToList();
             var result = new List<BatchPriceComponentItemModel>(10000);
             
             m_database.Sql().Call("GetBatchPricesReport")
@@ -94,14 +96,14 @@ namespace Elsa.App.CommonReports
                     item.MaterialName = material;
                     item.Month = month;
 
-                    AssignUnitAndUnitPrice(item, unitId, unitPrice);
+                    AssignUnitAndUnitPrice(item, unitId, unitPrice, unitIndex);
                 });
 
             return result;
         }
 
         private List<FixedCostReportItemModel> LoadFixedCostReport()
-        {
+        {            
             var result = new List<FixedCostReportItemModel>();
 
             m_database.Sql().Call("GetFixedCostReport")
@@ -120,9 +122,9 @@ namespace Elsa.App.CommonReports
             return result;
         }
 
-        private void AssignUnitAndUnitPrice(BatchPriceComponentItemModel model, int unitId, decimal unitPrice)
+        private void AssignUnitAndUnitPrice(BatchPriceComponentItemModel model, int unitId, decimal unitPrice, List<IMaterialUnit> units)
         {
-            var unit = m_unitRepository.GetUnit(unitId);
+            var unit = units.FirstOrDefault(u => u.Id == unitId) ?? throw new ArgumentException($"Invalid UnitId {unitId}");
 
             model.UnitText = $"1 {unit.Symbol}";
             model.UnitPrice = unitPrice;

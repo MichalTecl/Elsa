@@ -182,6 +182,14 @@ namespace Elsa.Commerce.Core.Repositories
                 changed = true;
                 trg.FirstContactDt = GetFirstContact(src.Email);
             }
+
+            var ename = src.IsCompany ? (src.Name ?? src.Email) : $"{src.Name} {src.Surname}".Trim();
+
+            if (trg.Name != ename) 
+            {
+                changed = true;
+                trg.Name = ename ?? trg.Name;
+            }
             
             if (!src.Email.Equals(trg.Email, StringComparison.InvariantCultureIgnoreCase))
             {                
