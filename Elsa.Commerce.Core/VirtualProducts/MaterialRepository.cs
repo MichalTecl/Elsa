@@ -283,6 +283,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     throw new InvalidOperationException("Nelze smazat materiál, který má recepturu");
                 }
 
+                var thresholds = m_database.SelectFrom<IMaterialThreshold>().Where(t => t.ProjectId == m_session.Project.Id && t.MaterialId == id).Execute();
+
+                m_database.DeleteAll(thresholds);
                 m_database.DeleteAll(toVp);
                 m_database.Delete(material);
 
