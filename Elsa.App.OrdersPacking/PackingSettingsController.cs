@@ -41,5 +41,23 @@ namespace Elsa.App.OrdersPacking
 
             m_vpRepo.ImportErpProductMappings(map);
         }
+
+        public FileResult GetKitDefinitions()
+        {
+            var export = m_vpRepo.ExportKits();
+
+            var bytes = XlsxSerializer.Instance.Serialize(export);
+
+            return new FileResult("Definice_Sad.xlsx", bytes);
+        }
+
+        public void UploadKitDefinitions(RequestContext context)
+        {
+            var file = context.HttpContext.Request.Files[0];
+
+            var map = XlsxSerializer.Instance.Deserialize<List<KitProductXlsModel>>(file.InputStream);
+
+            m_vpRepo.ImportKits(map);
+        }
     }
 }

@@ -12,7 +12,7 @@ using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Core.Entities.Commerce.Inventory;
-
+using Elsa.Core.Entities.Commerce.Inventory.Kits;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
@@ -391,6 +391,151 @@ namespace Elsa.Commerce.Core.Repositories
             }
 
             return tag;
+        }
+
+        public List<KitProductXlsModel> ExportKits()
+        {
+            List<IKitDefinition> kits = GetAllKitDefinitions();
+
+            var result = new List<KitProductXlsModel>();
+
+            foreach (var kit in kits)
+                foreach (var group in kit.SelectionGroups)
+                    foreach (var item in group.Items)
+                        result.Add(new KitProductXlsModel
+                        {
+                            KitName = kit.ItemName,
+                            SelectionGroupName = group.Name,
+                            ProductName = item.ItemName,
+                            Shortcut = item.Shortcut
+                        });
+
+            return result;
+        }
+
+        private List<IKitDefinition> GetAllKitDefinitions()
+        {
+            return m_database.SelectFrom<IKitDefinition>()
+                            .Join(kd => kd.SelectionGroups)
+                            .Join(kd => kd.SelectionGroups.Each().Items)
+                            .Where(k => k.ProjectId == m_session.Project.Id)
+                            .OrderBy(kd => kd.ItemName)
+                            .OrderBy(kd => kd.SelectionGroups.Each().Name)
+                            .OrderBy(kd => kd.SelectionGroups.Each().Items.Each().ItemName)
+                            .Execute()
+                            .ToList();
+        }
+
+        public void ImportKits(List<KitProductXlsModel> data)
+        {
+            var kits = data.GroupBy(kd => kd.KitName).ToList();
+
+            m_log.Info($"Uploaded {kits.Count} of kits");
+
+            var existingKits = GetAllKitDefinitions();
+            m_log.Info($"Exists {existingKits.Count} of kits");
+
+            foreach (var kit in kits)
+                ProcessKitImport(kit, existingKits);
+
+        }
+
+        private void ProcessKitImport(IGrouping<string, KitProductXlsModel> kit, List<IKitDefinition> existingKits)
+        {
+            m_log.Info($"Processing import of kit \"{kit.Key}\"");
+
+            using (var tx = m_database.OpenTransaction())
+            {
+                var dbKitDefinition = existingKits.FirstOrDefault(ek => ek.ItemName == kit.Key);
+                if (dbKitDefinition != null && kit.All(k => string.IsNullOrEmpty(k.SelectionGroupName)))
+                {
+                    m_log.Info($"Kit definition '{kit.Key}' imported with empty {nameof(KitProductXlsModel.SelectionGroupName)} - deleting");
+
+                    foreach(var existingGroup in dbKitDefinition.SelectionGroups)
+                    {
+                        m_database.DeleteAll(existingGroup.Items);
+                        m_database.Delete(existingGroup);
+                    }
+
+                    m_database.Delete(dbKitDefinition);
+
+                    tx.Commit();
+                    return;
+                }
+
+                if (dbKitDefinition == null)
+                {
+                    m_log.Info($"\tKit '{kit.Key}' does not exist - creating");
+                    dbKitDefinition = m_database.New<IKitDefinition>();
+                    dbKitDefinition.ProjectId = m_session.Project.Id;
+                    dbKitDefinition.ItemName = kit.Key;
+
+                    m_database.Save(dbKitDefinition);
+                }
+
+                // Delete removed groups
+                foreach(var existingGroup in dbKitDefinition.SelectionGroups)
+                {
+                    if(kit.All(newGroup => newGroup.SelectionGroupName != existingGroup.Name))
+                    {
+                        m_log.Info($"\tSelection group '{existingGroup.Name}' is not present in the import - deleting");
+                        m_database.DeleteAll(existingGroup.Items);
+                        m_database.Delete(existingGroup);
+                    }
+                }
+
+                var dbGroups = dbKitDefinition.SelectionGroups.ToList();
+
+                // Process groups
+                foreach(var xlsGroup in kit.GroupBy(k => k.SelectionGroupName))
+                {
+                    var dbGroup = dbKitDefinition.SelectionGroups.FirstOrDefault(dbg => dbg.Name == xlsGroup.Key);
+                    if (dbGroup == null)
+                    {
+                        m_log.Info($"\tSelection group '{xlsGroup.Key}' does not exist - creating");
+                        dbGroup = m_database.New<IKitSelectionGroup>();
+                        dbGroup.KitDefinitionId = dbKitDefinition.Id;
+                        dbGroup.Name = xlsGroup.Key;
+
+                        m_database.Save(dbGroup);
+                    }
+
+                    m_log.Info($"\tProcessing import of selection group '{xlsGroup.Key}'");
+
+                    // process group items:
+                    foreach(var existingGroupItem in dbGroup.Items)
+                    {
+                        if(xlsGroup.All(xg => xg.ProductName == existingGroupItem.ItemName))
+                        {
+                            m_log.Info($"\t\tItem '{existingGroupItem.ItemName}' not included in the import - deleting");
+                            m_database.Delete(existingGroupItem);
+                        }
+                    }
+
+                    foreach(var xlsItem in xlsGroup)
+                    {
+                        var dbItem = dbGroup.Items.FirstOrDefault(i => i.ItemName == xlsItem.ProductName);
+                        if (dbItem == null)
+                        {
+                            m_log.Info($"\t\tItem '{xlsItem.ProductName}' does not exist - creating");
+                            dbItem = m_database.New<IKitSelectionGroupItem>();
+                            dbItem.KitSelectionGroupId = dbGroup.Id;
+                            dbItem.ItemName = xlsItem.ProductName;
+                            dbItem.Shortcut = xlsItem.Shortcut ?? xlsItem.ProductName;
+
+                            m_database.Save(dbItem);
+                        }
+                        else if (dbItem.Shortcut != xlsItem.Shortcut)
+                        {
+                            dbItem.Shortcut = xlsItem.Shortcut;
+                            m_database.Save(dbItem);
+                        }
+                    }
+                }
+
+                tx.Commit();
+            }
+
         }
 
         private sealed class VpMappable : IVirtualProductMappableItem

@@ -107,6 +107,7 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="SQL\20201202_001_setAsyncPackingDefaultconf.sql" />
+    <Content Include="UI\Controls\Settings\KitDefinitions.html" />
     <Content Include="UI\Controls\Settings\EshopProductsMapping.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

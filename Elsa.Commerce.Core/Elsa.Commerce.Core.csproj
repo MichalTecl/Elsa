@@ -175,6 +175,7 @@
     <Compile Include="VirtualProducts\MaterialRepository.cs" />
     <Compile Include="VirtualProducts\Model\CompositionViewModel.cs" />
     <Compile Include="VirtualProducts\Model\ErpProductMapping.cs" />
+    <Compile Include="VirtualProducts\Model\KitProductXlsModel.cs" />
     <Compile Include="VirtualProducts\Model\MaterialComponent.cs" />
     <Compile Include="VirtualProducts\Model\ExtendedMaterial.cs" />
     <Compile Include="VirtualProducts\Model\IExtendedMaterialModel.cs" />

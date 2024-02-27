@@ -34,6 +34,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
         List<ErpProductMapping> ExportErpProductMappings();
 
         void ImportErpProductMappings(List<ErpProductMapping> mappings);
+
+        List<KitProductXlsModel> ExportKits();
+        void ImportKits(List<KitProductXlsModel> mappings);
     }
 
     public interface IDisposableVirtualProductsRepository : IVirtualProductRepository, IDisposable
