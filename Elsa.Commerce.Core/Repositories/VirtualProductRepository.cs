@@ -284,7 +284,9 @@ namespace Elsa.Commerce.Core.Repositories
             }
             */
 
-            if (!string.IsNullOrWhiteSpace(mapping.ItemName) && (mapping.ItemName != placedName))
+            placedName = placedName.Trim();
+
+            if (!string.IsNullOrWhiteSpace(mapping.ItemName) && (mapping.ItemName.Trim() != placedName))
             {
                 return false;
             }

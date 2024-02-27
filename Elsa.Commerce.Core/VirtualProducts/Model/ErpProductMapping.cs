@@ -10,11 +10,22 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
     [HeaderStyle(FontStyle = FontStyle.Bold)]
     public class ErpProductMapping
     {
+        private string _eshop = null;
+        private string _elsa = null;
+
         [XlsColumn("A", "E-Shop", "@")]
-        public string EshopItem { get; set; }
+        public string EshopItem 
+        { 
+            get { return _eshop?.Trim(); } 
+            set { _eshop = value; } 
+        }
 
         [XlsColumn("B", "Elsa", "@")]
-        public string Material { get; set; }
+        public string Material 
+        {
+            get { return _elsa?.Trim(); }
+            set { _elsa = value; } 
+        }
 
         public override bool Equals(object obj)
         {
