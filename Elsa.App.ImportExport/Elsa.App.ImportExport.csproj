@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="XlsSerializer.Core" Version="1.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+   <ProjectReference Include="..\..\Robowire\Robowire\Robowire.Common.Expressions\Robowire.Common.Expressions.csproj" />
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj" />
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj" />
+    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj" />
+    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj" />    
+    <ProjectReference Include="..\Elsa.Apps.Common\Elsa.Apps.Common.csproj" />
+  </ItemGroup>  
+
+</Project>

@@ -309,7 +309,7 @@ namespace Elsa.Commerce.Core.Repositories
                 .MapRows<ErpProductMapping>(row => new ErpProductMapping { EshopItem = row.GetString(0), Material = row.GetString(1) }).ToList();
         }
 
-        public void ImportErpProductMappings(List<ErpProductMapping> mappings)
+        public int ImportErpProductMappings(List<ErpProductMapping> mappings)
         {            
             var current = ExportErpProductMappings();
 
@@ -323,7 +323,7 @@ namespace Elsa.Commerce.Core.Repositories
             m_log.Info($"After filtering and removal of already existing entries there is {toProcess.Count} of records to be imported");
 
             if (toProcess.Count == 0)
-                return;
+                return 0;
 
             using (var tx = m_database.OpenTransaction())
             {
@@ -359,6 +359,8 @@ namespace Elsa.Commerce.Core.Repositories
 
                 m_log.Info($"Done");
             }
+
+            return toProcess.Count;
         }
 
         private static string Tagify(string itemName)
@@ -426,7 +428,7 @@ namespace Elsa.Commerce.Core.Repositories
                             .ToList();
         }
 
-        public void ImportKits(List<KitProductXlsModel> data)
+        public int ImportKits(List<KitProductXlsModel> data)
         {
             var kits = data.GroupBy(kd => kd.KitName).ToList();
 
@@ -438,6 +440,7 @@ namespace Elsa.Commerce.Core.Repositories
             foreach (var kit in kits)
                 ProcessKitImport(kit, existingKits);
 
+            return kits.Count;
         }
 
         private void ProcessKitImport(IGrouping<string, KitProductXlsModel> kit, List<IKitDefinition> existingKits)

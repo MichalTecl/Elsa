@@ -87,6 +87,10 @@
       <Project>{00851e14-33be-4f64-91d1-e27fa48422bd}</Project>
       <Name>Elsa.App.Crm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.ImportExport\Elsa.App.ImportExport.csproj">
+      <Project>{2f701563-935d-43bd-8cf3-bbf47df17397}</Project>
+      <Name>Elsa.App.ImportExport</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.Inspector\Elsa.App.Inspector.csproj">
       <Project>{A5AE1E90-BF3D-4B74-9046-E932207AC709}</Project>
       <Name>Elsa.App.Inspector</Name>

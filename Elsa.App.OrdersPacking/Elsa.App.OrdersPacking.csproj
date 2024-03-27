@@ -62,7 +62,6 @@
     <Compile Include="Model\PackingOrderModel.cs" />
     <Compile Include="Model\LightOrderInfo.cs" />
     <Compile Include="PackingController.cs" />
-    <Compile Include="PackingSettingsController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OrdersPackingUserRights.cs" />
   </ItemGroup>
@@ -104,11 +103,11 @@
     <None Include="packages.config" />
     <None Include="sencha.json" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UI\Controls\Settings\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\20201202_001_setAsyncPackingDefaultconf.sql" />
-    <Content Include="UI\Controls\Settings\KitDefinitions.html" />
-    <Content Include="UI\Controls\Settings\EshopProductsMapping.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

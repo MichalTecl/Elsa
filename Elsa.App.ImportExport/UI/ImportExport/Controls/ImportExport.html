@@ -1,0 +1,35 @@
+﻿<div id="impExpUi">
+    <div id="modulesList" data-bind="itemsSource:modules" data-key="Uid">
+        <div class="lt-template ieModuleRow">
+            <div data-bind="text:Title" class="ieModuleTitle"></div>
+            <div data-bind="text:Description" class="ieModuleDescription"></div>
+            <div class="ieActionsRow">
+                <a data-bind="href:downloadHref" class="ieDlLink">Stáhnout</a>
+                <form id="xlsPanel" event-bind="submit:onImportFilePasted($fuXls, Uid)" onsubmit="return false">
+                    <input type="file" lt-name="fuXls" />
+                    <input type="submit" value="Nahrát" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<link href="/UI/ImportExport/ImportExport.css" rel="stylesheet" />
+<script src="/UI/ImportExport/importexport.vm.js"></script>
+<script>
+    lt.element("impExpUi").withModel("app.ImportExport.vm").attach(function () {
+
+        this.onImportFilePasted = function (fileUpload, uid) {
+
+            var vm = app.ImportExport.vm;
+
+            var file = fileUpload.files[0];
+
+            lt.api("/importexport/import").query({ "moduleUid": uid }).formData(file.name, file).post(function (response) {
+                alert(response);
+            });
+
+            return false;
+        };
+
+    });
+</script>

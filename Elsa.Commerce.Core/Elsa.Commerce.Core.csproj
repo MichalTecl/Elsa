@@ -77,6 +77,8 @@
     <Compile Include="Impl\ErpClientFactory.cs" />
     <Compile Include="Impl\OrdersFacade.cs" />
     <Compile Include="Impl\OrderStatusTranslator.cs" />
+    <Compile Include="ImportExportModules\EshopProductMappingsImpExpModule.cs" />
+    <Compile Include="ImportExportModules\KitsImpExpModule.cs" />
     <Compile Include="IOrdersFacade.cs" />
     <Compile Include="IOrderStatusConverter.cs" />
     <Compile Include="IOrderStatusMappingRepository.cs" />
@@ -207,6 +209,10 @@
     <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
       <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.ImportExport\Elsa.App.ImportExport.csproj">
+      <Project>{2f701563-935d-43bd-8cf3-bbf47df17397}</Project>
+      <Name>Elsa.App.ImportExport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
       <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>

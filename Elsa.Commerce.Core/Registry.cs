@@ -1,6 +1,8 @@
-﻿using Elsa.Commerce.Core.Crm;
+﻿using Elsa.App.ImportExport;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Commerce.Core.CurrencyRates;
 using Elsa.Commerce.Core.Impl;
+using Elsa.Commerce.Core.ImportExportModules;
 using Elsa.Commerce.Core.Production;
 using Elsa.Commerce.Core.Production.Recipes;
 using Elsa.Commerce.Core.Repositories;
@@ -56,6 +58,8 @@ namespace Elsa.Commerce.Core
             setup.For<ISaleEventRepository>().Use<SaleEventRepository>();
             setup.For<IRecipeRepository>().Use<RecipeRepository>();
             setup.For<IOrderWeightCalculator>().Use<OrderWeightCalculator>();
+            setup.For<KitsImpExpModule>().Use<KitsImpExpModule>();
+            setup.For<EshopProductMappingsImpExpModule>().Use<EshopProductMappingsImpExpModule>();
         }
     }
 }

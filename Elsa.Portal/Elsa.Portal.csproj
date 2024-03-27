@@ -289,6 +289,10 @@
       <Project>{00851E14-33BE-4F64-91D1-E27FA48422BD}</Project>
       <Name>Elsa.App.Crm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.ImportExport\Elsa.App.ImportExport.csproj">
+      <Project>{2f701563-935d-43bd-8cf3-bbf47df17397}</Project>
+      <Name>Elsa.App.ImportExport</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.OrdersPacking\Elsa.App.OrdersPacking.csproj">
       <Project>{87D88B8D-17B5-4FB4-B7BD-AAA2D2FFB4A1}</Project>
       <Name>Elsa.App.OrdersPacking</Name>

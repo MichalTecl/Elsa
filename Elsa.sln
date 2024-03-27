@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31613.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{326F0792-00AF-4D82-B170-4CE248D4A975}"
 EndProject
@@ -183,9 +183,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Marketing", "Marketing", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Integration.SmartEmailing", "Elsa.Integration.SmartEmailing\Elsa.Integration.SmartEmailing.csproj", "{862BA13B-C84C-41A9-AC91-61C49DAF0A9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RaynetTests", "RaynetTests\RaynetTests.csproj", "{73F6647D-4131-4B5F-B698-BEE5444453DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RaynetTests", "RaynetTests\RaynetTests.csproj", "{73F6647D-4131-4B5F-B698-BEE5444453DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Test.Utils", "Elsa.Test.Utils\Elsa.Test.Utils.csproj", "{BC711161-B7B5-4A45-89DD-9F7F0B2C6F0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Test.Utils", "Elsa.Test.Utils\Elsa.Test.Utils.csproj", "{BC711161-B7B5-4A45-89DD-9F7F0B2C6F0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.App.ImportExport", "Elsa.App.ImportExport\Elsa.App.ImportExport.csproj", "{2F701563-935D-43BD-8CF3-BBF47DF17397}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -473,6 +475,10 @@ Global
 		{BC711161-B7B5-4A45-89DD-9F7F0B2C6F0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC711161-B7B5-4A45-89DD-9F7F0B2C6F0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC711161-B7B5-4A45-89DD-9F7F0B2C6F0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F701563-935D-43BD-8CF3-BBF47DF17397}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F701563-935D-43BD-8CF3-BBF47DF17397}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F701563-935D-43BD-8CF3-BBF47DF17397}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F701563-935D-43BD-8CF3-BBF47DF17397}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -561,6 +567,7 @@ Global
 		{862BA13B-C84C-41A9-AC91-61C49DAF0A9D} = {E812F077-3E95-4C82-BB55-EA4AE8889491}
 		{73F6647D-4131-4B5F-B698-BEE5444453DC} = {56FB2203-E4D8-428D-938B-7251897BE1D0}
 		{BC711161-B7B5-4A45-89DD-9F7F0B2C6F0D} = {56FB2203-E4D8-428D-938B-7251897BE1D0}
+		{2F701563-935D-43BD-8CF3-BBF47DF17397} = {456527A3-2BE8-4010-8AC6-187539CE484D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}

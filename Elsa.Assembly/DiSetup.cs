@@ -4,6 +4,7 @@ using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
 using Elsa.App.CommonReports;
 using Elsa.App.Crm;
+using Elsa.App.ImportExport;
 using Elsa.App.Inspector;
 using Elsa.App.MaterialLevels;
 using Elsa.App.OrdersPacking;
@@ -71,6 +72,7 @@ namespace Elsa.Assembly
             container.Setup(
                 s =>
                 {
+                    s.ScanAssembly(typeof(ImportExportRegistry).Assembly);
                     s.ScanAssembly(typeof(IInvoiceFormGeneratorFactory).Assembly);
                     s.ScanAssembly(typeof(FloxClient).Assembly);
                     s.ScanAssembly(typeof(FioClient).Assembly);
@@ -113,7 +115,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(EntityChangeProcessingRegistry).Assembly);
                     s.ScanAssembly(typeof(RaynetClientRegistry).Assembly);
                     s.ScanAssembly(typeof(ProductionPlannerRegistry).Assembly);
-
+                    
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 
                     s.Collect<IStartupJob>();
