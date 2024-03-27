@@ -6,6 +6,7 @@ using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
+using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 using Robowire.RobOrm.Core;
@@ -319,7 +320,86 @@ namespace Elsa.Commerce.Core.VirtualProducts
         {
             return new MaterialRepositoryWithPostponedCache(m_database, m_session, new CacheWithPostponedRemoval(m_cache), m_conversionHelper);
         }
-        
+
+        public List<MaterialReportingGroupAssignmentModel> GetMaterialReportingGroupAssignments()
+        {
+            return m_database.Sql().ExecuteWithParams(@"SELECT m.Name, rmg.Name
+                                                FROM Material m
+                                                LEFT JOIN ReportingMaterialGroupMaterial rmgm ON (m.Id = rmgm.MaterialId)
+                                                LEFT JOIN ReportingMaterialGroup rmg ON (rmgm.GroupId = rmg.Id)
+                                                JOIN MaterialInventory mi ON (m.InventoryId = mi.Id)
+                                                WHERE mi.CanBeConnectedToTag = 1
+                                                AND m.ProjectId = {0}
+                                                ORDER BY m.Name", m_session.Project.Id)
+                .MapRows<MaterialReportingGroupAssignmentModel>(rdr => new MaterialReportingGroupAssignmentModel
+                {
+                    MaterialName = rdr.GetString(0),
+                    ReportingGroupName = rdr.IsDBNull(1) ? null : rdr.GetString(1)
+                })
+                .ToList();            
+        }
+
+        public void SaveMaterialReportingGroupAssignments(IEnumerable<MaterialReportingGroupAssignmentModel> models, out int groupsCreated, out int materialsAssigned)
+        {
+            groupsCreated = 0;
+            materialsAssigned = 0;
+
+            var materialGroups = m_database.SelectFrom<IReportingMaterialGroup>()
+                .Where(g => g.ProjectId == m_session.Project.Id)
+                .Execute()
+                .ToList();
+
+            var materials = m_database.SelectFrom<IMaterial>().Where(m => m.ProjectId == m_session.Project.Id).Execute().ToList();
+            var assignments = m_database.SelectFrom<IReportingMaterialGroupMaterial>().Execute().ToList();
+
+            using(var tx = m_database.OpenTransaction())
+            {
+                foreach(var model in models)
+                {
+                    var material = materials.FirstOrDefault(m => m.Name ==  model.MaterialName) ?? throw new Exception($"Neznámý materiál '{model.MaterialName}'");
+                    var group = materialGroups.FirstOrDefault(g => g.Name.Equals(model.ReportingGroupName, StringComparison.InvariantCultureIgnoreCase));
+
+                    if (group == null && !string.IsNullOrWhiteSpace(model.ReportingGroupName))
+                    {
+                        groupsCreated++;
+                        group = m_database.New<IReportingMaterialGroup>();
+                        group.ProjectId = m_session.Project.Id;
+                        group.Name = model.ReportingGroupName;
+                        group.DisplayOrder = materialGroups.Max(g => g.DisplayOrder ?? 0) + 1;
+
+                        m_database.Save(group);
+                        materialGroups.Add(group);
+                    }
+
+                    var existingAssignment = assignments.FirstOrDefault(a => a.MaterialId == material.Id);
+
+                    if (existingAssignment?.GroupId == group?.Id)
+                        continue;
+
+                    materialsAssigned++;
+
+                    if (existingAssignment != null)
+                    {
+                        m_database.Delete(existingAssignment);
+                        assignments.Remove(existingAssignment);
+                    }
+
+                    if (group != null)
+                    {
+                        var assignment = m_database.New<IReportingMaterialGroupMaterial>();
+                        assignment.MaterialId = material.Id;
+                        assignment.GroupId = group.Id;
+
+                        m_database.Save(assignment);
+                        assignments.Add(assignment);
+                    }
+                }
+
+                tx.Commit();
+            }
+
+        }
+
         private sealed class MaterialRepositoryWithPostponedCache : MaterialRepository, IMaterialRepositoryWithPostponedCache
         {
             private readonly CacheWithPostponedRemoval m_ppCache;

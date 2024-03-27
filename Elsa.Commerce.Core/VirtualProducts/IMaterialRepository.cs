@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Inventory;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace Elsa.Commerce.Core.VirtualProducts
 {
@@ -39,6 +40,10 @@ namespace Elsa.Commerce.Core.VirtualProducts
         IEnumerable<IMaterialInventory> GetMaterialInventories();
         
         void EnsureCompatibleUnit(IExtendedMaterialModel material, IMaterialUnit unit);
+
+        List<MaterialReportingGroupAssignmentModel> GetMaterialReportingGroupAssignments();
+
+        void SaveMaterialReportingGroupAssignments(IEnumerable<MaterialReportingGroupAssignmentModel> models, out int groupsCreated, out int materialsAssigned);
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }

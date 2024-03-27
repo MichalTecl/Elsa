@@ -78,6 +78,7 @@
     <Compile Include="Impl\OrdersFacade.cs" />
     <Compile Include="Impl\OrderStatusTranslator.cs" />
     <Compile Include="ImportExportModules\EshopProductMappingsImpExpModule.cs" />
+    <Compile Include="ImportExportModules\MaterialReportingGroupsImpExpModule.cs" />
     <Compile Include="ImportExportModules\KitsImpExpModule.cs" />
     <Compile Include="IOrdersFacade.cs" />
     <Compile Include="IOrderStatusConverter.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
     <Compile Include="VirtualProducts\MaterialFacade.cs" />
+    <Compile Include="VirtualProducts\MaterialReportingGroupAssignmentModel.cs" />
     <Compile Include="VirtualProducts\MaterialRepository.cs" />
     <Compile Include="VirtualProducts\Model\CompositionViewModel.cs" />
     <Compile Include="VirtualProducts\Model\ErpProductMapping.cs" />

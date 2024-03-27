@@ -60,6 +60,7 @@ namespace Elsa.Commerce.Core
             setup.For<IOrderWeightCalculator>().Use<OrderWeightCalculator>();
             setup.For<KitsImpExpModule>().Use<KitsImpExpModule>();
             setup.For<EshopProductMappingsImpExpModule>().Use<EshopProductMappingsImpExpModule>();
+            setup.For<MaterialReportingGroupsImpExpModule>().Use<MaterialReportingGroupsImpExpModule>();
         }
     }
 }
