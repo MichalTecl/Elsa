@@ -5,9 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj" />
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj" />
-    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj" />
     <ProjectReference Include="..\Elsa.Apps.Common\Elsa.Apps.Common.csproj" />
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj" />
   </ItemGroup>

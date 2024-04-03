@@ -1,10 +1,7 @@
-﻿using System;
-
-using Elsa.Common;
-using Elsa.Common.Interfaces;
+﻿using Elsa.Common.Interfaces;
 using Elsa.Jobs.Common;
-
 using Robowire;
+using System;
 
 namespace Elsa.JobLauncher
 {

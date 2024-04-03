@@ -35,7 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Robowire, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -59,22 +59,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Robowire\Robowire\CodeGeneration\CodeGeneration.csproj">
-      <Project>{8d5fb7d2-8960-4bf7-938e-2ec9584bdec5}</Project>
-      <Name>CodeGeneration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.Common.Expressions\Robowire.Common.Expressions.csproj">
-      <Project>{e9aeacb2-d6e8-4f61-af63-3578f9831594}</Project>
-      <Name>Robowire.Common.Expressions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
-      <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
-      <Name>Robowire.RobOrm.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj">
-      <Project>{f2986071-08cd-42de-98fa-57e6fce729c5}</Project>
-      <Name>Robowire.RobOrm.SqlServer</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj">
       <Project>{91481b08-e437-474d-9793-a135f1db465c}</Project>
       <Name>Elsa.Core.Entities</Name>

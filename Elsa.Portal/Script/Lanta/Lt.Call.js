@@ -290,7 +290,7 @@ lt.api.UsageManager = lt.api.UsageManager || function() {
     self.subscribeBusyHandler = function(handler) {
         handlers.push(handler);
         handler(pendingOpsCounter > 0);
-    };
+    };    
 };
 
 lt.api.usageManager = lt.api.usageManager || new lt.api.UsageManager();

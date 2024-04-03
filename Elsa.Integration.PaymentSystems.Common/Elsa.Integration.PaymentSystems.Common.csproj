@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -54,14 +54,6 @@
     <Compile Include="Registry.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
-      <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
-      <Name>Robowire.RobOrm.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
-      <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
-      <Name>Robowire</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
       <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
       <Name>Elsa.Common.Interfaces</Name>
@@ -73,6 +65,14 @@
     <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj">
       <Project>{91481B08-E437-474D-9793-A135F1DB465C}</Project>
       <Name>Elsa.Core.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+      <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
+      <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj">
+      <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
+      <Name>Robowire</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

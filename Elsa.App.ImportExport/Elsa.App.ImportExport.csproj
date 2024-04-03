@@ -9,12 +9,7 @@
     <PackageReference Include="XlsSerializer.Core" Version="1.0.3" />
   </ItemGroup>
 
-  <ItemGroup>
-   <ProjectReference Include="..\..\Robowire\Robowire\Robowire.Common.Expressions\Robowire.Common.Expressions.csproj" />
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj" />
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj" />
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj" />
-    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj" />    
+  <ItemGroup>    
     <ProjectReference Include="..\Elsa.Apps.Common\Elsa.Apps.Common.csproj" />
   </ItemGroup>  
 

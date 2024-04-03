@@ -57,18 +57,6 @@
     <Compile Include="ReportingUserRights.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
-      <Project>{895e4a3c-99d4-4e2e-872c-7479140d0cf5}</Project>
-      <Name>Robowire.RoboApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
-      <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
-      <Name>Robowire.RobOrm.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
-      <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
-      <Name>Robowire</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Elsa.Apps.Common\Elsa.Apps.Common.csproj">
       <Project>{b09c721a-b22e-47a6-bc6b-9cd9155e174a}</Project>
       <Name>Elsa.Apps.Common</Name>
@@ -88,6 +76,22 @@
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{A9148D58-0F0E-43E7-8A11-A9F9BB04333C}</Project>
       <Name>Elsa.Users</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
+      <Project>{895e4a3c-99d4-4e2e-872c-7479140d0cf5}</Project>
+      <Name>Robowire.RoboApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+      <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
+      <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj">
+      <Project>{f2986071-08cd-42de-98fa-57e6fce729c5}</Project>
+      <Name>Robowire.RobOrm.SqlServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj">
+      <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
+      <Name>Robowire</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

@@ -39,7 +39,7 @@
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="Select.HtmlToPdf, Version=21.1.0.0, Culture=neutral, PublicKeyToken=e0ae9f6e27a97018, processorArchitecture=MSIL">
@@ -94,18 +94,6 @@
     <Compile Include="UiForms\ReceivingInvoiceFormRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
-      <Project>{895E4A3C-99D4-4E2E-872C-7479140D0CF5}</Project>
-      <Name>Robowire.RoboApi</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
-      <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
-      <Name>Robowire.RobOrm.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
-      <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
-      <Name>Robowire</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Elsa.Apps.Reporting\Elsa.Apps.Reporting.csproj">
       <Project>{AF048602-B9A5-4464-9F6D-3D3A4FDF55FE}</Project>
       <Name>Elsa.Apps.Reporting</Name>
@@ -137,6 +125,22 @@
     <ProjectReference Include="..\Elsa.Invoicing.Core\Elsa.Invoicing.Core.csproj">
       <Project>{680A0E79-828B-4284-9AF8-32BCF09D62CF}</Project>
       <Name>Elsa.Invoicing.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
+      <Project>{895e4a3c-99d4-4e2e-872c-7479140d0cf5}</Project>
+      <Name>Robowire.RoboApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+      <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
+      <Name>Robowire.RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj">
+      <Project>{f2986071-08cd-42de-98fa-57e6fce729c5}</Project>
+      <Name>Robowire.RobOrm.SqlServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj">
+      <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
+      <Name>Robowire</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

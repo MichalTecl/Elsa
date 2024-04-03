@@ -36,7 +36,7 @@
       <HintPath>..\packages\EPPlus.4.5.3.2\lib\net40\EPPlus.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
@@ -62,10 +62,6 @@
     <Compile Include="XTableController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
-      <Project>{895E4A3C-99D4-4E2E-872C-7479140D0CF5}</Project>
-      <Name>Robowire.RoboApi</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
       <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
       <Name>Elsa.Common.Interfaces</Name>
@@ -73,6 +69,10 @@
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
       <Name>Elsa.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
+      <Project>{895e4a3c-99d4-4e2e-872c-7479140d0cf5}</Project>
+      <Name>Robowire.RoboApi</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

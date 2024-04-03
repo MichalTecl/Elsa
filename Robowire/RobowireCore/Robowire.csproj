@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Robowire</RootNamespace>
+    <AssemblyName>Robowire</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Behavior\ServiceRecordExtensions.cs" />
+    <Compile Include="Behavior\DisposeBehavior.cs" />
+    <Compile Include="Behavior\LifecycleBehavior.cs" />
+    <Compile Include="Container.cs" />
+    <Compile Include="Core\CompiledLocatorBase.cs" />
+    <Compile Include="Core\ContainerSetup.cs" />
+    <Compile Include="Core\CtorParamSetupRecord.cs" />
+    <Compile Include="Core\ILocatorFactory.cs" />
+    <Compile Include="Core\ImplementingTypeSetup.cs" />
+    <Compile Include="Core\InstanceConstruction.cs" />
+    <Compile Include="Core\InstanceRecord.cs" />
+    <Compile Include="Core\IServiceSetupRecord.cs" />
+    <Compile Include="Core\SetupElementBase.cs" />
+    <Compile Include="Core\TypeNameHelper.cs" />
+    <Compile Include="IBehavior.cs" />
+    <Compile Include="IRobowireRegistry.cs" />
+    <Compile Include="IWithBehavior.cs" />
+    <Compile Include="Plugin\DefaultPlugins\DisposablesRegistrationPlugin.cs" />
+    <Compile Include="Plugin\Flow\IPluginCollection.cs" />
+    <Compile Include="Core\LocatorGeneration\LocatorBuilder.cs" />
+    <Compile Include="Core\NamedFactory.cs" />
+    <Compile Include="IConstructorSelectionSetup.cs" />
+    <Compile Include="IContainer.cs" />
+    <Compile Include="IContainerSetup.cs" />
+    <Compile Include="IDependencyResolutionSetup.cs" />
+    <Compile Include="IGeneratedCodeListener.cs" />
+    <Compile Include="IImplementingTypeSetup.cs" />
+    <Compile Include="ISelfSetupAttribute.cs" />
+    <Compile Include="Plugin\DefaultPlugins\CollectorPlugin.cs" />
+    <Compile Include="Plugin\DefaultPlugins\InterfaceImplementorBase.cs" />
+    <Compile Include="Plugin\DefaultPlugins\ConstructorInvocationBuilder.cs" />
+    <Compile Include="Plugin\DefaultPlugins\LifecyclePlugin.cs" />
+    <Compile Include="Plugin\DefaultPlugins\ValueFactoryInvocationBuilder.cs" />
+    <Compile Include="IInstanceConstruction.cs" />
+    <Compile Include="IInstanceImport.cs" />
+    <Compile Include="IServiceLocator.cs" />
+    <Compile Include="Plugin\Flow\PluginCollection.cs" />
+    <Compile Include="Plugin\IPlugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CodeGeneration\CodeGeneration.csproj">
+      <Project>{8d5fb7d2-8960-4bf7-938e-2ec9584bdec5}</Project>
+      <Name>CodeGeneration</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -113,7 +113,7 @@ namespace Elsa.Commerce.Core
             IErpOrderStatusMapping status;
             if (!erpOrderStatusMappings.TryGetValue(source.ErpStatus, out status))
             {
-                throw new InvalidOperationException($"Status mapping not found for ErpId={source.ErpSystemId} and Status=\"{source.ErpStatus}\"");
+                throw new InvalidOperationException($"Status mapping not found for ErpId={source.ErpSystemId} and Status=\"{source.ErpStatus}\" OrderNumber=\"{source.OrderNumber}\"");
             }
 
             return status.OrderStatusId;
