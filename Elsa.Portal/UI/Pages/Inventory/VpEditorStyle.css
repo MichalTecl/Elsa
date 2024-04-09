@@ -252,3 +252,51 @@ body, html {
     width:100px;
     margin-left:20px;
 }
+
+.abandonedPolicyContainer > input {
+    width: 70px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.abadnonedPolicyContainer {
+    background-color: #f7f7f7;
+    margin-left: 20px;
+    padding-left: 4px;
+}
+
+    .abadnonedPolicyContainer i {
+        font-size: 0.8em;
+    }
+
+    .abadnonedPolicyContainer .radioWithLabelContainer {
+        margin-left: 4px;
+    }
+
+    .abadnonedPolicyContainer .abdReportingGroup {
+        margin-left: 20px;
+        margin-bottom: 10px;
+    }
+
+.abdReportingGroup .prefixedTextbox {
+    height: 2.14285714em;
+    line-height: 1.4285714285714;
+    padding: 4px 5px;
+    border: 1px solid #ccc;
+    border-radius: 3.01px;
+    box-sizing: border-box;
+    font-size: inherit;
+    margin: 0;
+    max-width: 250px;
+    width: 100%;
+    vertical-align: baseline;
+    background-color: rgb(250, 255, 189) !important;
+}
+
+    .abdReportingGroup .prefixedTextbox input {
+        border-top: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+        border-radius: 0px;
+        border-left: 1px solid transparent;
+        border-right: 1px solid transparent;
+    }

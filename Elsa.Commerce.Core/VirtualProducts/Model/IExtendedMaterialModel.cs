@@ -3,6 +3,7 @@ using System.Text;
 
 using Elsa.Commerce.Core.Units;
 using Elsa.Core.Entities.Commerce.Inventory;
+using Robowire.RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {
@@ -50,5 +51,11 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         bool Autofinalization { get; }
         bool CanBeDigital { get;  }
+
+        int? DaysBeforeWarnForUnused { get; }
+                
+        string UnusedWarnMaterialType { get; }
+
+        bool UsageProlongsLifetime { get; }
     }
 }

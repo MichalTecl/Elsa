@@ -32,5 +32,11 @@ namespace Elsa.Apps.Inventory.Model
         public bool Autofinalization { get; set; }
 
         public bool CanBeDigital { get; set; }
+
+        public int? DaysBeforeWarnForUnused { get; set; }
+
+        public string UnusedWarnMaterialType { get; set; }
+
+        public bool UsageProlongsLifetime { get; set; }
     }
 }

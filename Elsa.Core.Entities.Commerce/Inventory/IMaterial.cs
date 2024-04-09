@@ -45,5 +45,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory
 
         [NVarchar(256, true)]
         string UnusedWarnMaterialType { get; set; }
+
+        bool? UsageProlongsLifetime { get; set; }
     }
 }

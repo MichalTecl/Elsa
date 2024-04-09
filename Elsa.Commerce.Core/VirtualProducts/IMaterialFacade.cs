@@ -19,7 +19,10 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool autofinalize,
             bool canBeDigital,
             IEnumerable<string> components,
-            string thresholdText);
+            string thresholdText,
+            int? daysBeforeWarnForUnused,
+            string unusedWarnMaterialType,
+            bool usageProlongsLifetime);
         
         MaterialSetupInfo GetMaterialInfo(string materialName);
 

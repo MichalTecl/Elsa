@@ -167,7 +167,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount,
             int nominalUnitId, int materialInventoryId, bool automaticBatches, bool requiresPrice,
-            bool requiresProductionPrice, bool requiresInvoice, bool requiresSupplierReference, bool autofinalize, bool canBeDigital)
+            bool requiresProductionPrice, bool requiresInvoice, bool requiresSupplierReference, bool autofinalize, bool canBeDigital,
+            int? daysBeforeWarnForUnused, string unusedWarnMaterialType, bool usageProlongsLifetime)
         {
             IMaterial material;
             if (materialId != null)
@@ -188,7 +189,10 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     && (material.RequiresInvoiceNr == requiresInvoice)
                     && (material.RequiresSupplierReference == requiresSupplierReference)
                     && (material.UseAutofinalization ?? false == autofinalize)
-                    && (material.CanBeDigitalOnly ?? false == canBeDigital))
+                    && (material.CanBeDigitalOnly ?? false == canBeDigital)
+                    && (material.DaysBeforeWarnForUnused == daysBeforeWarnForUnused)
+                    && (material.UnusedWarnMaterialType == unusedWarnMaterialType)
+                    && (material.UsageProlongsLifetime ?? false == usageProlongsLifetime))
                 {
                     return GetAllMaterials(null).Single(m => m.Id == materialId);
                 }
@@ -243,6 +247,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
             material.RequiresSupplierReference = requiresSupplierReference;
             material.UseAutofinalization = autofinalize;
             material.CanBeDigitalOnly = canBeDigital;
+            material.UnusedWarnMaterialType = string.IsNullOrWhiteSpace(unusedWarnMaterialType) ? null : unusedWarnMaterialType;
+            material.DaysBeforeWarnForUnused = daysBeforeWarnForUnused;
+            material.UsageProlongsLifetime = usageProlongsLifetime;
 
             m_database.Save(material);
 

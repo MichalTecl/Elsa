@@ -246,7 +246,10 @@ namespace Elsa.Apps.Inventory
                     request.RequiresInvoice,
                     request.RequiresSupplierReference, request.Autofinalization, request.CanBeDigital,
                     request.Materials.Select(s => s.DisplayText),
-                    thresholdText);
+                    thresholdText,
+                    request.DaysBeforeWarnForUnused,
+                    string.IsNullOrWhiteSpace(request.UnusedWarnMaterialType) ? null : request.UnusedWarnMaterialType.Trim(),
+                    request.UsageProlongsLifetime);
                 
                 m_cache.Remove(GetMappablesCacheKey());
 

@@ -48,10 +48,12 @@
                                     <input type="checkbox" lt-name="cbSupplier" data-bind="checked:RequiresSupplierReference" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
                                     <label>Sledovat dodavatele</label>
                                 </div>
-                                <div class="materialFlagEdit stackLeft">
-                                    <input type="checkbox" lt-name="cbAutofinalize" data-bind="checked:Autofinalization" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
-                                    <label>Automatický odpad</label>
-                                </div>
+                                <!--
+    <div class="materialFlagEdit stackLeft">
+        <input type="checkbox" lt-name="cbAutofinalize" data-bind="checked:Autofinalization" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
+        <label>Automatický odpad</label>
+    </div>
+        -->
                                 <div class="materialFlagEdit stackLeft">
                                     <input type="checkbox" lt-name="cbDigital" data-bind="checked:CanBeDigital" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
                                     <label>Může být vyřízen v digitální podobě</label>
@@ -66,10 +68,43 @@
                                     <input data-bind="value:ThresholdText;class!.hidden:HasThreshold" lt-name="tbThreshold" event-bind="change:onThresholdChanged(VM, $cbHasThreshold.checked, $tbThreshold.value)" />
                                 </div>
 
-                            </div>
-                            
-                            
-
+                                <!-- abadnoned -->
+                                <div class="materialFlagEdit abandonedBatchesSetupContainer">
+                                    <div class="stackLeft">
+                                        <input type="checkbox" lt-name="cbDetectAbandoned" data-bind="checked:detectAbandoned" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" />
+                                        <label>Detekovat opuštěné šarže</label>
+                                    </div>
+                                    <div class="abadnonedPolicyContainer" data-bind="class!.hidden:detectAbandoned">
+                                        <div class="stackLeft abandonedPolicyContainer">
+                                            <i>Po </i><input type="number" step="1" min="1" data-bind="value:DaysBeforeWarnForUnused" lt-name="tbDaysBeforeWarnForUnused" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" />
+                                            <i> dnech od </i>
+                                            <div class="abandonTriggerTypeContainer">
+                                                <div class="stackLeft radioWithLabelContainer">
+                                                    <input type="radio" name="rbTrigger" lt-name="rbTriggerManufactured" data-bind="checked:abandonTriggerIsManufacturing" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>výroby</label>
+                                                </div>
+                                                <div class="stackLeft radioWithLabelContainer">
+                                                    <input type="radio" name="rbTrigger" lt-name="rbTriggerUsed" data-bind="checked:abandonTriggerIsUsage" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>posledního použití</label>
+                                                </div>
+                                            </div>
+                                            <div class="abandonActionTypeContainer">
+                                                <div class="radioWithLabelContainer">
+                                                    <input type="radio" name="rbAction" lt-name="rbAbdActionReport" data-bind="checked:abdActionIsReport" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>upozornit</label>
+                                                    <div class="abdReportingGroup" data-bind="class!.hidden:abdActionIsReport">
+                                                        <label>Skupina upozornění</label>
+                                                        <div class="stackLeft prefixedTextbox">
+                                                            <span>Opuštěné&nbsp;</span>
+                                                            <input type="text" lt-name="tbAbdReportGroup" data-bind="value:UnusedWarnMaterialType" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="stackLeft radioWithLabelContainer">
+                                                    <input type="radio" name="rbAction" lt-name="rbAbdActionAutofinalize" data-bind="checked:abdActionIsAutofinalize" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>přesunout do odpadu</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                           
                         </div>
 
                         <div class="itemEditFoot restricted-MaterialEdits">
@@ -175,6 +210,31 @@
             model.HasThreshold = hasThreshold;
             model.ThresholdText = thresholdText;
             
+            lt.notify();
+        };
+
+        this.onAbandonedPolicyChanged = function (
+            model,
+            detectAbandoned,
+            daysBeforeWarnForUnused,
+            abandonTriggerIsManufacturing,
+            abandonTriggerIsUsage,
+            abdActionIsReport,
+            unusedWarnMaterialType,
+            abdActionIsAutofinalize) {
+
+            var days = parseInt(daysBeforeWarnForUnused);
+            if (isNaN(days))
+                days = null;
+
+            model.detectAbandoned = !!detectAbandoned;
+            model.DaysBeforeWarnForUnused = days;
+            model.abandonTriggerIsManufacturing = !!abandonTriggerIsManufacturing;
+            model.abandonTriggerIsUsage = !!abandonTriggerIsUsage;
+            model.abdActionIsReport = !!abdActionIsReport;
+            model.abdActionIsAutofinalize = !!abdActionIsAutofinalize;
+            model.UnusedWarnMaterialType = unusedWarnMaterialType;
+
             lt.notify();
         };
     });

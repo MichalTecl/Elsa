@@ -1,13 +1,10 @@
-﻿using System;
+﻿using Elsa.Commerce.Core.Units;
+using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Inventory;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-using Elsa.Commerce.Core.Units;
-using Elsa.Common.Utils;
-using Elsa.Core.Entities.Commerce.Inventory;
-
-using Newtonsoft.Json;
 
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {
@@ -33,7 +30,10 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             RequiresSupplierReference = adaptee.RequiresSupplierReference ?? false;
             Autofinalization = adaptee.UseAutofinalization ?? false;
             CanBeDigital = adaptee.CanBeDigitalOnly ?? false;
-            
+            DaysBeforeWarnForUnused = adaptee.DaysBeforeWarnForUnused;
+            UnusedWarnMaterialType = adaptee.UnusedWarnMaterialType;
+            UsageProlongsLifetime = adaptee.UsageProlongsLifetime == true;
+
             var threshold = adaptee.Thresholds?.FirstOrDefault();
             if (threshold != null)
             {
@@ -56,11 +56,11 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         [JsonIgnore]
         public IMaterial Adaptee { get; }
-        
+
         public bool HasThreshold { get; set; }
 
         public string ThresholdText { get; set; }
-        
+
         public IExtendedMaterialModel CreateBatch(decimal batchAmount, IMaterialUnit preferredBatchUnit, IUnitConversionHelper conversions)
         {
             // Nominal = 1kg
@@ -87,7 +87,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
                 var batchComponent = new MaterialComponent(sourceComponent.Unit, batchedComponentMaterial, componentBatchAmount, null);
                 batchComponents.Add(batchComponent);
             }
-            
+
             return batch;
         }
 
@@ -115,5 +115,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool Autofinalization { get; }
 
         public bool CanBeDigital { get; }
+        public int? DaysBeforeWarnForUnused { get; }
+        public string UnusedWarnMaterialType { get; }
+
+        public bool UsageProlongsLifetime { get; }
     }
 }

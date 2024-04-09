@@ -24,6 +24,25 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         mat.materials = materials;
         
         mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;
+
+        var unuDays = parseInt(mat.DaysBeforeWarnForUnused);
+        if (isNaN(unuDays)) {
+            mat.detectAbandoned = false;
+            mat.DaysBeforeWarnForUnused = null;
+            mat.abandonTriggerIsManufacturing = false;
+            mat.abandonTriggerIsUsage = false;
+            mat.abdActionIsReport = false;
+            mat.abdActionIsAutofinalize = false;
+        } else {
+            mat.DaysBeforeWarnForUnused = unuDays;
+            mat.detectAbandoned = true;                        
+            mat.abandonTriggerIsUsage = !!mat.UsageProlongsLifetime;
+            mat.abandonTriggerIsManufacturing = !mat.abandonTriggerIsUsage;
+
+            mat.abdActionIsAutofinalize = !!mat.Autofinalization;
+            mat.abdActionIsReport = (!!mat.UnusedWarnMaterialType) && (!mat.abdActionIsAutofinalize);
+            
+        }
     };
 
     var receiveMaterials = function (mats) {
@@ -274,7 +293,36 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         lt.notify();
     };
 
-    self.saveMaterial = function(model) {
+    self.saveMaterial = function (model) {
+
+        if (!model.detectAbandoned) {
+            model.DaysBeforeWarnForUnused = null;
+        } else {
+
+            model.DaysBeforeWarnForUnused = parseInt(model.DaysBeforeWarnForUnused);
+            if (isNaN(model.DaysBeforeWarnForUnused)) {
+                alert("Pro zpracování opuštěných šarží musí být vyplněn počet dnů");
+                return;
+            }
+
+            if ((!model.abandonTriggerIsManufacturing) && (!model.abandonTriggerIsUsage)) {
+                alert("Musí být zvolen způsob výpočtu doby opuštění šarže (od výroby / od polsedního použití)");
+                return;
+            }
+
+            if ((!model.abdActionIsAutofinalize) && (!model.abdActionIsReport)) {
+                alert("Musí být zvolena akce pro opuštěné šarže");
+                return;
+            }
+
+            if ((!!model.abdActionIsReport) && (!model.UnusedWarnMaterialType)) {
+                alert("Pro varování o opuštěných šarží musí být vyplněna skupina upozornění");
+                return;
+            }
+
+            model.UsageProlongsLifetime = !!model.abandonTriggerIsUsage;
+        }
+        
         var request = {
             MaterialId: model.Id,
             MaterialName: model.Name,
@@ -288,8 +336,11 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             Materials: [],
             HasThreshold: model.HasThreshold,
             ThresholdText: model.ThresholdText,
-            Autofinalization: model.Autofinalize,
-            CanBeDigital: model.CanBeDigital
+            Autofinalization: model.Autofinalize || (!!model.abdActionIsAutofinalize),
+            CanBeDigital: model.CanBeDigital,
+            DaysBeforeWarnForUnused: model.detectAbandoned ? model.DaysBeforeWarnForUnused : null,
+            UnusedWarnMaterialType: model.UnusedWarnMaterialType,
+            UsageProlongsLifetime: model.UsageProlongsLifetime
         };
 
         for (var i = 0; i < model.materials.length; i++) {

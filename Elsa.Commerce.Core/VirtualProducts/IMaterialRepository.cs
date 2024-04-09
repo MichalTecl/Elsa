@@ -31,7 +31,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool requiresPrice,
             bool requiresProductionPrice,
             bool requiresInvoice,
-            bool requiresSupplierReference, bool autofinalize, bool canBeDigital);
+            bool requiresSupplierReference, bool autofinalize, bool canBeDigital, int? daysBeforeWarnForUnused, string unusedWarnMaterialType, bool usageProlongsLifetime);
         
         void CleanCache();
         

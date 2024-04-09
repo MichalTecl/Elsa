@@ -54,7 +54,10 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool autofinalize,
             bool canBeDigital,
             IEnumerable<string> components,
-            string thresholdText
+            string thresholdText,
+            int? daysBeforeWarnForUnused,
+            string unusedWarnMaterialType,
+            bool usageProlongsLifetime 
             )
         {
             name = name?.Trim();
@@ -85,7 +88,13 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     requiresPrice, 
                     requiresProductionPrice,
                     requiresIncvoice,
-                    requiresSupplierReference, autofinalize, canBeDigital);
+                    requiresSupplierReference, 
+                    autofinalize, 
+                    canBeDigital,
+                    daysBeforeWarnForUnused,
+                    unusedWarnMaterialType,
+                    usageProlongsLifetime
+                    );
                 
                 if (thresholdText == null)
                 {
@@ -235,6 +244,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
             }
 
             return unit;
-        }
+        }        
     }
 }
