@@ -128,6 +128,7 @@
     <Content Include="SQL\20220610_001_vwBatchAvailableAmountWithPercentage.sql" />
     <Content Include="SQL\20220611_001_toInt.sql" />
     <Content Include="SQL\20220611_002_insp_unprocessedSourceBatches.sql" />
+    <Content Include="SQL\20240410-003 insp_abandonedBatchReamains.sql" />
     <Content Include="UI\Inspector\ActionControls\Ignore.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneWeek.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneDay.html" />
