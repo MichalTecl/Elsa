@@ -83,7 +83,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(PrefillCalendarJob).Assembly);
                     s.ScanAssembly(typeof(SetOrdersPaid).Assembly);
                     s.ScanAssembly(typeof(IPaymentSystemClientFactory).Assembly);
-                    s.ScanAssembly(typeof(VirtualProductsController).Assembly);
+                    s.ScanAssembly(typeof(InventoryAppRegistry).Assembly);
                     s.ScanAssembly(typeof(PreviewController).Assembly);
                     s.ScanAssembly(typeof(IPurchaseOrderRepository).Assembly);
                     s.ScanAssembly(typeof(PaymentsPairingController).Assembly);

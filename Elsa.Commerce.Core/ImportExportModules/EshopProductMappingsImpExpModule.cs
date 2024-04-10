@@ -22,7 +22,7 @@ namespace Elsa.Commerce.Core.ImportExportModules
 
         public override string Description => "Mapping materiálů v Else na názvy produktů v E-Shopu";
 
-        protected override IEnumerable<ErpProductMapping> ExportData(out string exportFileName)
+        protected override List<ErpProductMapping> ExportData(out string exportFileName)
         {
             exportFileName = "Eshop_Elsa_Mapping.xlsx";
             return _vpRepo.ExportErpProductMappings();

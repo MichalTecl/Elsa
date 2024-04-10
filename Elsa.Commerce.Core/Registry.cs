@@ -61,6 +61,7 @@ namespace Elsa.Commerce.Core
             setup.For<KitsImpExpModule>().Use<KitsImpExpModule>();
             setup.For<EshopProductMappingsImpExpModule>().Use<EshopProductMappingsImpExpModule>();
             setup.For<MaterialReportingGroupsImpExpModule>().Use<MaterialReportingGroupsImpExpModule>();
+            setup.For<AbandonedBatchRulesImpExp>().Use<AbandonedBatchRulesImpExp>();
         }
     }
 }

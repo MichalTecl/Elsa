@@ -23,7 +23,7 @@ namespace Elsa.Commerce.Core.ImportExportModules
 
         public override string Description => "Nastavení sad produktů";
 
-        protected override IEnumerable<KitProductXlsModel> ExportData(out string exportFileName)
+        protected override List<KitProductXlsModel> ExportData(out string exportFileName)
         {
             exportFileName = "Definice_Sad.xlsx";
             return _vpRepo.ExportKits();

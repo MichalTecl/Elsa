@@ -14,16 +14,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
     var materialInventories = null;
     var matInventoriesCallbacks = [];
-    
-    var adjustServerMaterial = function(mat) {
 
-        mat.editMode = false;
-
-        var materials = [];
-        
-        mat.materials = materials;
-        
-        mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;
+    var setupAbandonedBatchesStuff = function (mat) {
 
         var unuDays = parseInt(mat.DaysBeforeWarnForUnused);
         if (isNaN(unuDays)) {
@@ -35,14 +27,30 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             mat.abdActionIsAutofinalize = false;
         } else {
             mat.DaysBeforeWarnForUnused = unuDays;
-            mat.detectAbandoned = true;                        
+            mat.detectAbandoned = true;
             mat.abandonTriggerIsUsage = !!mat.UsageProlongsLifetime;
             mat.abandonTriggerIsManufacturing = !mat.abandonTriggerIsUsage;
 
             mat.abdActionIsAutofinalize = !!mat.Autofinalization;
             mat.abdActionIsReport = (!!mat.UnusedWarnMaterialType) && (!mat.abdActionIsAutofinalize);
-            
         }
+
+        mat.rbGroupAction = "radio_action" + (mat.Id || new Date().getTime());
+        mat.rbGroupTrigger = "radio_trigger" + (mat.Id || new Date().getTime());
+    };
+
+    var adjustServerMaterial = function(mat) {
+
+        mat.editMode = false;
+
+        var materials = [];
+        
+        mat.materials = materials;
+        
+        mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;
+
+        setupAbandonedBatchesStuff(mat);
+        
     };
 
     var receiveMaterials = function (mats) {
@@ -286,6 +294,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             if (self.currentMaterialInventory.AllowedUnit) {
                 newMat.nominalAmountText = "1" + self.currentMaterialInventory.AllowedUnit.Symbol;
             }
+
+            setupAbandonedBatchesStuff(newMat);
 
             self.selectedMaterials.unshift(newMat);
         }

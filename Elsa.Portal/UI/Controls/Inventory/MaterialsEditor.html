@@ -6,27 +6,32 @@
                 <button event-bind="click:search($tbMatsQuery.value)" class="fa fa-search"></button>
             </div>
         </div>
-        <div class="materialsListContainer">
-            <button event-bind="click:createNewMaterial" class="addMaterialProductBut restricted-MaterialEdits"><i class="fas fa-plus"></i></button>
+        <div class="materialsListContainer">            
+            <button event-bind="click:createNewMaterial" class="addMaterialProductBut restricted-MaterialEdits"><i class="fas fa-plus"></i></button>              
+            
             <div id="materialsList" class="listContainer">
 
                 <div lt-name="materialItemTemplate" class="materialItemContainer lt-template">
-                    <div data-bind="class.hidden:editMode" class="materialItemView showButtonsOnHover simpleListItem">
+                    <div data-bind="class.hidden:editMode" class="materialItemView showButtonsOnHover simpleListItem">                        
                         <div data-bind="text:Name" class="materialTitle"></div>
                         <i class="fas fa-edit faButton" event-bind="click:editMaterial(Id)"></i>
                     </div>
                     <div data-bind="class!.hidden:editMode" class="materialEditItem">
+                        <div class="wikilink">
+                            <a href="https://github.com/MichalTecl/Elsa/wiki/Materi%C3%A1l#nastaven%C3%AD-materi%C3%A1l%C5%AF-editor" target="_blank"></a>
+                        </div>
+
                         <i class="fas fa-cube"></i>
                         <input data-bind="value:Name" event-bind="change:updateModelName(this.value, VM)" />
-
+                        
                         <div class="materialEditContainer">
                             <div class="containsTitleContainer containsTitle">
                                 <i lt-name="lblNominalLeft"></i>
-                                <input required="required" data-bind="value:nominalAmountText" lt-name="tbNominalAmount" event-bind="change:onNominalAmountTextChanged(VM, this.value)"/>
+                                <input required="required" data-bind="value:nominalAmountText" lt-name="tbNominalAmount" event-bind="change:onNominalAmountTextChanged(VM, this.value)" />
                                 <i lt-name="lblNominalRight"></i>
                             </div>
                             <div class="materialEditor" lt-name="materialEditPlaceholder"></div>
-                            
+
                             <div class="materialEditFlags">
                                 <div class="materialFlagEdit stackLeft">
                                     <input type="checkbox" lt-name="cbAutoBatches" data-bind="checked:AutomaticBatches" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
@@ -49,11 +54,11 @@
                                     <label>Sledovat dodavatele</label>
                                 </div>
                                 <!--
-    <div class="materialFlagEdit stackLeft">
-        <input type="checkbox" lt-name="cbAutofinalize" data-bind="checked:Autofinalization" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
-        <label>Automatický odpad</label>
-    </div>
-        -->
+            <div class="materialFlagEdit stackLeft">
+                <input type="checkbox" lt-name="cbAutofinalize" data-bind="checked:Autofinalization" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
+                <label>Automatický odpad</label>
+            </div>
+                -->
                                 <div class="materialFlagEdit stackLeft">
                                     <input type="checkbox" lt-name="cbDigital" data-bind="checked:CanBeDigital" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
                                     <label>Může být vyřízen v digitální podobě</label>
@@ -80,15 +85,15 @@
                                             <i> dnech od </i>
                                             <div class="abandonTriggerTypeContainer">
                                                 <div class="stackLeft radioWithLabelContainer">
-                                                    <input type="radio" name="rbTrigger" lt-name="rbTriggerManufactured" data-bind="checked:abandonTriggerIsManufacturing" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>výroby</label>
+                                                    <input type="radio" lt-name="rbTriggerManufactured" data-bind="name:rbGroupTrigger;checked:abandonTriggerIsManufacturing" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>výroby</label>
                                                 </div>
                                                 <div class="stackLeft radioWithLabelContainer">
-                                                    <input type="radio" name="rbTrigger" lt-name="rbTriggerUsed" data-bind="checked:abandonTriggerIsUsage" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>posledního použití</label>
+                                                    <input type="radio" lt-name="rbTriggerUsed" data-bind="name:rbGroupTrigger;checked:abandonTriggerIsUsage" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>posledního použití</label>
                                                 </div>
                                             </div>
                                             <div class="abandonActionTypeContainer">
                                                 <div class="radioWithLabelContainer">
-                                                    <input type="radio" name="rbAction" lt-name="rbAbdActionReport" data-bind="checked:abdActionIsReport" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>upozornit</label>
+                                                    <input type="radio" lt-name="rbAbdActionReport" data-bind="name:rbGroupAction;checked:abdActionIsReport" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>upozornit</label>
                                                     <div class="abdReportingGroup" data-bind="class!.hidden:abdActionIsReport">
                                                         <label>Skupina upozornění</label>
                                                         <div class="stackLeft prefixedTextbox">
@@ -98,13 +103,16 @@
                                                     </div>
                                                 </div>
                                                 <div class="stackLeft radioWithLabelContainer">
-                                                    <input type="radio" name="rbAction" lt-name="rbAbdActionAutofinalize" data-bind="checked:abdActionIsAutofinalize" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>přesunout do odpadu</label>
+                                                    <input type="radio" lt-name="rbAbdActionAutofinalize" data-bind="name:rbGroupAction;checked:abdActionIsAutofinalize" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" /><label>přesunout do odpadu</label>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>                           
+
+
+                            </div>
+
                         </div>
 
                         <div class="itemEditFoot restricted-MaterialEdits">
@@ -112,7 +120,6 @@
                             <button event-bind="click:save(VM)"><i class="fas fa-check"></i></button>
                             <button event-bind="click:cancelEdit"><i class="fas fa-times"></i></button>
                         </div>
-
                     </div>
 
                 </div>

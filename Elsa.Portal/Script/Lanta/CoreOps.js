@@ -8,8 +8,8 @@ lanta.Extensions.defaultErrorHandler = lanta.Extensions.defaultErrorHandler || f
     alert(error.message || error);
 };
 
-window.onbeforeunload = function() {
-    lanta.Extensions.defaultErrorHandler = function(e) {};
+window.onbeforeunload = function () {
+    //lanta.Extensions.defaultErrorHandler = function(e) {};
 };
 
 lanta.CoreOps.defaultCustomArgumentFactory = function (element, argumentName) {

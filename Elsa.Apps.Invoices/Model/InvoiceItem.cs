@@ -17,14 +17,14 @@ namespace Elsa.Apps.Invoices.Model
         [ValidateMaterial]
         public string MaterialName { get; set; }
 
-        [XlsColumn("D", "Množství")]
+        [XlsColumn("D", "Množství", numberFormat: "0.00")]
         public decimal Quantity { get; set; }
 
         [XlsColumn("E", "Jednotka")]
         [SetUnitByMaterial("R[0]C[-2]")]
         public string Unit { get; set; }
 
-        [XlsColumn("F", "Cena bez DPH")]
+        [XlsColumn("F", "Cena bez DPH", numberFormat: "0.00")]
         public decimal Price { get; set; }
     }
 }

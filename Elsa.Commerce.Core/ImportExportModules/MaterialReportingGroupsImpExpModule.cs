@@ -23,7 +23,7 @@ namespace Elsa.Commerce.Core.ImportExportModules
 
         public override string Description => "Přiřazení produktů (materiálů v Else) do skupin pro reporting. Prázdná hodnota ve sloupci skupiny odebere materiál od skupiny, neexistující skupina bude vytvořena.";
 
-        protected override IEnumerable<MaterialReportingGroupAssignmentModel> ExportData(out string exportFileName)
+        protected override List<MaterialReportingGroupAssignmentModel> ExportData(out string exportFileName)
         {
             exportFileName = "SkupinyProduktu.xlsx";
             return _repo.GetMaterialReportingGroupAssignments();

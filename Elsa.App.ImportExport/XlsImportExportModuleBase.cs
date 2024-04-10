@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -23,11 +24,14 @@ namespace Elsa.App.ImportExport
 
         public string Import(Stream inputStream)
         {
-            var data = XlsxSerializer.Instance.Deserialize<List<TModel>>(inputStream);
-            return ImportData(data);
+            using (var ep = new ExcelPackage(inputStream))
+            {
+                var data = XlsxSerializer.Instance.Deserialize<List<TModel>>(ep);
+                return ImportData(data);
+            }
         }
 
-        protected abstract IEnumerable<TModel> ExportData(out string exportFileName);
+        protected abstract List<TModel> ExportData(out string exportFileName);
         protected abstract string ImportData(List<TModel> data);
     }
 }

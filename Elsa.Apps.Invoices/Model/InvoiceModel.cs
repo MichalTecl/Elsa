@@ -27,7 +27,7 @@ namespace Elsa.Apps.Invoices.Model
         [ListValidation("DATA_Suppliers!A:A", AllowBlank = false, Error = "Neznamy dodavatel")]
         public string SupplierName { get; set; }
 
-        [XlsCell("B5")]
+        [XlsCell("B5", numberFormat: "0.00")]
         [Label("Celk. cena")]
         public decimal TotalPrice { get; set; }
 

@@ -77,6 +77,7 @@
     <Compile Include="Impl\ErpClientFactory.cs" />
     <Compile Include="Impl\OrdersFacade.cs" />
     <Compile Include="Impl\OrderStatusTranslator.cs" />
+    <Compile Include="ImportExportModules\AbandonedBatchRulesImpExp.cs" />
     <Compile Include="ImportExportModules\EshopProductMappingsImpExpModule.cs" />
     <Compile Include="ImportExportModules\MaterialReportingGroupsImpExpModule.cs" />
     <Compile Include="ImportExportModules\KitsImpExpModule.cs" />
