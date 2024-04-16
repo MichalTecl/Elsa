@@ -249,7 +249,9 @@ namespace Elsa.Apps.Inventory
                     thresholdText,
                     request.DaysBeforeWarnForUnused,
                     string.IsNullOrWhiteSpace(request.UnusedWarnMaterialType) ? null : request.UnusedWarnMaterialType.Trim(),
-                    request.UsageProlongsLifetime);
+                    request.UsageProlongsLifetime,
+                    request.NotAbandonedUntilNewerBatchUsed,
+                    request.UniqueBatchNumbers);
                 
                 m_cache.Remove(GetMappablesCacheKey());
 

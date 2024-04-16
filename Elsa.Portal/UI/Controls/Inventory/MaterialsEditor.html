@@ -54,14 +54,19 @@
                                     <label>Sledovat dodavatele</label>
                                 </div>
                                 <!--
-            <div class="materialFlagEdit stackLeft">
-                <input type="checkbox" lt-name="cbAutofinalize" data-bind="checked:Autofinalization" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
-                <label>Automatický odpad</label>
-            </div>
-                -->
+    <div class="materialFlagEdit stackLeft">
+        <input type="checkbox" lt-name="cbAutofinalize" data-bind="checked:Autofinalization" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
+        <label>Automatický odpad</label>
+    </div>
+        -->
                                 <div class="materialFlagEdit stackLeft">
                                     <input type="checkbox" lt-name="cbDigital" data-bind="checked:CanBeDigital" event-bind="change:onFlagChanged(VM, $cbAutoBatches.checked, $cbInvoice.checked, $cbPrice.checked, $cbSupplier.checked, $cbProdPrice.checked, $cbAutofinalize.checked, $cbDigital.checked)" />
                                     <label>Může být vyřízen v digitální podobě</label>
+                                </div>
+
+                                <div class="materialFlagEdit stackLeft">
+                                    <input type="checkbox" lt-name="cbUniqueBatchNumbers" data-bind="checked:UniqueBatchNumbers" event-bind="change:onNamedPropChanged(VM, 'UniqueBatchNumbers', this.checked)" />
+                                    <label>Unikátní čísla šarží</label>
                                 </div>
 
                                 <!-- threshold-->
@@ -107,7 +112,12 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="stackLeft nuNewerBatchCont">
+                                            <input type="checkbox" lt-name="cbNewerBatch" data-bind="checked:NotAbandonedUntilNewerBatchUsed" event-bind="change:onNamedPropChanged(VM, 'NotAbandonedUntilNewerBatchUsed', this.checked)" />
+                                            <label>Jen pokud byla použita novější šarže</label>
+                                        </div>
                                     </div>
+
                                 </div>
 
 
@@ -202,6 +212,11 @@
             model.CanBeDigital = canBeDigital;
             lt.notify(this);
         };
+
+        this.onNamedPropChanged = function (model, propName, value) {
+            model[propName] = value;
+            lt.notify(this);
+        };
         
         this.deleteMaterial = function(model) {
             var cfm = confirm("Opravdu vymazat '" + model.Name + "'?");
@@ -228,7 +243,8 @@
             abandonTriggerIsUsage,
             abdActionIsReport,
             unusedWarnMaterialType,
-            abdActionIsAutofinalize) {
+            abdActionIsAutofinalize,
+             ) {
 
             var days = parseInt(daysBeforeWarnForUnused);
             if (isNaN(days))

@@ -22,7 +22,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
             string thresholdText,
             int? daysBeforeWarnForUnused,
             string unusedWarnMaterialType,
-            bool usageProlongsLifetime);
+            bool usageProlongsLifetime, 
+            bool notAbandonedUntilNewerBatchUsed,
+            bool uniqueBatchNumbers);
         
         MaterialSetupInfo GetMaterialInfo(string materialName);
 

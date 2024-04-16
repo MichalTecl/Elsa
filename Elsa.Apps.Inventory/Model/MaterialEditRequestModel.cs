@@ -38,5 +38,9 @@ namespace Elsa.Apps.Inventory.Model
         public string UnusedWarnMaterialType { get; set; }
 
         public bool UsageProlongsLifetime { get; set; }
+
+        public bool NotAbandonedUntilNewerBatchUsed { get; set; }
+
+        public bool UniqueBatchNumbers { get; set; }
     }
 }

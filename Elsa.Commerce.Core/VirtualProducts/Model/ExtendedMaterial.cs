@@ -33,6 +33,8 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             DaysBeforeWarnForUnused = adaptee.DaysBeforeWarnForUnused;
             UnusedWarnMaterialType = adaptee.UnusedWarnMaterialType;
             UsageProlongsLifetime = adaptee.UsageProlongsLifetime == true;
+            NotAbandonedUntilNewerBatchUsed = adaptee.NotAbandonedUntilNewerBatchUsed == true;
+            UniqueBatchNumbers = adaptee.UniqueBatchNumbers == true;
 
             var threshold = adaptee.Thresholds?.FirstOrDefault();
             if (threshold != null)
@@ -119,5 +121,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public string UnusedWarnMaterialType { get; }
 
         public bool UsageProlongsLifetime { get; }
+
+        public bool NotAbandonedUntilNewerBatchUsed { get; }
+
+        public bool UniqueBatchNumbers { get; }
     }
 }

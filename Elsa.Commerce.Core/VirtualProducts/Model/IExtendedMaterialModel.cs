@@ -57,5 +57,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         string UnusedWarnMaterialType { get; }
 
         bool UsageProlongsLifetime { get; }
+
+        bool NotAbandonedUntilNewerBatchUsed { get; }
+
+        bool UniqueBatchNumbers { get; }
     }
 }

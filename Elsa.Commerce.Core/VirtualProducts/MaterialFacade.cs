@@ -57,7 +57,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
             string thresholdText,
             int? daysBeforeWarnForUnused,
             string unusedWarnMaterialType,
-            bool usageProlongsLifetime 
+            bool usageProlongsLifetime,
+            bool notAbandonedUntilNewerBatchUsed,
+            bool uniqueBatchNumbers
             )
         {
             name = name?.Trim();
@@ -80,21 +82,26 @@ namespace Elsa.Commerce.Core.VirtualProducts
             {
                 var material = m_materialRepository.UpsertMaterial(
                     materialId,
-                    name,
-                    nominalAmountEntry.Amount,
-                    nominalUnit.Id,
-                    materialInventoryId,
-                    automaticBatches,
-                    requiresPrice, 
-                    requiresProductionPrice,
-                    requiresIncvoice,
-                    requiresSupplierReference, 
-                    autofinalize, 
-                    canBeDigital,
-                    daysBeforeWarnForUnused,
-                    unusedWarnMaterialType,
-                    usageProlongsLifetime
-                    );
+                    m =>
+                    {
+                        m.Name = name;
+                        m.NominalAmount = nominalAmountEntry.Amount;
+                        m.NominalUnitId = nominalUnit.Id;
+                        m.InventoryId = materialInventoryId;
+                        m.AutomaticBatches = automaticBatches;
+                        m.RequiresPrice = requiresPrice;
+                        m.RequiresProductionPrice = requiresProductionPrice;
+                        m.RequiresInvoiceNr = requiresIncvoice;
+                        m.RequiresSupplierReference = requiresSupplierReference;
+                        m.UseAutofinalization = autofinalize;
+                        m.CanBeDigitalOnly = canBeDigital;
+                        m.DaysBeforeWarnForUnused = daysBeforeWarnForUnused;
+                        m.UnusedWarnMaterialType = unusedWarnMaterialType;
+                        m.UsageProlongsLifetime = usageProlongsLifetime;
+                        m.NotAbandonedUntilNewerBatchUsed = notAbandonedUntilNewerBatchUsed;
+                        m.UniqueBatchNumbers = uniqueBatchNumbers;
+
+                    });
                 
                 if (thresholdText == null)
                 {

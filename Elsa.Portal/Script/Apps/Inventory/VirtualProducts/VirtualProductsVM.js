@@ -350,7 +350,9 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             CanBeDigital: model.CanBeDigital,
             DaysBeforeWarnForUnused: model.detectAbandoned ? model.DaysBeforeWarnForUnused : null,
             UnusedWarnMaterialType: model.UnusedWarnMaterialType,
-            UsageProlongsLifetime: model.UsageProlongsLifetime
+            UsageProlongsLifetime: model.UsageProlongsLifetime,
+            UniqueBatchNumbers: model.UniqueBatchNumbers,
+            NotAbandonedUntilNewerBatchUsed: model.NotAbandonedUntilNewerBatchUsed
         };
 
         for (var i = 0; i < model.materials.length; i++) {

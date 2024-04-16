@@ -47,5 +47,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         string UnusedWarnMaterialType { get; set; }
 
         bool? UsageProlongsLifetime { get; set; }
+
+        bool? NotAbandonedUntilNewerBatchUsed { get; set; }
+
+        bool? UniqueBatchNumbers { get; set; }
     }
 }

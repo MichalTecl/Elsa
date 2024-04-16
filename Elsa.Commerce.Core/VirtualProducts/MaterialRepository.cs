@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
@@ -163,6 +164,72 @@ namespace Elsa.Commerce.Core.VirtualProducts
             }
 
             m_cache.Remove(VirtualProductCompositionsCacheKey);
+        }
+
+        public IExtendedMaterialModel UpsertMaterial(int? materialId, Action<IMaterial> setup)
+        {
+            IMaterial material;
+            if (materialId != null)
+            {
+                material = GetAllMaterials(null).FirstOrDefault(m => m.Id == materialId.Value)?.Adaptee;
+                if (material == null)
+                {
+                    throw new InvalidOperationException($"Invalid material Id {materialId}");
+                }
+                
+                var oldNominalUnitId = material.NominalUnitId;
+
+                setup(material);
+
+                if (material.NominalUnitId != oldNominalUnitId)
+                {
+                    if (
+                        m_database.SelectFrom<IRecipe>()
+                            .Where(mc => mc.ProducedMaterialId == materialId)
+                            .Execute()
+                            .Any())
+                    {
+                        throw new InvalidOperationException($"Není možné změnit nominální jednotku materiálu, protože tento materiál je již součástí receptury");
+                    }
+
+                    if (
+                        m_database.SelectFrom<IVirtualProductMaterial>()
+                            .Where(mc => mc.ComponentId == materialId)
+                            .Execute()
+                            .Any())
+                    {
+                        throw new InvalidOperationException($"Není možné změnit nominální jednotku materiálu, protože tento materiál je přiřazen k některému tagu");
+                    }
+                }
+            }
+            else
+            {
+                material = m_database.New<IMaterial>();
+
+                setup(material);
+
+                if (GetAllMaterials(null).Any(m => m.Name.Equals(material.Name, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    throw new InvalidOperationException("Název materiálu byl již použit");
+                }
+
+                material = m_database.New<IMaterial>();
+            }
+
+            var inventory = GetMaterialInventories().FirstOrDefault(i => i.Id == material.InventoryId);
+            if (inventory == null)
+            {
+                throw new InvalidOperationException("Invalid reference to inventory");
+            }
+                        
+            material.ProjectId = m_session.Project.Id;            
+            material.UnusedWarnMaterialType = string.IsNullOrWhiteSpace(material.UnusedWarnMaterialType) ? null : material.UnusedWarnMaterialType;
+            
+            m_database.Save(material);
+
+            CleanCache();
+
+            return GetAllMaterials(null).Single(m => m.Id == material.Id);
         }
 
         public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount,
