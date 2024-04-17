@@ -1,6 +1,7 @@
 ﻿using Elsa.App.ImportExport;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
+using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +15,7 @@ namespace Elsa.Commerce.Core.ImportExportModules
     {
         private readonly IVirtualProductRepository _vpRepo;
 
-        public KitsImpExpModule(IVirtualProductRepository vpRepo)
+        public KitsImpExpModule(IVirtualProductRepository vpRepo, IDatabase db) : base(db)
         {
             _vpRepo = vpRepo;
         }
@@ -23,13 +24,13 @@ namespace Elsa.Commerce.Core.ImportExportModules
 
         public override string Description => "Nastavení sad produktů";
 
-        protected override List<KitProductXlsModel> ExportData(out string exportFileName)
+        protected override List<KitProductXlsModel> ExportData(out string exportFileName, IDatabase db)
         {
             exportFileName = "Definice_Sad.xlsx";
             return _vpRepo.ExportKits();
         }
 
-        protected override string ImportData(List<KitProductXlsModel> data)
+        protected override string ImportDataInTransaction(List<KitProductXlsModel> data, IDatabase db, ITransaction tx)
         {
             var cnt = _vpRepo.ImportKits(data);
 

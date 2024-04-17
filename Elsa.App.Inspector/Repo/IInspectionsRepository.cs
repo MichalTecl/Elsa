@@ -27,5 +27,13 @@ namespace Elsa.App.Inspector.Repo
         void PostponeIssue(int issueId, int days);
         int ResolveIssueTypeByIssueId(int issueId);
         void LogUserAction(int issueId, string actionText);
+
+        IEnumerable<IInspectionType> GetIssueTypes();
+        IEnumerable<IInspectionResponsibilityMatrix> GetResponsibilityMatrix();
+
+        int SetResponsibleUser(int issueTypeId, int userId, string emailOverride, int daysAfterDetect);
+
+        int RemoveResponsibleUser(int issueTypeId, int? userId);
+
     }
 }

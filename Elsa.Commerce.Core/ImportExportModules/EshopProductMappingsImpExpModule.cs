@@ -1,6 +1,7 @@
 ﻿using Elsa.App.ImportExport;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
+using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Elsa.Commerce.Core.ImportExportModules
     {
         private readonly IVirtualProductRepository _vpRepo;
 
-        public EshopProductMappingsImpExpModule(IVirtualProductRepository vpRepo)
+        public EshopProductMappingsImpExpModule(IVirtualProductRepository vpRepo, IDatabase database) : base(database)
         {
             _vpRepo = vpRepo;
         }
@@ -22,13 +23,13 @@ namespace Elsa.Commerce.Core.ImportExportModules
 
         public override string Description => "Mapping materiálů v Else na názvy produktů v E-Shopu";
 
-        protected override List<ErpProductMapping> ExportData(out string exportFileName)
+        protected override List<ErpProductMapping> ExportData(out string exportFileName, IDatabase db)
         {
             exportFileName = "Eshop_Elsa_Mapping.xlsx";
             return _vpRepo.ExportErpProductMappings();
         }
 
-        protected override string ImportData(List<ErpProductMapping> data)
+        protected override string ImportDataInTransaction(List<ErpProductMapping> data, IDatabase db, ITransaction tx)
         {
             var count = _vpRepo.ImportErpProductMappings(data);
 

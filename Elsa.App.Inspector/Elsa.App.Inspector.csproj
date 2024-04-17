@@ -32,14 +32,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EPPlus, Version=4.5.3.2, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.4.5.3.2\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="XlsSerializer.Core, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\XlsSerializer.Core.1.0.3\lib\net461\XlsSerializer.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\InspectorController.cs" />
@@ -52,6 +62,8 @@
     <Compile Include="Database\IInspectionSession.cs" />
     <Compile Include="Database\IInspectionType.cs" />
     <Compile Include="Database\ILogReaderScanHistory.cs" />
+    <Compile Include="ImpExpModules\ResponsibilityMatrixImpExpModule.cs" />
+    <Compile Include="ImpExpModules\ResponsibilityMatrixRowModel.cs" />
     <Compile Include="InspectionsSyncSession.cs" />
     <Compile Include="InspectorRegistry.cs" />
     <Compile Include="Jobs\InspectorJob.cs" />
@@ -64,9 +76,17 @@
     <Compile Include="Repo\InspectionsRepository.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Elsa.App.ImportExport\Elsa.App.ImportExport.csproj">
+      <Project>{2F701563-935D-43BD-8CF3-BBF47DF17397}</Project>
+      <Name>Elsa.App.ImportExport</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Apps.Reporting\Elsa.Apps.Reporting.csproj">
       <Project>{AF048602-B9A5-4464-9F6D-3D3A4FDF55FE}</Project>
       <Name>Elsa.Apps.Reporting</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
+      <Project>{61DD96B7-BF13-4C48-9353-08F2F907048E}</Project>
+      <Name>Elsa.Commerce.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
       <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
@@ -107,6 +127,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="sencha.json" />
   </ItemGroup>
   <ItemGroup>
@@ -128,8 +149,10 @@
     <Content Include="SQL\20220610_001_vwBatchAvailableAmountWithPercentage.sql" />
     <Content Include="SQL\20220611_001_toInt.sql" />
     <Content Include="SQL\20220611_002_insp_unprocessedSourceBatches.sql" />
+    <Content Include="SQL\20240416-001 insp_abandonedBatchReamains.sql" />
     <Content Include="SQL\20240410-003 insp_abandonedBatchReamains.sql" />
     <Content Include="UI\Inspector\ActionControls\Ignore.html" />
+    <Content Include="UI\Inspector\ActionControls\PostponeOneMonth.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneWeek.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneDay.html" />
     <Content Include="UI\Inspector\Inspector.css" />

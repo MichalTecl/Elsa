@@ -26,6 +26,9 @@ namespace Elsa.App.Inspector.Repo
             m_log = log;
         }
 
+        private string ResponsibilityMatrixCacheKey => $"inspMatrix_{m_session.Project.Id}";
+        private string IssueTypesCacheKey => $"inspIssueTypes_{m_session.Project.Id}";
+
         public IEnumerable<string> GetInspectionProcedures()
         {
             return m_database.Sql().Call("inspfw_getInspectionProcedures").MapRows(reader => reader.GetString(0));
@@ -237,6 +240,7 @@ namespace Elsa.App.Inspector.Repo
         public void OnIssueChanged(int issueId)
         {
             m_cache.Remove(GetIssuesOverviewCacheKey());
+            
         }
 
         public IInspectionIssue LoadIssue(int issueId, bool includeHidden)
@@ -288,5 +292,68 @@ namespace Elsa.App.Inspector.Repo
         {
             return $"inspIssuesOverview_{m_session.User.Id}";
         }
+
+        
+        public IEnumerable<IInspectionType> GetIssueTypes()
+        {
+            // load inspeciton types through 1 minutes cache. Cache key must be constructed to be unique for each project
+            return m_cache.ReadThrough(IssueTypesCacheKey, TimeSpan.FromMinutes(1), () =>
+            {
+                return m_database.SelectFrom<IInspectionType>().Execute().ToList();
+            });
+        }
+
+        public IEnumerable<IInspectionResponsibilityMatrix> GetResponsibilityMatrix()
+        {
+            //load responsibility matrix through 1 minutes cache. Cache key must be constructed to be unique for each project
+            return m_cache.ReadThrough(ResponsibilityMatrixCacheKey, TimeSpan.FromMinutes(1), () =>
+            {
+                return m_database.SelectFrom<IInspectionResponsibilityMatrix>().Execute().ToList();
+            });
+        }
+
+        public int SetResponsibleUser(int issueTypeId, int userId, string emailOverride, int daysAfterDetect)
+        {
+            // check whether the user is already responsible for the issue type using GetResponsibilityMatrix method
+            var record = GetResponsibilityMatrix().FirstOrDefault(r => r.InspectionTypeId == issueTypeId && r.ResponsibleUserId == userId);
+            if (record != null)
+            {
+                // update existing responsibility matrix record if new values are different
+                if (record.EMailOverride == emailOverride && record.DaysAfterDetect == daysAfterDetect)
+                    return 0;                
+            }
+            else
+            {
+                record = m_database.New<IInspectionResponsibilityMatrix>();
+            }
+            
+            record.InspectionTypeId = issueTypeId;
+            record.ResponsibleUserId = userId;
+            record.EMailOverride = emailOverride;
+            record.DaysAfterDetect = daysAfterDetect;
+            
+            m_database.Save(record);
+
+            m_cache.Remove(ResponsibilityMatrixCacheKey);
+
+            return 1;
+        }
+
+        public int RemoveResponsibleUser(int issueTypeId, int? userId)
+        {            
+            //check whether the user is responsible for the issue type using GetResponsibilityMatrix method
+            var existing = GetResponsibilityMatrix().Where(r => r.InspectionTypeId == issueTypeId && (userId == null || r.ResponsibleUserId == userId)).ToList();
+            if (existing.Count == 0)
+                return 0;
+
+            // delete the responsibility matrix record
+            m_database.DeleteAll(existing);
+
+            // invalidate cache
+            m_cache.Remove(ResponsibilityMatrixCacheKey);
+
+            return existing.Count;
+        }
     }
 }
+

@@ -39,9 +39,9 @@ namespace Elsa.Commerce.Core.Repositories
             return GetAllUsers().FirstOrDefault(u => u.Id == id);
         }
 
-        private IEnumerable<IUser> GetAllUsers()
+        public List<IUser> GetAllUsers()
         {
-            return m_cache.ReadThrough("allUsers", database => database.SelectFrom<IUser>());
+            return m_cache.ReadThrough("allUsers", database => database.SelectFrom<IUser>()).ToList();
         }
     }
 }

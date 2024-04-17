@@ -14,5 +14,6 @@ namespace Elsa.Commerce.Core
         string GetUserEmail(int userId);
 
         IUser GetUser(int id);
+        List<IUser> GetAllUsers();
     }
 }

@@ -6,8 +6,6 @@ using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using XlsSerializer.Core.Attributes;
 
 namespace Elsa.Commerce.Core.ImportExportModules
@@ -15,21 +13,19 @@ namespace Elsa.Commerce.Core.ImportExportModules
     public class AbandonedBatchRulesImpExp : XlsImportExportModuleBase<AbandonedBatchRuleModel>
     {
         private readonly IMaterialRepository _materialRepository;
-        private readonly IDatabase _db;
         private readonly ISession _session;
 
-        public AbandonedBatchRulesImpExp(IMaterialRepository materialRepository, IDatabase db, ISession session)
+        public AbandonedBatchRulesImpExp(IMaterialRepository materialRepository, IDatabase db, ISession session) : base(db)
         {
             _materialRepository = materialRepository;
-            _db = db;
             _session = session;
         }
 
         public override string Title => "Pravidla pro opuštěné šarže";
-        
+
         public override string Description => "Import/Export nastavení pravidel pro řešení opuštěných šarží pro jednotlivé materiály";
 
-        protected override List<AbandonedBatchRuleModel> ExportData(out string exportFileName)
+        protected override List<AbandonedBatchRuleModel> ExportData(out string exportFileName, IDatabase db)
         {
             exportFileName = "PravidlaOpustenychSarzi.xlsx";
 
@@ -47,73 +43,67 @@ namespace Elsa.Commerce.Core.ImportExportModules
             return res;
         }
 
-        protected override string ImportData(List<AbandonedBatchRuleModel> data)
+        protected override string ImportDataInTransaction(List<AbandonedBatchRuleModel> data, IDatabase db, ITransaction tx)
         {
-            var allMats = _db.SelectFrom<IMaterial>().Where(m => m.ProjectId == _session.Project.Id).Execute().ToDictionary(k => k.Name, k => k);
+            var allMats = db.SelectFrom<IMaterial>().Where(m => m.ProjectId == _session.Project.Id).Execute().ToDictionary(k => k.Name, k => k);
 
             int changed = 0;
 
-            using(var tx = _db.OpenTransaction())
+            foreach (var row in data)
             {
+                if (!allMats.TryGetValue(row.Material, out var material))
+                    throw new ArgumentException($"Neznámý materiál \"{row.Material}\"");
 
-                foreach (var row in data)
+                bool upd = false;
+
+                if (material.DaysBeforeWarnForUnused != row.ReportDays)
                 {
-                    if (!allMats.TryGetValue(row.Material, out var material))
-                        throw new ArgumentException($"Neznámý materiál \"{row.Material}\"");
-
-                    bool upd = false;
-                    
-                    if (material.DaysBeforeWarnForUnused != row.ReportDays)
-                    {
-                        material.DaysBeforeWarnForUnused = row.ReportDays;
-                        upd = true;
-                    }
-
-                    if ((material.UsageProlongsLifetime ?? false) != row.EventProlongs)
-                    {
-                        material.UsageProlongsLifetime = row.EventProlongs;
-                        upd = true;
-                    }
-
-                    if ((material.UseAutofinalization ?? false) != row.Autofinalize)
-                    {
-                        material.UseAutofinalization = row.Autofinalize;
-                        upd = true;
-                    }
-
-                    var rg = string.IsNullOrWhiteSpace(row.ReportGroup) ? null : row.ReportGroup.Trim();
-                    if (material.UnusedWarnMaterialType != rg)
-                    {
-                        material.UnusedWarnMaterialType = rg;
-                        upd = true;
-                    }
-
-                    if (row.ReportDays != null)
-                    {
-                        if ((!row.Autofinalize) && (rg == null))
-                        {
-                            throw new ArgumentException($"Neplatné nastavení pro materiál \"{row.Material}\". Pokud se nemá automaticky přesouvat do odpadu, musí být vyplněna skupina pro reportování");
-                        }
-
-                        if (row.Autofinalize && rg != null)
-                        {
-                            throw new ArgumentException($"Neplatné nastavení pro materiál \"{row.Material}\". Pokud se má automaticky přesouvat do odpadu, nesmí být vyplněna skupina pro reportování");
-                        }
-                    }
-
-                    if (!upd)
-                        continue;
-
-                    _db.Save(material);
-
-                    changed++;
+                    material.DaysBeforeWarnForUnused = row.ReportDays;
+                    upd = true;
                 }
 
-                if (changed > 0)
-                    _materialRepository.CleanCache();
+                if ((material.UsageProlongsLifetime ?? false) != row.EventProlongs)
+                {
+                    material.UsageProlongsLifetime = row.EventProlongs;
+                    upd = true;
+                }
 
-                tx.Commit();
+                if ((material.UseAutofinalization ?? false) != row.Autofinalize)
+                {
+                    material.UseAutofinalization = row.Autofinalize;
+                    upd = true;
+                }
+
+                var rg = string.IsNullOrWhiteSpace(row.ReportGroup) ? null : row.ReportGroup.Trim();
+                if (material.UnusedWarnMaterialType != rg)
+                {
+                    material.UnusedWarnMaterialType = rg;
+                    upd = true;
+                }
+
+                if (row.ReportDays != null)
+                {
+                    if ((!row.Autofinalize) && (rg == null))
+                    {
+                        throw new ArgumentException($"Neplatné nastavení pro materiál \"{row.Material}\". Pokud se nemá automaticky přesouvat do odpadu, musí být vyplněna skupina pro reportování");
+                    }
+
+                    if (row.Autofinalize && rg != null)
+                    {
+                        throw new ArgumentException($"Neplatné nastavení pro materiál \"{row.Material}\". Pokud se má automaticky přesouvat do odpadu, nesmí být vyplněna skupina pro reportování");
+                    }
+                }
+
+                if (!upd)
+                    continue;
+
+                db.Save(material);
+
+                changed++;
             }
+
+            if (changed > 0)
+                _materialRepository.CleanCache();
 
             return $"Hotovo. Byla změněna pravidla pro {changed} materiálů.";
         }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
 using Robowire.RobOrm.Core;
@@ -15,6 +17,6 @@ namespace Elsa.App.Inspector.Database
         DateTime LastRun { get; set; }
 
         int LastSessionId { get; set; }
-        IInspectionSession LastSession { get; }
+        IInspectionSession LastSession { get; }        
     }
 }
