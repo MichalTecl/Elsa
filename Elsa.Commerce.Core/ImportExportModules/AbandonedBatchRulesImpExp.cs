@@ -37,7 +37,8 @@ namespace Elsa.Commerce.Core.ImportExportModules
                 ReportDays = m.DaysBeforeWarnForUnused,
                 EventProlongs = m.UsageProlongsLifetime,
                 Autofinalize = m.Autofinalization,
-                ReportGroup = m.UnusedWarnMaterialType
+                ReportGroup = m.UnusedWarnMaterialType,
+                NotAbandonedUntilNewerBatchUsed = m.NotAbandonedUntilNewerBatchUsed
             }).ToList();
 
             return res;
@@ -71,6 +72,12 @@ namespace Elsa.Commerce.Core.ImportExportModules
                 if ((material.UseAutofinalization ?? false) != row.Autofinalize)
                 {
                     material.UseAutofinalization = row.Autofinalize;
+                    upd = true;
+                }
+
+                if ((material.NotAbandonedUntilNewerBatchUsed ?? false) != row.NotAbandonedUntilNewerBatchUsed)
+                {
+                    material.NotAbandonedUntilNewerBatchUsed = row.NotAbandonedUntilNewerBatchUsed;
                     upd = true;
                 }
 
@@ -121,10 +128,13 @@ namespace Elsa.Commerce.Core.ImportExportModules
         [XlsColumn("C", "Od posledního použití")]
         public bool EventProlongs { get; set; }
 
-        [XlsColumn("D", "Automaticky Odpad")]
+        [XlsColumn("D", "Pokud byla použita novější šarže")]
+        public bool NotAbandonedUntilNewerBatchUsed { get; set; }
+
+        [XlsColumn("E", "Automaticky Odpad")]
         public bool Autofinalize { get; set; }
 
-        [XlsColumn("E", "Reportovat ve skupině")]
+        [XlsColumn("F", "Reportovat ve skupině")]
         public string ReportGroup { get; set; }
     }
 }
