@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Elsa.Common.Interfaces;
@@ -25,10 +26,11 @@ namespace Elsa.Jobs.AutomaticQueries.Components
                 {"GET_PROJECT_ID", () => GetProjectId()},
                 {"GET_PREV_MONTH_YEAR", () => GetLastMonthYear()},
                 {"GET_PREV_MONTH", () => GetLastMonth()},
-                {"GET_CULTURE", () => m_session.Culture }
+                {"GET_CULTURE", () => m_session.Culture },
+                { "GET_WEEK_NUM", () => GetWeekNum() }
             };
         }
-
+                
         public bool TryEvalExpression(string expression, out object result)
         {
             var normExp = expression?.Trim()?.ToUpperInvariant();
@@ -120,6 +122,11 @@ namespace Elsa.Jobs.AutomaticQueries.Components
             now = new DateTime(now.Year, now.Month, 1).AddMonths(-1);
 
             return new Tuple<int, int>(now.Year, now.Month);
+        }
+
+        private object GetWeekNum()
+        {
+            return CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
         }
     }
 }

@@ -7,9 +7,58 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     self.currentOrder = null;
     self.currentQuery = "";
     self.ordersToPack = null;
-    
+    self.checklistMode = false;
+
+    var updateChecklistMode = function (items, mode) {
+
+        for (var i = 0; i < items.length; i++) {
+            items[i].showCheckbox = !!mode;
+        }
+    };
+
     var adjustServerKitItemObject = function(kitItem) {
         
+    };
+
+    var getLocalOrderRecord = function (orderId, createNew, update) {
+
+        if (!orderId) {
+            throw new Error("Invalid state");
+        }
+
+        var allObjects = [];
+
+        var allObjectsJson = localStorage.getItem("orderRecords");
+        if (!!allObjectsJson) {
+            allObjects = JSON.parse(allObjectsJson);
+        }
+                
+        var orderRecord = null;
+        var orderRecords = allObjects.filter(function (r) { return r.orderId === orderId; });
+        if (orderRecords.length > 0) {
+            orderRecord = orderRecords[0];
+        }
+
+        if ((!orderRecord) && (!createNew))
+            return null;
+
+        if (!orderRecord) {
+            orderRecord = {
+                "orderId": orderId,
+                "checkedItems": []
+            };
+
+            allObjects.push(orderRecord);
+        }
+
+        orderRecord.lastAccess = new Date().getTime();
+
+        if (!!update)
+            update(orderRecord);
+
+        localStorage.setItem("orderRecords", JSON.stringify(allObjects));
+
+        return orderRecord;
     };
 
     var validateBatchAssignment = function(orderItem) {
@@ -53,9 +102,10 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         
     };
 
-    var adjustServerOrderItemObject = function(orderItem) {
+    var adjustServerOrderItemObject = function(orderItem, checkedItems) {
         orderItem.highlightQuantity = orderItem.Quantity !== "1";
         orderItem.isKit = (!!orderItem.KitItems) && (orderItem.KitItems.length > 0);
+        orderItem.isChecked = checkedItems.indexOf(orderItem.ItemId) >= 0;
 
         if (orderItem.isKit) {
 
@@ -91,11 +141,24 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         order.hasInternalNote = (!!order.InternalNote) && (order.InternalNote.length > 0);
         order.hasDiscount = (!!order.DiscountsText) && (order.DiscountsText) && (order.DiscountsText.length > 0);
 
-        for (var i = 0; i < order.Items.length; i++) {
-            adjustServerOrderItemObject(order.Items[i]);
+        var localOrderRecord = getLocalOrderRecord(order.OrderId, false, null);
+
+        var checkedItems = [];
+        if (!!localOrderRecord) {
+            self.checklistMode = !!localOrderRecord.checklistMode;
+            checkedItems = localOrderRecord.checkedItems || checkedItems;
+        } else {
+            self.checklistMode = order.Items.length >= 10;
         }
+                
+        for (var i = 0; i < order.Items.length; i++) {
+            adjustServerOrderItemObject(order.Items[i], checkedItems);
+        }
+
+        updateChecklistMode(order.Items, self.checklistMode);
     };
 
+    
     self.searchOrder = function(qry) {
         
         if ((!qry) || (qry.length < 3)) {
@@ -219,6 +282,58 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             self.cancelCurrentOrder();
         });
     };
+
+    self.toggleChecklistMode = function () {
+
+        if (!self.currentOrder)
+            return;
+
+        self.checklistMode = !self.checklistMode;
+        getLocalOrderRecord(self.currentOrder.OrderId, true, function (orderRecord) {
+            orderRecord.checklistMode = !!self.checklistMode;
+        });
+
+        updateChecklistMode(self.currentOrder.Items, self.checklistMode);
+    };
+
+    self.setItemChecked = function (itemId, checked) {
+        var foundItems = self.currentOrder.Items.filter(function (i) { return i.ItemId === itemId; });
+        if (foundItems.length !== 1)
+            return;
+
+        foundItems[0].isChecked = !!checked;
+
+        getLocalOrderRecord(self.currentOrder.OrderId, true, function (orderRecord) {
+            if (checked) {
+                if (orderRecord.checkedItems.indexOf(itemId) < 0)
+                    orderRecord.checkedItems.push(itemId);
+            }
+            else {
+                var idx = orderRecord.checkedItems.indexOf(itemId);
+                if (idx >= 0)
+                    orderRecord.checkedItems.splice(idx, 1);
+            }
+        });
+
+    };
+
+    var cleanOrderRecords = function () {
+        // remove order records where last access is older than 3 days
+        var allObjectsJson = localStorage.getItem("orderRecords");
+        if(!allObjectsJson)
+            return;
+
+        var allObjects = JSON.parse(allObjectsJson);
+        var threeDaysAgo = new Date().getTime() - 3 * 24 * 60 * 60 * 1000;
+
+        var newObjects = allObjects.filter(function (r) {
+            return r.lastAccess >= threeDaysAgo;
+        });
+
+        localStorage.setItem("orderRecords", JSON.stringify(newObjects));
+    };
+
+    setTimeout(cleanOrderRecords, 0);
 };
 
 app.ordersPacking.vm = app.ordersPacking.vm || new app.ordersPacking.ViewModel();

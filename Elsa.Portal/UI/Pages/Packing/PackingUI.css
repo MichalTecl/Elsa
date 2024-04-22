@@ -67,11 +67,6 @@ html,body
     margin-left:20px;
 }
 
-#orderOverviewPanel #lblSourceErp {
-    margin-left:auto;
-    color:#bbbbbb;
-}
-
 #orderNotesPanel {
     margin-top:0px;
 }
@@ -368,5 +363,35 @@ div:last-child.batchItemTemplate {
 
 .highlightErrors .batchItemTemplate .fa-question-circle {
     font-size:2em;
-}em;
+}
+
+#rightItems {
+    margin-left: auto;
+}
+
+#icoChecklistMode {
+    cursor: pointer;
+    color: red;
+    opacity: 0.3;
+}
+
+#icoChecklistMode:hover {
+    opacity: 1;
+    color: black;
+}
+
+#icoChecklistMode.activated {
+    opacity: 1;
+    color: green;
+}
+
+.checklistModeCheckboxContainer > input {
+    display: grid;
+    grid-template-columns: 1em auto;
+    gap: 0.5em;
+}
+
+#lblSourceErp {
+    opacity:0.4;
+    margin-left:8px;
 }

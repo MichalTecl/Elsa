@@ -43,12 +43,15 @@
                         <i class="far fa-caret-square-left faButton" event-bind="click:onPackingCancel"></i>
 
                         <i id="lblOrderNumber" data-bind="text:currentOrder.OrderNumber"></i>
-                        
+
                         <div id="lblCustomer" fill-by="/UI/Controls/Common/CustomerView/Customer.html" data-bind="customerName:currentOrder.CustomerName; customerEmail:currentOrder.CustomerEmail"></div>
 
                         <i id="lblPrice" data-bind="text:currentOrder.Price"></i>
 
-                        <i id="lblSourceErp" data-bind="text:currentOrder.ErpName"></i>
+                        <div class="stackRight" id="rightItems">
+                            <i id="icoChecklistMode" class="fas fa-tasks" data-bind="class.activated:checklistMode" event-bind="click:toggleChecklistMode()"></i>
+                            <i id="lblSourceErp" data-bind="text:currentOrder.ErpName"></i>
+                        </div>
                     </div>
                     <div id="orderNotesPanel">
                         <div class="orderDiscountsPanel" data-bind="class!.hidden:currentOrder.hasDiscount">
@@ -69,6 +72,9 @@
                         <div id="itemsList">
                             <div id="itemTemplate" class="pckOrderItemContainer lt-template">
                                 <div class="stackLeft pckOrderItem">
+                                    <div class="checklistModeCheckboxContainer" data-bind="class!.hidden:showCheckbox">
+                                        <input type="checkbox" data-bind="checked:isChecked" event-bind="change:onItemCheckboxChanged(VM, this.checked)" />
+                                    </div>
                                     <div class="itemQty" data-bind="text:Quantity; class.highlightQuantity:highlightQuantity"></div>
                                     <div class="multiply" data-bind="class.highlightQuantity:highlightQuantity">x</div>
                                     <div class="itemTitle" data-bind="text:ProductName"> </div>
@@ -354,6 +360,16 @@
                 var model = lt.getViewModel(item);
                 tbSearch.value = model.OrderNumber;
                 app.ordersPacking.vm.searchOrder(model.OrderNumber);
+            };
+
+            this.toggleChecklistMode = function() {
+                app.ordersPacking.vm.toggleChecklistMode();
+                lt.notify();
+            };
+
+            this.onItemCheckboxChanged = function(model, checked) {
+                app.ordersPacking.vm.setItemChecked(model.ItemId, checked);
+                lt.notify();
             };
 
         });
