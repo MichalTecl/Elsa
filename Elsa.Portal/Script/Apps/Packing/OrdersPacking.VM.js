@@ -82,6 +82,16 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             throw new Error("Neni vybrana objednavka");
         }
 
+        if (!!self.checklistMode) {
+            var uncheckedItem = self.currentOrder.Items.filter(i => !i.isChecked);
+            if (uncheckedItem.length > 0) {
+                // ask the user whether they wants to proceed 
+                var result = confirm("Všechny položky nebyly zaškrtnuty. Chcete přesto pokračovat?");
+                if (!result)
+                    return;
+            }
+        }
+
         for (var i = 0; i < self.currentOrder.Items.length; i++) {
             var orderItem = self.currentOrder.Items[i];
 
@@ -212,7 +222,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     };
 
     self.packOrder = function() {
-
+                
         self.validateCurrentOrder();
 
         var ordid = self.currentOrder.OrderId;
