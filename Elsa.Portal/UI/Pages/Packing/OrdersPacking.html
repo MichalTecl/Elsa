@@ -62,9 +62,10 @@
                             <div id="customerNoteTitle" class="noteTitle">Vzkaz od zákazníka</div>
                             <p id="customerNoteBody" class="noteBody" data-bind="text:currentOrder.CustomerNote"></p>
                         </div>
-                        <div id="internalNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.hasInternalNote">
+                        <div id="internalNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.displayInternalNote;class.pulseAnimation:currentOrder.hasInternalNote">
                             <div id="internalNoteTitle" class="noteTitle">Interní poznámka</div>
-                            <p id="internalNoteBody" class="noteBody" data-bind="text:currentOrder.InternalNote"></p>
+                            <div data-bind="class!.hidden:loadingInternalNote">Načítám...</div>
+                            <p id="internalNoteBody" class="noteBody" data-bind="text:currentOrder.InternalNote;class.hidden:loadingInternalNote"></p>
                         </div>
                     </div>
                     <div id="orderItemsContainer">

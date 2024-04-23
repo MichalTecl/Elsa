@@ -23,15 +23,15 @@ namespace Elsa.App.OrdersPacking
     [Controller("ordersPacking")]
     public class PackingController : ElsaControllerBase
     {
-        private readonly IPurchaseOrderRepository m_orderRepository;
-        private readonly IShipmentProvider m_shipmentProvider;
-        private readonly IOrdersFacade m_ordersFacade;
-        private readonly IKitProductRepository m_kitProductRepository;
-        private readonly IErpClientFactory m_erpClientFactory;
-        private readonly IMaterialBatchFacade m_batchFacade;
-        private readonly IVirtualProductFacade m_virtualProductFacade;
-        private readonly IDatabase m_database;
-        private readonly OrdersSystemConfig m_config;
+        private readonly IPurchaseOrderRepository _orderRepository;
+        private readonly IShipmentProvider _shipmentProvider;
+        private readonly IOrdersFacade _ordersFacade;
+        private readonly IKitProductRepository _kitProductRepository;
+        private readonly IErpClientFactory _erpClientFactory;
+        private readonly IMaterialBatchFacade _batchFacade;
+        private readonly IVirtualProductFacade _virtualProductFacade;
+        private readonly IDatabase _database;
+        private readonly OrdersSystemConfig _config;
 
         public PackingController(
             IWebSession webSession,
@@ -46,15 +46,15 @@ namespace Elsa.App.OrdersPacking
             IVirtualProductFacade virtualProductFacade, OrdersSystemConfig config)
             : base(webSession, log)
         {
-            m_orderRepository = orderRepository;
-            m_shipmentProvider = shipmentProvider;
-            m_ordersFacade = ordersFacade;
-            m_kitProductRepository = kitProductRepository;
-            m_erpClientFactory = erpClientFactory;
-            m_batchFacade = batchFacade;
-            m_database = database;
-            m_virtualProductFacade = virtualProductFacade;
-            m_config = config;
+            _orderRepository = orderRepository;
+            _shipmentProvider = shipmentProvider;
+            _ordersFacade = ordersFacade;
+            _kitProductRepository = kitProductRepository;
+            _erpClientFactory = erpClientFactory;
+            _batchFacade = batchFacade;
+            _database = database;
+            _virtualProductFacade = virtualProductFacade;
+            _config = config;
         }
         
         public PackingOrderModel FindOrder(string number)
@@ -67,26 +67,26 @@ namespace Elsa.App.OrdersPacking
                 throw new Exception("Musí být alespoň tři čísla");
             }
                        
-            var seek = m_orderRepository.SearchOrder(number, OrderStatus.ReadyToPack.Id);
+            var seek = _orderRepository.SearchOrder(number, OrderStatus.ReadyToPack.Id);
 
             IPurchaseOrder filtered = null;
             if (seek != null)
             {
-                filtered = m_orderRepository.GetOrder(seek.Value);
+                filtered = _orderRepository.GetOrder(seek.Value);
             }
 
             if (filtered == null)
             {
                 Log.Info("Číslo objednávky nenalezeno");
                 Log.Info("Spojuji se se Zásilkovnou...");
-                var orderNumber = m_shipmentProvider.GetOrderNumberByPackageNumber(number);
+                var orderNumber = _shipmentProvider.GetOrderNumberByPackageNumber(number);
                 if (string.IsNullOrWhiteSpace(orderNumber))
                 {
                     throw new Exception($"Objednávka {number} nebyla nalezena");
                 }
 
                 var paid =
-                    m_orderRepository.GetOrdersByStatus(
+                    _orderRepository.GetOrdersByStatus(
                         OrderStatus.ReadyToPack,
                         DateTime.Now.AddDays(-90),
                         DateTime.Now.AddDays(1)).ToList();
@@ -96,7 +96,7 @@ namespace Elsa.App.OrdersPacking
                 {
                     Log.Info("Aplikace nemá načtenu tuto zásilku, je třeba aktualizovat seznam zásilek z Floxu...");
 
-                    paid = m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), shipProvider: null).ToList();
+                    paid = _ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), shipProvider: null).ToList();
 
                     order = paid.FirstOrDefault(o => (o.PreInvoiceId == orderNumber) || (o.OrderNumber == orderNumber));
                     if (order == null)
@@ -116,9 +116,9 @@ namespace Elsa.App.OrdersPacking
 
         public PackingOrderModel SelectKitItem(long orderId, long orderItemId, int kitItemId, int kitItemIndex)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var order = m_orderRepository.GetOrder(orderId);
+                var order = _orderRepository.GetOrder(orderId);
                 if (order == null)
                 {
                     throw new InvalidOperationException("Objednavka nenalezena");
@@ -130,7 +130,7 @@ namespace Elsa.App.OrdersPacking
                     throw new InvalidOperationException("Polozka objednavky nenalezena");
                 }
 
-                m_kitProductRepository.SetKitItemSelection(order, item, kitItemId, kitItemIndex);
+                _kitProductRepository.SetKitItemSelection(order, item, kitItemId, kitItemIndex);
 
                 var result = MapOrder(order);
 
@@ -144,9 +144,9 @@ namespace Elsa.App.OrdersPacking
         {
             WebSession.EnsureUserRight(OrdersPackingUserRights.MarkOrderPacked);
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var order = m_orderRepository.GetOrder(orderId);
+                var order = _orderRepository.GetOrder(orderId);
                 if (order == null)
                 {
                     throw new InvalidOperationException("Objednavka nenalezena");
@@ -168,13 +168,13 @@ namespace Elsa.App.OrdersPacking
                     ValidateItemBatches(item);
                 }
 
-                if (m_config.MarkOrdersSentAsync)
+                if (_config.MarkOrdersSentAsync)
                 {
-                    m_ordersFacade.SetOrderSentAsync(orderId);
+                    _ordersFacade.SetOrderSentAsync(orderId);
                 }
                 else
                 {
-                    m_ordersFacade.SetOrderSent(orderId);
+                    _ordersFacade.SetOrderSent(orderId);
                 }
 
                 tx.Commit();
@@ -186,9 +186,9 @@ namespace Elsa.App.OrdersPacking
             WebSession.EnsureUserRight(OrdersPackingUserRights.OrderBatchAssignment);
 
             PackingOrderModel result;
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var order = m_orderRepository.GetOrder(request.OrderId);
+                var order = _orderRepository.GetOrder(request.OrderId);
                 if (order == null)
                 {
                     throw new InvalidOperationException("Objednávka nebyla v systému nalezena");
@@ -196,13 +196,13 @@ namespace Elsa.App.OrdersPacking
 
                 if (!string.IsNullOrWhiteSpace(request.OriginalBatchNumber))
                 {
-                    m_batchFacade.ChangeOrderItemBatchAssignment(
+                    _batchFacade.ChangeOrderItemBatchAssignment(
                         order,
                         request.OrderItemId,
                         request.OriginalBatchNumber,
                         request.NewAmount);
                     
-                    order = m_orderRepository.GetOrder(order.Id);
+                    order = _orderRepository.GetOrder(order.Id);
 
                     if (request.NewAmount > 0m)
                     {
@@ -210,12 +210,12 @@ namespace Elsa.App.OrdersPacking
                     }
                 }
 
-                var item = m_ordersFacade.GetAllConcreteOrderItems(order).FirstOrDefault(i => i.Id == request.OrderItemId).Ensure();
+                var item = _ordersFacade.GetAllConcreteOrderItems(order).FirstOrDefault(i => i.Id == request.OrderItemId).Ensure();
 
                 if (!string.IsNullOrWhiteSpace(request.NewBatchSearchQuery) && ((request.NewAmount ?? item.Quantity) > 0m))
                 {
-                    var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, item);
-                    var batch = m_batchFacade.FindBatchBySearchQuery(material.MaterialId, request.NewBatchSearchQuery);
+                    var material = _virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, item);
+                    var batch = _batchFacade.FindBatchBySearchQuery(material.MaterialId, request.NewBatchSearchQuery);
 
                     result = MapOrder(
                         order,
@@ -239,14 +239,33 @@ namespace Elsa.App.OrdersPacking
                 return new LightOrderInfo[0];
             }
 
-            return m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), shipProvider: null, true).Select(i => new LightOrderInfo(i));
+            return _ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), shipProvider: null, true).Select(i => new LightOrderInfo(i));
+        }
+
+        public OrderAsyncFieldModel<string> GetMostRecentInternalNote(long orderId)
+        {
+            var elsaOrder = _orderRepository.GetOrder(orderId);
+            if (elsaOrder == null)
+            {
+                return null;
+            }
+            
+            var erp = _erpClientFactory.GetErpClient(elsaOrder.ErpId.Value);
+
+            var erpOrder = erp.LoadOrder(elsaOrder.OrderNumber);
+            return new Model.OrderAsyncFieldModel<string>
+            {
+                OrderId = orderId,
+                FieldName = "InternalNote",
+                FieldValue = erpOrder.InternalNote
+            };
         }
 
         private PackingOrderModel MapOrder(IPurchaseOrder entity, Tuple<long, BatchKey, decimal> orderItemBatchPreference = null)
         {
-            entity = m_ordersFacade.ResolveSingleItemKitSelection(entity);
+            entity = _ordersFacade.ResolveSingleItemKitSelection(entity);
 
-            var batchAssignments = m_batchFacade.TryResolveBatchAssignments(entity, orderItemBatchPreference).ToList();
+            var batchAssignments = _batchFacade.TryResolveBatchAssignments(entity, orderItemBatchPreference).ToList();
 
             var orderModel = new PackingOrderModel
                                  {
@@ -273,7 +292,7 @@ namespace Elsa.App.OrdersPacking
 
                 var kitItems = new List<KitItemsCollectionModel>();
                 
-                foreach (var sourceKitItem in m_kitProductRepository.GetKitForOrderItem(entity, sourceItem).OrderBy(ki => ki.KitItemIndex))
+                foreach (var sourceKitItem in _kitProductRepository.GetKitForOrderItem(entity, sourceItem).OrderBy(ki => ki.KitItemIndex))
                 {
                     var model = new KitItemsCollectionModel(sourceKitItem);
                     
@@ -338,7 +357,7 @@ namespace Elsa.App.OrdersPacking
                 throw new InvalidOperationException($"Neocekavany stav objednavky '{order.OrderNumber}' - objednavka nema prirazeny ERP system");
             }
 
-            var erpClient = m_erpClientFactory.GetErpClient(order.ErpId.Value);
+            var erpClient = _erpClientFactory.GetErpClient(order.ErpId.Value);
 
             return erpClient.GetPackingReferenceNumber(order);
         }

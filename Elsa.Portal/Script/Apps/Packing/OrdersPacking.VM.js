@@ -8,6 +8,46 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     self.currentQuery = "";
     self.ordersToPack = null;
     self.checklistMode = false;
+    self.loadingInternalNote = false;
+
+    var loadedIntNotes = {};
+
+    var loadInternalNote = function (orderId) {
+
+        var setNote = function (text) {
+            self.currentOrder.InternalNote = text;
+            self.currentOrder.hasInternalNote = (self.currentOrder.InternalNote) && (self.currentOrder.InternalNote.length > 0);
+            self.currentOrder.displayInternalNote = self.currentOrder.hasInternalNote;
+        };
+
+        if (loadedIntNotes.hasOwnProperty(orderId)) {
+            var noteText = loadedIntNotes[orderId];
+            setNote(noteText);
+            lt.notify();
+            return;
+        }
+
+        self.loadedIntNotes = {};
+
+        self.loadingInternalNote = true;
+        lt.notify();
+
+        lt.api("/ordersPacking/getMostRecentInternalNote").silent().query({ "orderId": orderId }).get(function (note) {
+
+            console.log(note);
+
+            if ((!self.currentOrder) || (self.currentOrder.OrderId !== note.OrderId))
+                return; 
+
+            loadedIntNotes[orderId] = note.FieldValue;
+
+            setNote(note.FieldValue);
+
+            self.loadingInternalNote = false;           
+
+        });
+
+    };
 
     var updateChecklistMode = function (items, mode) {
 
@@ -148,7 +188,8 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     var adjustServerOrderObject = function (order) {
         order.hasCustomerNote = (!!order.CustomerNote) && (order.CustomerNote.length > 0);
-        order.hasInternalNote = (!!order.InternalNote) && (order.InternalNote.length > 0);
+        order.hasInternalNote = false;
+        order.displayInternalNote = true;
         order.hasDiscount = (!!order.DiscountsText) && (order.DiscountsText) && (order.DiscountsText.length > 0);
 
         var localOrderRecord = getLocalOrderRecord(order.OrderId, false, null);
@@ -178,6 +219,8 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         lt.api("/ordersPacking/findOrder").query({ "number": qry }).get(function(order) {
             adjustServerOrderObject(order);
             self.currentOrder = order;
+            loadInternalNote(order.OrderId);
+
             self.currentQuery = qry;
             setTimeout(loadOrdersToPack, 500);
         });
@@ -201,6 +244,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             .get(function (updated) {
                 adjustServerOrderObject(updated);
                 self.currentOrder = updated;
+                loadInternalNote(updated.OrderId);
             });
     };
 
@@ -259,6 +303,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         lt.api("/ordersPacking/SetItemBatchAllocation").body(request).post(function(order) {
             adjustServerOrderObject(order);
             self.currentOrder = order;
+            loadInternalNote(order.OrderId);
         });
     };
 
@@ -274,6 +319,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         lt.api("/ordersPacking/SetItemBatchAllocation").body(request).post(function (order) {
             adjustServerOrderObject(order);
             self.currentOrder = order;
+            loadInternalNote(order.OrderId);
         });
     };
 
