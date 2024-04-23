@@ -61,6 +61,8 @@ namespace Elsa.Commerce.Core.StockEvents
         public void SaveEvent(int eventTypeId, int materialId, string batchNumber, decimal quantity, string reason,
             string unitSymbol, long? sourceOrderId = null)
         {
+            reason = reason == null ? null : reason.Trim();
+
             var eventType = GetAllEventTypes().FirstOrDefault(et => et.Id == eventTypeId).Ensure();
 
             if (!eventType.IsSubtracting)
