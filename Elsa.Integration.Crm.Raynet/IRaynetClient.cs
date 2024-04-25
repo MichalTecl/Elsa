@@ -22,5 +22,8 @@ namespace Elsa.Integration.Crm.Raynet
         RnResponse<List<ContactSource>> GetContactSources();
         RnResponse<long> CreateContactSource(string code);
         RnResponse<List<BusinessCaseModel>> GetBusinessCases(string name = null);
+        RnResponse<Dictionary<string, List<CustomFieldDefinitionModel>>> GetCustomFieldTypes();
+
+        T ReadCustomField<T>(IHasCustomFields entity, string customFieldLabel);
     }
 }

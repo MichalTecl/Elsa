@@ -60,7 +60,7 @@
     }
 
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
-    public class ContactDetail : Contact
+    public class ContactDetail : Contact, IHasCustomFields
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -85,6 +85,8 @@
         public Dictionary<string, string> SocialNetworkContact { get; set; }
         public IdContainer SecurityLevel { get; set; }
         public IdContainer OriginLead { get; set; }
+
+        public string CustomFieldsCategory => "Company";
     }
 
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
@@ -105,8 +107,6 @@
         public string TaxNumber2 { get; set; }
         public string TaxPayer { get; set; }
     }
-
-
 }
 
 

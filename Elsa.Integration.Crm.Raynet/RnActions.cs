@@ -14,9 +14,13 @@ namespace Elsa.Integration.Crm.Raynet
     {
         private readonly RnProtocol _protocol;
 
+        private readonly Lazy<Dictionary<string, List<CustomFieldDefinitionModel>>> _cfDefinitions;
+
         public RnActions(RnProtocol client)
         {
             _protocol = client;
+
+            _cfDefinitions = new Lazy<Dictionary<string, List<CustomFieldDefinitionModel>>>(() => GetCustomFieldTypes().Data);
         }
 
         public RnResponse<IdResponse> InsertContact(ContactDetail contact)
@@ -122,6 +126,26 @@ namespace Elsa.Integration.Crm.Raynet
                 url = $"{url}?name[LIKE_NOCASE]={HttpUtility.UrlEncode(name)}";
 
             return _protocol.Call<RnResponse<List<BusinessCaseModel>>>(HttpMethod.Get, url);
+        }
+
+        public RnResponse<Dictionary<string, List<CustomFieldDefinitionModel>>> GetCustomFieldTypes()
+        {
+            return _protocol.Call<RnResponse<Dictionary<string, List<CustomFieldDefinitionModel>>>>(HttpMethod.Get, "https://app.raynet.cz/api/v2/customField/config/");
+        }
+
+        public T ReadCustomField<T>(IHasCustomFields entity, string customFieldLabel) 
+        {
+            if (!_cfDefinitions.Value.TryGetValue(entity.CustomFieldsCategory, out var definitions))
+                throw new ArgumentException($"No custom fields category \"{entity.CustomFieldsCategory}\"");
+
+            var definition = definitions.FirstOrDefault(d => d.Label == customFieldLabel);
+            if (definition == null)
+                throw new ArgumentException($"No custom field has label \"{customFieldLabel}\"");
+
+            if (!entity.CustomFields.TryGetValue(definition.Name, out var value))
+                return default;
+
+            return (value is T converted) ? converted : default;                
         }
     }
 }

@@ -10,22 +10,24 @@ namespace Elsa.JobLauncher.Scheduler
         public static readonly ElsaJob LoadPayments = new ElsaJob("STAHOVANI_PLATEB", 3, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(0, 10, 0));
         public static readonly ElsaJob PayOnDeliveryProcessing = new ElsaJob("ZPRAC_DOBIRKY", 4, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(0, 10, 0));
 
-        public static readonly ElsaJob BigImport = new ElsaJob("VELKY_IMPORT_FLOX", -10, TimeSpan.FromHours(2), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(2, 5));
-        public static readonly ElsaJob Currencies = new ElsaJob("MENOVE_KURZY", -9, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(2, 5));
-        public static readonly ElsaJob Geocoding = new ElsaJob("GEOCODING", -8, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(2, 5));
+        public static readonly ElsaJob BigImport = new ElsaJob("VELKY_IMPORT_FLOX", -10, TimeSpan.FromHours(2), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
+        public static readonly ElsaJob Currencies = new ElsaJob("MENOVE_KURZY", -9, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
+        public static readonly ElsaJob Geocoding = new ElsaJob("GEOCODING", -8, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
 
-        public static readonly ElsaJob DbBackup = new ElsaJob("DB_BACKUP", 5, TimeSpan.FromMinutes(20), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(2, 5));
+        public static readonly ElsaJob DbBackup = new ElsaJob("DB_BACKUP", 5, TimeSpan.FromMinutes(20), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
 
-        public static readonly ElsaJob FinReports = new ElsaJob("GENEROVANI_UCT_REPORTU", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8,0,0) && eval.NowIsBetween(0, 7));
+        public static readonly ElsaJob FinReports = new ElsaJob("GENEROVANI_UCT_REPORTU", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8,0,0) && eval.NowIsBetween(0, 5));
 
-        public static readonly ElsaJob AutoQueries = new ElsaJob("AUTOMATICKE_DOTAZY", 2, TimeSpan.FromMinutes(20), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 7));
+        public static readonly ElsaJob AutoQueries = new ElsaJob("AUTOMATICKE_DOTAZY", 2, TimeSpan.FromMinutes(20), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
-        public static readonly ElsaJob Inspector = new ElsaJob("INSPEKTOR", 2, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8,0,0) && eval.NowIsBetween(0, 7));
+        public static readonly ElsaJob Inspector = new ElsaJob("INSPEKTOR", 2, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8,0,0) && eval.NowIsBetween(5, 7));
 
         public static readonly ElsaJob LogReader =
             new ElsaJob("Log_Reader", 3, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(4, 0, 0) && eval.NowIsBetween(5, 22));
 
-        public static readonly ElsaJob DataPush = new ElsaJob("DATA_PUSH", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 7));
+        public static readonly ElsaJob DataPush = new ElsaJob("DATA_PUSH", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
+
+        public static readonly ElsaJob StoreMap = new ElsaJob("STORE_MAP", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
         public static IEnumerable<ElsaJob> All
         {
@@ -46,6 +48,7 @@ namespace Elsa.JobLauncher.Scheduler
                 yield return Inspector;
                 yield return LogReader;
                 yield return DataPush;
+                yield return StoreMap;
             }
         }
     }

@@ -85,6 +85,10 @@
       <Project>{09e35860-d69e-42a0-aabd-a7431f283c97}</Project>
       <Name>Elsa.App.Profile</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.PublicFiles\Elsa.App.PublicFiles.csproj">
+      <Project>{76a3e869-fb0e-4d99-a54b-3e9acbb3a990}</Project>
+      <Name>Elsa.App.PublicFiles</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.SaleEvents\Elsa.App.SaleEvents.csproj">
       <Project>{0C94EB6A-E1DD-4791-B7F3-AA1E86AB9231}</Project>
       <Name>Elsa.App.SaleEvents</Name>
@@ -188,6 +192,10 @@
     <ProjectReference Include="..\Elsa.Jobs.AutomaticQueries\Elsa.Jobs.AutomaticQueries.csproj">
       <Project>{A3DA3672-1F5A-44EB-8001-A19C7C97FE73}</Project>
       <Name>Elsa.Jobs.AutomaticQueries</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.BuildStoresMap\Elsa.Jobs.BuildStoresMap.csproj">
+      <Project>{ff37368f-ef59-4d88-bc05-37d0a5204cf5}</Project>
+      <Name>Elsa.Jobs.BuildStoresMap</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.Common.EntityChangeProcessing\Elsa.Jobs.Common.EntityChangeProcessing.csproj">
       <Project>{7096841A-6EC7-4D85-9313-BA57A6660E49}</Project>

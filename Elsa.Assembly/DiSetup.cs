@@ -9,6 +9,7 @@ using Elsa.App.Inspector;
 using Elsa.App.MaterialLevels;
 using Elsa.App.OrdersPacking;
 using Elsa.App.Profile;
+using Elsa.App.PublicFiles;
 using Elsa.App.SaleEvents;
 using Elsa.App.Shipment;
 using Elsa.Apps.CommonData;
@@ -34,6 +35,7 @@ using Elsa.Integration.PaymentSystems.Fio;
 using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Jobs.AutomaticQueries;
+using Elsa.Jobs.BuildStoresMap;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.Common.EntityChangeProcessing;
 using Elsa.Jobs.DbBackup;
@@ -115,7 +117,9 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(EntityChangeProcessingRegistry).Assembly);
                     s.ScanAssembly(typeof(RaynetClientRegistry).Assembly);
                     s.ScanAssembly(typeof(ProductionPlannerRegistry).Assembly);
-                    
+                    s.ScanAssembly(typeof(StoreMapRegistry).Assembly);
+                    s.ScanAssembly(typeof(PublicFilesRegistry).Assembly);
+
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 
                     s.Collect<IStartupJob>();

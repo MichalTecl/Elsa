@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 namespace Elsa.Common.Utils
 {
     public static class StringUtil
-    {
+    {        
         private static readonly Dictionary<char, char> s_searchStringReplacements = new Dictionary<char, char>()
                                                                             {
                                                                                     { 'á', 'a' },

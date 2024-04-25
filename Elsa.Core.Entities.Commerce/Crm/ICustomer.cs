@@ -76,5 +76,15 @@ namespace Elsa.Core.Entities.Commerce.Crm
         bool? IsCompany { get; set; }
         
         DateTime? DisabledDt { get; set; }
+
+        bool? HasEshop { get; set; }
+        bool? HasStore { get; set; }
+
+        /// <summary>
+        /// Means that the customer for example made 2 or more orders in the eshop
+        /// </summary>
+        DateTime? ValuableDistributorFrom { get; set; }
+
+        DateTime? ValuableDistributorTo { get; set; }
     }
 }

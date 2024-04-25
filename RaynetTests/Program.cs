@@ -11,7 +11,10 @@ namespace RaynetTests
             var protocol = new RnProtocol(ConfigFactory.Get<RaynetClientConfig>(), ConsoleLogger.Instance);
             IRaynetClient rn = new RnActions(protocol);
 
-            var contacts = rn.GetBusinessCases("2307298");
+            var contact = rn.GetContactDetail(43);
+
+            var eshop = rn.ReadCustomField<bool>(contact.Data, "E-shop");
+            var store = rn.ReadCustomField<bool>(contact.Data, "Kamenná prodejna");
         }
     }
 }
