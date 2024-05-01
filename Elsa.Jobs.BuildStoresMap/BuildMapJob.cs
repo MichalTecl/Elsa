@@ -5,6 +5,7 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Crm;
 using Elsa.Integration.Crm.Raynet;
 using Elsa.Integration.Crm.Raynet.Model;
+using Elsa.Jobs.BuildStoresMap.Config;
 using Elsa.Jobs.BuildStoresMap.Entities;
 using Elsa.Jobs.Common;
 using Robowire.RobOrm.Core;
@@ -24,28 +25,32 @@ namespace Elsa.Jobs.BuildStoresMap
         private readonly ISession _session;
         private readonly ILog _log;
         private readonly IPublicFilesHelper _publicFiles;
+        private readonly StoreMapConfig _config;
 
-        public BuildMapJob(IRaynetClient raynet, IDatabase db, ISession session, ILog log, IPublicFilesHelper publicFiles)
+        public BuildMapJob(IRaynetClient raynet, IDatabase db, ISession session, ILog log, IPublicFilesHelper publicFiles, StoreMapConfig config)
         {
             _raynet = raynet;
             _db = db;
             _session = session;
             _log = log;
             _publicFiles = publicFiles;
+            _config = config;
         }
 
         public void Run(string customDataJson)
         {
             _log.Info("Running procedure MarkValuableDistributors");
-            var res = _db.Sql().Call("MarkValuableDistributors").NonQuery();
+            var res = _db.Sql().Call("MarkValuableDistributors")
+                .WithParam("@projectId", _session.Project.Id)
+                .WithParam("@minOrdersCount", _config.MinOrdersCount)
+                .WithParam("@maxMonthsFromLastOrder", _config.MaxMonthsFromLastOrder)
+                .NonQuery();
             _log.Info($"MarkValuableDistributors returned {res}");
 
             _log.Info("Loading Elsa Db contacts (Valuable Distributors)");
             var dbContacts = _db.SelectFrom<ICustomer>()
                 .Where(c => c.ProjectId == _session.Project.Id)
-                .Where(c => c.IsDistributor && (c.IsCompany == true))
-                .Where(c => c.ValuableDistributorFrom != null)
-                .Where(c => c.LastDeactivationDt == null)
+                .Where(c => c.IsValuableDistributor == true)
                 .Execute()
                 .ToList();
 
@@ -189,6 +194,7 @@ namespace Elsa.Jobs.BuildStoresMap
                 var stores = _db.SelectFrom<ICustomerStore>()
                     .Join(s => s.Customer)
                     .Where(s => s.Customer.ProjectId == _session.Project.Id)
+                    .Where(s => s.Customer.IsValuableDistributor == true)
                     .Execute()
                     .ToList();
 
@@ -211,7 +217,6 @@ namespace Elsa.Jobs.BuildStoresMap
                         _log.Error($"Error writing store {store.Id} to csv: {ex.Message}");
                         csv.RollbackRow();
                     }
-
                 }
             });           
         }

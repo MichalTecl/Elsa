@@ -83,8 +83,7 @@ namespace Elsa.Core.Entities.Commerce.Crm
         /// <summary>
         /// Means that the customer for example made 2 or more orders in the eshop
         /// </summary>
-        DateTime? ValuableDistributorFrom { get; set; }
-
-        DateTime? ValuableDistributorTo { get; set; }
+        bool? IsValuableDistributor { get; set; }
+        DateTime? IsValuableDistributorChangeDt { get; set; }
     }
 }
