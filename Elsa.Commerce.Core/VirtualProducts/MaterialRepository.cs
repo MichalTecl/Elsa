@@ -212,8 +212,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 {
                     throw new InvalidOperationException("Název materiálu byl již použit");
                 }
-
-                material = m_database.New<IMaterial>();
             }
 
             var inventory = GetMaterialInventories().FirstOrDefault(i => i.Id == material.InventoryId);

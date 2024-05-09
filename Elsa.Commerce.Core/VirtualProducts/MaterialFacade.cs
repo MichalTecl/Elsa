@@ -100,7 +100,6 @@ namespace Elsa.Commerce.Core.VirtualProducts
                         m.UsageProlongsLifetime = usageProlongsLifetime;
                         m.NotAbandonedUntilNewerBatchUsed = notAbandonedUntilNewerBatchUsed;
                         m.UniqueBatchNumbers = uniqueBatchNumbers;
-
                     });
                 
                 if (thresholdText == null)
