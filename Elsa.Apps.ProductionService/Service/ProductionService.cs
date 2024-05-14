@@ -24,8 +24,9 @@ namespace Elsa.Apps.ProductionService.Service
             typeof(ApplySourceSegmentId),
             typeof(LoadRecipe),
             typeof(SanitizeReceivedRequest),
-            typeof(ApplyResultingMaterial),
+            typeof(ApplyResultingMaterial),            
             typeof(ValidateAmountAndPrice),
+            typeof(CheckUniqueBatchNumber),
             typeof(SetComponents),
             typeof(AddBatchChangeWarning)
         };

@@ -60,6 +60,7 @@
     <Compile Include="Service\Process\Steps\ApplyResultingMaterial.cs" />
     <Compile Include="Service\Process\Steps\ApplySourceSegmentId.cs" />
     <Compile Include="Service\Process\Steps\CheckSourceSegmentEditability.cs" />
+    <Compile Include="Service\Process\Steps\CheckUniqueBatchNumber.cs" />
     <Compile Include="Service\Process\Steps\LoadRecipe.cs" />
     <Compile Include="Service\Process\Steps\SanitizeReceivedRequest.cs" />
     <Compile Include="Service\Process\Steps\SetComponents.cs" />

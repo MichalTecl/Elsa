@@ -527,6 +527,16 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     
                     var recipe = m_recipeRepository.Value.GetRecipe(recipeId).Ensure("Recipe object expected");
 
+                    var material = m_materialRepository.GetMaterialById(recipe.ProducedMaterialId).Ensure("Produced material not found");
+                    if (material.UniqueBatchNumbers == true)
+                    {
+                        var existingBatch = GetBatchByNumber(material.Id, batchNumber);
+                        if (existingBatch?.Batch.Id != replaceBatchId)
+                        {
+                            throw new InvalidOperationException($"Šarže {batchNumber} již existuje a pro materiál {material.Name} je nastaven zákaz duplicitních čísel šarží");
+                        }
+                    }
+
                     var batch = m_database.New<IMaterialBatch>();
                     batch.MaterialId = recipe.ProducedMaterialId;
                     batch.RecipeId = recipe.Id;
