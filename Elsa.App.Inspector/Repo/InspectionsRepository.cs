@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Elsa.App.Inspector.Database;
 using Elsa.App.Inspector.Model;
@@ -42,17 +43,88 @@ namespace Elsa.App.Inspector.Repo
                 {
                     // @spName VARCHAR(300), @projectId INT, @sessionId INT, @retryIssueId INT = null
 
-                    m_database.Sql().Call("inspfw_runInspection")
+                    using (var table = m_database.Sql().Call("inspfw_runInspection")
                         .WithParam("@sessionId", session.SessionId)
                         .WithParam("@projectId", m_session.Project.Id)
                         .WithParam("@spName", procedureName)
-                        .NonQuery();
+                        .Table())
+                    {
+                        if (table.Rows.Count == 0)
+                        {
+                            m_log.Info($"Inspection {procedureName} returned no data");
+                            return;
+                        }
+
+                        ProcessResults(session, procedureName, table);
+                    }
                 }
                 catch (Exception ex)
                 {
                     m_log.Error($"Inspection failed sp={procedureName}, sessionId={session.SessionId}", ex);
                 }
             });
+        }
+
+        private void ProcessResults(InspectionsSyncSession session, string procedureName, DataTable table)
+        {
+            const string issueTypeColumn = "IssueType";
+            const string issueCodeColumn = "IssueCode";
+            const string messageColumn = "Message";
+            const string issueDataPrefix = "data:";
+            const string actionControlPrefix = "ActionControlUrl";
+            const string actionNamePrefix = "ActionName";
+
+            foreach(var row in table.Rows.Cast<DataRow>())
+            {
+                var issueTypeName = row[issueTypeColumn].ToString();
+                var issueCode = row[issueCodeColumn].ToString();
+                var message = row[messageColumn].ToString();
+
+                var issueId = AddIssue(session.SessionId, issueTypeName, issueCode, message);
+
+                m_log.Info($"Issue added: type={issueTypeName} code={issueCode} message={message} => id={issueId}");
+
+                // process action data
+                foreach(var col in table.Columns.Cast<DataColumn>().Where(c => c.ColumnName.StartsWith(issueDataPrefix)))
+                {
+                    m_log.Info($"Processing action data {col.ColumnName}");
+
+                    var key = col.ColumnName.Substring(issueDataPrefix.Length);
+                    var value = row[col];
+
+                    if (value == DBNull.Value)
+                    {
+                        m_log.Info($"Action data {key} is null");
+                        continue;
+                    }
+
+                    if (value is int v)
+                        SetIssueData(issueId, key, v);
+                    else
+                        SetIssueData(issueId, key, value.ToString());
+                }
+
+                foreach(var actioncontrolCol in table.Columns.OfType<DataColumn>().Where(c => c.ColumnName.StartsWith(actionControlPrefix)))
+                {
+                    m_log.Info($"Processing action control {actioncontrolCol.ColumnName}");
+                    var actionNameCol = actioncontrolCol.ColumnName.Replace(actionControlPrefix, actionNamePrefix);
+
+                    // throw if action name column is missing
+                    if (!table.Columns.Contains(actionNameCol))
+                    {
+                        throw new InvalidOperationException($"Action name column {actionNameCol} is missing");
+                    }
+
+                    var actionName = row[actionNameCol].ToString();
+                    var controlUrl = row[actioncontrolCol].ToString();
+
+                    m_log.Info($"Setting action {actionName} with control {controlUrl}");
+
+                    SetIssueAction(issueId, controlUrl, actionName);
+                }
+            }
+                        
+            m_log.Info($"Processing of resultset returned by {procedureName} completed");
         }
 
         public void RunInspectionAndCloseSession(InspectionsSyncSession session, int issueId)
@@ -354,6 +426,47 @@ namespace Elsa.App.Inspector.Repo
 
             return existing.Count;
         }
+
+        // method calling this procedure: EXEC @issueId = inspfw_addIssue @sessionId, @inspType, @code, @message;
+        public int AddIssue(int sessionId, string inspectionTypeName, string code, string message)
+        {
+            return m_database.Sql().Call("inspfw_addIssueAndSelectId")
+                .WithParam("@sessionId", sessionId)
+                .WithParam("@typeName", inspectionTypeName)
+                .WithParam("@code", code)
+                .WithParam("@message", message)
+                .Scalar<int>();
+        }
+
+        // method calling this procedure: inspfw_setIssueAction @issueId, '/UI/Controls/Inventory/WarehouseControls/WhActions/StockEventThrashActionButton.html', @stockEventTypeName;
+        public void SetIssueAction(int issueId, string controlUrl, string actionName)
+        {
+            m_database.Sql().Call("inspfw_setIssueAction")
+                .WithParam("@issueId", issueId)
+                .WithParam("@controlUrl", controlUrl)
+                .WithParam("@actionName", actionName)
+                .NonQuery();
+        }
+
+        // method calling this procedure: inspfw_setIssueDataInt @issueId, 'MaterialId', @materialId;
+        public void SetIssueData(int issueId, string key, int value)
+        {
+            m_database.Sql().Call("inspfw_setIssueDataInt")
+                .WithParam("@issueId", issueId)
+                .WithParam("@property", key)
+                .WithParam("@value", value)
+                .NonQuery();
+        }
+
+        public void SetIssueData(int issueId, string key, string value)
+        {
+            m_database.Sql().Call("inspfw_setIssueDataString")
+                .WithParam("@issueId", issueId)
+                .WithParam("@property", key)
+                .WithParam("@value", value)
+                .NonQuery();
+        }
+
     }
 }
 

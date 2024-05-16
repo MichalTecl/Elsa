@@ -22,43 +22,36 @@ IF EXISTS(SELECT TOP 1 1 FROM sys.procedures WHERE name = 'insp_loosingDistribut
 
 GO
 
-CREATE PROCEDURE [dbo].[insp_loosingDistributor] (@sessionId INT, @projectId INT, @retryIssueId INT = null)
+CREATE PROCEDURE [insp_loosingDistributor] (@sessionId INT, @projectId INT, @retryIssueId INT = null)
 AS
 BEGIN
-					
-    DECLARE @dists TABLE (id INT, name NVARCHAR(300), monthsAgo int);
+	
+	/*
+	const string issueTypeColumn = "IssueType";
+	const string issueCodeColumn = "IssueCode";
+	const string messageColumn = "Message";
+	const string issueDataPrefix = "data:";
+	const string actionControlPrefix = "ActionControlUrl";
+	const string actionNamePrefix = "ActionName";
+	*/
+    
+	-- DECLARE @projectId INT = 1
 
-	INSERT INTO @dists
-	SELECT *
-	  FROM (
-		SELECT c.Id, c.Name, DATEDIFF(month, lor.LatestSuccessOrderDt, GETDATE()) lastOrderMonths
-			  FROM Customer c	  
-			  JOIN vwCustomerLatestOrder lor ON (lor.CustomerId = c.Id)
-			 WHERE c.ProjectId = @projectId
-			   AND c.IsDistributor = 1
-			   AND c.IsCompany = 1) x
-			WHERE x.lastOrderMonths BETWEEN 4 AND 6;
-		 	 		
-     WHILE(EXISTS(SELECT TOP 1 1 FROM @dists))
-	 BEGIN
-		DECLARE @code NVARCHAR(100);
-		DECLARE @message NVARCHAR(2000);
-		DECLARE @custid INT;
-		DECLARE @name NVARCHAR(200);
-		DECLARE @months INT;
-
-		SELECT TOP 1 @custId = Id, @name = name, @months = monthsAgo FROM @dists;
-		DELETE FROM @dists WHERE Id = @custid;
-									
-		SET @code = 'loosingdistributor_' + LTRIM(STR(@custid));
-		SET @message = N'VO ' + @name + N' už ' + LTRIM(STR(@months)) + N' měsíců nic neobjednal.';
-
-		DECLARE @issueId INT;
-		EXEC @issueId = inspfw_addIssue @sessionId, N'VO na odchodu', @code, @message;
-				
-		EXEC inspfw_setIssueAction @issueId, '/UI/Inspector/ActionControls/PostponeOneMonth.html', N'Připomenout za měsíc';
-			
-	 END
+	SELECT N'VO na odchodu' IssueType,
+	       'loosingdistributor_' + LTRIM(STR(x.id)) IssueCode,
+		    x.Name + N' - více než ' + LTRIM(STR(x.lastOrderMonths)) + N' měsíců od poslední objednávky' [Message],
+			'/UI/Inspector/ActionControls/PostponeOneMonth.html' "ActionControlUrl_Postpone1M",
+			N'Připomenout za měsíc' "ActionName_Postpone1M",
+			x.Id "data:CustomerId"
+		  FROM
+			(SELECT
+	          c.Id, c.Name, DATEDIFF(month, lor.LatestSuccessOrderDt, GETDATE()) lastOrderMonths
+			FROM Customer c	  
+			JOIN vwCustomerLatestOrder lor ON (lor.CustomerId = c.Id)
+			WHERE c.ProjectId = @projectId
+			AND c.IsDistributor = 1
+			AND c.IsCompany = 1) x
+		WHERE x.lastOrderMonths BETWEEN 4 AND 6;
 
 END
-
+GO
