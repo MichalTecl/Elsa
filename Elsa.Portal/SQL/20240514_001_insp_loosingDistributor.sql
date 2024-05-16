@@ -51,7 +51,7 @@ BEGIN
 		DELETE FROM @dists WHERE Id = @custid;
 									
 		SET @code = 'loosingdistributor_' + LTRIM(STR(@custid));
-		SET @message = N'VO ' + @name + N' už ' + @months + N' měsíců nic neobjednal.';
+		SET @message = N'VO ' + @name + N' už ' + LTRIM(STR(@months)) + N' měsíců nic neobjednal.';
 
 		DECLARE @issueId INT;
 		EXEC @issueId = inspfw_addIssue @sessionId, N'VO na odchodu', @code, @message;
@@ -61,6 +61,4 @@ BEGIN
 	 END
 
 END
-GO
-
 
