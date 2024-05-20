@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Windows.Media.Animation;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
 using Elsa.Commerce.Core.Repositories;
@@ -21,7 +22,7 @@ using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse.Impl
@@ -81,8 +82,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_fixedCostRepository = fixedCostRepository;
         }
 
-        public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity)
+        public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity, out string batchChangeWarnMessage)
         {
+            batchChangeWarnMessage = null;
+            
             var orderItem = GetAllOrderItems(order).FirstOrDefault(i => i.Id == orderItemId);
             if (orderItem == null)
             {
@@ -126,15 +129,58 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 {
                     throw new InvalidOperationException($"Požadované množství {new Amount(assignmentQuantity, material.Amount.Unit)} již není k dispozici v šarži {batch.Batch.BatchNumber}");
                 }
-                
+
+                batchChangeWarnMessage = CheckChange(batchId, material);
+
                 m_orderRepository.UpdateOrderItemBatch(orderItem, batchId, assignmentQuantity);
-                
+
                 tx.Commit();
 
                 ReleaseBatchAmountCache(batchId);
             }
         }
-        
+
+        private string CheckChange(int batchId, MaterialAmountModel material)
+        {
+            try
+            {
+                if (CheckBatchChange(material.MaterialId, batchId, out var oldBatchInfo))
+                {
+                    m_log.Info($"Possible batch change detected");
+                    var newBatchNr = m_batchRepository.GetBatchNumberById(batchId);
+                    if (newBatchNr == oldBatchInfo?.Item1)
+                    {
+                        m_log.Info($"But the batch number is the same, so no change is needed (oldBatchId={oldBatchInfo?.Item2}, newBatchId={batchId})");
+                        return null;
+                    }
+                    else if (oldBatchInfo == null)
+                    {
+                        m_log.Info($"But there was no batch assigned yet, so no change warn needed");
+                        return null;
+                    }
+                    else
+                    {
+                        var oldBatchAmount = GetAvailableAmount(oldBatchInfo.Item2);
+                        if (oldBatchAmount.IsZero)
+                        {
+                            m_log.Info($"But the old batch was already spent, so no change warn needed");
+                            return null;
+                        }
+                        else
+                        {
+                            return $"Pozor, zbývá {oldBatchAmount.ToString()} dříve použité šarže {oldBatchInfo.Item1}!";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                m_log.Error("Error while checking batch change", ex);
+            }
+
+            return null;
+        }
+
         public Amount GetAvailableAmount(int batchId)
         {
             return m_cache.ReadThrough(GetBatchAmountCacheKey(batchId), TimeSpan.FromMinutes(10), () =>
@@ -329,8 +375,6 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 {
                     throw new InvalidOperationException("Invalid batch id");
                 }
-                
-                //m_batchPreferrenceRepository.RemoveBatchFromPreferrence(batchNumber);
                 
                 m_database.DeleteAll(oldAssignments);
             
@@ -839,15 +883,18 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                             amountToAllocate = m_amountProcessor.Subtract(amountToAllocate, allocateByPreferrence);
 
-                            result.Add(new OrderItemBatchAssignmentModel()
+                            var assignment = new OrderItemBatchAssignmentModel()
                             {
                                 AssignedQuantity = allocateByPreferrence.Value,
                                 MaterialBatchId = preferredBatch.Id,
                                 BatchNumber = preferredBatch.BatchNumber,
                                 OrderItemId = orderItem.Id
-                            });
+                            };
 
-                            AssignOrderItemToBatch(preferredBatch.Id, order, orderItem.Id, allocateByPreferrence.Value);
+                            result.Add(assignment);
+
+                            AssignOrderItemToBatch(preferredBatch.Id, order, orderItem.Id, allocateByPreferrence.Value, out var batchChangeWarnMessage);
+                            assignment.WarningMessage = batchChangeWarnMessage;
                         }
 
                         if (availableBatchAmount.IsNotPositive)
@@ -1248,6 +1295,43 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         public Tuple<int, string> GetBatchNumberAndMaterialIdByBatchId(int batchId)
         {
             return m_batchRepository.GetBatchNumberAndMaterialIdByBatchId(batchId);
+        }
+
+        private bool CheckBatchChange(int materialId, int newBatchId, out Tuple<string, int> oldBatch)
+        {
+            var ckey = $"batchAssignments_{m_session.Project.Id}";
+            //var currentAssignments = m_cache.ReadThrough<Dictionary<int, Tuple<string, int>>>(ckey, TimeSpan.FromHours(1),
+            //    () => LoadCurrentBatchAssignments());
+
+            var currentAssignments = LoadCurrentBatchAssignments();
+
+            if ((!currentAssignments.TryGetValue(materialId, out oldBatch)) || (oldBatch.Item2 != newBatchId))
+            {
+                m_log.Info($"Batch assignment change - now using '{newBatchId}' instead of previously used '{oldBatch?.Item2}'. (MaterialId={materialId})");
+                m_cache.Remove(ckey);
+                return true;
+            }
+
+            return false;
+        }
+
+        private Dictionary<int, Tuple<string, int>> LoadCurrentBatchAssignments()
+        {
+            var res = new Dictionary<int, Tuple<string, int>>();
+
+            m_database.Sql().Execute(@"SELECT mb.MaterialId, mb.BatchNumber, mb.Id BatchId
+                                          FROM OrderItemMaterialBatch oimb
+                                          JOIN MaterialBatch mb ON (oimb.MaterialBatchId = mb.Id)
+                                          JOIN (SELECT  
+		                                        mb.MaterialId, MAX(oimb.AssignmentDt) lastAss
+		                                          FROM OrderItemMaterialBatch oimb
+		                                          JOIN MaterialBatch mb ON (oimb.MaterialBatchId = mb.Id)
+		                                         GROUP BY mb.MaterialId) la ON (la.MaterialId = mb.MaterialId AND la.lastAss = oimb.AssignmentDt)
+                                         WHERE mb.ProjectId = @projectId")
+                .WithParam("@projectId", m_session.Project.Id)
+                .ReadRows<int, string, int>((materialId, batchNumber, batchId) => res[materialId] = new Tuple<string, int>(batchNumber, batchId));
+
+            return res;
         }
     }
 }

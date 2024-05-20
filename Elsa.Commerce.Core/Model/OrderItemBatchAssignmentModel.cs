@@ -11,6 +11,8 @@ namespace Elsa.Commerce.Core.Model
         public decimal AssignedQuantity { get; set; }
 
         public string BatchNumber { get; set; }
+
+        public string WarningMessage { get; set; }
         
         public void Add(OrderItemBatchAssignmentModel assignment)
         {

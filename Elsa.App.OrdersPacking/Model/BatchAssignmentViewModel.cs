@@ -16,6 +16,7 @@ namespace Elsa.App.OrdersPacking.Model
             MaterialBatchId = src.MaterialBatchId;
             AssignedQuantity = src.AssignedQuantity;
             BatchNumber = src.BatchNumber;
+            WarningMessage = src.WarningMessage;
         }
 
         public bool CanSplit { get; set; }
