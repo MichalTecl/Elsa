@@ -157,6 +157,14 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         orderItem.isKit = (!!orderItem.KitItems) && (orderItem.KitItems.length > 0);
         orderItem.isChecked = checkedItems.indexOf(orderItem.ItemId) >= 0;
 
+        for (var i = 0; i < orderItem.BatchAssignment.length; i++) {
+            var message = orderItem.BatchAssignment[i].WarningMessage;
+
+            if (!!message) {
+                alert(message);
+            }
+        }
+
         if (orderItem.isKit) {
 
             var lastKitIndex = -1;
