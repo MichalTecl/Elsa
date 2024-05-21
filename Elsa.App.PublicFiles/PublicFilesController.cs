@@ -29,9 +29,24 @@ namespace Elsa.App.PublicFiles
             if (string.IsNullOrWhiteSpace(cid) || string.IsNullOrWhiteSpace(ftype))
                 return new FileResult("error.txt", Encoding.ASCII.GetBytes("500"));
 
-            return _cache.ReadThrough<FileResult>($"PublicFiles/{cid.GetHashCode()}/{ftype.GetHashCode()}",
-                TimeSpan.FromMinutes(1),
-                () => _publicFilesHelper.GetFile(cid, ftype));
-        }        
+            try
+            {
+                return _cache.ReadThrough<FileResult>($"PublicFiles/{cid.GetHashCode()}/{ftype.GetHashCode()}",
+                TimeSpan.FromMinutes(60),
+                () =>
+                {
+
+                    var file = _publicFilesHelper.GetFile(cid, ftype);
+                    file.AllowCrossOriginAccess = true;
+                    return file;
+
+                });
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Error while getting file {cid}/{ftype}", ex);
+                return new FileResult("error.txt", Encoding.ASCII.GetBytes("500"));
+            }
+        }
     }
 }

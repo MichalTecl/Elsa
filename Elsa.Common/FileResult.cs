@@ -26,6 +26,8 @@ namespace Elsa.Common
             m_contentDisposition = contentDisposition;
         }
       
+        public bool AllowCrossOriginAccess { get; set; }
+
         public void WriteResponse(HttpContextBase context)
         {
             var fileType = Path.GetExtension(m_fileName)?.Replace(".", "") ?? "file";
@@ -33,6 +35,12 @@ namespace Elsa.Common
             context.Response.Clear();
             context.Response.ContentType = m_contentType ?? $"application/{fileType}";
             context.Response.AddHeader("Content-Disposition", $"{m_contentDisposition}; filename={m_fileName}");
+
+            if(AllowCrossOriginAccess)
+            {
+                context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+            }
+
             context.Response.OutputStream.Write(m_data, 0, m_data.Length);
             context.Response.End();
         }
