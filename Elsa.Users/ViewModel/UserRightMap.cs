@@ -92,6 +92,28 @@ namespace Elsa.Users.ViewModel
             }
         }
 
+        public UserRightViewModel Find(Func<UserRightViewModel, bool> predicate)
+        {
+            return Find(m_models, predicate);
+        }
+
+        private UserRightViewModel Find(IEnumerable<UserRightViewModel> rights, Func<UserRightViewModel, bool> predicate)
+        {
+            foreach(var r in rights)
+            {
+                if (predicate(r))
+                    return r;
+
+                var child = Find(r.ChildRights, predicate);
+                if (child != null)
+                {
+                    return child;
+                }
+            }
+
+            return null;
+        }
+
         public override string ToString()
         {
             return string.Join(", ", Unwrap(m_models));

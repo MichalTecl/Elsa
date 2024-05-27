@@ -76,6 +76,20 @@ namespace Elsa.Smtp.Core
                 m_log.Error($"Sending e-mail to: {to}, subject: {subject} failed", ex);
                 throw;
             }
+
+            if (string.IsNullOrEmpty(m_settings.AllMailReceiver))
+            {
+                m_log.Info("Mailer.AllMailReceiver not set");
+                return;
+            }
+
+            if (to.Contains(m_settings.AllMailReceiver))
+            {
+                return;
+            }
+
+            m_log.Info($"AllMailReceiver is set, but not included in receivers - Sending e-mail to: {m_settings.AllMailReceiver}, subject: {subject}");
+            Send(m_settings.AllMailReceiver, subject, body);
         }
     }
 }

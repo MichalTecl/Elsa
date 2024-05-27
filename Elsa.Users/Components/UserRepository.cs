@@ -616,5 +616,19 @@ namespace Elsa.Users.Components
                 return new UserRightMap(UserRights.All, index);
             });
         }
+
+        public IEnumerable<IUser> GetUsersByRight(UserRight right)
+        {            
+            // TODO may need to be optimized if used frequently
+            var allUsers = GetAllUsers();
+
+            foreach (var user in allUsers)
+            {
+                if (GetUserRights(user.Id).Contains(right.Symbol))
+                {
+                    yield return user;
+                }
+            }
+        }
     }
 }
