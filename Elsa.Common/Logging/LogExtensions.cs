@@ -11,7 +11,7 @@ namespace Elsa.Common.Logging
     public static class LogExtensions
     {
         private static readonly object s_protoLock = new object();
-
+                
         public static string SaveRequestProtocol(this ILog log, string method, string url, IDictionary<string, object> sent, string received) 
         {
             var sentSb = new StringBuilder();
@@ -66,6 +66,20 @@ namespace Elsa.Common.Logging
 
                 return path;
             }
+        }
+    
+        public static void SaveInspectionIssue(this ILog log, string issueTypeName, string issueCode, string message)
+        {
+            var model = new InspectionIssueModel
+            {
+                IssueTypeName = issueTypeName,
+                IssueCode = issueCode,
+                Message = message
+            };
+
+            var serialized = InspectionIssueModel.Serialize(model);
+                        
+            log.Info(serialized);
         }
     }
 }

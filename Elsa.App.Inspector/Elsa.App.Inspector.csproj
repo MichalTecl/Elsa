@@ -62,6 +62,7 @@
     <Compile Include="Database\IInspectionSession.cs" />
     <Compile Include="Database\IInspectionType.cs" />
     <Compile Include="Database\ILogReaderScanHistory.cs" />
+    <Compile Include="Database\ILogStoredInspectionIssue.cs" />
     <Compile Include="ImpExpModules\ResponsibilityMatrixImpExpModule.cs" />
     <Compile Include="ImpExpModules\ResponsibilityMatrixRowModel.cs" />
     <Compile Include="InspectionsSyncSession.cs" />

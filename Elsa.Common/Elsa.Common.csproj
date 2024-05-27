@@ -80,6 +80,7 @@
     <Compile Include="Logging\FileLogWriter.cs" />
     <Compile Include="Logging\ILog.cs" />
     <Compile Include="Logging\ILogWriter.cs" />
+    <Compile Include="Logging\InspectionIssueModel.cs" />
     <Compile Include="Logging\LogExtensions.cs" />
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="Logging\NoActionLogWriter.cs" />

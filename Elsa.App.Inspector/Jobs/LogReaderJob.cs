@@ -52,6 +52,8 @@ namespace Elsa.App.Inspector.Jobs
             rawEntries = rawEntries.Where(e => e.Dt > lastCheckDt).ToList();
             m_log.Info($"Log files contain {rawEntries.Count} of entries logged after last check");
 
+            ProcessInspectionIssues(rawEntries);
+
             var entries = rawEntries.Where(e => e.Severity == "ERR").OrderBy(e => e.Dt).ToList();
             m_log.Info($"{entries.Count} of ER entries");
 
@@ -83,6 +85,41 @@ namespace Elsa.App.Inspector.Jobs
             m_database.Save(checkEntry);
 
             m_log.Info($"LastCheckDt set to {checkEntry.CheckDt}");
+        }
+
+        private void ProcessInspectionIssues(List<LogEntryModel> rawEntries)
+        {
+            var pattern = $"\t{InspectionIssueModel.DataEntryMarker}";
+
+            m_log.Info($"Starting processing logged inspection issues (Marked by {InspectionIssueModel.DataEntryMarker})");
+            var issues = rawEntries.Where(e => e.Message.Contains(pattern)).ToList();
+            m_log.Info($"Found {issues.Count} of logged inspection issues");
+
+            if (issues.Count == 0)
+            {
+                return;
+            }
+
+            foreach(var i in issues)
+            {
+                var message = i.Message.Split('\t').FirstOrDefault(part => part.StartsWith(InspectionIssueModel.DataEntryMarker));
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    m_log.Error($"Failed to extract inspection issue data from message: {i.Message}");
+                    continue;
+                }
+
+                var data = InspectionIssueModel.Deserialize(message);
+
+                var entry = m_database.New<ILogStoredInspectionIssue>();
+                entry.ProjectId = m_session.Project.Id;
+                entry.Message = data.Message;
+                entry.IssueCode = data.IssueCode;
+                entry.IssueTypeName = data.IssueTypeName;
+                entry.LogDt = i.Dt;
+
+                m_database.Save(entry);
+            }
         }
 
         private static IEnumerable<LogEntryModel> Read(IEnumerable<string> files)
