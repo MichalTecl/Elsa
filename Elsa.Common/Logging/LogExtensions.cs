@@ -68,7 +68,7 @@ namespace Elsa.Common.Logging
             }
         }
     
-        public static void SaveInspectionIssue(this ILog log, string issueTypeName, string issueCode, string message)
+        public static void SetInspectionIssue(this ILog log, string issueTypeName, string issueCode, string message)
         {
             var model = new InspectionIssueModel
             {

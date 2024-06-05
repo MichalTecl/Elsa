@@ -41,7 +41,7 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
             if ((context.Request.ProducingPrice ?? 0m) < 0.001m)
             {
                 if (context.TargetMaterial.RequiresProductionPrice != true)
-                {
+                {                    
                     context.Request.ProducingPrice = 0m;
                 }
                 else
@@ -49,6 +49,8 @@ namespace Elsa.Apps.ProductionService.Service.Process.Steps
                     context.InvalidateRequest("Je třeba zadat cenu práce");
                 }
             }
+
+            context.Request.DisableProductionPriceInput = (context.TargetMaterial.RequiresProductionPrice != true) && ((context.Recipe.ProductionPricePerUnit ?? 0M) == 0);
         }
     }
 }

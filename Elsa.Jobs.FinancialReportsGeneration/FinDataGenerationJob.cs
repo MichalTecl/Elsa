@@ -190,16 +190,22 @@ namespace Elsa.Jobs.FinancialReportsGeneration
 
             SaveCollections(year, month, tempDir);
 
+            m_log.Info("Loading InvoiceFormTypes");
             var formTypes = m_formsRepository.GetInvoiceFormTypes().ToList();
+            m_log.Info($"Loaded {formTypes.Count} InvoiceFormTypes: [{string.Join(", ", formTypes.Select(ft => ft.Name))}]");
 
             foreach (var formType in formTypes)
             {
+                m_log.Info($"Loading collecton for formType.Name = {formType.Name}, formType.Id={formType.Id}, year={year}, month={month}");
+
                 var collection = m_formsRepository.FindCollection(formType.Id, year, month);
                 if (collection == null)
                 {
                     m_log.Error($"Collection not found!");
                     continue;
                 }
+
+                m_log.Info($"Collection loaded: {collection.Forms.Count()} forms");
 
                 var ftDir = Path.Combine(tempDir, StringUtil.ReplaceNationalChars(formType.Name));
                 Directory.CreateDirectory(ftDir);
@@ -228,6 +234,8 @@ namespace Elsa.Jobs.FinancialReportsGeneration
                 m_log.Info("Archive created");
                 Directory.Delete(ftDir, true);
             }
+
+            m_log.Info("All form types processed");
 
             SaveStockReport(year, month, tempDir);
             

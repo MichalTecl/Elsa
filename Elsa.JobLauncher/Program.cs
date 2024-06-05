@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Linq;
 using System.Threading;
 
 using Elsa.Assembly;
@@ -49,7 +50,7 @@ namespace Elsa.JobLauncher
                 Console.WriteLine("Authenticated, starting scheduler");
 
                 var scheduler = locator.Get<ElsaJobsScheduler>();
-                scheduler.Start();
+                scheduler.Start(args.FirstOrDefault());
             }
             
         }

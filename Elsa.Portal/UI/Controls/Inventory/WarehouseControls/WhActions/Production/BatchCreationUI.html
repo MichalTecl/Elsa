@@ -23,7 +23,7 @@
                 </div>
             </div>
 
-            <div class="formRow">
+            <div class="formRow" data-bind="class.hidden:producingRecipe.DisableProductionPriceInput">
                 <label>Cena práce</label>
                 <div class="stackLeft">
                     <input type="number" step="0.001" min="0" data-bind="value:producingRecipe.ProducingPrice" event-bind="change:updatemodel(producingRecipe, '#ProducingPrice', this.value)"/>

@@ -34,9 +34,12 @@ namespace Elsa.Apps.ProductionService.Models
 
         public bool IsFirstRound { get; set; } = true;
 
+        public decimal PriceCalcAmount { get; set; }
+
+        public bool DisableProductionPriceInput { get; set; }
+
         public List<RequestValidationMessage> Messages { get; } = new List<RequestValidationMessage>();
 
-        public List<ProductionComponent> Components { get; } = new List<ProductionComponent>();
-        public decimal PriceCalcAmount { get; set; }
+        public List<ProductionComponent> Components { get; } = new List<ProductionComponent>();        
     }
 }

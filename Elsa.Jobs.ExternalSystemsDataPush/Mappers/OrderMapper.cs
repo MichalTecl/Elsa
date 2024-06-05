@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Elsa.Integration.Crm.Raynet.Model;
 using Elsa.Jobs.ExternalSystemsDataPush.Model;
+using Elsa.Common.Logging;
 
 namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
 {
@@ -28,6 +29,9 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
                 if (prodCode == null) 
                 {
                     log.Info($"Cannot process order {order.OrderNr} because it's item code={item.ProductUid} (\"{item.ProductName}\") does not exist in RN product list");
+
+                    log.SetInspectionIssue("Produkty chybějící v Raynetu", $"rnMissingProduct_{item.ProductUid}",  $"Produkt {item.ProductUid} (\"{item.ProductName}\") neexistuje v Raynetu");
+
                     return null;
                 }
 

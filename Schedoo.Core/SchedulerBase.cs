@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -17,13 +18,18 @@ namespace Schedoo.Core
             m_tick = tick;
         }
 
-        public void Start()
+        public void Start(string forcedJobName = null)
         {
             //while (true)
             //{
                 try
                 {
-                    var jobs = m_dataRepository.AllJobs.OrderBy(j => j.Priority).ToList();
+                    var jobs = m_dataRepository.AllJobs.Where(j => string.IsNullOrWhiteSpace(forcedJobName) || j.Uid == forcedJobName).OrderBy(j => j.Priority).ToList();
+
+                    if (!string.IsNullOrWhiteSpace(forcedJobName) && jobs.Count != 1)
+                    {
+                        throw new InvalidOperationException($"{jobs.Count} found by \"{forcedJobName}\"");
+                    }
 
                     foreach (var job in jobs)
                     {
@@ -42,7 +48,7 @@ namespace Schedoo.Core
                                 continue;
                             }
 
-                            var preconditons = EvalPreconditions(job, context);
+                            var preconditons = (job.Uid == forcedJobName) || EvalPreconditions(job, context);
                             WriteContextLog(context, preconditons);
                             if (!preconditons)
                             {
@@ -86,6 +92,15 @@ namespace Schedoo.Core
                     Console.WriteLine();
                     Console.WriteLine("GENERAL JOB LAUNCHER ERROR:");
                     Console.WriteLine(ex);
+
+                    try
+                    {
+                        File.WriteAllText($"error_{Guid.NewGuid()}.txt", ex.ToString());
+                }
+                    catch
+                    {
+                        ;
+                    }
 
                     Thread.Sleep(5000);
                 }

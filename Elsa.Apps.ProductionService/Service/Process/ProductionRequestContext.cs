@@ -34,7 +34,7 @@ namespace Elsa.Apps.ProductionService.Service.Process
         public Amount MinimalAmount { get; set; }
 
         public IMaterial TargetMaterial { get; set; }
-        
+
         public void InvalidateRequest(string message)
         {
             Request.IsValid = false;
