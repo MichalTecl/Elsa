@@ -1,0 +1,17 @@
+<div id="inspCuSelector" class="restricted-InspectorOtherUsers">
+    <div class="tabPanelHeadersContainer" data-bind="itemsSource:crossUserIssues" data-key="UserId" >
+        <div class="lt-template tabControlTabHead" data-bind="active-tab:activeTab" event-bind="click:onUserTabClick(UserId)">
+            <div class="tabControlHeadTitle" ><span data-bind="text:UserName"></span><span data-bind="text:IssuesCount"></span></div>
+        </div>
+    </div>
+</div>
+<script>
+    lt.element("inspCuSelector").withModel("app.Inspector.vm").attach(function() {
+        var vm = app.Inspector.vm;
+
+        this.onUserTabClick = function(userId) {
+            vm.setActiveUser(userId);
+        };
+
+    });
+</script>

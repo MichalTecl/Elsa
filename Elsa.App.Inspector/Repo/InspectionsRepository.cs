@@ -4,10 +4,12 @@ using System.Data;
 using System.Linq;
 using Elsa.App.Inspector.Database;
 using Elsa.App.Inspector.Model;
+using Elsa.Commerce.Core;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
+using OfficeOpenXml.FormulaParsing.Utilities;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.App.Inspector.Repo
@@ -18,13 +20,15 @@ namespace Elsa.App.Inspector.Repo
         private readonly ISession m_session;
         private readonly ICache m_cache;
         private readonly ILog m_log;
+        private readonly IUserRepository m_userRepository;
 
-        public InspectionsRepository(IDatabase database, ISession session, ICache cache, ILog log)
+        public InspectionsRepository(IDatabase database, ISession session, ICache cache, ILog log, IUserRepository userRepository)
         {
             m_database = database;
             m_session = session;
             m_cache = cache;
             m_log = log;
+            m_userRepository = userRepository;
         }
 
         private string ResponsibilityMatrixCacheKey => $"inspMatrix_{m_session.Project.Id}";
@@ -213,7 +217,7 @@ namespace Elsa.App.Inspector.Repo
             }
             finally
             {
-                OnIssueChanged(0);
+                OnIssueChanged(-1);
             }
         }
 
@@ -256,15 +260,15 @@ namespace Elsa.App.Inspector.Repo
             return sync;
         }
 
-        public List<IssuesSummaryItemModel> GetActiveIssuesSummary()
+        public List<IssuesSummaryItemModel> GetActiveIssuesSummary(int userId)
         {
-            return m_cache.ReadThrough(GetIssuesOverviewCacheKey(), TimeSpan.FromMinutes(5), () =>
+            return m_cache.ReadThrough(GetIssuesOverviewCacheKey(userId), TimeSpan.FromMinutes(5), () =>
             {
                 var result = new List<IssuesSummaryItemModel>();
 
                 m_database.Sql().Call("inspfw_getActiveIssuesSummary")
                     .WithParam("@projectId", m_session.Project.Id)
-                    .WithParam("@userId", m_session.User.Id)
+                    .WithParam("@userId", userId)
                     .ReadRows<int, string, int>(
                         (id, name, count) =>
                         {
@@ -315,9 +319,11 @@ namespace Elsa.App.Inspector.Repo
             return query.Execute().ToList();
         }
 
-        public void OnIssueChanged(int issueId)
+        public void OnIssueChanged(int isueId)
         {
-            m_cache.Remove(GetIssuesOverviewCacheKey());
+            var allUsers = m_userRepository.GetAllUsers();
+            foreach(var u in allUsers)
+                m_cache.Remove(GetIssuesOverviewCacheKey(u.Id));
             
         }
 
@@ -366,9 +372,9 @@ namespace Elsa.App.Inspector.Repo
             m_database.Save(entry);
         }
 
-        private string GetIssuesOverviewCacheKey()
+        private string GetIssuesOverviewCacheKey(int userId)
         {
-            return $"inspIssuesOverview_{m_session.User.Id}";
+            return $"inspIssuesOverview_{userId}";
         }
 
         
@@ -473,6 +479,26 @@ namespace Elsa.App.Inspector.Repo
                 .NonQuery();
         }
 
+        public List<UserIssuesCount> GetUserIssuesCounts()
+        {
+            var result = new List<UserIssuesCount>();
+
+            var userIndex = m_userRepository.GetUserIndex();
+
+            m_database.Sql().Call("inspfw_getIssueCountForUsers")
+                .WithParam("@projectId", m_session.Project.Id)
+                .ReadRows<int, int>((id, count) =>
+                result.Add(new UserIssuesCount()
+                {
+                    UserId = id,
+                    UserName = userIndex.Get(id, u => u.EMail, "?"),
+                    IssuesCount = count
+                })); ;
+
+            var me = m_session.User.Id;
+
+            return result.OrderBy(r => r.UserId == me ? 0 : 1).ThenBy(r => r.UserName).ToList();
+        }
     }
 }
 

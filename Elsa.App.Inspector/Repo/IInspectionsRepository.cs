@@ -17,7 +17,9 @@ namespace Elsa.App.Inspector.Repo
 
         InspectionsSyncSession OpenSession();
 
-        List<IssuesSummaryItemModel> GetActiveIssuesSummary();
+        List<IssuesSummaryItemModel> GetActiveIssuesSummary(int userId);
+
+        List<UserIssuesCount> GetUserIssuesCounts();
 
         List<IInspectionIssue> LoadIssues(int issueTypeId, int pageIndex, int pageSize);
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
@@ -42,6 +42,11 @@ namespace Elsa.Commerce.Core.Repositories
         public List<IUser> GetAllUsers()
         {
             return m_cache.ReadThrough("allUsers", database => database.SelectFrom<IUser>()).ToList();
+        }
+
+        public DataIndex<int, IUser> GetUserIndex()
+        {
+            return new DataIndex<int, IUser>(GetAllUsers(), u => u.Id);
         }
     }
 }

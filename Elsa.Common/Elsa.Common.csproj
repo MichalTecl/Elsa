@@ -68,6 +68,7 @@
     <Compile Include="Configuration\ConfigurationRepository.cs" />
     <Compile Include="Configuration\IConfigEntryDefinition.cs" />
     <Compile Include="Configuration\IConfigurationRepository.cs" />
+    <Compile Include="DataIndex.cs" />
     <Compile Include="Data\AdapterBase.cs" />
     <Compile Include="DoNotLogAttribute.cs" />
     <Compile Include="DoNotLogParamsAttribute.cs" />

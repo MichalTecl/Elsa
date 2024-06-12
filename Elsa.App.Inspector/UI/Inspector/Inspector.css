@@ -89,3 +89,17 @@
     vertical-align: baseline;
     white-space: nowrap;
 }
+
+#inspCuSelector .tabPanelHeadersContainer {
+    margin-left: -10px;
+}
+
+#inspCuSelector .tabControlHeadTitle {
+    font-size: 0.9em;
+    color: #333;
+}
+
+#inspCuSelector .tabControlHeadTitle span:last-child {
+    margin-left: 10px;
+    color: #533;
+}	

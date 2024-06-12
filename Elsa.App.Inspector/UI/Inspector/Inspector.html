@@ -8,38 +8,43 @@
             </div>
         </div>
         <div id="inspectorUi" class="panelContent">
-            <div id="issuesList" data-bind="itemsSource:summary" data-key="TypeId">
-                <div class="lt-template inspTypeRow">
-                    <div class="stackLeft inspTypeRowHead">
-                        <i data-bind="class.hidden:isExpanded" class="far fa-plus-square faButton" event-bind="click:toggleExpansion(VM)"></i>
-                        <i data-bind="class!.hidden:isExpanded" class="far fa-minus-square faButton hidden" event-bind="click:toggleExpansion(VM)"></i>
-                        
-                        <div data-bind="text:TypeName" class="inspTypeRowTitle"></div>
-                        <div data-bind="text:IssuesCount" class="inspTypeRowIssuCount"></div>
-                    </div>
-                    <div class="inspTypeRowContent" data-bind="class!.hidden:isExpanded">
-                        <div data-bind="itemsSource:issues" data-key="IssueId" class="inspIssuesList">
-                            <div class="lt-template inspIssueRow" data-bind="class.hidden:IsHidden">
-                                <div class="inspIssueRowHead stackLeft">
-                                    <div class="issueHeadExpanderCont">
-                                        <div data-bind="class!.hidden:hasActions">
-                                            <i data-bind="class.hidden:isExpanded" class="far fa-plus-square faButton" event-bind="click:toggleActionsExpansion(VM)"></i>
-                                            <i data-bind="class!.hidden:isExpanded" class="far fa-minus-square faButton hidden" event-bind="click:toggleActionsExpansion(VM)"></i>
-                                        </div>
-                                    </div>
-                                    <div class="inspIssueRowTitle" data-bind="text:Message"></div>
-                                </div>
-                                <div class="inspIssueActions" data-bind="class!.hidden:isExpanded">
-                                    <div class=" restricted-InspectorActions">
-                                        <div data-bind="itemsSource:actions" class="stackLeft inspIssueActionsList" data-key="control">
-                                            <div class="lt-template inspIsuActionPlaceholder" data-bind="fill-by:control"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                            </div>
+            <div class="iCusContainer">
+                <div replace-by="/UI/Inspector/InspectorCrossUserSelector.html"></div>
+            </div>
+            <div class="iIssulistContainer">
+                <div id="issuesList" data-bind="itemsSource:summary" data-key="TypeId">
+                    <div class="lt-template inspTypeRow">
+                        <div class="stackLeft inspTypeRowHead">
+                            <i data-bind="class.hidden:isExpanded" class="far fa-plus-square faButton" event-bind="click:toggleExpansion(VM)"></i>
+                            <i data-bind="class!.hidden:isExpanded" class="far fa-minus-square faButton hidden" event-bind="click:toggleExpansion(VM)"></i>
+
+                            <div data-bind="text:TypeName" class="inspTypeRowTitle"></div>
+                            <div data-bind="text:IssuesCount" class="inspTypeRowIssuCount"></div>
                         </div>
-                        <button data-bind="class!.hidden:canLoadMore" event-bind="click:loadMore(TypeId)">Více</button>
+                        <div class="inspTypeRowContent" data-bind="class!.hidden:isExpanded">
+                            <div data-bind="itemsSource:issues" data-key="IssueId" class="inspIssuesList">
+                                <div class="lt-template inspIssueRow" data-bind="class.hidden:IsHidden">
+                                    <div class="inspIssueRowHead stackLeft">
+                                        <div class="issueHeadExpanderCont">
+                                            <div data-bind="class!.hidden:hasActions">
+                                                <i data-bind="class.hidden:isExpanded" class="far fa-plus-square faButton" event-bind="click:toggleActionsExpansion(VM)"></i>
+                                                <i data-bind="class!.hidden:isExpanded" class="far fa-minus-square faButton hidden" event-bind="click:toggleActionsExpansion(VM)"></i>
+                                            </div>
+                                        </div>
+                                        <div class="inspIssueRowTitle" data-bind="text:Message"></div>
+                                    </div>
+                                    <div class="inspIssueActions" data-bind="class!.hidden:isExpanded">
+                                        <div class=" restricted-InspectorActions">
+                                            <div data-bind="itemsSource:actions" class="stackLeft inspIssueActionsList" data-key="control">
+                                                <div class="lt-template inspIsuActionPlaceholder" data-bind="fill-by:control"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <button data-bind="class!.hidden:canLoadMore" event-bind="click:loadMore(TypeId)">Více</button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -15,6 +15,9 @@ function() {
 
     var autoRefresh = false;
 
+    self.crossUserIssues = [];
+    self.selectedUserId = null;
+
     var getType = function(typeId) {
 
         for (var i = 0; i < self.summary.length; i++) {
@@ -128,8 +131,23 @@ function() {
         }
     };
 
-    var loadSummary = function() {
-        lt.api("/inspector/getSummary").get(receiveSummary);
+    var receiveCrossUserIssues = function (issues) {
+        self.crossUserIssues = issues;  
+
+        if (self.selectedUserId === null && issues.length > 0) {
+            self.selectedUserId = issues[0].UserId;
+        }
+
+        self.crossUserIssues.forEach(function (u) {
+            u.activeTab = (u.UserId === self.selectedUserId) ? 1 : 0;
+        });
+
+    };
+
+    var loadSummary = function () {
+        lt.api("/inspector/getSummary").query({ "userId": self.selectedUserId }).get(receiveSummary);
+
+        lt.api("/inspector/getUsersIssuesCounts").get(receiveCrossUserIssues);
     };
     
     self.collapseType = function(typeId) {
@@ -162,6 +180,17 @@ function() {
 
     this.init = function(autorefresh) {
         autoRefresh = autorefresh;
+        loadSummary();
+    };
+
+    self.setActiveUser = function (userId) {
+        if (userId === self.selectedUserId)
+            return; 
+
+        self.selectedUserId = userId;
+        receiveCrossUserIssues(self.crossUserIssues);
+        self.summary = [];
+        lt.notify();
         loadSummary();
     };
 };

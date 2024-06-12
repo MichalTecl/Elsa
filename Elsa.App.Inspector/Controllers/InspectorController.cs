@@ -21,12 +21,17 @@ namespace Elsa.App.Inspector.Controllers
         }
 
         [DoNotLog]
-        public List<IssuesSummaryItemModel> GetSummary()
+        public List<IssuesSummaryItemModel> GetSummary(int? userId)
         {
             if(!WebSession.HasUserRight(ReportingUserRights.InspectorApp))
                 return new List<IssuesSummaryItemModel>(0);
 
-            return m_inspectionsRepository.GetActiveIssuesSummary();
+            if (userId == null || (!WebSession.HasUserRight(ReportingUserRights.InspectorOtherUsers)))
+            {
+                userId = WebSession.User.Id;
+            }
+
+            return m_inspectionsRepository.GetActiveIssuesSummary(userId.Value);
         }
 
         public InspectionIssuesCollection GetIssues(int inspectionTypeId, int pageIndex)
@@ -87,6 +92,14 @@ namespace Elsa.App.Inspector.Controllers
             EnsureUserRight(ReportingUserRights.InspectorActions);
 
             m_inspectionsRepository.PostponeIssue(issueId, days);
+        }
+
+        public List<UserIssuesCount> GetUsersIssuesCounts()
+        {
+            if (!WebSession.HasUserRight(ReportingUserRights.InspectorOtherUsers))
+                return new List<UserIssuesCount>(0);            
+
+            return m_inspectionsRepository.GetUserIssuesCounts();
         }
     }
 }

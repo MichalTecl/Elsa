@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
 namespace Elsa.Commerce.Core
@@ -15,5 +16,7 @@ namespace Elsa.Commerce.Core
 
         IUser GetUser(int id);
         List<IUser> GetAllUsers();
+
+        DataIndex<int, IUser> GetUserIndex();
     }
 }
