@@ -62,6 +62,7 @@
     <Compile Include="Database\IEmailRecipientList.cs" />
     <Compile Include="Database\IRecipientListsRepository.cs" />
     <Compile Include="Database\RecipientListsRepository.cs" />
+    <Compile Include="DebugMailSender.cs" />
     <Compile Include="IMailSender.cs" />
     <Compile Include="SmtpMailSender.cs" />
     <Compile Include="SmtpRegistry.cs" />

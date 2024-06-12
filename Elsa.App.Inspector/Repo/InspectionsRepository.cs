@@ -115,6 +115,12 @@ namespace Elsa.App.Inspector.Repo
                         throw new InvalidOperationException($"Action name column {actionNameCol} is missing");
                     }
 
+                    if (row.IsNull(actioncontrolCol) || row.IsNull(actionNameCol))
+                    {
+                        m_log.Info("Action control url or name is null");
+                        continue;
+                    }
+
                     var actionName = row[actionNameCol].ToString();
                     var controlUrl = row[actioncontrolCol].ToString();
 

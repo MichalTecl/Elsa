@@ -26,10 +26,7 @@ namespace Elsa.Smtp.Core
 
         [ConfigEntry("Mailer.SenderPassword", ConfigEntryScope.Project)]
         public string SenderPassword { get; set; }
-
-        [ConfigEntry("Mailer.AllMailReceiver", ConfigEntryScope.Project)]
-        public string AllMailReceiver { get; set; }
-
+                
         public bool EnableSsl { get; set; } = true;
 
         public SmtpDeliveryMethod DeliveryMethod { get; set; } = SmtpDeliveryMethod.Network;

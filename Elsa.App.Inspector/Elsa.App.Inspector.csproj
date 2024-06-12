@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\20200811_002_insp_abandonedBatchRemains.sql" />
+    <Content Include="SQL\20240611_001_ordersWithMissingBatches - adding Ignore.sql" />
     <Content Include="SQL\20220914_001_ordersStuckInStatus - switched to ERP statuses.sql" />
     <Content Include="SQL\20220914_000_vwIssueTypeResponsibleUser.sql" />
     <Content Include="SQL\20201029_000_vwIssueTypeResponsibleUser.sql" />
@@ -155,6 +156,8 @@
     <Content Include="SQL\20240516_001_inspfw_addIssueAndSelectIssueId.sql" />
     <Content Include="SQL\20240528_001_insp_processIssuesFromLog.sql" />
     <Content Include="SQL\20240528_002_vwIssueTypeResponsibleUser.sql" />
+    <Content Include="SQL\20240611-001 insp_abandonedBatchReamains.sql" />
+    <Content Include="SQL\20240612_001_vwAbandonedBatches.sql" />
     <Content Include="UI\Inspector\ActionControls\Ignore.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneMonth.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneWeek.html" />
