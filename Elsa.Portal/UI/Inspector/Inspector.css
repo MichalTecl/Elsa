@@ -92,7 +92,12 @@
 
 #inspCuSelector .tabPanelHeadersContainer {
     margin-left: -10px;
+    margin-bottom: 10px;
+    margin-top: -14px;
+    min-width: 100%;
+    width: 100%;
 }
+
 
 #inspCuSelector .tabControlHeadTitle {
     font-size: 0.9em;
