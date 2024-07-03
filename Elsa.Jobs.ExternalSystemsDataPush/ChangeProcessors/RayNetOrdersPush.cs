@@ -34,6 +34,26 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
             return _productList;
         }
 
+        private HashSet<string> _productsOrderedInLastYear = null;
+        private HashSet<string> GetProductsOrderedInLastYear()
+        {
+            if (_productsOrderedInLastYear == null)
+            {               
+                var query = "SELECT DISTINCT oi.PlacedName "
+                           + " FROM PurchaseOrder po"
+                           + " JOIN vwOrderItems voi ON (po.Id = voi.OrderId)"
+                           + " JOIN OrderItem oi ON (voi.OrderItemId = oi.Id)"
+                           + " WHERE po.ProjectId = {0} AND po.PurchaseDate > DATEADD(year, -1, GETDATE())";
+
+                _productsOrderedInLastYear 
+                    = new HashSet<string>(_db.Sql()
+                    .ExecuteWithParams(query, _session.Project.Id)
+                    .MapRows(r => r.GetString(0)));
+            }
+
+            return _productsOrderedInLastYear;
+        }
+
         public RayNetOrdersPush(IRaynetClient raynet, IDatabase db, ISession session)
         {
             _raynet = raynet;
@@ -100,7 +120,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.ChangeProcessors
                                                 
                         log.Info($"Order {orderEvent.Entity.OrderNr} is successfuly finished -> sending to RN");
 
-                        var businessCase = OrderMapper.ToBcModel(orderEvent.Entity, GetProductList(), log);
+                        var businessCase = OrderMapper.ToBcModel(orderEvent.Entity, GetProductList(), GetProductsOrderedInLastYear(), log);
                         if (businessCase == null) 
                         {
                             log.Info($"It was not possible to map {orderEvent.Entity.OrderNr} -> skipping sending to RN");

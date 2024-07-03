@@ -11,7 +11,7 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
 {
     public static class OrderMapper
     {
-        public static BusinessCaseModel ToBcModel(OrderExportModel order, List<ProductListItem> productListItems, Elsa.Common.Logging.ILog log) 
+        public static BusinessCaseModel ToBcModel(OrderExportModel order, List<ProductListItem> productListItems, HashSet<string> productsOrderedInLastYear, Elsa.Common.Logging.ILog log) 
         {
             var bc = new BusinessCaseModel
             {
@@ -30,7 +30,8 @@ namespace Elsa.Jobs.ExternalSystemsDataPush.Mappers
                 {
                     log.Info($"Cannot process order {order.OrderNr} because it's item code={item.ProductUid} (\"{item.ProductName}\") does not exist in RN product list");
 
-                    log.SetInspectionIssue("Produkty chybějící v Raynetu", $"rnMissingProduct_{item.ProductUid}",  $"Produkt {item.ProductUid} (\"{item.ProductName}\") neexistuje v Raynetu");
+                    if(productsOrderedInLastYear.Contains(item.ProductName))
+                        log.SetInspectionIssue("Produkty chybějící v Raynetu", $"rnMissingProduct_{item.ProductUid}",  $"Produkt {item.ProductUid} (\"{item.ProductName}\") neexistuje v Raynetu");
 
                     return null;
                 }
