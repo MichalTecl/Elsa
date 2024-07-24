@@ -20,15 +20,18 @@ jobs:
     - name: Set up NuGet
       uses: NuGet/setup-nuget@v1.0.5
 
-    - name: Set up Visual Studio Build Tools
-      uses: microsoft/setup-msbuild@v1
-
     - name: Restore NuGet packages
       run: nuget restore Elsa.sln -PackagesDirectory packages
 
     - name: Build with MSBuild
       run: |
-        & "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe" Elsa.sln /p:Configuration=Release
+        # Locate MSBuild.exe path using environment variables
+        $msbuildPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
+        if (-Not (Test-Path $msbuildPath)) {
+          Write-Host "MSBuild.exe not found at path: $msbuildPath"
+          exit 1
+        }
+        & $msbuildPath Elsa.sln /p:Configuration=Release
 
     - name: Print MSBuild Logs
       run: |
