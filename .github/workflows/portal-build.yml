@@ -27,7 +27,7 @@ jobs:
       run: echo ${PWD}
 
     - name: List Files in Working Directory
-      run: dir
+      run: Get-ChildItem
 
     - name: Clear NuGet Cache
       run: nuget locals all -clear
@@ -36,18 +36,16 @@ jobs:
       run: nuget restore Elsa.Portal/Elsa.Portal.csproj -PackagesDirectory packages
 
     - name: List NuGet Packages
-      run: |
-        dir packages /s /b
-        dir packages /s /b > packages_list.txt
+      run: Get-ChildItem -Path packages -Recurse -Filter *.nupkg
 
     - name: Create Diagnostic Logs
       run: |
         echo "System Information" > diagnostics.txt
         systeminfo >> diagnostics.txt
         echo "Environment Variables" >> diagnostics.txt
-        set >> diagnostics.txt
+        Get-ChildItem Env: | Out-File -Append -FilePath diagnostics.txt
         echo "Directory Listing" >> diagnostics.txt
-        dir >> diagnostics.txt
+        Get-ChildItem | Out-File -Append -FilePath diagnostics.txt
         echo "NuGet Configurations" >> diagnostics.txt
         nuget config -list >> diagnostics.txt
         echo "Installed Packages" >> diagnostics.txt
