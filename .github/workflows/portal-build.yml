@@ -17,6 +17,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Set up MSBuild
+      uses: warrenbuckley/Setup-MSBuild@v1
+      with:
+        vs-version: 'latest'  # Nebo specifikujte konkrétní verzi, např. '2022'
+
     - name: Print Working Directory
       run: pwd
 
