@@ -20,20 +20,39 @@ jobs:
     - name: Set up Visual Studio Build Tools
       uses: microsoft/setup-msbuild@v1
 
+    - name: Print Working Directory
+      run: pwsh -command "Get-Location"
+
+    - name: List Files in Working Directory
+      run: pwsh -command "Get-ChildItem -Recurse"
+
     - name: Clear NuGet Cache
       run: nuget locals all -clear
 
     - name: Restore NuGet packages
       run: nuget restore Elsa.Portal/Elsa.Portal.csproj -PackagesDirectory packages
 
-    - name: Install Newtonsoft.Json Package
-      run: nuget install Newtonsoft.Json -Version 13.0.1 -OutputDirectory packages
+    - name: List NuGet Packages
+      run: pwsh -command "Get-ChildItem -Recurse -Filter *.nupkg"
 
-    - name: List Installed NuGet Packages
-      run: dir packages /s /b
+    - name: Create Diagnostic Logs
+      run: |
+        echo "System Information" > diagnostics.txt
+        systeminfo >> diagnostics.txt
+        echo "Environment Variables" >> diagnostics.txt
+        set >> diagnostics.txt
+        echo "Directory Listing" >> diagnostics.txt
+        dir >> diagnostics.txt
+        echo "NuGet Configurations" >> diagnostics.txt
+        nuget config -list >> diagnostics.txt
+        echo "Installed Packages" >> diagnostics.txt
+        nuget list >> diagnostics.txt
+
+    - name: Pre-build Action - Run PowerShell Script
+      run: powershell -File path\to\your\script.ps1  # Adjust the path to your script
 
     - name: Build
-      run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release /v:diag
+      run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
 
     - name: Print MSBuild Logs
       run: type build_logs.txt
