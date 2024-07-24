@@ -17,8 +17,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Restore dependencies
-      run: nuget restore Elsa.Portal/Elsa.Portal.csproj
+    - name: Print Working Directory
+      run: pwd
+
+    - name: List Files in Working Directory
+      run: dir
+
+    - name: Restore NuGet packages
+      run: nuget restore Elsa.Portal/Elsa.Portal.csproj -PackagesDirectory packages
 
     - name: Build
       run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
