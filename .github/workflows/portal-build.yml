@@ -17,23 +17,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up NuGet
-      uses: NuGet/setup-nuget@v1.0.5
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.x'  # Specifikujte verzi .NET SDK, kterou potřebujete
 
     - name: Restore NuGet packages
-      run: nuget restore Elsa.sln -PackagesDirectory packages
+      run: dotnet restore Elsa.sln
 
     - name: Build with MSBuild
       run: |
-        # Locate MSBuild.exe path using environment variables
-        $msbuildPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
-        if (-Not (Test-Path $msbuildPath)) {
-          Write-Host "MSBuild.exe not found at path: $msbuildPath"
-          exit 1
-        }
-        & $msbuildPath Elsa.sln /p:Configuration=Release
+        # Use dotnet build to compile the solution
+        dotnet build Elsa.sln -c Release
 
-    - name: Print MSBuild Logs
+    - name: Print Build Logs
       run: |
-        echo "MSBuild Logs" > build_logs.txt
+        echo "Build Logs" > build_logs.txt
         type build_logs.txt
