@@ -3,10 +3,10 @@ name: Build Portal
 on:
   push:
     branches:
-      - main  # Změňte na vaši hlavní větev, pokud není 'main'
+      - main  # Ujistěte se, že máte větev 'main' nebo změňte na správnou větev
   pull_request:
     branches:
-      - main  # Změňte na vaši hlavní větev, pokud není 'main'
+      - main  # Ujistěte se, že máte větev 'main' nebo změňte na správnou větev
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1
 
     - name: Print Working Directory
-      run: pwd
+      run: echo %cd%
 
     - name: List Files in Working Directory
       run: dir
@@ -31,7 +31,7 @@ jobs:
 
     - name: Restore NuGet packages
       run: nuget restore Elsa.Portal/Elsa.Portal.csproj -PackagesDirectory packages
-	  
+
     - name: List NuGet Packages
       run: dir /s /b | findstr /i ".nupkg"
 
@@ -47,11 +47,6 @@ jobs:
         nuget config -list >> diagnostics.txt
         echo "Installed Packages" >> diagnostics.txt
         nuget list >> diagnostics.txt
-		
+
     - name: Build
-      run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
-	  
-    - name: Print MSBuild Logs
-      run: |
-        echo "MSBuild Logs" >> build_logs.txt
-        type build_logs.txt
+      run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release /v:diag
