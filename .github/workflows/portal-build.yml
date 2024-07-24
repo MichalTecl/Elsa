@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
@@ -26,8 +26,9 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore Elsa.Portal/Elsa.Portal.csproj -PackagesDirectory packages
 
-    - name: Build
-      run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
+    - name: Build with MSBuild from Visual Studio
+      run: |
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
 
     - name: Print MSBuild Logs
       run: |
