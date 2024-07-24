@@ -35,19 +35,6 @@ jobs:
     - name: List NuGet Packages
       run: Get-ChildItem -Recurse | Where-Object { $_.Name -match "\.nupkg$" }
 
-    - name: Create Diagnostic Logs
-      run: |
-        "System Information" | Out-File -FilePath diagnostics.txt -Append
-        systeminfo | Out-File -FilePath diagnostics.txt -Append
-        "Environment Variables" | Out-File -FilePath diagnostics.txt -Append
-        Get-ChildItem Env: | Out-File -FilePath diagnostics.txt -Append
-        "Directory Listing" | Out-File -FilePath diagnostics.txt -Append
-        Get-ChildItem -Recurse | Out-File -FilePath diagnostics.txt -Append
-        "NuGet Configurations" | Out-File -FilePath diagnostics.txt -Append
-        nuget config -list | Out-File -FilePath diagnostics.txt -Append
-        "Installed Packages" | Out-File -FilePath diagnostics.txt -Append
-        nuget list | Out-File -FilePath diagnostics.txt -Append
-
     - name: Build
       run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release /v:diag
 
