@@ -405,7 +405,7 @@
   </ProjectExtensions>
   <PropertyGroup>
     <PreBuildEvent>if "$(ConfigurationName)" == "Release" (
-  powershell -ExecutionPolicy Bypass -File "$(SolutionDir)_UTILS\sencha2.ps1" -targetProj "$(ProjectPath)"  
+  powershell -ExecutionPolicy Bypass -File "$(ProjectDir)..\_UTILS\sencha2.ps1" -targetProj "$(ProjectPath)"  
 ) else (
   sencha "$(ProjectPath)" worker
 )
