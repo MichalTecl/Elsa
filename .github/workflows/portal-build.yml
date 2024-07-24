@@ -21,10 +21,10 @@ jobs:
       uses: microsoft/setup-msbuild@v1
 
     - name: Print Working Directory
-      run: echo %cd%
+      run: Write-Output $PWD
 
     - name: List Files in Working Directory
-      run: dir
+      run: Get-ChildItem -Recurse
 
     - name: Clear NuGet Cache
       run: nuget locals all -clear
@@ -33,20 +33,23 @@ jobs:
       run: nuget restore Elsa.Portal/Elsa.Portal.csproj -PackagesDirectory packages
 
     - name: List NuGet Packages
-      run: dir /s /b | findstr /i ".nupkg"
+      run: Get-ChildItem -Recurse | Where-Object { $_.Name -match "\.nupkg$" }
 
     - name: Create Diagnostic Logs
       run: |
-        echo "System Information" > diagnostics.txt
-        systeminfo >> diagnostics.txt
-        echo "Environment Variables" >> diagnostics.txt
-        set >> diagnostics.txt
-        echo "Directory Listing" >> diagnostics.txt
-        dir >> diagnostics.txt
-        echo "NuGet Configurations" >> diagnostics.txt
-        nuget config -list >> diagnostics.txt
-        echo "Installed Packages" >> diagnostics.txt
-        nuget list >> diagnostics.txt
+        "System Information" | Out-File -FilePath diagnostics.txt -Append
+        systeminfo | Out-File -FilePath diagnostics.txt -Append
+        "Environment Variables" | Out-File -FilePath diagnostics.txt -Append
+        Get-ChildItem Env: | Out-File -FilePath diagnostics.txt -Append
+        "Directory Listing" | Out-File -FilePath diagnostics.txt -Append
+        Get-ChildItem -Recurse | Out-File -FilePath diagnostics.txt -Append
+        "NuGet Configurations" | Out-File -FilePath diagnostics.txt -Append
+        nuget config -list | Out-File -FilePath diagnostics.txt -Append
+        "Installed Packages" | Out-File -FilePath diagnostics.txt -Append
+        nuget list | Out-File -FilePath diagnostics.txt -Append
 
     - name: Build
       run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release /v:diag
+
+    - name: Print MSBuild Logs
+      run: Get-Content build_logs.txt
