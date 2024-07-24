@@ -17,10 +17,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install .NET Framework Build Tools
-      run: |
-        choco install dotnet-framework --version=4.7.2 --params "/NoDesktop"
-
     - name: Restore dependencies
       run: nuget restore Elsa/Elsa.Portal/Elsa.Portal.csproj
 
