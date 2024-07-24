@@ -404,11 +404,12 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PreBuildEvent>if $(ConfigurationName) == Debug (
+    <PreBuildEvent>if "$(ConfigurationName)" == "Release" (
+  powershell -ExecutionPolicy Bypass -File "$(SolutionDir)_UTILS\sencha2.ps1" -targetProj "$(ProjectPath)"  
+) else (
   sencha "$(ProjectPath)" worker
-) ELSE (
-   sencha "$(ProjectPath)"
-)</PreBuildEvent>
+)
+</PreBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.3.6.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.3.6.0\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
