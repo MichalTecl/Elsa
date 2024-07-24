@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main  # Změňte na vaši hlavní větev, pokud není 'main'
-  workflow_dispatch:  # Umožňuje manuální spuštění workflow
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build:
@@ -18,7 +18,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Restore dependencies
-      run: nuget restore Elsa/Elsa.Portal/Elsa.Portal.csproj
+      run: nuget restore Elsa.Portal/Elsa.Portal.csproj
 
     - name: Build
-      run: msbuild Elsa/Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
+      run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
