@@ -21,7 +21,7 @@ jobs:
       uses: NuGet/setup-nuget@v1.0.5
 
     - name: Restore NuGet packages
-      run: nuget restore Elsa.sln -PackagesDirectory packages
+      run: nuget restore Elsa.Portal/Elsa.Portal.csproj -PackagesDirectory packages
 
     - name: Build with MSBuild
       run: |
@@ -31,7 +31,7 @@ jobs:
           Write-Host "MSBuild.exe not found at path: $msbuildPath"
           exit 1
         }
-        & $msbuildPath Elsa.sln /p:Configuration=Release
+        & $msbuildPath Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
 
     - name: Print MSBuild Logs
       run: |
