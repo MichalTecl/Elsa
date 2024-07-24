@@ -26,7 +26,7 @@ jobs:
     - name: Build with MSBuild
       run: |
         # Locate MSBuild.exe path using environment variables
-        $msbuildPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
+        $msbuildPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
         if (-Not (Test-Path $msbuildPath)) {
           Write-Host "MSBuild.exe not found at path: $msbuildPath"
           exit 1
