@@ -1,0 +1,27 @@
+name: Build Portal
+
+on:
+  push:
+    branches:
+      - main  # Změňte na vaši hlavní větev, pokud není 'main'
+  pull_request:
+    branches:
+      - main  # Změňte na vaši hlavní větev, pokud není 'main'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install .NET Framework Build Tools
+      run: |
+        choco install dotnet-framework --version=4.7.2 --params "/NoDesktop"
+
+    - name: Restore dependencies
+      run: nuget restore Elsa/Elsa.Portal/Elsa.Portal.csproj
+
+    - name: Build
+      run: msbuild Elsa/Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
