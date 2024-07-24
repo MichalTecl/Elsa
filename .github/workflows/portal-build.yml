@@ -11,48 +11,49 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Visual Studio Build Tools
-      uses: microsoft/setup-msbuild@v1
+    - name: Install PowerShell
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y powershell
 
-    - name: Print Working Directory
-      run: pwsh -command "Get-Location"
-
-    - name: List Files in Working Directory
-      run: pwsh -command "Get-ChildItem -Recurse"
+    - name: Install .NET Core SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '4.x'  # Adjust according to your project's .NET version
 
     - name: Clear NuGet Cache
-      run: nuget locals all -clear
+      run: dotnet nuget locals all --clear
 
     - name: Restore NuGet packages
-      run: nuget restore Elsa.Portal/Elsa.Portal.csproj -PackagesDirectory packages
+      run: dotnet restore Elsa.Portal/Elsa.Portal.csproj
 
     - name: List NuGet Packages
-      run: pwsh -command "Get-ChildItem -Recurse -Filter *.nupkg"
+      run: find . -name "*.nupkg"
 
     - name: Create Diagnostic Logs
       run: |
         echo "System Information" > diagnostics.txt
-        systeminfo >> diagnostics.txt
+        uname -a >> diagnostics.txt
         echo "Environment Variables" >> diagnostics.txt
-        set >> diagnostics.txt
+        printenv >> diagnostics.txt
         echo "Directory Listing" >> diagnostics.txt
-        dir >> diagnostics.txt
+        ls -la >> diagnostics.txt
         echo "NuGet Configurations" >> diagnostics.txt
-        nuget config -list >> diagnostics.txt
+        dotnet nuget list source >> diagnostics.txt
         echo "Installed Packages" >> diagnostics.txt
-        nuget list >> diagnostics.txt
+        dotnet list package >> diagnostics.txt
 
     - name: Pre-build Action - Run PowerShell Script
-      run: powershell -File path\to\your\script.ps1  # Adjust the path to your script
+      run: pwsh path/to/your/script.ps1  # Adjust the path to your script
 
     - name: Build
-      run: msbuild Elsa.Portal/Elsa.Portal.csproj /p:Configuration=Release
+      run: dotnet build Elsa.Portal/Elsa.Portal.csproj -c Release
 
-    - name: Print MSBuild Logs
-      run: type build_logs.txt
+    - name: Print Build Logs
+      run: cat build_logs.txt
