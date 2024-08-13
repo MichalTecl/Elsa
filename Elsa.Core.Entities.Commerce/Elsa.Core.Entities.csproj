@@ -101,6 +101,7 @@
     <Compile Include="Crm\ICustomerGroup.cs" />
     <Compile Include="Crm\ICustomerGroupType.cs" />
     <Compile Include="Crm\ICustomerRelatedNote.cs" />
+    <Compile Include="Crm\IDistributorSnooze.cs" />
     <Compile Include="Crm\INewsletterSubscriber.cs" />
     <Compile Include="ElsaDbInstaller.cs" />
     <Compile Include="Extensions\AddressExtensions.cs" />

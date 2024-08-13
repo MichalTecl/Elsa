@@ -618,7 +618,17 @@ namespace Elsa.Commerce.Core.Repositories
         {
             return $"customerSRepIndex_{m_session.Project.Id}";
         }
-                
+
+        public void SnoozeCustomer(int customerId)
+        {
+            var rec = m_database.New<IDistributorSnooze>();
+            rec.AuthorId = m_session.User.Id;
+            rec.CustomerId = customerId;
+            rec.SetDt = DateTime.Now;
+
+            m_database.Save(rec);
+        }
+
         private class AddressModel : IAddress
         {
             public int CustomerId { get; set; }

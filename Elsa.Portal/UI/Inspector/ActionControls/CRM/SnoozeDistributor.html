@@ -1,0 +1,12 @@
+﻿<span>
+    <button id="butSnooze_{%GENERATE%}" event-bind="click:snooze(issueId, data, callback)">Ignorovat do další objednávky</button>
+    <script>
+        lt.element("butSnooze_{%GENERATE%}").attach(function() {
+            this.snooze = function(issueId, data, callback) {
+                lt.api("/customers/snoozeCustomer").query({ "customerId": data.CustomerId }).post(function() {
+                    callback();
+                });
+            }
+        });
+    </script>
+</span>

@@ -34,5 +34,6 @@ namespace Elsa.Commerce.Core.Crm
         Dictionary<int, string> GetCustomerSalesRepresentativeEmailIndex();
 
         void SaveCustomerSalesRep(int customerId, string salesRepEmail);
+        void SnoozeCustomer(int customerId);
     }
 }

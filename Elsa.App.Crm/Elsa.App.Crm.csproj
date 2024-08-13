@@ -115,10 +115,12 @@
     <Content Include="SQL\20230716_001_vwCustomerGroupsCsv.sql" />
     <Content Include="SQL\20230716_002_CRM_GetSalesRepresentativeReport.sql" />
     <Content Include="SQL\20230716_003_RegisterCrmWidget.sql" />
+    <Content Include="SQL\20240813_001_vwSnoozedDistributors.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
+    <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

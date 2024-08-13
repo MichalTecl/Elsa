@@ -16,7 +16,7 @@ namespace Elsa.JobLauncher.Scheduler
 
         public static readonly ElsaJob DbBackup = new ElsaJob("DB_BACKUP", 5, TimeSpan.FromMinutes(20), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
 
-        public static readonly ElsaJob FinReports = new ElsaJob("GENEROVANI_UCT_REPORTU", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8,0,0) && eval.NowIsBetween(0, 5));
+        public static readonly ElsaJob FinReports = new ElsaJob("GENEROVANI_UCT_REPORTU", 1, TimeSpan.FromHours(3), eval => eval.DidntRunMoreThan(8,0,0) && eval.NowIsBetween(0, 5));
 
         public static readonly ElsaJob AutoQueries = new ElsaJob("AUTOMATICKE_DOTAZY", 2, TimeSpan.FromMinutes(20), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 

@@ -18,31 +18,35 @@ namespace Elsa.App.Crm
     [Controller("customers")]
     public class CustomersController : ElsaControllerBase
     {
-        private readonly ICustomerRepository m_customerRepository;
-        private readonly IUserRepository m_userRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly IUserRepository _userRepository;
 
         public CustomersController(IWebSession webSession, ILog log, ICustomerRepository customerRepository, IUserRepository userRepository)
             : base(webSession, log)
         {
-            m_customerRepository = customerRepository;
-            m_userRepository = userRepository;
+            _customerRepository = customerRepository;
+            _userRepository = userRepository;
         }
 
         public CustomerViewModel GetCustomer(string email)
         {            
-            var customer = m_customerRepository.GetOverview(email);
+            var customer = _customerRepository.GetOverview(email);
             if (customer == null)
             {
                 return null;
             }
 
-            return new CustomerViewModel(customer, WebSession.Project, m_userRepository);
+            return new CustomerViewModel(customer, WebSession.Project, _userRepository);
         }
 
         public IEnumerable<CustomerViewModel> GetCustomers(List<string> emails)
         {            
-            return m_customerRepository.GetOverviews(emails).Select(o => new CustomerViewModel(o, WebSession.Project, m_userRepository));
+            return _customerRepository.GetOverviews(emails).Select(o => new CustomerViewModel(o, WebSession.Project, _userRepository));
         }
 
+        public void SnoozeCustomer(int customerId)
+        {
+            _customerRepository.SnoozeCustomer(customerId);
+        }
     }
 }
