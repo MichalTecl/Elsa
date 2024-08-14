@@ -53,7 +53,8 @@ BEGIN
 			WHERE c.ProjectId = @projectId
 			AND c.IsDistributor = 1
 			AND c.IsCompany = 1
-			AND c.Id NOT IN (SELECT CustomerId FROM vwSnoozedDistributors)) x
+			AND c.Id NOT IN (SELECT CustomerId FROM vwSnoozedDistributors)
+			AND ((c.DisabledDt IS NULL) OR (c.DisabledDt < GETDATE()))) x
 		WHERE x.lastOrderMonths BETWEEN 4 AND 6
 
 END

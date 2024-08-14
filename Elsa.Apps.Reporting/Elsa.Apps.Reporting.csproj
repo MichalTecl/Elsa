@@ -98,6 +98,7 @@
   <ItemGroup>
     <Content Include="SQL\20220303_002_xrep_distributors.sql" />
     <Content Include="SQL\20220303_001_ListReportProcedures.sql" />
+    <Content Include="SQL\20240813_003_xrep_salesB2bB2c.sql" />
     <Content Include="UI\Reporting\ReportListPage.html" />
   </ItemGroup>
   <ItemGroup>

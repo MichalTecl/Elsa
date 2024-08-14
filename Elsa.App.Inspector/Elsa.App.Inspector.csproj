@@ -134,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\20200811_002_insp_abandonedBatchRemains.sql" />
+    <Content Include="SQL\20240814_001_insp_missingEshopItemMapping - fix.sql" />
     <Content Include="SQL\20240611_001_ordersWithMissingBatches - adding Ignore.sql" />
     <Content Include="SQL\20220914_001_ordersStuckInStatus - switched to ERP statuses.sql" />
     <Content Include="SQL\20220914_000_vwIssueTypeResponsibleUser.sql" />
