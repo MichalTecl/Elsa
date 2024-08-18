@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Server;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,8 @@ namespace Elsa.App.OrdersPacking.Model
         public string CustomerNote { get; set; }
 
         public string DiscountsText { get; set; }
+
+        public string PackingWarning { get; set; }
 
         public List<PackingOrderItemModel> Items { get; } = new List<PackingOrderItemModel>();
     }

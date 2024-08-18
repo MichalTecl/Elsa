@@ -273,6 +273,8 @@ namespace Elsa.App.OrdersPacking
 
             var batchAssignments = _batchFacade.TryResolveBatchAssignments(entity, orderItemBatchPreference).ToList();
 
+            var blocker = _orderRepository.TryGetProcessBlockMessage(entity.Id, OrderProcessingStageNames.Packing);
+
             var orderModel = new PackingOrderModel
                                  {
                                      OrderId = entity.Id,
@@ -283,7 +285,8 @@ namespace Elsa.App.OrdersPacking
                                      InternalNote = entity.InternalNote,
                                      ErpName = entity.Erp?.Description,
                                      DiscountsText = entity.DiscountsText,
-                                     Price = $"{StringUtil.FormatDecimal(entity.PriceWithVat)} {entity.Currency.Symbol}"
+                                     Price = $"{StringUtil.FormatDecimal(entity.PriceWithVat)} {entity.Currency.Symbol}",
+                                     PackingWarning = blocker
                                  };
             
             foreach (var sourceItem in entity.Items.OrderBy(i => i.Id))

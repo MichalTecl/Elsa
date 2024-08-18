@@ -231,6 +231,10 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
             self.currentQuery = qry;
             setTimeout(loadOrdersToPack, 500);
+
+            if (!!order.PackingWarning) {
+                alert(order.PackingWarning);
+            }
         });
 
     };
