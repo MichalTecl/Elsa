@@ -10,12 +10,10 @@ using System.Threading.Tasks;
 namespace Elsa.Core.Entities.Commerce.Crm
 {
     [Entity]
-    public interface IDistributorSnooze : IIntIdEntity
+    public interface IDistributorSnooze : IIntIdEntity, IHasAuthor
     {
         int CustomerId { get; set; }
         ICustomer Customer { get; }
-        DateTime SetDt { get; set; }
-        int AuthorId { get; set; }
-        IUser Author { get; }
+        DateTime SetDt { get; set; }        
     }
 }

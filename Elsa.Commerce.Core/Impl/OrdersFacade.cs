@@ -239,7 +239,7 @@ namespace Elsa.Commerce.Core.Impl
                             m_mailSender.Send(order.PackingUser?.EMail ?? m_session.User.EMail, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
                                 $"Pozor - při dokončení balení objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: '{ex.Message}'\r\nZkontrolujte objednávku ručně.");
 
-
+                            m_orderRepository.SetProcessBlock(order, OrderProcessingStageNames.Packing, "Předchozí pokus o zabalení této objednávky selhal - je třeba ji odbavit v systému Flox");
                         }
                     });
                 }

@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -22,9 +23,10 @@ namespace Elsa.Commerce.Core.Repositories
 
         private readonly ICurrencyRepository m_currencyRepository;
         private readonly IOrderStatusMappingRepository m_statusMappingRepository;
-        private readonly List<IPurchaseOrder> m_cache = new List<IPurchaseOrder>();
-        
-        public PurchaseOrderRepository(IErpClientFactory erpClientFactory, IDatabase database, ISession session, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productRepository)
+        private readonly List<IPurchaseOrder> _ordersCache = new List<IPurchaseOrder>();
+        private readonly ICache m_cache;
+
+        public PurchaseOrderRepository(IErpClientFactory erpClientFactory, IDatabase database, ISession session, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productRepository, ICache cache)
         {
             m_erpClientFactory = erpClientFactory;
             m_database = database;
@@ -32,6 +34,7 @@ namespace Elsa.Commerce.Core.Repositories
             m_currencyRepository = currencyRepository;
             m_statusMappingRepository = statusMappingRepository;
             m_productRepository = productRepository;
+            m_cache = cache;
         }
 
         public long ImportErpOrder(IErpOrderModel orderModel)
@@ -142,7 +145,7 @@ namespace Elsa.Commerce.Core.Repositories
         public IPurchaseOrder TryLoadOrderByOrderNumber(string orderNumber)
         {
             var cachedOrder =
-                m_cache.FirstOrDefault(i => (i.ProjectId == m_session.Project.Id) && (i.OrderNumber == orderNumber));
+                _ordersCache.FirstOrDefault(i => (i.ProjectId == m_session.Project.Id) && (i.OrderNumber == orderNumber));
             if (cachedOrder != null)
             {
                 return cachedOrder;
@@ -158,9 +161,9 @@ namespace Elsa.Commerce.Core.Repositories
 
         public void PreloadOrders(DateTime from, DateTime to)
         {
-            m_cache.Clear();
+            _ordersCache.Clear();
             
-            m_cache.AddRange(BuildOrdersQuery().Where(o => (o.PurchaseDate >= @from) && (o.PurchaseDate <= to)).Execute());
+            _ordersCache.AddRange(BuildOrdersQuery().Where(o => (o.PurchaseDate >= @from) && (o.PurchaseDate <= to)).Execute());
         }
 
         public IEnumerable<OrdersOverviewModel> GetOrdersOverview(DateTime from, DateTime to)
@@ -390,6 +393,31 @@ namespace Elsa.Commerce.Core.Repositories
             }
 
              return mapper;
+        }
+
+        public void SetProcessBlock(IPurchaseOrder order, string stage, string message)
+        {
+            var record = m_database.New<IOrderProcessingBlocker>();
+
+            record.PurchaseOrderId = order.Id;
+            record.CreateDt = DateTime.Now;
+            record.Message = message;
+            record.DisabledStageSymbol = stage;
+            record.AuthorId = m_session.User.Id;
+
+            m_database.Save(record);            
+
+            m_cache.Remove($"OrderProcessingBlockers_{order.Id}");
+        }
+
+        public string TryGetProcessBlockMessage(long orderId, string stage)
+        {
+            var blocks = m_cache.ReadThrough(
+                $"OrderProcessingBlockers_{orderId}", 
+                TimeSpan.FromMinutes(10), 
+                () => m_database.SelectFrom<IOrderProcessingBlocker>().Where(b => b.PurchaseOrderId == orderId).Execute().ToList());
+
+            return blocks.FirstOrDefault(b => b.DisabledStageSymbol.Equals(stage, StringComparison.InvariantCultureIgnoreCase))?.Message;
         }
     }
 }

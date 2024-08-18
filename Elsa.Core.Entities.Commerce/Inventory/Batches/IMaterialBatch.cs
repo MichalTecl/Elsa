@@ -12,16 +12,13 @@ using Robowire.RobOrm.SqlServer.Attributes;
 namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 {
     [Entity]
-    public interface IMaterialBatch : IProjectRelatedEntity, IVolumeAndUnit, IMaterialBatchEditables
+    public interface IMaterialBatch : IProjectRelatedEntity, IVolumeAndUnit, IMaterialBatchEditables, IHasAuthor
     {
         int Id { get; }
 
         int MaterialId { get; set; }
         IMaterial Material { get; }
-        
-        int AuthorId { get; set; }
-        IUser Author { get; }
-
+              
         int? PriceConversionId { get; set; }
         ICurrencyConversion PriceConversion { get; }
 

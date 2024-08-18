@@ -41,5 +41,8 @@ namespace Elsa.Commerce.Core
         IEnumerable<IPurchaseOrder> GetReturns(int month, int year);
 
         long? SearchOrder(string orderNumberEndsWith, int orderStatusId);
+        void SetProcessBlock(IPurchaseOrder order, string stage, string message);
+
+        string TryGetProcessBlockMessage(long orderId, string stage);
     }
 }

@@ -146,6 +146,12 @@ namespace Elsa.App.OrdersPacking
 
             using (var tx = _database.OpenTransaction())
             {
+                var blocker = _orderRepository.TryGetProcessBlockMessage(orderId, "Packing");
+                if (!string.IsNullOrWhiteSpace(blocker))
+                {
+                    throw new InvalidOperationException($"Objednavku nelze zabalit: {blocker}");
+                }
+
                 var order = _orderRepository.GetOrder(orderId);
                 if (order == null)
                 {

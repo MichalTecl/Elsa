@@ -67,11 +67,14 @@
     <Compile Include="Automation\IScheduledJob.cs" />
     <Compile Include="Commerce\IOrderItem.cs" />
     <Compile Include="Commerce\IOrderPriceElement.cs" />
+    <Compile Include="Commerce\IOrderProcessingBlocker.cs" />
+    <Compile Include="Commerce\IOrderRelatedEntity.cs" />
     <Compile Include="Commerce\IOrderStatus.cs" />
     <Compile Include="Commerce\IProduct.cs" />
     <Compile Include="Commerce\IPurchaseOrder.cs" />
     <Compile Include="Commerce\IPurchaseOrderHistory.cs" />
     <Compile Include="Commerce\ISupplier.cs" />
+    <Compile Include="Commerce\OrderProcessingStageNames.cs" />
     <Compile Include="Commerce\SaleEvents\ISaleEvent.cs" />
     <Compile Include="Commerce\SaleEvents\ISaleEventAllocation.cs" />
     <Compile Include="Common\IAddress.cs" />
@@ -79,6 +82,7 @@
     <Compile Include="Common\IBaseCalendar.cs" />
     <Compile Include="Common\ICurrency.cs" />
     <Compile Include="Common\ICurrencyConversion.cs" />
+    <Compile Include="Common\IHasAuthor.cs" />
     <Compile Include="Common\IIntIdEntity.cs" />
     <Compile Include="Common\IPostalAddress.cs" />
     <Compile Include="Common\IVolumeAndUnit.cs" />

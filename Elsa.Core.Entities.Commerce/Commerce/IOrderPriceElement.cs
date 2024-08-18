@@ -4,16 +4,13 @@ using Robowire.RobOrm.SqlServer.Attributes;
 namespace Elsa.Core.Entities.Commerce.Commerce
 {
     [Entity]
-    public interface IOrderPriceElement
+    public interface IOrderPriceElement : IOrderRelatedEntity
     {
         long Id { get; }
 
         [NotFk]
         long ExternalId { get; set; }
-
-        long PurchaseOrderId { get; set; }
-        IPurchaseOrder PurchaseOrder { get; }
-
+                
         [NVarchar(255, true)]
         string TypeName { get; set; }
 
