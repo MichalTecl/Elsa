@@ -1,5 +1,5 @@
 ﻿<ElsaBody>
-
+    <script src="/UI/Reporting/Reporting.VM.js"></script>
     <div class="panel w4">
         <div class="panelHead">
             <div class="panelTitle">Reporty</div>
@@ -7,35 +7,34 @@
         <div id="reportListUi" class="panelContent">
             <div id="reportList" data-bind="itemsSource:reports" data-key="Code">
                 <div class="lt-template">
-                    <a data-bind="text:Title;href:link"></a>
+                    <div class="reportTypeRowCont">
+                        <div class="reportTypeItemHead stackLeft">
+                            <div class="reportExpander">
+                                <div data-bind="class!.hidden:canExpand">
+                                    <i data-bind="class.hidden:expanded" class="far fa-plus-square faButton" event-bind="click:toggleExpansion(VM)"></i>
+                                    <i data-bind="class!.hidden:expanded" class="far fa-minus-square faButton hidden" event-bind="click:toggleExpansion(VM)"></i>
+                                </div>
+                            </div>
+
+                            <a data-bind="text:Title;href:link"></a>
+                        </div>
+                        <div class="reportTypeDetailCont" data-bind="class!.hidden:expanded">
+                            <pre data-bind="text:Note"></pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <script>
-        var app = app || {};
-        app.Reporting = app.Reporting || {};
-        app.Reporting.VM = app.Reporting.VM ||
-            function () {
+        lt.element("reportListUi").withModel("app.Reporting.vm").attach(function () {
 
-                var self = this;
-                this.reports = [];
-
-                lt.api("/reporting/getReportTypes")
-                    .get(function (reps) {
-                        self.reports = [];
-
-                        for (var i = 0; i < reps.length; i++) {
-                            var r = reps[i];
-                            r.link = '/reporting/getreport?code=' + r.Code;
-                            self.reports.push(r);
-                        }                        
-                    });
+            this.toggleExpansion = function (vm) {
+                vm.expanded = !vm.expanded;
+                lt.notify();
             };
 
-        app.Reporting.vm = app.Reporting.vm || new app.Reporting.VM();
-
-        lt.element("reportListUi").withModel("app.Reporting.vm").attach(function() { });
+        });
     </script>
 
 

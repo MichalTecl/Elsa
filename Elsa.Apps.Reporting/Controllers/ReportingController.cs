@@ -22,25 +22,20 @@ namespace Elsa.Apps.Reporting.Controllers
     {
         private readonly IDatabase m_database;
         private readonly IWebSession m_session;
+        private readonly Repo.ReportRepository m_reportRepository;
 
-        public ReportingController(IWebSession webSession, ILog log, IDatabase database) : base(webSession, log)
+        public ReportingController(IWebSession webSession, ILog log, IDatabase database, Repo.ReportRepository reportRepository) : base(webSession, log)
         {
             m_database = database;
             m_session = webSession;
+            m_reportRepository = reportRepository;
         }
 
         public List<ReportTypeModel> GetReportTypes()
         {
             EnsureUserRight(ReportingUserRights.ReportingApp);
 
-            var result = new List<ReportTypeModel>();
-
-            m_database
-                .Sql()
-                .Call("ListReportProcedures")
-                .ReadRows<string, string>((spName, title) => result.Add(new ReportTypeModel { Code = spName, Title = title.Trim() }));
-
-            return result;
+            return m_reportRepository.GetReportTypes();                
         }
 
         public FileResult GetReport(string code)

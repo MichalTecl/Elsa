@@ -11,6 +11,7 @@ namespace Elsa.Apps.Reporting
     {
         public void Setup(IContainerSetup setup)
         {
+            setup.For<Repo.ReportRepository>().Use<Repo.ReportRepository>();
         }
     }
 }

@@ -11,5 +11,7 @@ namespace Elsa.Apps.Reporting.Model
         public string Title { get; set; }
 
         public string Code { get; set; }
+
+        public string Note { get; set; }
     }
 }

@@ -55,6 +55,7 @@
     <Compile Include="Controllers\ReportingController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReportingUserRights.cs" />
+    <Compile Include="Repo\ReportRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Elsa.Apps.Common\Elsa.Apps.Common.csproj">
@@ -96,9 +97,13 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="SQL\20240819_003_xrep_salesB2bB2c - Added note.sql" />
+    <Content Include="SQL\20240819_002_ListReportProcedures - report code.sql" />
     <Content Include="SQL\20220303_002_xrep_distributors.sql" />
     <Content Include="SQL\20220303_001_ListReportProcedures.sql" />
+    <Content Include="SQL\20230819_001_xrep_b2c_orders_mail_price.sql" />
     <Content Include="SQL\20240813_003_xrep_salesB2bB2c.sql" />
+    <Content Include="UI\Reporting\Reporting.VM.js" />
     <Content Include="UI\Reporting\ReportListPage.html" />
   </ItemGroup>
   <ItemGroup>

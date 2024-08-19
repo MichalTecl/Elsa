@@ -259,6 +259,7 @@
     <Content Include="SQL\20230715_001_vwOrderItemProduct.sql" />
     <Content Include="SQL\20240724_001_GetDeliveryAddressesIndex.sql" />
     <Content Include="SQL\20231003_001_SaveCustomerSalesRep.sql" />
+    <Content Include="SQL\20240818_001_OrderCustomerIndexes.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
