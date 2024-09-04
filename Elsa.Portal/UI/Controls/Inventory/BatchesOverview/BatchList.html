@@ -197,16 +197,17 @@
         </div>
     </div>
 
-<div class="bovLazyPanel bovStockEvents">
-    <div data-key="type" data-bind="itemsSource:stockEvents">
-        <div class="lt-template">
-            <div class="stackLeft stockEventsTitle">
-                <div class="subExpander">
-                    <i data-bind="class.hidden:expanded" class="far fa-plus-square faButton" event-bind="click:expandStockEvents(VM)"></i>
-                    <i data-bind="class!.hidden:expanded" class="far fa-minus-square faButton" event-bind="click:collapseStockEvents(VM)"></i>
+    <div class="bovLazyPanel bovStockEvents">
+        <div data-key="type" data-bind="itemsSource:stockEvents">
+            <div class="lt-template">
+                <div class="stackLeft stockEventsTitle bovLazPanelController">
+                    <div class="subExpander">
+                        <i data-bind="class.hidden:expanded" class="far fa-plus-square faButton" event-bind="click:expandStockEvents(VM)"></i>
+                        <i data-bind="class!.hidden:expanded" class="far fa-minus-square faButton" event-bind="click:collapseStockEvents(VM)"></i>
+                    </div>
+                    <span><span data-bind="text:type"></span> (</span><span data-bind="text:count"></span><span>)</span>
                 </div>
-                <span><span data-bind="text:type"></span> (</span><span data-bind="text:count"></span><span>)</span>
-                <div class="stockEventsListContainer" data-bind="class!.hidden:expanded">
+                <div class="stockEventsListContainer bovSubContent" data-bind="class!.hidden:expanded">
                     <div class="gridRow gridHead">
                         <div class="cell5">Množství</div>
                         <div class="cell5">Provedl</div>
@@ -224,11 +225,10 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-</div>
+    <!--</div>-->
 
 <div class="bovLazyPanel bovPriceComponents restricted-MaterialBatchPriceCalculationView">
     <div data-queryProperty="LoadPriceComponentsPage"

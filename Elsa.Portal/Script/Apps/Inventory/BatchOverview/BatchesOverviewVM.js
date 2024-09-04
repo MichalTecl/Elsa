@@ -65,18 +65,22 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
                 return;
             }
 
-            receivedBatch.stockEvents = [];
-            var eventsSource = receivedBatch.StockEventCounts || {};
-            
-            for (var eventType in eventsSource) {
-                if (eventsSource.hasOwnProperty(eventType)) {
-                    receivedBatch.stockEvents.push({
-                        "type": eventType,
-                        "count": eventsSource[eventType],
-                        "expanded": false,
-                        "items": [],
-                        "batchId": receivedBatch.BatchId
-                    });
+            var isBatchesUpdate = (receivedBatch.StockEventCounts !== undefined);
+
+            if (isBatchesUpdate) {
+                receivedBatch.stockEvents = [];
+                var eventsSource = receivedBatch.StockEventCounts || {};
+
+                for (var eventType in eventsSource) {
+                    if (eventsSource.hasOwnProperty(eventType)) {
+                        receivedBatch.stockEvents.push({
+                            "type": eventType,
+                            "count": eventsSource[eventType],
+                            "expanded": false,
+                            "items": [],
+                            "batchId": receivedBatch.BatchId
+                        });
+                    }
                 }
             }
 
