@@ -51,7 +51,7 @@ app.productionService.VM = app.productionService.VM || function() {
         self.uploadProducingRecipe();
     };
     
-    var updateRecipesView = function() {
+    var updateRecipesView = function () {
 
         var textMatcher = new TextMatcher(self.searchFilter);
 
@@ -74,13 +74,14 @@ app.productionService.VM = app.productionService.VM || function() {
                 if (self.onlyFavorite && (!recipe.IsFavorite)) {
                     recipe.Visible = false;
                 }
-                
+
                 materialNode.Visible = materialNode.Visible || recipe.Visible;
 
                 if (recipe.IsPlaceholder) {
                     recipe.Visible = false;
                 }
             }
+
         }
     };
     
@@ -166,8 +167,9 @@ app.productionService.VM = app.productionService.VM || function() {
 
     this.cancelProducingRecipe = function() {
         self.producingRecipe = null;
-        if (app.urlBus.get("editSegment")) {
+        if (app.urlBus.get("editSegment") || app.urlBus.get("setQuickProduction")) {
             app.urlBus.clear("editSegment");
+            app.urlBus.clear("setQuickProduction");
         } else {
             lt.notify();
         }
@@ -177,7 +179,7 @@ app.productionService.VM = app.productionService.VM || function() {
         lt.api("/productionService/ProcessProductionRequest").body(self.producingRecipe)
             .post(function (received) {
 
-                if (app.urlBus.get("editSegment")) {
+                if (app.urlBus.get("editSegment") || app.urlBus.get("setQuickProduction")) {
                     self.cancelProducingRecipe();
                     return;
                 }
@@ -199,6 +201,11 @@ app.productionService.VM = app.productionService.VM || function() {
         self.recipes = [];
         lt.notify();
 
+        var activeRecipe = null;
+        var activeMaterialNode = null;
+        var quickProduction = app.urlBus.get("setQuickProduction");
+
+
         lt.api("/productionService/getRecipes").get(function(received) {
 
             var hasFavorite = false;
@@ -212,6 +219,11 @@ app.productionService.VM = app.productionService.VM || function() {
                 var materialNode = getOrCreateMaterialNode(recipe.MaterialId, recipe.MaterialName);
                 recipe.searchText = recipe.MaterialName + " " + recipe.RecipeName;
                 materialNode.Recipes.push(recipe);
+
+                if (quickProduction != null && quickProduction.RecipeId === recipe.RecipeId) {
+                    activeRecipe = recipe;
+                    activeMaterialNode = materialNode;
+                }                      
             }
 
             if (!doNotModifyFilters) {
@@ -219,6 +231,14 @@ app.productionService.VM = app.productionService.VM || function() {
             }
 
             updateRecipesView();
+
+            if (activeRecipe) {
+                self.producingRecipe = activeRecipe;
+                self.producingRecipe["ProducingBatchNumber"] = quickProduction.BatchNumber;
+                self.producingRecipe["ProducingAmount"] = quickProduction.ProducibleAmount;
+
+                self.uploadProducingRecipe();
+            }            
         });
 
     };
@@ -235,7 +255,7 @@ app.productionService.VM = app.productionService.VM || function() {
     app.urlBus.watch("editSegment", function (segmentId) {
         self.producingRecipe = { "SourceSegmentId": segmentId };
         self.uploadProducingRecipe();
-    });
+    });    
 };
 
 app.productionService.vm = app.productionService.vm || new app.productionService.VM();

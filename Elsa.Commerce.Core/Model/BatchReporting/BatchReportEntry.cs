@@ -46,6 +46,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public List<BatchStockEventSuggestion> EventSuggestions { get; } = new List<BatchStockEventSuggestion>();
         public decimal TotalAmountValue { get; set; }
         public string TotalAmountUnitName { get; set; }
+        public List<OneClickProductionOption> ProductionSuggestions { get; } = new List<OneClickProductionOption>();
 
         public BatchReportEntry(BatchKey batchKey) : base(batchKey)
         {

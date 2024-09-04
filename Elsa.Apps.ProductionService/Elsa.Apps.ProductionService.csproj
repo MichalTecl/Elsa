@@ -108,5 +108,11 @@
   <ItemGroup>
     <Folder Include="Storage\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="sencha.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SQL\20240904_001_getOneClickProductionOptions.sql" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

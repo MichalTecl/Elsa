@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows.Media.Animation;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
+using Elsa.Commerce.Core.Production.Recipes;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
@@ -45,6 +46,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         private readonly IStockEventRepository m_stockEventRepository;
         private readonly ISession m_session;
         private readonly IFixedCostRepository m_fixedCostRepository;
+        private readonly IRecipeRepository m_recipeRepository;
 
         public MaterialBatchFacade(
             ILog log,
@@ -62,7 +64,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             IUnitRepository unitRepository,
             IStockEventRepository stockEventRepository,
             ISession session,
-            IFixedCostRepository fixedCostRepository)
+            IFixedCostRepository fixedCostRepository,
+            IRecipeRepository recipeRepository)
         {
             m_log = log;
             m_virtualProductFacade = virtualProductFacade;
@@ -80,6 +83,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_stockEventRepository = stockEventRepository;
             m_session = session;
             m_fixedCostRepository = fixedCostRepository;
+            m_recipeRepository = recipeRepository;
         }
 
         public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity, out string batchChangeWarnMessage)
@@ -779,6 +783,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             m_cache.Remove(GetMaterialLevelCacheKey(materialId));
             m_cache.Remove(GetBatchStatusCacheKey(batchId));
             m_cache.Remove(GetBatchAmountCacheKey(batchId));
+
+            InvalidateBatchesDependantCaches();
         }
 
         private List<IOrderItem> GetAllOrderItems(IPurchaseOrder order)
@@ -1332,6 +1338,40 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 .ReadRows<int, string, int>((materialId, batchNumber, batchId) => res[materialId] = new Tuple<string, int>(batchNumber, batchId));
 
             return res;
+        }
+
+        public IEnumerable<OneClickProductionOption> GetOneClickProductionOptions()
+        {
+            var unfilteredOptions = LoadOneClickProdOptions();
+            var userRecipes = m_recipeRepository.GetRecipes();
+
+            foreach (var option in unfilteredOptions)
+            {            
+                if (userRecipes.Any(r => r.RecipeId == option.RecipeId))
+                {
+                    yield return option;
+                }
+            }
+        }
+
+        private List<OneClickProductionOption> LoadOneClickProdOptions()
+        {
+            var cacheKey = CreateCacheKeyDependantOnBatches("OneClickProductionOptions");
+
+            return m_cache.ReadThrough(cacheKey, TimeSpan.FromSeconds(10), () =>  
+                m_database.Sql().Call("GetOneClickProductionOptions")
+                    .WithParam("@projectId", m_session.Project.Id)
+                    .AutoMap<OneClickProductionOption>());
+        }
+
+        public string CreateCacheKeyDependantOnBatches(string suffix)
+        {
+            return $"p{m_session.Project.Id}_dependsOnBatches::{suffix}";
+        }
+
+        public void InvalidateBatchesDependantCaches()
+        {
+            m_cache.RemoveByPrefix(CreateCacheKeyDependantOnBatches(string.Empty));
         }
     }
 }

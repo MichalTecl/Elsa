@@ -55,7 +55,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
         public IList<RecipeInfo> GetRecipes()
         {
-            return m_cache.ReadThrough($"recipes{m_session.User.Id}", TimeSpan.FromSeconds(10), () =>
+            return m_cache.ReadThrough($"recipes{m_session.User.Id}", TimeSpan.FromMinutes(3), () =>
             {
                 var favorites = new HashSet<int>(m_database.SelectFrom<IUserFavoriteRecipe>()
                     .Where(r => r.UserId == m_session.User.Id).Transform(r => r.RecipeId).Execute());
@@ -310,7 +310,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                     throw new InvalidOperationException("Receptura musí mít alespoň jednu složku!");
                 }
 
-                if(!transfSrcFound && allowOneClickProduction)
+                if((!transfSrcFound) && allowOneClickProduction)
                 {
                     throw new InvalidOperationException("Receptura umožňující výrobu jedním kliknutím musí mít hlavní složku");
                 }

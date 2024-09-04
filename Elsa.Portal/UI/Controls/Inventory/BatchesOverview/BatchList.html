@@ -47,8 +47,8 @@
 <div class="menu" lt-name="mnuBatchActions">
     <ul class="menu-options">
         <li class="menu-option restricted-MaterialBatchEdits" data-bind="class!.disabled:CanDelete;title:NoDelReason" event-bind="click:deleteBatch(VM)">
-            <div class="stackLeft" >
-                <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt menuItemIcon" ></i>
+            <div class="stackLeft">
+                <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt menuItemIcon"></i>
                 <div class="menuItemTitle">Smazat</div>
             </div>
         </li>
@@ -58,6 +58,16 @@
                     <div class="stackLeft">
                         <i class="fas fa-cut menuItemIcon"></i>
                         <div class="menuItemTitle" data-bind="text:Title"></div>
+                    </div>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <ul data-key="OptionKey" data-bind="itemsSource:ProductionSuggestions">
+                <li class="lt-template menu-option" event-bind="click:invokeProduction(VM)">
+                    <div class="stackLeft">
+                        <i class="fas fa-sun menuItemIcon"></i>
+                        <div class="menuItemTitle" data-bind="text:Text"></div>
                     </div>
                 </li>
             </ul>
@@ -542,6 +552,10 @@
         self.invokeStockEvent = function(model) {
             app.urlBus.set("setStockEvent", model);
         };
+
+        self.invokeProduction = function (model) {
+            app.urlBus.set("setQuickProduction", model);
+        }
 
         self.editSegment = function(model) {
             app.urlBus.set("editSegment", model.SegmentId);

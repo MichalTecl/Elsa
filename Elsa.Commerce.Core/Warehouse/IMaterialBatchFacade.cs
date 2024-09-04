@@ -77,5 +77,14 @@ namespace Elsa.Commerce.Core.Warehouse
         IEnumerable<PriceComponentModel> GetPriceComponents(BatchKey key);
 
         IBatchPriceBulkProvider CreatPriceBulkProvider(DateTime from, DateTime to);
+
+        IEnumerable<OneClickProductionOption> GetOneClickProductionOptions();
+
+        /// <summary>
+        /// Gets cache key which will be invalidated on any batch change
+        /// </summary>
+        string CreateCacheKeyDependantOnBatches(string suffix);
+
+        void InvalidateBatchesDependantCaches();
     }
 }

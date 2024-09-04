@@ -119,6 +119,7 @@
     <Compile Include="Model\MaterialAmountModel.cs" />
     <Compile Include="Model\MaterialBatchResolutionModel.cs" />
     <Compile Include="Model\MaterialLevelModel.cs" />
+    <Compile Include="Model\OneClickProductionOption.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
     <Compile Include="Model\PriceComponentModel.cs" />
     <Compile Include="OrderWeightCalculator.cs" />

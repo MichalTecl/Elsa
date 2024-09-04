@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-
+using Dapper;
 using Robowire.RobOrm.Core.NonOrm;
 
 namespace Robowire.RobOrm.SqlServer.Pure
@@ -400,6 +400,24 @@ namespace Robowire.RobOrm.SqlServer.Pure
             }
 
             return reader.GetFieldValue<T>(ordinal);
+        }
+
+        public List<T> AutoMap<T>()
+        {
+            return Read<List<T>>(reader => 
+            {
+                var result = new List<T>();
+
+                var parser = reader.GetRowParser<T>(typeof(T));
+
+                while (reader.Read())
+                {
+                    var parsedRow = parser(reader);
+                    result.Add(parsedRow);
+                }
+
+                return result;
+            });
         }
     }
 }

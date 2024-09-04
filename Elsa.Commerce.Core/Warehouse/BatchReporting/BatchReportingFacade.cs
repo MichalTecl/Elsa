@@ -138,6 +138,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             result.Report.AddRange(rawEntries);
             result.CanLoadMore = (result.Report.Count == c_pageSize);
 
+            var oneClickProds = m_batchFacade.GetOneClickProductionOptions().ToList();
+
             foreach (var b in result.Report.OfType<BatchReportEntry>())
             {
                 var material = m_materialRepository.GetMaterialById(b.MaterialId);
@@ -147,12 +149,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     b.AvailableAmount = "0";
                 }
                 else
-                {
-                    /*
-                    var available = m_batchFacade.GetAvailableAmount(b.BatchKey);
-                    b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
-                    b.Available = available;
-                    */
+                {                    
                     var available = new Amount(b.AvailableAmountValue, m_unitRepository.GetUnit(b.AvailableAmountUnitId));
                     
                     available = m_amountProcessor.Convert(available, material.NominalUnit);
@@ -175,6 +172,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 }
 
                 PopulateStockEventSuggestions(b);
+                PopulateProductionSuggestions(b, oneClickProds);
             }
 
             if ((query.HasKey) && (result.Report.Count == 0))
@@ -241,6 +239,12 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                 addSuggestion(eventType, batchReportEntry.Available);
             }
+        }
+
+        private void PopulateProductionSuggestions(BatchReportEntry b, List<OneClickProductionOption> oneClickProds)
+        {
+            var prods = oneClickProds.Where(p => p.BatchNumber == b.BatchNumber && p.SourceMaterialId == b.MaterialId).ToList();
+            b.ProductionSuggestions.AddRange(prods);
         }
 
         private void PopulateStockEventCounts(BatchReportEntry batchReportEntry)

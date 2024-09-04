@@ -84,6 +84,8 @@
                 tab.selectTab("batchProduction");
             });
 
+        app.urlBus.watch("setQuickProduction", function () { tab.selectTab("batchProduction"); });
+
     </script>
 
     <script src="/Script/Apps/Inventory/VirtualProducts/VirtualProductsVM.js"></script>
