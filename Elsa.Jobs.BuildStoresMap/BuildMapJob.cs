@@ -195,6 +195,7 @@ namespace Elsa.Jobs.BuildStoresMap
                     .Join(s => s.Customer)
                     .Where(s => s.Customer.ProjectId == _session.Project.Id)
                     .Where(s => s.Customer.IsValuableDistributor == true)
+                    .Where(s => s.Customer.HasStore == true)
                     .Execute()
                     .ToList();
 
