@@ -21,6 +21,6 @@ namespace Elsa.Commerce.Core.Production.Recipes
         RecipeInfo SetRecipeDeleted(int recipeId, bool shouldBeDeleted);
 
         RecipeInfo SaveRecipe(int materialId, int recipeId, string recipeName, decimal productionPrice,
-            Amount producedAmount, string note, string visibleforUserRole, IEnumerable<RecipeComponentModel> components);
+            Amount producedAmount, string note, string visibleforUserRole, bool allowOneclickProduction, IEnumerable<RecipeComponentModel> components);
     }
 }

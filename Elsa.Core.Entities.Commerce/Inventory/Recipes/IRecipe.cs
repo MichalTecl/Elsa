@@ -41,5 +41,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Recipes
         string VisibleForUserRole { get; set; }
 
         IEnumerable<IRecipeComponent> Components { get; }
+
+        bool? AllowOneClickProduction { get; set; }
     }
 }

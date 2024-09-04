@@ -57,6 +57,7 @@ namespace Elsa.Apps.ProductionService.Recipes
                 model.RecipeName = entity.RecipeName;
                 model.ProductionPrice = entity.ProductionPrice;
                 model.VisibleForUserRole = entity.VisibleForUserRole;
+                model.AllowOneClickProduction = entity.AllowOneClickProduction;
 
                 model.Items.AddRange(entity.Items);
             }
@@ -128,7 +129,7 @@ namespace Elsa.Apps.ProductionService.Recipes
             }
 
             m_recipes.SaveRecipe(recipeMaterial.Id, rq.RecipeId, rq.RecipeName.Trim(), rq.ProductionPrice, recipeAmount,
-                rq.Note?.Trim(), rq.VisibleForUserRole, items);
+                rq.Note?.Trim(), rq.VisibleForUserRole, rq.AllowOneClickProduction, items);
         }
     }
 }

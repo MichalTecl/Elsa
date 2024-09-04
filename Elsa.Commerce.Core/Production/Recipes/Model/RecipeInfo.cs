@@ -21,5 +21,7 @@ namespace Elsa.Commerce.Core.Production.Recipes.Model
         public bool IsFavorite { get; set; }
 
         public string VisibleForUserRole { get; set; }
+
+        public bool AllowOneClickProduction { get; set; }
     }
 }

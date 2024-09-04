@@ -20,11 +20,15 @@
         </div>
         <div class="formRow">
             <label>Poznámka</label>
-            <textarea class="reNote" data-bind="value:Note;html:Note" event-bind="userinput:updateVm('Note', this.value)" ></textarea>
+            <textarea class="reNote" data-bind="value:Note;html:Note" event-bind="userinput:updateVm('Note', this.value)"></textarea>
         </div>
         <div class="formRow">
             <label>Viditelné pro uživatele v roli</label>
             <input type="text" data-bind="value:VisibleForUserRole" event-bind="userinput:updateVm('VisibleForUserRole', this.value)" />
+        </div>
+        <div class="formRow stackLeft">
+            <input type="checkbox" data-bind="checked:AllowOneClickProduction" event-bind="change:updateVm('AllowOneClickProduction', this.checked)" />
+            <span>Umožnit výrobu jedním kliknutím (ze seznamu šarží)</span>
         </div>
         <div class="formRow reItemsRow">
             <label>Složení</label>

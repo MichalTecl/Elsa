@@ -141,7 +141,8 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 ProductionPrice = entity.ProductionPricePerUnit ?? 0,
                 AmountUnit = m_unitRepository.GetUnit(entity.ProducedAmountUnitId).Symbol,
                 VisibleForUserRole = entity.VisibleForUserRole,
-                Note = entity.Note
+                Note = entity.Note,
+                AllowOneClickProduction = entity.AllowOneClickProduction ?? false
             };
 
             foreach (var c in entity.Components.OrderBy(c => c.SortOrder))
@@ -194,7 +195,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
         public RecipeInfo SaveRecipe(int materialId, int recipeId, string recipeName, decimal productionPrice,
             Amount producedAmount,
-            string note, string visibleForUserRole, IEnumerable<RecipeComponentModel> components)
+            string note, string visibleForUserRole, bool allowOneClickProduction, IEnumerable<RecipeComponentModel> components)
         {
             using (var tx = m_database.OpenTransaction())
             {
@@ -248,6 +249,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 entity.ProductionPricePerUnit = productionPrice > 0 ? (decimal?)productionPrice : null;
                 entity.Note = note;
                 entity.VisibleForUserRole = visibleForUserRole;
+                entity.AllowOneClickProduction = allowOneClickProduction;
 
                 m_database.Save(entity);
 
@@ -306,6 +308,11 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 if (!usedMaterials.Any())
                 {
                     throw new InvalidOperationException("Receptura musí mít alespoň jednu složku!");
+                }
+
+                if(!transfSrcFound && allowOneClickProduction)
+                {
+                    throw new InvalidOperationException("Receptura umožňující výrobu jedním kliknutím musí mít hlavní složku");
                 }
 
                 foreach (var removedComponent in entity.Components.Where(rc => !usedMaterials.Contains(rc.MaterialId)))
