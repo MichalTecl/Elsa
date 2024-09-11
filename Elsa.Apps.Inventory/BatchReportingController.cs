@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Elsa.Apps.Inventory.Model;
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchReporting;
 using Elsa.Commerce.Core.Warehouse.BatchReporting;
 using Elsa.Common;
@@ -37,6 +38,11 @@ namespace Elsa.Apps.Inventory
             }
 
             return m_reportingFacade.QueryBatches(query);
+        }
+
+        public BatchMenuItems GetMenu(string batchKey) 
+        {
+            return m_reportingFacade.GetBatchMenuItems(BatchKey.Parse(batchKey));
         }
     }
 }

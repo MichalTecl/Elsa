@@ -25,5 +25,7 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         public bool CanDelete { get; set; }
 
         public string NoDelReason { get; set; }
+
+        public bool HasDetail { get; set; }
     }
 }

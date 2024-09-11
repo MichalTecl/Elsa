@@ -47,7 +47,7 @@ namespace Elsa.Commerce.Core.Model
         public string ToString(IBatchKeyResolver repo)
         {
             EnsureLoaded(repo);
-            return $"{m_batchNumber}:{m_materialId}";
+            return Format(m_batchNumber, m_materialId ?? -1);
         }
 
         public bool Match(IMaterialBatch batch, IBatchKeyResolver repo)
@@ -98,6 +98,11 @@ namespace Elsa.Commerce.Core.Model
         public string UnsafeToString()
         {
             return ToString(null);
+        }
+
+        public static string Format(string batchNumber, int materialId)
+        {
+            return $"{batchNumber}:{materialId}";
         }
     }
 }

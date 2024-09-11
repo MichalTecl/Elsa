@@ -126,6 +126,22 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
         }
     };
 
+    self.openPopup = function (vm, callback) {
+        if (!!vm.popupLoaded) {
+            callback();
+            return;
+        }
+
+        lt.api("/batchReporting/getMenu").query({ "batchKey": vm.BatchId }).get(function (menuModel) {
+            vm.EventSuggestions = menuModel.EventSuggestions;
+            vm.ProductionSuggestions = menuModel.ProductionSuggestions;
+            vm.popupLoaded = true;
+
+            lt.notify();
+            callback();
+        });        
+    };
+
     self.load = function (session, callback, query) {
         
         lt.api("/batchReporting/get")
@@ -171,6 +187,18 @@ app.batchesOverview.ViewModel = app.batchesOverview.ViewModel || function() {
 
     self.cutOrderAllocation = function(handle, callback) {
         lt.api("/materialBatches/cutOrderAllocation").query({ "handle": handle }).get(callback);
+    };
+
+    self.expandDetail = function (model) {
+        if (model.HasDetail) {
+            model.expanded = true;
+            lt.notify();
+            return;
+        }
+
+        self.loadSingleBatch(model, { LoadBatchDetails: true }, function (session) {            
+            model.expanded = true;            
+        });
     };
 };
 

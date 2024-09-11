@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using Elsa.Apps.Inventory.Model;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchReporting;
 using Elsa.Commerce.Core.Production;
@@ -13,9 +14,11 @@ using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
+using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 using Robowire.RobOrm.Core;
@@ -40,7 +43,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private readonly IUserRepository m_userRepository;
         private readonly IStockEventRepository m_stockEventRepository;
         private readonly ISaleEventRepository m_saleEventRepository;
-        
+        private readonly ILog m_log;
+
         public BatchReportingFacade(ISession session,
             IDatabase database,
             IMaterialBatchFacade batchFacade,
@@ -53,8 +57,9 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             IOrderStatusRepository orderStatusRepository,
             IPurchaseOrderRepository orderRepository,
             IUserRepository userRepository,
-            IStockEventRepository stockEventRepository, 
-            ISaleEventRepository saleEventRepository)
+            IStockEventRepository stockEventRepository,
+            ISaleEventRepository saleEventRepository,
+            ILog log)
         {
             m_session = session;
             m_database = database;
@@ -70,10 +75,13 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             m_userRepository = userRepository;
             m_stockEventRepository = stockEventRepository;
             m_saleEventRepository = saleEventRepository;
+            m_log = log;
         }
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
         {
+            m_log.Info($"Querying batches. Query={query}");
+
             if (query.LoadOrdersPage != null)
             {
                 return LoadOrders(query.ToKey(), query.LoadOrdersPage.Value);
@@ -96,6 +104,14 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
             IPurchaseOrder order = null;
 
+            if (   query.RelativeToOrderId != null 
+                || query.ComponentId != null
+                || query.CompositionId != null)
+            {
+                query.LoadBatchDetails = true;
+                m_log.Info("Loaing batch details for composition or component");
+            }
+
             if (query.RelativeToOrderId != null)
             {
                 order = m_orderRepository.GetOrder(query.RelativeToOrderId.Value);
@@ -109,7 +125,13 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 pageNumber = 0;
             }
 
-            var sql = m_database.Sql().Call("LoadBatchesReport")
+            m_log.Info("Calling LoadBatchesReport");
+
+            var procedureName = query.LoadBatchDetails ? "LoadBatchesReport" : "LoadBatchesReport_Fast";
+
+            var sqlStopwatch = m_log.StartStopwatch($"Calling {procedureName} procedure");
+
+            var sql = m_database.Sql().Call(procedureName)
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@pageSize", pageSize)
                 .WithParam("@pageNumber", pageNumber)
@@ -134,47 +156,50 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             var result = new BatchReportModel { Query = query };
 
             var rawEntries = sql.MapRows(MapEntry);
-            
+
+            sqlStopwatch.Dispose();
+            m_log.Info($"loaded {rawEntries.Count} rows");
+
             result.Report.AddRange(rawEntries);
             result.CanLoadMore = (result.Report.Count == c_pageSize);
 
-            var oneClickProds = m_batchFacade.GetOneClickProductionOptions().ToList();
+            m_log.Info("Processing report entries");
 
-            foreach (var b in result.Report.OfType<BatchReportEntry>())
-            {
-                var material = m_materialRepository.GetMaterialById(b.MaterialId);
-
-                if (b.IsClosed)
+            using (m_log.StartStopwatch("Processing report entries"))
+                foreach (var b in result.Report.OfType<BatchReportEntry>())
                 {
-                    b.AvailableAmount = "0";
+                    b.HasDetail = query.LoadBatchDetails;
+
+                    var material = m_materialRepository.GetMaterialById(b.MaterialId);
+
+                    if (b.IsClosed)
+                    {
+                        b.AvailableAmount = "0";
+                    }
+                    else
+                    {
+                        var available = new Amount(b.AvailableAmountValue, m_unitRepository.GetUnit(b.AvailableAmountUnitId));
+
+                        available = m_amountProcessor.Convert(available, material.NominalUnit);
+                        b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
+                        b.Available = available;
+                    }
+
+                    var totalUnit = m_unitRepository.GetUnitBySymbol(b.TotalAmountUnitName);
+                    var totalAmount = new Amount(b.TotalAmountValue, totalUnit);
+                    totalAmount = m_amountProcessor.Convert(totalAmount, material.NominalUnit);
+
+                    b.BatchVolume = $"{StringUtil.FormatDecimal(totalAmount.Value)} {totalAmount.Unit.Symbol}";
+
+                    //b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
+                    b.CanDelete = !(b.HasStockEvents || b.NumberOfCompositions > 0 || b.NumberOfOrders > 0 || b.NumberOfSaleEvents > 0);
+
+                    if (b.HasStockEvents)
+                    {
+                        PopulateStockEventCounts(b);
+                    }
                 }
-                else
-                {                    
-                    var available = new Amount(b.AvailableAmountValue, m_unitRepository.GetUnit(b.AvailableAmountUnitId));
-                    
-                    available = m_amountProcessor.Convert(available, material.NominalUnit);
-                    b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
-                    b.Available = available;
-                }
-
-                var totalUnit = m_unitRepository.GetUnitBySymbol(b.TotalAmountUnitName);
-                var totalAmount = new Amount(b.TotalAmountValue, totalUnit);
-                totalAmount = m_amountProcessor.Convert(totalAmount, material.NominalUnit);
-
-                b.BatchVolume = $"{StringUtil.FormatDecimal(totalAmount.Value)} {totalAmount.Unit.Symbol}";
-
-                //b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
-                b.CanDelete = !(b.HasStockEvents || b.NumberOfCompositions > 0 || b.NumberOfOrders > 0 || b.NumberOfSaleEvents > 0);
-
-                if (b.HasStockEvents)
-                {
-                    PopulateStockEventCounts(b);
-                }
-
-                PopulateStockEventSuggestions(b);
-                PopulateProductionSuggestions(b, oneClickProds);
-            }
-
+            
             if ((query.HasKey) && (result.Report.Count == 0))
             {
                 result.Report.Add(new DeletedBatchReportEntry(query.ToKey()));
@@ -203,9 +228,9 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             return result;
         }
         
-        private void PopulateStockEventSuggestions(BatchReportEntry batchReportEntry)
+        private void PopulateStockEventSuggestions(BatchMenuItems target, string batchNumber, IMaterial material, Amount available)
         {
-            if (batchReportEntry.Available?.IsNotPositive ?? true)
+            if (available.IsNotPositive)
             {
                 return;
             }
@@ -216,39 +241,39 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                 var sug = new BatchStockEventSuggestion()
                 {
-                    BatchNumber = batchReportEntry.BatchNumber,
+                    BatchNumber = batchNumber,
                     Amount = manipulationAmount.Value,
                     EventTypeId = type.Id,
-                    MaterialId = batchReportEntry.MaterialId,
-                    MaterialName = batchReportEntry.MaterialName,
+                    MaterialId = material.Id,
+                    MaterialName = material.Name,
                     UnitSymbol = manipulationAmount.Unit.Symbol,
                     Title = $"{type.Name} {StringUtil.FormatDecimal(amount.Value)} {amount.Unit.Symbol}"
                 };
 
-                batchReportEntry.EventSuggestions.Add(sug);
+                target.EventSuggestions.Add(sug);
 
                 return sug;
             };
 
             foreach (var eventType in m_stockEventRepository.GetAllEventTypes())
             {
-                if (batchReportEntry.Available.Unit.IntegerOnly)
+                if (available.Unit.IntegerOnly)
                 {
-                    addSuggestion(eventType, new Amount(1m, batchReportEntry.Available.Unit));
+                    addSuggestion(eventType, new Amount(1m, available.Unit));
                 }
 
-                addSuggestion(eventType, batchReportEntry.Available);
+                addSuggestion(eventType, available);
             }
         }
 
-        private void PopulateProductionSuggestions(BatchReportEntry b, List<OneClickProductionOption> oneClickProds)
+        private void PopulateProductionSuggestions(BatchMenuItems target, string batchNumber, IMaterial material, Amount available)
         {
-            var prods = oneClickProds.Where(p => p.BatchNumber == b.BatchNumber && p.SourceMaterialId == b.MaterialId).ToList();
-            b.ProductionSuggestions.AddRange(prods);
+            var prods = m_batchFacade.GetOneClickProductionOptions().Where(p => p.BatchNumber == batchNumber && p.SourceMaterialId == material.Id).ToList();
+            target.ProductionSuggestions.AddRange(prods);
         }
 
         private void PopulateStockEventCounts(BatchReportEntry batchReportEntry)
-        {
+        {            
             foreach (var evt in m_stockEventRepository.GetBatchEvents(batchReportEntry.BatchKey))
             {
                 int sum;
@@ -553,6 +578,20 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 return null;
 
             return val;
+        }
+
+        public BatchMenuItems GetBatchMenuItems(BatchKey batchKey)
+        {
+            var result = new BatchMenuItems() { BatchKey = batchKey.UnsafeToString() };
+
+            var available = m_batchFacade.GetAvailableAmount(batchKey);
+
+            var material = m_materialRepository.GetMaterialById(batchKey.GetMaterialId(m_batchFacade));
+
+            PopulateStockEventSuggestions(result, batchKey.GetBatchNumber(m_batchFacade), material.Adaptee, available);
+            PopulateProductionSuggestions(result, batchKey.GetBatchNumber(m_batchFacade), material.Adaptee, available);
+            
+            return result;
         }
     }
 }

@@ -40,7 +40,7 @@
         </span>
     </div>
     <div class="cell1">
-        <i class="fas fa-bars faButton" event-bind="click:showContextMenu($mnuBatchActions, this)"></i>
+        <i class="fas fa-bars faButton" event-bind="click:openPopup($mnuBatchActions,this, VM)"></i>
     </div>
 </div>
 
@@ -444,9 +444,15 @@
            
         };
 
-        self.toggleExpansion = function(model) {
-            model.expanded = !model.expanded;
-            lt.notify(self);
+        self.toggleExpansion = function (model) {
+
+            if (model.expanded) {
+                model.expanded = false;
+                lt.notify(self);
+                return;
+            }
+
+            app.batchesOverview.vm.expandDetail(model);
         };
 
         self.toggleView = function(button, panel) {
@@ -575,6 +581,15 @@
 
             app.batchesOverview.vm.cutOrderAllocation(orderId.toString(), function () {
                 self.refreshBatchView(1);
+            });
+        };
+
+        self.openPopup = function (mnuBatchActions, source, vm) {
+            console.log("opening popup");
+
+            app.batchesOverview.vm.openPopup(vm, function ()
+            {
+                document.body.showContextMenu(mnuBatchActions, source);
             });
         };
 

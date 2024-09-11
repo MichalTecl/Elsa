@@ -188,6 +188,7 @@
     <Compile Include="VirtualProducts\Model\MaterialEntry.cs" />
     <Compile Include="VirtualProducts\Model\MaterialSetupInfo.cs" />
     <Compile Include="VirtualProducts\VirtualProductFacade.cs" />
+    <Compile Include="Warehouse\BatchMenuItems.cs" />
     <Compile Include="Warehouse\BatchPriceBulkProvider.cs" />
     <Compile Include="Warehouse\BatchReporting\BatchReportingFacade.cs" />
     <Compile Include="Warehouse\BatchReporting\IBatchReportingFacade.cs" />
@@ -261,6 +262,7 @@
     <Content Include="SQL\20240724_001_GetDeliveryAddressesIndex.sql" />
     <Content Include="SQL\20231003_001_SaveCustomerSalesRep.sql" />
     <Content Include="SQL\20240818_001_OrderCustomerIndexes.sql" />
+    <Content Include="SQL\20240911_002_LoadBatchesReport.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
