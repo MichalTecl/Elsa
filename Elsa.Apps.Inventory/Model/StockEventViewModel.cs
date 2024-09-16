@@ -16,6 +16,7 @@ namespace Elsa.Apps.Inventory.Model
             Author = e.User.EMail;
             Note = e.Note;
             GroupingKey = e.EventGroupingKey;
+            EventDt = e.EventDt.ToString("dd.MM.yyyy  HH:mm:ss");
             m_amount = new Amount(e.Delta, e.Unit);
         }
 
@@ -30,6 +31,8 @@ namespace Elsa.Apps.Inventory.Model
         public string Author { get; }
 
         public string Note { get; }
+
+        public string EventDt { get; }
 
         public void Join(StockEventViewModel rawEvent, AmountProcessor amountProcessor)
         {

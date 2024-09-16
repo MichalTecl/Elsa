@@ -222,6 +222,7 @@
                         <div class="cell5">Množství</div>
                         <div class="cell5">Provedl</div>
                         <div class="cell10">Důvod</div>
+                        <div class="cell5">Datum</div>
                         <div class="cell1"></div>
                     </div>
                     <div class="stockEventsList" data-key="EventId" data-bind="itemsSource:items">
@@ -229,6 +230,7 @@
                             <div class="cell5" data-bind="text:Amount"></div>
                             <div class="cell5" data-bind="text:Author"></div>
                             <div class="cell10" data-bind="text:Note"></div>
+                            <div class="cell5" data-bind="text:EventDt"></div>
                             <div class="cell1">
                                 <i class="far fa-trash-alt faButton" event-bind="click:deleteStockEvent(EventId)"></i>
                             </div>
