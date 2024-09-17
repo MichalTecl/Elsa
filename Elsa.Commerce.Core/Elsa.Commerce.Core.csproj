@@ -263,6 +263,7 @@
     <Content Include="SQL\20231003_001_SaveCustomerSalesRep.sql" />
     <Content Include="SQL\20240818_001_OrderCustomerIndexes.sql" />
     <Content Include="SQL\20240911_002_LoadBatchesReport.sql" />
+    <Content Include="SQL\20240917_001_GetBatchPriceComponents.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
