@@ -18,5 +18,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Kits
 
         [NVarchar(64, true)]
         string Shortcut { get; set; }
+
+        [NVarchar(256, true)]
+        string InTextMarker { get; set; }
     }
 }

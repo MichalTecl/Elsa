@@ -25,6 +25,9 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Kits
         [NVarchar(126, true)]
         string Name { get; set; }
 
+        [NVarchar(256, true)]
+        string InTextMarker { get; set; }
+
         IEnumerable<IKitSelectionGroupItem> Items { get; }
     }
 }
