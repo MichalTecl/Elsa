@@ -15,7 +15,7 @@ namespace Elsa.App.OrdersPacking.Model
     public class KitItemsCollectionModel : KitItemsCollection
     {
         public KitItemsCollectionModel(KitItemsCollection source)
-            : base(source.GroupItems, source.SelectedItem, source.KitItemIndex, source.GroupId, source.GroupName)
+            : base(source.KitDefinitionId, source.GroupItems, source.SelectedItem, source.KitItemIndex, source.GroupId, source.GroupName)
         {
             SelectedItem = source.SelectedItem;
         }

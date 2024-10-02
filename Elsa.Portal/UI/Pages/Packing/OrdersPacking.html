@@ -60,7 +60,7 @@
                         </div>
                         <div id="customerNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.hasCustomerNote">
                             <div id="customerNoteTitle" class="noteTitle">Vzkaz od zákazníka</div>
-                            <p id="customerNoteBody" class="noteBody" data-bind="text:currentOrder.CustomerNote"></p>
+                            <pre id="customerNoteBody" class="noteBody" data-bind="text:currentOrder.CustomerNote"></pre>
                         </div>
                         <div id="internalNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.displayInternalNote;class.pulseAnimation:currentOrder.hasInternalNote">
                             <div id="internalNoteTitle" class="noteTitle">Interní poznámka</div>

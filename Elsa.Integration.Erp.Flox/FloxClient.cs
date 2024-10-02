@@ -380,9 +380,23 @@ namespace Elsa.Integration.Erp.Flox
             foreach (var om in result)
             {
                 om.ErpSystemId = Erp.Id;
+                ValidateOrderData(om);
             }
 
             return ordersModel.Orders.Orders;
+        }
+
+        private void ValidateOrderData(FloxErpOrderModel om)
+        {
+            // All items must be unique
+            var uniqueItems = new HashSet<string>();
+            foreach(var i in om.LineItems)
+            {
+                if (!uniqueItems.Add(i.ProductName))
+                {
+                    m_log.Error($"Order item duplicity detected: OrderNr={om.OrderNumber} Item={i.ProductName}");
+                }
+            }
         }
 
         private static void CreateMassFilter(Dictionary<string, string> parameters, IPostBuilder post)

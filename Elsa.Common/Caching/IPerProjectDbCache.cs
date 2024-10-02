@@ -16,6 +16,7 @@ namespace Elsa.Common.Caching
             where TEntity : class, IProjectRelatedEntity;
 
         T ReadThrough<T>(string key, Func<T> factory);
+        T ReadThrough<T>(string key, TimeSpan timeout, Func<T> factory);
 
         void Remove(string key);
 

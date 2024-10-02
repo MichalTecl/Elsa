@@ -4,6 +4,7 @@ using System.Linq;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -19,12 +20,14 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly IPerProjectDbCache m_cache;
         private readonly IDatabase m_database;
         private readonly IPurchaseOrderRepository m_orderRepository;
+        private readonly ISession m_session;
 
-        public KitProductRepository(IPerProjectDbCache cache, IDatabase database, IPurchaseOrderRepository orderRepository)
+        public KitProductRepository(IPerProjectDbCache cache, IDatabase database, IPurchaseOrderRepository orderRepository, ISession session)
         {
             m_cache = cache;
             m_database = database;
             m_orderRepository = orderRepository;
+            m_session = session;
         }
 
         public IEnumerable<IKitDefinition> GetAllKitDefinitions()
@@ -68,7 +71,7 @@ namespace Elsa.Commerce.Core.Repositories
                             }
                         }
 
-                        result.Add(new KitItemsCollection(selection.Items, selectedItem, kitItemIndex, selection.Id, selection.Name));
+                        result.Add(new KitItemsCollection(kitDefinition.Id, selection.Items, selectedItem, kitItemIndex, selection.Id, selection.Name));
                     }
                 }
             }
@@ -140,6 +143,17 @@ namespace Elsa.Commerce.Core.Repositories
         public bool IsKit(IPurchaseOrder order, IOrderItem item)
         {
             return GetAllKitDefinitions().FirstOrDefault(k => k.IsMatch(order, item)) != null;
+        }
+
+        public List<KitNoteParseResultModel> ParseKitNotes(long orderId)
+        {
+            return m_cache.ReadThrough($"kitNoteParseResult_{orderId}", 
+                TimeSpan.FromMinutes(1),
+                () => m_database.Sql()
+                .Call("ParseKitNote")
+                .WithParam("@orderId", orderId)
+                .WithParam("@projectId", m_session.Project.Id)
+                .AutoMap<KitNoteParseResultModel>());
         }
     }
 }

@@ -116,6 +116,7 @@
     <Compile Include="Model\IErpCustomerModel.cs" />
     <Compile Include="Model\IVirtualProductMappableItem.cs" />
     <Compile Include="Model\KitItemsCollection.cs" />
+    <Compile Include="Model\KitNoteParseResultModel.cs" />
     <Compile Include="Model\MaterialAmountModel.cs" />
     <Compile Include="Model\MaterialBatchResolutionModel.cs" />
     <Compile Include="Model\MaterialLevelModel.cs" />

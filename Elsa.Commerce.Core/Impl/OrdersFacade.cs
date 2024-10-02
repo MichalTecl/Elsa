@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Threading.Tasks;
-using Elsa.Commerce.Core.Model;
+﻿using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
-using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -13,9 +7,12 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-using Elsa.Core.Entities.Commerce.Inventory.Kits;
 using Elsa.Smtp.Core;
 using Robowire.RobOrm.Core;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Elsa.Commerce.Core.Impl
 {
@@ -85,7 +82,7 @@ namespace Elsa.Commerce.Core.Impl
                     order.PaymentPairingUserId = m_session.User.Id;
                     order.PaymentPairingDt = DateTime.Now;
                     m_database.Save(order);
-                    
+
                     m_log.Info($"Order saved to the database in transaction; paymentId={order.PaymentId}, pairngUserId={order.PaymentPairingUserId}, pairingDt={order.PaymentPairingDt}");
                 }
                 else
@@ -109,7 +106,7 @@ namespace Elsa.Commerce.Core.Impl
                 {
                     m_log.Info($"Order sync skipped - statusId={order.OrderStatusId}");
                 }
-                
+
                 tx.Commit();
                 m_log.Info("Transaction commited");
             }
@@ -233,7 +230,7 @@ namespace Elsa.Commerce.Core.Impl
                                     }
                                 }, "SetOrderSent");
                         }
-                        catch(Exception ex) 
+                        catch (Exception ex)
                         {
                             m_log.Error($"Chyba pri posilani zabalene objednavky", ex);
                             m_mailSender.Send(order.PackingUser?.EMail ?? m_session.User.EMail, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
@@ -349,25 +346,47 @@ namespace Elsa.Commerce.Core.Impl
 
             foreach (var orderItem in entity.Items)
             {
-                var kit = m_kitProductRepository.GetKitForOrderItem(entity, orderItem).ToList();
+                var kit = m_kitProductRepository.GetKitForOrderItem(entity, orderItem).OrderBy(k => k.KitItemIndex).ToList();
                 if (!kit.Any())
                 {
                     continue;
                 }
-                
+
                 foreach (var kitItem in kit)
                 {
-                    var groupItems = kitItem.GroupItems.ToList();
-                    if (kitItem.SelectedItem != null || groupItems.Count != 1)
+                    if (kitItem.SelectedItem != null)
                     {
-                        // Item already selected or it should be chosen by the operator
+                        // already selected
                         continue;
                     }
 
-                    m_kitProductRepository.SetKitItemSelection(entity, orderItem, groupItems.Single().Id, kitItem.KitItemIndex);
-                    modified = true;
-                }
+                    var groupItems = kitItem.GroupItems.ToList();
+                    if (groupItems.Count == 1)
+                    {
+                        // we can assign this one because there is only one option
+                        m_kitProductRepository.SetKitItemSelection(entity, orderItem, groupItems.Single().Id, kitItem.KitItemIndex);
+                        modified = true;
+                        continue;
+                    }
 
+
+                    // let's see whether we have kit info in the customer note... (here I rely on good caching on the repo side, so it's called over and over again)
+                    var parsedKit = m_kitProductRepository.ParseKitNotes(entity.Id);
+                    var kitSelection = parsedKit.FirstOrDefault(
+                        parsed => parsed.KitDefinitionId == kitItem.KitDefinitionId
+                                && parsed.KitNr == (kitItem.KitItemIndex + 1)
+                                && parsed.SelectionGroupId == kitItem.GroupId
+                                );
+                    if (kitSelection != null)
+                    {
+                        var groupItem = groupItems.FirstOrDefault(gi => gi.Id == kitSelection.SelectionGroupItemId);
+                        if (groupItem != null)
+                        {
+                            m_kitProductRepository.SetKitItemSelection(entity, orderItem, groupItem.Id, kitItem.KitItemIndex);
+                            modified = true;
+                        }
+                    }
+                }
             }
 
             if (!modified)
@@ -387,7 +406,7 @@ namespace Elsa.Commerce.Core.Impl
             m_log.Info($"PerformErpActionSafe started: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription} statusId={order.OrderStatusId} erpStatus={order.ErpStatusName}");
 
             m_database.Save(order);
-            
+
             var orderId = order.Id;
 
             if (order.ErpId == null)
@@ -427,7 +446,7 @@ namespace Elsa.Commerce.Core.Impl
             }
 
             order = m_orderRepository.GetOrder(importedOrderId);
-            
+
             try
             {
                 validateSyncedOrder(order);
@@ -452,12 +471,13 @@ namespace Elsa.Commerce.Core.Impl
             return qry.Execute();
         }
 
-        private bool MatchShipmentProvider(IPurchaseOrder order, string shipmentProviderName) 
+        private bool MatchShipmentProvider(IPurchaseOrder order, string shipmentProviderName)
         {
             if (shipmentProviderName == null)
                 return true;
 
-            var lookup = m_cache.ReadThrough($"shipmentProviderLookup_{m_session.Project.Id}", TimeSpan.FromSeconds(10), () => {
+            var lookup = m_cache.ReadThrough($"shipmentProviderLookup_{m_session.Project.Id}", TimeSpan.FromSeconds(10), () =>
+            {
                 return m_database.SelectFrom<IShipmentProviderLookup>().Where(p => p.ProjectId == m_session.Project.Id).Execute().ToList();
             });
 

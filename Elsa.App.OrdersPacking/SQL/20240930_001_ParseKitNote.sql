@@ -44,7 +44,7 @@ BEGIN
 				HAVING COUNT(k.Id) > 1) selectable ON  (selectable.GroupId = ksg.Id)
 		  JOIN OrderItem oi ON (oi.PlacedName = kd.ItemName)
 		  JOIN PurchaseOrder po ON (oi.PurchaseOrderId = po.Id)
-		 WHERE po.OrderStatusId = 3
+		 WHERE po.OrderStatusId < 5
 		   AND po.ProjectId = @projectId;
 	END
 

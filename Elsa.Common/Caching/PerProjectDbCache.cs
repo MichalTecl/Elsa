@@ -44,14 +44,19 @@ namespace Elsa.Common.Caching
                 });
         }
 
-        public T ReadThrough<T>(string key, Func<T> factory)
+        public T ReadThrough<T>(string key, TimeSpan timeout, Func<T> factory)
         {
             key = $"key_{key}_by_projectId={m_session.Project.Id}";
 
             return m_cache.ReadThrough(
                 key,
-                TimeSpan.FromMinutes(s_rnd.Next(8, 15)), 
+                timeout,                
                 factory);
+        }
+
+        public T ReadThrough<T>(string key, Func<T> factory)
+        {
+            return ReadThrough(key, TimeSpan.FromMinutes(s_rnd.Next(8, 15)), factory);
         }
 
         public void Remove(string key)

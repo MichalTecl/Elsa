@@ -10,6 +10,7 @@ using Elsa.Commerce.Core.Shipment;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
@@ -32,6 +33,7 @@ namespace Elsa.App.OrdersPacking
         private readonly IVirtualProductFacade _virtualProductFacade;
         private readonly IDatabase _database;
         private readonly OrdersSystemConfig _config;
+        private readonly ICache _cache;
 
         public PackingController(
             IWebSession webSession,
@@ -43,7 +45,7 @@ namespace Elsa.App.OrdersPacking
             IErpClientFactory erpClientFactory,
             IMaterialBatchFacade batchFacade,
             IDatabase database,
-            IVirtualProductFacade virtualProductFacade, OrdersSystemConfig config)
+            IVirtualProductFacade virtualProductFacade, OrdersSystemConfig config, ICache cache)
             : base(webSession, log)
         {
             _orderRepository = orderRepository;
@@ -55,8 +57,9 @@ namespace Elsa.App.OrdersPacking
             _database = database;
             _virtualProductFacade = virtualProductFacade;
             _config = config;
+            _cache = cache;
         }
-        
+
         public PackingOrderModel FindOrder(string number)
         {
             WebSession.EnsureUserRight(OrdersPackingUserRights.OpenOrderPackingApplication);
@@ -268,7 +271,7 @@ namespace Elsa.App.OrdersPacking
         }
 
         private PackingOrderModel MapOrder(IPurchaseOrder entity, Tuple<long, BatchKey, decimal> orderItemBatchPreference = null)
-        {
+        {            
             entity = _ordersFacade.ResolveSingleItemKitSelection(entity);
 
             var batchAssignments = _batchFacade.TryResolveBatchAssignments(entity, orderItemBatchPreference).ToList();
