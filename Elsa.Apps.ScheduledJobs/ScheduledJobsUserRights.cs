@@ -7,5 +7,6 @@ namespace Elsa.Apps.ScheduledJobs
     public static class ScheduledJobsUserRights
     {
         public static readonly UserRight ViewScheduledJobsAdminGrid = new UserRight(nameof(ViewScheduledJobsAdminGrid), "Automatické úlohy - Správce");
+        public static readonly UserRight RebootSystem = new UserRight(nameof(RebootSystem), "Restart systému .../system/reboot");
     }
 }
