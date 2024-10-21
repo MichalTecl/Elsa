@@ -108,13 +108,12 @@
     <None Include="packages.config" />
     <None Include="sencha.json" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UI\Controls\Settings\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="SQL\20201202_001_setAsyncPackingDefaultconf.sql" />
     <Content Include="SQL\20240930_001_ParseKitNote.sql" />
     <Content Include="SQL\20240930_002_insp_kitProductNoteCheck.sql" />
+    <Content Include="UI\Inspector\ActionControls\OrderPacking\OrderNoteDetailView.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -128,3 +128,11 @@
     padding-bottom: 10px;
     padding-top: 2px;
 }
+
+.longCustomerInput {
+    white-space: pre-wrap;
+    border: 1px solid #ccc;
+    padding: 5px;
+    margin-bottom: 5px;
+    font-family: monospace;
+}

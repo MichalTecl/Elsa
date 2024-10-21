@@ -162,6 +162,7 @@
     <Content Include="SQL\20240612_001_vwAbandonedBatches.sql" />
     <Content Include="SQL\20240612_002_insp_erpCustomerGroupsMappings.sql" />
     <Content Include="SQL\20240612_003_inspfw_getIssueCountForUsers.sql" />
+    <Content Include="SQL\20241021_001_insp_kitProductNoteCheck.sql" />
     <Content Include="UI\Inspector\ActionControls\Ignore.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneMonth.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneWeek.html" />

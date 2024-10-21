@@ -1,0 +1,15 @@
+﻿<div>
+    <div id="cusNoteView_{%GENERATE%}">
+        <pre data-bind="text:data.customerNote" class="longCustomerInput"></pre>
+        <button event-bind="click:postpone(issueId, callback)">Je to v pořádku</button>
+    </div>
+    <script>
+        lt.element("cusNoteView_{%GENERATE%}").attach(function () {
+            this.postpone = function (issueId, callback) {
+                lt.api("/inspector/postponeIssue").query({ "issueId": issueId, "days": 9999 }).post(function () {
+                    callback();
+                });
+            }
+        });
+    </script>
+</div>
