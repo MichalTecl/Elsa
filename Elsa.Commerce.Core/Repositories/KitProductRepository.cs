@@ -155,5 +155,10 @@ namespace Elsa.Commerce.Core.Repositories
                 .WithParam("@projectId", m_session.Project.Id)
                 .AutoMap<KitNoteParseResultModel>());
         }
+
+        public IKitDefinition GetKitDefinition(int id)
+        {
+            return GetAllKitDefinitions().FirstOrDefault(k => k.Id == id);
+        }
     }
 }

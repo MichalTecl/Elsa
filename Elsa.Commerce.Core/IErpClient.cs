@@ -17,7 +17,9 @@ namespace Elsa.Commerce.Core
 
         IErpCommonSettings CommonSettings { get; }
 
-        IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null);
+        IEnumerable<IErpOrderModel> LoadOrdersSnapshot(DateTime from, DateTime? to = null);
+
+        IEnumerable<IErpOrderModel> LoadOrdersIncremental(DateTime changedAfter);
 
         IEnumerable<IErpOrderModel> LoadPaidOrders(DateTime from, DateTime to);
 
@@ -29,6 +31,7 @@ namespace Elsa.Commerce.Core
 
         IEnumerable<IErpCustomerModel> LoadCustomers();
 
-        string GetPackingReferenceNumber(IPurchaseOrder po);        
+        string GetPackingReferenceNumber(IPurchaseOrder po);
+        string LoadOrderInternalNote(string orderNumber);
     }
 }

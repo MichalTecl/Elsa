@@ -6,7 +6,9 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
+using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
 using Robowire.RobOrm.Core;
@@ -25,8 +27,9 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly IOrderStatusMappingRepository m_statusMappingRepository;
         private readonly List<IPurchaseOrder> _ordersCache = new List<IPurchaseOrder>();
         private readonly ICache m_cache;
+        private readonly ILog m_log;
 
-        public PurchaseOrderRepository(IErpClientFactory erpClientFactory, IDatabase database, ISession session, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productRepository, ICache cache)
+        public PurchaseOrderRepository(IErpClientFactory erpClientFactory, IDatabase database, ISession session, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productRepository, ICache cache, ILog log)
         {
             m_erpClientFactory = erpClientFactory;
             m_database = database;
@@ -35,6 +38,7 @@ namespace Elsa.Commerce.Core.Repositories
             m_statusMappingRepository = statusMappingRepository;
             m_productRepository = productRepository;
             m_cache = cache;
+            m_log = log;
         }
 
         public long ImportErpOrder(IErpOrderModel orderModel)
@@ -142,6 +146,80 @@ namespace Elsa.Commerce.Core.Repositories
             return result;
         }
 
+        public void ImportErpOrders(int erpId, List<IErpOrderModel> orders)
+        {
+            m_log.Info($"Got {orders.Count} orders to sync");
+
+            if (orders.Count == 0)
+            {
+                m_log.Info("Skipping saving...");
+                return;
+            }
+
+            if (orders.Any(o => o.ErpSystemId != erpId))
+                throw new Exception("Passed order for another erp");
+
+            var erp = m_erpClientFactory.GetErpClient(erpId);
+
+            var loadExistingFrom = orders.Min(o => erp.Mapper.GetPurchaseDate(o));
+            var loadExistingTo = orders.Max(o => erp.Mapper.GetPurchaseDate(o));
+
+            m_log.Info($"Loading existing orders index from {loadExistingFrom} to {loadExistingTo}");
+
+            var existingOrders = m_database.SelectFrom<IPurchaseOrder>()
+                .Where(o => o.ProjectId == m_session.Project.Id)
+                .Where(o => o.ErpId == erpId)
+                .Where(o => o.PurchaseDate >= loadExistingFrom)
+                .Execute()
+                .ToDictionary(o => o.OrderNumber, o => o);
+
+            m_log.Info($"Loaded {existingOrders.Count} existing records");
+
+            var dirtyOrders = new List<IErpOrderModel>(orders.Count);
+
+            foreach(var o in orders)
+            {
+                if(!existingOrders.TryGetValue(o.OrderNumber, out var existingOrder))
+                {
+                    m_log.Info($"Order {o.OrderNumber} is new - adding to import");
+                    dirtyOrders.Add(o);
+                    continue;
+                }
+
+                if (existingOrder.OrderHash != o.OrderHash)
+                {
+                    m_log.Info($"Order {o.OrderNumber} is changed - adding to import");
+                    dirtyOrders.Add(o);
+                }
+            }
+
+            m_log.Info($"{dirtyOrders.Count} orders considered to be new or changed");
+
+            if(dirtyOrders.Count == 0)
+            {
+                m_log.Info("Skipping orders saving");
+                return;
+            }
+
+            var preloadFrom = dirtyOrders.Min(o => erp.Mapper.GetPurchaseDate(o));
+            var preloadTo = dirtyOrders.Max(o => erp.Mapper.GetPurchaseDate(o));
+
+            PreloadOrders(preloadFrom, preloadTo);
+
+            foreach(var o in dirtyOrders)
+            {
+                try
+                {
+                    ImportErpOrder(o);
+                }
+                catch (Exception ex)
+                {
+                    m_log.Error($"Failed to save order {o.OrderNumber}", ex);
+                    throw;
+                }
+            }
+        }
+
         public IPurchaseOrder TryLoadOrderByOrderNumber(string orderNumber)
         {
             var cachedOrder =
@@ -162,8 +240,12 @@ namespace Elsa.Commerce.Core.Repositories
         public void PreloadOrders(DateTime from, DateTime to)
         {
             _ordersCache.Clear();
-            
+
+            m_log.Info($"Preloading orders cache {from} - {to}");
+
             _ordersCache.AddRange(BuildOrdersQuery().Where(o => (o.PurchaseDate >= @from) && (o.PurchaseDate <= to)).Execute());
+
+            m_log.Info($"Orders cache loaded {_ordersCache.Count} orders");
         }
 
         public IEnumerable<OrdersOverviewModel> GetOrdersOverview(DateTime from, DateTime to)
@@ -419,5 +501,41 @@ namespace Elsa.Commerce.Core.Repositories
 
             return blocks.FirstOrDefault(b => b.DisabledStageSymbol.Equals(stage, StringComparison.InvariantCultureIgnoreCase))?.Message;
         }
+
+        public DateTime? GetLastSuccessSyncDt(int erpId)
+        {
+            return m_database.SelectFrom<IOrdersSyncHistory>()
+                .Where(h => h.ErpId == erpId)
+                .Where(h => h.EndDt != null)
+                .OrderByDesc(h => h.StartDt)
+                .Execute()
+                .FirstOrDefault()?
+                .StartDt;
+        }
+
+        public int StartSyncSession(int erpId)
+        {
+            var s = m_database.New<IOrdersSyncHistory>();
+            s.ErpId = erpId;
+            s.StartDt = DateTime.Now;
+            m_database.Save(s);
+
+            return s.Id;
+        }
+
+        public void EndSyncSession(int sessionId)
+        {
+            var record = m_database.SelectFrom<IOrdersSyncHistory>()
+                .Where(h => h.Id == sessionId)
+                .Execute()
+                .FirstOrDefault() ?? throw new ArgumentException($"OrdersSyncSession id={sessionId} does not exist");
+
+            if (record.EndDt != null)
+                throw new ArgumentException($"OrdersSyncSession id={sessionId} already ended");
+
+            record.EndDt = DateTime.Now;
+
+            m_database.Save(record);
+        }        
     }
 }

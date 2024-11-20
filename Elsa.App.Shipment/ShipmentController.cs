@@ -36,7 +36,7 @@ namespace Elsa.App.Shipment
             if (string.IsNullOrWhiteSpace(provider))
                 throw new ArgumentNullException(nameof(provider));
 
-            var orders = m_ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-90), provider).ToList();
+            var orders = m_ordersFacade.GetAndSyncPaidOrders(provider).ToList();
 
             var data = m_shipmentProvider.GenerateShipmentRequestDocument(orders, uniFormat);
 

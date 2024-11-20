@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
+using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Commerce;
 
 using Robowire.RobOrm.Core;
@@ -11,6 +12,8 @@ namespace Elsa.Commerce.Core
     public interface IPurchaseOrderRepository
     {
         long ImportErpOrder(IErpOrderModel orderModel);
+
+        void ImportErpOrders(int erpId, List<IErpOrderModel> orders);
 
         IPurchaseOrder TryLoadOrderByOrderNumber(string orderNumber);
 
@@ -44,5 +47,11 @@ namespace Elsa.Commerce.Core
         void SetProcessBlock(IPurchaseOrder order, string stage, string message);
 
         string TryGetProcessBlockMessage(long orderId, string stage);
+
+        DateTime? GetLastSuccessSyncDt(int erpId);
+
+        int StartSyncSession(int erpId);
+
+        void EndSyncSession(int sessionId);
     }
 }

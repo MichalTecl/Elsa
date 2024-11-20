@@ -1,4 +1,5 @@
-﻿using Elsa.Common.Utils;
+﻿using Elsa.Common.Logging.Helpers;
+using Elsa.Common.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,7 +27,7 @@ namespace Elsa.Common.Logging
             return SaveRequestProtocol(log, method, url, sentSb.ToString(), received);
         }
 
-        public static string SaveRequestProtocol(this ILog log, string method, string url, string sent, string received)
+        public static string SaveRequestProtocol(this ILog log, string method, string url, string sent, string received, params IRequestProtocolExtra[] extras)
         {
             var fn = $"{DateTime.Now:yyyyMMdd HHmmss} {method} {StringUtil.SanitizeFileName(url, '.')}";
 
@@ -42,7 +43,8 @@ namespace Elsa.Common.Logging
             sb.AppendLine("RECEIVED:");
             sb.AppendLine(received);
 
-            
+            foreach (var extra in extras)
+                extra.Apply(method, url, sent, received, sb);
 
             lock (s_protoLock)
             {
@@ -81,5 +83,17 @@ namespace Elsa.Common.Logging
                         
             log.Info(serialized);
         }
+
+        public static class Extras
+        {
+            public static IRequestProtocolExtra PrettifyJsonReponse = new PrettifyJsonResponseExtra();
+        }
     }
+
+    public interface IRequestProtocolExtra
+    {
+        void Apply(string method, string url, string sent, string received, StringBuilder target);
+    }
+
+
 }

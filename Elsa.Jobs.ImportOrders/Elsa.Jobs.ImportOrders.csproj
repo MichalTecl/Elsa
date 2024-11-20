@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="ImportOrdersCustomData.cs" />
     <Compile Include="ImportOrdersJob.cs" />
+    <Compile Include="ImportOrdersJobRegistry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

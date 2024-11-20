@@ -28,6 +28,7 @@ using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Common.XTable;
 using Elsa.Core.Entities.Commerce;
+using Elsa.Integration.ChatGpt;
 using Elsa.Integration.Crm.Raynet;
 using Elsa.Integration.Erp.Flox;
 using Elsa.Integration.PaymentSystems.Common;
@@ -44,6 +45,7 @@ using Elsa.Jobs.FinancialReportsGeneration;
 using Elsa.Jobs.GeocodeAddresses;
 using Elsa.Jobs.ImportOrders;
 using Elsa.Jobs.LoadCurrencyRates;
+using Elsa.Jobs.OrderDataValidation;
 using Elsa.Jobs.PaymentPairing;
 using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
@@ -119,6 +121,8 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(ProductionPlannerRegistry).Assembly);
                     s.ScanAssembly(typeof(StoreMapRegistry).Assembly);
                     s.ScanAssembly(typeof(PublicFilesRegistry).Assembly);
+                    s.ScanAssembly(typeof(OrderDataValidationJobRegistry).Assembly);
+                    s.ScanAssembly(typeof(ChatGptRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 

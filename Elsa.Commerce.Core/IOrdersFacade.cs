@@ -14,7 +14,7 @@ namespace Elsa.Commerce.Core
 
         void SetOrderSentAsync(long orderId);
 
-        IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, string shipProvider, bool skipErp = false);
+        IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(string shipProvider, bool skipErp = false);
 
         IEnumerable<IOrderItem> GetAllConcreteOrderItems(IPurchaseOrder order);
 

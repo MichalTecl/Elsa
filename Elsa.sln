@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.34407.143
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{326F0792-00AF-4D82-B170-4CE248D4A975}"
 EndProject
@@ -197,6 +197,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Utils", "_Utils", "{25F98D
 	ProjectSection(SolutionItems) = preProject
 		_UTILS\sencha2.ps1 = _UTILS\sencha2.ps1
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Jobs.OrderDataValidation", "Elsa.Jobs.OrderDataValidation\Elsa.Jobs.OrderDataValidation.csproj", "{D166BCE7-E639-4918-82C9-7ACB1533FFA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChatGpt", "ChatGpt", "{A9253CDD-68A4-4400-81F4-E7E3431F0A18}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Integration.ChatGpt", "Elsa.Integration.ChatGpt\Elsa.Integration.ChatGpt.csproj", "{9737FAE0-50C6-4588-8C7B-DB881E349585}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BwApiClient", "BwApiClient\BwApiClient.csproj", "{B0E5393A-7922-41C9-836D-1B9637692FB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -496,6 +504,18 @@ Global
 		{76A3E869-FB0E-4D99-A54B-3E9ACBB3A990}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76A3E869-FB0E-4D99-A54B-3E9ACBB3A990}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76A3E869-FB0E-4D99-A54B-3E9ACBB3A990}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D166BCE7-E639-4918-82C9-7ACB1533FFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D166BCE7-E639-4918-82C9-7ACB1533FFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D166BCE7-E639-4918-82C9-7ACB1533FFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D166BCE7-E639-4918-82C9-7ACB1533FFA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9737FAE0-50C6-4588-8C7B-DB881E349585}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9737FAE0-50C6-4588-8C7B-DB881E349585}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9737FAE0-50C6-4588-8C7B-DB881E349585}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9737FAE0-50C6-4588-8C7B-DB881E349585}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0E5393A-7922-41C9-836D-1B9637692FB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0E5393A-7922-41C9-836D-1B9637692FB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0E5393A-7922-41C9-836D-1B9637692FB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0E5393A-7922-41C9-836D-1B9637692FB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -587,6 +607,10 @@ Global
 		{1EDCBAB3-DA52-40B1-998B-88F878FF2875} = {CE99B536-50DF-4CC8-A61A-6BE5F525E809}
 		{FF37368F-EF59-4D88-BC05-37D0A5204CF5} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
 		{76A3E869-FB0E-4D99-A54B-3E9ACBB3A990} = {456527A3-2BE8-4010-8AC6-187539CE484D}
+		{D166BCE7-E639-4918-82C9-7ACB1533FFA1} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
+		{A9253CDD-68A4-4400-81F4-E7E3431F0A18} = {A188EE1B-B81C-4698-B872-CB072E73525D}
+		{9737FAE0-50C6-4588-8C7B-DB881E349585} = {A9253CDD-68A4-4400-81F4-E7E3431F0A18}
+		{B0E5393A-7922-41C9-836D-1B9637692FB5} = {9A3EA0C7-2DD3-4A32-ADED-527F45DC0526}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}

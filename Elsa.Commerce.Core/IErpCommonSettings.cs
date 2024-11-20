@@ -9,5 +9,11 @@ namespace Elsa.Integration.Erp.Flox
         DateTime HistoryStart { get; }
 
         int OrderSyncHistoryDays { get; }
+
+        bool UseIncrementalOrderChangeMode { get; }
+
+        int IncrementalModeMaxHistoryDays { get; }
+
+        int PaidOrdersSyncHistoryDays { get; }
     }
 }

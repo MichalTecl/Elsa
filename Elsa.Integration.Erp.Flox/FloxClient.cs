@@ -11,6 +11,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
+using Elsa.Integration.Erp.Flox.BwApiConnection;
 using Elsa.Integration.Erp.Flox.Protocol;
 using Elsa.Integration.Erp.Flox.Protocol.CustomerModel;
 using Elsa.Integration.Erp.Flox.Protocol.OrderModel;
@@ -19,20 +20,14 @@ namespace Elsa.Integration.Erp.Flox
 {
     public class FloxClient : IErpClient, IDisposable
     {
-        private readonly ILog m_log;
-
-        private readonly FloxClientConfig m_config;
-
-        private readonly IOrderStatusMappingRepository m_statusMappingRepository;
-
-        private string m_csrfToken;
-
-        private DateTime m_lastAccess = DateTime.MinValue;
-
-        private readonly WebFormsClient m_client;
-
-        private readonly ICustomerRepository m_customerRepository;
-
+        private readonly ILog _log;
+        private readonly FloxClientConfig _config;
+        private readonly IOrderStatusMappingRepository _statusMappingRepository;
+        private string _csrfToken;
+        private DateTime _lastAccess = DateTime.MinValue;
+        private readonly WebFormsClient _client;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly GraphQlApiConnector _apiConnector;
 
         public FloxClient(
             FloxClientConfig config,
@@ -40,34 +35,31 @@ namespace Elsa.Integration.Erp.Flox
             ILog log,
             IOrderStatusMappingRepository statusMappingRepository, ICustomerRepository customerRepository)
         {
-            m_config = config;
+            _config = config;
             Mapper = mapper;
-            m_log = log;
-            m_statusMappingRepository = statusMappingRepository;
-            m_client = new WebFormsClient(m_log);
-            m_customerRepository = customerRepository;
+            _log = log;
+            _statusMappingRepository = statusMappingRepository;
+            _client = new WebFormsClient(_log);
+            _customerRepository = customerRepository;
+
+            _apiConnector = new GraphQlApiConnector(config, log);
         }
 
         public IErp Erp { get; set; }
 
         public IErpDataMapper Mapper { get; }
 
-        public IErpCommonSettings CommonSettings => m_config;
-
-        public IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to = null)
-        {
-            return LoadOrders(from, to, null);
-        }
-
+        public IErpCommonSettings CommonSettings => _config;
+               
         public IEnumerable<IErpOrderModel> LoadPaidOrders(DateTime from, DateTime to)
         {
-            var mappings = m_statusMappingRepository.GetMappings(Erp.Id);
+            var mappings = _statusMappingRepository.GetMappings(Erp.Id);
 
             foreach (var m in mappings)
             {
                 if (OrderStatus.IsPaid(m.Value.OrderStatusId))
                 {
-                    foreach (var order in LoadOrders(from, to, m.Key))
+                    foreach (var order in LoadOrders(from, to, null, m.Key))
                     {
                         yield return order;
                     }
@@ -78,11 +70,17 @@ namespace Elsa.Integration.Erp.Flox
 
         private void ChangeOrderStatus(string orderId, string status)
         {
+            if (!_config.EnableWriteOperations)
+            {
+                _log.Error($"!!! Flox - ChangeOrderStatus({orderId}) - neaktivni operace");
+                return;
+            }
+
             EnsureSession();
 
             var result =
-                m_client.Post(ActionUrl("/erp/orders/main/changeStatus"))
-                    .Field("arf", m_csrfToken)
+                _client.Post(ActionUrl("/erp/orders/main/changeStatus"))
+                    .Field("arf", _csrfToken)
                     .Field("order_id", orderId)
                     .Field("status", status)
                     .Field("statusmail", /*statusmail ? "on" :*/ string.Empty)
@@ -95,18 +93,24 @@ namespace Elsa.Integration.Erp.Flox
         }
 
         public void MarkOrderPaid(IPurchaseOrder po)
-        {
-            if (!m_config.EnableWriteOperations)
-            {
-                m_log.Error($"!!! Flox - MarkOrderPaid({po.OrderNumber}) - neaktivni operace");
-                return;
-            }
-
+        {            
             ChangeOrderStatus(po.ErpOrderId, FloxOrderStatuses.Paid);
         }
 
         public IErpOrderModel LoadOrder(string orderNumber)
         {
+            if (_config.PreferApi)
+            {
+                try
+                {
+                    return _apiConnector.LoadOrder(orderNumber);
+                }
+                catch(Exception ex)
+                {
+                    _log.Error($"Failed to load order ({orderNumber}) using API. Activating fallback to 'webform' mode", ex);
+                }
+            }
+
             EnsureSession();
 
             var dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
@@ -114,7 +118,7 @@ namespace Elsa.Integration.Erp.Flox
             var fields = new Dictionary<string, string> { ["downloadToken"] = dlToken, ["order_num"] = orderNumber };
 
             var post =
-                m_client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
+                _client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
                     .Field("dataSubset", "a:0:{}")
                     .Field("data", string.Empty);
 
@@ -136,11 +140,11 @@ namespace Elsa.Integration.Erp.Flox
 
         public void MakeOrderSent(IPurchaseOrder po)
         {
-            m_log.Info($"Zacinam nastavovat objednavku {po.OrderNumber} jako odeslanou");
+            _log.Info($"Zacinam nastavovat objednavku {po.OrderNumber} jako odeslanou");
 
-            if (!m_config.EnableWriteOperations)
+            if (!_config.EnableWriteOperations)
             {
-                m_log.Error($"!!! Flox - MarkOrderPaid({po.OrderNumber}) - neaktivni operace");
+                _log.Error($"!!! Flox - MarkOrderPaid({po.OrderNumber}) - neaktivni operace");
                 return;
             }
             
@@ -160,12 +164,12 @@ namespace Elsa.Integration.Erp.Flox
         {
             EnsureSession();
 
-            m_log.Info("Starting 'Persons' export");
+            _log.Info("Starting 'Persons' export");
             
             var url = ActionUrl("/erp/impexp/export/index/persons/xml");
             
             var exportString =
-                m_client.Post(url)
+                _client.Post(url)
                     .Field(
                         "dataSubset",
                         "a:9:{s:10:\"xcol_email\";s:2:\"on\";s:9:\"xcol_name\";s:2:\"on\";s:12:\"xcol_surname\";s:2:\"on\";s:11:\"xcol_active\";s:2:\"on\";s:15:\"xcol_newsletter\";s:2:\"on\";s:17:\"xcol_address_name\";s:2:\"on\";s:20:\"xcol_address_surname\";s:2:\"on\";s:18:\"xcol_address_phone\";s:2:\"on\";s:11:\"xcol_groups\";s:2:\"on\";}")
@@ -178,15 +182,15 @@ namespace Elsa.Integration.Erp.Flox
 
             var parsed = PersonsDoc.Parse(exportString, false);
 
-            var cgIndex = m_customerRepository.GetCustomerGroupTypes();
+            var cgIndex = _customerRepository.GetCustomerGroupTypes();
                         
             result.AddRange(parsed.Select(i => new ErpPersonModel(i, cgIndex)));
 
-            m_log.Info($"Received {result.Count} of 'Persons'");
+            _log.Info($"Received {result.Count} of 'Persons'");
 
-            m_log.Info("Requesting 'Companies' export");
+            _log.Info("Requesting 'Companies' export");
             exportString =
-                m_client.Post(ActionUrl("/erp/impexp/export/index/companies/xml"))
+                _client.Post(ActionUrl("/erp/impexp/export/index/companies/xml"))
                     .Field(
                         "dataSubset",
                         "a:18:{s:15:\"xcol_company_id\";s:2:\"on\";s:9:\"xcol_name\";s:2:\"on\";s:11:\"xcol_vat_id\";s:2:\"on\";s:12:\"xcol_website\";s:2:\"on\";s:10:\"xcol_email\";s:2:\"on\";s:17:\"xcol_main_user_id\";s:2:\"on\";s:25:\"xcol_address_company_name\";s:2:\"on\";s:19:\"xcol_address_street\";s:2:\"on\";s:31:\"xcol_address_descriptive_number\";s:2:\"on\";s:31:\"xcol_address_orientation_number\";s:2:\"on\";s:17:\"xcol_address_city\";s:2:\"on\";s:16:\"xcol_address_zip\";s:2:\"on\";s:18:\"xcol_address_state\";s:2:\"on\";s:20:\"xcol_address_country\";s:2:\"on\";s:18:\"xcol_address_phone\";s:2:\"on\";s:11:\"xcol_groups\";s:2:\"on\";s:13:\"xcol_salesrep\";s:2:\"on\";s:14:\"xtab_addresses\";s:2:\"on\";}")
@@ -200,12 +204,12 @@ namespace Elsa.Integration.Erp.Flox
             parsed = PersonsDoc.Parse(exportString, true);
             result.AddRange(parsed.Select(i => new ErpPersonModel(i, cgIndex)));
 
-            m_log.Info($"Collected {result.Count} of Persons + Companies records");
+            _log.Info($"Collected {result.Count} of Persons + Companies records");
 
-            m_log.Info("Requesting newsletter subscribers export");
+            _log.Info("Requesting newsletter subscribers export");
             var newsletterReceivers = LoadNewsletterReceivers().ToList();
 
-            m_log.Info($"Received {newsletterReceivers.Count} of newsletter subscribers");
+            _log.Info($"Received {newsletterReceivers.Count} of newsletter subscribers");
 
             foreach(var subscriber in newsletterReceivers)
             {
@@ -216,7 +220,7 @@ namespace Elsa.Integration.Erp.Flox
                     if (!customer.IsNewsletterSubscriber)
                     {
                         customer.IsNewsletterSubscriber = true;
-                        m_log.Info($"Setting existing customer {subscriber} to be Newsletter subscriber");
+                        _log.Info($"Setting existing customer {subscriber} to be Newsletter subscriber");
                     }
                 }
                 else
@@ -245,17 +249,17 @@ namespace Elsa.Integration.Erp.Flox
             EnsureSession();
             
             var timeStamp = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
-            var url = ActionUrl($"/erp/orders/invoices/finalize/{orderNum}?arf={m_csrfToken}&_dc={timeStamp}");
-            m_log.Info($"Incializuji generovani faktury ve Floxu: {url}");
+            var url = ActionUrl($"/erp/orders/invoices/finalize/{orderNum}?arf={_csrfToken}&_dc={timeStamp}");
+            _log.Info($"Incializuji generovani faktury ve Floxu: {url}");
 
-            var result = m_client.Get<DefaultResponse>(url);
+            var result = _client.Get<DefaultResponse>(url);
             if (!result.Success)
             {
-                m_log.Error($"Generovani faktury selhalo. Request={url}, Response={result.OriginalMessage}");
+                _log.Error($"Generovani faktury selhalo. Request={url}, Response={result.OriginalMessage}");
                 throw new Exception(result.OriginalMessage);
             }
             
-            m_log.Info($"Generovani fatktury OK OrderNum={orderNum}");
+            _log.Info($"Generovani fatktury OK OrderNum={orderNum}");
         }
 
         public void SendInvoiceToCustomer(string orderId)
@@ -263,36 +267,36 @@ namespace Elsa.Integration.Erp.Flox
             EnsureSession();
 
             var timeStamp = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
-            var url = ActionUrl($"/erp/orders/invoices/sendEmail/{orderId}?arf={m_csrfToken}&_dc={timeStamp}");
-            m_log.Info($"Posilam pozadavek na odeslani e-mailu klientovi: {url}");
+            var url = ActionUrl($"/erp/orders/invoices/sendEmail/{orderId}?arf={_csrfToken}&_dc={timeStamp}");
+            _log.Info($"Posilam pozadavek na odeslani e-mailu klientovi: {url}");
 
-            var result = m_client.Get<DefaultResponse>(url);
+            var result = _client.Get<DefaultResponse>(url);
             if (!result.Success)
             {
-                m_log.Error($"Pozadavek na odeslani emailu klientovi selhal. Request={url}, Response={result.OriginalMessage}");
+                _log.Error($"Pozadavek na odeslani emailu klientovi selhal. Request={url}, Response={result.OriginalMessage}");
                 throw new Exception(result.OriginalMessage);
             }
 
-            m_log.Info($"Odesilani emailu OK OrderId={orderId}");
+            _log.Info($"Odesilani emailu OK OrderId={orderId}");
         }
 
         private void Login()
         {
-            m_log.Info("Prihlasuji se k Floxu");
+            _log.Info("Prihlasuji se k Floxu");
             
             var result =
-                m_client.Post(ActionUrl("/admin/login/authenticate/"))
-                    .Field("username", m_config.User)
-                    .Field("password", m_config.Password)
+                _client.Post(ActionUrl("/admin/login/authenticate/"))
+                    .Field("username", _config.User)
+                    .Field("password", _config.Password)
                     .Call<DefaultResponse>();
 
             if (!result.Success)
             {
-                m_log.Error($"Prihlaseni k Floxu se nezdarilo: \"{result.OriginalMessage}\"");
+                _log.Error($"Prihlaseni k Floxu se nezdarilo: \"{result.OriginalMessage}\"");
                 throw new Exception(result.OriginalMessage);
             }
             
-            var ordersPage = m_client.GetString(ActionUrl("/erp/main/orders"));
+            var ordersPage = _client.GetString(ActionUrl("/erp/main/orders"));
 
             var x = ordersPage.IndexOf("var CsrfToken=function()", StringComparison.InvariantCultureIgnoreCase);
             if (x < 0)
@@ -304,14 +308,14 @@ namespace Elsa.Integration.Erp.Flox
             x = token.IndexOf('\'');
             token = token.Substring(x + 1);
             x = token.IndexOf('\'');
-            m_csrfToken = token.Substring(0, x);
+            _csrfToken = token.Substring(0, x);
 
-            m_lastAccess = DateTime.Now;
+            _lastAccess = DateTime.Now;
         }
 
         private string ActionUrl(string action)
         {
-            return $"{m_config.Url}{action}";
+            return $"{_config.Url}{action}";
         }
 
         private void EnsureSession()
@@ -319,27 +323,40 @@ namespace Elsa.Integration.Erp.Flox
             try
             {
 
-                if ((DateTime.Now - m_lastAccess).TotalMinutes > 1d)
+                if ((DateTime.Now - _lastAccess).TotalMinutes > 1d)
                 {
                     Login();
                 }
-                m_lastAccess = DateTime.Now;
+                _lastAccess = DateTime.Now;
             }
             catch (Exception ex)
             {
-                m_log.Error("Prihlaseni k Floxu selhalo", ex);
+                _log.Error("Prihlaseni k Floxu selhalo", ex);
                 throw;
             }
         }
 
         public void Dispose()
         {
-            m_client.Dispose();
+            _client.Dispose();
         }
 
-        private IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to, string status)
+        private IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to, DateTime? changedAfter, string status)
         {
-            m_log.Info($"Zacinam stahovani objednavek od={from}, do={to}, status={status}");
+            if (_config.PreferApi)
+            {
+                int? statusId = null;
+
+                if (!string.IsNullOrEmpty(status))
+                {
+                    statusId = int.Parse(status);
+                }
+
+                var received = _apiConnector.LoadOrders(changedAfter ?? from, statusId);
+                return PostMap(received);
+            }
+            
+            _log.Info($"Zacinam stahovani objednavek od={from}, do={to}, status={status}");
             EnsureSession();
 
             var xDateFrom = from.ToString("d.+M.+yyyy");
@@ -365,7 +382,7 @@ namespace Elsa.Integration.Erp.Flox
 
             fields["downloadToken"] = dlToken;
 
-            var post = m_client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
+            var post = _client.Post(ActionUrl("/erp/impexp/export/index/orders_with_items/xml"))
                         .Field("dataSubset", "a:0:{}")
                         .Field("data", string.Empty);
 
@@ -374,19 +391,22 @@ namespace Elsa.Integration.Erp.Flox
             var stringData = post.Call();
 
             var ordersModel = ExportDocument.Parse(stringData);
+                        
+            return PostMap(ordersModel.Orders.Orders);
+        }
 
-            var result = ordersModel.Orders.Orders;
-
-            foreach (var om in result)
+        private IEnumerable<IErpOrderModel> PostMap(IEnumerable<IErpOrderModel> orders)
+        {
+            foreach(var om in orders)
             {
                 om.ErpSystemId = Erp.Id;
                 ValidateOrderData(om);
-            }
 
-            return ordersModel.Orders.Orders;
+                yield return om;
+            }
         }
 
-        private void ValidateOrderData(FloxErpOrderModel om)
+        private void ValidateOrderData(IErpOrderModel om)
         {
             // All items must be unique
             var uniqueItems = new HashSet<string>();
@@ -394,7 +414,7 @@ namespace Elsa.Integration.Erp.Flox
             {
                 if (!uniqueItems.Add(i.ProductName))
                 {
-                    m_log.Error($"Order item duplicity detected: OrderNr={om.OrderNumber} Item={i.ProductName}");
+                    _log.Error($"Order item duplicity detected: OrderNr={om.OrderNumber} Item={i.ProductName}");
                 }
             }
         }
@@ -434,7 +454,7 @@ namespace Elsa.Integration.Erp.Flox
         private List<string> LoadNewsletterReceivers()
         {
             var exportString =
-                m_client.Post(ActionUrl("/erp/impexp/export/index/newsletterReceivers/xml"))
+                _client.Post(ActionUrl("/erp/impexp/export/index/newsletterReceivers/xml"))
                     .Field(
                         "dataSubset",
                         "a:0:{}")
@@ -446,6 +466,26 @@ namespace Elsa.Integration.Erp.Flox
             var parsed = NewsletterSubscriptionsModel.Parse(exportString);
 
             return parsed.Select(i => i.Email).ToList();
+        }
+
+        public IEnumerable<IErpOrderModel> LoadOrdersSnapshot(DateTime from, DateTime? to = null)
+        {
+            return LoadOrders(from, to, null, null);
+        }
+
+        public IEnumerable<IErpOrderModel> LoadOrdersIncremental(DateTime changedAfter)
+        {
+            return LoadOrders(changedAfter, null, changedAfter, null);
+        }
+
+        public string LoadOrderInternalNote(string orderNumber)
+        {
+            if (!_config.PreferApi)
+            {
+                return LoadOrder(orderNumber)?.InternalNote;
+            }
+
+            return _apiConnector.LoadOrderInternalNote(orderNumber);
         }
     }
 }

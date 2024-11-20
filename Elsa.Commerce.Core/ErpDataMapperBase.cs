@@ -236,5 +236,9 @@ namespace Elsa.Commerce.Core
             return s;
         }
 
+        public virtual DateTime GetPurchaseDate(IErpOrderModel source)
+        {
+            return ParseDt(source.PurchaseDate, source, null, nameof(source.PurchaseDate));
+        }
     }
 }

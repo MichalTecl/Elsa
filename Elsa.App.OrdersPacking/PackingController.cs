@@ -99,7 +99,7 @@ namespace Elsa.App.OrdersPacking
                 {
                     Log.Info("Aplikace nemá načtenu tuto zásilku, je třeba aktualizovat seznam zásilek z Floxu...");
 
-                    paid = _ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), shipProvider: null).ToList();
+                    paid = _ordersFacade.GetAndSyncPaidOrders(shipProvider: null).ToList();
 
                     order = paid.FirstOrDefault(o => (o.PreInvoiceId == orderNumber) || (o.OrderNumber == orderNumber));
                     if (order == null)
@@ -248,7 +248,7 @@ namespace Elsa.App.OrdersPacking
                 return new LightOrderInfo[0];
             }
 
-            return _ordersFacade.GetAndSyncPaidOrders(DateTime.Now.AddDays(-30), shipProvider: null, true).Select(i => new LightOrderInfo(i));
+            return _ordersFacade.GetAndSyncPaidOrders(shipProvider: null, true).Select(i => new LightOrderInfo(i));
         }
 
         public OrderAsyncFieldModel<string> GetMostRecentInternalNote(long orderId)
@@ -261,12 +261,12 @@ namespace Elsa.App.OrdersPacking
             
             var erp = _erpClientFactory.GetErpClient(elsaOrder.ErpId.Value);
 
-            var erpOrder = erp.LoadOrder(elsaOrder.OrderNumber);
+            var erpOrderNote = erp.LoadOrderInternalNote(elsaOrder.OrderNumber);
             return new Model.OrderAsyncFieldModel<string>
             {
                 OrderId = orderId,
                 FieldName = "InternalNote",
-                FieldValue = erpOrder.InternalNote
+                FieldValue = erpOrderNote
             };
         }
 

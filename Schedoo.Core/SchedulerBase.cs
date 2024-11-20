@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 
 namespace Schedoo.Core
@@ -11,7 +10,7 @@ namespace Schedoo.Core
         private readonly IDataRepository m_dataRepository;
 
         private readonly TimeSpan m_tick;
-        
+
         protected SchedulerBase(IDataRepository dataRepository, TimeSpan tick)
         {
             m_dataRepository = dataRepository;
@@ -22,23 +21,28 @@ namespace Schedoo.Core
         {
             //while (true)
             //{
-                try
+            try
+            {
+                var jobs = m_dataRepository.AllJobs.Where(j => string.IsNullOrWhiteSpace(forcedJobName) || j.Uid == forcedJobName).OrderBy(j => j.Priority).ToList();
+
+                if (!string.IsNullOrWhiteSpace(forcedJobName) && jobs.Count != 1)
                 {
-                    var jobs = m_dataRepository.AllJobs.Where(j => string.IsNullOrWhiteSpace(forcedJobName) || j.Uid == forcedJobName).OrderBy(j => j.Priority).ToList();
+                    throw new InvalidOperationException($"{jobs.Count} found by \"{forcedJobName}\"");
+                }
 
-                    if (!string.IsNullOrWhiteSpace(forcedJobName) && jobs.Count != 1)
-                    {
-                        throw new InvalidOperationException($"{jobs.Count} found by \"{forcedJobName}\"");
-                    }
+                foreach (var job in jobs)
+                {
+                    var context = CreateContext(job);
 
-                    foreach (var job in jobs)
+                    try
                     {
-                        var context = CreateContext(job);
-                        
-                        try
+                        if (context.IsNowRunning())
                         {
-                            if (context.IsNowRunning())
+#if DEBUG
+                            if (job.Uid != forcedJobName)
                             {
+#endif
+
                                 var lastStart = m_dataRepository.GetLastJobStarted(job) ?? DateTime.MinValue;
                                 if ((m_dataRepository.Now - lastStart) > job.RunTimeout)
                                 {
@@ -47,63 +51,71 @@ namespace Schedoo.Core
 
                                 continue;
                             }
-
-                            var preconditons = (job.Uid == forcedJobName) || EvalPreconditions(job, context);
-                            WriteContextLog(context, preconditons);
-                            if (!preconditons)
-                            {
-                                continue;
-                            }
-
-                            OnJobStart(job);
-
-                            m_dataRepository.OnJobStart(job);
-                            StartJob(job);
-                            m_dataRepository.OnJobSucceeded(job);
-
-                            OnJobSucceeded(job);
+#if DEBUG
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            try
-                            {
-                                m_dataRepository.OnJobFailed(job, ex);
-                            }
-                            catch
-                            {
-                                ;
-                            }
+                            Console.WriteLine("WARNING: Ignoring unfinished job in DEBUG mode");
+                        }
+#endif
 
-                            try
-                            {
-                                OnJobFailed(job, ex);
-                            }
-                            catch
-                            {
-                                ;
-                            }
+
+                        var preconditons = (job.Uid == forcedJobName) || EvalPreconditions(job, context);
+                        WriteContextLog(context, preconditons);
+                        if (!preconditons)
+                        {
+                            continue;
+                        }
+
+                        OnJobStart(job);
+
+                        m_dataRepository.OnJobStart(job);
+                        StartJob(job);
+                        m_dataRepository.OnJobSucceeded(job);
+
+                        OnJobSucceeded(job);
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            m_dataRepository.OnJobFailed(job, ex);
+                        }
+                        catch
+                        {
+                            ;
+                        }
+
+                        try
+                        {
+                            OnJobFailed(job, ex);
+                        }
+                        catch
+                        {
+                            ;
                         }
                     }
-
-                    Thread.Sleep(m_tick);
                 }
-                catch (Exception ex)
+
+                Thread.Sleep(m_tick);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine();
+                Console.WriteLine("GENERAL JOB LAUNCHER ERROR:");
+                Console.WriteLine(ex);
+
+                try
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("GENERAL JOB LAUNCHER ERROR:");
-                    Console.WriteLine(ex);
-
-                    try
-                    {
-                        File.WriteAllText($"error_{Guid.NewGuid()}.txt", ex.ToString());
+                    File.WriteAllText($"error_{Guid.NewGuid()}.txt", ex.ToString());
                 }
-                    catch
-                    {
-                        ;
-                    }
-
-                    Thread.Sleep(5000);
+                catch
+                {
+                    ;
                 }
+
+                Thread.Sleep(5000);
+            }
             //}
         }
 

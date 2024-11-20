@@ -68,6 +68,7 @@
     <Compile Include="CurrencyRates\ICurrencyConversionHelper.cs" />
     <Compile Include="CustomerUidCalculator.cs" />
     <Compile Include="ErpDataMapperBase.cs" />
+    <Compile Include="IAdHocOrdersSyncProvider.cs" />
     <Compile Include="ICurrencyRepository.cs" />
     <Compile Include="IErpClient.cs" />
     <Compile Include="IErpClientFactory.cs" />

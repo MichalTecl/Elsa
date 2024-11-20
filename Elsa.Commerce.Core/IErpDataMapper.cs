@@ -20,5 +20,7 @@ namespace Elsa.Commerce.Core
             Func<string, ICurrency> currencyByCurrencySymbol,
             IDictionary<string, IErpOrderStatusMapping> erpOrderStatusMappings,
             IProductRepository productRepository);
+
+        DateTime GetPurchaseDate(IErpOrderModel source);
     }
 }

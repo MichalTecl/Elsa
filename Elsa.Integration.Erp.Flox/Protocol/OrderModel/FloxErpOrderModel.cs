@@ -238,7 +238,7 @@ namespace Elsa.Integration.Erp.Flox.Protocol.OrderModel
         {
             get
             {
-                var elements = PriceElements.Items.Where(p => p.TypeErpName.Equals("discount")).Select(p => p.Title).ToList();
+                var elements = OrderPriceElements.Where(p => p.TypeErpName.Equals("discount")).Select(p => p.Title).ToList();
                 if (!elements.Any())
                 {
                     return null;

@@ -28,6 +28,7 @@ namespace Elsa.Commerce.Core.Impl
         private readonly IKitProductRepository m_kitProductRepository;
         private readonly IMailSender m_mailSender;
         private readonly ICache m_cache;
+        private readonly IAdHocOrdersSyncProvider m_adhocOrdersSyncProvider;
 
         public OrdersFacade(
             IPurchaseOrderRepository orderRepository,
@@ -36,7 +37,7 @@ namespace Elsa.Commerce.Core.Impl
             ISession session,
             IPaymentRepository paymentRepository,
             ILog log,
-            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository, IMailSender mailSender, ICache cache)
+            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository, IMailSender mailSender, ICache cache, IAdHocOrdersSyncProvider adhocOrdersSyncProvider)
         {
             m_orderRepository = orderRepository;
             m_database = database;
@@ -48,6 +49,7 @@ namespace Elsa.Commerce.Core.Impl
             m_kitProductRepository = kitProductRepository;
             m_mailSender = mailSender;
             m_cache = cache;
+            m_adhocOrdersSyncProvider = adhocOrdersSyncProvider;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
@@ -245,50 +247,28 @@ namespace Elsa.Commerce.Core.Impl
             }
         }
 
-        public IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(DateTime historyDepth, string shipProvider, bool skipErp = false)
+        public IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(string shipProvider, bool skipErp = false)
         {
-            m_log.Info($"Nacitam zaplacene objednavky od {historyDepth}");
+            m_log.Info($"Nacitam zaplacene objednavky");
 
-            if (skipErp)
+            if (!skipErp)
             {
-                foreach (var rpo in m_orderRepository.GetOrdersByStatus(OrderStatus.ReadyToPack))
+                try
                 {
-                    if (!MatchShipmentProvider(rpo, shipProvider))
-                        continue;
-
-                    yield return rpo;
+                    m_adhocOrdersSyncProvider.SyncPaidOrders();
                 }
-
-                yield break;
+                catch (Exception ex)
+                {
+                    m_log.Error($"AdHoc paid orders sync failed", ex);
+                }
             }
 
-
-            var erps = m_clientFactory.GetAllErpClients().ToList();
-
-            m_orderRepository.PreloadOrders(historyDepth, DateTime.Now.AddDays(1));
-
-            foreach (var erpClient in erps)
+            foreach (var rpo in m_orderRepository.GetOrdersByStatus(OrderStatus.ReadyToPack))
             {
-                m_log.Info($"Nacitam zaplacene objednavky od {historyDepth} z ERP = {erpClient.Erp.Description}");
-
-                var paidOrders = erpClient.LoadPaidOrders(historyDepth, DateTime.Now.AddDays(1)).ToList();
-                m_log.Info($"Stazeno {paidOrders.Count} objednavek");
-
-                if (!paidOrders.Any())
-                {
+                if (!MatchShipmentProvider(rpo, shipProvider))
                     continue;
-                }
 
-                foreach (var paidOrder in paidOrders)
-                {
-                    var importedId = m_orderRepository.ImportErpOrder(paidOrder);
-                    var order = m_orderRepository.GetOrder(importedId);
-
-                    if (!MatchShipmentProvider(order, shipProvider))
-                        continue;
-
-                    yield return order;
-                }
+                yield return rpo;
             }
 
             m_log.Info("Hotovo");

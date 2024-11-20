@@ -79,6 +79,7 @@
     <Compile Include="IUnitConvertor.cs" />
     <Compile Include="Logging\AsyncLogger.cs" />
     <Compile Include="Logging\FileLogWriter.cs" />
+    <Compile Include="Logging\Helpers\PrettifyJsonResponseExtra.cs" />
     <Compile Include="Logging\ILog.cs" />
     <Compile Include="Logging\ILogWriter.cs" />
     <Compile Include="Logging\InspectionIssueModel.cs" />
