@@ -6,6 +6,8 @@ namespace Elsa.App.MaterialLevels.Components.Model
 {
     public class MaterialLevelEntryModel
     {
+        public const string OrderDtViewFormat = "dd.MM.";
+
         public int MaterialId { get; set; }
 
         public string MaterialName { get; set; }
@@ -25,7 +27,7 @@ namespace Elsa.App.MaterialLevels.Components.Model
 
         public string ThresholdFormatted => Threshold?.ToString();
 
-        public bool HasWarning { get; set; }
+        public WarningLevel WarningLevel { get; set; }
 
         public string UnitSymbol => Threshold?.Unit.Symbol ?? Total?.Unit.Symbol ?? DefaultUnitSymbol;
 
@@ -34,6 +36,16 @@ namespace Elsa.App.MaterialLevels.Components.Model
         public string SupplierEmail { get; set; }
 
         public string SupplierPhone { get; set; }
+
+        public string OrderDt { get; set; }
+        public string OrderUser { get; set; }
+    }
+
+    public enum WarningLevel
+    {
+        None = 0,
+        Low = 1, 
+        High = 2
     }
 
     public class BatchAmountModel

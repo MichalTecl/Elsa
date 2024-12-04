@@ -57,6 +57,7 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
             model.materialLink = getBatchSearchLink(model.MaterialName, null);
             model.hasThreshold = model.ThresholdFormatted !== null;
             model.displaySupplier = self.showSupplier;
+            model.hasOrderDt = !!model.OrderDt;
 
             for (var j = 0; j < model.Batches.length; j++) {
                 var b = model.Batches[j];
@@ -64,6 +65,9 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
             }
 
             model.showSupplier = self.displaySupplier;
+            model.enteringOrderDt = false;
+
+            model.warnLevelClass = "lt-template gridRow warnLevelClass" + model.WarningLevel;
         }
 
         self.report = data;
@@ -257,6 +261,22 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
             .post(function() {
                 self.refresh();
             });
+    };
+
+    self.setOrderDtEditing = function (materialId) {
+        for (var i in self.report) {
+            self.report[i].enteringOrderDt = (self.report[i].MaterialId === materialId);
+        }
+
+        lt.notify();
+    };
+
+    self.setOrderDt = function (materialId, value) {
+        lt.api("/MaterialAmountReport/setOrderDt")
+            .query({ "materialId": materialId, "value": value })
+            .post(function (actualized) {
+                self.refresh();
+            })
     };
 
     self.setFilter = function(value) {

@@ -472,6 +472,17 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         }
 
+        public void SaveOrderDt(int materialId, DateTime? orderDt)
+        {
+            //(@materialId INT, @orderDt DATETIME, @userId INT)
+            m_database.Sql()
+                .Call("SaveMaterialOrderDt")
+                .WithParam("@materialId", materialId)
+                .WithParam("@orderDt", orderDt)
+                .WithParam("@userId", m_session.User.Id)
+                .NonQuery();
+        }
+
         private sealed class MaterialRepositoryWithPostponedCache : MaterialRepository, IMaterialRepositoryWithPostponedCache
         {
             private readonly CacheWithPostponedRemoval m_ppCache;

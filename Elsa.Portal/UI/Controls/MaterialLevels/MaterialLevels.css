@@ -1,9 +1,18 @@
-﻿.matlvlWarningRow > div {
+﻿.warnLevelClass2 > div {
     background-color: #ffe0e0;
 }
 
-.matlvlWarningRow:hover > div {
+.warnLevelClass2:hover > div {
     background-color: #ffe0e0 !important;
+}
+
+.warnLevelClass1 > div {
+    background-color: #fffbe6;
+    ;
+}
+
+.warnLevelClass1:hover > div {
+    background-color: #fffbe6 !important;
 }
 
 .matlvlInventoryTabHead {
@@ -119,3 +128,21 @@
     color: #555;
     font-size: 13px;
 }
+
+div.orderDtCell .orderDtButtons {
+    display: none;
+}
+
+div.orderDtCell:hover .orderDtButtons {
+    display: block;
+}
+
+.orderDtInputCont .fa-times {
+    margin-left: 8px;
+    opacity: 0.5;
+}
+
+div.orderDtView {
+    margin-right:5px;
+}
+

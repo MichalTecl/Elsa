@@ -389,7 +389,7 @@ namespace Elsa.Commerce.Core.Impl
 
             var orderId = order.Id;
 
-            if (order.ErpId == null)
+            if (order.ErpId == null || order.ErpId == 0)
             {
                 throw new InvalidOperationException("Cannot perform ERP operation for order without ERP");
             }

@@ -26,9 +26,10 @@ namespace Elsa.App.MaterialLevels.Components
         private readonly IMaterialRepository m_materialRepository;
         private readonly ICache m_cache;
         private readonly IInventoryWatchRepository m_inventoryWatchRepository;
+        private readonly IUserRepository m_userRepository;
 
         public MaterialLevelsLoader(ISession session, IDatabase database, AmountProcessor amountProcessor,
-            IUnitRepository unitRepository, IMaterialThresholdRepository thresholdRepository, ICache cache, IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository)
+            IUnitRepository unitRepository, IMaterialThresholdRepository thresholdRepository, ICache cache, IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IUserRepository userRepository)
         {
             m_session = session;
             m_database = database;
@@ -38,14 +39,18 @@ namespace Elsa.App.MaterialLevels.Components
             m_cache = cache;
             m_materialRepository = materialRepository;
             m_inventoryWatchRepository = inventoryWatchRepository;
+            m_userRepository = userRepository;
         }
 
         public IEnumerable<MaterialLevelEntryModel> Load(int inventoryId)
         {
             var result = new List<MaterialLevelEntryModel>();
 
+            // user repo cache fill :(
+            m_userRepository.GetAllUsers();
+
             m_database.Sql().Call("GetMaterialLevelsReport").WithParam("@inventoryId", inventoryId).WithParam("@projectId", m_session.Project.Id)
-                .ReadRows<int,string, string, int, decimal, string, string, string>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone)=>
+                .ReadRows<int,string, string, int, decimal, string, string, string, DateTime?, int?>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone, orderDt, orderUserId)=>
                 {
                     var entry = result.FirstOrDefault(r => r.MaterialId == materialId);
                     if (entry == null)
@@ -64,6 +69,8 @@ namespace Elsa.App.MaterialLevels.Components
                         entry.SupplierName = supName;
                         entry.SupplierEmail = supMail;
                         entry.SupplierPhone = supPhone;
+                        entry.OrderDt = orderDt?.ToString(MaterialLevelEntryModel.OrderDtViewFormat);
+                        entry.OrderUser = orderUserId == null ? null : m_userRepository.GetUserNick(orderUserId.Value);
                     }
 
                     if (available == 0)
@@ -111,10 +118,23 @@ namespace Elsa.App.MaterialLevels.Components
                     r.DefaultUnitSymbol = material.NominalUnit.Symbol;
                 }
 
-                r.HasWarning = r.Threshold != null && m_amountProcessor.GreaterThan(r.Threshold, r.Total ?? r.Threshold.ToZeroAmount());
+                var isLow = r.Threshold != null && m_amountProcessor.GreaterThan(r.Threshold, r.Total ?? r.Threshold.ToZeroAmount());
+
+                if (!isLow)
+                {
+                    r.WarningLevel = WarningLevel.None;
+                }
+                else if(!string.IsNullOrEmpty(r.OrderDt))
+                {
+                    r.WarningLevel = WarningLevel.Low;
+                }
+                else
+                {
+                    r.WarningLevel = WarningLevel.High;
+                }
             }
 
-            return result.OrderBy(r => r.HasWarning ? 0 : 1).ThenBy(r => r.MaterialName);
+            return result.OrderByDescending(r => (int)r.WarningLevel).ThenBy(r => r.MaterialName);
         }
 
         public IEnumerable<InventoryModel> GetInventories()

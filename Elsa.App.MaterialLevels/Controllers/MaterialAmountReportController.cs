@@ -102,5 +102,21 @@ namespace Elsa.App.MaterialLevels.Controllers
                 thresholdEntry.Amount,
                 thresholdUnit.Id);
         }
+
+        public string SetOrderDt(int materialId, string value)
+        {            
+            EnsureUserRight(InventoryUserRights.MaterialLevelsChangeThresholds);
+
+            DateTime? parsed = null;
+
+            if (!string.IsNullOrEmpty(value)) 
+            {
+                parsed = DateTime.ParseExact(value, "yyyy-MM-dd", null);
+            }
+
+            m_materialRepository.SaveOrderDt(materialId, parsed);
+
+            return parsed?.ToString(MaterialLevelEntryModel.OrderDtViewFormat) ?? string.Empty;
+        }
     }
 }

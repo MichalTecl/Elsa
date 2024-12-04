@@ -128,7 +128,7 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
 
             var rq = "?";
             var resp = "?";
-            var url = $"{_config.Url.TrimEnd('/')}/api/graphql";
+            var url = _config.ApiUrl;
             try
             {
                 using (var http = new HttpClient())

@@ -103,7 +103,10 @@ namespace Elsa.Integration.Erp.Flox
             {
                 try
                 {
-                    return _apiConnector.LoadOrder(orderNumber);
+                    var loaded = _apiConnector.LoadOrder(orderNumber);
+                    loaded.ErpSystemId = Erp.Id;
+
+                    return loaded;
                 }
                 catch(Exception ex)
                 {

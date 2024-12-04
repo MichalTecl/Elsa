@@ -35,6 +35,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
         List<MaterialReportingGroupAssignmentModel> GetMaterialReportingGroupAssignments();
 
         void SaveMaterialReportingGroupAssignments(IEnumerable<MaterialReportingGroupAssignmentModel> models, out int groupsCreated, out int materialsAssigned);
+
+        void SaveOrderDt(int materialId, DateTime? orderDt);
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }

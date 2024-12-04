@@ -36,10 +36,11 @@
                 <div class="cell5">Dostupné</div>
                 <div class="cell5">Minimum</div>
                 <div class="cell10" data-bind="class!.hidden:showSupplier">Dodavatel</div>
+                <div class="cell10" data-bind="class!.hidden:showSupplier">Objednáno</div>
                 <div class="cell40">Šarže</div>
             </div>
             <div data-bind="itemsSource:report" data-key="MaterialId">
-                <div class="lt-template gridRow" data-bind="class.matlvlWarningRow:HasWarning;class.hidden:hidden">
+                <div class="lt-template gridRow" data-bind="class:warnLevelClass;class.hidden:hidden">
                     <div class="cell20">
                         <a target="_blank" data-bind="text:MaterialName;href:materialLink"></a>
                     </div>
@@ -55,7 +56,26 @@
                             </span>
                         </div>
                     </div>
-                    <div class="cell10 matlevSupplierCell"  data-bind="class!.hidden:displaySupplier" event-bind="click:onSupplierClick(SupplierName, SupplierEmail, SupplierPhone)"><a data-bind="text:SupplierName"></a></div>
+                    <div class="cell10 matlevSupplierCell" data-bind="class!.hidden:displaySupplier" event-bind="click:onSupplierClick(SupplierName, SupplierEmail, SupplierPhone)"><a data-bind="text:SupplierName"></a></div>
+
+                    <div class="cell10 stackLeft orderDtCell" data-bind="class!.hidden:displaySupplier">
+                        <div class="stackLeft">
+                            <div class="orderDtView" data-bind="text:OrderDt; class.hidden:enteringOrderDt"></div>
+
+                            <div class="restricted-MaterialLevelsChangeOrderDt">
+                                <div class="stackLeft orderDtButtons" data-bind="class.hidden:enteringOrderDt">
+                                    <i class="far fa-edit faButton" event-bind="click:onOrderDtEditClick(MaterialId, MaterialName)"></i>
+                                    <a class="orderDtToday actionLink" event-bind="click:onOrderDtTodayClick(MaterialId)" data-bind="class.hidden:hasOrderDt">Dnes</a>
+                                </div>
+
+                                <div data-bind="class!.hidden:enteringOrderDt" class="orderDtInputCont stackLeft">
+                                    <input type="date" lt-name="orderDtInp" event-bind="change:onOrderDtConfirm(MaterialId, this.value)" />
+                                    <i class="fas fa-times faButton" id="butCleanFilter" event-bind="click:cancelOrderDtInput()"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="cell40">
                         <div class="stackLeft matlvlBatchesList" data-bind="itemsSource:Batches" data-key="BatchNumber">
                             <div class="lt-template stackLeft  matlvlBatchesListItem">
@@ -74,6 +94,8 @@
 
 <script>
     lt.element("mlUi").withModel("app.MaterialLevels.vm").attach(function(tbFilter) {
+
+        var self = this;
 
         this.onTabClick = function(id) {
             app.MaterialLevels.vm.onInventorySelected(id);
@@ -120,6 +142,23 @@
         this.onCleanFilterClick = function() {
             tbFilter.value = "";
             app.MaterialLevels.vm.setFilter("");
+        };
+
+        this.onOrderDtEditClick = function (materialId, materialName) {
+            app.MaterialLevels.vm.setOrderDtEditing(materialId);
+        };
+
+        this.cancelOrderDtInput = function () {
+            app.MaterialLevels.vm.setOrderDtEditing(null);
+        };
+
+        this.onOrderDtConfirm = function (materialId, value) {
+            app.MaterialLevels.vm.setOrderDt(materialId, value);
+        };
+
+        this.onOrderDtTodayClick = function (materialId) {
+            var ftoday = new Date().toISOString().split("T")[0];
+            self.onOrderDtConfirm(materialId, ftoday);
         };
 
         app.MaterialLevels.vm.onInventorySelected(null);
