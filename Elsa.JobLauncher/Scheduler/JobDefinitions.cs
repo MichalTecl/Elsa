@@ -29,7 +29,7 @@ namespace Elsa.JobLauncher.Scheduler
 
         public static readonly ElsaJob StoreMap = new ElsaJob("STORE_MAP", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
-        public static readonly ElsaJob OrderDataValidation = new ElsaJob("ORDER_DATA_VALIDATION", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
+        //public static readonly ElsaJob OrderDataValidation = new ElsaJob("ORDER_DATA_VALIDATION", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
         public static IEnumerable<ElsaJob> All
         {
@@ -47,7 +47,7 @@ namespace Elsa.JobLauncher.Scheduler
                 yield return FinReports;
 
                 yield return AutoQueries;
-                yield return OrderDataValidation;
+                //yield return OrderDataValidation;
                 
                 yield return Inspector;
 
