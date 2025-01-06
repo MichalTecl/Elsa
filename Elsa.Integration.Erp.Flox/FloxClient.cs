@@ -108,12 +108,17 @@ namespace Elsa.Integration.Erp.Flox
 
                     return loaded;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     _log.Error($"Failed to load order ({orderNumber}) using API. Activating fallback to 'webform' mode", ex);
                 }
             }
 
+            return LoadOrderWithoutApi(orderNumber);
+        }
+
+        private IErpOrderModel LoadOrderWithoutApi(string orderNumber)
+        {
             EnsureSession();
 
             var dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
@@ -483,12 +488,14 @@ namespace Elsa.Integration.Erp.Flox
 
         public string LoadOrderInternalNote(string orderNumber)
         {
-            if (!_config.PreferApi)
-            {
-                return LoadOrder(orderNumber)?.InternalNote;
-            }
+            /*
+                         
+            Waiting for  Byznysweb fix
 
-            return _apiConnector.LoadOrderInternalNote(orderNumber);
+            return LoadOrder(orderNumber)?.InternalNote;
+            */
+
+            return LoadOrderWithoutApi(orderNumber)?.InternalNote;
         }
     }
 }
