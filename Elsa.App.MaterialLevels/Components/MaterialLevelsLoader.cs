@@ -27,9 +27,10 @@ namespace Elsa.App.MaterialLevels.Components
         private readonly ICache m_cache;
         private readonly IInventoryWatchRepository m_inventoryWatchRepository;
         private readonly IUserRepository m_userRepository;
+        private readonly ISupplierRepository m_supplierRepository;
 
         public MaterialLevelsLoader(ISession session, IDatabase database, AmountProcessor amountProcessor,
-            IUnitRepository unitRepository, IMaterialThresholdRepository thresholdRepository, ICache cache, IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IUserRepository userRepository)
+            IUnitRepository unitRepository, IMaterialThresholdRepository thresholdRepository, ICache cache, IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IUserRepository userRepository, ISupplierRepository supplierRepository)
         {
             m_session = session;
             m_database = database;
@@ -40,6 +41,7 @@ namespace Elsa.App.MaterialLevels.Components
             m_materialRepository = materialRepository;
             m_inventoryWatchRepository = inventoryWatchRepository;
             m_userRepository = userRepository;
+            m_supplierRepository = supplierRepository;
         }
 
         public IEnumerable<MaterialLevelEntryModel> Load(int inventoryId)
@@ -48,6 +50,8 @@ namespace Elsa.App.MaterialLevels.Components
 
             // user repo cache fill :(
             m_userRepository.GetAllUsers();
+
+            var supplierOrderLimits = m_supplierRepository.GetSuppliers().GroupBy(s => s.Name).ToDictionary(s => s.Key, s => s.Min(t => t.OrderFulfillDays ?? 9999));
 
             m_database.Sql().Call("GetMaterialLevelsReport").WithParam("@inventoryId", inventoryId).WithParam("@projectId", m_session.Project.Id)
                 .ReadRows<int,string, string, int, decimal, string, string, string, DateTime?, int?>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone, orderDt, orderUserId)=>
@@ -70,6 +74,7 @@ namespace Elsa.App.MaterialLevels.Components
                         entry.SupplierEmail = supMail;
                         entry.SupplierPhone = supPhone;
                         entry.OrderDt = orderDt?.ToString(MaterialLevelEntryModel.OrderDtViewFormat);
+                        entry.RawOrderDt = orderDt;
                         entry.OrderUser = orderUserId == null ? null : m_userRepository.GetUserNick(orderUserId.Value);
                     }
 
@@ -122,14 +127,25 @@ namespace Elsa.App.MaterialLevels.Components
 
                 if (!isLow)
                 {
+                    // there is enough
                     r.WarningLevel = WarningLevel.None;
                 }
                 else if(!string.IsNullOrEmpty(r.OrderDt))
                 {
+                    // we are under threshold, but another batch is ordered
                     r.WarningLevel = WarningLevel.Low;
+
+                    // but maybe the order is delayed?
+                    if (supplierOrderLimits.TryGetValue(r.SupplierName, out var orderLimitDays) && (r.RawOrderDt.Value.AddDays(orderLimitDays) < DateTime.Now))
+                    {
+                        r.WarningLevel = WarningLevel.High;
+                        r.DelayedOrder = true;
+                    } 
                 }
                 else
                 {
+                    // we are under threshold
+
                     r.WarningLevel = WarningLevel.High;
                 }
             }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Elsa.Common;
 using Newtonsoft.Json;
 
@@ -39,6 +40,8 @@ namespace Elsa.App.MaterialLevels.Components.Model
 
         public string OrderDt { get; set; }
         public string OrderUser { get; set; }
+        public bool DelayedOrder { get; internal set; }
+        internal DateTime? RawOrderDt { get; set; }
     }
 
     public enum WarningLevel

@@ -146,3 +146,8 @@ div.orderDtView {
     margin-right:5px;
 }
 
+.orderDtDelayed {
+    color:red;
+    font-weight:bold;
+}
+
