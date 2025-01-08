@@ -8,6 +8,7 @@ using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.EditorBuilder;
 using Elsa.EditorBuilder.Internal;
 
@@ -61,6 +62,7 @@ namespace Elsa.Apps.CommonData
                     s.IdentificationNumber = entity.IdentificationNumber;
                     s.TaxIdentificationNumber = entity.TaxIdentificationNumber;
                     s.Note = entity.Note;
+                    s.OrderFulfillDays = StringUtil.TryParseInt(entity.OrderFulfillDays);
                 });
 
             return new SupplierViewModel(saved);
@@ -96,27 +98,30 @@ namespace Elsa.Apps.CommonData
         {
             gridBuilder.Column(CellClass.Cell10, s => s.Name)
                 .Column(CellClass.Cell10, s => s.ContactPhone)
-                .Column(CellClass.Cell10, s => s.ContactEmail);
+                .Column(CellClass.Cell10, s => s.ContactEmail);                
         }
 
         protected override void SetupForm(IFormBuilder<SupplierViewModel> formBuilder)
         {
-            formBuilder.Div("splHead",
-                    f => f.Field(s => s.Name)
-                        .Field(s => s.ContactEmail)
+            formBuilder.Div("cols1",
+                        f => f.Field(s => s.Name)
+                    ).Div("cols2",
+                    f => f.Field(s => s.ContactEmail)
                         .Field(s => s.ContactPhone))
 
-                .Div("splIds",
+                .Div("cols2",
                     f => f.Field(s => s.IdentificationNumber)
                         .Field(s => s.TaxIdentificationNumber))
-
-                .Div("splAddress address",
-                    f => f.Field(s => s.Street)
-                        .Field(s => s.City)
-                        .Field(s => s.Country)
-                        .Field(s => s.Zip))
-                .Div("splCurr", f => f.Field(s => s.CurrencyName, fld => fld.ReplaceByUrl = "/UI/Controls/Common/Elements/CurrencyDropDown.html"))
-                .Div("splNote", f => f.Field(s => s.Note, ff => ff.EditElementNodeType = "textarea"));
+                .Div("cols1", f => f.Field(s => s.Street))
+                .Div("cols2", f => f.Field(s => s.City).Field(s => s.Zip))
+                .Div("cols2", f => f.Field(s => s.Country))
+                .Div("cols2", f => f.Field(s => s.CurrencyName, fld => fld.ReplaceByUrl = "/UI/Controls/Common/Elements/CurrencyDropDown.html")
+                .Field(s => s.OrderFulfillDays, fld =>
+                {
+                    fld.Title = "Počet dnů na doručení objednávky";
+                    
+                }))                
+                .Div("cols1", f => f.Field(s => s.Note, ff => ff.EditElementNodeType = "textarea"));
         }
 
         public IEnumerable<string> GetSupplierNames()

@@ -213,6 +213,10 @@
       <Project>{2f701563-935d-43bd-8cf3-bbf47df17397}</Project>
       <Name>Elsa.App.ImportExport</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.EntityComments\Elsa.Common.EntityComments.csproj">
+      <Project>{C9136906-286D-4C0C-896E-D3A06E41C947}</Project>
+      <Name>Elsa.Common.EntityComments</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
       <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
       <Name>Elsa.Common.Interfaces</Name>

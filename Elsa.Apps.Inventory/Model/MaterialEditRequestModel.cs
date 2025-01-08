@@ -42,5 +42,7 @@ namespace Elsa.Apps.Inventory.Model
         public bool NotAbandonedUntilNewerBatchUsed { get; set; }
 
         public bool UniqueBatchNumbers { get; set; }
+
+        public string Comment { get; set; }
     }
 }

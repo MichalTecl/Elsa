@@ -2,6 +2,7 @@
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -125,5 +126,13 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public bool NotAbandonedUntilNewerBatchUsed { get; }
 
         public bool UniqueBatchNumbers { get; }
+
+        #region Entity Comment
+        public int RecordId => Id;
+        public string EntityTypeName => "Material";
+        public string CommentText { get; set; }
+        public DateTime? CommentDt { get; set; }
+        public string CommentAuthorNick { get; set; }                
+        #endregion
     }
 }

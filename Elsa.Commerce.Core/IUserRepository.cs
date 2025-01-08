@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
-namespace Elsa.Commerce.Core
+namespace Elsa.Commerce.Core 
 {
-    public interface IUserRepository
-    {
-        string GetUserNick(int userId);
-
+    public interface IUserRepository : IUserNickProvider
+    {        
         string GetUserEmail(int userId);
 
         IUser GetUser(int id);

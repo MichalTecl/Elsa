@@ -11,6 +11,7 @@ using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Commerce.Core.Warehouse.Thresholds;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.EntityComments;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
@@ -38,8 +39,9 @@ namespace Elsa.Apps.Inventory
         private readonly IUnitConversionHelper m_conversionHelper;
         private readonly IDatabase m_database;
         private readonly IMaterialThresholdRepository m_materialThresholdRepository;
+        private readonly IEntityCommentsFacade m_entityCommentsFacade;
 
-        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade, IUnitConversionHelper conversionHelper, IDatabase database, IMaterialThresholdRepository materialThresholdRepository)
+        public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade, IUnitConversionHelper conversionHelper, IDatabase database, IMaterialThresholdRepository materialThresholdRepository, IEntityCommentsFacade entityCommentsFacade)
             : base(webSession, log)
         {
             m_virtualProductRepository = virtualProductRepository;
@@ -51,6 +53,7 @@ namespace Elsa.Apps.Inventory
             m_conversionHelper = conversionHelper;
             m_database = database;
             m_materialThresholdRepository = materialThresholdRepository;
+            m_entityCommentsFacade = entityCommentsFacade;
         }
 
         public IEnumerable<VirtualProductViewModel> GetVirtualProducts(string searchQuery)
@@ -223,6 +226,8 @@ namespace Elsa.Apps.Inventory
             {
                 return null;
             }
+
+            m_entityCommentsFacade.TryLoadComment(InventoryUserRights.MaterialCommentsView, material);
             
             return material;
         }
@@ -234,7 +239,7 @@ namespace Elsa.Apps.Inventory
             var thresholdText = request.HasThreshold ? (request.ThresholdText ?? string.Empty) : null;
 
             using (var tx = m_database.OpenTransaction())
-            {
+            {                
                 var saved = m_materialFacade.ProcessMaterialEditRequest(
                     request.MaterialId,
                     request.MaterialName,
@@ -252,7 +257,11 @@ namespace Elsa.Apps.Inventory
                     request.UsageProlongsLifetime,
                     request.NotAbandonedUntilNewerBatchUsed,
                     request.UniqueBatchNumbers);
-                
+
+                saved.CommentText = request.Comment;
+
+                m_entityCommentsFacade.AddComment(InventoryUserRights.MaterialCommentsEdit, saved);
+
                 m_cache.Remove(GetMappablesCacheKey());
 
                 tx.Commit();
@@ -284,7 +293,7 @@ namespace Elsa.Apps.Inventory
 
             return result;
         }
-
+               
         public void DeleteMaterial(int id)
         {
             EnsureUserRight(InventoryUserRights.MaterialEdits);

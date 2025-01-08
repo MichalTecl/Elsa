@@ -206,6 +206,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Integration.ChatGpt", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BwApiClient", "BwApiClient\BwApiClient.csproj", "{B0E5393A-7922-41C9-836D-1B9637692FB5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Common.EntityComments", "Elsa.Common.EntityComments\Elsa.Common.EntityComments.csproj", "{C9136906-286D-4C0C-896E-D3A06E41C947}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -516,6 +518,10 @@ Global
 		{B0E5393A-7922-41C9-836D-1B9637692FB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0E5393A-7922-41C9-836D-1B9637692FB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0E5393A-7922-41C9-836D-1B9637692FB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9136906-286D-4C0C-896E-D3A06E41C947}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9136906-286D-4C0C-896E-D3A06E41C947}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9136906-286D-4C0C-896E-D3A06E41C947}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9136906-286D-4C0C-896E-D3A06E41C947}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -611,6 +617,7 @@ Global
 		{A9253CDD-68A4-4400-81F4-E7E3431F0A18} = {A188EE1B-B81C-4698-B872-CB072E73525D}
 		{9737FAE0-50C6-4588-8C7B-DB881E349585} = {A9253CDD-68A4-4400-81F4-E7E3431F0A18}
 		{B0E5393A-7922-41C9-836D-1B9637692FB5} = {9A3EA0C7-2DD3-4A32-ADED-527F45DC0526}
+		{C9136906-286D-4C0C-896E-D3A06E41C947} = {FC61D761-EDCC-4BEF-9B3B-06957ACCFAE6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}

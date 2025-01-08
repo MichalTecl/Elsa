@@ -388,5 +388,13 @@ namespace Elsa.Common.Utils
                 return Convert.ToBase64String(hash);
             }
         }
+
+        public static int? TryParseInt(string input, Func<string, int?> handleFailedParse = null)
+        {
+            if (!string.IsNullOrWhiteSpace(input) && int.TryParse(input, out var result))
+                return result;
+
+            return handleFailedParse == null ? null : handleFailedParse(input);
+        }
     }
 }

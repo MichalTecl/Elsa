@@ -15,7 +15,7 @@ using Elsa.Commerce.Core.Warehouse;
 using Elsa.Commerce.Core.Warehouse.BatchReporting;
 using Elsa.Commerce.Core.Warehouse.Impl;
 using Elsa.Commerce.Core.Warehouse.Thresholds;
-
+using Elsa.Common.Interfaces;
 using Robowire;
 
 namespace Elsa.Commerce.Core
@@ -62,6 +62,7 @@ namespace Elsa.Commerce.Core
             setup.For<EshopProductMappingsImpExpModule>().Use<EshopProductMappingsImpExpModule>();
             setup.For<MaterialReportingGroupsImpExpModule>().Use<MaterialReportingGroupsImpExpModule>();
             setup.For<AbandonedBatchRulesImpExp>().Use<AbandonedBatchRulesImpExp>();
+            setup.For<IUserNickProvider>().Import.FromFactory(sl => sl.Get<IUserRepository>());
         }
     }
 }

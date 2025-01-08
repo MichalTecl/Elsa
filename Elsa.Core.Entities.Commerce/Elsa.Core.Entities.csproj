@@ -82,6 +82,7 @@
     <Compile Include="Common\IBaseCalendar.cs" />
     <Compile Include="Common\ICurrency.cs" />
     <Compile Include="Common\ICurrencyConversion.cs" />
+    <Compile Include="Common\IEntityComment.cs" />
     <Compile Include="Common\IHasAuthor.cs" />
     <Compile Include="Common\IIntIdEntity.cs" />
     <Compile Include="Common\IPostalAddress.cs" />

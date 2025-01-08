@@ -23,6 +23,7 @@ using Elsa.Apps.ScheduledJobs;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration;
 using Elsa.Common;
+using Elsa.Common.EntityComments;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
@@ -123,6 +124,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(PublicFilesRegistry).Assembly);
                     s.ScanAssembly(typeof(OrderDataValidationJobRegistry).Assembly);
                     s.ScanAssembly(typeof(ChatGptRegistry).Assembly);
+                    s.ScanAssembly(typeof(EntityCommentsRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 

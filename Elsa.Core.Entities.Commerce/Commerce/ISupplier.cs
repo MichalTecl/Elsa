@@ -51,6 +51,8 @@ namespace Elsa.Core.Entities.Commerce.Commerce
         int CurrencyId { get; set; }
         ICurrency Currency { get; }
 
+        int? OrderFulfillDays { get; set; }
+
         DateTime? DisableDt { get; set; }
         int? DisableUserId { get; set; }
         IUser DisableUser { get; }

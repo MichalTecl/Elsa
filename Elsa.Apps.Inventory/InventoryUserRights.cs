@@ -26,5 +26,7 @@ namespace Elsa.Apps.Inventory
         public static readonly UserRight MaterialLevelsChangeThresholds = new UserRight(nameof(MaterialLevelsChangeThresholds), "Přehled zásob - nastavení min. množství", MaterialLevels);
         public static readonly UserRight ViewSuppliers = new UserRight(nameof(ViewSuppliers), "Přehled zásob - zobrazit dodavatele", MaterialLevels);
         public static readonly UserRight MaterialLevelsChangeOrderDt = new UserRight(nameof(MaterialLevelsChangeOrderDt), "Přehled zásob - vložení data objednání", MaterialLevels);
+        public static readonly UserRight MaterialCommentsView = new UserRight(nameof(MaterialCommentsView), "Komentáře k materiálům - čtení", Materials);
+        public static readonly UserRight MaterialCommentsEdit = new UserRight(nameof(MaterialCommentsEdit), "Komentáře k materiálům - úpravy", MaterialCommentsView);
     }
 }

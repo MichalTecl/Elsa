@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj" />
+    <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj" />
+    <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj" />
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj" />
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj" />
+    <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj" />
+  </ItemGroup>
+
+</Project>

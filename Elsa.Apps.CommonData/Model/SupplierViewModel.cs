@@ -23,6 +23,7 @@ namespace Elsa.Apps.CommonData.Model
             ContactEmail = src.ContactEmail;
             Note = src.Note;
             CurrencyName = src.Currency.Symbol;
+            OrderFulfillDays = src.OrderFulfillDays?.ToString() ?? string.Empty;
         }
 
         public int? Id { get; set; }
@@ -61,5 +62,8 @@ namespace Elsa.Apps.CommonData.Model
 
         [Display(Name ="Poznámky")]
         public string Note { get; set; }
+
+        [Display(Name = "Dny na objednávku")]
+        public string OrderFulfillDays { get; set; }
     }
 }

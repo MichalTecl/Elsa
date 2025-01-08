@@ -70,12 +70,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="sencha.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj">
       <Project>{895e4a3c-99d4-4e2e-872c-7479140d0cf5}</Project>
       <Name>Robowire.RoboApi</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="UI\AutoEditor\AutoEditor.css" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

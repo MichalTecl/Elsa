@@ -23,6 +23,7 @@ namespace Elsa.EditorBuilder.Internal
             s_templates[typeof(decimal)] = CreateInput("number", i => i.EditorProperties["step"] = "0.0001");
             s_templates[typeof(DateTime)] = CreateInput("date");
             s_templates[typeof(bool)] = CreateInput("checkbox", i => i.EditElementBoundProperty = "checked");
+            s_templates[typeof(int?)] = CreateInput("number", i => i.EditorProperties["step"] = "1");
         }
 
         public static FormField GetField(Type t)

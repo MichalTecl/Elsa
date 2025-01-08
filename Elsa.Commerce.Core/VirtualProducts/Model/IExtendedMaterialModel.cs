@@ -2,12 +2,14 @@
 using System.Text;
 
 using Elsa.Commerce.Core.Units;
+using Elsa.Common.EntityComments;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Robowire.RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {
-    public interface IExtendedMaterialModel 
+    public interface IExtendedMaterialModel : ISingleCommentEntity
     {
         int Id { get; }
 

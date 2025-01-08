@@ -44,7 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ISession.cs" />
+    <Compile Include="ISingleCommentEntity.cs" />
     <Compile Include="IStartupJob.cs" />
+    <Compile Include="IUserNickProvider.cs" />
     <Compile Include="IWebSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserRight.cs" />
