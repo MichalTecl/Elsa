@@ -5,6 +5,7 @@ using System.Linq;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
@@ -21,13 +22,15 @@ namespace Elsa.Commerce.Core.Repositories
         private readonly IDatabase m_database;
         private readonly IPurchaseOrderRepository m_orderRepository;
         private readonly ISession m_session;
+        private readonly ILog m_logger;
 
-        public KitProductRepository(IPerProjectDbCache cache, IDatabase database, IPurchaseOrderRepository orderRepository, ISession session)
+        public KitProductRepository(IPerProjectDbCache cache, IDatabase database, IPurchaseOrderRepository orderRepository, ISession session, ILog logger)
         {
             m_cache = cache;
             m_database = database;
             m_orderRepository = orderRepository;
             m_session = session;
+            m_logger = logger;
         }
 
         public IEnumerable<IKitDefinition> GetAllKitDefinitions()
@@ -149,11 +152,22 @@ namespace Elsa.Commerce.Core.Repositories
         {
             return m_cache.ReadThrough($"kitNoteParseResult_{orderId}", 
                 TimeSpan.FromMinutes(1),
-                () => m_database.Sql()
-                .Call("ParseKitNote")
-                .WithParam("@orderId", orderId)
-                .WithParam("@projectId", m_session.Project.Id)
-                .AutoMap<KitNoteParseResultModel>());
+                () =>
+                {
+                    try
+                    {
+                        return m_database.Sql()
+                            .Call("ParseKitNote")
+                            .WithParam("@orderId", orderId)
+                            .WithParam("@projectId", m_session.Project.Id)
+                            .AutoMap<KitNoteParseResultModel>();
+                    }
+                    catch(Exception e)
+                    {
+                        m_logger.Error($"Error parsing kit note for orderId={orderId}", e);
+                        return new List<KitNoteParseResultModel>(0);
+                    }
+                });
         }
 
         public IKitDefinition GetKitDefinition(int id)

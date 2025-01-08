@@ -4,12 +4,14 @@ using BwApiClient.Model.Inputs;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.Erp.Flox.BwApiConnection.Model;
 using System;
 using System.CodeDom.Compiler;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -22,6 +24,8 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
 {
     internal class GraphQlApiConnector 
     {
+        private static readonly ConcurrentDictionary<string, Mutex> _apiAccessMutexes = new ConcurrentDictionary<string, Mutex>();
+
         private readonly FloxClientConfig _config;
         private readonly ILog _log;
 
@@ -129,8 +133,23 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
             var rq = "?";
             var resp = "?";
             var url = _config.ApiUrl;
+
+            var mutexName = $"Global\\BwApiExclusive{_config.ApiUrl}:{StringUtil.GetHash(_config.ApiKey)}";
+
+            var mutex = _apiAccessMutexes.GetOrAdd(mutexName, k => new Mutex(false, mutexName));
+
+            bool lockTaken = false;
             try
             {
+                _log.Info($"Trying to acquire mutex '{mutexName}'");
+                lockTaken = mutex.WaitOne(2 * 60 * 1000, false); // 2 minutes
+                if (!lockTaken)
+                {
+                    _log.Error($"Failed to acquire mutex '{mutexName}'");
+                    throw new TimeoutException("Časový limit pro přístup k Byznysweb API vypršel, operaci nelze dokončit");
+                }
+                _log.Info($"Acquired mutex '{mutexName}'");
+
                 using (var http = new HttpClient())
                 {
                     T result;
@@ -162,6 +181,14 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
                 _log.Error($"Response:{resp}");
 
                 throw;
+            }
+            finally
+            {
+                if (lockTaken)
+                {                    
+                    mutex.ReleaseMutex();
+                    _log.Info($"Released mutex '{mutexName}'");
+                }
             }
         }
                

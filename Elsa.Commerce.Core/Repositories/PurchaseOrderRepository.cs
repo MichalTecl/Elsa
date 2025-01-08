@@ -43,6 +43,8 @@ namespace Elsa.Commerce.Core.Repositories
 
         public long ImportErpOrder(IErpOrderModel orderModel)
         {
+            m_log.Info($"Starting import of order {orderModel.OrderNumber}");
+
             long result;
             using (var trx = m_database.OpenTransaction())
             {
@@ -51,6 +53,7 @@ namespace Elsa.Commerce.Core.Repositories
                 var host = new OrderMapperHost(mapper, orderModel, this, m_database, m_currencyRepository, m_statusMappingRepository, m_productRepository);
                 if (!host.Map())
                 {
+                    m_log.Info($"Order {orderModel.OrderNumber} unchanged (orderId={host.Order.Id}) - done");
                     trx.Commit();
                     return host.Order.Id;
                 }
@@ -82,8 +85,13 @@ namespace Elsa.Commerce.Core.Repositories
 
                 if (host.Order.Id < 1)
                 {
+                    m_log.Info($"Order {orderModel.OrderNumber} will be INSERTed");
                     host.Order.InsertUserId = m_session.User.Id;
                     host.Order.InsertDt = DateTime.Now;
+                }
+                else
+                {
+                    m_log.Info($"Order {orderModel.OrderNumber} will be UPDATEd (orderId={host.Order.Id})");
                 }
 
                 host.Order.ProjectId = m_session.Project.Id;
@@ -92,8 +100,12 @@ namespace Elsa.Commerce.Core.Repositories
 
                 foreach (var item in host.Items)
                 {
+                    var isInsert = item.Id < 1;
+
                     item.PurchaseOrderId = host.Order.Id;
                     m_database.Save(item);
+
+                    m_log.Info($"OrderItem OrderId={host.Order?.Id} OrderNr={host.Order?.OrderNumber} ItemId={item.Id} {(isInsert ? "inserted" : "updated")}");
                 }
 
                 foreach(var priceElement in host.PriceElements) 
@@ -103,7 +115,9 @@ namespace Elsa.Commerce.Core.Repositories
                 }
 
                 foreach (var delId in host.OrderItemsToDelete)
-                {                    
+                {
+                    m_log.Info($"Existing orderItem OrderId={host.Order?.Id} OrderNr={host.Order?.OrderNumber} ItemId={delId} will be deleted");
+
                     var kitChildren = m_database.SelectFrom<IOrderItem>().Where(i => i.KitParentId == delId).Execute()
                         .ToList();
 
@@ -139,6 +153,8 @@ namespace Elsa.Commerce.Core.Repositories
                 }
 
                 result = host.Order.Id;
+
+                m_log.Info($"Import of order {orderModel.OrderNumber} (orderId={host.Order.Id}) completed, commiting the transaction");
 
                 trx.Commit();
             }
