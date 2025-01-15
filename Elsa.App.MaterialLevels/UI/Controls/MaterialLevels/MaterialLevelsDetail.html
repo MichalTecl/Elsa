@@ -58,8 +58,11 @@
                     </div>
                     <div class="cell10 matlevSupplierCell" data-bind="class!.hidden:displaySupplier" event-bind="click:onSupplierClick(SupplierName, SupplierEmail, SupplierPhone)"><a data-bind="text:SupplierName"></a></div>
 
-                    <div class="cell10 stackLeft orderDtCell" data-bind="class!.hidden:displaySupplier">
+                    <div class="cell10 stackLeft orderDtCell" data-bind="class!.hidden:displaySupplier;title:DelayedOrderMessage">
                         <div class="stackLeft">
+
+                            <i class="fas fa-clock icoOrdTimeouted" data-bind="class!.hidden:DelayedOrder;title:DelayedOrderMessage"></i>
+
                             <div class="orderDtView" data-bind="text:OrderDt; class.hidden:enteringOrderDt; class.orderDtDelayed:DelayedOrder"></div>
 
                             <div class="restricted-MaterialLevelsChangeOrderDt">

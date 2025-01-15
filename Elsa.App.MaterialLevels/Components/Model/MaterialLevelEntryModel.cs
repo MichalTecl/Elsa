@@ -41,6 +41,7 @@ namespace Elsa.App.MaterialLevels.Components.Model
         public string OrderDt { get; set; }
         public string OrderUser { get; set; }
         public bool DelayedOrder { get; internal set; }
+        public string DelayedOrderMessage { get; internal set; }
         internal DateTime? RawOrderDt { get; set; }
     }
 

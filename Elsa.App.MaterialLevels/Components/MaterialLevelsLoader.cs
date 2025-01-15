@@ -51,7 +51,7 @@ namespace Elsa.App.MaterialLevels.Components
             // user repo cache fill :(
             m_userRepository.GetAllUsers();
 
-            var supplierOrderLimits = m_supplierRepository.GetSuppliers().GroupBy(s => s.Name).ToDictionary(s => s.Key, s => s.Min(t => t.OrderFulfillDays ?? 9999));
+            var supplierOrderLimits = m_supplierRepository.GetSuppliers().GroupBy(s => s.Name).ToDictionary(s => s.Key, s => new { Lim = s.Min(t => t.OrderFulfillDays ?? 9999), Name = s.Min(x => x.Name) });
 
             m_database.Sql().Call("GetMaterialLevelsReport").WithParam("@inventoryId", inventoryId).WithParam("@projectId", m_session.Project.Id)
                 .ReadRows<int,string, string, int, decimal, string, string, string, DateTime?, int?>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone, orderDt, orderUserId)=>
@@ -135,9 +135,12 @@ namespace Elsa.App.MaterialLevels.Components
                     // we are under threshold, but another batch is ordered
                     r.WarningLevel = WarningLevel.Low;
 
+                    DateTime orderDelaylimit;
                     // but maybe the order is delayed?
-                    if (supplierOrderLimits.TryGetValue(r.SupplierName, out var orderLimitDays) && (r.RawOrderDt.Value.AddDays(orderLimitDays) < DateTime.Now))
-                    {
+                    if (supplierOrderLimits.TryGetValue(r.SupplierName, out var supplierInfo) 
+                    && ((orderDelaylimit = r.RawOrderDt.Value.AddDays(supplierInfo.Lim)) < DateTime.Now))
+                    {                        
+                        r.DelayedOrderMessage = $"Naskladnění bylo očekáváno do {StringUtil.FormatDate(orderDelaylimit)}. (Limit je {supplierInfo.Lim} dnů pro dodavatele {supplierInfo.Name})";
                         r.WarningLevel = WarningLevel.High;
                         r.DelayedOrder = true;
                     } 

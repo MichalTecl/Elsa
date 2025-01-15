@@ -151,3 +151,7 @@ div.orderDtView {
     font-weight:bold;
 }
 
+.icoOrdTimeouted {
+    color: #FF0000;
+    margin-right: 5px;
+}
