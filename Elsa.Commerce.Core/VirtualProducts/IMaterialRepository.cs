@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common.Caching;
+using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Inventory;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
@@ -37,6 +38,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
         void SaveMaterialReportingGroupAssignments(IEnumerable<MaterialReportingGroupAssignmentModel> models, out int groupsCreated, out int materialsAssigned);
 
         void SaveOrderDt(int materialId, DateTime? orderDt);
+
+        void SaveMaterialComment(int materialId, string comment, UserRight writeCommentUserRight);
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }

@@ -155,3 +155,20 @@ div.orderDtView {
     color: #FF0000;
     margin-right: 5px;
 }
+
+.materialNoteCont .matNoteIco {
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+.matLevelsMaterialCell .matNoteIcon {
+    opacity: 0.5;
+}
+
+.matLevelsMaterialCell:hover .matNoteIcon {
+    display: none;
+}
+
+.matLevelsMaterialCell:hover .matNoteEditButton {
+    display: block !important;
+}

@@ -10,6 +10,7 @@ using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse.Thresholds;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.EntityComments;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Robowire.RobOrm.Core;
@@ -28,9 +29,10 @@ namespace Elsa.App.MaterialLevels.Components
         private readonly IInventoryWatchRepository m_inventoryWatchRepository;
         private readonly IUserRepository m_userRepository;
         private readonly ISupplierRepository m_supplierRepository;
+        private readonly IEntityCommentsFacade m_entityComments;
 
         public MaterialLevelsLoader(ISession session, IDatabase database, AmountProcessor amountProcessor,
-            IUnitRepository unitRepository, IMaterialThresholdRepository thresholdRepository, ICache cache, IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IUserRepository userRepository, ISupplierRepository supplierRepository)
+            IUnitRepository unitRepository, IMaterialThresholdRepository thresholdRepository, ICache cache, IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IUserRepository userRepository, ISupplierRepository supplierRepository, IEntityCommentsFacade entityComments)
         {
             m_session = session;
             m_database = database;
@@ -42,6 +44,7 @@ namespace Elsa.App.MaterialLevels.Components
             m_inventoryWatchRepository = inventoryWatchRepository;
             m_userRepository = userRepository;
             m_supplierRepository = supplierRepository;
+            m_entityComments = entityComments;
         }
 
         public IEnumerable<MaterialLevelEntryModel> Load(int inventoryId)
@@ -104,6 +107,8 @@ namespace Elsa.App.MaterialLevels.Components
 
             foreach (var r in result)
             {
+                m_entityComments.TryLoadComment(InventoryUserRights.MaterialCommentsView, r);
+
                 var threshold = m_thresholdRepository.GetThreshold(r.MaterialId);
                 if (threshold != null)
                 {

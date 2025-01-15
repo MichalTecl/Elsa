@@ -32,17 +32,26 @@
                 </div>
             </div>
             <div class="gridRow gridHead">
-                <div class="cell20">Materiál</div>
+                <div class="cell30">Materiál</div>
                 <div class="cell5">Dostupné</div>
                 <div class="cell5">Minimum</div>
                 <div class="cell10" data-bind="class!.hidden:showSupplier">Dodavatel</div>
-                <div class="cell10" data-bind="class!.hidden:showSupplier">Objednáno</div>
+                <div class="cell5" data-bind="class!.hidden:showSupplier">Objednáno</div>
                 <div class="cell40">Šarže</div>
             </div>
             <div data-bind="itemsSource:report" data-key="MaterialId">
                 <div class="lt-template gridRow" data-bind="class:warnLevelClass;class.hidden:hidden">
-                    <div class="cell20">
-                        <a target="_blank" data-bind="text:MaterialName;href:materialLink"></a>
+                    <div class="cell30 stackLeft matLevelsMaterialCell">
+                        <div class="stackLeft">
+                            <a target="_blank" data-bind="text:MaterialName;href:materialLink"></a>
+                            <div class="materialNoteCont stackLeft">
+                                <i class="far fa-sticky-note matNoteIco matNoteIcon" data-bind="class!.hidden:hasComment"></i>
+                                <span class="restricted-MaterialCommentsEdit">
+                                    <i class="fas fa-sticky-note matNoteIco matNoteEditButton faButton hidden" event-bind="click:editMaterialNote(VM)"></i>
+                                </span>
+                                <div class="materialNote" data-bind="text:CommentText"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="cell5" data-bind="text:TotalFormatted"></div>
                     <div class="cell5">
@@ -58,7 +67,7 @@
                     </div>
                     <div class="cell10 matlevSupplierCell" data-bind="class!.hidden:displaySupplier" event-bind="click:onSupplierClick(SupplierName, SupplierEmail, SupplierPhone)"><a data-bind="text:SupplierName"></a></div>
 
-                    <div class="cell10 stackLeft orderDtCell" data-bind="class!.hidden:displaySupplier;title:DelayedOrderMessage">
+                    <div class="cell5 stackLeft orderDtCell" data-bind="class!.hidden:displaySupplier;title:DelayedOrderMessage">
                         <div class="stackLeft">
 
                             <i class="fas fa-clock icoOrdTimeouted" data-bind="class!.hidden:DelayedOrder;title:DelayedOrderMessage"></i>
@@ -162,6 +171,19 @@
         this.onOrderDtTodayClick = function (materialId) {
             var ftoday = new Date().toISOString().split("T")[0];
             self.onOrderDtConfirm(materialId, ftoday);
+        };
+
+        this.editMaterialNote = function (model) {
+
+            var currentComment = model.CommentText || "";
+
+            var newComment = prompt("Poznámka k " + model.MaterialName, currentComment);
+
+            if (newComment === null || newComment === currentComment) {                
+                return;
+            }
+
+            app.MaterialLevels.vm.setMaterialComment(model.MaterialId, newComment);
         };
 
         app.MaterialLevels.vm.onInventorySelected(null);

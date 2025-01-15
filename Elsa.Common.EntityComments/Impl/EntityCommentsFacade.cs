@@ -47,7 +47,7 @@ namespace Elsa.Common.EntityComments.Impl
 
         private EntityComment LoadCurrentComment(ISingleCommentEntity data)
         {
-            var existing = _repository.GetComments(data.EntityTypeName, new int[data.RecordId]);
+            var existing = _repository.GetComments(data.EntityTypeName, new int[] { data.RecordId });
             if (existing.TryGetValue(data.RecordId, out var invalidComments))
                 return invalidComments.OrderByDescending(c => c.Id).FirstOrDefault();
 

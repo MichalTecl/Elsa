@@ -24,7 +24,7 @@ namespace Elsa.App.MaterialLevels.Controllers
         private readonly IInventoryWatchRepository m_inventoryWatchRepository;
         private readonly IMaterialThresholdRepository m_materialThresholdRepository;
         private readonly IUnitRepository m_unitRepository;
-        
+                
         public MaterialAmountReportController(IWebSession webSession, ILog log, IMaterialLevelsLoader levelsLoader,
             IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IMaterialThresholdRepository materialThresholdRepository, IUnitRepository unitRepository) : base(webSession, log)
         {
@@ -101,6 +101,11 @@ namespace Elsa.App.MaterialLevels.Controllers
             m_materialThresholdRepository.SaveThreshold(materialId,
                 thresholdEntry.Amount,
                 thresholdUnit.Id);
+        }
+
+        public void SetComment(int materialId, string text)
+        {
+            m_materialRepository.SaveMaterialComment(materialId, text, InventoryUserRights.MaterialCommentsEdit);
         }
 
         public string SetOrderDt(int materialId, string value)

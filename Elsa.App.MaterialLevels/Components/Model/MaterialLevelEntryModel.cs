@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Elsa.Common;
+using Elsa.Common.Interfaces;
 using Newtonsoft.Json;
 
 namespace Elsa.App.MaterialLevels.Components.Model
 {
-    public class MaterialLevelEntryModel
+    public class MaterialLevelEntryModel : ISingleCommentEntity
     {
         public const string OrderDtViewFormat = "dd.MM.";
 
@@ -42,7 +43,18 @@ namespace Elsa.App.MaterialLevels.Components.Model
         public string OrderUser { get; set; }
         public bool DelayedOrder { get; internal set; }
         public string DelayedOrderMessage { get; internal set; }
+                
         internal DateTime? RawOrderDt { get; set; }
+
+        #region ISingleCommentEntity
+        public int RecordId => MaterialId;
+        public string EntityTypeName => "Material";
+        public string CommentText { get; set; }
+        public DateTime? CommentDt { get; set; }
+        public string CommentAuthorNick { get; set; }
+
+        #endregion
+
     }
 
     public enum WarningLevel

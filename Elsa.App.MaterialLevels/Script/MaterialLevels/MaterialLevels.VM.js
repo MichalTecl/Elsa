@@ -58,6 +58,7 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
             model.hasThreshold = model.ThresholdFormatted !== null;
             model.displaySupplier = self.showSupplier;
             model.hasOrderDt = !!model.OrderDt;
+            model.hasComment = !!model.CommentText;
 
             for (var j = 0; j < model.Batches.length; j++) {
                 var b = model.Batches[j];
@@ -277,6 +278,14 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
             .post(function (actualized) {
                 self.refresh();
             })
+    };
+
+    self.setMaterialComment = function (materialId, newComment) {
+        lt.api("/MaterialAmountReport/setComment")
+            .query({ "materialId": materialId, "text": newComment })
+            .post(function () {
+                self.refresh();
+            });
     };
 
     self.setFilter = function(value) {

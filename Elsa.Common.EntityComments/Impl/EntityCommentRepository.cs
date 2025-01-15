@@ -51,10 +51,9 @@ namespace Elsa.Common.EntityComments.Impl
                 return result;
             });
 
-            var filter = new HashSet<int>(ids ??  Enumerable.Empty<int>());
+            var filter = new HashSet<int>(ids?.Where(id => id > 0) ??  Enumerable.Empty<int>());
             if (filter.Count == 0)
                 return all;
-
             
             var filtered = new Dictionary<int, List<EntityComment>>(filter.Count);
 
@@ -80,6 +79,7 @@ namespace Elsa.Common.EntityComments.Impl
                 if (!string.IsNullOrEmpty(text))
                 {
                     var record = _db.New<IEntityComment>();
+                    record.RecordId = recordId;
                     record.ProjectId = _session.Project.Id;
                     record.AuthorId = _session.User.Id;
                     record.EntityType = entityType;

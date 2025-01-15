@@ -461,6 +461,11 @@ input.readonly {
     width: 400px;
 }
 
+.cell30 {
+    min-width: 500px;
+    width: 500px;
+}
+
 .cell40 {
     min-width: 600px;
     width: 600px;

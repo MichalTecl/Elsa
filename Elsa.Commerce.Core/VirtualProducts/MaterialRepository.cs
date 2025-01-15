@@ -6,7 +6,9 @@ using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Common;
 using Elsa.Common.Caching;
+using Elsa.Common.EntityComments;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
@@ -20,16 +22,18 @@ namespace Elsa.Commerce.Core.VirtualProducts
         private readonly ISession m_session;
         private readonly ICache m_cache;
         private readonly IUnitConversionHelper m_conversionHelper;
+        private readonly IEntityCommentsFacade m_entityComments;
         
         private string MaterialsCacheKey => $"AllMaterialsBy_ProjectId={m_session.Project.Id}";
         private string VirtualProductCompositionsCacheKey => $"AllVPCompositionsBy_ProjectID={m_session.Project.Id}";
-        
-        public MaterialRepository(IDatabase database, ISession session, ICache cache, IUnitConversionHelper conversionHelper)
+
+        public MaterialRepository(IDatabase database, ISession session, ICache cache, IUnitConversionHelper conversionHelper, IEntityCommentsFacade entityComments)
         {
             m_database = database;
             m_session = session;
             m_cache = cache;
             m_conversionHelper = conversionHelper;
+            m_entityComments = entityComments;
         }
 
         public IExtendedMaterialModel GetMaterialById(int materialId)
@@ -390,7 +394,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IMaterialRepositoryWithPostponedCache GetWithPostponedCache()
         {
-            return new MaterialRepositoryWithPostponedCache(m_database, m_session, new CacheWithPostponedRemoval(m_cache), m_conversionHelper);
+            return new MaterialRepositoryWithPostponedCache(m_database, m_session, new CacheWithPostponedRemoval(m_cache), m_conversionHelper, m_entityComments);
         }
 
         public List<MaterialReportingGroupAssignmentModel> GetMaterialReportingGroupAssignments()
@@ -483,12 +487,26 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 .NonQuery();
         }
 
+        public void SaveMaterialComment(int materialId, string comment, UserRight writeCommentUserRight)
+        {
+            var mat = GetMaterialById(materialId).Ensure();
+
+            if (mat.CommentText == comment)
+                return;
+
+            mat.CommentText = comment;
+
+            m_entityComments.AddComment(writeCommentUserRight, mat);
+
+            CleanCache();
+        }
+
         private sealed class MaterialRepositoryWithPostponedCache : MaterialRepository, IMaterialRepositoryWithPostponedCache
         {
             private readonly CacheWithPostponedRemoval m_ppCache;
 
-            public MaterialRepositoryWithPostponedCache(IDatabase database, ISession session, CacheWithPostponedRemoval cache, IUnitConversionHelper conversionHelper)
-                : base(database, session, cache, conversionHelper)
+            public MaterialRepositoryWithPostponedCache(IDatabase database, ISession session, CacheWithPostponedRemoval cache, IUnitConversionHelper conversionHelper, IEntityCommentsFacade comments)
+                : base(database, session, cache, conversionHelper, comments)
             {
                 m_ppCache = cache;
             }
