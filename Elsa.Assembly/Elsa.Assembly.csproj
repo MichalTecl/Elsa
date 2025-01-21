@@ -139,6 +139,10 @@
       <Project>{b09c721a-b22e-47a6-bc6b-9cd9155e174a}</Project>
       <Name>Elsa.Apps.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Apps.EshopMapping\Elsa.Apps.EshopMapping.csproj">
+      <Project>{0914f404-3bd4-4e57-9f5a-3aa79899be9a}</Project>
+      <Name>Elsa.Apps.EshopMapping</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Apps.Inventory\Elsa.Apps.Inventory.csproj">
       <Project>{3f09c69a-33b7-4a85-91c6-516bb3e08771}</Project>
       <Name>Elsa.Apps.Inventory</Name>

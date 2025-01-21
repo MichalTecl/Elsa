@@ -488,14 +488,25 @@ namespace Elsa.Integration.Erp.Flox
 
         public string LoadOrderInternalNote(string orderNumber)
         {
-            /*
-                         
-            Waiting for  Byznysweb fix
+            try
+            {
+                return LoadOrder(orderNumber)?.InternalNote;
+            }
+            catch (Exception ex) 
+            {
+                _log.Error("Failed attempt to load order internal note", ex);
+                return LoadOrderWithoutApi(orderNumber)?.InternalNote;
+            }
+        }
 
-            return LoadOrder(orderNumber)?.InternalNote;
-            */
+        public List<string> GetProductNames()
+        {
+            if (!_config.PreferApi)
+            {
+                throw new NotSupportedException("Product list is only supported when using API");
+            }
 
-            return LoadOrderWithoutApi(orderNumber)?.InternalNote;
+            return _apiConnector.LoadProductNames().ToList();            
         }
     }
 }

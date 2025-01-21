@@ -33,7 +33,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         List<ErpProductMapping> ExportErpProductMappings();
 
-        int ImportErpProductMappings(List<ErpProductMapping> mappings);
+        int ImportErpProductMappings(List<ErpProductMapping> mappings, bool keepOldLinks);
 
         List<KitProductXlsModel> ExportKits();
         int ImportKits(List<KitProductXlsModel> mappings);

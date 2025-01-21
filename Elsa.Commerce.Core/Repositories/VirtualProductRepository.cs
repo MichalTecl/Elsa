@@ -309,7 +309,7 @@ namespace Elsa.Commerce.Core.Repositories
                 .MapRows<ErpProductMapping>(row => new ErpProductMapping { EshopItem = row.GetString(0), Material = row.GetString(1) }).ToList();
         }
 
-        public int ImportErpProductMappings(List<ErpProductMapping> mappings)
+        public int ImportErpProductMappings(List<ErpProductMapping> mappings, bool keepOldLinks)
         {            
             var current = ExportErpProductMappings();
 
@@ -341,6 +341,7 @@ namespace Elsa.Commerce.Core.Repositories
                             .WithParam("@materialName", imp.Material)
                             .WithParam("@tagName", tag)
                             .WithParam("@projectId", m_session.Project.Id)
+                            .WithParam("@keepOldLinks", keepOldLinks ? 1 : 0)
                             .Scalar<string>();
 
                         if (!string.IsNullOrWhiteSpace(res))

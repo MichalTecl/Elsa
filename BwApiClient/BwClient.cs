@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace BwApiClient
 {
@@ -141,6 +142,15 @@ namespace BwApiClient
         {
             return await Execute(_orderShallowQuery.WithVariable("orderNr", orderNumber));
         }
+
+        private static readonly IQuery<PaginatedList<Product>> _productListQuery = _builder.Build(q => q.GetProductList("cz", QueryVariable.Pass<ProductParams>("$params"), null)
+        .With(pl => pl.data.With(p => p.warehouse_items.With(whi => whi.price, whi => whi.attributes.With(atr => atr.values)))));
+
+        public async Task<PaginatedList<Product>> GetProducts(int? cursor)
+        {
+            return await Execute(_productListQuery.WithVariable("$params", new ProductParams { cursor = cursor }));
+        }
+
 
         private async Task<T> Execute<T>(IQuery<T> query)
         {

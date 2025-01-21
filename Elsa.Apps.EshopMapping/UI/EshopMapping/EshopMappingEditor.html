@@ -1,0 +1,99 @@
+<div id="eshopMappingEditorUi">
+    <div id="eshopMappingEditorHead">
+        E-Shop mapping editor
+        <div class="wikilink">
+            <a href="https://github.com/MichalTecl/Elsa/wiki/Integrace-s-ERP#mapov%C3%A1n%C3%AD-produkt%C5%AF-e-shop%C5%AF-na-materi%C3%A1ly-v-else" target="_blank"></a>
+        </div>
+    </div>
+    <div id="maplist" data-bind="itemsSource:mappings" data-key="itemId">
+        <div class="lt-template emapItemCont">
+            <div class="emapCollapsedItemCont" data-bind="class.hidden:expanded" event-bind="click:onExpandClick(itemId)">
+                <div class="stackLeft">
+                    <i class="fas fa-chevron-right faButton emapExpandBut" data-bind="class!.hidden:hasMaterial" event-bind="click:onExpandClick(itemId)"></i>
+                    <i class="far fa-times-circle emapMappingMissingIcon" data-bind="class.hidden:hasMaterial"></i>
+                    <div data-bind="text:ElsaMaterialName" class="emapElsaMaterialName"></div>
+                    <i class="fas fa-exchange-alt emapMapLinkSymbol"></i>
+                    <i class="far fa-times-circle emapMappingMissingIcon" data-bind="class.hidden:hasShopItem"></i>
+                    <div data-bind="text:firstShopItem" class="emapFirstShopItemLabel emapShopItem"></div>
+                    <div class="emapAdditionalItemsTextLabel" data-bind="class!.hidden:hasAdditionalShopItems; text:additionalShopItemsText"></div>
+                </div>
+            </div>
+
+            <div class="emapExpandedItemCont" data-bind="class!.hidden:expanded">
+                <div class="emapElsaMaterialCont stackLeft">
+                    <i class="fas fa-chevron-down faButton emapExpandBut" event-bind="click:onCollapseClick(itemId)"></i>
+                    <div data-bind="text:ElsaMaterialName" class="emapElsaMaterialName"></div>
+                </div>            
+                <div class="emapMappedItemsCont">
+                    <div data-bind="itemsSource:Products" data-key="ProductName">
+                        <div class="lt-template emapMappedItem stackLeft">
+                            <i class="fas fa-unlink faButton" event-bind="click:onUnmapClick(VM)"></i>
+                            <div class="emapMappedItemName" data-bind="text:ProductName"></div>
+                            <div data-bind="itemsSource:attributes" data-key="text" class="stackLeft emapItemAttributes">
+                                <div class="lt-template emapItemAttribute" data-bind="text:text"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="emapAddMappedItemCont stackLeft">
+                        <i class="fas fa-plus faButton" event-bind="click:onShowAddItemClick(VM, $addItemForm)" data-bind="class.hidden:addItemFormShown"></i>
+                        <i class="fas fa-times faButton" event-bind="click:onHideAddItemClick(VM, $emapProductPicker, $butSaveMap)" data-bind="class!.hidden:addItemFormShown"></i>
+                        <div class="stackLeft" data-bind="class!.hidden:addItemFormShown">
+                            <div class="autocomplete" lt-name="addItemForm">
+                                <input lt-name="emapProductPicker" event-bind="change:onProductPickerChange(this, $butSaveMap)" />
+                            </div>
+                            <button class="butSubmit" style="display:none" lt-name="butSaveMap" event-bind="click:setProductMapping(this, VM, $emapProductPicker)"></button>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/UI/EshopMapping/EshopMappingEditor.VM.js"></script>
+<script>
+    lt.element("eshopMappingEditorUi").withModel("app.EshopMapping.vm").attach(function () {
+
+        const self = this;
+                
+        this.onUnmapClick = function (item) { app.EshopMapping.vm.unmapItem(item.connectedMaterial, item.ProductName); }
+
+        this.onExpandClick = function (itemId) { app.EshopMapping.vm.expandItem(itemId); }
+        this.onCollapseClick = function (itemId) { self.onExpandClick(null); }
+
+        this.onShowAddItemClick = function (record, container) {
+            if (!container.autosuggestSetup) {
+
+                app.ui.autosuggest(container, app.EshopMapping.vm.getEshopProducts);
+                container.autosuggestSetup = true;
+            }
+            record.addItemFormShown = true;
+            lt.notify();
+        };
+
+        this.onHideAddItemClick = function (record, input, button) {
+            record.addItemFormShown = false;
+            lt.notify();
+
+            self.onProductPickerChange(input, button);
+        };
+
+        this.setProductMapping = function (button, record, input) {
+            app.EshopMapping.vm.mapItem(record.ElsaMaterialName, input.value, () => {
+                input.value = "";
+                self.onProductPickerChange(input, button);
+                record.addItemFormShown = false;
+            })
+        };
+
+        this.onProductPickerChange = function (input, saveButton) {
+            if (app.EshopMapping.vm.getProductNameExists(input.value)) {
+                saveButton.style.display = 'block';
+            } else {
+                saveButton.style.display = 'none';
+            }
+        };
+    });
+</script>
+<link href="/UI/EshopMapping/EshopMappingEditor.css" rel="stylesheet" />

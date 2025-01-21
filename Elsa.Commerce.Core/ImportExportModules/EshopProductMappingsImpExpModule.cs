@@ -31,7 +31,7 @@ namespace Elsa.Commerce.Core.ImportExportModules
 
         protected override string ImportDataInTransaction(List<ErpProductMapping> data, IDatabase db, ITransaction tx)
         {
-            var count = _vpRepo.ImportErpProductMappings(data);
+            var count = _vpRepo.ImportErpProductMappings(data, false);
 
             return $"Hotovo. Bylo uloženo {count} změn.";
         }

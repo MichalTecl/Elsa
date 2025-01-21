@@ -39,7 +39,7 @@ namespace BwApiClient.Model.Data
         /// <summary>
         /// Weight.
         /// </summary>
-        public string weight { get; set; }
+        public Weight weight { get; set; }
 
         /// <summary>
         /// Warehouse status of this variant. May be null if the status is determined by the main product's status.

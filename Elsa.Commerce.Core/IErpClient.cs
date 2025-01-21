@@ -33,5 +33,7 @@ namespace Elsa.Commerce.Core
 
         string GetPackingReferenceNumber(IPurchaseOrder po);
         string LoadOrderInternalNote(string orderNumber);
+
+        List<string> GetProductNames();
     }
 }

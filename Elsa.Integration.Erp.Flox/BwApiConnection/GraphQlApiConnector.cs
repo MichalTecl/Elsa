@@ -125,6 +125,52 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
             return order?.internal_note;
         }
 
+        internal IEnumerable<string> LoadProductNames()
+        {
+            int? cursor = null;
+
+            do
+            {
+                _log.Info($"Loading product list page, cursor={cursor}");
+                var productlist = CallApi(c => c.GetProducts(cursor));
+                _log.Info($"Received {productlist.data.Count} record(s); new cursor={productlist.pageInfo.nextCursor}");
+
+                cursor = productlist.pageInfo.nextCursor;
+              
+                foreach(var p in productlist.data)
+                {
+                    _log.Info($"Processing {p.link}:");
+                    if ((p.warehouse_items?.Count ?? 0) <= 1)
+                    {
+                        _log.Info($"No WH items - returning title=\"{p.title}\"");
+                        yield return p.title;
+                        continue;
+                    }
+
+                    foreach (var whi in p.warehouse_items)
+                    {
+                        var attrs = whi.attributes;
+                        if (attrs?.Count != 1)
+                        {
+                            _log.Error($"Unexpected count of attributes ({attrs?.Count})");
+                            continue;
+                        }
+
+                        var vals = attrs[0]?.values?.Select(v => v.value)?.ToList();
+
+                        if (vals?.Count != 1)
+                        {
+                            _log.Error($"Unexpected count of values {attrs[0]?.values?.Count}");
+                            continue;
+                        }
+
+                        yield return($"{p.title} ({vals[0]})");
+                    }
+                }
+
+            } while (cursor != null);
+        }
+
         private T CallApi<T>(Func<BwClient, Task<T>> op)
         {
             if (!_config.PreferApi)

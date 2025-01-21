@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MTecl.GraphQlClient;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -38,16 +39,18 @@ namespace BwApiClient.Model.Data
         /// Main product image.
         /// </summary>
         public string image { get; set; }
-               
+
 
         /// <summary>
         /// Short description (plain text).
         /// </summary>
+        [Gql("short")]
         public string shortDescription { get; set; }
 
         /// <summary>
         /// Long description (HTML format allowed).
         /// </summary>
+        [Gql("long")]
         public string longDescription { get; set; }
 
         /// <summary>

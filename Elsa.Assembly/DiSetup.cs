@@ -13,6 +13,7 @@ using Elsa.App.PublicFiles;
 using Elsa.App.SaleEvents;
 using Elsa.App.Shipment;
 using Elsa.Apps.CommonData;
+using Elsa.Apps.EshopMapping;
 using Elsa.Apps.Inventory;
 using Elsa.Apps.InvoiceForms;
 using Elsa.Apps.Invoices;
@@ -125,6 +126,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(OrderDataValidationJobRegistry).Assembly);
                     s.ScanAssembly(typeof(ChatGptRegistry).Assembly);
                     s.ScanAssembly(typeof(EntityCommentsRegistry).Assembly);
+                    s.ScanAssembly(typeof(EshopMappingRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 
