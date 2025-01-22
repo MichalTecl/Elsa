@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-
+﻿using System;
+using System.Collections.Generic;
+using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Robowire.RobOrm.Core;
@@ -51,5 +52,11 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         bool? NotAbandonedUntilNewerBatchUsed { get; set; }
 
         bool? UniqueBatchNumbers { get; set; }
+
+        DateTime? HideDt { get; set; }
+        int? HideUserId { get; set; }
+        IUser HideUser { get; }
+
+        int? OrderFulfillDays { get; set; }
     }
 }

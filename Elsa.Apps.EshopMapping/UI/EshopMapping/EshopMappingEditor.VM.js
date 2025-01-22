@@ -13,7 +13,37 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
         let textFilter = null;
         let showOnlyIncompletes = false;
 
+        let currentPickedElsaMaterial = null;
+        let currentPickedEshopProduct = null;
+
         self.mappings = [];
+        self.isPuzzleActive = false;
+        self.currentPuzzleValue = null;
+
+        var updatePuzzleState = () => {
+
+            self.isPuzzleActive = !!currentPickedElsaMaterial || !!currentPickedEshopProduct;
+            self.currentPuzzleValue = currentPickedElsaMaterial || currentPickedEshopProduct;
+
+            const pst = (m) => {
+
+                // Initially the puzzle is shown only for items where one side is missing
+                if (!currentPickedElsaMaterial && !currentPickedEshopProduct && m.hasMaterial && m.hasShopItem)
+                    return false;
+                                    
+                if (m.hasMaterial && !!currentPickedElsaMaterial)
+                    return false;
+
+                if (m.hasShopItem && !!currentPickedEshopProduct)
+                    return false;
+
+                return true;
+            };
+            
+            self.mappings.forEach(m => {
+                m.showPuzzle = pst(m);
+            });
+        };
 
         var showMappings = () => {
 
@@ -32,6 +62,8 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                 return true;
             });
 
+            updatePuzzleState();
+            
             lt.notify();
         };
 
@@ -71,6 +103,10 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
             return allEshopProducts.indexOf(name) > -1;
         };
 
+        self.hideMaterial = function (name) {
+            lt.api("/eshopMapping/hideMaterial").query({ "elsaMaterialName": name }).get(receiveMappings);
+        };
+
         self.getAllSearchEntries = function (query, callback) {
             callback(allSearchEntries);
         };
@@ -87,6 +123,34 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
             lt.notify();
 
             load(true);
+        };
+
+        self.onPuzzleActivated = function (record) {
+
+            currentPickedElsaMaterial = currentPickedElsaMaterial || record.ElsaMaterialName;
+            currentPickedEshopProduct = currentPickedEshopProduct || record.firstShopItem;
+            
+            if (!!currentPickedElsaMaterial && !!currentPickedEshopProduct) {
+
+                self.mapItem(currentPickedElsaMaterial, currentPickedEshopProduct, () => {
+                    currentPickedEshopProduct = null;
+                    currentPickedElsaMaterial = null;
+                    updatePuzzleState();
+                })
+
+                return;
+            }
+
+            updatePuzzleState();
+            lt.notify();
+        };
+
+        self.cancelPuzzle = () => {
+            currentPickedElsaMaterial = null;
+            currentPickedEshopProduct = null;
+
+            updatePuzzleState();
+            lt.notify();
         };
 
         const receiveMappings = (mappings) => {

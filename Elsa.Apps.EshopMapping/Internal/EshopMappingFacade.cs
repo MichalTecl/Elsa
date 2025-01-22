@@ -53,7 +53,7 @@ namespace Elsa.Apps.EshopMapping.Internal
                 () => _db.Sql().Call("GetProductOrderingInfo").WithParam("@erpId", erpId).AutoMap<ProductOrderingInfo>().ToDictionary(oi => oi.PlacedName, oi => oi));
 
             var productsInventory = _materialRepo.GetMaterialInventories().FirstOrDefault(i => i.CanBeConnectedToTag).Ensure();
-            var elsaProducts = _materialRepo.GetAllMaterials(productsInventory.Id).ToList();
+            var elsaProducts = _materialRepo.GetAllMaterials(productsInventory.Id, false).ToList();
                         
             var result = new List<EshopItemMappingRecord>(elsaProducts.Count);
             foreach(var material in elsaProducts.OrderBy(p => p.Name))

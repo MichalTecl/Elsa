@@ -1,9 +1,11 @@
 ﻿using Elsa.Apps.EshopMapping.Internal;
 using Elsa.Apps.EshopMapping.Model;
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Robowire.RoboApi;
 using System;
 using System.Collections.Generic;
@@ -17,11 +19,13 @@ namespace Elsa.Apps.EshopMapping.Controllers
     {
         private readonly IErpRepository _erpRepository;
         private readonly IEshopMappingFacade _facade;
-        
-        public EshopMappingController(IWebSession webSession, ILog log, IErpRepository erpRepository, IEshopMappingFacade facade) : base(webSession, log)
+        private readonly IMaterialRepository _materialRepository;
+
+        public EshopMappingController(IWebSession webSession, ILog log, IErpRepository erpRepository, IEshopMappingFacade facade, IMaterialRepository materialRepository) : base(webSession, log)
         {
             _erpRepository = erpRepository;
             _facade = facade;
+            _materialRepository = materialRepository;
         }
 
         private int GetErpId()
@@ -45,6 +49,15 @@ namespace Elsa.Apps.EshopMapping.Controllers
         public List<EshopItemMappingRecord> Unmap(string elsaMaterialName, string eshopProductName)
         {
             _facade.Unmap(GetErpId(), elsaMaterialName, eshopProductName);
+            return GetMappings(false);
+        }
+
+        public List<EshopItemMappingRecord> HideMaterial(string elsaMaterialName)
+        {
+            var material = _materialRepository.GetMaterialByName(elsaMaterialName).Ensure();
+
+            _materialRepository.SetMaterialHidden(material.Id, true, false);
+
             return GetMappings(false);
         }
     }

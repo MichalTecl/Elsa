@@ -164,7 +164,7 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<MaterialInfo> GetAllMaterials(int? inventoryId)
         {
-            return m_materialRepository.GetAllMaterials(inventoryId).Select(m => new MaterialInfo(m));
+            return m_materialRepository.GetAllMaterials(inventoryId, true).Select(m => new MaterialInfo(m));
         }
 
         public VirtualProductViewModel GetVirtualProductById(int id)
@@ -206,7 +206,7 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<IExtendedMaterialModel> SearchMaterials(string query, int? inventoryId)
         {
-            var allMats = m_materialRepository.GetAllMaterials(inventoryId);
+            var allMats = m_materialRepository.GetAllMaterials(inventoryId, true);
 
             var normQuery = StringUtil.NormalizeSearchText(99, query);
 
@@ -270,9 +270,23 @@ namespace Elsa.Apps.Inventory
             }
         }
 
+        public IExtendedMaterialModel HideMaterial(int id)
+        {
+            EnsureUserRight(InventoryUserRights.MaterialEdits);
+            
+            return m_materialRepository.SetMaterialHidden(id, true);
+        }
+
+        public IExtendedMaterialModel UnhideMaterial(int id)
+        {
+            EnsureUserRight(InventoryUserRights.MaterialEdits);
+
+            return m_materialRepository.SetMaterialHidden(id, false);
+        }
+
         public IEnumerable<string> GetAllMaterialNames()
         {
-            return m_materialRepository.GetAllMaterials(null).Select(m => m.Name);
+            return m_materialRepository.GetAllMaterials(null, true).Select(m => m.Name);
         }
 
         public IEnumerable<IMaterialInventory> GetMaterialInventories()
@@ -282,7 +296,7 @@ namespace Elsa.Apps.Inventory
 
         public Dictionary<string, List<string>> GetAllMaterialsWithCompatibleUnits()
         {
-            var materials = m_materialRepository.GetAllMaterials(null).ToList();
+            var materials = m_materialRepository.GetAllMaterials(null, false).ToList();
 
             var result = new Dictionary<string, List<string>>(materials.Count);
             foreach (var m in materials)

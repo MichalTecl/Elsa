@@ -15,22 +15,33 @@
         <div class="stackLeft emapRecordSearchCont">
             <input type="checkbox" id="cbIncompleteOnly" event-bind="change:filter" />
             <label for="cbIncompleteOnly">Jen nekompletní</label>
+
+            <div data-bind="class!.hidden:isPuzzleActive">
+                <div id="cancelPuzzleCont" class="stackLeft" style="display:none">
+                    <i class="fas fa-times faButton" event-bind="click:VM.cancelPuzzle()"></i>
+                    <i class="fas fa-puzzle-piece"></i>
+                    <div id="currentPuzzleValue" data-bind="text:currentPuzzleValue"></div>
+                </div>
+            </div>
             <button event-bind="click:VM.refreshErp()" id="emapReloadBut">Načíst produkty z Floxu</button>
         </div>
 
 
     </div>
-    <div id="maplist" data-bind="itemsSource:mappings" data-key="itemId">
+    <div id="maplist" data-bind="itemsSource:mappings;class.activePuzzle:isPuzzleActive;class!.initialPuzzle:isPuzzleActive" data-key="itemId">
         <div class="lt-template emapItemCont">
-            <div class="emapCollapsedItemCont" data-bind="class.hidden:expanded" event-bind="click:onExpandClick(itemId, hasMaterial)">
+            <div class="emapCollapsedItemCont" data-bind="class.hidden:expanded" >
                 <div class="stackLeft">
-                    <i class="fas fa-chevron-right faButton emapExpandBut" data-bind="class!.hidden:hasMaterial" event-bind="click:onExpandClick(itemId)"></i>
+                    <i class="fas fa-chevron-right faButton emapExpandBut" data-bind="class!.hidden:hasMaterial" event-bind="click:onExpandClick(itemId, hasMaterial)"></i>
                     <i class="far fa-times-circle emapMappingMissingIcon" data-bind="class.hidden:hasMaterial"></i>
                     <div data-bind="text:ElsaMaterialName" class="emapElsaMaterialName"></div>
                     <i class="fas fa-exchange-alt emapMapLinkSymbol"></i>
                     <i class="far fa-times-circle emapMappingMissingIcon" data-bind="class.hidden:hasShopItem"></i>
                     <div data-bind="text:firstShopItem" class="emapFirstShopItemLabel emapShopItem"></div>
                     <div class="emapAdditionalItemsTextLabel" data-bind="class!.hidden:hasAdditionalShopItems; text:additionalShopItemsText"></div>
+                    <div class="puzzleCont">
+                        <i class="fas fa-puzzle-piece faButton magicPuzzle" data-bind="class!.hidden:showPuzzle" event-bind="click:onPuzzleClick(VM)"></i>
+                    </div>
                 </div>
             </div>
 
@@ -41,6 +52,7 @@
                     <div replace-by="/UI/ElsaIcon.html"></div>
 
                     <div data-bind="text:ElsaMaterialName" class="emapElsaMaterialName"></div>
+                    <i class="far fa-eye-slash faButton" data-bind="class.hidden:hasShopItem" event-bind="click:hideMaterial(ElsaMaterialName)"></i>
                 </div>
                 <div class="emapMappedItemsCont">
                     <div data-bind="itemsSource:Products" data-key="ProductName">
@@ -69,7 +81,7 @@
 </div>
 <script type="text/javascript" src="/UI/EshopMapping/EshopMappingEditor.VM.js"></script>
 <script>
-    lt.element("eshopMappingEditorUi").withModel("app.EshopMapping.vm").attach(function (searchPanel, emapSearchInput, cbIncompleteOnly) {
+    lt.element("eshopMappingEditorUi").withModel("app.EshopMapping.vm").attach(function (searchPanel, emapSearchInput, cbIncompleteOnly, cancelPuzzleCont) {
 
         const self = this;
 
@@ -126,7 +138,24 @@
 
         this.filter = function () {
             app.EshopMapping.vm.filter(emapSearchInput.value, cbIncompleteOnly.checked);
-        };        
+        };     
+
+        this.onPuzzleClick = function (model) {
+
+            // hack to not show it during app initialization
+            cancelPuzzleCont.style.display = 'flex';
+
+            app.EshopMapping.vm.onPuzzleActivated(model);
+        };
+
+        this.hideMaterial = function (name) {
+            var r = confirm("Opravdu chcete skrýt materiál " + name + "? V případě, že jej budete chtít znovu zviditelnit, bude třeba ho upravit v editoru materiálů.");
+
+            if (!r)
+                return;
+
+            app.EshopMapping.vm.hideMaterial(name);
+        };
     });
 </script>
 <link href="/UI/EshopMapping/EshopMappingEditor.css" rel="stylesheet" />

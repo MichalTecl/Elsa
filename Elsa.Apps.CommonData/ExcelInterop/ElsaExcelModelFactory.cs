@@ -32,7 +32,7 @@ namespace Elsa.Apps.CommonData.ExcelInterop
 
             if (loadMaterials)
             {
-                instance.Materials.AddRange(m_materialRepository.GetAllMaterials(null).Where(materialFilter)
+                instance.Materials.AddRange(m_materialRepository.GetAllMaterials(null, false).Where(materialFilter)
                     .OrderBy(m => m.Name).Select(m => new MaterialAndUnit
                     {
                         MaterialName = m.Name,

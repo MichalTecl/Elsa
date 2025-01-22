@@ -43,7 +43,7 @@ namespace Elsa.Apps.ProductionService
             result.AddRange(m_recipeRepository.GetRecipes());
 
             var manufacturedInventories = m_materialRepository.GetMaterialInventories().Where(i => i.IsManufactured).Select(i => i.Id).ToList();
-            result.AddRange(m_materialRepository.GetAllMaterials(null).Where(m => manufacturedInventories.Contains(m.InventoryId)).Where(m => result.All(r => r.MaterialId != m.Id)).OrderBy(m => m.Name).Select(m => new MaterialNodePlaceholder()
+            result.AddRange(m_materialRepository.GetAllMaterials(null, false).Where(m => manufacturedInventories.Contains(m.InventoryId)).Where(m => result.All(r => r.MaterialId != m.Id)).OrderBy(m => m.Name).Select(m => new MaterialNodePlaceholder()
             {
                 MaterialId = m.Id,
                 MaterialName = m.Name

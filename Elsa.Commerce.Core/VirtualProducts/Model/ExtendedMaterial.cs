@@ -36,6 +36,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
             UsageProlongsLifetime = adaptee.UsageProlongsLifetime == true;
             NotAbandonedUntilNewerBatchUsed = adaptee.NotAbandonedUntilNewerBatchUsed == true;
             UniqueBatchNumbers = adaptee.UniqueBatchNumbers == true;
+            IsHidden = adaptee.HideDt != null;
 
             var threshold = adaptee.Thresholds?.FirstOrDefault();
             if (threshold != null)
@@ -127,12 +128,16 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public bool UniqueBatchNumbers { get; }
 
+        public bool IsHidden { get; }
+
         #region Entity Comment
         public int RecordId => Id;
         public string EntityTypeName => "Material";
         public string CommentText { get; set; }
         public DateTime? CommentDt { get; set; }
-        public string CommentAuthorNick { get; set; }                
+        public string CommentAuthorNick { get; set; }
+
+        
         #endregion
     }
 }

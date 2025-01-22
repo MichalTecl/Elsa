@@ -38,7 +38,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IExtendedMaterialModel GetMaterialById(int materialId)
         {
-            var mat = GetAllMaterials(null).FirstOrDefault(m => m.Id == materialId);
+            var mat = GetAllMaterials(null, true).FirstOrDefault(m => m.Id == materialId);
             if (mat != null)
             {
                 return mat;
@@ -47,7 +47,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_cache.Remove(MaterialsCacheKey);
             m_cache.Remove(VirtualProductCompositionsCacheKey);
 
-            mat = GetAllMaterials(null).FirstOrDefault(m => m.Id == materialId);
+            mat = GetAllMaterials(null, true).FirstOrDefault(m => m.Id == materialId);
             if (mat != null)
             {
                 return mat;
@@ -58,7 +58,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IExtendedMaterialModel GetMaterialByName(string materialName)
         {
-            return GetAllMaterials(null).FirstOrDefault(m => m.Name == materialName);
+            return GetAllMaterials(null, true).FirstOrDefault(m => m.Name == materialName);
         }
 
         public IEnumerable<MaterialComponent> GetMaterialsByVirtualProductId(int virtualProductId)
@@ -72,13 +72,18 @@ namespace Elsa.Commerce.Core.VirtualProducts
             }
         }
 
-        public IEnumerable<IExtendedMaterialModel> GetAllMaterials(int? inventoryId)
+        public IEnumerable<IExtendedMaterialModel> GetAllMaterials(int? inventoryId, bool includeHidden)
         {
             var all = m_cache.ReadThrough(MaterialsCacheKey, TimeSpan.FromMinutes(10), GetAllMaterialsFromDatabase);
 
             if (inventoryId != null)
             {
-                all = all.Where(i => i.InventoryId == inventoryId.Value);
+                all = all.Where(i => i.InventoryId == inventoryId.Value);                
+            }
+
+            if (!includeHidden)
+            {
+                all = all.Where(m => !m.IsHidden);
             }
 
             return all;
@@ -175,7 +180,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             IMaterial material;
             if (materialId != null)
             {
-                material = GetAllMaterials(null).FirstOrDefault(m => m.Id == materialId.Value)?.Adaptee;
+                material = GetAllMaterials(null, true).FirstOrDefault(m => m.Id == materialId.Value)?.Adaptee;
                 if (material == null)
                 {
                     throw new InvalidOperationException($"Invalid material Id {materialId}");
@@ -212,7 +217,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
                 setup(material);
 
-                if (GetAllMaterials(null).Any(m => m.Name.Equals(material.Name, StringComparison.InvariantCultureIgnoreCase)))
+                if (GetAllMaterials(null, true).Any(m => m.Name.Equals(material.Name, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     throw new InvalidOperationException("Název materiálu byl již použit");
                 }
@@ -231,7 +236,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
             CleanCache();
 
-            return GetAllMaterials(null).Single(m => m.Id == material.Id);
+            return GetAllMaterials(null, true).Single(m => m.Id == material.Id);
         }
 
         public IExtendedMaterialModel UpsertMaterial(int? materialId, string name, decimal nominalAmount,
@@ -242,7 +247,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             IMaterial material;
             if (materialId != null)
             {
-                material = GetAllMaterials(null).FirstOrDefault(m => m.Id == materialId.Value)?.Adaptee;
+                material = GetAllMaterials(null, true).FirstOrDefault(m => m.Id == materialId.Value)?.Adaptee;
                 if (material == null)
                 {
                     throw new InvalidOperationException($"Invalid material Id {materialId}");
@@ -263,7 +268,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     && (material.UnusedWarnMaterialType == unusedWarnMaterialType)
                     && (material.UsageProlongsLifetime ?? false == usageProlongsLifetime))
                 {
-                    return GetAllMaterials(null).Single(m => m.Id == materialId);
+                    return GetAllMaterials(null, true).Single(m => m.Id == materialId);
                 }
 
                 if (material.NominalUnitId != nominalUnitId)
@@ -290,7 +295,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             }
             else
             {
-                if (GetAllMaterials(null).Any(m => m.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
+                if (GetAllMaterials(null, true).Any(m => m.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
                 {
                     throw new InvalidOperationException("Název materiálu byl již použit");
                 }
@@ -324,7 +329,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
             CleanCache();
 
-            return GetAllMaterials(null).Single(m => m.Id == material.Id);
+            return GetAllMaterials(null, true).Single(m => m.Id == material.Id);
         }
 
         public void CleanCache()
@@ -499,6 +504,33 @@ namespace Elsa.Commerce.Core.VirtualProducts
             m_entityComments.AddComment(writeCommentUserRight, mat);
 
             CleanCache();
+        }
+
+        public IExtendedMaterialModel SetMaterialHidden(int id, bool hide, bool clearCache = true)
+        {
+            var mat = GetMaterialById(id);
+            if (mat.IsHidden == hide)
+                return mat;
+
+            var dbRecord = mat.Adaptee;
+
+            dbRecord.HideUserId = hide ? (int?)m_session.User.Id : null;
+            dbRecord.HideDt = hide ? (DateTime?)DateTime.Now : null;
+
+            m_database.Save(dbRecord);
+
+            // there is so much stuff related to material visibility...
+            if (clearCache)
+            {
+                m_cache.Clear();
+            }
+            else
+            {
+                // but sometimes...
+                CleanCache();
+            }
+
+            return GetMaterialById(id);
         }
 
         private sealed class MaterialRepositoryWithPostponedCache : MaterialRepository, IMaterialRepositoryWithPostponedCache

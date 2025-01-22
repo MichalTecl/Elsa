@@ -1,5 +1,4 @@
 ﻿.mappablesEditor #mappablesList {
-   /* background-color: #eeeeee; */
 }
 
 #mappablesList .mappableContainer {
@@ -44,117 +43,113 @@
     margin-left: 20px;
 }
 
-
-.fa-cubes{
-    opacity:0.7;
-    font-size:0.8em;
+.fa-cubes {
+    opacity: 0.7;
+    font-size: 0.8em;
 }
 
-.virtualProductItemView{
-    display:flex;
+.virtualProductItemView {
+    display: flex;
 }
 
 .addVirtualProductBut {
-    margin-right:8px;
-    font-size:1em;    
+    margin-right: 8px;
+    font-size: 1em;
 }
 
 .virtualProductsListContainer {
     margin-top: 10px;
 }
 
-
-
 .virtualProductEditItem {
-    margin-top:20px;
-    border:1px solid #eeeeee;
-    padding:4px;
-    margin-bottom:30px;
-    width:620px;    
+    margin-top: 20px;
+    border: 1px solid #eeeeee;
+    padding: 4px;
+    margin-bottom: 30px;
+    width: 620px;
 }
 
 .itemEditFoot {
-    margin-top:10px;    
-    margin-left:494px;
+    margin-top: 10px;
+    margin-left: 494px;
 }
 
-.itemEditFoot > button {
-    min-width:60px;        
-}
+    .itemEditFoot > button {
+        min-width: 60px;
+    }
 
 .virtualProductEditItem > input {
-    min-width:600px !important;
+    min-width: 600px !important;
 }
 
-
-.materialSuggestions div[lt-selected-item="1"]{
-    font-weight:bold;
+.materialSuggestions div[lt-selected-item="1"] {
+    font-weight: bold;
 }
 
-.materialEntryInput{
-    min-width:450px;
-    margin-bottom:0 !important;
+.materialEntryInput {
+    min-width: 450px;
+    margin-bottom: 0 !important;
 }
 
-.materialEntryInput:not(:focus):valid {
-    border:none;
-    background-color:transparent !important;
-}
+    .materialEntryInput:not(:focus):valid {
+        border: none;
+        background-color: transparent !important;
+    }
 
 .matListMainContainer {
-    margin-left:30px;
-    border-left:1px solid #eee;
-    border-bottom:1px solid #eee;    
-    border-bottom-left-radius:10px;
+    margin-left: 30px;
+    border-left: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    border-bottom-left-radius: 10px;
 }
 
 .addMaterialtoVpButton {
-    margin-top:5px;
-    margin-left:5px;
+    margin-top: 5px;
+    margin-left: 5px;
 }
 
 .containsTitle {
-    margin-top:8px;
-    margin-bottom:3px;
-    margin-left:16px;
-    font-weight:bold;
-    color:#777799;
+    margin-top: 8px;
+    margin-bottom: 3px;
+    margin-left: 16px;
+    font-weight: bold;
+    color: #777799;
 }
 
 .matListMainContainer .fa-minus {
-	display:none;
-	margin-left:4px;
+    display: none;
+    margin-left: 4px;
 }
 
-div[lt-name="errorsDisplay"]{
-    color:red;    
-    padding-top:5px;    
+div[lt-name="errorsDisplay"] {
+    color: red;
+    padding-top: 5px;
 }
 
-.materialSuggestionItem {   
-	margin-top:18px;
+.materialSuggestionItem {
+    margin-top: 18px;
 }
 
 .materialSuggestions:last-child {
-    margin-bottom:25px;
+    margin-bottom: 25px;
 }
 
 .materialSuggestions {
-    background-color:#eeeeee;
-    margin-top:0px;
-    padding:4px;
-    max-width:442px;
-    border-bottom-left-radius:8px;
-    border-bottom-right-radius:8px;
+    background-color: #eeeeee;
+    margin-top: 0px;
+    padding: 4px;
+    max-width: 442px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
-.materialSuggestions > div {
-    margin:6px;    
-}
+    .materialSuggestions > div {
+        margin: 6px;
+    }
 
-.materialSuggestions:empty {
-    display:none;
-}
+    .materialSuggestions:empty {
+        display: none;
+    }
 
 #mainTab {
     margin-top: 0 !important;
@@ -165,69 +160,65 @@ div[lt-name="errorsDisplay"]{
 }
 
 .virtualProductEditItem > div.itemEditFoot > i {
-  position:absolute;
-  left:25px;
+    position: absolute;
+    left: 25px;
 }
-
 
 div.containsTitleContainer > input {
-   width:100px;
+    width: 100px;
 }
-
 
 .materialEditItem {
-    margin-top:20px;
-    border:1px solid #eeeeee;
-    padding:4px;
-    margin-bottom:30px;
-    width:620px;    
+    margin-top: 20px;
+    border: 1px solid #eeeeee;
+    padding: 4px;
+    margin-bottom: 30px;
+    width: 620px;
 }
 
-.materialEditItem > input {
-    min-width:595px !important;
-}
+    .materialEditItem > input {
+        min-width: 595px !important;
+    }
 
-.materialEditItem > div.itemEditFoot > i {
-  position:absolute;
-  left:25px;
-}
+    .materialEditItem > div.itemEditFoot > i {
+        position: absolute;
+        left: 25px;
+    }
 
 div.containsTitleContainer > input {
-   width:100px;
+    width: 100px;
 }
 
 .addMaterialProductBut {
-    margin-top:8px;
-    margin-bottom:10px;
+    margin-top: 8px;
+    margin-bottom: 10px;
 }
-
-
 
 .showButtonsOnHover {
-    display:flex;
+    display: flex;
 }
 
-.showButtonsOnHover > .faButton {
-    display:none;
-}
+    .showButtonsOnHover > .faButton {
+        display: none;
+    }
 
-.showButtonsOnHover:hover > .faButton {
-    display:block;
-    margin-left:5px;     
-}
+    .showButtonsOnHover:hover > .faButton {
+        display: block;
+        margin-left: 5px;
+    }
 
 .simpleListItem {
-    padding-top:4px;
-    padding-bottom:4px;    
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
-.simpleListItem:hover {
-    background-color:#efefff;
-}
+    .simpleListItem:hover {
+        background-color: #efefff;
+    }
 
 .listContainer {
-    margin-top:8px;
-    border-top:1px solid #eeeeef;
+    margin-top: 8px;
+    border-top: 1px solid #eeeeef;
 }
 
 body, html {
@@ -235,22 +226,22 @@ body, html {
 }
 
 .materialEditFlags {
-    margin-top:5px;
-    padding-top:5px;    
-    padding-bottom:5px;    
-    padding-left:8px;
-    border-top:1px solid #eee;
-    border-bottom:1px solid #eee;
+    margin-top: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 8px;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
 }
 
-.materialEditFlags label {
-    font-size:0.8em;
-    margin-top:0.2em;        
-}
+    .materialEditFlags label {
+        font-size: 0.8em;
+        margin-top: 0.2em;
+    }
 
 .thresholdContainer > input {
-    width:100px;
-    margin-left:20px;
+    width: 100px;
+    margin-left: 20px;
 }
 
 .abandonedPolicyContainer > input {
@@ -300,3 +291,36 @@ body, html {
         border-left: 1px solid transparent;
         border-right: 1px solid transparent;
     }
+
+.itemEditFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+    .itemEditFooter .materialCommandIcons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .itemEditFooter .materialHideControl {
+        display: flex;
+        gap: 5px;
+    }
+
+    .itemEditFooter .materialEditButtons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .itemEditFooter button {
+        width: 60px;
+    }
+
+.hiddenMaterialItem {
+    opacity: 0.7;
+    text-decoration: line-through;
+}

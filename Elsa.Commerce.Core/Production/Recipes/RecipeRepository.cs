@@ -63,7 +63,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 var dbRecipes = m_database.SelectFrom<IRecipe>().Where(r => r.ProjectId == m_session.Project.Id)                    
                     .Execute();
 
-                var materials = m_materialRepository.GetAllMaterials(null).ToArray();
+                var materials = m_materialRepository.GetAllMaterials(null, false).ToArray();
 
                 var result = new List<RecipeInfo>(dbRecipes.Where(FilterByUserRoleVisibility).Select(e => new RecipeInfo
                 {

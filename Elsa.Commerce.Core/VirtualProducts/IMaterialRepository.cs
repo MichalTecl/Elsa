@@ -17,7 +17,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         IEnumerable<MaterialComponent> GetMaterialsByVirtualProductId(int virtualProductId);
 
-        IEnumerable<IExtendedMaterialModel> GetAllMaterials(int? inventoryId);
+        IEnumerable<IExtendedMaterialModel> GetAllMaterials(int? inventoryId, bool includeHidden);
 
         void DetachMaterial(int virtualProductId, int materialId);
 
@@ -40,6 +40,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
         void SaveOrderDt(int materialId, DateTime? orderDt);
 
         void SaveMaterialComment(int materialId, string comment, UserRight writeCommentUserRight);
+
+        IExtendedMaterialModel SetMaterialHidden(int id, bool hide, bool clearCache = true);
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }

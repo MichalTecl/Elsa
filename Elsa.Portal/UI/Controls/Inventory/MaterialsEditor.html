@@ -12,7 +12,7 @@
             <div id="materialsList" class="listContainer">
 
                 <div lt-name="materialItemTemplate" class="materialItemContainer lt-template">
-                    <div data-bind="class.hidden:editMode" class="materialItemView showButtonsOnHover simpleListItem">                        
+                    <div data-bind="class.hidden:editMode;class.hiddenMaterialItem:IsHidden" class="materialItemView showButtonsOnHover simpleListItem">                        
                         <div data-bind="text:Name" class="materialTitle"></div>
                         <i class="fas fa-edit faButton" event-bind="click:editMaterial(Id)"></i>
                     </div>
@@ -125,10 +125,20 @@
 
                         </div>
 
-                        <div class="itemEditFoot restricted-MaterialEdits">
-                            <i class="far fa-trash-alt faButton " event-bind="click:deleteMaterial(VM)"></i>
-                            <button event-bind="click:save(VM)"><i class="fas fa-check"></i></button>
-                            <button event-bind="click:cancelEdit"><i class="fas fa-times"></i></button>
+                        <div class="restricted-MaterialEdits">
+                            <div class="itemEditFooter">
+                                <div class="materialCommandIcons">
+                                    <i class="far fa-trash-alt faButton " event-bind="click:deleteMaterial(VM)"></i>
+                                    <div class="materialHideControl">
+                                        <i class="far fa-eye-slash faButton" data-bind="class.hidden:IsHidden" event-bind="click:hideMaterial(VM)"></i>
+                                        <i class="far fa-eye faButton" data-bind="class!.hidden:IsHidden" event-bind="click:unhideMaterial(VM)"></i>
+                                    </div>
+                                </div>
+                                <div class="materialEditButtons">
+                                    <button event-bind="click:save(VM)"><i class="fas fa-check"></i></button>
+                                    <button event-bind="click:cancelEdit"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -260,5 +270,8 @@
 
             lt.notify();
         };
+
+        this.hideMaterial = function (model) { app.virtualProductsEditor.vm.hideMaterial(model.Id); };
+        this.unhideMaterial = function (model) { app.virtualProductsEditor.vm.unhideMaterial(model.Id); };
     });
 </script>

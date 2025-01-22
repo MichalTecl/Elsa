@@ -211,7 +211,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IEnumerable<MaterialSetupInfo> GetAllMaterialInfo()
         {
-            var allMaterials = m_materialRepository.GetAllMaterials(null).ToList();
+            var allMaterials = m_materialRepository.GetAllMaterials(null, true).ToList();
 
             var basenames = new HashSet<string>(allMaterials.Where(m => m.AutomaticBatches).Select(m => $"{StringUtil.ConvertToBaseText(m.Name, '_', '_', 3)}_{DateTime.Now:yyyyMMdd}"));
 

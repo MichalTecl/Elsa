@@ -595,7 +595,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         
         public IEnumerable<MaterialLevelModel> GetMaterialLevels(bool includeUnwatched = false)
         {
-            var materialIds = includeUnwatched ? m_materialRepository.GetAllMaterials(null).Select(m => m.Id) : m_materialThresholdRepository.GetAllThresholds().Select(t => t.MaterialId);
+            var materialIds = includeUnwatched ? m_materialRepository.GetAllMaterials(null, false).Select(m => m.Id) : m_materialThresholdRepository.GetAllThresholds().Select(t => t.MaterialId);
 
             foreach (var materialId in materialIds)
             {

@@ -233,3 +233,85 @@
     width: 600px;
     margin-left: 5px;
 }
+
+.initialPuzzle .emapItemCont .puzzleCont {
+    display:none;
+}
+
+.initialPuzzle .emapItemCont:hover .puzzleCont {
+    display: block;
+}
+
+.activePuzzle .emapItemCont .puzzleCont {
+    display: block;
+    color: darkorange;
+    transition: transform 0.3s ease-in-out;
+}
+
+.activePuzzle .emapItemCont:hover .puzzleCont {
+    display: block;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(10deg);
+    }
+
+    50% {
+        transform: rotate(-10deg);
+    }
+
+    75% {
+        transform: rotate(5deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+#cancelPuzzleCont {
+    display: flex;
+    align-items: center;
+    background-color: #f44336; /* Výrazná červená */
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    gap: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    position: fixed; /* Připevní element k obrazovce */
+    top: 0; /* Na horním okraji */
+    left: 0; /* Zarovnáno vlevo */
+    width: 100%; /* Zajistí, že label pokryje šířku stránky */
+    z-index: 1000; /* Nad ostatními prvky */
+}
+
+    #cancelPuzzleCont .fa-times {
+        font-size: 20px;
+        cursor: pointer;
+        color: white;
+        margin-right: 5px;
+        transition: transform 0.2s, color 0.2s;
+    }
+
+        #cancelPuzzleCont .fa-times:hover {
+            transform: scale(1.1); /* Mírnější efekt při najetí */
+            color: #bbdefb; /* Jemnější modrá při najetí myší */
+        }
+
+    #cancelPuzzleCont .fa-puzzle-piece {
+        font-size: 24px;
+        color: #ffeb3b; /* Výrazná žlutá pro zvýraznění, symbolizuje režim */
+    }
+
+#currentPuzzleValue {
+    font-weight: bold;
+    flex-grow: 1;
+}

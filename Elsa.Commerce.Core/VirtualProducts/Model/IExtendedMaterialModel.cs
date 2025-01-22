@@ -63,5 +63,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         bool NotAbandonedUntilNewerBatchUsed { get; }
 
         bool UniqueBatchNumbers { get; }
+
+        bool IsHidden { get; }
     }
 }

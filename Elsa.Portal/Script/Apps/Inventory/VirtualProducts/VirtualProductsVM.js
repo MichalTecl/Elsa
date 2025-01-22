@@ -363,6 +363,14 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         
     };
 
+    self.hideMaterial = function (id) {
+        lt.api("/virtualProducts/hideMaterial").query({ "id": id }).post(receiveSingleMaterial);
+    };
+
+    self.unhideMaterial = function (id) {
+        lt.api("/virtualProducts/unhideMaterial").query({ "id": id }).post(receiveSingleMaterial);
+    };
+
     self.deleteMaterial = function(id) {
 
         lt.api("/virtualProducts/deleteMaterial").query({ id: id }).get(function() {

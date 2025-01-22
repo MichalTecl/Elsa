@@ -29,7 +29,7 @@ namespace Elsa.Commerce.Core.ImportExportModules
         {
             exportFileName = "PravidlaOpustenychSarzi.xlsx";
 
-            var allMaterials = _materialRepository.GetAllMaterials(null).OrderBy(m => m.InventoryId).OrderBy(m => m.Name);
+            var allMaterials = _materialRepository.GetAllMaterials(null, false).OrderBy(m => m.InventoryId).OrderBy(m => m.Name);
 
             var res = allMaterials.Select(m => new AbandonedBatchRuleModel
             {
