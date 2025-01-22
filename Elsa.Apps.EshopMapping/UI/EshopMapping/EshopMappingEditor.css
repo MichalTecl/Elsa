@@ -1,3 +1,235 @@
-﻿.emapMappedItemsCont {
-    margin-left:20px;
+﻿/* Head */
+#eshopMappingEditorHead {
+    padding-bottom: 16px;
+    padding-left: 30px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+#emapReloadBut {
+    font-size: 70%;
+    margin-left: 50px;
+}
+
+#eshopMappingEditorUi input {
+    max-width: 100% !important;
+}
+
+.emapRecordSearchCont {
+    margin-top: 14px;
+}
+
+#emapSearchInput {
+    width: 500px;
+}
+
+.emapMappedItemsCont {
+    margin-left: 20px;
+}
+
+#maplist {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.emapItemCont {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    margin-bottom: 6px;
+    background-color: #fafafa;
+    border: 1px solid #e6e6e6;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+    .emapItemCont:hover {
+        background-color: #f5f5f5;
+        border-color: #ccc;
+    }
+
+.emapElsaMaterialName {
+    font-weight: 500;
+    font-size: 1rem;
+    margin-right: 8px;
+}
+
+.elsaIconContainer {
+    height: 12px;
+    margin-top: -6px;
+    margin-right: -6px;
+    opacity: 0.6;
+}
+
+.emapMapLinkSymbol {
+    color: #007bff;
+    margin: 0 8px;
+    font-size: 1.2em;
+}
+
+.emapMappingMissingIcon {
+    color: #e74c3c;
+    font-size: 1.1em;
+    margin-left: 8px;
+}
+
+.emapExpandBut {
+    color: #6c757d;
+    font-size: 1.1em;
+    cursor: pointer;
+    padding-right: 5px;
+}
+
+
+.emapFirstShopItemLabel {
+    font-size: 0.95em;
+    color: #666;
+    margin-right: 10px;
+}
+
+.emapAdditionalItemsTextLabel {
+    font-size: 0.85em;
+    color: #999;
+    font-style: italic;
+}
+
+.emapItemCont:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+.emapItemCont:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.emapMappingMissingIcon:hover {
+    color: #c0392b;
+}
+
+.emapExpandedItemCont {
+    padding: 15px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.emapElsaMaterialCont {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.emapElsaMaterialName {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #333;
+    margin-left: 10px;
+}
+
+.emapExpandBut {
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 1.1em;
+    margin-right: 10px;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.emapMappedItemsCont {
+    padding: 10px;
+    border-top: 1px solid #e6e6e6;
+    margin-top: 10px;
+}
+
+.emapMappedItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: #f9f9f9;
+    border: 1px solid #e6e6e6;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+    .emapMappedItem:hover {
+        background-color: #f5f5f5;
+        border-color: #ccc;
+    }
+
+.emapMappedItemName {
+    font-size: 0.95rem;
+    color: #333;
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.emapItemAttributes {
+    font-size: 0.75rem;
+    color: #555;
+    margin-left: 10px;
+    font-style: italic;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.emapItemAttribute {
+    margin-right: 0; /* Gap místo marginu */
+    background-color: #e0f7fa; /* Jemná modrá barva */
+    padding: 5px 10px;
+    border-radius: 12px;
+    color: #00796b; /* Kontrastní tmavší zelená */
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+.emapAddMappedItemCont {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+    .emapAddMappedItemCont:hover {
+        background-color: #f5f5f5;
+    }
+
+.autocomplete input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 200px;
+}
+
+.butSubmit {
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: 10px;
+    transition: background-color 0.2s ease;
+}
+
+    .butSubmit:hover {
+        background-color: #0056b3;
+    }
+
+#maplist .autocomplete input {
+    width: 600px;
+    margin-left: 5px;
 }

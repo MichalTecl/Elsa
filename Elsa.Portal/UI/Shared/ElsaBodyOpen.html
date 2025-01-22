@@ -2,17 +2,18 @@
 <html>
 <head>
     <script>
-        var can = {%this_user_stuff%};
+        var can = {% this_user_stuff %};
         var __release = "%releasetag%";
     </script>
     <title>ELSA</title>
-    <meta charset="utf-8" />    
+    <meta charset="utf-8" />
     <script src="/Bundles/Bundle.ashx?bundle=Lanta"></script>
     <script src="/Script/Apps/User/UserVM.js"></script>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="/UI/Controls/Common/TabControl.js"></script>
     <script src="/UI/Controls/Common/AutoSuggest.js"></script>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div replace-by="/UI/Widgets/User/UserWidget.html"></div>

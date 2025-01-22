@@ -141,26 +141,38 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
         var x = document.getElementById(this.id + "autocomplete-list");
         if (x) x = x.getElementsByTagName("div");
         if (e.keyCode == 40) {
-            /*If the arrow DOWN key is pressed,
-            increase the currentFocus variable:*/
+            /* If the arrow DOWN key is pressed,
+            increase the currentFocus variable: */
             currentFocus++;
-            /*and and make the current item more visible:*/
+            /* and make the current item more visible: */
             addActive(x);
-        } else if (e.keyCode == 38) { //up
-            /*If the arrow UP key is pressed,
-            decrease the currentFocus variable:*/
+        } else if (e.keyCode == 38) { // up
+            /* If the arrow UP key is pressed,
+            decrease the currentFocus variable: */
             currentFocus--;
-            /*and and make the current item more visible:*/
+            /* and make the current item more visible: */
             addActive(x);
-        } else if (e.keyCode == 13) {
-            /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        } else if (e.keyCode == 13) { // enter
+            /* If the ENTER key is pressed, prevent the form from being submitted: */
             e.preventDefault();
             if (currentFocus > -1) {
-                /*and simulate a click on the "active" item:*/
+                /* Simulate a click on the "active" item: */
                 if (x) x[currentFocus].click();
+            } else {
+                /* If no item is active, trigger change event with current input value: */
+                if ("createEvent" in document) {
+                    var evt = document.createEvent("HTMLEvents");
+                    evt.initEvent("change", false, true);
+                    inp.dispatchEvent(evt);
+                } else {
+                    inp.fireEvent("onchange");
+                }
+                /* Close all autocomplete lists: */
+                closeAllLists();
             }
         }
     });
+
     function addActive(x) {
         /*a function to classify an item as "active":*/
         if (!x) return false;

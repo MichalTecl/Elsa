@@ -93,6 +93,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="icon.svg" />
     <Content Include="packages.config" />
     <Content Include="Bundles\Bundle.ashx" />
     <Content Include="Script\Apps\Accounting\FixedCosts.vm.js" />
@@ -188,6 +189,7 @@
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\ReceivingInvoicesReport.html" />
     <Content Include="UI\Controls\Reporting\Invoicing\InvoiceFormReports\ReleaseFormsReport.html" />
     <Content Include="UI\Controls\Reporting\StockLevelReport.html" />
+    <Content Include="UI\ElsaIcon.html" />
     <Content Include="UI\Pages\Inventory\MaterialLevels.css" />
     <Content Include="UI\Pages\Inventory\MaterialLevels.html" />
     <Content Include="UI\Pages\Inventory\VirtualProductsEditor.html" />
