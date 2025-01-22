@@ -24,7 +24,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             string unusedWarnMaterialType,
             bool usageProlongsLifetime, 
             bool notAbandonedUntilNewerBatchUsed,
-            bool uniqueBatchNumbers);
+            bool uniqueBatchNumbers,
+            int? orderFulfillDays);
         
         MaterialSetupInfo GetMaterialInfo(string materialName);
 

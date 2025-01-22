@@ -44,5 +44,7 @@ namespace Elsa.Apps.Inventory.Model
         public bool UniqueBatchNumbers { get; set; }
 
         public string Comment { get; set; }
+
+        public int? OrderFulfillDays { get; set; }
     }
 }

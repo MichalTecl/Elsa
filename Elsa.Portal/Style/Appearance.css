@@ -650,5 +650,9 @@ input.readonly {
 }
 
 .wikilink.inset {
-    right: 6px;
+    right: 6px !important;
+}
+
+.wikilink.topright > a {
+    right: -0px !important;
 }

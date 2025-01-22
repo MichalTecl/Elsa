@@ -59,7 +59,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             string unusedWarnMaterialType,
             bool usageProlongsLifetime,
             bool notAbandonedUntilNewerBatchUsed,
-            bool uniqueBatchNumbers
+            bool uniqueBatchNumbers,
+            int? orderFulfillDays
             )
         {
             name = name?.Trim();
@@ -100,6 +101,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                         m.UsageProlongsLifetime = usageProlongsLifetime;
                         m.NotAbandonedUntilNewerBatchUsed = notAbandonedUntilNewerBatchUsed;
                         m.UniqueBatchNumbers = uniqueBatchNumbers;
+                        m.OrderFulfillDays = orderFulfillDays == 0 ? null : orderFulfillDays;
                     });
                 
                 if (thresholdText == null)

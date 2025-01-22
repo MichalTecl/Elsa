@@ -50,7 +50,14 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;
 
         setupAbandonedBatchesStuff(mat);
-        
+
+        var inventory = materialInventories.find(i => i.Id == mat.InventoryId);
+        if (!!inventory) {
+
+            mat.isManufactured = inventory.IsManufactured;
+        } else {
+            console.error("Missing inventories info");
+        }
     };
 
     var receiveMaterials = function (mats) {
@@ -352,7 +359,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             UnusedWarnMaterialType: model.UnusedWarnMaterialType,
             UsageProlongsLifetime: model.UsageProlongsLifetime,
             UniqueBatchNumbers: model.UniqueBatchNumbers,
-            NotAbandonedUntilNewerBatchUsed: model.NotAbandonedUntilNewerBatchUsed
+            NotAbandonedUntilNewerBatchUsed: model.NotAbandonedUntilNewerBatchUsed,
+            OrderFulfillDays: model.OrderFulfillDays
         };
 
         for (var i = 0; i < model.materials.length; i++) {

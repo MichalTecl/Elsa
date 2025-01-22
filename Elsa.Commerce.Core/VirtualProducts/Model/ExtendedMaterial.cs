@@ -137,7 +137,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public DateTime? CommentDt { get; set; }
         public string CommentAuthorNick { get; set; }
 
-        
+        public int? OrderFulfillDays => Adaptee.OrderFulfillDays;
+
+
         #endregion
     }
 }

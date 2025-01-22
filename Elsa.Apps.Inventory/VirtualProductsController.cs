@@ -256,7 +256,8 @@ namespace Elsa.Apps.Inventory
                     string.IsNullOrWhiteSpace(request.UnusedWarnMaterialType) ? null : request.UnusedWarnMaterialType.Trim(),
                     request.UsageProlongsLifetime,
                     request.NotAbandonedUntilNewerBatchUsed,
-                    request.UniqueBatchNumbers);
+                    request.UniqueBatchNumbers,
+                    request.OrderFulfillDays);
 
                 saved.CommentText = request.Comment;
 

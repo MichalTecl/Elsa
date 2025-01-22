@@ -107,6 +107,8 @@ namespace Elsa.App.MaterialLevels.Components
 
             foreach (var r in result)
             {
+                var material = m_materialRepository.GetMaterialById(r.MaterialId);
+
                 m_entityComments.TryLoadComment(InventoryUserRights.MaterialCommentsView, r);
 
                 var threshold = m_thresholdRepository.GetThreshold(r.MaterialId);
@@ -123,8 +125,7 @@ namespace Elsa.App.MaterialLevels.Components
                 r.Total = m_amountProcessor.Sum(r.Batches.Select(b => b.Amount));
 
                 if (string.IsNullOrWhiteSpace(r.UnitSymbol))
-                {
-                    var material = m_materialRepository.GetMaterialById(r.MaterialId);
+                {                    
                     r.DefaultUnitSymbol = material.NominalUnit.Symbol;
                 }
 
@@ -140,15 +141,26 @@ namespace Elsa.App.MaterialLevels.Components
                     // we are under threshold, but another batch is ordered
                     r.WarningLevel = WarningLevel.Low;
 
+                    Func<string> limitInfo = null;
+                    int ffLimitDays = 99999;
+                    if ((material.OrderFulfillDays ?? 0) > 0)
+                    {
+                        limitInfo = () => $"Limit je {material.OrderFulfillDays} dnů pro materiál {material.Name}";
+                        ffLimitDays = material.OrderFulfillDays.Value;
+                    }
+                    else if (supplierOrderLimits.TryGetValue(r.SupplierName, out var supplierInfo))
+                    {
+                        limitInfo = () => $"Limit je {supplierInfo.Lim} dnů pro dodavatele {supplierInfo.Name}";
+                        ffLimitDays = supplierInfo.Lim;
+                    }
+
                     DateTime orderDelaylimit;
-                    // but maybe the order is delayed?
-                    if (supplierOrderLimits.TryGetValue(r.SupplierName, out var supplierInfo) 
-                    && ((orderDelaylimit = r.RawOrderDt.Value.AddDays(supplierInfo.Lim)) < DateTime.Now))
-                    {                        
-                        r.DelayedOrderMessage = $"Naskladnění bylo očekáváno do {StringUtil.FormatDate(orderDelaylimit)}. (Limit je {supplierInfo.Lim} dnů pro dodavatele {supplierInfo.Name})";
+                    if ((orderDelaylimit = r.RawOrderDt.Value.AddDays(ffLimitDays)) < DateTime.Now)
+                    {
+                        r.DelayedOrderMessage = $"Naskladnění bylo očekáváno do {StringUtil.FormatDate(orderDelaylimit)}. ({limitInfo()})";
                         r.WarningLevel = WarningLevel.High;
                         r.DelayedOrder = true;
-                    } 
+                    }                    
                 }
                 else
                 {

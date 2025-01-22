@@ -65,5 +65,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         bool UniqueBatchNumbers { get; }
 
         bool IsHidden { get; }
+
+        int? OrderFulfillDays { get; }
     }
 }

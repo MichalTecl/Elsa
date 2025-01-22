@@ -7,8 +7,12 @@
 }
 
 #emapReloadBut {
-    font-size: 70%;
-    margin-left: 50px;
+    font-size: 70%;    
+}
+
+.srchContChild {
+    margin-left:5px;
+    margin-right:10px;
 }
 
 #eshopMappingEditorUi input {
@@ -278,11 +282,11 @@
 #cancelPuzzleCont {
     display: flex;
     align-items: center;
-    background-color: #f44336; /* Výrazná červená */
+    background-color: #1976d2; /* Příjemná modrá pro informativní vzhled */
     color: white;
     padding: 8px 12px;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 0; /* Zrušeno zaoblení pro minimalistický design */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Jemný stín pro decentní oddělení */
     gap: 10px;
     font-family: Arial, sans-serif;
     font-size: 14px;
@@ -291,6 +295,7 @@
     left: 0; /* Zarovnáno vlevo */
     width: 100%; /* Zajistí, že label pokryje šířku stránky */
     z-index: 1000; /* Nad ostatními prvky */
+    border-bottom: 4px solid #1565c0; /* Jemné oddělení pomocí spodního okraje */
 }
 
     #cancelPuzzleCont .fa-times {
@@ -302,16 +307,17 @@
     }
 
         #cancelPuzzleCont .fa-times:hover {
-            transform: scale(1.1); /* Mírnější efekt při najetí */
-            color: #bbdefb; /* Jemnější modrá při najetí myší */
+            transform: scale(1.1);
+            color: #90caf9; /* Jemná modrá při najetí */
         }
 
     #cancelPuzzleCont .fa-puzzle-piece {
         font-size: 24px;
-        color: #ffeb3b; /* Výrazná žlutá pro zvýraznění, symbolizuje režim */
+        color: #ffeb3b; /* Výrazná žlutá pro symbolizaci režimu */
     }
 
 #currentPuzzleValue {
     font-weight: bold;
     flex-grow: 1;
+    text-align: left; /* Zarovná text doleva pro lepší čitelnost */
 }

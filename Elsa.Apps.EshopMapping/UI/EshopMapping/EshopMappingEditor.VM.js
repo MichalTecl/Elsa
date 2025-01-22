@@ -12,6 +12,7 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
         let allSearchEntries = [];
         let textFilter = null;
         let showOnlyIncompletes = false;
+        let showOnlyMultimaps = false;
 
         let currentPickedElsaMaterial = null;
         let currentPickedEshopProduct = null;
@@ -55,6 +56,10 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                     return false;
                 }
 
+                if (showOnlyMultimaps && !m.hasAdditionalShopItems) {
+                    return false;
+                }
+                                
                 if ((!!textFilter) && (!matcher.match(m.searchTag, true))) {
                     return false;
                 }
@@ -111,9 +116,10 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
             callback(allSearchEntries);
         };
 
-        self.filter = function (textQuery, onlyIncomplete) {
+        self.filter = function (textQuery, onlyIncomplete, onlyMultimaps) {
             textFilter = textQuery;
             showOnlyIncompletes = onlyIncomplete;
+            showOnlyMultimaps = onlyMultimaps;
 
             showMappings();
         };

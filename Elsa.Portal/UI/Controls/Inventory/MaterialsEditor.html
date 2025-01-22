@@ -78,6 +78,17 @@
                                     <input data-bind="value:ThresholdText;class!.hidden:HasThreshold" lt-name="tbThreshold" event-bind="change:onThresholdChanged(VM, $cbHasThreshold.checked, $tbThreshold.value)" />
                                 </div>
 
+                                <!-- order fulfill days -->
+                                <div class="materialFlagEdit orderFulfillDaysContainer" data-bind="class.hidden:isManufactured">
+                                    <div class="stackLeft">                                        
+                                        <label>Limit - max. počet dnů od objednání do naskladnění</label>
+                                    </div>
+                                    <input type="number" 
+                                           data-bind="value:OrderFulfillDays;" 
+                                           lt-name="tbFulfill" 
+                                           event-bind="change:onNamedPropChanged(VM, 'OrderFulfillDays', this.value)" />
+                                </div>
+
                                 <!-- abadnoned -->
                                 <div class="materialFlagEdit abandonedBatchesSetupContainer">
                                     <div class="stackLeft">
@@ -116,6 +127,7 @@
                                             <input type="checkbox" lt-name="cbNewerBatch" data-bind="checked:NotAbandonedUntilNewerBatchUsed" event-bind="change:onNamedPropChanged(VM, 'NotAbandonedUntilNewerBatchUsed', this.checked)" />
                                             <label>Jen pokud byla použita novější šarže</label>
                                         </div>
+
                                     </div>
 
                                 </div>

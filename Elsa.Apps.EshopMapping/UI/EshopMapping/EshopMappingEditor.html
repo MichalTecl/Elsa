@@ -2,7 +2,7 @@
     
 
     <div id="eshopMappingEditorHead">
-        <div class="wikilink inset">
+        <div class="wikilink topright">
             <a href="https://github.com/MichalTecl/Elsa/wiki/Integrace-s-ERP#mapov%C3%A1n%C3%AD-produkt%C5%AF-e-shop%C5%AF-na-materi%C3%A1ly-v-else" target="_blank"></a>
         </div>
 
@@ -13,8 +13,17 @@
             <button class="fa fa-search"></button>
         </div>
         <div class="stackLeft emapRecordSearchCont">
-            <input type="checkbox" id="cbIncompleteOnly" event-bind="change:filter" />
-            <label for="cbIncompleteOnly">Jen nekompletní</label>
+            <div class="srchContChild">
+                <input type="checkbox" id="cbIncompleteOnly" event-bind="change:filter" />
+                <label for="cbIncompleteOnly">Jen nekompletní</label>
+            </div>
+
+            <div class="srchContChild">
+                <input type="checkbox" id="cbMultimapsOnly" event-bind="change:filter" />
+                <label for="cbMultimapsOnly">Jen vícenásobné</label>
+            </div>
+
+            <button event-bind="click:VM.refreshErp()" id="emapReloadBut" class="srchContChild">Načíst produkty z Floxu</button>
 
             <div data-bind="class!.hidden:isPuzzleActive">
                 <div id="cancelPuzzleCont" class="stackLeft" style="display:none">
@@ -23,11 +32,9 @@
                     <div id="currentPuzzleValue" data-bind="text:currentPuzzleValue"></div>
                 </div>
             </div>
-            <button event-bind="click:VM.refreshErp()" id="emapReloadBut">Načíst produkty z Floxu</button>
+
         </div>
-
-
-    </div>
+        </div>
     <div id="maplist" data-bind="itemsSource:mappings;class.activePuzzle:isPuzzleActive;class!.initialPuzzle:isPuzzleActive" data-key="itemId">
         <div class="lt-template emapItemCont">
             <div class="emapCollapsedItemCont" data-bind="class.hidden:expanded" >
@@ -81,7 +88,7 @@
 </div>
 <script type="text/javascript" src="/UI/EshopMapping/EshopMappingEditor.VM.js"></script>
 <script>
-    lt.element("eshopMappingEditorUi").withModel("app.EshopMapping.vm").attach(function (searchPanel, emapSearchInput, cbIncompleteOnly, cancelPuzzleCont) {
+    lt.element("eshopMappingEditorUi").withModel("app.EshopMapping.vm").attach(function (searchPanel, emapSearchInput, cbIncompleteOnly, cancelPuzzleCont, cbMultimapsOnly) {
 
         const self = this;
 
@@ -137,7 +144,8 @@
         };
 
         this.filter = function () {
-            app.EshopMapping.vm.filter(emapSearchInput.value, cbIncompleteOnly.checked);
+                        
+            app.EshopMapping.vm.filter(emapSearchInput.value, cbIncompleteOnly.checked, cbMultimapsOnly.checked);
         };     
 
         this.onPuzzleClick = function (model) {
