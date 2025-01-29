@@ -60,5 +60,13 @@ namespace Elsa.Apps.EshopMapping.Controllers
 
             return GetMappings(false);
         }
+
+        public string PeekOrders(bool kit, string placedName)
+        {
+            return string.Join(
+                Environment.NewLine, 
+                _facade.PeekOrders(placedName, GetErpId(), kit).Select(o => $"{o.OrderDt}  {o.OrderNumber}  {o.CustomerName}  {o.Status}")
+                );
+        }
     }
 }

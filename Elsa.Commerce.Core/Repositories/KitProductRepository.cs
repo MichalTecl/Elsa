@@ -18,6 +18,8 @@ namespace Elsa.Commerce.Core.Repositories
     public class KitProductRepository : IKitProductRepository
     {
         private const string c_cacheKey = "completeKitProductDefinitions";
+        private const string c_itemKitsIndexCacheKey = "kitItem_kits";
+
         private readonly IPerProjectDbCache m_cache;
         private readonly IDatabase m_database;
         private readonly IPurchaseOrderRepository m_orderRepository;
@@ -173,6 +175,42 @@ namespace Elsa.Commerce.Core.Repositories
         public IKitDefinition GetKitDefinition(int id)
         {
             return GetAllKitDefinitions().FirstOrDefault(k => k.Id == id);
+        }
+
+        private static readonly ICollection<IKitDefinition> _emptyKdList = new List<IKitDefinition>(0).AsReadOnly();
+
+        public ICollection<IKitDefinition> GetKitsByItemName(string itemName)
+        {
+            var kindex = m_cache.ReadThrough(c_itemKitsIndexCacheKey, () => {
+
+                var allKits = GetAllKitDefinitions();
+
+                var index = new Dictionary<string, List<IKitDefinition>>();
+
+                foreach (var kitDefinition in allKits) 
+                    foreach(var selectionGroup in kitDefinition.SelectionGroups)
+                        foreach(var groupItem in selectionGroup.Items)
+                        {
+                            if(!index.TryGetValue(groupItem.ItemName, out var relatedKits))
+                            {
+                                relatedKits = new List<IKitDefinition>();
+                                index[groupItem.ItemName] = relatedKits;
+                            }
+                            else if (relatedKits.Any(rk => rk.Id == kitDefinition.Id))
+                            {
+                                continue;
+                            }
+
+                            relatedKits.Add(kitDefinition);
+                        }
+
+                return index;            
+            });
+
+            if (!kindex.TryGetValue(itemName, out var kits))
+                return _emptyKdList;
+
+            return kits;
         }
     }
 }

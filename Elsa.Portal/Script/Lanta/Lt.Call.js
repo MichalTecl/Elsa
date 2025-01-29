@@ -114,7 +114,11 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
         try {
 
             if (!!queryString) {
-                url = url + "?" + queryString;
+                let sep = "?";
+                if (url.indexOf("?") > -1)
+                    sep = "&";
+
+                url = url + sep + queryString;
             }
 
             xmlHttp.open(httpMethod, url, true);

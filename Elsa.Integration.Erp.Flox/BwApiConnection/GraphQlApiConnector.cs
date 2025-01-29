@@ -125,8 +125,10 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
             return order?.internal_note;
         }
 
-        internal IEnumerable<string> LoadProductNames()
+        internal List<string> LoadProductNames()
         {
+            var result = new List<string>();
+
             int? cursor = null;
 
             do
@@ -143,7 +145,7 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
                     if ((p.warehouse_items?.Count ?? 0) <= 1)
                     {
                         _log.Info($"No WH items - returning title=\"{p.title}\"");
-                        yield return p.title;
+                        result.Add(p.title);
                         continue;
                     }
 
@@ -164,11 +166,13 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
                             continue;
                         }
 
-                        yield return($"{p.title} ({vals[0]})");
+                        result.Add($"{p.title} ({vals[0]})");
                     }
                 }
 
             } while (cursor != null);
+
+            return result;
         }
 
         private T CallApi<T>(Func<BwClient, Task<T>> op)

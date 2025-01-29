@@ -39,12 +39,13 @@
         <div class="lt-template emapItemCont">
             <div class="emapCollapsedItemCont" data-bind="class.hidden:expanded" >
                 <div class="stackLeft">
-                    <i class="fas fa-chevron-right faButton emapExpandBut" data-bind="class!.hidden:hasMaterial" event-bind="click:onExpandClick(itemId, hasMaterial)"></i>
-                    <i class="far fa-times-circle emapMappingMissingIcon" data-bind="class.hidden:hasMaterial"></i>
+                    <i class="fas fa-folder faButton" data-bind="class!.hidden:isKit" event-bind="click:onExpandClick(itemId)"></i>
+                    <i class="fas fa-chevron-right faButton emapExpandBut" data-bind="class.hidden:isKit" event-bind="click:onExpandClick(itemId)"></i>
+                    <i class="far fa-times-circle emapMappingMissingIcon" data-bind="class!.hidden:showMissingMaterial"></i>
                     <div data-bind="text:ElsaMaterialName" class="emapElsaMaterialName"></div>
-                    <i class="fas fa-exchange-alt emapMapLinkSymbol"></i>
+                    <i class="fas fa-exchange-alt emapMapLinkSymbol" data-bind="class!.hidden:requiresMapping"></i>
                     <i class="far fa-times-circle emapMappingMissingIcon" data-bind="class.hidden:hasShopItem"></i>
-                    <div data-bind="text:firstShopItem" class="emapFirstShopItemLabel emapShopItem"></div>
+                    <div data-bind="text:firstShopItem; class!.hidden:hasShopItem" class="emapFirstShopItemLabel emapShopItem"></div>
                     <div class="emapAdditionalItemsTextLabel" data-bind="class!.hidden:hasAdditionalShopItems; text:additionalShopItemsText"></div>
                     <div class="puzzleCont">
                         <i class="fas fa-puzzle-piece faButton magicPuzzle" data-bind="class!.hidden:showPuzzle" event-bind="click:onPuzzleClick(VM)"></i>
@@ -53,32 +54,67 @@
             </div>
 
             <div class="emapExpandedItemCont" data-bind="class!.hidden:expanded">
-                <div class="emapElsaMaterialCont stackLeft">
-                    <i class="fas fa-chevron-down faButton emapExpandBut" event-bind="click:onCollapseClick(itemId)"></i>
+                <div data-bind="class.hidden:isKit">
+                    <div class="emapElsaMaterialCont stackLeft">
+                        <i class="fas fa-chevron-down faButton emapExpandBut" event-bind="click:onCollapseClick(itemId)"></i>
 
-                    <div replace-by="/UI/ElsaIcon.html"></div>
+                        <div replace-by="/UI/ElsaIcon.html"></div>
 
-                    <div data-bind="text:ElsaMaterialName" class="emapElsaMaterialName"></div>
-                    <i class="far fa-eye-slash faButton" data-bind="class.hidden:hasShopItem" event-bind="click:hideMaterial(ElsaMaterialName)"></i>
-                </div>
-                <div class="emapMappedItemsCont">
-                    <div data-bind="itemsSource:Products" data-key="ProductName">
-                        <div class="lt-template emapMappedItem stackLeft">
-                            <i class="fas fa-unlink faButton" event-bind="click:onUnmapClick(VM)"></i>
-                            <div class="emapMappedItemName" data-bind="text:ProductName"></div>
-                            <div data-bind="itemsSource:attributes" data-key="text" class="stackLeft emapItemAttributes">
-                                <div class="lt-template emapItemAttribute" data-bind="text:text"></div>
+                        <div data-bind="text:ElsaMaterialName" class="emapElsaMaterialName"></div>
+                        <i class="far fa-eye-slash faButton" data-bind="class.hidden:hasShopItem" event-bind="click:hideMaterial(ElsaMaterialName)"></i>
+                    </div>
+                    <div class="emapMappedItemsCont">
+                        <div data-bind="itemsSource:Products" data-key="ProductName">
+                            <div class="lt-template emapMappedItem stackLeft">
+                                <i class="fas fa-unlink faButton" event-bind="click:onUnmapClick(VM)" data-bind="class!.hidden:canUnlinkFromMaterial"></i>
+                                <img class="emapErpIcon" data-bind="src:ErpIconUrl; class!.emapErpProductMissing:ErpProductExists" />
+                                <div class="emapMappedItemName" data-bind="text:ProductName"></div>
+                                <div data-bind="itemsSource:attributes" data-key="text" class="stackLeft emapItemAttributes">
+                                    <div class="lt-template emapItemAttribute stackLeft">
+                                        <div data-bind="text:text"></div>
+                                        <i class="fas fa-info-circle faButton" data-bind="class!.hidden:hasDetail" event-bind="click:onAttributeDetailClick(detailUrl)"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="emapAddMappedItemCont stackLeft" data-bind="class!.hidden:canAddProduct">
+                            <i class="fas fa-plus faButton" event-bind="click:onShowAddItemClick(VM, $addItemForm)" data-bind="class.hidden:addItemFormShown"></i>
+                            <i class="fas fa-times faButton" event-bind="click:onHideAddItemClick(VM, $emapProductPicker, $butSaveMap)" data-bind="class!.hidden:addItemFormShown"></i>
+                            <div class="stackLeft" data-bind="class!.hidden:addItemFormShown">
+                                <div class="autocomplete" lt-name="addItemForm">
+                                    <input lt-name="emapProductPicker" event-bind="change:onProductPickerChange(this, $butSaveMap)" />
+                                </div>
+                                <button class="butSubmit" style="display:none" lt-name="butSaveMap" event-bind="click:setProductMapping(this, VM, $emapProductPicker)"></button>
                             </div>
                         </div>
                     </div>
-                    <div class="emapAddMappedItemCont stackLeft">
-                        <i class="fas fa-plus faButton" event-bind="click:onShowAddItemClick(VM, $addItemForm)" data-bind="class.hidden:addItemFormShown"></i>
-                        <i class="fas fa-times faButton" event-bind="click:onHideAddItemClick(VM, $emapProductPicker, $butSaveMap)" data-bind="class!.hidden:addItemFormShown"></i>
-                        <div class="stackLeft" data-bind="class!.hidden:addItemFormShown">
-                            <div class="autocomplete" lt-name="addItemForm">
-                                <input lt-name="emapProductPicker" event-bind="change:onProductPickerChange(this, $butSaveMap)" />
+                </div>
+
+                <div data-bind="class!.hidden:isKit" class="emapKitDetailView">
+                    <div>
+                        <i class="fas fa-folder-open faButton emapExpandBut" event-bind="click:onCollapseClick(singleProduct.itemId)"></i>
+                        <div class="emapMappedItem stackLeft">                            
+                            <img class="emapErpIcon" data-bind="src:singleProduct.ErpIconUrl; class!.emapErpProductMissing:singleProduct.ErpProductExists" />
+                            <div class="emapMappedItemName" data-bind="text:singleProduct.ProductName"></div>
+                            <div data-bind="itemsSource:singleProduct.attributes" data-key="text" class="stackLeft emapItemAttributes">
+                                <div class="lt-template emapItemAttribute stackLeft">
+                                    <div data-bind="text:text"></div>
+                                    <i class="fas fa-info-circle faButton" data-bind="class!.hidden:hasDetail" event-bind="click:onAttributeDetailClick(detailUrl)"></i>
+                                </div>
+                            </div>                            
+                        </div>
+                        <div class="emapKitContentCont">
+                            <div class="emapKitList" data-bind="itemsSource:singleProduct.KitDefinition.SelectionGroups" data-key="Id">
+                                <div class="lt-template emapKitGroupItem">
+                                    <div class="emapKitGroupName" data-bind="text:Name"></div>
+                                    <div class="emapKitGroupItemsList" data-bind="itemsSource:Items" data-key="Id">
+                                        <div class="lt-template emapKitItem stackLeft">
+                                            <img class="emapErpIcon" data-bind="src:erpIconUrl; class!.emapErpProductMissing:erpProductExists" />
+                                            <div class="emapKitItemName" data-bind="text:ItemName"></div>
+                                        </div> 
+                                    </div>
+                                </div>
                             </div>
-                            <button class="butSubmit" style="display:none" lt-name="butSaveMap" event-bind="click:setProductMapping(this, VM, $emapProductPicker)"></button>
                         </div>
                     </div>
                 </div>
@@ -92,6 +128,10 @@
 
         const self = this;
 
+        emapSearchInput.addEventListener('focus', function () {
+            this.select();
+        });
+
         this.bind(function (mappings) {
             if (!searchPanel.autosuggestSetup) {
                 app.ui.autosuggest(searchPanel, app.EshopMapping.vm.getAllSearchEntries);
@@ -101,11 +141,7 @@
                 
         this.onUnmapClick = function (item) { app.EshopMapping.vm.unmapItem(item.connectedMaterial, item.ProductName); }
 
-        this.onExpandClick = function (itemId, hasMaterial) {
-            if (!hasMaterial) {
-                return;
-            }
-
+        this.onExpandClick = function (itemId) {
             app.EshopMapping.vm.expandItem(itemId);
         }
         this.onCollapseClick = function (itemId) { self.onExpandClick(null, true); }
@@ -113,7 +149,7 @@
         this.onShowAddItemClick = function (record, container) {
             if (!container.autosuggestSetup) {
 
-                app.ui.autosuggest(container, app.EshopMapping.vm.getEshopProducts);
+                app.ui.autosuggest(container, app.EshopMapping.vm.getUnboundEshopProducts);
                 container.autosuggestSetup = true;
             }
             record.addItemFormShown = true;
@@ -163,6 +199,10 @@
                 return;
 
             app.EshopMapping.vm.hideMaterial(name);
+        };
+
+        this.onAttributeDetailClick = function (url) {
+            app.EshopMapping.vm.showAttributeDetail(url);
         };
     });
 </script>

@@ -499,14 +499,14 @@ namespace Elsa.Integration.Erp.Flox
             }
         }
 
-        public List<string> GetProductNames()
+        public ICollection<string> GetProductNames()
         {
             if (!_config.PreferApi)
             {
                 throw new NotSupportedException("Product list is only supported when using API");
             }
 
-            return _apiConnector.LoadProductNames().ToList();            
+            return _apiConnector.LoadProductNames().AsReadOnly();
         }
     }
 }

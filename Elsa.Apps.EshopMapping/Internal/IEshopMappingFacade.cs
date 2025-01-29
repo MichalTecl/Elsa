@@ -10,5 +10,6 @@ namespace Elsa.Apps.EshopMapping.Internal
         List<EshopItemMappingRecord> GetMappings(int erpId, bool reloadErpProducts);
         void Map(int erpId, string elsaMaterialName, string eshopProductName, bool deleteExistingMapping);
         void Unmap(int erpId, string elsaMaterialName, string eshopProductName);
+        List<OrdersPeekModel> PeekOrders(string placedName, int erpId, bool inKits);
     }
 }

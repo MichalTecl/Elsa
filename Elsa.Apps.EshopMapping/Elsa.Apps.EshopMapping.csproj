@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Folder Include="SQL\" />
+    <Folder Include="UI\EshopMapping\Partial\" />
   </ItemGroup>
 
 </Project>

@@ -18,5 +18,8 @@ namespace Elsa.Core.Entities.Commerce.Integration
 
         [NVarchar(-1, true)]
         string ClientData { get; set; }
+
+        [NVarchar(255, true)]
+        string IconUrl { get; set; }
     }
 }

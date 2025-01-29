@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Elsa.Core.Entities.Commerce.Inventory.Kits;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,15 +9,23 @@ namespace Elsa.Apps.EshopMapping.Model
     {
         public string ElsaMaterialName { get; set; }
 
-        public List<MappedProduct> Products { get; } = new List<MappedProduct>();
+        public List<MappedProduct> Products { get; } = new List<MappedProduct>();        
     }
 
     public class MappedProduct
     {
+        public MappedProduct(string erpIconUrl)
+        {
+            ErpIconUrl = erpIconUrl;
+        }
+
         public bool ErpProductExists { get; set; }
         public string ProductName { get; set; }
-        public int OrderCount { get; set; }
-        public string LastOrderedAt { get; set; }
+        public ProductOrderingInfo OrderingInfo { get; set; }
         public bool SeemsAbandoned { get; set; }
+        public List<string> OwningKits { get; } = new List<string>();
+        public string ErpIconUrl { get; }
+
+        public IKitDefinition KitDefinition { get; set; }
     }
 }

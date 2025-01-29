@@ -7,12 +7,12 @@
 }
 
 #emapReloadBut {
-    font-size: 70%;    
+    font-size: 70%;
 }
 
 .srchContChild {
-    margin-left:5px;
-    margin-right:10px;
+    margin-left: 5px;
+    margin-right: 10px;
 }
 
 #eshopMappingEditorUi input {
@@ -80,6 +80,7 @@
     color: #e74c3c;
     font-size: 1.1em;
     margin-left: 8px;
+    margin-right: 8px;
 }
 
 .emapExpandBut {
@@ -239,7 +240,7 @@
 }
 
 .initialPuzzle .emapItemCont .puzzleCont {
-    display:none;
+    display: none;
 }
 
 .initialPuzzle .emapItemCont:hover .puzzleCont {
@@ -320,4 +321,24 @@
     font-weight: bold;
     flex-grow: 1;
     text-align: left; /* Zarovná text doleva pro lepší čitelnost */
+}
+
+.emapErpIcon {
+    display: inline-block; /* Ikona zůstane na řádku */
+    vertical-align: middle; /* Zarovnání s textem */
+    width: 12px; /* Nastavení velikosti ikony */
+    height: 12px; /* Nastavení výšky ikony */
+    margin-left: 8px; /* Mezera mezi ikonou a textem */
+}
+
+.emapErpProductMissing {
+    opacity: 0.6; /* Poloprůhledná ikona */
+    filter: grayscale(100%); /* Ikona v šedých tónech */
+    border: 1px dashed red; /* Červený rámeček jako varování */
+    padding: 2px; /* Prostor mezi ikonou a rámečkem */
+    border-radius: 4px; /* Zaoblené rohy */
+}
+
+.emapItemAttribute > .faButton {
+    margin-left: 4px;
 }

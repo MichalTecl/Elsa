@@ -9,6 +9,7 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                 
         let currentExpandedItemId = null;
         let allEshopProducts = [];
+        let unboundEshopProducts = [];
         let allSearchEntries = [];
         let textFilter = null;
         let showOnlyIncompletes = false;
@@ -27,6 +28,9 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
             self.currentPuzzleValue = currentPickedElsaMaterial || currentPickedEshopProduct;
 
             const pst = (m) => {
+
+                if (m.isKit)
+                    return false;
 
                 // Initially the puzzle is shown only for items where one side is missing
                 if (!currentPickedElsaMaterial && !currentPickedEshopProduct && m.hasMaterial && m.hasShopItem)
@@ -52,7 +56,10 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
 
             self.mappings = allMappings.filter(m => {
 
-                if (showOnlyIncompletes && m.hasShopItem && m.hasMaterial) {
+                if (m.expanded)
+                    return true;
+
+                if (showOnlyIncompletes && m.hasShopItem && (m.hasMaterial || m.isKit)) {
                     return false;
                 }
 
@@ -65,6 +72,13 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                 }
 
                 return true;
+            }).sort((a, b) => {
+                // First sort by sorterGroup
+                if (a.sorterGroup !== b.sorterGroup) {
+                    return a.sorterGroup - b.sorterGroup;
+                }
+                // If sorterGroup is the same, sort by searchTag
+                return a.searchTag.localeCompare(b.searchTag);
             });
 
             updatePuzzleState();
@@ -76,6 +90,10 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
             currentExpandedItemId = itemId;
             self.mappings.forEach(m => {
                 m.expanded = m.itemId === currentExpandedItemId;
+
+                if (!m.expanded)
+                    m.pinned = false;
+
                 m.addItemFormShown = false;
             });
 
@@ -104,6 +122,10 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
             callback(allEshopProducts);
         };
 
+        self.getUnboundEshopProducts = function (query, callback) {
+            callback(unboundEshopProducts);
+        };
+
         self.getProductNameExists = function (name) {
             return allEshopProducts.indexOf(name) > -1;
         };
@@ -120,6 +142,8 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
             textFilter = textQuery;
             showOnlyIncompletes = onlyIncomplete;
             showOnlyMultimaps = onlyMultimaps;
+
+            self.expandItem(null);
 
             showMappings();
         };
@@ -163,7 +187,12 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
 
             allEshopProducts = [];
             allSearchEntries = [];
+            unboundEshopProducts = [];
 
+            let productMap = {};
+            let kitDefinitions = [];
+            let defaultErpIconUrl = null;
+            
             mappings.forEach(m => {
                 m.itemId = m.ElsaMaterialName || m.Products.find(x => !!x.ProductName).ProductName;
                 m.expanded = m.itemId === currentExpandedItemId;
@@ -176,12 +205,23 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
 
                 m.searchTagItems = [];
                 m.searchTagItems.push(m.ElsaMaterialName);
+                m.isKit = false;
 
-
+                m.requiresMapping = true;
+                
                 if (!allSearchEntries.includes(m.ElsaMaterialName))
                     allSearchEntries.push(m.ElsaMaterialName);
 
                 m.Products.forEach(p => {
+
+                    defaultErpIconUrl = defaultErpIconUrl || p.ErpIconUrl;
+
+                    productMap[p.ProductName] = p;
+
+                    if (!m.singleProduct)
+                        m.singleProduct = p;
+
+                    p.canUnlinkFromMaterial = m.hasMaterial;
 
                     if (!allEshopProducts.includes(p.ProductName))
                         allEshopProducts.push(p.ProductName);
@@ -203,11 +243,62 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                     p.connectedMaterial = m.ElsaMaterialName;
                     p.attributes = [];
 
-                    if (p.OrderCount === 0) {
-                        p.attributes.push({ text: "poslední dva roky neobjednáno" });
+                    const statsSrc = p.OrderingInfo || {};
+                    const stats = {
+                        "orderCountNoKit": statsSrc.OrderCountNoKit || 0,
+                        "orderCountInKit": statsSrc.OrderCountInKit || 0,
+                        "lastOrderDtNoKit": statsSrc.LastOrderDtNoKit || '',
+                        "lastOrderDtKit": statsSrc.LastOrderDtKit || ''
+                    };
+                    stats.totalOrders = stats.orderCountInKit + stats.orderCountNoKit;
+
+                    const attr = (text, detailUrl) => {
+                        p.attributes.push({ "text": text, "hasDetail": !!detailUrl, "detailUrl": detailUrl });
+                    };
+
+                    if (!!p.KitDefinition) {
+                        attr("SADA");
+                        kitDefinitions.push(p.KitDefinition);
+                    }
+
+                    if (!p.ErpProductExists)
+                        attr("Produkt neexistuje ve Floxu");
+
+                    if (stats.totalOrders === 0) {
+                        attr("poslední dva roky neobjednáno");
                     } else {
-                        p.attributes.push({ text: p.OrderCount + " objednávek" });                        
-                        p.attributes.push({ text: "Poslední objednávka " + p.LastOrderedAt })
+
+                        if (stats.orderCountInKit === 0) {
+                            attr(stats.orderCountNoKit + " objednávek", '/eshopMapping/peekOrders?kit=false&placedName=' + encodeURIComponent(p.ProductName));
+                            attr("Poslední objednávka " + stats.lastOrderDtNoKit);
+                        } else {
+                                                                                                             
+                            attr(stats.orderCountInKit + " objednávek v sadě", '/eshopMapping/peekOrders?kit=true&placedName=' + encodeURIComponent(p.ProductName));
+                            attr("Poslední objednávka v sadě " + stats.lastOrderDtKit);
+
+                            if (stats.orderCountNoKit > 0) {
+                                attr(stats.orderCountNoKit + " objednávek mimo sady", '/eshopMapping/peekOrders?kit=false&placedName=' + encodeURIComponent(p.ProductName));
+                                attr("Poslední objednávka mimo sady " + stats.lastOrderDtNoKit);
+                            } else {
+                                attr("Žádné objednávky mimo sady");
+                            }
+                        }
+                    }
+
+                    p.OwningKits.forEach(owk => {
+                        p.attributes.push({ text: "Patří do sady \"" + owk + "\"", hasDetail: false });
+                    });
+
+                    if (!!p.KitDefinition) {
+                        p.isKit = true;
+                        m.isKit = true;
+                        m.requiresMapping = false;
+                    } else {
+                        p.isKit = false;
+                    }
+
+                    if (!m.isKit && !m.hasMaterial) {
+                        unboundEshopProducts.push(p.ProductName);
                     }
                 });
 
@@ -218,10 +309,43 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                     m.additionalShopItemsText = "(+" + m.additionalShopItemsCount + ")";
                 }
 
+                m.showMissingMaterial = !(m.isKit || m.hasMaterial);
+                                
+                m.sorterGroup = 0;
+
+                m.canAddProduct = true;
+
+                if (m.isKit) {
+                    m.sorterGroup = 10;
+                    m.canAddProduct = false;
+                }
+                else if (!m.hasShopItem) {
+                    m.sorterGroup = 20;
+                } else if (!m.hasMaterial) {
+                    m.sorterGroup = 30;
+                    m.canAddProduct = false;
+                }
             });
+
+            kitDefinitions.forEach(kd =>
+                kd.SelectionGroups.forEach(sg =>
+                    sg.Items.forEach(
+                        item => {
+                            var sourceProduct = productMap[item.ItemName] || {};
+                            item.erpProductExists = !!sourceProduct.ErpProductExists;
+                            item.erpIconUrl = sourceProduct.ErpIconUrl || allEshopProducts[0].ErpIconUrl;
+                        }
+                    )));
 
             allMappings = mappings;
             showMappings();
+        };
+
+        self.showAttributeDetail = (detailUrl) => {
+            lt.api(detailUrl)                
+                .get((str) => {                    
+                    alert(str);
+                });
         };
 
         let load = (reloadErp) => {

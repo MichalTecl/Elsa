@@ -220,6 +220,14 @@ namespace Elsa.Common.Utils
             return dt.ToString("dd.MM.yyyy");
         }
 
+        public static string FormatDate(DateTime? dt, string defaultValue = null)
+        {
+            if (dt == null) 
+                return defaultValue;
+
+            return FormatDate(dt.Value);
+        }
+
         public static DateTime ParseDateTime(string modelDisplayDt)
         {
             return DateTime.ParseExact(modelDisplayDt, "dd.MM.yy HH:mm", CultureInfo.CurrentCulture);

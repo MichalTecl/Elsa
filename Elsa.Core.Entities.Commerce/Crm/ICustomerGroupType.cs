@@ -19,5 +19,7 @@ namespace Elsa.Core.Entities.Commerce.Crm
         bool IsDistributor { get; set; }
 
         bool IsDisabled { get; set; }
+
+        bool? RequiresSalesRep { get; set; }
     }
 }
