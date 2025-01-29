@@ -11,10 +11,16 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
         let allEshopProducts = [];
         let unboundEshopProducts = [];
         let allSearchEntries = [];
-        let textFilter = null;
-        let showOnlyIncompletes = false;
-        let showOnlyMultimaps = false;
 
+        let textMatcher = null;
+
+        const filters = {
+            "text": { active: true, predicate: (m) => (textMatcher == null) || textMatcher.match(m.searchTag, true) },
+            "incomplete": { active: false, predicate: (m) => !(m.hasShopItem && (m.hasMaterial || m.isKit)) },
+            "multimaps": { active: false, predicate: (m) => m.hasAdditionalShopItems },
+            "kits": { active: false, predicate: (m) => m.isKit }
+        };
+       
         let currentPickedElsaMaterial = null;
         let currentPickedEshopProduct = null;
 
@@ -52,35 +58,24 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
 
         var showMappings = () => {
 
-            var matcher = new TextMatcher(textFilter);
+            var afilters = Object.values(filters).filter(f => f.active).map(f => f.predicate);
 
-            self.mappings = allMappings.filter(m => {
+            self.mappings = allMappings;
 
-                if (m.expanded)
-                    return true;
+            self.mappings.forEach(m => {
+                m.isVisible = true;
 
-                if (showOnlyIncompletes && m.hasShopItem && (m.hasMaterial || m.isKit)) {
-                    return false;
+                if (m.expanded) {
+                    return;
                 }
 
-                if (showOnlyMultimaps && !m.hasAdditionalShopItems) {
-                    return false;
-                }
-                                
-                if ((!!textFilter) && (!matcher.match(m.searchTag, true))) {
-                    return false;
+                var discriminant = afilters.find(f => !f(m));
+                if (!!discriminant) {
+                    m.isVisible = false;
                 }
 
-                return true;
-            }).sort((a, b) => {
-                // First sort by sorterGroup
-                if (a.sorterGroup !== b.sorterGroup) {
-                    return a.sorterGroup - b.sorterGroup;
-                }
-                // If sorterGroup is the same, sort by searchTag
-                return a.searchTag.localeCompare(b.searchTag);
             });
-
+                        
             updatePuzzleState();
             
             lt.notify();
@@ -138,6 +133,7 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
             callback(allSearchEntries);
         };
 
+        /*
         self.filter = function (textQuery, onlyIncomplete, onlyMultimaps) {
             textFilter = textQuery;
             showOnlyIncompletes = onlyIncomplete;
@@ -145,6 +141,18 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
 
             self.expandItem(null);
 
+            showMappings();
+        };
+        */
+
+        self.setTextFilter = (pattern) => {
+            textMatcher = new TextMatcher(pattern);
+
+            showMappings();
+        };
+
+        self.setFilter = (name, active) => {
+            filters[name].active = active;
             showMappings();
         };
 
@@ -334,10 +342,19 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                             var sourceProduct = productMap[item.ItemName] || {};
                             item.erpProductExists = !!sourceProduct.ErpProductExists;
                             item.erpIconUrl = sourceProduct.ErpIconUrl || allEshopProducts[0].ErpIconUrl;
+                            item.isEditing = false;
                         }
                     )));
 
-            allMappings = mappings;
+            allMappings = mappings.sort((a, b) => {
+                // First sort by sorterGroup
+                if (a.sorterGroup !== b.sorterGroup) {
+                    return a.sorterGroup - b.sorterGroup;
+                }
+                // If sorterGroup is the same, sort by searchTag
+                return a.searchTag.localeCompare(b.searchTag);
+            });
+           
             showMappings();
         };
 
@@ -346,6 +363,12 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                 .get((str) => {                    
                     alert(str);
                 });
+        };
+
+        self.updateKitItem = (kitItemId, newItemName) => {
+            lt.api("/eshopMapping/updateKitItem")
+                .query({ kitItemId, newItemName })
+                .post(receiveMappings);
         };
 
         let load = (reloadErp) => {

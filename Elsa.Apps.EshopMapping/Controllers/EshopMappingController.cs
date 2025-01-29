@@ -20,12 +20,14 @@ namespace Elsa.Apps.EshopMapping.Controllers
         private readonly IErpRepository _erpRepository;
         private readonly IEshopMappingFacade _facade;
         private readonly IMaterialRepository _materialRepository;
+        private readonly IKitProductRepository _kitProductRepository;
 
-        public EshopMappingController(IWebSession webSession, ILog log, IErpRepository erpRepository, IEshopMappingFacade facade, IMaterialRepository materialRepository) : base(webSession, log)
+        public EshopMappingController(IWebSession webSession, ILog log, IErpRepository erpRepository, IEshopMappingFacade facade, IMaterialRepository materialRepository, IKitProductRepository kitProductRepository) : base(webSession, log)
         {
             _erpRepository = erpRepository;
             _facade = facade;
             _materialRepository = materialRepository;
+            _kitProductRepository = kitProductRepository;
         }
 
         private int GetErpId()
@@ -49,6 +51,13 @@ namespace Elsa.Apps.EshopMapping.Controllers
         public List<EshopItemMappingRecord> Unmap(string elsaMaterialName, string eshopProductName)
         {
             _facade.Unmap(GetErpId(), elsaMaterialName, eshopProductName);
+            return GetMappings(false);
+        }
+
+        public List<EshopItemMappingRecord> UpdateKitItem(int kitItemId, string newItemName)
+        {
+            _kitProductRepository.UpdateKitItemMapping(kitItemId, newItemName);
+
             return GetMappings(false);
         }
 

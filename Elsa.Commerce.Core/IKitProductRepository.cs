@@ -22,5 +22,7 @@ namespace Elsa.Commerce.Core
         List<KitNoteParseResultModel> ParseKitNotes(long orderId);
 
         ICollection<IKitDefinition> GetKitsByItemName(string itemName);
+
+        void UpdateKitItemMapping(int kitItemId, string newItemName);
     }
 }

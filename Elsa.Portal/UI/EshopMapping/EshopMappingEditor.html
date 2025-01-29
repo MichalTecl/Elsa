@@ -8,19 +8,24 @@
 
         <div class="stackLeft emapRecordSearchCont">
             <div class="autocomplete" id="searchPanel">
-                <input id="emapSearchInput" event-bind="change:filter" />
+                <input id="emapSearchInput" event-bind="change:VM.setTextFilter(this.value)" />
             </div>
             <button class="fa fa-search"></button>
         </div>
         <div class="stackLeft emapRecordSearchCont">
             <div class="srchContChild">
-                <input type="checkbox" id="cbIncompleteOnly" event-bind="change:filter" />
+                <input type="checkbox" id="cbIncompleteOnly" event-bind="change:VM.setFilter('incomplete', this.checked)" />
                 <label for="cbIncompleteOnly">Jen nekompletní</label>
             </div>
 
             <div class="srchContChild">
-                <input type="checkbox" id="cbMultimapsOnly" event-bind="change:filter" />
+                <input type="checkbox" id="cbMultimapsOnly" event-bind="change:VM.setFilter('multimaps', this.checked)" />
                 <label for="cbMultimapsOnly">Jen vícenásobné</label>
+            </div>
+
+            <div class="srchContChild">
+                <input type="checkbox" id="cbKitsOnly" event-bind="change:VM.setFilter('kits', this.checked)" />
+                <label for="cbKitsOnly">Jen sady</label>
             </div>
 
             <button event-bind="click:VM.refreshErp()" id="emapReloadBut" class="srchContChild">Načíst produkty z Floxu</button>
@@ -36,7 +41,7 @@
         </div>
         </div>
     <div id="maplist" data-bind="itemsSource:mappings;class.activePuzzle:isPuzzleActive;class!.initialPuzzle:isPuzzleActive" data-key="itemId">
-        <div class="lt-template emapItemCont">
+        <div class="lt-template emapItemCont" data-bind="class!.hidden:isVisible">
             <div class="emapCollapsedItemCont" data-bind="class.hidden:expanded" >
                 <div class="stackLeft">
                     <i class="fas fa-folder faButton" data-bind="class!.hidden:isKit" event-bind="click:onExpandClick(itemId)"></i>
@@ -109,8 +114,17 @@
                                     <div class="emapKitGroupName" data-bind="text:Name"></div>
                                     <div class="emapKitGroupItemsList" data-bind="itemsSource:Items" data-key="Id">
                                         <div class="lt-template emapKitItem stackLeft">
-                                            <img class="emapErpIcon" data-bind="src:erpIconUrl; class!.emapErpProductMissing:erpProductExists" />
-                                            <div class="emapKitItemName" data-bind="text:ItemName"></div>
+                                            <div class="kitItemMarker" data-bind="text:InTextMarker"></div>
+                                            <img class="emapErpIcon" data-bind="src:erpIconUrl; class!.emapErpProductMissing:erpProductExists;class.hidden:isEditing" />
+                                            <div class="emapKitItemName" data-bind="text:ItemName;class.hidden:isEditing"></div>
+                                            <div>
+                                                <i class="far fa-edit faButton emapKitItemEditBut" event-bind="click:showKitItemEditor(VM, $kitItemEditCont)" data-bind="class.hidden:isEditing"></i>
+                                            </div>
+                                            <div class="autocomplete emapKitItemEditCont stackLeft" lt-name="kitItemEditCont" data-bind="class!.hidden:isEditing">
+                                                <i class="fas fa-times faButton" event-bind="click:cancelKitItemEdit(VM)"></i>
+                                                <input type="text" lt-name="kitItemEditInput" />
+                                                <button class="butSubmit" lt-name="butSaveMap" event-bind="click:confirmKitItemEdit(VM, $kitItemEditInput.value)"></button>
+                                            </div>                                            
                                         </div> 
                                     </div>
                                 </div>
@@ -204,6 +218,27 @@
         this.onAttributeDetailClick = function (url) {
             app.EshopMapping.vm.showAttributeDetail(url);
         };
+
+        this.showKitItemEditor = (record, container) => {
+            if (!container.autosuggestSetup) {
+
+                app.ui.autosuggest(container, app.EshopMapping.vm.getEshopProducts);
+                container.autosuggestSetup = true;
+            }
+            record.isEditing = true;
+            lt.notify();
+        };
+
+        this.cancelKitItemEdit = (record) => {
+            record.isEditing = false;
+            lt.notify();
+        };
+
+        this.confirmKitItemEdit = (record, newItemName) => {
+            record.isEditing = false;
+            app.EshopMapping.vm.updateKitItem(record.Id, newItemName);
+        };
+
     });
 </script>
 <link href="/UI/EshopMapping/EshopMappingEditor.css" rel="stylesheet" />

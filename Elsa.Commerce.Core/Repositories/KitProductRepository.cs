@@ -212,5 +212,43 @@ namespace Elsa.Commerce.Core.Repositories
 
             return kits;
         }
+
+        public void UpdateKitItemMapping(int kitItemId, string newItemName)
+        {
+            newItemName = newItemName?.Trim();
+
+            if (string.IsNullOrWhiteSpace(newItemName))
+                throw new ArgumentNullException("Název položky nesmí být prázdný");
+
+            if(newItemName.Length > 255)
+                throw new ArgumentException("Název položky smí mít nejvíce 255 znaků");
+
+            var all = GetAllKitDefinitions();
+
+            IKitSelectionGroupItem item = null;
+
+            foreach(var kd in all)
+                foreach(var sg in kd.SelectionGroups)
+                    foreach(var i in sg.Items)
+                    {
+                        if (i.Id == kitItemId)
+                        {
+                            item = i;
+                            break;
+                        }
+                    }
+
+            item.ErpProductId = null;
+            item.ItemName = newItemName;
+            m_database.Save(item);
+
+            ClearCache();
+        }
+
+        private void ClearCache()
+        {
+            m_cache.Remove(c_cacheKey);
+            m_cache.Remove(c_itemKitsIndexCacheKey);
+        }
     }
 }

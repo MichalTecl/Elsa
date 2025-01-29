@@ -342,3 +342,73 @@
 .emapItemAttribute > .faButton {
     margin-left: 4px;
 }
+
+/* General Kit Container */
+.emapKitDetailView {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+    .emapKitDetailView .emapMappedItemName {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .emapKitDetailView .emapErpIcon {
+        width: 12px;
+        height: 12px;
+    }
+
+
+
+    .emapKitDetailView .emapKitContentCont {
+        margin-top: 16px;
+        padding-left: 16px;
+        border-left: 2px solid #ddd;
+    }
+
+    .emapKitDetailView .emapKitGroupName {
+        font-weight: bold;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        color: #555;
+    }
+
+    .emapKitDetailView .emapKitItem {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 8px;
+        padding-left: 15px;
+    }
+
+    .emapKitDetailView .emapKitItemName {
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .emapKitDetailView .kitItemMarker {
+        font-size: 0.9rem;
+        color: #119;
+    }
+
+        .emapKitDetailView .kitItemMarker:not(:empty)::after {
+            content: ":";
+        }
+
+        .emapKitDetailView .kitItemMarker:empty {
+            display: none;
+        }
+
+.emapKitItemEditBut {
+    display: none;
+}
+
+.emapKitDetailView .emapKitItem:hover .emapKitItemEditBut {
+    display: block;
+}
