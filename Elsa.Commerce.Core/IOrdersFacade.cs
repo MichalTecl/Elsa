@@ -21,5 +21,6 @@ namespace Elsa.Commerce.Core
         IEnumerable<Tuple<IPurchaseOrder, decimal>> GetOrdersByUsedBatch(BatchKey batch, int pageSize, int pageNumber);
 
         IPurchaseOrder ResolveSingleItemKitSelection(IPurchaseOrder entity);
+        IPurchaseOrder EnsureActualizedOrder(IPurchaseOrder order);
     }
 }

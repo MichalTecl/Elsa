@@ -155,4 +155,11 @@ namespace BwApiClient.Model.Data
         }
     }
 
+    public class OrderLastChangeInfo
+    {
+        /// <summary>
+        /// Date of the last change.
+        /// </summary>
+        public DateTime last_change { get; set; }
+    }
 }

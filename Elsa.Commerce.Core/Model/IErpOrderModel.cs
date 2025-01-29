@@ -91,6 +91,8 @@ namespace Elsa.Commerce.Core.Model
 
         string OrderHash { get; }
 
+        string ErpLastChangeDt { get; }
+
         [NotFk]
         string VatId { get; }
         string CompanyRegistrationId { get; }

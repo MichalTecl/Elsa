@@ -138,7 +138,12 @@ namespace Elsa.Integration.Erp.Flox
             }
 
             return elms.FirstOrDefault()?.Title;
-        }        
+        }
+
+        protected override DateTime ObtainErpLastchangeDate(IErpOrderModel source)
+        {
+            return DateTime.Parse(source.ErpLastChangeDt);
+        }
     }
 }
 

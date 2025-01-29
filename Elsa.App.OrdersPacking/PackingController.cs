@@ -111,9 +111,12 @@ namespace Elsa.App.OrdersPacking
 
                 Log.Info("Objednávka nalezena");
 
+                order = _ordersFacade.EnsureActualizedOrder(order);
+
                 return MapOrder(order);
             }
 
+            filtered = _ordersFacade.EnsureActualizedOrder(filtered);
             return MapOrder(filtered);
         }
 

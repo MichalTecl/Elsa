@@ -42,6 +42,9 @@ namespace BwApiClient.Model
         [Gql("getOrder")]
         Order GetOrder(string order_num);
 
+        [Gql("getOrder")]
+        OrderLastChangeInfo GetOrderLastChangeInfo(string order_num);
+
         /// <summary>
         /// Preinvoice list.
         /// </summary>

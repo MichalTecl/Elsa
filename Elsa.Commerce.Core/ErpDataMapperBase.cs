@@ -155,10 +155,13 @@ namespace Elsa.Commerce.Core
 
             target.VatId = source.VatId;
             target.CompanyRegId = source.CompanyRegistrationId;
+            target.ErpLastChange = ObtainErpLastchangeDate(source);
         }
 
         protected abstract decimal? ObtainPercentDiscountValue(IErpOrderModel source);
         protected abstract string ObtainPercentDiscountText(IErpOrderModel source);
+        protected abstract DateTime ObtainErpLastchangeDate(IErpOrderModel source);
+
 
         protected abstract bool HasDeliveryAddress(IErpOrderModel source);
 

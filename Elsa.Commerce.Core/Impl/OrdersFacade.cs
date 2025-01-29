@@ -18,17 +18,17 @@ namespace Elsa.Commerce.Core.Impl
 {
     public class OrdersFacade : IOrdersFacade
     {
-        private readonly IPurchaseOrderRepository m_orderRepository;
-        private readonly IDatabase m_database;
-        private readonly IErpClientFactory m_clientFactory;
-        private readonly ISession m_session;
-        private readonly IPaymentRepository m_paymentRepository;
-        private readonly ILog m_log;
-        private readonly IMaterialBatchFacade m_batchFacade;
-        private readonly IKitProductRepository m_kitProductRepository;
-        private readonly IMailSender m_mailSender;
-        private readonly ICache m_cache;
-        private readonly IAdHocOrdersSyncProvider m_adhocOrdersSyncProvider;
+        private readonly IPurchaseOrderRepository _orderRepository;
+        private readonly IDatabase _database;
+        private readonly IErpClientFactory _erpClientFactory;
+        private readonly ISession _session;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly ILog _log;
+        private readonly IMaterialBatchFacade _batchFacade;
+        private readonly IKitProductRepository _kitProductRepository;
+        private readonly IMailSender _mailSender;
+        private readonly ICache _cache;
+        private readonly IAdHocOrdersSyncProvider _adhocOrdersSyncProvider;
 
         public OrdersFacade(
             IPurchaseOrderRepository orderRepository,
@@ -39,22 +39,22 @@ namespace Elsa.Commerce.Core.Impl
             ILog log,
             IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository, IMailSender mailSender, ICache cache, IAdHocOrdersSyncProvider adhocOrdersSyncProvider)
         {
-            m_orderRepository = orderRepository;
-            m_database = database;
-            m_clientFactory = clientFactory;
-            m_session = session;
-            m_paymentRepository = paymentRepository;
-            m_log = log;
-            m_batchFacade = batchFacade;
-            m_kitProductRepository = kitProductRepository;
-            m_mailSender = mailSender;
-            m_cache = cache;
-            m_adhocOrdersSyncProvider = adhocOrdersSyncProvider;
+            _orderRepository = orderRepository;
+            _database = database;
+            _erpClientFactory = clientFactory;
+            _session = session;
+            _paymentRepository = paymentRepository;
+            _log = log;
+            _batchFacade = batchFacade;
+            _kitProductRepository = kitProductRepository;
+            _mailSender = mailSender;
+            _cache = cache;
+            _adhocOrdersSyncProvider = adhocOrdersSyncProvider;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
         {
-            var order = m_orderRepository.GetOrder(orderId);
+            var order = _orderRepository.GetOrder(orderId);
             if (order == null)
             {
                 throw new InvalidOperationException("Order not found");
@@ -62,7 +62,7 @@ namespace Elsa.Commerce.Core.Impl
 
             if (paymentId != null)
             {
-                var payment = m_paymentRepository.GetPayment(paymentId.Value);
+                var payment = _paymentRepository.GetPayment(paymentId.Value);
                 if (payment == null)
                 {
                     throw new InvalidOperationException("Platba neexistuje");
@@ -75,21 +75,21 @@ namespace Elsa.Commerce.Core.Impl
                 }
             }
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                m_log.Info("Starting transaction for payment pairing orderId={orderId}, paymentId={paymentId}");
+                _log.Info("Starting transaction for payment pairing orderId={orderId}, paymentId={paymentId}");
                 if (order.ErpId != null)
                 {
                     order.PaymentId = paymentId;
-                    order.PaymentPairingUserId = m_session.User.Id;
+                    order.PaymentPairingUserId = _session.User.Id;
                     order.PaymentPairingDt = DateTime.Now;
-                    m_database.Save(order);
+                    _database.Save(order);
 
-                    m_log.Info($"Order saved to the database in transaction; paymentId={order.PaymentId}, pairngUserId={order.PaymentPairingUserId}, pairingDt={order.PaymentPairingDt}");
+                    _log.Info($"Order saved to the database in transaction; paymentId={order.PaymentId}, pairngUserId={order.PaymentPairingUserId}, pairingDt={order.PaymentPairingDt}");
                 }
                 else
                 {
-                    m_log.Error("Order.ErpId == null");
+                    _log.Error("Order.ErpId == null");
                 }
 
                 if (order.OrderStatusId == OrderStatus.PendingPayment.Id)
@@ -106,11 +106,11 @@ namespace Elsa.Commerce.Core.Impl
                 }
                 else
                 {
-                    m_log.Info($"Order sync skipped - statusId={order.OrderStatusId}");
+                    _log.Info($"Order sync skipped - statusId={order.OrderStatusId}");
                 }
 
                 tx.Commit();
-                m_log.Info("Transaction commited");
+                _log.Info("Transaction commited");
             }
 
             return order;
@@ -118,16 +118,16 @@ namespace Elsa.Commerce.Core.Impl
 
         public IPurchaseOrder SetOrderSent(long orderId)
         {
-            var order = m_orderRepository.GetOrder(orderId);
+            var order = _orderRepository.GetOrder(orderId);
             if (order == null)
             {
                 throw new InvalidOperationException("Order not found");
             }
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 order.PackingDt = DateTime.Now;
-                order.PackingUserId = m_session.User.Id;
+                order.PackingUserId = _session.User.Id;
 
                 foreach (var item in GetAllConcreteOrderItems(order))
                 {
@@ -152,7 +152,7 @@ namespace Elsa.Commerce.Core.Impl
                 if (order.ErpId == null)
                 {
                     order.OrderStatusId = OrderStatus.Sent.Id;
-                    m_database.Save(order);
+                    _database.Save(order);
                 }
                 else
                 {
@@ -177,16 +177,16 @@ namespace Elsa.Commerce.Core.Impl
 
         public void SetOrderSentAsync(long orderId)
         {
-            var order = m_orderRepository.GetOrder(orderId);
+            var order = _orderRepository.GetOrder(orderId);
             if (order == null)
             {
                 throw new InvalidOperationException("Order not found");
             }
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 order.PackingDt = DateTime.Now;
-                order.PackingUserId = m_session.User.Id;
+                order.PackingUserId = _session.User.Id;
 
                 foreach (var item in GetAllConcreteOrderItems(order))
                 {
@@ -211,7 +211,7 @@ namespace Elsa.Commerce.Core.Impl
                 if (order.ErpId == null)
                 {
                     order.OrderStatusId = OrderStatus.Sent.Id;
-                    m_database.Save(order);
+                    _database.Save(order);
                 }
                 else
                 {
@@ -234,11 +234,11 @@ namespace Elsa.Commerce.Core.Impl
                         }
                         catch (Exception ex)
                         {
-                            m_log.Error($"Chyba pri posilani zabalene objednavky", ex);
-                            m_mailSender.Send(order.PackingUser?.EMail ?? m_session.User.EMail, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
+                            _log.Error($"Chyba pri posilani zabalene objednavky", ex);
+                            _mailSender.Send(order.PackingUser?.EMail ?? _session.User.EMail, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
                                 $"Pozor - při dokončení balení objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: '{ex.Message}'\r\nZkontrolujte objednávku ručně.");
 
-                            m_orderRepository.SetProcessBlock(order, OrderProcessingStageNames.Packing, "Předchozí pokus o zabalení této objednávky selhal - je třeba ji odbavit v systému Flox");
+                            _orderRepository.SetProcessBlock(order, OrderProcessingStageNames.Packing, "Předchozí pokus o zabalení této objednávky selhal - je třeba ji odbavit v systému Flox");
                         }
                     });
                 }
@@ -249,21 +249,21 @@ namespace Elsa.Commerce.Core.Impl
 
         public IEnumerable<IPurchaseOrder> GetAndSyncPaidOrders(string shipProvider, bool skipErp = false)
         {
-            m_log.Info($"Nacitam zaplacene objednavky");
+            _log.Info($"Nacitam zaplacene objednavky");
 
             if (!skipErp)
             {
                 try
                 {
-                    m_adhocOrdersSyncProvider.SyncPaidOrders();
+                    _adhocOrdersSyncProvider.SyncPaidOrders();
                 }
                 catch (Exception ex)
                 {
-                    m_log.Error($"AdHoc paid orders sync failed", ex);
+                    _log.Error($"AdHoc paid orders sync failed", ex);
                 }
             }
 
-            foreach (var rpo in m_orderRepository.GetOrdersByStatus(OrderStatus.ReadyToPack))
+            foreach (var rpo in _orderRepository.GetOrdersByStatus(OrderStatus.ReadyToPack))
             {
                 if (!MatchShipmentProvider(rpo, shipProvider))
                     continue;
@@ -271,14 +271,14 @@ namespace Elsa.Commerce.Core.Impl
                 yield return rpo;
             }
 
-            m_log.Info("Hotovo");
+            _log.Info("Hotovo");
         }
 
         public IEnumerable<IOrderItem> GetAllConcreteOrderItems(IPurchaseOrder order)
         {
             foreach (var item in order.Items)
             {
-                var kitItems = m_kitProductRepository.GetKitForOrderItem(order, item).ToList();
+                var kitItems = _kitProductRepository.GetKitForOrderItem(order, item).ToList();
 
                 if (!kitItems.Any())
                 {
@@ -297,16 +297,16 @@ namespace Elsa.Commerce.Core.Impl
         {
             var orderIds = new List<Tuple<long, decimal>>();
 
-            m_database.Sql().Call("GetOrderIdsByUsedBatch").WithParam("@projectId", m_session.Project.Id)
-                .WithParam("@materialId", bqatch.GetMaterialId(m_batchFacade))
-                .WithParam("@batchNumber", bqatch.GetBatchNumber(m_batchFacade))
+            _database.Sql().Call("GetOrderIdsByUsedBatch").WithParam("@projectId", _session.Project.Id)
+                .WithParam("@materialId", bqatch.GetMaterialId(_batchFacade))
+                .WithParam("@batchNumber", bqatch.GetBatchNumber(_batchFacade))
                 .WithParam("@skip", pageSize * pageNumber).WithParam("@take", pageSize).ReadRows<long, int, string, decimal>(
                     (orderId, prio, orderNum, qty) =>
                     {
                         orderIds.Add(new Tuple<long, decimal>(orderId, qty));
                     });
 
-            var entities = m_database.SelectFrom<IPurchaseOrder>()
+            var entities = _database.SelectFrom<IPurchaseOrder>()
                 .Where(o => o.Id.InCsv(orderIds.Select(i => i.Item1)))
                 .Execute().ToList();
 
@@ -326,7 +326,7 @@ namespace Elsa.Commerce.Core.Impl
 
             foreach (var orderItem in entity.Items)
             {
-                var kit = m_kitProductRepository.GetKitForOrderItem(entity, orderItem).OrderBy(k => k.KitItemIndex).ToList();
+                var kit = _kitProductRepository.GetKitForOrderItem(entity, orderItem).OrderBy(k => k.KitItemIndex).ToList();
                 if (!kit.Any())
                 {
                     continue;
@@ -344,14 +344,14 @@ namespace Elsa.Commerce.Core.Impl
                     if (groupItems.Count == 1)
                     {
                         // we can assign this one because there is only one option
-                        m_kitProductRepository.SetKitItemSelection(entity, orderItem, groupItems.Single().Id, kitItem.KitItemIndex);
+                        _kitProductRepository.SetKitItemSelection(entity, orderItem, groupItems.Single().Id, kitItem.KitItemIndex);
                         modified = true;
                         continue;
                     }
 
 
                     // let's see whether we have kit info in the customer note... (here I rely on good caching on the repo side, so it's called over and over again)
-                    var parsedKit = m_kitProductRepository.ParseKitNotes(entity.Id);
+                    var parsedKit = _kitProductRepository.ParseKitNotes(entity.Id);
                     var kitSelection = parsedKit.FirstOrDefault(
                         parsed => parsed.KitDefinitionId == kitItem.KitDefinitionId
                                 && parsed.KitNr == (kitItem.KitItemIndex + 1)
@@ -362,7 +362,7 @@ namespace Elsa.Commerce.Core.Impl
                         var groupItem = groupItems.FirstOrDefault(gi => gi.Id == kitSelection.SelectionGroupItemId);
                         if (groupItem != null)
                         {
-                            m_kitProductRepository.SetKitItemSelection(entity, orderItem, groupItem.Id, kitItem.KitItemIndex);
+                            _kitProductRepository.SetKitItemSelection(entity, orderItem, groupItem.Id, kitItem.KitItemIndex);
                             modified = true;
                         }
                     }
@@ -374,7 +374,7 @@ namespace Elsa.Commerce.Core.Impl
                 return entity;
             }
 
-            return m_orderRepository.GetOrder(entity.Id);
+            return _orderRepository.GetOrder(entity.Id);
         }
 
         private IPurchaseOrder PerformErpActionSafe(
@@ -383,9 +383,9 @@ namespace Elsa.Commerce.Core.Impl
             Action<IPurchaseOrder> validateSyncedOrder,
             string actionLogDescription)
         {
-            m_log.Info($"PerformErpActionSafe started: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription} statusId={order.OrderStatusId} erpStatus={order.ErpStatusName}");
+            _log.Info($"PerformErpActionSafe started: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription} statusId={order.OrderStatusId} erpStatus={order.ErpStatusName}");
 
-            m_database.Save(order);
+            _database.Save(order);
 
             var orderId = order.Id;
 
@@ -394,38 +394,38 @@ namespace Elsa.Commerce.Core.Impl
                 throw new InvalidOperationException("Cannot perform ERP operation for order without ERP");
             }
 
-            var erp = m_clientFactory.GetErpClient(order.ErpId.Value);
+            var erp = _erpClientFactory.GetErpClient(order.ErpId.Value);
 
             try
             {
                 erpAction(erp, order);
-                m_log.Info($"PerformErpActionSafe - erpAction performed ok: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription}");
+                _log.Info($"PerformErpActionSafe - erpAction performed ok: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription}");
             }
             catch (Exception ex)
             {
-                m_log.Error($"PerformErpActionSafe - erpAction failed: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription}", ex);
+                _log.Error($"PerformErpActionSafe - erpAction failed: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription}", ex);
                 throw;
             }
 
-            m_log.Info($"Downloading order from ERP by orderNumber={order.OrderNumber}");
+            _log.Info($"Downloading order from ERP by orderNumber={order.OrderNumber}");
 
             var erpOrder = erp.LoadOrder(order.OrderNumber);
             if (erpOrder == null)
             {
-                m_log.Error($"Downloading order from ERP by orderNumber={order.OrderNumber} failed!");
+                _log.Error($"Downloading order from ERP by orderNumber={order.OrderNumber} failed!");
 
                 throw new InvalidOperationException(
                             $"Nepodarilo se stahnout objednavku '{order.OrderNumber}' ze systemu '{order.Erp?.Description}'");
             }
 
-            var importedOrderId = m_orderRepository.ImportErpOrder(erpOrder);
+            var importedOrderId = _orderRepository.ImportErpOrder(erpOrder);
             if (importedOrderId != orderId)
             {
                 throw new InvalidOperationException(
                             $"Chyba synchronizace objednavky '{order.OrderNumber}' ze systemu '{order.Erp?.Description}'");
             }
 
-            order = m_orderRepository.GetOrder(importedOrderId);
+            order = _orderRepository.GetOrder(importedOrderId);
 
             try
             {
@@ -433,18 +433,18 @@ namespace Elsa.Commerce.Core.Impl
             }
             catch (Exception ex)
             {
-                m_log.Error($"Chyba pri pokusu o zpracovani objednavky '{order.OrderNumber}' po pozadavku na zmenu v systemu '{order.Erp?.Description}': {ex.Message}", ex);
+                _log.Error($"Chyba pri pokusu o zpracovani objednavky '{order.OrderNumber}' po pozadavku na zmenu v systemu '{order.Erp?.Description}': {ex.Message}", ex);
                 throw new InvalidOperationException($"Chyba pri pokusu o zpracovani objednavky '{order.OrderNumber}' po pozadavku na zmenu v systemu '{order.Erp?.Description}': {ex.Message}");
             }
 
-            m_log.Info($"PerformErpActionSafe finished ok; order reloaded from database: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription} statusId={order.OrderStatusId} erpStatus={order.ErpStatusName}");
+            _log.Info($"PerformErpActionSafe finished ok; order reloaded from database: orderId={order.Id} orderNr={order.OrderNumber} action={actionLogDescription} statusId={order.OrderStatusId} erpStatus={order.ErpStatusName}");
 
             return order;
         }
 
         private IEnumerable<IOrderItemMaterialBatch> GetAssignedBatches(long orderItemId)
         {
-            var qry = m_database.SelectFrom<IOrderItemMaterialBatch>()
+            var qry = _database.SelectFrom<IOrderItemMaterialBatch>()
                 .Join(ib => ib.MaterialBatch)
                 .Where(ib => ib.OrderItemId == orderItemId);
 
@@ -456,9 +456,9 @@ namespace Elsa.Commerce.Core.Impl
             if (shipmentProviderName == null)
                 return true;
 
-            var lookup = m_cache.ReadThrough($"shipmentProviderLookup_{m_session.Project.Id}", TimeSpan.FromSeconds(10), () =>
+            var lookup = _cache.ReadThrough($"shipmentProviderLookup_{_session.Project.Id}", TimeSpan.FromSeconds(10), () =>
             {
-                return m_database.SelectFrom<IShipmentProviderLookup>().Where(p => p.ProjectId == m_session.Project.Id).Execute().ToList();
+                return _database.SelectFrom<IShipmentProviderLookup>().Where(p => p.ProjectId == _session.Project.Id).Execute().ToList();
             });
 
             var matching = lookup.Where(lkp => StringUtil.MatchStarWildcard(lkp.ShipMethodWildcardPattern, order.ShippingMethodName))
@@ -470,6 +470,50 @@ namespace Elsa.Commerce.Core.Impl
                 throw new Exception($"U objednávky {order.OrderNumber} nelze určit dopravce. ShippingMethodName=\"{order.ShippingMethodName}\"; Nalezení dopravci:[{string.Join(",", matching)}]");
 
             return string.Equals(matching[0], shipmentProviderName, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        public IPurchaseOrder EnsureActualizedOrder(IPurchaseOrder order)
+        {
+            _log.Info($"Ensuring that order is actualised - Id={order.Id}, OrderNr={order.OrderNumber} ErpLastchange={(order.ErpLastChange?.ToString() ?? "null")}");
+
+            var localLastChange = order.ErpLastChange ?? _cache.ReadThrough(
+                    $"LastOrdersSyncDt_{_session.Project.Id}", 
+                    TimeSpan.FromMinutes(1),
+                    () => _orderRepository.GetLastSuccessSyncDt(order.ErpId.Ensure($"Order {order.Id} {order.OrderNumber} ErpId == null")) ?? DateTime.MinValue
+                );
+
+            _log.Info($"localLastchange is considered to be {localLastChange}");
+
+            try
+            {
+                var erp = _erpClientFactory.GetErpClient(order.ErpId.Value);
+                var erpLastChange = erp.ObtainOrderLastChange(order.OrderNumber);
+
+                _log.Info($"order {order.OrderNumber}: localLastChange={localLastChange}, erpLastChange={erpLastChange}");
+
+                if (localLastChange >= erpLastChange)
+                {
+                    _log.Info($"Local version of order {order.OrderNumber} is actual");
+                    return order;
+                }
+                
+                _log.Info($"Local version of order {order.OrderNumber} is outdated");
+
+                var erpOrder = erp.LoadOrder(order.OrderNumber);
+                var impId = _orderRepository.ImportErpOrder(erpOrder);
+
+                if (impId != order.Id)
+                {
+                    _log.Error($"This is weird - updated order got another id {order.Id} x {impId}");
+                }
+
+                return _orderRepository.GetOrder(impId);
+            }
+            catch (Exception ex)
+            {
+                _log.Error($"Getting order from ERP failed: {ex.Message}", ex);
+                return order;
+            }
         }
     }
 }

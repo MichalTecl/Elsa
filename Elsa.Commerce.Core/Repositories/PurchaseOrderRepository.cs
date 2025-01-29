@@ -524,6 +524,7 @@ namespace Elsa.Commerce.Core.Repositories
                 .Where(h => h.ErpId == erpId)
                 .Where(h => h.EndDt != null)
                 .OrderByDesc(h => h.StartDt)
+                .Take(1)
                 .Execute()
                 .FirstOrDefault()?
                 .StartDt;

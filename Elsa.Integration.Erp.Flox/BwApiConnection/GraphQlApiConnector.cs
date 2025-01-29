@@ -41,7 +41,14 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
            
             return Map(CallApi(a => a.GetOrder(orderNumber)));
         }
-                
+
+        public DateTime GetOrderLastChangeDt(string orderNumber)
+        {
+            var info = CallApi(a => a.GetOrderLastChangeInfoAsync(orderNumber)).Ensure($"Order {orderNumber} not avaliable in ERP");
+
+            return info.last_change;
+        }
+
         public List<IErpOrderModel> LoadOrders(DateTime changedFrom, int? orderStatusId = null)
         {
             _log.Info($"Loading orders changed after {changedFrom}");

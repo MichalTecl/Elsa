@@ -9,6 +9,7 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Common.Communication;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.Erp.Flox.BwApiConnection;
@@ -507,6 +508,17 @@ namespace Elsa.Integration.Erp.Flox
             }
 
             return _apiConnector.LoadProductNames().AsReadOnly();
+        }
+
+        public DateTime ObtainOrderLastChange(string orderNumber)
+        {
+            if (!_config.PreferApi)
+            {
+                var order  = LoadOrder(orderNumber)?.Ensure();
+                return DateTime.Parse(order.ErpLastChangeDt);
+            }
+
+            return _apiConnector.GetOrderLastChangeDt(orderNumber);
         }
     }
 }

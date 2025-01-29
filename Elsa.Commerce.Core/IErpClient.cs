@@ -27,6 +27,8 @@ namespace Elsa.Commerce.Core
 
         IErpOrderModel LoadOrder(string orderNumber);
 
+        DateTime ObtainOrderLastChange(string orderNumber);
+
         void MakeOrderSent(IPurchaseOrder po);
 
         IEnumerable<IErpCustomerModel> LoadCustomers();

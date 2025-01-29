@@ -198,6 +198,8 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection.Model
 
         public string CompanyRegistrationId => _source.customer.company_reg_id;
 
+        public string ErpLastChangeDt => ToDtStr(_source.last_change);
+
         public void SetDebugNumber(string nnum)
         {
             throw new NotImplementedException();

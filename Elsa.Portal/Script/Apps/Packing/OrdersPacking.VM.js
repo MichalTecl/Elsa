@@ -27,11 +27,15 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             return;
         }
 
+
+        /*
+        this (async load of internal note) was disabled with implementation of orders refreshing before each packing...
         self.loadedIntNotes = {};
 
         self.loadingInternalNote = true;
         lt.notify();
 
+        
         lt.api("/ordersPacking/getMostRecentInternalNote").silent().query({ "orderId": orderId }).get(function (note) {
 
             console.log(note);
@@ -46,6 +50,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             self.loadingInternalNote = false;           
 
         });
+        */
 
     };
 

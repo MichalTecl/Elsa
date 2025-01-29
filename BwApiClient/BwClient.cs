@@ -118,6 +118,12 @@ namespace BwApiClient
             return await Execute(_orderQuery.WithVariable("orderNr", orderNumber));
         }
 
+        private static readonly IQuery<OrderLastChangeInfo> _orderLastChangeQuery = _builder.Build(q => q.GetOrderLastChangeInfo(QueryVariable.Pass<string>("orderNr")));
+        public async Task<OrderLastChangeInfo> GetOrderLastChangeInfoAsync(string orderNr)
+        {
+            return await Execute(_orderLastChangeQuery.WithVariable("orderNr", orderNr));
+        }
+
         private static readonly IQuery<OrderStatusInfo> _orderStatusChange = _builder.BuildMutation(q =>
         q.ChangeOrderStatus(
             QueryVariable.Pass<string>("$orderNr"),
