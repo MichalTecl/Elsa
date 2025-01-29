@@ -1,10 +1,4 @@
-﻿USE [Elsa]
-GO
-
-/****** Object:  StoredProcedure [dbo].[insp_missingSalesRep]    Script Date: 1/29/2025 10:10:16 AM ******/
-SET ANSI_NULLS ON
-GO
-IF EXISTS(SELECT TOP 1 1 FROM sys.procedures WHERE name = 'insp_missingSalesRep')
+﻿IF EXISTS(SELECT TOP 1 1 FROM sys.procedures WHERE name = 'insp_missingSalesRep')
 	DROP PROCEDURE insp_missingSalesRep;
 
 GO
