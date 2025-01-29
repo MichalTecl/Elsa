@@ -116,6 +116,7 @@
     <Content Include="SQL\20230716_002_CRM_GetSalesRepresentativeReport.sql" />
     <Content Include="SQL\20230716_003_RegisterCrmWidget.sql" />
     <Content Include="SQL\20240813_001_vwSnoozedDistributors.sql" />
+    <Content Include="SQL\20250129_001_insp_missingSalesRep.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
