@@ -82,6 +82,7 @@
     <Compile Include="Common\IBaseCalendar.cs" />
     <Compile Include="Common\ICurrency.cs" />
     <Compile Include="Common\ICurrencyConversion.cs" />
+    <Compile Include="Common\ICustomerRelatedEntity.cs" />
     <Compile Include="Common\IEntityComment.cs" />
     <Compile Include="Common\IHasAuthor.cs" />
     <Compile Include="Common\IIntIdEntity.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="Core\IChangeControlEntity.cs" />
     <Compile Include="Core\IProjectRelatedEntity.cs" />
     <Compile Include="Crm\ICustomer.cs" />
+    <Compile Include="Crm\ICustomerChangeLog.cs" />
     <Compile Include="Crm\ICustomerEmailChange.cs" />
     <Compile Include="Crm\ICustomerGroup.cs" />
     <Compile Include="Crm\ICustomerGroupType.cs" />

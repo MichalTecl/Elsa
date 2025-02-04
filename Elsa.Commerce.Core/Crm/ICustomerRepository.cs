@@ -8,6 +8,7 @@ using Elsa.Commerce.Core.Crm.Model;
 using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Crm;
+using Elsa.Core.Entitites.Crm;
 
 namespace Elsa.Commerce.Core.Crm
 {
@@ -16,15 +17,11 @@ namespace Elsa.Commerce.Core.Crm
         void SyncCustomers(IEnumerable<IErpCustomerModel> source);
 
         void SyncShadowCustomers();
-
-        void PutComment(int customerId, string body);
-
+                
         CustomerOverview GetOverview(string email);
 
         IEnumerable<CustomerOverview> GetOverviews(IEnumerable<string> emails);
-
-        void UpdateNewsletterSubscribersList(string sourceName, Dictionary<string, bool> actualSubscriers);
-
+                
         List<string> GetSubscribersToSync(string sourceName);
 
         Dictionary<string, ICustomerGroupType> GetCustomerGroupTypes();
@@ -32,8 +29,9 @@ namespace Elsa.Commerce.Core.Crm
         Dictionary<int, IAddress> GetDistributorDeliveryAddressesIndex();
 
         Dictionary<int, string> GetCustomerSalesRepresentativeEmailIndex();
-
-        void SaveCustomerSalesRep(int customerId, string salesRepEmail);
-        void SnoozeCustomer(int customerId);
+               
+        void SnoozeCustomer(int customerId);    
+        
+        ICustomerChangeLog LogCustomerChange(int customerId, string field, object oldValue, object newValue, string groupingKey = null);
     }
 }

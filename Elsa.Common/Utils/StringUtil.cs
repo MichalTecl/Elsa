@@ -195,7 +195,7 @@ namespace Elsa.Common.Utils
             return $"{FormatDecimal(value)}{unit}";
         }
 
-        public static string Limit(this string inp, int len)
+        public static string Limit(this string inp, int len, string rightSideCutMarker = "")
         {
             if (string.IsNullOrEmpty(inp))
             {
@@ -204,7 +204,7 @@ namespace Elsa.Common.Utils
 
             if (inp.Length > len)
             {
-                return inp.Substring(0, len);
+                return string.Concat(inp.Substring(0, len - rightSideCutMarker.Length), rightSideCutMarker);
             }
 
             return inp;

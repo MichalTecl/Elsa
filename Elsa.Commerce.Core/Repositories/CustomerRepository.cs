@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Dapper;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Commerce.Core.Crm.Model;
@@ -16,7 +18,8 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Crm;
-
+using Elsa.Core.Entitites.Crm;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
@@ -38,6 +41,8 @@ namespace Elsa.Commerce.Core.Repositories
 
         public void SyncCustomers(IEnumerable<IErpCustomerModel> source)
         {
+            var changeLogGroupingTag = $"Import_{Guid.NewGuid()}";
+
             var allDbCustomers =
                 m_database.SelectFrom<ICustomer>().Where(c => c.ProjectId == m_session.Project.Id).Execute().OrderByDescending(i => i.Id).ToList();
 
@@ -48,7 +53,7 @@ namespace Elsa.Commerce.Core.Repositories
                     allDbCustomers.FirstOrDefault(s => s.Email.Equals(src.Email, StringComparison.InvariantCultureIgnoreCase) && string.IsNullOrEmpty(s.ErpUid))
                     ?? m_database.New<ICustomer>();
 
-                SyncCustomer(src, trg);
+                SyncCustomer(src, trg, changeLogGroupingTag);
             }
         }
 
@@ -56,12 +61,7 @@ namespace Elsa.Commerce.Core.Repositories
         {
             m_database.Sql().Call("SyncShadowCustomers").WithParam("@projectId", m_session.Project.Id).NonQuery();
         }
-
-        public void PutComment(int customerId, string body)
-        {
-            throw new NotImplementedException();
-        }
-
+                
         public CustomerOverview GetOverview(string email)
         {
             return GetOverviews(new[] { email }).FirstOrDefault();
@@ -173,144 +173,96 @@ namespace Elsa.Commerce.Core.Repositories
             m_database.Save(customer);
         }
 
-        private void SyncCustomer(IErpCustomerModel src, ICustomer trg)
+        private void SyncCustomer(IErpCustomerModel src, ICustomer trg, string changeLogGroupingTag)
         {
-            var changed = false;
+            var changes = new List<ICustomerChangeLog>();
+
+            void LogChange(string field, object oldVal, object newVal)
+            {
+                if (trg.Id == 0)
+                    return;
+
+                changes.Add(CreateChangeLog(trg.Id, field, oldVal, newVal, changeLogGroupingTag));
+            }
+
+            T TrackChange<T>(string name, Func<ICustomer, T> oldValueGetter, Func<IErpCustomerModel, T> newValueGetter, bool allowOverwriteByNull = false, Func<T, T, bool> comparer = null, Action<IErpCustomerModel, ICustomer> customOnChanged = null)
+            {
+                comparer = comparer ?? new Func<T, T, bool>((a, b) => (a?.Equals(b) == true) || (a == null && b == null));
+                
+                var oldVal = oldValueGetter(trg);
+                var newVal = newValueGetter(src);
+                if (newVal == null)
+                    return oldVal;
+
+                if (comparer(oldVal, newVal))
+                    return newVal;
+
+                LogChange(name, oldVal, newVal);
+
+                customOnChanged?.Invoke(src, trg);
+
+                return newVal;
+            }
                         
             if (trg.Id == 0)
-            {
-                changed = true;
+            {                
                 trg.FirstContactDt = GetFirstContact(src.Email);
             }
 
             var ename = src.IsCompany ? (src.Name ?? src.Email) : $"{src.Name} {src.Surname}".Trim();
+            trg.Name = TrackChange("Jméno", t => t.Name, _ => ename);
 
-            if (trg.Name != ename) 
-            {
-                changed = true;
-                trg.Name = ename ?? trg.Name;
-            }
-            
-            if (!src.Email.Equals(trg.Email, StringComparison.InvariantCultureIgnoreCase))
-            {                
-                if (!string.IsNullOrEmpty(trg.Email)) 
+            trg.Email = TrackChange("Email", t => t.Email, s => s.Email, comparer: (a, b) => a?.Equals(b, StringComparison.InvariantCultureIgnoreCase) == true, 
+                customOnChanged: (s, t) => {
+                var changeRecord = m_database.New<ICustomerEmailChange>(ch =>
                 {
-                    var changeRecord = m_database.New<ICustomerEmailChange>(ch =>
-                    {
-                        ch.ChangeDt = DateTime.Now;
-                        ch.OldEmail = trg.Email;
-                        ch.NewEmail = src.Email;
-                        ch.ErpUid = src.ErpCustomerId;
-                        ch.ProjectId = m_session.Project.Id;
-                    });
-                    m_database.Save(changeRecord);
-                }
+                    ch.ChangeDt = DateTime.Now;
+                    ch.OldEmail = trg.Email;
+                    ch.NewEmail = src.Email;
+                    ch.ErpUid = src.ErpCustomerId;
+                    ch.ProjectId = m_session.Project.Id;
+                });
+                m_database.Save(changeRecord);
+            });
 
-                trg.Email = src.Email;
-                changed = true;
-            }
-
-            if ((trg.Phone != src.Phone) && !string.IsNullOrWhiteSpace(src.Phone))
-            {
-                trg.Phone = src.Phone;
-                changed = true;
-            }
-                        
-            if ((trg.LastActivationDt == null) && src.IsActive)
-            {
-                trg.LastActivationDt = DateTime.Now;
-                changed = true;
-            }
+            trg.LastActivationDt = TrackChange(
+                "Datum aktivace účtu", 
+                t => t.LastActivationDt, 
+                s => s.IsActive ? (DateTime?)DateTime.Now : null, 
+                comparer: (_, __) => !((trg.LastActivationDt == null) && src.IsActive));
 
             if ((trg.LastDeactivationDt == null) && (trg.LastActivationDt != null) && (!src.IsActive))
             {
+                LogChange("Datum deaktivace účtu", trg.LastDeactivationDt, DateTime.Now); 
                 trg.LastDeactivationDt = DateTime.Now;
-                changed = true;
             }
 
+            trg.Phone = TrackChange("Telefon", t => t.Phone, s => s.Phone);
+            
             if (!trg.IsRegistered)
             {
+                LogChange("Datum registrace", DateTime.Now, null);
                 trg.IsRegistered = true;
-                trg.RegistrationDt = DateTime.Now;
-                changed = true;
-            }
-                        
-            if (trg.IsDistributor != src.IsDistributor)
-            {
-                trg.IsDistributor = src.IsDistributor;
-                changed = true;
+                trg.RegistrationDt = DateTime.Now;                
             }
 
-            if (trg.VatId != src.VatId) 
-            {
-                trg.VatId = src.VatId;
-                changed = true;
-            }
-
-            if(trg.CompanyRegistrationId != src.CompanyRegistrationId) 
-            {
-                trg.CompanyRegistrationId = src.CompanyRegistrationId;
-                changed = true;
-            }
-
-            if (trg.CompanyName != src.CompanyName)
-            {
-                trg.CompanyName = src.CompanyName;
-                changed = true;
-            }
-
-            if (trg.Street != src.Street)
-            {
-                trg.Street = src.Street;
-                changed = true;
-            }
-
-            if (trg.DescriptiveNumber != src.DescriptiveNumber)
-            {
-                trg.DescriptiveNumber = src.DescriptiveNumber;
-                changed = true;
-            }
-
-            if (trg.OrientationNumber != src.OrientationNumber)
-            {
-                trg.OrientationNumber = src.OrientationNumber;
-                changed = true;
-            }
-
-            if (trg.City != src.City)
-            {
-                trg.City = src.City;
-                changed = true;
-            }
-
-            if (trg.Zip != src.Zip)
-            {
-                trg.Zip = src.Zip;
-                changed = true;
-            }
-
-            if (trg.Country != src.Country)
-            {
-                trg.Country = src.Country;
-                changed = true;
-            }
-
-            if (trg.MainUserEmail != src.MainUserEmail) 
-            {
-                trg.MainUserEmail = src.MainUserEmail;
-                changed = true;
-            }
-
-            if (trg.IsCompany != src.IsCompany)
-            {
-                trg.IsCompany = src.IsCompany;
-                changed = true;
-            }
-
+            trg.IsDistributor = TrackChange("Velkoodběratel", t => t.IsDistributor, s => s.IsDistributor);
+            trg.VatId = TrackChange("DIČ", t => t.VatId, s => s.VatId);           
+            trg.CompanyRegistrationId = TrackChange("IČO", t => t.CompanyRegistrationId, s => s.CompanyRegistrationId);
+            trg.CompanyName = TrackChange("Název firmy", t => t.CompanyName, s => s.CompanyName);
+            trg.Street = TrackChange("Ulice", t => t.Street, s => s.Street);
+            trg.DescriptiveNumber = TrackChange("Č.P.", t => t.DescriptiveNumber, s => s.DescriptiveNumber);
+            trg.OrientationNumber = TrackChange("Č.O.", t => t.DescriptiveNumber, s => s.DescriptiveNumber);
+            trg.City = TrackChange("Město", t => t.City, s => s.City);
+            trg.Zip = TrackChange("PSČ", t => t.Zip, s => s.Zip);
+            trg.Country = TrackChange("Země", t => t.Country, s => s.Country);
+            trg.MainUserEmail = TrackChange("1. Kontaktní osoba - email", t => t.MainUserEmail, s => s.MainUserEmail);
+            trg.IsCompany = TrackChange("Firma", t => t.IsCompany, s => s.IsCompany);
+            
             if ((trg.DisabledDt != null) != src.IsDisabled) 
-            {
+            {                
+                LogChange("Datum deaktivace v systému", trg.DisabledDt, src.IsDisabled ? DateTime.Now : (DateTime?)null);
                 trg.DisabledDt = src.IsDisabled ? DateTime.Now : (DateTime?)null;
-                changed = true;
             }
 
             if (trg.NewsletterSubscriber != src.IsNewsletterSubscriber)
@@ -320,42 +272,30 @@ namespace Elsa.Commerce.Core.Repositories
                 {
                     trg.NewsletterSubscriber = src.IsNewsletterSubscriber;
                     if (src.IsNewsletterSubscriber)
-                    {
+                    {                        
+                        LogChange("Datum přihlášení odběru newsletteru", trg.NewsletterSubscriptionDt, DateTime.Now);
                         trg.NewsletterSubscriptionDt = DateTime.Now;
                     }
                     else
-                    {
+                    {                        
+                        LogChange("Datum odhlášení odběru newsletteru", trg.NewsletterUnsubscribeDt, DateTime.Now);
                         trg.NewsletterUnsubscribeDt = DateTime.Now;
                     }
-
-                    changed = true;
                 }
             }
 
-            var nick = GetNick(trg);
-            if (nick != trg.Nick)
-            {
-                trg.Nick = nick;
-                changed = true;
-            }
+            trg.Nick = TrackChange("Zkratka v systému", t => t.Nick, _ => GetNick(trg));
+            trg.SearchTag = TrackChange("Search Tag", t => t.SearchTag, s => GetSearchTag(src));
+            trg.ErpUid = TrackChange("ERPUID", t => t.ErpUid, s => s.ErpCustomerId);
 
-            var searchTag = GetSearchTag(src);
-            if (trg.SearchTag != searchTag)
-            {
-                trg.SearchTag = searchTag;
-                changed = true;
-            }
-                        
-            if (trg.ErpUid != src.ErpCustomerId) 
-            {
-                trg.ErpUid = src.ErpCustomerId;
-                changed = true;
-            }
-                        
-            if (changed)
+            var isInsert = trg.Id == 0;
+            if (changes.Count > 0 || isInsert)
             {
                 trg.LastImportDt = DateTime.Now;
                 SaveCustomer(trg);
+
+                if (isInsert)
+                    LogChange("Záznam vytvořen", null, DateTime.Now);
             }
 
             var importedGroups = (src.Groups ?? string.Empty).Split(',').Select(g => g.Trim()).Where(g => !string.IsNullOrWhiteSpace(g)).Distinct().ToList();
@@ -372,6 +312,8 @@ namespace Elsa.Commerce.Core.Repositories
                 m_database.Save(ng);
                 existingGroups.Add(ng);
                 m_log.Info($"Customer {trg.Name} added to group {ng.ErpGroupName}");
+
+                LogChange($"Členem kategorie {ng.ErpGroupName}", false, true);
             }
 
             foreach(var toDelete in existingGroups) 
@@ -381,9 +323,25 @@ namespace Elsa.Commerce.Core.Repositories
 
                 m_database.Delete(toDelete);
                 m_log.Info($"Customer {trg.Name} removed from group {toDelete.ErpGroupName}");
+
+                LogChange($"Členem kategorie {toDelete.ErpGroupName}", true, false);
             }
 
-            SaveCustomerSalesRep(trg.Id, src.SalesRepresentativeEmail);
+            SaveCustomerSalesRep(trg.Id, src.SalesRepresentativeEmail, (old, neue) =>
+            {
+                LogChange("OZ", old, neue);
+            });
+
+            if (changes.Count > 0)
+            {
+                var key = Guid.NewGuid().ToString();
+                foreach(var c in changes)
+                {
+                    c.GroupingKey = key;
+                }
+
+                m_database.SaveAll(changes);
+            }
         }
 
         private string GetNick(ICustomer trg)
@@ -435,100 +393,7 @@ namespace Elsa.Commerce.Core.Repositories
         {
             return StringUtil.NormalizeSearchText(1000, cm.Name, cm.Email, cm.Surname, cm.Phone);
         }
-
-        public void UpdateNewsletterSubscribersList(string sourceName, Dictionary<string, bool> actualSubscriers)
-        {
-            var localSubscribers = m_database.SelectFrom<INewsletterSubscriber>().Where(s => s.ProjectId == m_session.Project.Id && s.SourceName == sourceName).Execute().ToList();
-            var customers = m_database
-                .SelectFrom<ICustomer>().Where(c => c.ProjectId == m_session.Project.Id)
-                .Execute()
-                .ToList();
-
-            void update(string email, bool status, bool updateCustomerTable) 
-            {
-                email = email.Trim().ToLowerInvariant();
-
-                var localRecord = localSubscribers.FirstOrDefault(local => local.Email.Equals(email));
                 
-                if ((localRecord != null) && (status == (localRecord.UnsubscribeDt == null)))
-                    return;
-
-                m_log.Info($"Newsletter list member update received: {email} = {(status ? "SUBSCRIBED" : "UNSUBSCRIBED")}");
-
-                localRecord = localRecord ?? m_database.New<INewsletterSubscriber>();
-                localRecord.Email = email;
-                localRecord.ProjectId = m_session.Project.Id;
-                localRecord.SourceName = sourceName;
-
-                if (status)
-                {
-                    localRecord.UnsubscribeDt = null;
-                    localRecord.SubscribeDt = DateTime.Now;
-                }
-                else
-                {
-                    localRecord.UnsubscribeDt = DateTime.Now;
-                }
-
-                m_database.Save(localRecord);
-
-                if (updateCustomerTable)
-                {
-                    var localCustomer = customers.FirstOrDefault(lc => lc.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase)) ?? m_database.New<ICustomer>();
-
-                    if (status)
-                    {
-                        if (localCustomer.NewsletterSubscriber && (localCustomer.NewsletterSubscriptionDt != null))
-                            return;
-                    }
-                    else
-                    {
-                        if ((!localCustomer.NewsletterSubscriber) && (localCustomer.NewsletterUnsubscribeDt != null))
-                            return;
-                    }
-
-                    localCustomer.ProjectId = m_session.Project.Id;
-                    localCustomer.Email = email;
-                    
-                    if(localCustomer.Id < 1)
-                    {
-                        localCustomer.FirstContactDt = DateTime.Now;
-                        localCustomer.Nick = GetNick(localCustomer);
-                        localCustomer.SearchTag = StringUtil.NormalizeSearchText(1000, email);
-                    }
-
-                    localCustomer.NewsletterSubscriber = status;
-                    if (status)
-                    {                     
-                        localCustomer.NewsletterSubscriptionDt = DateTime.Now;
-                        localCustomer.NewsletterUnsubscribeDt = null;
-                    }
-                    else 
-                    {                        
-                        localCustomer.NewsletterUnsubscribeDt = DateTime.Now;
-                    }
-
-                    m_database.Save(localCustomer);
-                }
-            }
-
-            // 1. save received data to db
-            foreach (var actual in actualSubscriers)
-            {
-                update(actual.Key, actual.Value, true);
-            }
-
-            var notReceived = localSubscribers
-                .Where(l => l.UnsubscribeDt == null)
-                .Select(l => l.Email.Trim().ToLowerInvariant())
-                .Where(local => !actualSubscriers.ContainsKey(local)).ToList();
-            
-            foreach(var nr in notReceived)
-            {
-                update(nr, false, false);
-            }           
-        }
-
         public List<string> GetSubscribersToSync(string sourceName)
         {
             var sql = @"SELECT cus.Email
@@ -586,7 +451,7 @@ namespace Elsa.Commerce.Core.Repositories
             });
         }
 
-        public void SaveCustomerSalesRep(int customerId, string salesRepEmail)
+        public void SaveCustomerSalesRep(int customerId, string salesRepEmail, Action<string, string> onChange)
         {
             if (string.IsNullOrWhiteSpace(salesRepEmail))
                 salesRepEmail = null;
@@ -612,6 +477,8 @@ namespace Elsa.Commerce.Core.Repositories
                 .NonQuery();
 
             m_cache.Remove(GetSalesRepIndexCacheKey());
+
+            onChange(existingSrep, salesRepEmail);
         }
 
         private string GetSalesRepIndexCacheKey() 
@@ -626,7 +493,17 @@ namespace Elsa.Commerce.Core.Repositories
             rec.CustomerId = customerId;
             rec.SetDt = DateTime.Now;
 
+            LogCustomerChange(customerId, "Odložit do další objednávky", null, DateTime.Now);
+
             m_database.Save(rec);
+        }
+
+        public ICustomerChangeLog LogCustomerChange(int customerId, string field, object oldValue, object newValue, string groupingKey = null)
+        {
+            var rec = CreateChangeLog(customerId, field, oldValue, newValue, groupingKey);
+            m_database.Save(rec);
+
+            return rec;
         }
 
         private class AddressModel : IAddress
@@ -652,5 +529,33 @@ namespace Elsa.Commerce.Core.Repositories
             public string Zip { get; set; }
         }       
 
+        private ICustomerChangeLog CreateChangeLog(int customerId, string field, object oldValue, object newValue, string groupingKey = null)
+        {
+            string GetValueString(object val)
+            { 
+                if (val == null)
+                    return string.Empty;
+
+                if (val is bool x)
+                    return x ? "ANO" : "NE";
+
+                if (val is DateTime dt)
+                    return StringUtil.FormatDateTime(dt);
+
+                return StringUtil.Limit(val.ToString(), 1000, "...");
+            };
+            
+            var record = m_database.New<ICustomerChangeLog>();
+            record.ChangeDt = DateTime.Now;
+            record.AuthorId = m_session.User.Id;
+            record.CustomerId = customerId;
+            record.Field = field;
+            record.OldValue = GetValueString(oldValue);
+            record.NewValue = GetValueString(newValue);
+            record.GroupingKey = groupingKey ?? Guid.NewGuid().ToString();
+
+
+            return record;
+        }
     }
 }
