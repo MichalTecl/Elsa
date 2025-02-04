@@ -271,10 +271,7 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection.Model
                     CheckNotNull(li.ProductItemWeight, "lineItem.ProductItemWeight");                    
 
                     if (li.Quantity < 1)
-                        throw new ArgumentException($"lineItem.Quentity <= 0");
-
-                    if (li.TaxPercent <= 0)
-                        throw new ArgumentException($"lineItem.TaxPercent <= 0");
+                        throw new ArgumentException($"lineItem.Quentity <= 0");                        
                 }
 
                 foreach(var pe in OrderPriceElements)

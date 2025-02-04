@@ -241,7 +241,7 @@ namespace Elsa.Commerce.Core.Repositories
             
             if (!trg.IsRegistered)
             {
-                LogChange("Datum registrace", DateTime.Now, null);
+                LogChange("Datum registrace", trg.RegistrationDt, DateTime.Now);
                 trg.IsRegistered = true;
                 trg.RegistrationDt = DateTime.Now;                
             }

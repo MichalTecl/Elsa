@@ -55,6 +55,8 @@
     <Compile Include="CustomersController.cs" />
     <Compile Include="DataReporting\DatasetLoader.cs" />
     <Compile Include="Entities\ICustomerGroupMapping.cs" />
+    <Compile Include="Entities\ICustomerTagAssignment.cs" />
+    <Compile Include="Entities\ICustomerTagType.cs" />
     <Compile Include="Entities\ISalesRepCustomer.cs" />
     <Compile Include="Entities\ISalesRepresentative.cs" />
     <Compile Include="Model\CustomerRelatedItem.cs" />
@@ -65,6 +67,7 @@
     <Compile Include="CrmRegistry.cs" />
     <Compile Include="CrmReportingController.cs" />
     <Compile Include="ReportBuilder\ReportPackage.cs" />
+    <Compile Include="Repositories\CustomerTagRepository.cs" />
     <Compile Include="Repositories\SalesRepRepository.cs" />
   </ItemGroup>
   <ItemGroup>
