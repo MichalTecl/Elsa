@@ -7,5 +7,6 @@ namespace Elsa.App.Crm
     public static class CrmUserRights
     {
         public static readonly UserRight ViewCrmWidget = new UserRight(nameof(ViewCrmWidget), "CRM");
+        public static readonly UserRight DistributorsApp = new UserRight(nameof(DistributorsApp), "Velkoodběratelé - přístup do aplikace", ViewCrmWidget);        
     }
 }

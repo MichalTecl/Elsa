@@ -13,49 +13,50 @@ using System.Threading.Tasks;
 
 namespace Elsa.Common.Data
 {
-    public class AutoRepo<T> where T:class, IProjectRelatedEntity, IIntIdEntity
+    public class AutoRepo<T> where T:class, IIntIdEntity
     {
         private readonly ISession _session;
         private readonly IDatabase _database;
         private readonly ICache _cache;
-        private readonly Func<IDatabase, IQueryBuilder<T>> _selectQuery;
+        private readonly Func<IDatabase, IQueryBuilder<T>, IQueryBuilder<T>> _selectQueryModifier;
         private readonly TimeSpan? _cacheTtl;
         private readonly string _cacheKeySuffix;
 
-        public AutoRepo(ISession session, IDatabase database, ICache cache, Func<IDatabase, IQueryBuilder<T>> selectQuery, TimeSpan? cacheTtl, string cacheKeySuffix)
+        public AutoRepo(ISession session, 
+            IDatabase database, 
+            ICache cache, 
+            Func<IDatabase, IQueryBuilder<T>, IQueryBuilder<T>> selectQueryModifier = null, 
+            int? cacheTtlSeconds = 600, 
+            string cacheKeySuffix = "")
         {
             _session = session;
             _database = database;
             _cache = cache;
-            _selectQuery = selectQuery;
-            _cacheTtl = cacheTtl;            
+            _selectQueryModifier = selectQueryModifier;
+            _cacheTtl = (cacheTtlSeconds ?? 0) <= 0 ? null : (TimeSpan?)TimeSpan.FromMinutes(cacheTtlSeconds.Value);
             _cacheKeySuffix = cacheKeySuffix;
 
             CacheKey = $"autorepo_{typeof(T).Name}_{_session.Project.Id}{_cacheKeySuffix}";
         }
-
-        public AutoRepo(ISession session, IDatabase database, ICache cache, TimeSpan? cacheTtl = null, string cacheKeySuffix = "") 
-            : this(session,
-                  database,
-                  cache,
-                  db => db.SelectFrom<T>(),
-                  cacheTtl ?? TimeSpan.FromMinutes(10),
-                  cacheKeySuffix ?? string.Empty) 
-        {
-        }
-
+               
         public string CacheKey { get; }
 
         public List<T> GetAll()
         {
-            var getter = _selectQuery.Invoke(_database).Where(i => i.ProjectId == _session.Project.Id);
+            var getter = _database.SelectFrom<T>();
+
+            if (_selectQueryModifier != null)
+                getter = _selectQueryModifier(_database, getter);
+
+            if (typeof(IProjectRelatedEntity).IsAssignableFrom(typeof(T)))
+                getter = getter.Where(i => ((IProjectRelatedEntity)i).ProjectId == _session.Project.Id);
 
             if (_cacheTtl == null)
                 return getter.Execute().ToList();
 
             return _cache.ReadThrough(CacheKey, _cacheTtl.Value, () => getter.Execute().ToList());
         }
-
+         
         public void ClearCache() => _cache.Remove(CacheKey);
 
         public void UpdateWhere(Action<T> update, Func<T, bool> where)
@@ -111,7 +112,8 @@ namespace Elsa.Common.Data
 
         public void Save(T entity)
         {
-            entity.ProjectId = _session.Project.Id;
+            if (entity is IProjectRelatedEntity pre)
+                pre.ProjectId = _session.Project.Id;
 
             if (entity is IHasAuthor auth && entity.Id < 1)
                 auth.AuthorId = _session.User.Id;

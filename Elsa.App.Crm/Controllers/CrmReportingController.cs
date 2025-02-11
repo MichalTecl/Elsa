@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elsa.App.Crm
+namespace Elsa.App.Crm.Controllers
 {
     [Controller("crmreporting")]
     public class CrmReportingController : ElsaControllerBase

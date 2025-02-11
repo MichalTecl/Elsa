@@ -60,12 +60,13 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 var favorites = new HashSet<int>(m_database.SelectFrom<IUserFavoriteRecipe>()
                     .Where(r => r.UserId == m_session.User.Id).Transform(r => r.RecipeId).Execute());
 
-                var dbRecipes = m_database.SelectFrom<IRecipe>().Where(r => r.ProjectId == m_session.Project.Id)                    
+                var dbRecipes = m_database.SelectFrom<IRecipe>().Where(r => r.ProjectId == m_session.Project.Id)
                     .Execute();
 
-                var materials = m_materialRepository.GetAllMaterials(null, false).ToArray();
-
-                var result = new List<RecipeInfo>(dbRecipes.Where(FilterByUserRoleVisibility).Select(e => new RecipeInfo
+                var materials = m_materialRepository.GetAllMaterials(null, true).ToList();
+                               
+                var result = new List<RecipeInfo>(dbRecipes
+                    .Where(FilterByUserRoleVisibility).Select(e => new RecipeInfo
                 {
                     IsActive = e.DeleteUserId == null,
                     IsFavorite = favorites.Contains(e.Id),
@@ -73,7 +74,12 @@ namespace Elsa.Commerce.Core.Production.Recipes
                     MaterialName = materials.FirstOrDefault(mm => mm.Id == e.ProducedMaterialId)?.Name,
                     RecipeId = e.Id,
                     RecipeName = e.RecipeName                   
-                }).OrderBy(r => r.MaterialName).ThenBy(r => r.IsActive ? 0 : 1).ThenBy(r => r.IsFavorite ? 0 : 1).ThenBy(r => r.RecipeName));
+                })
+                    .Where(r => !materials.Any(m => m.Id == r.MaterialId && m.IsHidden))
+                    .OrderBy(r => r.MaterialName)
+                    .ThenBy(r => r.IsActive ? 0 : 1)
+                    .ThenBy(r => r.IsFavorite ? 0 : 1)
+                    .ThenBy(r => r.RecipeName));
 
                 return result;
             });

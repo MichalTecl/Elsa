@@ -43,6 +43,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 
         int? RecipeId { get; set; }
         IRecipe Recipe { get; }
+
+        DateTime? FullSpendDt { get; set; }
     }
 
     public interface IMaterialBatchEditables

@@ -15,6 +15,8 @@ namespace Elsa.App.Crm
         {
             setup.For<DatasetLoader>().Use<DatasetLoader>();
             setup.For<SalesRepRepository>().Use<SalesRepRepository>();
+            setup.For<CustomerMeetingsRepository>().Use<CustomerMeetingsRepository>();
+            setup.For<CustomerTagRepository>().Use<CustomerTagRepository>();
         }
     }
 }

@@ -74,5 +74,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl.Model
         public IEnumerable<IMaterialBatchComposition> Components =>
             Get<IMaterialBatchRepository, IEnumerable<IMaterialBatchComposition>>("Components",
                 r => r.GetBatchComponents(Id));
+
+        public DateTime? FullSpendDt { get => m_adaptee.FullSpendDt; set => m_adaptee.FullSpendDt = value; }
     }
 }

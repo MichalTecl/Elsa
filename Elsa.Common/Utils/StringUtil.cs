@@ -58,9 +58,6 @@ namespace Elsa.Common.Utils
                                                                                              { 'ú', 'u' },
                                                                                              { 'ů', 'u' }
                                                                                      };
-                                                                                    
-
-
 
         private const string c_searchStringValidChars = "abcdefghijklmnopqrstuvxz123456789";
         private const string c_seoValidChars = "abcdefghijklmnopqrstuvwxyz1234567890";
@@ -403,6 +400,15 @@ namespace Elsa.Common.Utils
                 return result;
 
             return handleFailedParse == null ? null : handleFailedParse(input);
+        }
+
+        public static IEnumerable<int> ParseIntCsv(string csv)
+        {
+            if (string.IsNullOrWhiteSpace(csv))
+                yield break;
+
+            foreach(var i in csv.Split(',', ';').Select(j => j.Trim()).Where(j => !string.IsNullOrWhiteSpace(j)))
+                yield return int.Parse(i);
         }
     }
 }

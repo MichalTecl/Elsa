@@ -1,0 +1,22 @@
+root = true
+
+# All files
+[*]
+indent_style = space
+
+# Xml files
+[*.xml]
+indent_size = 2
+
+# Naming conventions for private fields (prefix with _)
+[*.cs]
+dotnet_naming_rule.private_fields_should_be_prefixed_with_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_prefixed_with_underscore.style = prefix_with_underscore
+dotnet_naming_rule.private_fields_should_be_prefixed_with_underscore.severity = warning
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_fields.required_modifiers = 
+
+dotnet_naming_style.prefix_with_underscore.required_prefix = _
+dotnet_naming_style.prefix_with_underscore.capitalization = camel_case

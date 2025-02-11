@@ -51,23 +51,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\CrmDistributorsController.cs" />
+    <Compile Include="Controllers\CrmMetadataController.cs" />
+    <Compile Include="CrmApp\CustomerDataFacade.cs" />
     <Compile Include="CrmUserRights.cs" />
     <Compile Include="CustomersController.cs" />
     <Compile Include="DataReporting\DatasetLoader.cs" />
     <Compile Include="Entities\ICustomerGroupMapping.cs" />
     <Compile Include="Entities\ICustomerTagAssignment.cs" />
     <Compile Include="Entities\ICustomerTagType.cs" />
+    <Compile Include="Entities\IMeeting.cs" />
+    <Compile Include="Entities\IMeetingCategory.cs" />
+    <Compile Include="Entities\IMeetingParticipant.cs" />
+    <Compile Include="Entities\IMeetingStatus.cs" />
+    <Compile Include="Entities\IMeetingStatusType.cs" />
+    <Compile Include="Entities\IMeetingStatusAction.cs" />
     <Compile Include="Entities\ISalesRepCustomer.cs" />
     <Compile Include="Entities\ISalesRepresentative.cs" />
+    <Compile Include="Model\CrmMetadata.cs" />
+    <Compile Include="Model\DistributorGridFilter.cs" />
+    <Compile Include="Model\DistributorGridRowModel.cs" />
     <Compile Include="Model\CustomerRelatedItem.cs" />
     <Compile Include="Model\CustomerViewModel.cs" />
     <Compile Include="Model\DistributorViewModel.cs" />
     <Compile Include="Model\SalesRepresentativeModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CrmRegistry.cs" />
-    <Compile Include="CrmReportingController.cs" />
+    <Compile Include="Controllers\CrmReportingController.cs" />
     <Compile Include="ReportBuilder\ReportPackage.cs" />
+    <Compile Include="Repositories\CustomerMeetingsRepository.cs" />
     <Compile Include="Repositories\CustomerTagRepository.cs" />
+    <Compile Include="Repositories\DistributorsRepository.cs" />
     <Compile Include="Repositories\SalesRepRepository.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -120,10 +134,16 @@
     <Content Include="SQL\20230716_003_RegisterCrmWidget.sql" />
     <Content Include="SQL\20240813_001_vwSnoozedDistributors.sql" />
     <Content Include="SQL\20250129_002_insp_missingSalesRep.sql" />
+    <Content Include="SQL\20250205_001_IntTable.sql" />
+    <Content Include="SQL\20250211_001_LoadAllDistributors.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
+    <Content Include="UI\DistributorsApp\DistributorGrid.html" />
+    <Content Include="UI\DistributorsApp\Distributors.css" />
+    <Content Include="UI\DistributorsApp\Distributors.VM.js" />
+    <Content Include="UI\DistributorsApp\DistributorsAppPage.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
   <ItemGroup />
