@@ -273,8 +273,17 @@ lanta.Markup.bindExpression = lanta.Markup.bindExpression || function(owner, ele
         }
 
 		var parts = exp.split(":");
-		if (parts.length !== 2) {
-		    throw new Error("Invalid expression '" + exp + "'");
+        if (parts.length !== 2) {
+            var mess = "Invalid bind expression '" + exp + "'";
+
+            console.error(mess);
+            element.innerHTML = mess;
+            if (!window['thrown' + mess]) {
+                window['thrown' + mess] = true;
+                throw new Error(mess);                
+            }
+                        
+            return;
 		}
 
 		var to = parts[0].trim();

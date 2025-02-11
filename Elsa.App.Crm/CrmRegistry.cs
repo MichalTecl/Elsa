@@ -17,6 +17,7 @@ namespace Elsa.App.Crm
             setup.For<SalesRepRepository>().Use<SalesRepRepository>();
             setup.For<CustomerMeetingsRepository>().Use<CustomerMeetingsRepository>();
             setup.For<CustomerTagRepository>().Use<CustomerTagRepository>();
+            setup.For<DistributorsRepository>().Use<DistributorsRepository>();
         }
     }
 }

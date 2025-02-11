@@ -15,5 +15,7 @@ namespace Elsa.App.Crm.Model
         public int? SalesRepresentativeId { get; set; }
 
         public int? CustomerGroupTypeId { get; set; }
+
+        public bool IncludeDisabled { get; set; }
     }
 }

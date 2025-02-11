@@ -15,17 +15,17 @@ namespace Elsa.App.Crm.Model
         private readonly IntCsvList _salesRepIds = new IntCsvList();
 
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get ; set; }
         public string Email { get; set; }
 
         [JsonIgnore]
-        public string TagTypesCsv { get; set; }
+        public string TagTypesCsv { get => _tagTypeIds.Csv; set => _tagTypeIds.Csv = value; }
 
         [JsonIgnore]
-        public string CustomerGroupTypesCsv { get; set; }
+        public string CustomerGroupTypesCsv { get => _customerGroupTypeIds.Csv; set => _customerGroupTypeIds.Csv = value; }
 
         [JsonIgnore]
-        public string SalesRepIdsCsv { get; set; }
+        public string SalesRepIdsCsv { get => _salesRepIds.Csv; set => _salesRepIds.Csv = value; }
 
         public DateTime? LastContactDt { get; set; }
         public DateTime? FutureContactDt { get; set; }

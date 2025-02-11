@@ -1,9 +1,10 @@
 ﻿using Elsa.App.Crm.Model;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Utils.TextMatchers;
 using Robowire.RobOrm.Core;
-
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,16 +15,29 @@ namespace Elsa.App.Crm.Repositories
         private readonly IDatabase _database;
         private readonly ICache _cache;
         private readonly ISession _session;
+        private readonly ICustomerRepository _customerRepository;
 
-        public DistributorsRepository(IDatabase database, ICache cache, ISession session)
+        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository)
         {
             _database = database;
             _cache = cache;
             _session = session;
+            _customerRepository = customerRepository;
         }
 
         internal List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sortProperty, bool ascending)
         {
+            var disabledGroupIds = _cache
+                .ReadThrough(
+                    $"disabledCustomerGroupTypes_{_session.Project.Id}", 
+                    TimeSpan.FromMinutes(10), 
+                    () => new HashSet<int>(_customerRepository
+                            .GetCustomerGroupTypes()
+                            .Values
+                            .Where(cg => cg.IsDisabled)
+                            .Select(cg => cg.Id)
+                            ));
+
             var matcher = SearchTagMatcher.GetMatcher(filter.TextFilter);
 
             var all = GetAllDistributors().Where(d =>
@@ -41,6 +55,9 @@ namespace Elsa.App.Crm.Repositories
                 if (filter.SalesRepresentativeId != null && !d.SalesRepIds.Contains(filter.SalesRepresentativeId.Value))
                     return false;
 
+                if (!filter.IncludeDisabled && d.CustomerGroupTypeIds.Any(cgId => disabledGroupIds.Contains(cgId)))
+                    return false;
+                
                 return true;
             });
 

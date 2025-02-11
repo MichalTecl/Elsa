@@ -51,7 +51,16 @@ lanta.ViewLoading.inheritAttributes = lanta.ViewLoading.inheritAttributes || fun
 
         var parts = exp.split(":");
         if (parts.length !== 2) {
-            throw new Error("Invalid expression '" + exp + "'");
+            var mess = "Invalid expression '" + exp + "'";
+
+            console.error(mess);
+            element.innerHTML = mess;
+            if (!window['thrown' + mess]) {
+                window['thrown' + mess] = true;
+                throw new Error(mess);
+            }
+            
+            return '<i>' + mess + '</i>';
         }
 
         var to = parts[0].trim();
