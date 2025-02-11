@@ -1,0 +1,71 @@
+﻿
+
+
+/* Trend graph */
+
+
+
+
+/* Trend graph */
+
+.digrTrendView {
+    display: flex;
+    align-items: flex-end; /* Zarovnání dolů */
+    width: 100%;
+    height: 24px; /* Výška grafu */
+    gap: 2px; /* Mezera mezi sloupci */
+    overflow: hidden;
+    padding: 2px 0;
+    background: linear-gradient(to right, rgba(240, 240, 240, 0.6), rgba(220, 220, 220, 0.6)); /* Jemný gradientní podklad */
+    border-radius: 4px; /* Zaoblení okrajů */
+}
+
+.digrTrendItem {
+    flex: 1;
+    background: linear-gradient(to top, #008000, #66cc66); /* Lepší zelený gradient */
+    border-radius: 3px;
+    transition: height 0.3s ease-in-out, background 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+    /* Jemná textura na sloupcích */
+    .digrTrendItem::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+        border-radius: 3px;
+    }
+
+/* Prázdné sloupce */
+.digrTrendItemEmpty {
+    background: rgba(120, 120, 120, 0.3); /* Lepší viditelnost */
+    min-height: 3px;
+    border-radius: 2px;
+}
+
+/* Zvýraznění při hoveru */
+.digrTrendItem:not(.digrTrendItemEmpty):hover {
+    background: linear-gradient(to top, #00cc00, #99ff99);
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+    transform: scaleX(1.05);
+}
+
+/* Jemná animace při načtení */
+.digrTrendItem {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

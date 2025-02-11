@@ -75,6 +75,7 @@
     <Compile Include="Model\CustomerViewModel.cs" />
     <Compile Include="Model\DistributorViewModel.cs" />
     <Compile Include="Model\SalesRepresentativeModel.cs" />
+    <Compile Include="Model\SalesTrendTick.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CrmRegistry.cs" />
     <Compile Include="Controllers\CrmReportingController.cs" />
@@ -136,6 +137,7 @@
     <Content Include="SQL\20250129_002_insp_missingSalesRep.sql" />
     <Content Include="SQL\20250205_001_IntTable.sql" />
     <Content Include="SQL\20250211_001_LoadAllDistributors.sql" />
+    <Content Include="SQL\20250211_006_getDistributorsSales.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

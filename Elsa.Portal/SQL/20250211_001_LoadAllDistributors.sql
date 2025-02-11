@@ -7,14 +7,7 @@ CREATE PROCEDURE LoadAllDistributors(@projectId INT, @userId INT)
 AS
 BEGIN
 
-	-- select * from Customer c where c.iscompany = 1 and c.isdistributor = 1
-
-	DECLARE @previousThreeMonthsStart DATETIME = DATEADD(month, -3, GETDATE());
-	DECLARE @previousSixMonthsStart DATETIME = DATEADD(month, -6, GETDATE());
-
-
-
-SELECT c.Id, 
+	SELECT c.Id, 
 	   ISNULL(c.Name, c.Email) Name,
 	   c.Email,
        c.SearchTag,
@@ -24,18 +17,7 @@ SELECT c.Id,
 	   passedMeeting.meetingDt LastContactDt,
 	   futureMeeting.meetingDt FutureContactDt,		   
 	   ISNULL(allOrders.TotalOrdersCount, 0) TotalOrdersCount,
-	   ISNULL(allOrders.TotalOrdersTaxedPrice, 0) TotalOrdersTaxedPrice,
-	   ISNULL(prevQuarterOrders.TotalOrdersTaxedPrice, 0) PrevQuarterOrdersPrice,
-	   ISNULL(lastQuarterOrders.TotalOrdersTaxedPrice, 0) LastQuarterOrdersPrice,
-	   ISNULL((ISNULL(lastQuarterOrders.TotalOrdersTaxedPrice, 0) - ISNULL(prevQuarterOrders.TotalOrdersTaxedPrice, 0)) /  
-				NULLIF(
-					CASE 
-						WHEN ISNULL(lastQuarterOrders.TotalOrdersTaxedPrice, 0) >= ISNULL(prevQuarterOrders.TotalOrdersTaxedPrice, 0) 
-						THEN ISNULL(lastQuarterOrders.TotalOrdersTaxedPrice, 0) 
-						ELSE ISNULL(prevQuarterOrders.TotalOrdersTaxedPrice, 0) 
-					END, 
-					0
-				) * 100, 0)  CrossQuarterTrend
+	   ISNULL(allOrders.TotalOrdersTaxedPrice, 0) TotalOrdersTaxedPrice	   
 
   FROM Customer c
 
@@ -57,21 +39,7 @@ SELECT c.Id,
 			  FROM PurchaseOrder po
 			 WHERE po.OrderStatusId = 5
 			GROUP BY po.CustomerErpUid) allOrders ON (allOrders.CustomerErpUid = c.ErpUid)
-
-	LEFT JOIN (SELECT po.CustomerErpUid, 
-				   SUM(po.PriceWithVat) TotalOrdersTaxedPrice
-			  FROM PurchaseOrder po
-			 WHERE po.OrderStatusId = 5
-			   AND po.BuyDate BETWEEN @previousThreeMonthsStart AND GETDATE()
-			GROUP BY po.CustomerErpUid) lastQuarterOrders ON (lastQuarterOrders.CustomerErpUid = c.ErpUid)
-
-	LEFT JOIN (SELECT po.CustomerErpUid, 
-				   SUM(po.PriceWithVat) TotalOrdersTaxedPrice
-			  FROM PurchaseOrder po
-			 WHERE po.OrderStatusId = 5
-			   AND po.BuyDate BETWEEN @previousSixMonthsStart AND @previousThreeMonthsStart
-			GROUP BY po.CustomerErpUid) prevQuarterOrders ON (prevQuarterOrders.CustomerErpUid = c.ErpUid)
-
+				
 	LEFT JOIN (SELECT 
 				cta.CustomerId,
 				STRING_AGG(cta.TagTypeId, ',') AS TagTypesCsv
@@ -95,5 +63,6 @@ SELECT c.Id,
  WHERE c.ProjectId = @projectId
    AND c.IsCompany = 1
    AND c.IsDistributor = 1;
+	   
 	   
 END

@@ -31,12 +31,11 @@ namespace Elsa.App.Crm.Model
         public DateTime? FutureContactDt { get; set; }
         public int TotalOrdersCount { get; set; }
         public decimal TotalOrdersTaxedPrice { get; set; }
-        public decimal PrevQuarterOrdersPrice { get; set; }
-        public decimal LastQuarterOrdersPrice { get; set; }
-        public decimal CrossQuarterTrend { get; set; }
-
+       
         [JsonIgnore]
         public string SearchTag { get; set; }
+
+        public List<SalesTrendTick> TrendModel { get; set; }
 
         public List<int> TagTypeIds => _tagTypeIds;
         public List<int> CustomerGroupTypeIds => _customerGroupTypeIds;

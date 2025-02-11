@@ -38,6 +38,9 @@ namespace Elsa.App.Crm.Repositories
                             .Select(cg => cg.Id)
                             ));
 
+            var trends = GetTrendIndex();
+            var emptyTrend = new List<SalesTrendTick>(0);
+
             var matcher = SearchTagMatcher.GetMatcher(filter.TextFilter);
 
             var all = GetAllDistributors().Where(d =>
@@ -57,10 +60,18 @@ namespace Elsa.App.Crm.Repositories
 
                 if (!filter.IncludeDisabled && d.CustomerGroupTypeIds.Any(cgId => disabledGroupIds.Contains(cgId)))
                     return false;
-                
+
+                // just reusing the filtering loop...
+
+                if (trends.TryGetValue(d.Id, out var trend))
+                    d.TrendModel = trend;
+                else
+                    d.TrendModel = emptyTrend;
+
                 return true;
             });
 
+            
             if (!string.IsNullOrEmpty(sortProperty))
             {
                 all = ascending ? all.OrderBy(i => GetSorterValue(i, sortProperty)) : all.OrderByDescending(i => GetSorterValue(i, sortProperty));
@@ -77,6 +88,31 @@ namespace Elsa.App.Crm.Repositories
                 .WithParam("@projectId", _session.Project.Id)
                 .WithParam("@userId", _session.User.Id)
                 .AutoMap<DistributorGridRowModel>();
+        }
+
+        private Dictionary<int, List<SalesTrendTick>> GetTrendIndex()
+        {
+            return _cache.ReadThrough($"distributorOrdersHistoryTrend_{_session.Project.Id}", TimeSpan.FromHours(1), () =>
+            {
+                var trends = new Dictionary<int, SalesTrend>();
+
+                const int historyDepth = 23;
+
+                _database.Sql()
+                    .Call("getDistributorsSales")
+                    .WithParam("@projectId", _session.Project.Id)
+                    .WithParam("@historyDepth", historyDepth)
+                    .ReadRows<int, int, decimal>((customerId, month, value) =>
+                    {
+
+                        if (!trends.TryGetValue(customerId, out var trend))
+                            trends[customerId] = trend = new SalesTrend(historyDepth);
+
+                        trend.Add(month, value);
+                    });
+
+                return trends.ToDictionary(t => t.Key, t => t.Value.GetModel().ToList());
+            });
         }
 
         private static object GetSorterValue(object i, string prop)
