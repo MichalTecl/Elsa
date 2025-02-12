@@ -95,7 +95,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(PaymentsPairingController).Assembly);
                     s.ScanAssembly(typeof(ZasilkovnaClient).Assembly);
                     s.ScanAssembly(typeof(ShipmentController).Assembly);
-                    s.ScanAssembly(typeof(PackingController).Assembly);
+                    s.ScanAssembly(typeof(OrdersPackingRegistry).Assembly);
                     s.ScanAssembly(typeof(CustomersSyncJob).Assembly);
                     s.ScanAssembly(typeof(CustomersController).Assembly);
                     s.ScanAssembly(typeof(ImportRatesJob).Assembly);

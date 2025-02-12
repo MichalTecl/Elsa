@@ -11,5 +11,6 @@ namespace Elsa.App.OrdersPacking
         public static readonly UserRight OpenOrderPackingApplication = new UserRight(nameof(OpenOrderPackingApplication), "Otevření objednávky pro balení", ViewOrdersPackingWidget);
         public static readonly UserRight OrderBatchAssignment = new UserRight(nameof(OrderBatchAssignment), "Přiřazení šarží k objednávkám", OpenOrderPackingApplication);
         public static readonly UserRight MarkOrderPacked = new UserRight(nameof(MarkOrderPacked), "Zabalení objednávky", OrderBatchAssignment);
+        public static readonly UserRight OrdersReview = new UserRight(nameof(OrdersReview), "Objednávky ke kontrole", ViewOrdersPackingWidget);
     }
 }

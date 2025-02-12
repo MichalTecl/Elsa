@@ -55,13 +55,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\OrderReviewRepository.cs" />
+    <Compile Include="Entities\IOrderReviewResult.cs" />
     <Compile Include="Model\BatchAllocationChangeRequest.cs" />
     <Compile Include="Model\BatchAssignmentViewModel.cs" />
     <Compile Include="Model\KitItemsCollectionModel.cs" />
     <Compile Include="Model\OrderAsyncFieldModel.cs" />
+    <Compile Include="Model\OrderReviewRow.cs" />
     <Compile Include="Model\PackingOrderItemModel.cs" />
     <Compile Include="Model\PackingOrderModel.cs" />
     <Compile Include="Model\LightOrderInfo.cs" />
+    <Compile Include="OrdersPackingRegistry.cs" />
+    <Compile Include="OrdersReviewController.cs" />
     <Compile Include="PackingController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OrdersPackingUserRights.cs" />
@@ -115,7 +120,11 @@
     <Content Include="SQL\20250107_001_ParseKitNote.sql" />
     <Content Include="SQL\20240930_001_ParseKitNote.sql" />
     <Content Include="SQL\20240930_002_insp_kitProductNoteCheck.sql" />
+    <Content Include="SQL\20250212_001_GetOrdersToReview.sql" />
     <Content Include="UI\Inspector\ActionControls\OrderPacking\OrderNoteDetailView.html" />
+    <Content Include="UI\OrdersReview\OrdersReview.css" />
+    <Content Include="UI\OrdersReview\OrdersReview.html" />
+    <Content Include="UI\OrdersReview\OrdersReview.VM.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

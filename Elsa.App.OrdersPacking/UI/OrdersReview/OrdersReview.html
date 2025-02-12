@@ -1,0 +1,57 @@
+<ElsaBody>
+    <script src="OrdersReview.VM.js"></script>
+
+    <div id="ordersReviewApp">
+
+        <div id="orevOrdersList" data-bind="itemsSource:orders" data-key="OrderId">
+            <div class="lt-template orevOrderInfo">
+                <div class="orevOrderInfoHead">
+                    <div class="orevIhOrderNr" data-bind="text:OrderNr"></div>
+
+                    <div class="orevIhCustomer">
+                        <div data-bind="customerName:CustomerName; customerEmail:CustomerEmail" fill-by="/UI/Controls/Common/CustomerView/Customer.html"></div>
+                    </div>
+
+                    <div class="orevIhEmail">
+                        <a data-bind="text:CustomerEmail; href:mailHref"></a>
+                    </div>
+
+                    <div class="orevIhOrderStatus" data-bind="text:Status"></div>
+                    <div class="orevIhOrderDt" data-bind="text:OrderDt"></div>
+                    <div class="orevIhOrderPrice" data-bind="text:Price"></div>
+                </div>
+                
+                <div class="orevOrderInfoNote" data-bind="class!.hidden:hasNote">
+                    <pre data-bind="text:CustomerNote"></pre>
+                </div>
+
+                <div class="orevOrderInfoItems">
+                    <i class="fas fa-list-ul faButton" data-bind="class.hidden:hasItems" event-bind="click:loadItems(VM)"></i>
+                    <div class="orevOrderItemList" data-bind="itemsSource:items" data-key="Id">
+                        <div class="lt-template orevIlItem">
+                            <div class="orevIlItemQty" data-bind="text:Quantity"></div>
+                            <div class="orevIlItemName" data-bind="text:PlacedName"></div>
+                        </div> 
+                    </div>
+                </div>
+
+                <div class="orevOrderInfoFoot">
+                    <button event-bind="click:markReviewed(OrderId)"><i class="fas fa-thumbs-up"></i></button> 
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        lt.element("ordersReviewApp")
+            .withModel("app.OrdersReview.vm")
+            .attach(function () {
+                this.loadItems = (model) => app.OrdersReview.vm.loadItems(model);
+
+                this.markReviewed = (orderId) => app.OrdersReview.vm.markReviewed(orderId);
+            });
+    </script>
+
+    <link href="OrdersReview.css" rel="stylesheet" />
+</ElsaBody>

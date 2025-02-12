@@ -50,6 +50,8 @@ namespace Elsa.Common
             Func<object> defaultInvocation,
             Action<object> defaultResultWrite)
         {
+            OnBeforeCall(context);
+
             if (WebSession.User == null)
             {
                 if (!Attribute.IsDefined(method, typeof(AllowAnonymousAttribute)))
@@ -159,5 +161,7 @@ namespace Elsa.Common
         {
             return WebSession?.HasUserRight(right) == true; 
         }
+
+        protected virtual void OnBeforeCall(RequestContext context) { }
     }
 }
