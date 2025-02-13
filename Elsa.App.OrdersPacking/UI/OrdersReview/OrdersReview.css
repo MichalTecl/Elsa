@@ -89,10 +89,19 @@
     font-style: italic;
     font-size: 14px;
     color: #444;
-    white-space: pre-wrap;
-    display: flex;
-    align-items: center;
+    display: block;
+    width: 100%;
+    max-width: 100%;
 }
+
+/* !!! OPRAVA: Pre musí dovolit zalamování !!! */
+.orevOrderInfoNote pre {
+    white-space: pre-wrap !important; /* Zachová nové řádky, ale umožní zalomení */
+    overflow-wrap: anywhere; /* Zalomení dlouhých slov */
+    word-break: break-word; /* Starší prohlížeče */
+    display: block; /* Zajistí správné chování */
+}
+
 
 /* Seznam položek */
 .orevOrderInfoItems {

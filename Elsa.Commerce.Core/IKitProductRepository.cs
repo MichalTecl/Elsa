@@ -19,7 +19,7 @@ namespace Elsa.Commerce.Core
 
         bool IsKit(IPurchaseOrder order, IOrderItem item);
 
-        List<KitNoteParseResultModel> ParseKitNotes(long orderId);
+        List<KitNoteParseResultModel> ParseKitNotes(long? orderId);
 
         ICollection<IKitDefinition> GetKitsByItemName(string itemName);
 

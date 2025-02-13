@@ -3,7 +3,7 @@
 
 GO
 
-CREATE PROCEDURE GetOrdersToReview (@projectId INT)
+CREATE PROCEDURE GetOrdersToReview (@projectId INT,  @invalidKitNoteOrderIds IntTable READONLY)
 AS
 BEGIN
 	SELECT TOP 10
@@ -33,6 +33,8 @@ BEGIN
 				AND 
 				PATINDEX('%------', TRIM(REPLACE(REPLACE(REPLACE(REPLACE(po.CustomerNote, CHAR(13), ''), CHAR(10), ''), CHAR(9), ''), CHAR(160), ''))) = (LEN(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(po.CustomerNote, CHAR(13), ''), CHAR(10), ''), CHAR(9), ''), CHAR(160), ''))) - 5)
 			))
+		  OR
+		  (po.Id IN (SELECT Id FROM @invalidKitNoteOrderIds)) -- If the kitnote is not valid
 	  
 		  OR	  
 		  /* Orders outside of CZ */

@@ -17,27 +17,27 @@ namespace Elsa.Commerce.Core.Repositories
 {
     public class KitProductRepository : IKitProductRepository
     {
-        private const string c_cacheKey = "completeKitProductDefinitions";
-        private const string c_itemKitsIndexCacheKey = "kitItem_kits";
+        private const string _cacheKey = "completeKitProductDefinitions";
+        private const string _itemKitsIndexCacheKey = "kitItem_kits";
 
-        private readonly IPerProjectDbCache m_cache;
-        private readonly IDatabase m_database;
-        private readonly IPurchaseOrderRepository m_orderRepository;
-        private readonly ISession m_session;
-        private readonly ILog m_logger;
+        private readonly IPerProjectDbCache _cache;
+        private readonly IDatabase _database;
+        private readonly IPurchaseOrderRepository _orderRepository;
+        private readonly ISession _session;
+        private readonly ILog _logger;
 
         public KitProductRepository(IPerProjectDbCache cache, IDatabase database, IPurchaseOrderRepository orderRepository, ISession session, ILog logger)
         {
-            m_cache = cache;
-            m_database = database;
-            m_orderRepository = orderRepository;
-            m_session = session;
-            m_logger = logger;
+            _cache = cache;
+            _database = database;
+            _orderRepository = orderRepository;
+            _session = session;
+            _logger = logger;
         }
 
         public IEnumerable<IKitDefinition> GetAllKitDefinitions()
         {
-            return m_cache.ReadThrough(c_cacheKey,
+            return _cache.ReadThrough(_cacheKey,
                 db =>
                     {
                         return
@@ -57,7 +57,7 @@ namespace Elsa.Commerce.Core.Repositories
                 return result;
             }
 
-            var selectedChildItems = m_orderRepository.GetChildItemsByParentItemId(item.Id).OrderBy(i => i.Id).ToList();
+            var selectedChildItems = _orderRepository.GetChildItemsByParentItemId(item.Id).OrderBy(i => i.Id).ToList();
 
             for (var kitItemIndex = 0; kitItemIndex < (int)item.Quantity; kitItemIndex++)
             {
@@ -106,26 +106,26 @@ namespace Elsa.Commerce.Core.Repositories
 
                     found = true;
 
-                    using (var tx = m_database.OpenTransaction())
+                    using (var tx = _database.OpenTransaction())
                     {
                         if (group.SelectedItem != null)
                         {
-                            var assignmentsToDelete = m_database.SelectFrom<IOrderItemMaterialBatch>()
+                            var assignmentsToDelete = _database.SelectFrom<IOrderItemMaterialBatch>()
                                 .Where(a => a.OrderItemId == group.SelectedItem.Id).Execute();
 
-                            m_database.DeleteAll(assignmentsToDelete);
+                            _database.DeleteAll(assignmentsToDelete);
 
-                            m_database.Delete(group.SelectedItem);
+                            _database.Delete(group.SelectedItem);
                         }
 
-                        var orderItem = m_database.New<IOrderItem>();
+                        var orderItem = _database.New<IOrderItem>();
                         orderItem.ErpProductId = targetKitItem.ErpProductId;
                         orderItem.KitParentId = item.Id;
                         orderItem.PlacedName = targetKitItem.ItemName;
                         orderItem.Quantity = 1;
                         orderItem.KitItemIndex = kitItemIndex;
 
-                        m_database.Save(orderItem);
+                        _database.Save(orderItem);
 
                         tx.Commit();
                         break;
@@ -139,7 +139,7 @@ namespace Elsa.Commerce.Core.Repositories
             }
             finally
             {
-                m_cache.Remove(c_cacheKey);
+                _cache.Remove(_cacheKey);
             }
 
             return GetKitForOrderItem(order, item);
@@ -150,23 +150,23 @@ namespace Elsa.Commerce.Core.Repositories
             return GetAllKitDefinitions().FirstOrDefault(k => k.IsMatch(order, item)) != null;
         }
 
-        public List<KitNoteParseResultModel> ParseKitNotes(long orderId)
+        public List<KitNoteParseResultModel> ParseKitNotes(long? orderId)
         {
-            return m_cache.ReadThrough($"kitNoteParseResult_{orderId}", 
+            return _cache.ReadThrough($"kitNoteParseResult_{orderId}", 
                 TimeSpan.FromMinutes(1),
                 () =>
                 {
                     try
                     {
-                        return m_database.Sql()
+                        return _database.Sql()
                             .Call("ParseKitNote")
                             .WithParam("@orderId", orderId)
-                            .WithParam("@projectId", m_session.Project.Id)
+                            .WithParam("@projectId", _session.Project.Id)
                             .AutoMap<KitNoteParseResultModel>();
                     }
                     catch(Exception e)
                     {
-                        m_logger.Error($"Error parsing kit note for orderId={orderId}", e);
+                        _logger.Error($"Error parsing kit note for orderId={orderId}", e);
                         return new List<KitNoteParseResultModel>(0);
                     }
                 });
@@ -181,7 +181,7 @@ namespace Elsa.Commerce.Core.Repositories
 
         public ICollection<IKitDefinition> GetKitsByItemName(string itemName)
         {
-            var kindex = m_cache.ReadThrough(c_itemKitsIndexCacheKey, () => {
+            var kindex = _cache.ReadThrough(_itemKitsIndexCacheKey, () => {
 
                 var allKits = GetAllKitDefinitions();
 
@@ -240,15 +240,15 @@ namespace Elsa.Commerce.Core.Repositories
 
             item.ErpProductId = null;
             item.ItemName = newItemName;
-            m_database.Save(item);
+            _database.Save(item);
 
             ClearCache();
         }
 
         private void ClearCache()
         {
-            m_cache.Remove(c_cacheKey);
-            m_cache.Remove(c_itemKitsIndexCacheKey);
+            _cache.Remove(_cacheKey);
+            _cache.Remove(_itemKitsIndexCacheKey);
         }
     }
 }
