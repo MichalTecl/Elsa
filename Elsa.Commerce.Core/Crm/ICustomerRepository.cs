@@ -33,5 +33,9 @@ namespace Elsa.Commerce.Core.Crm
         void SnoozeCustomer(int customerId);    
         
         ICustomerChangeLog LogCustomerChange(int customerId, string field, object oldValue, object newValue, string groupingKey = null);
+
+        List<ICustomerRelatedNote> GetCustomerRelatedNotes(int customerId);
+
+        void AddCustomerNote(int customerId, string text);
     }
 }

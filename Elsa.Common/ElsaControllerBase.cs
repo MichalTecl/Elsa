@@ -50,6 +50,7 @@ namespace Elsa.Common
             Func<object> defaultInvocation,
             Action<object> defaultResultWrite)
         {
+            OnBeforeCall();
             OnBeforeCall(context);
 
             if (WebSession.User == null)
@@ -163,5 +164,6 @@ namespace Elsa.Common
         }
 
         protected virtual void OnBeforeCall(RequestContext context) { }
+        protected virtual void OnBeforeCall() { }
     }
 }

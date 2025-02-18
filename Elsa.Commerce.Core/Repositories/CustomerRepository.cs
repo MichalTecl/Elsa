@@ -26,17 +26,17 @@ namespace Elsa.Commerce.Core.Repositories
 {
     public class CustomerRepository : ICustomerRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly ILog m_log;
-        private readonly ICache m_cache;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly ILog _log;
+        private readonly ICache _cache;
 
         public CustomerRepository(IDatabase database, ISession session, ILog log, ICache cache)
         {
-            m_database = database;
-            m_session = session;
-            m_log = log;
-            m_cache = cache;
+            _database = database;
+            _session = session;
+            _log = log;
+            _cache = cache;
         }
 
         public void SyncCustomers(IEnumerable<IErpCustomerModel> source)
@@ -44,14 +44,14 @@ namespace Elsa.Commerce.Core.Repositories
             var changeLogGroupingTag = $"Import_{Guid.NewGuid()}";
 
             var allDbCustomers =
-                m_database.SelectFrom<ICustomer>().Where(c => c.ProjectId == m_session.Project.Id).Execute().OrderByDescending(i => i.Id).ToList();
+                _database.SelectFrom<ICustomer>().Where(c => c.ProjectId == _session.Project.Id).Execute().OrderByDescending(i => i.Id).ToList();
 
             foreach (var src in source)
             {
                 var trg =
                     allDbCustomers.FirstOrDefault(dbc => dbc.ErpUid == src.ErpCustomerId) ??
                     allDbCustomers.FirstOrDefault(s => s.Email.Equals(src.Email, StringComparison.InvariantCultureIgnoreCase) && string.IsNullOrEmpty(s.ErpUid))
-                    ?? m_database.New<ICustomer>();
+                    ?? _database.New<ICustomer>();
 
                 SyncCustomer(src, trg, changeLogGroupingTag);
             }
@@ -59,7 +59,7 @@ namespace Elsa.Commerce.Core.Repositories
 
         public void SyncShadowCustomers()
         {
-            m_database.Sql().Call("SyncShadowCustomers").WithParam("@projectId", m_session.Project.Id).NonQuery();
+            _database.Sql().Call("SyncShadowCustomers").WithParam("@projectId", _session.Project.Id).NonQuery();
         }
                 
         public CustomerOverview GetOverview(string email)
@@ -73,9 +73,9 @@ namespace Elsa.Commerce.Core.Repositories
 
 
             var orders =
-                m_database.SelectFrom<IPurchaseOrder>()
+                _database.SelectFrom<IPurchaseOrder>()
                     .Join(o => o.Currency)
-                    .Where(o => o.ProjectId == m_session.Project.Id)
+                    .Where(o => o.ProjectId == _session.Project.Id)
                     .Where(o => o.CustomerEmail.InCsv(entities.Select(e => e.Email)))
                     .Execute()
                     .ToList();
@@ -125,12 +125,12 @@ namespace Elsa.Commerce.Core.Repositories
 
         private IEnumerable<ICustomer> GetCustomerEntities(IEnumerable<string> emails)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var entities = 
-                    m_database.SelectFrom<ICustomer>()
+                    _database.SelectFrom<ICustomer>()
                         .Join(c => c.Notes)
-                        .Where(c => (c.ProjectId == m_session.Project.Id) && c.Email.InCsv(emails))
+                        .Where(c => (c.ProjectId == _session.Project.Id) && c.Email.InCsv(emails))
                         .Execute().ToList();
 
 
@@ -142,16 +142,16 @@ namespace Elsa.Commerce.Core.Repositories
 
                 foreach (var unknown in unknowns)
                 {
-                    m_database.Sql()
+                    _database.Sql()
                         .Call("syncShadowCustomers")
-                        .WithParam("@projectId", m_session.Project.Id)
+                        .WithParam("@projectId", _session.Project.Id)
                         .WithParam("@email", unknown)
                         .NonQuery();
 
                     var entity =
-                        m_database.SelectFrom<ICustomer>()
+                        _database.SelectFrom<ICustomer>()
                             .Join(c => c.Notes)
-                            .Where(c => (c.ProjectId == m_session.Project.Id) && (c.Email == unknown))
+                            .Where(c => (c.ProjectId == _session.Project.Id) && (c.Email == unknown))
                             .Execute()
                             .FirstOrDefault();
 
@@ -169,8 +169,8 @@ namespace Elsa.Commerce.Core.Repositories
 
         private void SaveCustomer(ICustomer customer)
         {
-            customer.ProjectId = m_session.Project.Id;
-            m_database.Save(customer);
+            customer.ProjectId = _session.Project.Id;
+            _database.Save(customer);
         }
 
         private void SyncCustomer(IErpCustomerModel src, ICustomer trg, string changeLogGroupingTag)
@@ -214,15 +214,15 @@ namespace Elsa.Commerce.Core.Repositories
 
             trg.Email = TrackChange("Email", t => t.Email, s => s.Email, comparer: (a, b) => a?.Equals(b, StringComparison.InvariantCultureIgnoreCase) == true, 
                 customOnChanged: (s, t) => {
-                var changeRecord = m_database.New<ICustomerEmailChange>(ch =>
+                var changeRecord = _database.New<ICustomerEmailChange>(ch =>
                 {
                     ch.ChangeDt = DateTime.Now;
                     ch.OldEmail = trg.Email;
                     ch.NewEmail = src.Email;
                     ch.ErpUid = src.ErpCustomerId;
-                    ch.ProjectId = m_session.Project.Id;
+                    ch.ProjectId = _session.Project.Id;
                 });
-                m_database.Save(changeRecord);
+                _database.Save(changeRecord);
             });
 
             trg.LastActivationDt = TrackChange(
@@ -299,19 +299,19 @@ namespace Elsa.Commerce.Core.Repositories
             }
 
             var importedGroups = (src.Groups ?? string.Empty).Split(',').Select(g => g.Trim()).Where(g => !string.IsNullOrWhiteSpace(g)).Distinct().ToList();
-            var existingGroups = m_database.SelectFrom<ICustomerGroup>().Where(g => g.CustomerId == trg.Id).Execute().ToList();
+            var existingGroups = _database.SelectFrom<ICustomerGroup>().Where(g => g.CustomerId == trg.Id).Execute().ToList();
 
             foreach(var importedGroup in importedGroups) 
             {
                 if (existingGroups.Any(eg => eg.ErpGroupName.Equals(importedGroup, StringComparison.InvariantCultureIgnoreCase)))
                     continue;
 
-                var ng = m_database.New<ICustomerGroup>();
+                var ng = _database.New<ICustomerGroup>();
                 ng.CustomerId = trg.Id;
                 ng.ErpGroupName = importedGroup;
-                m_database.Save(ng);
+                _database.Save(ng);
                 existingGroups.Add(ng);
-                m_log.Info($"Customer {trg.Name} added to group {ng.ErpGroupName}");
+                _log.Info($"Customer {trg.Name} added to group {ng.ErpGroupName}");
 
                 LogChange($"Členem kategorie {ng.ErpGroupName}", false, true);
             }
@@ -321,8 +321,8 @@ namespace Elsa.Commerce.Core.Repositories
                 if (importedGroups.Any(ig => ig.Equals(toDelete.ErpGroupName, StringComparison.CurrentCultureIgnoreCase)))
                     continue;
 
-                m_database.Delete(toDelete);
-                m_log.Info($"Customer {trg.Name} removed from group {toDelete.ErpGroupName}");
+                _database.Delete(toDelete);
+                _log.Info($"Customer {trg.Name} removed from group {toDelete.ErpGroupName}");
 
                 LogChange($"Členem kategorie {toDelete.ErpGroupName}", true, false);
             }
@@ -340,7 +340,7 @@ namespace Elsa.Commerce.Core.Repositories
                     c.GroupingKey = key;
                 }
 
-                m_database.SaveAll(changes);
+                _database.SaveAll(changes);
             }
         }
 
@@ -379,10 +379,10 @@ namespace Elsa.Commerce.Core.Repositories
         private DateTime GetFirstContact(string srcEmail)
         {
             var dt =
-                m_database.Sql()
+                _database.Sql()
                     .ExecuteWithParams(
                         "SELECT MIN(PurchaseDate) FROM PurchaseOrder WHERE ProjectId = {0} AND CustomerEmail = {1}",
-                        m_session.Project.Id,
+                        _session.Project.Id,
                         srcEmail)
                     .Scalar<DateTime?>();
 
@@ -405,13 +405,13 @@ namespace Elsa.Commerce.Core.Repositories
 						                          WHERE sub.ProjectId = {0}
 						                            AND sub.SourceName = {1})";
 
-            var missingSubscribers = m_database.Sql().ExecuteWithParams(sql, m_session.Project.Id, sourceName).MapRows(r => r.GetString(0));
+            var missingSubscribers = _database.Sql().ExecuteWithParams(sql, _session.Project.Id, sourceName).MapRows(r => r.GetString(0));
             return missingSubscribers.ToList();
         }
 
         public Dictionary<string, ICustomerGroupType> GetCustomerGroupTypes()
         {
-            return m_database.SelectFrom<ICustomerGroupType>().Where(c => c.ProjectId == m_session.Project.Id).Execute().ToDictionary(g => g.ErpGroupName, g => g);
+            return _database.SelectFrom<ICustomerGroupType>().Where(c => c.ProjectId == _session.Project.Id).Execute().ToDictionary(g => g.ErpGroupName, g => g);
         }
 
         public Dictionary<int, IAddress> GetDistributorDeliveryAddressesIndex()
@@ -419,8 +419,8 @@ namespace Elsa.Commerce.Core.Repositories
             var result = new Dictionary<int, IAddress>();
 
             Func<DbDataReader, AddressModel> addressParser = null;
-            m_database.Sql().Call("GetDeliveryAddressesIndex")
-                .WithParam("@projectId", m_session.Project.Id)
+            _database.Sql().Call("GetDeliveryAddressesIndex")
+                .WithParam("@projectId", _session.Project.Id)
                 .ReadRows(reader => {
                     addressParser = addressParser ?? reader.GetRowParser<AddressModel>(typeof(AddressModel));
                     var parsed = addressParser(reader);
@@ -433,17 +433,17 @@ namespace Elsa.Commerce.Core.Repositories
 
         public Dictionary<int, string> GetCustomerSalesRepresentativeEmailIndex()
         {
-            return m_cache.ReadThrough(GetSalesRepIndexCacheKey(), TimeSpan.FromMinutes(10), () =>
+            return _cache.ReadThrough(GetSalesRepIndexCacheKey(), TimeSpan.FromMinutes(10), () =>
             {
                 var result = new Dictionary<int, string>();
 
-                m_database.Sql().ExecuteWithParams(@"SELECT c.Id CustomerId, sr.NameInErp
+                _database.Sql().ExecuteWithParams(@"SELECT c.Id CustomerId, sr.NameInErp
                                               FROM Customer c
                                               JOIN SalesRepCustomer src ON (c.Id = src.CustomerId)
                                               JOIN SalesRepresentative   sr ON (src.SalesRepId = sr.Id)
                                              WHERE src.ValidFrom < GETDATE()
                                                AND ((src.ValidTo IS NULL) OR (src.ValidTo > GETDATE()))
-                                               AND c.ProjectId = {0}", m_session.Project.Id)
+                                               AND c.ProjectId = {0}", _session.Project.Id)
                     .ReadRows<int, string>(
                     (cid, email) => result[cid] = email);
 
@@ -469,39 +469,39 @@ namespace Elsa.Commerce.Core.Repositories
             }
                                     
             //SaveCustomerSalesRep(@projectId INT, @userId INT, @customerId INT, @salesRepEmail nvarchar(100))
-            var existing = m_database.Sql().Call("SaveCustomerSalesRep")
-                .WithParam("@projectId", m_session.Project.Id)
-                .WithParam("@userId", m_session.User.Id)
+            var existing = _database.Sql().Call("SaveCustomerSalesRep")
+                .WithParam("@projectId", _session.Project.Id)
+                .WithParam("@userId", _session.User.Id)
                 .WithParam("@customerId", customerId)
                 .WithParam("@salesRepEmail", salesRepEmail)
                 .NonQuery();
 
-            m_cache.Remove(GetSalesRepIndexCacheKey());
+            _cache.Remove(GetSalesRepIndexCacheKey());
 
             onChange(existingSrep, salesRepEmail);
         }
 
         private string GetSalesRepIndexCacheKey() 
         {
-            return $"customerSRepIndex_{m_session.Project.Id}";
+            return $"customerSRepIndex_{_session.Project.Id}";
         }
 
         public void SnoozeCustomer(int customerId)
         {
-            var rec = m_database.New<IDistributorSnooze>();
-            rec.AuthorId = m_session.User.Id;
+            var rec = _database.New<IDistributorSnooze>();
+            rec.AuthorId = _session.User.Id;
             rec.CustomerId = customerId;
             rec.SetDt = DateTime.Now;
 
             LogCustomerChange(customerId, "Odložit do další objednávky", null, DateTime.Now);
 
-            m_database.Save(rec);
+            _database.Save(rec);
         }
 
         public ICustomerChangeLog LogCustomerChange(int customerId, string field, object oldValue, object newValue, string groupingKey = null)
         {
             var rec = CreateChangeLog(customerId, field, oldValue, newValue, groupingKey);
-            m_database.Save(rec);
+            _database.Save(rec);
 
             return rec;
         }
@@ -545,9 +545,9 @@ namespace Elsa.Commerce.Core.Repositories
                 return StringUtil.Limit(val.ToString(), 1000, "...");
             };
             
-            var record = m_database.New<ICustomerChangeLog>();
+            var record = _database.New<ICustomerChangeLog>();
             record.ChangeDt = DateTime.Now;
-            record.AuthorId = m_session.User.Id;
+            record.AuthorId = _session.User.Id;
             record.CustomerId = customerId;
             record.Field = field;
             record.OldValue = GetValueString(oldValue);
@@ -556,6 +556,38 @@ namespace Elsa.Commerce.Core.Repositories
 
 
             return record;
+        }
+
+        public List<ICustomerRelatedNote> GetCustomerRelatedNotes(int customerId)
+        {
+            return _cache.ReadThrough($"customernotes_{customerId}", TimeSpan.FromMinutes(10), () => _database.SelectFrom<ICustomerRelatedNote>()
+                .Join(c => c.Customer)
+                .Where(c => c.CustomerId == customerId)
+                .Where(c => c.Customer.ProjectId == _session.Project.Id)
+                .OrderByDesc(n => n.CreateDt)
+                .Execute()
+                .ToList());
+        }
+
+        public void AddCustomerNote(int customerId, string text)
+        {
+            var customer = _database
+                .SelectFrom<ICustomer>()
+                .Where(c => c.Id == customerId && c.ProjectId == _session.Project.Id)
+                .Take(1)
+                .Execute()
+                .FirstOrDefault()
+                .Ensure("Invalid customerId");
+
+            var note = _database.New<ICustomerRelatedNote>();
+            note.AuthorId = _session.User.Id;
+            note.CustomerId = customer.Id;
+            note.CreateDt = DateTime.Now;
+            note.Body = text;
+
+            _database.Save(note);
+
+            _cache.Remove($"customernotes_{customerId}");
         }
     }
 }

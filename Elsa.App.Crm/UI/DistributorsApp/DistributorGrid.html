@@ -1,96 +1,108 @@
 ﻿<div id="digrMainCont">
+    <div id="digrGridCont" data-bind="class.hidden:isDetailOpen">
+        <div id="digrFilters">
+            <div class="digrFiltersSection">
+                <input type="text" id="digrTextFilter" event-bind="change:setFilter('text', '', this.value)" />
+            </div>
 
-    <div id="digrFilters">
-        <div class="digrFiltersSection">
-            <input type="text" id="digrTextFilter" event-bind="change:setFilter('text', '', this.value)" />
+            <div class="digrFiltersSection">
+                <div class="digrTagFilters" data-bind="itemsSource:allTags" data-key="Id">
+                    <div class="lt-template digrFilterTag">
+                        <input type="checkbox" event-bind="change:setFilter('tag', Id, this.checked)" />
+                        <label data-bind="text:Name"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="digrFiltersSection">
+                <select class="digrCustomerGroupFilters" data-bind="itemsSource:allCustomerGroups" data-key="Id" event-bind="change:setFilter('customerGroup', '', this.value)">
+                    <option class="lt-template digrCustomerGroupFilterOption" data-bind="text:ErpGroupName; value:Id"></option>
+                </select>
+            </div>
+
+            <div class="digrFiltersSection">
+                <select class="digrSrepSelect" data-bind="itemsSource:allSalesReps" data-key="Id" event-bind="change:setFilter('salesRep', '', this.value)">
+                    <option class="lt-template digrSalesRepSelectOption" data-bind="text:PublicName;value:Id"></option>
+                </select>
+            </div>
+
+            <div class="digrFiltersSection">
+                <select class="digrSortTypeSelect" data-bind="itemsSource:allSorters" data-key="Id" event-bind="change:setFilter('sorter', '', this.value)">
+                    <option class="lt-template digrSorterTypeOption" data-bind="text:Text;value:Id"></option>
+                </select>
+            </div>
+
+            <div class="digrFiltersSection">
+                <input type="checkbox" class="digrFilterIncludeDisabledCb" event-bind="change:setFilter('direct', 'IncludeDisabled', this.checked)" />
+                <label>Zahrnout zrušené</label>
+            </div>
+
+            <button id="butSearch" event-bind="click:VM.search()"></button>
         </div>
 
-        <div class="digrFiltersSection">
-            <div class="digrTagFilters" data-bind="itemsSource:allTags" data-key="Id">
-                <div class="lt-template digrFilterTag">
-                    <input type="checkbox" event-bind="change:setFilter('tag', Id, this.checked)" />
-                    <label data-bind="text:Name"></label>
+        <div id="digrGrid">
+            <div class="gridRow gridHead">
+                <div class="cell10">Jméno</div>
+                <div class="cell10">Kategorie</div>
+                <div class="cell20">Štítky</div>
+                <div class="cell10">OZ</div>
+                <div class="cell5">Poslední kontakt</div>
+                <div class="cell5">Nejbližší kontakt</div>
+                <div class="cell5">Celkem nákup</div>
+                <div class="cell10">Trend</div>
+            </div>
+            <div class="gridBody" data-bind="itemsSource:data" data-key="Id">
+                <div class="lt-template gridRow">
+                    <div class="cell10" >
+                        <a data-bind="text:Name" event-bind="click:openDetail(Id)"></a>
+                    </div>
+
+                    <div class="cell10">
+                        <div data-bind="itemsSource:customerGroups" data-key="Id" class="digrCustGroupsContainer stackLeft">
+                            <div class="lt-template digrCustGroupItem" data-bind="text:ErpGroupName"></div>
+                        </div>
+                    </div>
+
+                    <div class="cell20">
+                        <div data-bind="itemsSource:tags" data-key="Id" class="digrCustTagsContainer stackLeft">
+                            <div class="lt-template digrCustTagItem" data-bind="text:Name"></div>
+                        </div>
+                    </div>
+
+                    <div class="cell10" data-bind="text:salesRep.PublicName"></div>
+                    <div class="cell5" data-bind="text:TotalOrdersTaxedPrice"></div>
+                    <div class="cell5"></div>
+                    <div class="cell5"></div>
+
+                    <div class="cell10">
+                        <div data-bind="itemsSource:TrendModel" data-key="id" class="digrTrendView">
+                            <div data-bind="style.height:height;class.digrTrendItemEmpty:IsEmpty;title:symbol" class="lt-template digrTrendItem"></div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
-
-        <div class="digrFiltersSection">
-            <select class="digrCustomerGroupFilters" data-bind="itemsSource:allCustomerGroups" data-key="Id" event-bind="change:setFilter('customerGroup', '', this.value)">
-                <option class="lt-template digrCustomerGroupFilterOption" data-bind="text:ErpGroupName; value:Id"></option>
-            </select>
-        </div>
-
-        <div class="digrFiltersSection">
-            <select class="digrSrepSelect" data-bind="itemsSource:allSalesReps" data-key="Id" event-bind="change:setFilter('salesRep', '', this.value)">
-                <option class="lt-template digrSalesRepSelectOption" data-bind="text:PublicName;value:Id"></option>
-            </select>
-        </div>
-
-        <div class="digrFiltersSection">
-            <select class="digrSortTypeSelect" data-bind="itemsSource:allSorters" data-key="Id" event-bind="change:setFilter('sorter', '', this.value)">
-                <option class="lt-template digrSorterTypeOption" data-bind="text:Text;value:Id"></option>
-            </select>
-        </div>
-
-        <div class="digrFiltersSection">
-            <input type="checkbox" class="digrFilterIncludeDisabledCb" event-bind="change:setFilter('direct', 'IncludeDisabled', this.checked)" />
-            <label>Zahrnout zrušené</label>
-        </div>
-
-        <button id="butSearch" event-bind="click:VM.search()"></button>
-    </div>
-
-    <div id="digrGrid">
-        <div class="gridRow gridHead">
-            <div class="cell10">Jméno</div>
-            <div class="cell10">Kategorie</div>
-            <div class="cell20">Štítky</div>
-            <div class="cell10">OZ</div>
-            <div class="cell5">Poslední kontakt</div>
-            <div class="cell5">Nejbližší kontakt</div>
-            <div class="cell5">Celkem nákup</div>
-            <div class="cell10">Trend</div>
-        </div>
-        <div class="gridBody" data-bind="itemsSource:data" data-key="Id">
-            <div class="lt-template gridRow">
-                <div class="cell10" data-bind="text:Name"></div>
-                
-                <div class="cell10">
-                    <div data-bind="itemsSource:customerGroups" data-key="Id" class="digrCustGroupsContainer stackLeft">
-                        <div class="lt-template digrCustGroupItem" data-bind="text:ErpGroupName"></div>
-                    </div>
-                </div>
-
-                <div class="cell20">
-                    <div data-bind="itemsSource:tags" data-key="Id" class="digrCustTagsContainer stackLeft">
-                        <div class="lt-template digrCustTagItem" data-bind="text:Name"></div>
-                    </div>
-                </div>
-                                
-                <div class="cell10" data-bind="text:salesRep.PublicName"></div>
-                <div class="cell5" data-bind="text:TotalOrdersTaxedPrice"></div>
-                <div class="cell5"></div>
-                <div class="cell5"></div>
-
-                <div class="cell10">
-                    <div data-bind="itemsSource:TrendModel" data-key="id" class="digrTrendView">
-                        <div data-bind="style.height:height;class.digrTrendItemEmpty:IsEmpty;title:symbol" class="lt-template digrTrendItem"></div> 
-                    </div>
-                </div>
-
-            </div>
+        <div class="digrGridButtons">
+            <button event-bind="click:VM.load()" data-bind="class!.hidden:canReadMore">Načíst více</button>
         </div>
     </div>
-    <div class="digrGridButtons">
-        <button event-bind="click:VM.load()" data-bind="class!.hidden:canReadMore">Načíst více</button>
-    </div>
+    <div id="digrDetailCont" fill-by="/UI/DistributorsApp/DistributorDetailView.html" data-bind="class!.hidden:isDetailOpen"></div>
 </div>
+
+
+
 <script>
     lt.element("digrMainCont")
         .withModel("app.Distributors.vm")
         .attach(function() {
 
             this.setFilter = (type, key, value) => app.Distributors.vm.updateFilter(type, key, value);
+
+            this.openDetail = (customerId) => {
+                window.location.hash = 'customerId=' + customerId;                
+                return false;
+            };
 
         });
 </script>

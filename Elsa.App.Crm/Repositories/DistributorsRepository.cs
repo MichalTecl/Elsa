@@ -3,6 +3,7 @@ using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Utils.TextMatchers;
+using Elsa.Core.Entities.Commerce.Crm;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace Elsa.App.Crm.Repositories
             _customerRepository = customerRepository;
         }
 
-        internal List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
+        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
         {
             var disabledGroupIds = _cache
                 .ReadThrough(
@@ -85,6 +86,25 @@ namespace Elsa.App.Crm.Repositories
             }
 
             return result;
+        }
+
+        public DistributorDetailViewModel GetDetail(int customerId)
+        {            
+            return _database
+                .Sql()
+                .Call("LoadDistributorDetail")
+                .WithParam("@projectId", _session.Project.Id)
+                .WithParam("@customerId", customerId)
+                .AutoMap<DistributorDetailViewModel>()
+                .FirstOrDefault();
+        }
+
+        public List<DistributorAddressViewModel> GetDistributorAddresses(int customerId)
+        {
+            return _cache.ReadThrough($"distributorAddresses_{customerId}", TimeSpan.FromMinutes(10), () => _database.Sql()
+                .Call("LoadCustomerAddresses")
+                .WithParam("@customerId", customerId)
+                .AutoMap<DistributorAddressViewModel>());
         }
 
         private List<DistributorGridRowModel> GetAllDistributors()

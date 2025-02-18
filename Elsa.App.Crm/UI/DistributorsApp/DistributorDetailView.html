@@ -1,0 +1,103 @@
+﻿<div id="digrDetailControlCont">
+    <div class="digrDetSection100">
+        <div id="digrDetName" data-bind="text:detail.Name"></div>
+    </div>
+
+    <div class="digrDetSection50">
+        <div class="digrDetLabeledItem">
+            <label>Kategorie</label>
+            <div class="digrDetCategoriesCont" data-bind="itemsSource:detail.customerGroups" data-key="Id">
+                <div class="lt-template digrDetCategory" data-bind="text:ErpGroupName"></div>
+            </div>
+        </div>
+        <div class="digrDetLabeledItem">
+            <label>OZ</label>
+            <div class="digrSalesRepBox digrROtext" data-bind="text:detail.salesRepName"></div>
+        </div>
+        <div class="digrStoreEshopCheckboxesCont">
+            <div class="digrSeCboxCont">
+                <input type="checkbox" data-bind="checked:detail.HasEshop" event-bind="change:VM.updateDetail('direct', 'HasEshop', this.checked)" />
+                <label>E-Shop</label>
+            </div>
+            <div class="digrSeCboxCont">
+                <input type="checkbox" data-bind="checked:detail.HasStore" event-bind="change:VM.updateDetail('direct', 'HasStore', this.checked)" />
+                <label>Kamenný obchod</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="digrDetSection50">
+        <div class="digrDetAddressesHead">
+            <select id="digrDetAddressTypeSelect" data-bind="itemsSource:detail.addresses" data-key="AddressName" event-bind="change:VM.selectAddress(this.value)">
+                <option class="lt-template digrDetAddresTypeOption" data-bind="text:AddressName; value:AddressName"></option>
+            </select>
+            <i class="far fa-plus-square fa-button digrDetAddAddressButton" event-bind="click:addAddress"></i>
+        </div>
+        <div class="digrDetAddressCont" data-bind="class.digrAddrStoreMode:selectedAddress.IsStore;class!.digrAddrReadOnly:selectedAddress.IsStore">
+            <div class="digrDetLabeledItem storeOnly digrAdrStoreNameCont">
+                <label>Název prodejny</label>
+                <input type="text" data-bind="text:selectedAddress.StoreName" event-bind="change:VM.updateAddress('StoreName', this.value)" />
+                <i class="fas fa-trash-alt fa-button addressDeleteButton" event-bind="click:VM.deleteAddress()"></i>
+            </div>
+            <div class="digrDetLabeledItem nostoreOnly">
+                <label>E-Mail</label>
+                <input type="text" data-bind="text:selectedAddress.Email" />
+            </div>
+            <div class="digrDetLabeledItem nostoreOnly">
+                <label>Telefon</label>
+                <input type="text" data-bind="text:selectedAddress.Phone" />
+            </div>
+            <div class="digrDetLabeledItem digrAdrAddressCont">
+                <label>Adresa</label>
+                <input type="text" data-bind="text:selectedAddress.Address" event-bind="change:VM.updateAddress('Address', this.value)" />
+                <label>Město</label>
+                <input type="text" data-bind="text:selectedAddress.City" event-bind="change:VM.updateAddress('City', this.value)" />
+            </div>
+            <div class="digrDetLabeledItem storeOnly">
+                <label>GPS</label>
+                <input type="text" data-bind="text:selectedAddress.Gps" event-bind="change:VM.updateAddress('Gps', this.value)" />
+            </div>
+            <div class="digrDetLabeledItem storeOnly">
+                <label>WWW</label>
+                <input type="text" data-bind="text:selectedAddress.Www" event-bind="change:VM.updateAddress('Www', this.value)" />
+            </div>
+        </div>
+    </div>
+
+    <div class="digrDetSection100">
+        <div class="digrDetLabeledItem50">
+            <label>E-Mail</label>
+            <div class="digrROtext" data-bind="text:detail.Email"></div>
+        </div>
+        <div class="digrDetLabeledItem50">
+            <label>Tel.</label>
+            <div class="digrROtext" data-bind="text:detail.Phone"></div>
+        </div>
+    </div>
+
+    <div class="digrDetSection100">
+        <div class="digrDetLabeledItem50">
+            <label>IČO</label>
+            <div class="digrROtext" data-bind="text:detail.RegistrationId"></div>
+        </div>
+        <div class="digrDetLabeledItem50">
+            <label>DIČ</label>
+            <div class="digrROtext" data-bind="text:detail.VatId"></div>
+        </div>
+    </div>
+    <div class="digrDetSection100 digrDetNoteCont">
+        <i class="fas fa-pencil-alt fa-button" event-bind="click:addNote"></i>
+        <pre class="digrDetNote" data-bind="text:detail.lastNoteText"></pre>
+    </div>
+    <div class="digrDetSection100 digrDetTabs">
+        <div class="digrDetTabsHead" data-bind="itemsSource:detailTabs" data-key="text">
+            <div class="lt-template digrDetTab" data-bind="text:text;class.activeTab:isActive" event-bind="click:VM.activateTab(text)"></div>
+        </div>
+        <div class="digrDetTabContent" data-bind="fill-by:currentTabContentControl"></div>
+    </div>
+</div>
+
+<script>
+    lt.element("digrDetailControlCont")
+        .attach(function () { });
+</script>

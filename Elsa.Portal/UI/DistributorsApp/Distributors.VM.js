@@ -27,6 +27,10 @@ app.Distributors.VM = app.Distributors.VM || function(){
         IncludeDisabled: false
     };
 
+    self.isDetailOpen = false;
+    self.detail = null;
+    self.selectedAddress = null;
+
     const updateFilterArray = (array, value, shouldBeIncluded) => {
 
             var inx = array.indexOf(value);
@@ -169,9 +173,79 @@ app.Distributors.VM = app.Distributors.VM || function(){
         return result;
     }
 
+    /** Detail **********************/
+
+    const receiveAddresses = (addresses) => {
+
+        if (!self.detail)
+            return;
+
+        self.detail.addresses = addresses;
+        self.selectedAddress = self.detail.addresses[0];
+    };
+
+    const loadAddresses = () => lt.api("/CrmDistributors/getAddresses").query({ "customerId": self.detail.Id }).get(receiveAddresses);
+
+    const receiveDetail = (detail) => {
+        self.detail = detail;
+        self.isDetailOpen = true;
+
+        loadAddresses();
+    };
+
+    const loadDetail = (customerId) => {
+
+        if (!customerId) {
+
+            if (self.isDetailOpen) {
+                self.detail = null;
+                self.isDetailOpen = false;
+                self.selectedAddress = null;
+                lt.notify();
+            }
+
+            return;
+        }
+
+        lt.api("/CrmDistributors/getDetail").query({ "customerId": customerId }).get(receiveDetail);
+    }
+
+    self.selectAddress = (addressName) => {
+        self.selectedAddress = self.detail.addresses.find(a => a.AddressName === addressName);
+    };
+
+
+    /** Initialization **************************************************/
+
     load(1);
 
     lt.api("/CrmDistributors/getSortingTypes").get(st => self.allSorters = st);
+
+    const checkCustomerIdQuery = () => {
+        const params = new URLSearchParams(window.location.search);
+        let customerId = params.get('customerId');
+                
+        if (!customerId) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            customerId = hashParams.get('customerId');
+        }
+
+        // Ověříme, zda je customerId platné číslo
+        if (customerId && /^\d+$/.test(customerId)) {
+            let customerIdInt = parseInt(customerId, 10);
+            
+            loadDetail(customerId);
+            return true;
+        }
+
+        loadDetail(null);
+
+        return false;
+    };
+
+    checkCustomerIdQuery();
+    window.addEventListener('hashchange', checkCustomerIdQuery);
+    
 };
 
 app.Distributors.vm = app.Distributors.vm || new app.Distributors.VM();
