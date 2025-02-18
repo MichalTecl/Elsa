@@ -94,7 +94,6 @@
     max-width: 100%;
 }
 
-/* !!! OPRAVA: Pre musí dovolit zalamování !!! */
 .orevOrderInfoNote pre {
     white-space: pre-wrap !important; /* Zachová nové řádky, ale umožní zalomení */
     overflow-wrap: anywhere; /* Zalomení dlouhých slov */

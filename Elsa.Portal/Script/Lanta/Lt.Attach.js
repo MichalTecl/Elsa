@@ -85,6 +85,9 @@
 
     this.attach = function(controller) {
 
+        if (!controller.hasOwnProperty('prototype'))
+            throw new Error("Arrow function not allowed here!");
+
         controller = controller || function() {};
 
         var model = null;

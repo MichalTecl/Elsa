@@ -8,12 +8,16 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     self.data = [];
 
+    self.allCustomerGroups = [];
+    self.allTags = [];
+    self.allSalesReps = [];
+    self.allSorters = [];
+
     self.page = 1;
     self.pageSize = 20;
     self.canReadMore = false;
 
-    self.sortBy = "Name";
-    self.sortAscending = true;
+    self.sorterId = null;
 
     self.filter = {
         TextFilter: null,
@@ -23,8 +27,57 @@ app.Distributors.VM = app.Distributors.VM || function(){
         IncludeDisabled: false
     };
 
+    const updateFilterArray = (array, value, shouldBeIncluded) => {
+
+            var inx = array.indexOf(value);
+
+            if ((inx > -1) == shouldBeIncluded)
+                return;
+
+        if (shouldBeIncluded)
+                array.push(value);
+            else
+                array.splice(inx, 1);
+    };
+
+    const filterUpdaters = {
+        "direct": (k, v) => self.filter[k] = v,
+        "text": (k, v) => self.filter.TextFilter = v,
+        "salesRep": (k, v) => self.filter.SalesRepresentativeId = v,
+        "tag": (k, v) => updateFilterArray(self.filter.Tags, k, v),
+        "customerGroup": (k, v) => self.filter.CustomerGroupTypeId = v,
+        "sorter": (k, v) => self.sorterId = v,
+    };
+
     self.load = () => {
         load(self.page + 1);
+    };
+
+    self.updateFilter = (type, key, value) => {
+
+        updater = filterUpdaters[type];
+        if (!updater)
+            throw new Error("Undefined filter type " + type);
+
+        updater(key, value);
+
+        console.log(self.filter);
+    };
+
+    self.search = () => {
+        self.page = 0;
+        self.canReadMore = false;
+        self.data = [];
+
+        lt.notify();
+
+        self.load();
+    };
+
+    const receiveMetadata = (m) => {
+        self.allCustomerGroups = [{ ErpGroupName: "", Id: null }, ... m.CustomerGroupTypes];
+        self.allTags = m.CustomerTagTypes;
+        self.allSalesReps = [{ PublicName: "", Id: null }, ...m.SalesRepresentatives];
     };
 
     const withMetadata = (consumer) => {
@@ -83,8 +136,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
             .query({                
                 "pageSize": self.pageSize || 10,
                 "page": page || 1,
-                "sortBy": self.sortBy,
-                "ascending": self.sortAscending
+                "sorterId": self.sorterId
             })
             .body(self.filter)
             .post((data) => {
@@ -94,9 +146,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 self.canReadMore = data.length == self.pageSize;
             });
     };
-
-    // just to initiate metadata loading
-    withMetadata((m) => console.log("metadata recevied"));
+        
+    withMetadata((m) => receiveMetadata(m));
 
     let monSymbCache = {};
     const getMonthSymbols = (n) => {
@@ -119,6 +170,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
     }
 
     load(1);
+
+    lt.api("/CrmDistributors/getSortingTypes").get(st => self.allSorters = st);
 };
 
 app.Distributors.vm = app.Distributors.vm || new app.Distributors.VM();

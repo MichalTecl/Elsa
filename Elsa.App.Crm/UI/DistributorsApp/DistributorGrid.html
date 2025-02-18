@@ -1,6 +1,44 @@
 ﻿<div id="digrMainCont">
 
-    <div id="digrFilters"></div>
+    <div id="digrFilters">
+        <div class="digrFiltersSection">
+            <input type="text" id="digrTextFilter" event-bind="change:setFilter('text', '', this.value)" />
+        </div>
+
+        <div class="digrFiltersSection">
+            <div class="digrTagFilters" data-bind="itemsSource:allTags" data-key="Id">
+                <div class="lt-template digrFilterTag">
+                    <input type="checkbox" event-bind="change:setFilter('tag', Id, this.checked)" />
+                    <label data-bind="text:Name"></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="digrFiltersSection">
+            <select class="digrCustomerGroupFilters" data-bind="itemsSource:allCustomerGroups" data-key="Id" event-bind="change:setFilter('customerGroup', '', this.value)">
+                <option class="lt-template digrCustomerGroupFilterOption" data-bind="text:ErpGroupName; value:Id"></option>
+            </select>
+        </div>
+
+        <div class="digrFiltersSection">
+            <select class="digrSrepSelect" data-bind="itemsSource:allSalesReps" data-key="Id" event-bind="change:setFilter('salesRep', '', this.value)">
+                <option class="lt-template digrSalesRepSelectOption" data-bind="text:PublicName;value:Id"></option>
+            </select>
+        </div>
+
+        <div class="digrFiltersSection">
+            <select class="digrSortTypeSelect" data-bind="itemsSource:allSorters" data-key="Id" event-bind="change:setFilter('sorter', '', this.value)">
+                <option class="lt-template digrSorterTypeOption" data-bind="text:Text;value:Id"></option>
+            </select>
+        </div>
+
+        <div class="digrFiltersSection">
+            <input type="checkbox" class="digrFilterIncludeDisabledCb" event-bind="change:setFilter('direct', 'IncludeDisabled', this.checked)" />
+            <label>Zahrnout zrušené</label>
+        </div>
+
+        <button id="butSearch" event-bind="click:VM.search()"></button>
+    </div>
 
     <div id="digrGrid">
         <div class="gridRow gridHead">
@@ -50,7 +88,9 @@
 <script>
     lt.element("digrMainCont")
         .withModel("app.Distributors.vm")
-        .attach(() => {
+        .attach(function() {
+
+            this.setFilter = (type, key, value) => app.Distributors.vm.updateFilter(type, key, value);
 
         });
 </script>

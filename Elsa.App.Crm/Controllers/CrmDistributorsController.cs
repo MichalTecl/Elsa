@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Elsa.App.Crm.Repositories.DistributorsRepository;
 
 namespace Elsa.App.Crm.Controllers
 {
@@ -22,9 +23,11 @@ namespace Elsa.App.Crm.Controllers
             _distributorsRepository = distributorsRepository;
         }
 
-        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sortBy, bool ascending)
+        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
         {
-            return _distributorsRepository.GetDistributors(filter, pageSize, page, sortBy, ascending);
+            return _distributorsRepository.GetDistributors(filter, pageSize, page, sorterId);
         }
+
+        public DistributorSorting[] GetSortingTypes() => DistributorSorting.Sortings;
     }
 }

@@ -25,7 +25,7 @@ namespace Elsa.App.Crm.Repositories
             _customerRepository = customerRepository;
         }
 
-        internal List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sortProperty, bool ascending)
+        internal List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
         {
             var disabledGroupIds = _cache
                 .ReadThrough(
@@ -48,9 +48,12 @@ namespace Elsa.App.Crm.Repositories
                 if (!matcher.Match(d.SearchTag))
                     return false;
 
-                if (filter.Tags.Any())
-                    if (!filter.Tags.All(filterTagId => d.TagTypeIds.Contains(filterTagId)))
-                        return false;
+                if (filter.Tags.Count > 0)
+                {
+                    foreach (var filterTagId in filter.Tags)
+                        if (!d.TagTypeIds.Contains(filterTagId))
+                            return false;
+                }
 
                 if (filter.CustomerGroupTypeId != null && !d.CustomerGroupTypeIds.Contains(filter.CustomerGroupTypeId.Value))
                     return false;
@@ -60,26 +63,28 @@ namespace Elsa.App.Crm.Repositories
 
                 if (!filter.IncludeDisabled && d.CustomerGroupTypeIds.Any(cgId => disabledGroupIds.Contains(cgId)))
                     return false;
-
-                // just reusing the filtering loop...
-
-                if (trends.TryGetValue(d.Id, out var trend))
-                    d.TrendModel = trend;
-                else
-                    d.TrendModel = emptyTrend;
-
+                               
+                
                 return true;
             });
 
-            
-            if (!string.IsNullOrEmpty(sortProperty))
+            var sorter = DistributorSorting.Sortings.FirstOrDefault(s => s.Id == sorterId) ?? DistributorSorting.Sortings.First();
+
+            all = sorter.Sorter(all);
+
+            all = all.Skip(pageSize * (page - 1)).Take(pageSize);
+
+            var result = all.ToList();
+
+            foreach(var a in result)
             {
-                all = ascending ? all.OrderBy(i => GetSorterValue(i, sortProperty)) : all.OrderByDescending(i => GetSorterValue(i, sortProperty));
+                if (trends.TryGetValue(a.Id, out var trend))
+                    a.TrendModel = trend;
+                else
+                    a.TrendModel = emptyTrend;
             }
 
-            all = all.Skip(pageSize * page).Take(pageSize);
-
-            return all.ToList();
+            return result;
         }
 
         private List<DistributorGridRowModel> GetAllDistributors()
@@ -114,10 +119,28 @@ namespace Elsa.App.Crm.Repositories
                 return trends.ToDictionary(t => t.Key, t => t.Value.GetModel().ToList());
             });
         }
-
-        private static object GetSorterValue(object i, string prop)
+                
+        public class DistributorSorting
         {
-            return i.GetType().GetProperty(prop).GetValue(i, null);
+            public static readonly DistributorSorting[] Sortings = new[]
+            {
+                new DistributorSorting("default", "Název A-Z", recs => recs.OrderBy(i => i.Name)),
+                new DistributorSorting("idDesc", "Od nejnovějšího", recs => recs.OrderByDescending(i => i.Id)),
+                new DistributorSorting("futureContactAsc", "Nejbližší plánovaný kontakt", recs => recs.Where(i => i.FutureContactDt != null).OrderBy(i => i.FutureContactDt)),
+                new DistributorSorting("pastContactAsc", "Nejdéle od kontaktu", recs => recs.Where(i => i.LastContactDt != null).OrderBy(i => i.LastContactDt)),
+                new DistributorSorting("pastContactDesc", "Nejčerstvější kontakt", recs => recs.Where(i => i.LastContactDt != null).OrderByDescending(i => i.LastContactDt)),
+            };
+
+            private DistributorSorting(string id, string text, Func<IEnumerable<DistributorGridRowModel>, IEnumerable<DistributorGridRowModel>> sorter)
+            {
+                Id = id;
+                Text = text;
+                Sorter = sorter;
+            }
+
+            public string Id { get; }
+            public string Text { get; }
+            public Func<IEnumerable<DistributorGridRowModel>, IEnumerable<DistributorGridRowModel>> Sorter { get; }
         }
     }
 }
