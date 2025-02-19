@@ -543,6 +543,9 @@ lanta.Markup.fireEvent = lanta.Markup.fireEvent || function(event, eventInfo) {
         }
 
         handler.apply(elementOwner, args);
+
+        lt.notify();
+
     } catch (e) {
         lanta.Extensions.defaultErrorHandler(e);
     }

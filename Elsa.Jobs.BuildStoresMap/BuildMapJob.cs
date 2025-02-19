@@ -1,4 +1,5 @@
-﻿using Elsa.App.PublicFiles;
+﻿using Elsa.App.Crm;
+using Elsa.App.PublicFiles;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
@@ -6,7 +7,6 @@ using Elsa.Core.Entities.Commerce.Crm;
 using Elsa.Integration.Crm.Raynet;
 using Elsa.Integration.Crm.Raynet.Model;
 using Elsa.Jobs.BuildStoresMap.Config;
-using Elsa.Jobs.BuildStoresMap.Entities;
 using Elsa.Jobs.Common;
 using Robowire.RobOrm.Core;
 using System;

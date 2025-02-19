@@ -1,5 +1,6 @@
 ﻿using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Crm;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,9 @@ namespace Elsa.App.Crm.Model
     {
         private string _address = null;
 
+        [JsonProperty("isDeleted")]
+        public bool IsDeleted { get; set; }
+
         public string AddressName { get; set; }
         public string Street { get; set; }
         public string DescriptiveNumber {  get; set; }
@@ -37,6 +41,22 @@ namespace Elsa.App.Crm.Model
         public string Zip { get; set; }
         public string Lat { get; set; }
         public string Lon { get; set; }
+
+        public string Gps 
+        { 
+            get => $"{Lat}, {Lon}"; 
+            set 
+            {
+                var parts = value?.Split(',').Select(v =>  v.Trim()).Where(v => !string.IsNullOrWhiteSpace(v)).ToArray();
+                
+                if (parts.Length > 1)
+                {
+                    Lat = parts.First();
+                    Lon = parts.Last();
+                }
+            }
+        }
+
         public string Phone { get; set; }
         public string Email { get; set; }
         public string Www { get; set; }

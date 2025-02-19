@@ -589,5 +589,15 @@ namespace Elsa.Commerce.Core.Repositories
 
             _cache.Remove($"customernotes_{customerId}");
         }
+
+        public ICustomer GetCustomer(int id)
+        {
+            return _database
+                .SelectFrom<ICustomer>()
+                .Where(c => c.ProjectId == _session.Project.Id)
+                .Where(c => c.Id == id)
+                .Execute()
+                .FirstOrDefault();
+        }
     }
 }

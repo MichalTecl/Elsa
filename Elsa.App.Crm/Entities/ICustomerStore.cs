@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Elsa.Jobs.BuildStoresMap.Entities
+namespace Elsa.App.Crm
 {
     [Entity]
     public interface ICustomerStore : IIntIdEntity

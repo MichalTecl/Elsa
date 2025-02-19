@@ -58,6 +58,7 @@
     <Compile Include="CustomersController.cs" />
     <Compile Include="DataReporting\DatasetLoader.cs" />
     <Compile Include="Entities\ICustomerGroupMapping.cs" />
+    <Compile Include="Entities\ICustomerStore.cs" />
     <Compile Include="Entities\ICustomerTagAssignment.cs" />
     <Compile Include="Entities\ICustomerTagType.cs" />
     <Compile Include="Entities\IMeeting.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Entities\ISalesRepCustomer.cs" />
     <Compile Include="Entities\ISalesRepresentative.cs" />
     <Compile Include="Model\CrmMetadata.cs" />
+    <Compile Include="Model\DistributorChangeRequestModel.cs" />
     <Compile Include="Model\DistributorDetailViewModel.cs" />
     <Compile Include="Model\DistributorGridFilter.cs" />
     <Compile Include="Model\DistributorGridRowModel.cs" />

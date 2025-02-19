@@ -49,7 +49,12 @@
 var app = app || {};
 app.ui = app.ui || {};
 
-app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, argumentFactory, customizer) {
+app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, argumentFactory, customizer, pickCallback) {
+
+    if (!!container["__autosuggestAttached"])
+        return;
+
+    container["__autosuggestAttached"] = true;
 
     customizer = customizer || app.ui.autosuggest.defaultCustomizer;
 
@@ -127,6 +132,9 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
                                     inp.fireEvent("onchange");
                                 }
 
+                                if (!!pickCallback)
+                                    pickCallback(chosenValue);
+
                                 closeAllLists();
                             });
                         a.appendChild(b);
@@ -167,6 +175,7 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
                 } else {
                     inp.fireEvent("onchange");
                 }
+                                
                 /* Close all autocomplete lists: */
                 closeAllLists();
             }

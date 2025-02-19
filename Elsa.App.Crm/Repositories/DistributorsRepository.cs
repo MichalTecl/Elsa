@@ -2,6 +2,7 @@
 using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Utils;
 using Elsa.Common.Utils.TextMatchers;
 using Elsa.Core.Entities.Commerce.Crm;
 using Robowire.RobOrm.Core;
@@ -101,10 +102,41 @@ namespace Elsa.App.Crm.Repositories
 
         public List<DistributorAddressViewModel> GetDistributorAddresses(int customerId)
         {
-            return _cache.ReadThrough($"distributorAddresses_{customerId}", TimeSpan.FromMinutes(10), () => _database.Sql()
+            return _database.Sql()
                 .Call("LoadCustomerAddresses")
                 .WithParam("@customerId", customerId)
-                .AutoMap<DistributorAddressViewModel>());
+                .AutoMap<DistributorAddressViewModel>();
+        }
+
+        public List<ICustomerStore> GetStores(int customerId)
+        {
+            return _database
+                .SelectFrom<ICustomerStore>()
+                .Join(s => s.Customer)
+                .Where(s => s.Customer.ProjectId == _session.Project.Id)
+                .Where(s => s.CustomerId == customerId).Execute().ToList();
+        }
+
+        public void DeleteStore(int customerId, string addressName)
+        {
+            var store = GetStores(customerId).FirstOrDefault(s => s.SystemRecordName == addressName).Ensure("Invalid address name");
+
+            _database.Delete(store);
+        }
+
+        public void SaveStore(int customerId, string addressName, Action<ICustomerStore> change)
+        {
+            var store = GetStores(customerId)
+                .FirstOrDefault(s => s.SystemRecordName == addressName) 
+                ?? _database.New<ICustomerStore>(s =>
+                {
+                    s.SystemRecordName = addressName;
+                    s.CustomerId = customerId;                    
+                });
+
+            change(store);
+
+            _database.Save(store);
         }
 
         private List<DistributorGridRowModel> GetAllDistributors()

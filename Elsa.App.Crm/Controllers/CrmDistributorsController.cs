@@ -7,6 +7,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Robowire.RoboApi;
+using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +23,16 @@ namespace Elsa.App.Crm.Controllers
         private readonly DistributorsRepository _distributorsRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IUserRepository _userRepo;
+        private readonly CustomerTagRepository _tagRepo;
+        private readonly IDatabase _db;
 
-        public CrmDistributorsController(IWebSession webSession, ILog log, DistributorsRepository distributorsRepository, ICustomerRepository customerRepository, IUserRepository userRepo) : base(webSession, log)
+        public CrmDistributorsController(IWebSession webSession, ILog log, DistributorsRepository distributorsRepository, ICustomerRepository customerRepository, IUserRepository userRepo, CustomerTagRepository tagRepo, IDatabase db) : base(webSession, log)
         {
             _distributorsRepository = distributorsRepository;
             _customerRepository = customerRepository;
             _userRepo = userRepo;
+            _tagRepo = tagRepo;
+            _db = db;
         }
 
         public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
@@ -52,6 +57,40 @@ namespace Elsa.App.Crm.Controllers
                     NoteDt = StringUtil.FormatDateTime(n.CreateDt),
                     Text = n.Body
                 });
+        }
+
+        public void Save(DistributorChangeRequestModel rq)
+        {
+            EnsureUserRight(CrmUserRights.DistributorsAppEdits);
+
+            using(var tx = _db.OpenTransaction())
+            {
+                var customer = _customerRepository.GetCustomer(rq.CustomerId).Ensure("Invalid CstomerId");
+
+                if (rq.AddedTags != null)
+                    rq.AddedTags.ForEach(t => _tagRepo.Assign(customer.Id, t));
+
+                if (rq.RemovedTags != null)
+                    rq.RemovedTags.ForEach(t => _tagRepo.Unassign(customer.Id, t));
+
+                foreach (var storeAddress in rq.ChangedAddresses.Where(a => a.IsDeleted))
+                    _distributorsRepository.DeleteStore(customer.Id, storeAddress.AddressName);
+                 
+                foreach(var address in rq.ChangedAddresses.Where(a => !a.IsDeleted))
+                {
+                    _distributorsRepository.SaveStore(customer.Id, address.AddressName, s => {
+                        s.Name = address.StoreName;
+                        s.Address = address.Address;
+                        s.City = address.City;
+                        s.Www = address.Www;
+                        s.PreviewName = address.StoreName;
+                        s.Lat = address.Lat;
+                        s.Lon = address.Lon;
+                    });
+                }
+
+                tx.Commit();
+            }
         }
 
         protected override void OnBeforeCall()

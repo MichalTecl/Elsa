@@ -14,6 +14,8 @@ namespace Elsa.Commerce.Core.Crm
 {
     public interface ICustomerRepository
     {
+        ICustomer GetCustomer(int id);
+
         void SyncCustomers(IEnumerable<IErpCustomerModel> source);
 
         void SyncShadowCustomers();

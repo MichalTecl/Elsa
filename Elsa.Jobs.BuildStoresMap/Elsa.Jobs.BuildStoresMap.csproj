@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Elsa.App.Crm\Elsa.App.Crm.csproj" />
     <ProjectReference Include="..\Elsa.App.PublicFiles\Elsa.App.PublicFiles.csproj" />
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj" />
     <ProjectReference Include="..\Elsa.Integration.Crm.Raynet\Elsa.Integration.Crm.Raynet.csproj" />
