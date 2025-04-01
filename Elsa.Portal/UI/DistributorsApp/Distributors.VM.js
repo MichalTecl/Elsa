@@ -1,4 +1,5 @@
-﻿var app = app || {};
+﻿
+var app = app || {};
 app.Distributors = app.Distributors || {};
 app.Distributors.VM = app.Distributors.VM || function(){
     const self = this;
@@ -36,6 +37,33 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.tagPickerActive = false;
 
     self.isDetailPage = false;
+    self.isGridPage = false;
+
+    self.detailTabs = [
+        { "text": "Poznámky", "control": "DistributorNotes" },
+        { "text": "Schůzky", "control": "DistributorMeetings" }
+    ];
+
+    self.currentTabContentControl = null;
+
+    self.activateTab = (text) => {
+
+        self.currentTabContentControl = null;
+
+        self.detailTabs.forEach(t => {
+            const thisOne = t.text === text;
+            t.isActive = thisOne;
+
+            if (thisOne) {
+
+                const controlUrl = t.control.indexOf('/') > -1 ? t.control : "/UI/DistributorsApp/Tabs/" + t.control + '.html';
+
+                self.currentTabContentControl = controlUrl;
+            }
+        });
+    };
+
+    self.activateTab(self.detailTabs[0].text);
 
     const updateFilterArray = (array, value, shouldBeIncluded) => {
 
@@ -213,6 +241,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
         if (!self.detail)
             return;
+
+        addresses.forEach(a => a.IsNotStore = !a.IsStore);
 
         self.detail.addresses = addresses;
         self.selectedAddress = self.detail.addresses[0];
@@ -507,36 +537,27 @@ app.Distributors.VM = app.Distributors.VM || function(){
             history.replaceState(null, "", newHash ? `#${newHash}` : window.location.pathname);
         }
     };
+    
+    window.queryWatch.watch("customerId", (strCustomerId) => {
 
-    const checkCustomerIdQuery = () => {
-        const params = new URLSearchParams(window.location.search);
-        let customerId = params.get('customerId');
-                
-        if (!customerId) {
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            customerId = hashParams.get('customerId');
+        if (strCustomerId && /^\d+$/.test(strCustomerId)) {
+            let customerId = parseInt(strCustomerId, 10);
+
+            if(!self.isGridPage)
+                self.isDetailPage = true;
+
+            loadDetail(customerId);
         }
-                
-        if (customerId && /^\d+$/.test(customerId)) {
-            let customerIdInt = parseInt(customerId, 10);
-            
-            loadDetail(customerIdInt);
-            return true;
+        else {
+            self.isGridPage = true;
+            loadDetail(null);
+            load(1);
         }
 
-        
-        loadDetail(null);
-
-        load(1);
-
-        return false;
-    };
-
-    if (checkCustomerIdQuery()) {
-        self.isDetailPage = true;
-    } 
-
-    window.addEventListener('hashchange', checkCustomerIdQuery);    
+    });
 };
 
 app.Distributors.vm = app.Distributors.vm || new app.Distributors.VM();
+
+
+

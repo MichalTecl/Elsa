@@ -91,10 +91,10 @@ if (lanta.Markup.attributeSetters.length === 0) {
 	    return true;
 	});
 
-	//checked, selected, disabled
+	//checked, selected, disabled, readonly
 	lanta.Markup.attributeSetters.push(function (target, propertyName, value) {
 
-		if (propertyName !== "checked" && propertyName !== "selected" && propertyName !== "disabled") {
+        if (propertyName !== "checked" && propertyName !== "selected" && propertyName !== "disabled" && propertyName != "readonly") {
 			return false;
 		}
 

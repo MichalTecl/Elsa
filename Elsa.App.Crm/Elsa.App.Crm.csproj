@@ -148,11 +148,15 @@
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
+    <Content Include="UI\DistributorsApp\DistributorDetailView.css" />
     <Content Include="UI\DistributorsApp\DistributorDetailView.html" />
     <Content Include="UI\DistributorsApp\DistributorGrid.html" />
     <Content Include="UI\DistributorsApp\Distributors.css" />
     <Content Include="UI\DistributorsApp\Distributors.VM.js" />
     <Content Include="UI\DistributorsApp\DistributorsAppPage.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.VM.js" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
   <ItemGroup />

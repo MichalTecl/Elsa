@@ -64,17 +64,17 @@
             </div>
             <div class="digrDetLabeledItem nostoreOnly">
                 <label>E-Mail</label>
-                <input type="text" data-bind="value:selectedAddress.Email" />
+                <input type="text" data-bind="value:selectedAddress.Email" readonly="readonly" />
             </div>
             <div class="digrDetLabeledItem nostoreOnly">
                 <label>Telefon</label>
-                <input type="text" data-bind="value:selectedAddress.Phone" />
+                <input type="text" data-bind="value:selectedAddress.Phone" readonly="readonly"  />
             </div>
             <div class="digrDetLabeledItem digrAdrAddressCont">
-                <label>Adresa</label>
-                <input type="text" data-bind="value:selectedAddress.Address" event-bind="change:VM.updateAddress('Address', this.value)" />
+                <label>Adresa</label>                
+                <input type="text" data-bind="value:selectedAddress.Address;readonly:selectedAddress.IsNotStore" event-bind="change:VM.updateAddress('Address', this.value)" />
                 <label>Město</label>
-                <input type="text" data-bind="value:selectedAddress.City" event-bind="change:VM.updateAddress('City', this.value)" />
+                <input type="text" data-bind="value:selectedAddress.City;readonly:selectedAddress.IsNotStore" event-bind="change:VM.updateAddress('City', this.value)" />
             </div>
             <div class="digrDetLabeledItem storeOnly">
                 <label>GPS</label>
@@ -114,7 +114,7 @@
     </div>
     <div class="digrDetSection100 digrDetTabs">
         <div class="digrDetTabsHead" data-bind="itemsSource:detailTabs" data-key="text">
-            <div class="lt-template digrDetTab" data-bind="text:text;class.activeTab:isActive" event-bind="click:VM.activateTab(text)"></div>
+            <div class="lt-template digrDetTab" data-bind="text:text;class.activeTab:isActive" event-bind="click:activateDetailTab(text)"></div>
         </div>
         <div class="digrDetTabContent" data-bind="fill-by:currentTabContentControl"></div>
     </div>
@@ -145,5 +145,8 @@
                 app.Distributors.vm.tagPickerActive = false;
                 lt.notify();
             }
+            this.activateDetailTab = (text) => app.Distributors.vm.activateTab(text);
         });
 </script>
+
+<link href="/UI/DistributorsApp/DistributorDetailView.css" rel="stylesheet" />

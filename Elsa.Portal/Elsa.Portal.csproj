@@ -128,6 +128,7 @@
     <Content Include="Script\Apps\SaleEvents\SaleEvents.VM.js" />
     <Content Include="Script\Common\ContextMenu.js" />
     <Content Include="Script\Common\GlobalEventHandlers.js" />
+    <Content Include="Script\Common\QueryWatch.js" />
     <Content Include="Script\Common\TextMatcher.js" />
     <Content Include="Script\Common\UrlBus.js" />
     <Content Include="Script\Common\XTable.js" />

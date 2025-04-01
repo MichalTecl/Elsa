@@ -1,0 +1,11 @@
+.digrAddrStoreMode .nostoreOnly {
+    display:none;
+}
+
+.digrAddrReadOnly .storeOnly {
+    display:none;
+}
+
+.digrAddrReadOnly .digrDetLabeledItem {
+    pointer-events: none;    
+} 
