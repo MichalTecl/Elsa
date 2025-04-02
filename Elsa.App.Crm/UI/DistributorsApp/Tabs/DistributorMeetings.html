@@ -1,4 +1,13 @@
-<div id="distrMeetingsPanel">DISTRIBUTOR MEETINGS</div>
+<div id="distrMeetingsPanel">
+    <div id="distrMeetingsList" data-key="Id" data-bind="itemsSource:meetings">
+        <div class="lt-template distrMeetingListItem">
+            Meeting
+        </div>
+    </div>
+</div>
+<script src="/UI/DistributorsApp/Tabs/DistributorMeetings.VM.js"></script>
 <script>
-    lt.element("distrMeetingsPanel").attach(function () {});
+    lt.element("distrMeetingsPanel")
+        .withModel("app.DistributorMeetings.vm")
+        .attach(function () { });
 </script>

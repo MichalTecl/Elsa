@@ -19,9 +19,8 @@ namespace Elsa.App.Crm.Entities
 
         int MeetingCategoryId { get; set; }
         IMeetingCategory MeetingCategory { get; }
-
-        int MeetingStatusId { get; set; }
-        IMeetingStatus MeetingStatus { get; }
+                
+        IEnumerable<IMeetingStatus> MeetingStatuses { get; }
 
         [NVarchar(255, false)]
         string Title { get; set; }

@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\CrmDistributorsController.cs" />
+    <Compile Include="Controllers\CrmMeetingsController.cs" />
     <Compile Include="Controllers\CrmMetadataController.cs" />
     <Compile Include="CrmApp\CustomerDataFacade.cs" />
     <Compile Include="CrmUserRights.cs" />
@@ -155,6 +156,7 @@
     <Content Include="UI\DistributorsApp\Distributors.VM.js" />
     <Content Include="UI\DistributorsApp\DistributorsAppPage.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.VM.js" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>

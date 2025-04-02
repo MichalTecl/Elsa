@@ -36,8 +36,11 @@
 
             const receiveNotes = (notes) => self.notes = notes;
 
-            window.queryWatch.watch("customerId", (strCustomerId) => {
-                customerId = (!!strCustomerId) ? parseInt(strCustomerId) : null;
+            app.Distributors.vm.withCustomerId((cid) => {
+
+                customerId = cid;
+
+                self.notes = [];
 
                 self.notes = [];
 
@@ -48,7 +51,7 @@
                     .query({ "customerId": customerId })
                     .get(receiveNotes);
             });
-
+                        
             self.addNote = (text) => {
                 lt.api("/Crmdistributors/addNote")
                     .query({ customerId })

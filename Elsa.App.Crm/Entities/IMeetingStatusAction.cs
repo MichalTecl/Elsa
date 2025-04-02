@@ -1,4 +1,5 @@
 ﻿using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Core;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
 using System;

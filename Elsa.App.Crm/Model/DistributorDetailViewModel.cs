@@ -1,4 +1,5 @@
 ﻿using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Crm;
 using Newtonsoft.Json;
 using System;
@@ -71,5 +72,45 @@ namespace Elsa.App.Crm.Model
         public string NoteDt { get; set; }
         public string Text { get; set; }
         public bool IsOwn { get; set; }
+    }
+
+    public class StatusVmBase
+    {
+        public int StatusTypeId { get; set; }
+        public string StatusTypeName { get; set; }
+        public string StatusTypeColor { get; set; }
+        public string StatusTypeIconClass { get; set; }
+
+    }
+
+    public class MeetingStatusActionViewModel : StatusVmBase
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public bool RequiresNote { get; set; }
+    }
+
+    public class MeetingStatusHistoryViewModel : StatusVmBase
+    {
+        public int Id { get; set; }
+        public string Author { get; set; }
+        public string setDt { get; set; }
+        public string Note { get; set; }
+    }
+
+    public class CustomerMeetingViewModel : StatusVmBase 
+    {
+        public int Id { get; set; }
+
+        public string StartDt { get; set; }
+        public string EndDt { get; set; }
+        public string Title { get; set; }
+        public string Text { get; set; }
+
+        public string Author { get; set; }
+
+        public List<MeetingStatusActionViewModel> Actions { get; set; } = new List<MeetingStatusActionViewModel>();
+        public List<IUser> Participants { get; set; } = new List<IUser>();
+        //public List<MeetingStatusHistoryViewModel> History { get; set; } = new List<MeetingStatusHistoryViewModel>();
     }
 }

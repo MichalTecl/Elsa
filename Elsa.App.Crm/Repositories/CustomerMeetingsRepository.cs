@@ -20,8 +20,10 @@ namespace Elsa.App.Crm.Repositories
         private readonly AutoRepo<IMeetingCategory> _meetingCategoryRepo;
         private readonly AutoRepo<IMeetingStatusType> _meetingStautsTypeRepo;
         private readonly AutoRepo<IMeetingStatusAction> _meetingStatusActionRepo;
+        
+        private readonly DistributorsRepository _distributorsRepo;
 
-        public CustomerMeetingsRepository(IDatabase database, ISession session, ICache cache)
+        public CustomerMeetingsRepository(IDatabase database, ISession session, ICache cache, DistributorsRepository distributorsRepo)
         {
             _database = database;
             _session = session;
@@ -30,6 +32,7 @@ namespace Elsa.App.Crm.Repositories
             _meetingCategoryRepo = new AutoRepo<IMeetingCategory>(session, database, cache, selectQueryModifier: (db, q) => q.OrderBy(i => i.Title));
             _meetingStautsTypeRepo = new AutoRepo<IMeetingStatusType>(session, database, cache, selectQueryModifier: (db, q) => q.OrderBy(i => i.Title));
             _meetingStatusActionRepo = new AutoRepo<IMeetingStatusAction>(session, database, cache, selectQueryModifier: (db, q) => q.OrderBy(i => i.SortOrder));
+            _distributorsRepo = distributorsRepo;
         }
 
         public List<IMeetingCategory> GetAllMeetingCategories()
@@ -45,6 +48,18 @@ namespace Elsa.App.Crm.Repositories
         public List<IMeetingStatusAction> GetMeetingStatusActions(int? currentStatusId)
         {
             return _meetingStatusActionRepo.GetAll().Where(ms => currentStatusId == null || currentStatusId == ms.CurrentStatusTypeId).ToList();
+        }
+
+        public List<IMeeting> GetMeetings(int customerId)
+        {
+            return _database.SelectFrom<IMeeting>()
+                 .Join(m => m.Customer)
+                 .Join(m => m.Participants)
+                 .Join(m => m.MeetingStatuses)
+                .Where(m => m.CustomerId == customerId)
+                .Where(m => m.Customer.ProjectId == _session.Project.Id)
+                .Execute()
+                .ToList();
         }
     }
 }

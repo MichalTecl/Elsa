@@ -39,9 +39,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.isDetailPage = false;
     self.isGridPage = false;
 
-    self.detailTabs = [
+    self.detailTabs = [        
+        { "text": "Schůzky", "control": "DistributorMeetings" },
         { "text": "Poznámky", "control": "DistributorNotes" },
-        { "text": "Schůzky", "control": "DistributorMeetings" }
     ];
 
     self.currentTabContentControl = null;
@@ -118,7 +118,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         self.allSalesReps = [{ PublicName: "", Id: null }, ...m.SalesRepresentatives];
     };
 
-    const withMetadata = (consumer) => {
+    self.withMetadata = (consumer) => {
         if (!!__metadata) {
             consumer(__metadata);
             return;
@@ -141,7 +141,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         
         const mapMd = (source, ids) => (ids || []).map(id => (source || []).find(s => s.Id === id));   
 
-        withMetadata((metadata) => {
+        self.withMetadata((metadata) => {
 
             data.forEach(d => {
 
@@ -186,7 +186,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
             });
     };
         
-    withMetadata((m) => receiveMetadata(m));
+    self.withMetadata((m) => receiveMetadata(m));
 
     let monSymbCache = {};
     const getMonthSymbols = (n) => {
@@ -257,7 +257,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
         loadAddresses();
 
-        withMetadata((md) => {
+        self.withMetadata((md) => {
 
             if (self.detail.SalesRepIds.length > 0)
                 self.detail.salesRepName = (md.SalesRepresentatives.find(s => s.Id === self.detail.SalesRepIds[0]) || {}).PublicName;
@@ -441,7 +441,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
             if (allowedTagNames.indexOf(name) === -1)
                 return;
 
-            withMetadata((md) => {
+            self.withMetadata((md) => {
 
                 const toAdd = md.CustomerTagTypes.find(t => t.Name === name);
                 const id = toAdd.Id;
@@ -463,7 +463,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     self.getAttachableTags = (qry, callback) => {
 
-        withMetadata((md) =>
+        self.withMetadata((md) =>
             callback(self.detail.attachableTags || (self.detail.attachableTags = md.CustomerTagTypes.filter(tag => {
 
                 if (!tag.CanBeAssignedManually)
@@ -537,16 +537,28 @@ app.Distributors.VM = app.Distributors.VM || function(){
             history.replaceState(null, "", newHash ? `#${newHash}` : window.location.pathname);
         }
     };
-    
-    window.queryWatch.watch("customerId", (strCustomerId) => {
 
-        if (strCustomerId && /^\d+$/.test(strCustomerId)) {
-            let customerId = parseInt(strCustomerId, 10);
 
-            if(!self.isGridPage)
+    self.withCustomerId = (callback) => {
+        window.queryWatch.watch("customerId", (strCustomerId) => {
+            let customerId = null;
+
+            if (strCustomerId && /^\d+$/.test(strCustomerId)) {
+                customerId = parseInt(strCustomerId, 10);
+            }
+
+            callback(customerId);
+        });
+    };
+
+    self.withCustomerId((customerId) => {
+
+        if (customerId) {
+            if (!self.isGridPage)
                 self.isDetailPage = true;
 
             loadDetail(customerId);
+
         }
         else {
             self.isGridPage = true;
@@ -554,7 +566,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
             load(1);
         }
 
-    });
+    });    
 };
 
 app.Distributors.vm = app.Distributors.vm || new app.Distributors.VM();
