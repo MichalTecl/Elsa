@@ -57,13 +57,20 @@ namespace Elsa.App.Crm.Controllers
                     Author = usindex.Get(n.AuthorId, null)?.EMail,
                     NoteDt = StringUtil.FormatDateTime(n.CreateDt),
                     Text = n.Body,
-                    IsOwn = n.CustomerId == WebSession.User.Id,
+                    IsOwn = n.AuthorId == WebSession.User.Id,
                 });
         }
 
         public IEnumerable<CustomerNoteViewModel> AddNote(int customerId, string text)
         {
             _customerRepository.AddCustomerNote(customerId, text);
+
+            return GetNotes(customerId);
+        }
+
+        public IEnumerable<CustomerNoteViewModel> DeleteNote(int customerId, int noteId)
+        {
+            _customerRepository.DeleteCustomerNote(noteId);
 
             return GetNotes(customerId);
         }

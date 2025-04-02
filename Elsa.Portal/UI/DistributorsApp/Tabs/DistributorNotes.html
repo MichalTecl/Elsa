@@ -17,6 +17,7 @@
             <div class="digrNoteHead">
                 <div class="digrNoteDt" data-bind="text:NoteDt"></div>
                 <div class="digrNoteAuthor" data-bind="text:Author"></div>
+                <i data-bind="class!.hidden:IsOwn" class="far fa-trash-alt faButton" event-bind="click:deleteNote(Id)"></i>
             </div>
             <div class="digrNoteBody" data-bind="text:Text"></div>
         </div>
@@ -54,6 +55,16 @@
                     .body(text).post(receiveNotes);
             };
 
+            self.deleteNote = (noteId) => {
+                if (!window.confirm("Smazat?"))
+                    return;
+
+                lt
+                .api("/Crmdistributors/deleteNote")
+                .query({ noteId, customerId })
+                .post(receiveNotes);
+            }
+
         }
     };
 
@@ -75,6 +86,8 @@
                 cancelEdit();
             };
 
+            this.deleteNote = app.DistributorNotes.vm.deleteNote;
+                        
             newNoteInput.addEventListener("input", function () {
                 if (newNoteInput.value.trim() === "") {
                     digrNewNotePanel.classList.remove("activeNoteControls");

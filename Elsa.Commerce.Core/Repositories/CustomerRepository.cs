@@ -590,6 +590,17 @@ namespace Elsa.Commerce.Core.Repositories
             _cache.Remove($"customernotes_{customerId}");
         }
 
+        public void DeleteCustomerNote(int noteId)
+        {
+            var note = _database.SelectFrom<ICustomerRelatedNote>().Where(n => n.Id == noteId && n.AuthorId == _session.User.Id).Execute().FirstOrDefault();
+
+            if (note == null)
+                throw new ArgumentException("Poznamku nelze smazat");
+
+            _database.Delete(note);
+            _cache.Remove($"customernotes_{note.CustomerId}");
+        }
+
         public ICustomer GetCustomer(int id)
         {
             return _database

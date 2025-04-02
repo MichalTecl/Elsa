@@ -39,5 +39,6 @@ namespace Elsa.Commerce.Core.Crm
         List<ICustomerRelatedNote> GetCustomerRelatedNotes(int customerId);
 
         void AddCustomerNote(int customerId, string text);
+        void DeleteCustomerNote(int noteId);
     }
 }

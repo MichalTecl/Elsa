@@ -92,7 +92,7 @@ lanta.ViewLoading.loader = function (target, value, attribute, callback) {
         if (attribute === "fill-by") {
             target.innerHTML = html;
             lanta.ViewLoading.makeScriptsLive(target, value);
-            if (!!callback) {
+            if (typeof callback === "function") {
                 callback(target);
             }
             return;

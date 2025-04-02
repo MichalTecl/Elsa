@@ -26,10 +26,10 @@
                     currentValue = index[w.key] = getQueryParamValue(w.key);
                 }
 
-                if (currentValue !== w.lastValue || (!w.hasOwnProperty("lastValue"))) {
+                //if (currentValue !== w.lastValue || (!w.hasOwnProperty("lastValue"))) {
                     w.lastValue = currentValue;
                     w.callback(currentValue);
-                }
+                //}
             });
         };
 
