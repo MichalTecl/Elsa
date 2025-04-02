@@ -19,7 +19,7 @@
                 <div class="digrNoteAuthor" data-bind="text:Author"></div>
                 <i data-bind="class!.hidden:IsOwn" class="far fa-trash-alt faButton" event-bind="click:deleteNote(Id)"></i>
             </div>
-            <div class="digrNoteBody" data-bind="text:Text"></div>
+            <pre class="digrNoteBody" data-bind="text:Text"></pre>
         </div>
     </div>
 </div>
@@ -52,7 +52,7 @@
             self.addNote = (text) => {
                 lt.api("/Crmdistributors/addNote")
                     .query({ customerId })
-                    .body(text).post(receiveNotes);
+                    .rawBody(text).post(receiveNotes);
             };
 
             self.deleteNote = (noteId) => {

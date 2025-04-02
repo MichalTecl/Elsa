@@ -170,6 +170,11 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
         return self;
     };
 
+    this.rawBody = function (str) {
+        bodyJson = str;
+        return self;
+    };
+
     this.formData = function(name, value) {
 
         formData = formData || new FormData();
