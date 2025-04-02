@@ -1,4 +1,95 @@
-<div id="digrNotesPanel">DISTRIBUTOR NOTES</div>
+<div id="digrNotesPanel">
+    
+    <div id="digrNewNotePanel" >
+        <div id="digrNewNoteTextPanel">
+            <textarea id="newNoteInput"></textarea>
+        </div>
+        <div id="digrNewNoteControls">
+            <button class="cancelButton" event-bind="click:cancelNoteEdit()"></button>
+            <button class="confirmButton" event-bind="click:submitNote()"></button>
+        </div>
+    </div>
+
+
+
+    <div id="digrNotesList" data-bind="itemsSource:notes" data-key="Id">
+        <div class="digrNoteItem lt-template">
+            <div class="digrNoteHead">
+                <div class="digrNoteDt" data-bind="text:NoteDt"></div>
+                <div class="digrNoteAuthor" data-bind="text:Author"></div>
+            </div>
+            <div class="digrNoteBody" data-bind="text:Text"></div>
+        </div>
+    </div>
+</div>
+
 <script>
-    lt.element("digrNotesPanel").attach(function () {});
+
+    app.DistributorNotes = app.DistributorNotes || {
+        VM: function () {
+            const self = this;
+
+            let customerId = null;
+
+            self.notes = [];
+
+            const receiveNotes = (notes) => self.notes = notes;
+
+            window.queryWatch.watch("customerId", (strCustomerId) => {
+                customerId = (!!strCustomerId) ? parseInt(strCustomerId) : null;
+
+                self.notes = [];
+
+                if (!customerId)
+                    return;
+
+                lt.api("/CrmDistributors/getNotes")
+                    .query({ "customerId": customerId })
+                    .get(receiveNotes);
+            });
+
+            self.addNote = (text) => {
+                lt.api("/Crmdistributors/addNote")
+                    .query({ customerId })
+                    .body(text).post(receiveNotes);
+            };
+
+        }
+    };
+
+    app.DistributorNotes.vm = app.DistributorNotes.vm || new app.DistributorNotes.VM();
+
+    lt.element("digrNotesPanel")
+        .withModel("app.DistributorNotes.vm")
+        .attach(function (digrNewNotePanel, newNoteInput) {
+
+            const cancelEdit = function () {
+                newNoteInput.value = "";
+                newNoteInput.dispatchEvent(new Event("input"));
+            };
+
+            this.cancelNoteEdit = cancelEdit;
+
+            this.submitNote = function () {
+                app.DistributorNotes.vm.addNote(newNoteInput.value);
+                cancelEdit();
+            };
+
+            newNoteInput.addEventListener("input", function () {
+                if (newNoteInput.value.trim() === "") {
+                    digrNewNotePanel.classList.remove("activeNoteControls");
+                } else {
+                    digrNewNotePanel.classList.add("activeNoteControls");
+                }
+            });
+
+        });
 </script>
+
+<style type="text/css">
+    #digrNewNoteControls { display: none; }
+
+    .activeNoteControls #digrNewNoteControls {
+        display: block;
+    }
+</style>

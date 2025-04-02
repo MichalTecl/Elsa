@@ -156,7 +156,6 @@
     <Content Include="UI\DistributorsApp\DistributorsAppPage.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.html" />
-    <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.VM.js" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
   <ItemGroup />

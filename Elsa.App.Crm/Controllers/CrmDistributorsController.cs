@@ -53,10 +53,19 @@ namespace Elsa.App.Crm.Controllers
             return _customerRepository.GetCustomerRelatedNotes(customerId)
                 .Select(n => new CustomerNoteViewModel 
                 {
-                    Author = usindex.Get(n.CustomerId, null)?.EMail,
+                    Id = n.Id,
+                    Author = usindex.Get(n.AuthorId, null)?.EMail,
                     NoteDt = StringUtil.FormatDateTime(n.CreateDt),
-                    Text = n.Body
+                    Text = n.Body,
+                    IsOwn = n.CustomerId == WebSession.User.Id,
                 });
+        }
+
+        public IEnumerable<CustomerNoteViewModel> AddNote(int customerId, string text)
+        {
+            _customerRepository.AddCustomerNote(customerId, text);
+
+            return GetNotes(customerId);
         }
 
         public void Save(DistributorChangeRequestModel rq)

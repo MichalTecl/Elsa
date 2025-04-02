@@ -66,8 +66,10 @@ namespace Elsa.App.Crm.Model
 
     public class  CustomerNoteViewModel 
     {
+        public int Id { get; set; }
         public string Author { get; set; }
         public string NoteDt { get; set; }
         public string Text { get; set; }
+        public bool IsOwn { get; set; }
     }
 }

@@ -37,8 +37,14 @@ namespace Elsa.Common
             Func<T> defaultValueFactory)
         {
 
-
-            return defaultValueFactory();
+            try
+            {
+                return defaultValueFactory();
+            }
+            catch(Exception ex)
+            {
+                throw new ArgumentException($"Cannot obtain value of '{parameter.Name}' parameter for {controller.GetType().Name}.{method.Name}: {ex.Message}", ex);
+            }
         }
 
         public void Call(

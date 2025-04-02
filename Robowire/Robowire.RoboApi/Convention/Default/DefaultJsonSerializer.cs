@@ -70,9 +70,9 @@ namespace Robowire.RoboApi.Convention.Default
             {
                 return (T)(object)data;
             }
-
+                        
             MethodInfo parseMethod;
-            if ((parseMethod = typeof(T).GetMethod("Parse", BindingFlags.Static | BindingFlags.Public)) != null)
+            if ((parseMethod = typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public).FirstOrDefault(m => m.Name == "Parse" && m.GetParameters().Length == 1)) != null)
             {
                 var box = parseMethod.Invoke(null, new object[] { data });
                 return (T)box;
