@@ -86,31 +86,37 @@ namespace Elsa.App.Crm.Model
     public class MeetingStatusActionViewModel : StatusVmBase
     {
         public int Id { get; set; }
-        public string Title { get; set; }
-        public bool RequiresNote { get; set; }
+        public string Title { get; set; }        
     }
-
-    public class MeetingStatusHistoryViewModel : StatusVmBase
+        
+    public class MeetingParticipantViewModel
     {
-        public int Id { get; set; }
-        public string Author { get; set; }
-        public string setDt { get; set; }
-        public string Note { get; set; }
+        public MeetingParticipantViewModel() { }
+
+        public MeetingParticipantViewModel(IUser user)
+        {
+            UserId = user.Id;
+            UserName = user.EMail;
+        }
+
+        public int UserId { get; set; }
+        public string UserName { get; set; }
     }
 
     public class CustomerMeetingViewModel : StatusVmBase 
     {
         public int Id { get; set; }
-
+        public int CustomerId { get; set; }
         public string StartDt { get; set; }
         public string EndDt { get; set; }
         public string Title { get; set; }
         public string Text { get; set; }
-
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
+        public string CategoryIconClass { get; set; }
         public string Author { get; set; }
-
+        public int ExpectedDurationMinutes { get; set; }
         public List<MeetingStatusActionViewModel> Actions { get; set; } = new List<MeetingStatusActionViewModel>();
-        public List<IUser> Participants { get; set; } = new List<IUser>();
-        //public List<MeetingStatusHistoryViewModel> History { get; set; } = new List<MeetingStatusHistoryViewModel>();
+        public List<MeetingParticipantViewModel> Participants { get; set; } = new List<MeetingParticipantViewModel>();
     }
 }

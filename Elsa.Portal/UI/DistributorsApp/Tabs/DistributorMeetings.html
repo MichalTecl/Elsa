@@ -1,7 +1,87 @@
-<div id="distrMeetingsPanel">
+﻿<div id="distrMeetingsPanel">
+
+    <div id="distrNewMeetingPanel">
+        <div id="distrNewMeetingCategories" data-bind="itemsSource:meetingCategories;class.hidden:editingMeeting" data-key="Id">
+            <div class="lt-template distrNewMeetingButton" event-bind="click:newMeetingClick(Id)">
+                <i data-bind="class:IconClass"></i>
+                <div class="distrNewMeetingButtonTitle" data-bind="text:Title"></div>
+            </div>
+        </div>
+
+        <div id="distrCurrentMeeting" data-bind="class!.hidden:editingMeeting">
+
+            <div id="distrCurrentMeetingForm">
+                <div class="dcmRow">
+                    <div class="distrFormCategory">
+                        <i data-bind="class:currentMeeting.CategoryIconClass"></i>
+                        <div class="distrNewMeetingButtonTitle" data-bind="text:currentMeeting.CategoryName"></div>
+                    </div>
+                    <input id="currMeetingTitle" data-bind="value:currentMeeting.Title" event-bind="change:updateModel('Title', this.value)" />
+                </div>
+                <div class="dcmRow">
+                    <label>Od</label>
+                    <input type="datetime-local" data-bind="value:currentMeeting.StartDt" event-bind="change:updateModel('StartDt', this.value)" />
+                    <label>Do</label>
+                    <input type="datetime-local" data-bind="value:currentMeeting.EndDt" event-bind="change:updateModel('EndDt', this.value)" />
+                </div>
+                <div class="dcmRow">
+                    <textarea data-bind="value:currentMeeting.Text" event-bind="change:updateModel('Text', this.value)"></textarea>
+                </div>
+                <div class="dcmRow" id="distrCurrMeetingParticipants">
+                    <label>Účastníci</label>
+                    <div id="dcmParticipantList" data-bind="itemsSource:currentMeeting.Participants" data-key="UserId">
+                        <div class="lt-template dcmParticipantItem stackLeft">
+                            <div data-bind="text:UserName"></div>
+                            <i class="fas fa-times participantRemoveButton" event-bind="click:removeParticipant(UserId)"></i>
+                        </div>
+                    </div>
+                    <i class="fas fa-plus-circle" data-bind="class.hidden:addingParticipant" event-bind="click:openParticipantAdd"></i>
+                    <div id="newParticipantSelector" class="autocomplete" data-bind="class!.hidden:addingParticipant">
+                        <input id="newParticipantName" />
+                        <i class="fas fa-check-square" event-bind="click:addParticipant($newParticipantName.value)"></i>
+                    </div> 
+                    <div class="dcmRow">
+                        <label>Stav</label>
+                        <select id="dcmStatusSelect" data-bind="itemsSource:meetingStatusTypes;value:currentMeeting.StatusTypeId" data-key="Id" event-bind="change:updateModel('StatusTypeId', this.value)">
+                            <option class="lt-template" data-bind="value:Id; text:Title; style.color:ColorHex"></option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="distrCurrentMeetingControls">
+                <button event-bind="click:cancelEdit()"></button>
+                <button event-bind="click:saveMeeting()"></button>
+            </div>
+        </div>
+
+    </div>
+
     <div id="distrMeetingsList" data-key="Id" data-bind="itemsSource:meetings">
         <div class="lt-template distrMeetingListItem">
-            Meeting
+            <div class="distrMeetingItemHead stackLeft" event-bind="click:openMeetingDetail(Id)">
+                <i data-bind="class:CategoryIconClass; style.color:StatusTypeColor"></i>
+                <div class="distrMeetingItemDt" data-bind="text:previewDt"></div>
+                <div class="distrMeetingItemTitle" data-bind="text:Title"></div>                
+            </div>
+
+            <div data-bind="class!.hidden:isOpen">
+
+                <div class="preMeetingParticipantsRow stackLeft" data-bind="itemsSource:Participants" data-key="UserId">
+                    <div class="lt-template preMeetingParticipantsRowItem" data-bind="text:UserName"></div>
+                </div>
+
+                <textarea data-bind="text:Text" lt-name="meetingText" event-bind="input:meetingTextChange(Id, this.value)"></textarea>
+                <i class="fas fa-check-square" data-bind="class!.hidden:textDirty" event-bind="click:saveMeetingText(Id, $meetingText.value)"></i>
+
+                <div class="preMeetingStatusButtonsRow" data-bind="itemsSource:Actions" data-key="Id">
+                    <button class="lt-template stackLeft" data-bind="style.backgroundColor:StatusTypeColor" event-bind="click:setMeetingStatus(meetingId, StatusTypeId)">
+                        <i data-bind="class:StatusTypeIconClass"></i>
+                        <div data-bind="text:Title"></div>
+                    </button>
+                </div>
+                <i class="fas fa-pencil-alt preMeetingrowEditButton" event-bind="click:editMeeting(Id)"></i>
+            </div>
         </div>
     </div>
 </div>
@@ -9,5 +89,25 @@
 <script>
     lt.element("distrMeetingsPanel")
         .withModel("app.DistributorMeetings.vm")
-        .attach(function () { });
+        .attach(function (newParticipantSelector) {
+
+            this.newMeetingClick = (categoryId) => app.DistributorMeetings.vm.newMeeting(categoryId);
+            this.removeParticipant = (userId) => app.DistributorMeetings.vm.removeParticipant(userId);
+            this.cancelEdit = () => app.DistributorMeetings.vm.cancelMeetingEdit();
+            this.saveMeeting = () => app.DistributorMeetings.vm.saveMeeting();
+            this.addParticipant = (userName) => app.DistributorMeetings.vm.addParticipant(userName);
+            this.openMeetingDetail = (meetingId) => app.DistributorMeetings.vm.openMeetingDetail(meetingId);
+            this.setMeetingStatus = (meetingId, statusId) => app.DistributorMeetings.vm.setMeetingStatus(meetingId, statusId);
+            this.meetingTextChange = (meetingId, text) => app.DistributorMeetings.vm.meetingTextChange(meetingId, text);
+            this.saveMeetingText = (meetingId, text) => app.DistributorMeetings.vm.saveMeetingText(meetingId, text);
+            this.editMeeting = (id) => app.DistributorMeetings.vm.editMeeting(id);
+
+            this.updateModel = (property, value) => app.DistributorMeetings.vm.updateCurrentMeeting(property, value);
+
+            this.openParticipantAdd = () => {
+                app.ui.autosuggest(newParticipantSelector, app.DistributorMeetings.vm.getParticipantSelection);
+                app.DistributorMeetings.vm.setParticipantAdd();
+            };
+
+        });
 </script>

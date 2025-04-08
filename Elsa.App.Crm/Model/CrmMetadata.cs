@@ -10,7 +10,7 @@ namespace Elsa.App.Crm.Model
 {
     public class CrmMetadata
     {
-        public CrmMetadata(List<IMeetingStatusType> meetingStatusTypes, List<IMeetingStatusAction> meetingStatusActions, List<IMeetingCategory> meetingCategories, List<ICustomerTagType> customerTagTypes, List<ISalesRepresentative> salesRepresentatives, List<ICustomerGroupType> customerGroupTypes)
+        public CrmMetadata(List<IMeetingStatus> meetingStatusTypes, List<IMeetingStatusAction> meetingStatusActions, List<IMeetingCategory> meetingCategories, List<ICustomerTagType> customerTagTypes, List<ISalesRepresentative> salesRepresentatives, List<ICustomerGroupType> customerGroupTypes)
         {
             MeetingStatusTypes = meetingStatusTypes;
             MeetingStatusActions = meetingStatusActions;
@@ -20,7 +20,7 @@ namespace Elsa.App.Crm.Model
             CustomerGroupTypes = customerGroupTypes;
         }
 
-        public List<IMeetingStatusType> MeetingStatusTypes { get; }
+        public List<IMeetingStatus> MeetingStatusTypes { get; }
         public List<IMeetingStatusAction> MeetingStatusActions { get; }
         public List<IMeetingCategory> MeetingCategories { get; }
         public List<ICustomerTagType> CustomerTagTypes { get; }

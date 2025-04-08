@@ -18,7 +18,7 @@ namespace Elsa.App.Crm.Repositories
         private readonly ICache _cache;
 
         private readonly AutoRepo<IMeetingCategory> _meetingCategoryRepo;
-        private readonly AutoRepo<IMeetingStatusType> _meetingStautsTypeRepo;
+        private readonly AutoRepo<IMeetingStatus> _meetingStautsTypeRepo;
         private readonly AutoRepo<IMeetingStatusAction> _meetingStatusActionRepo;
         
         private readonly DistributorsRepository _distributorsRepo;
@@ -30,7 +30,7 @@ namespace Elsa.App.Crm.Repositories
             _cache = cache;
 
             _meetingCategoryRepo = new AutoRepo<IMeetingCategory>(session, database, cache, selectQueryModifier: (db, q) => q.OrderBy(i => i.Title));
-            _meetingStautsTypeRepo = new AutoRepo<IMeetingStatusType>(session, database, cache, selectQueryModifier: (db, q) => q.OrderBy(i => i.Title));
+            _meetingStautsTypeRepo = new AutoRepo<IMeetingStatus>(session, database, cache, selectQueryModifier: (db, q) => q.OrderBy(i => i.Title));
             _meetingStatusActionRepo = new AutoRepo<IMeetingStatusAction>(session, database, cache, selectQueryModifier: (db, q) => q.OrderBy(i => i.SortOrder));
             _distributorsRepo = distributorsRepo;
         }
@@ -40,7 +40,7 @@ namespace Elsa.App.Crm.Repositories
             return _meetingCategoryRepo.GetAll();
         }
 
-        public List<IMeetingStatusType> GetMeetingStatusTypes()
+        public List<IMeetingStatus> GetMeetingStatusTypes()
         {
             return _meetingStautsTypeRepo.GetAll();
         }
@@ -55,11 +55,22 @@ namespace Elsa.App.Crm.Repositories
             return _database.SelectFrom<IMeeting>()
                  .Join(m => m.Customer)
                  .Join(m => m.Participants)
-                 .Join(m => m.MeetingStatuses)
                 .Where(m => m.CustomerId == customerId)
                 .Where(m => m.Customer.ProjectId == _session.Project.Id)
                 .Execute()
                 .ToList();
+        }
+
+        public IMeeting GetMeeting(int meetingId)
+        {
+            return _database.SelectFrom<IMeeting>()
+                    .Join(m => m.Customer)
+                 .Join(m => m.Participants)
+                .Where(m => m.Id == meetingId)
+                .Where(m => m.Customer.ProjectId == _session.Project.Id)
+                .Take(1)
+                .Execute()
+                .FirstOrDefault();
         }
     }
 }

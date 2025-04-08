@@ -23,13 +23,13 @@ BEGIN
 
   LEFT JOIN (SELECT mtg.CustomerId, MAX(mtg.StartDt) meetingDt
 			   FROM Meeting mtg 
-			   JOIN MeetingStatusType ms ON (ms.Id = mtg.MeetingStatusId)
+			   JOIN MeetingStatus ms ON (ms.Id = mtg.StatusId)
 			   WHERE ms.ActionExpected = 0
 			  GROUP BY mtg.CustomerId) passedMeeting ON (passedMeeting.CustomerId = c.Id)
 
   LEFT JOIN (SELECT mtg.CustomerId, MIN(mtg.StartDt) meetingDt
 			   FROM Meeting mtg 
-			   JOIN MeetingStatusType ms ON (ms.Id = mtg.MeetingStatusId)
+			   JOIN MeetingStatus ms ON (ms.Id = mtg.StatusId)
 			   WHERE ms.ActionExpected = 1
 			  GROUP BY mtg.CustomerId) futureMeeting ON (futureMeeting.CustomerId = c.Id)
 

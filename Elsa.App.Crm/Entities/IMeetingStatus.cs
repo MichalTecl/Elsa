@@ -1,26 +1,22 @@
 ﻿using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Core;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Elsa.App.Crm.Entities
 {
     [Entity]
-    public interface IMeetingStatus : IIntIdEntity, IHasAuthor
+    public interface IMeetingStatus : IIntIdEntity, IProjectRelatedEntity
     {
-        int MeetingId { get; set; }
-        IMeeting Meeting { get; }
+        [NVarchar(100, false)]
+        string Title { get; set; }
 
-        int StatusTypeId { get; set; }
-        IMeetingStatusType StatusType { get; }
+        [NVarchar(32, false)]
+        string ColorHex { get; set; }
 
-        DateTime SetDt { get; set; }
-
-        [NVarchar(1000, true)]
-        string Note { get; set; }
+        [NVarchar(32, true)]
+        string IconClass { get; set; }
+        
+        bool ActionExpected { get; set; }
     }
 }

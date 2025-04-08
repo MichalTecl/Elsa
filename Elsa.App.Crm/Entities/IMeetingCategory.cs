@@ -11,18 +11,17 @@ using System.Threading.Tasks;
 namespace Elsa.App.Crm.Entities
 {
     [Entity]
-    public interface IMeetingCategory : IIntIdEntity, IProjectRelatedEntity, IHasAuthor
+    public interface IMeetingCategory : IIntIdEntity, IProjectRelatedEntity
     {
         [NVarchar(100, false)]
         string Title { get; set; }
-
-        [NVarchar(32, false)]
-        string ColorHex { get; set; }
 
         [NVarchar(32, true)]
         string IconClass { get; set; }
 
         int InitialStatusId { get; set; }
-        IMeetingStatusType InitialStatus { get; }
+        IMeetingStatus InitialStatus { get; }
+
+        int ExpectedDurationMinutes { get; set; }
     }
 }

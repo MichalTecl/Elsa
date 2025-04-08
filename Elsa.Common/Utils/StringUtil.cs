@@ -81,6 +81,16 @@ namespace Elsa.Common.Utils
             return sb.ToString();
         }
 
+        public static string TrimAndValidateNonEmpty(this string input, Func<string> messageFactory)
+        {
+            input = input.Trim();
+
+            if (string.IsNullOrWhiteSpace(input))
+                throw new ArgumentException(messageFactory());
+
+            return input;
+        }
+
         public static string NormalizeSearchText(int lenLimit, IEnumerable<string> inp)
         {
             if (inp == null)
@@ -225,9 +235,17 @@ namespace Elsa.Common.Utils
             return FormatDate(dt.Value);
         }
 
-        public static DateTime ParseDateTime(string modelDisplayDt)
-        {
-            return DateTime.ParseExact(modelDisplayDt, "dd.MM.yy HH:mm", CultureInfo.CurrentCulture);
+        public static DateTime ParseDateTime(string modelDisplayDt, Func<string, string> errorMessageFactory = null)
+        {            
+            if (DateTime.TryParseExact(modelDisplayDt, "dd.MM.yy HH:mm", CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out var result))
+                return result;
+
+            if (errorMessageFactory == null)
+            {
+                throw new ArgumentException($"Text '{modelDisplayDt}' není platná hodnota datum/čas");
+            }
+
+            throw new ArgumentException(errorMessageFactory(modelDisplayDt));
         }
 
         public static float GetReadability(decimal number)
@@ -409,6 +427,16 @@ namespace Elsa.Common.Utils
 
             foreach(var i in csv.Split(',', ';').Select(j => j.Trim()).Where(j => !string.IsNullOrWhiteSpace(j)))
                 yield return int.Parse(i);
+        }
+
+        public static string FormatDateTimeForUiInput(DateTime dateTime)
+        {
+            return dateTime.ToString("yyyy-MM-ddTHH:mm");
+        }
+
+        public static DateTime ParseUiInputDateTime(string input)
+        {
+            return DateTime.ParseExact(input, "yyyy-MM-ddTHH:mm", CultureInfo.CurrentCulture);
         }
     }
 }

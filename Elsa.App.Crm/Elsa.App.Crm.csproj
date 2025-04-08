@@ -66,7 +66,6 @@
     <Compile Include="Entities\IMeetingCategory.cs" />
     <Compile Include="Entities\IMeetingParticipant.cs" />
     <Compile Include="Entities\IMeetingStatus.cs" />
-    <Compile Include="Entities\IMeetingStatusType.cs" />
     <Compile Include="Entities\IMeetingStatusAction.cs" />
     <Compile Include="Entities\ISalesRepCustomer.cs" />
     <Compile Include="Entities\ISalesRepresentative.cs" />
@@ -142,9 +141,10 @@
     <Content Include="SQL\202500218_002_LoadCustomerAddresses.sql" />
     <Content Include="SQL\20250129_002_insp_missingSalesRep.sql" />
     <Content Include="SQL\20250205_001_IntTable.sql" />
-    <Content Include="SQL\20250211_001_LoadAllDistributors.sql" />
+    <Content Include="SQL\20250408_001_LoadAllDistributors.sql" />
     <Content Include="SQL\20250211_006_getDistributorsSales.sql" />
     <Content Include="SQL\20250218_001_LoadDistributorDetail.sql" />
+    <Content Include="SQL\20250408_002_initialData.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

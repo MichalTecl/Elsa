@@ -15,15 +15,10 @@ namespace Elsa.App.Crm.Entities
     {
         [NVarchar(100, false)]
         string Title { get; set; }
-
         int CurrentStatusTypeId { get; set; }
-        IMeetingStatusType CurrentStatusType { get; }
-
+        IMeetingStatus CurrentStatusType { get; }
         int NextStatusTypeId { get; set; }
-        IMeetingStatusType NextStatusType { get; }
-
-        bool RequiresNote { get; set; }
-
+        IMeetingStatus NextStatusType { get; }
         int SortOrder { get; set; }
     }
 }
