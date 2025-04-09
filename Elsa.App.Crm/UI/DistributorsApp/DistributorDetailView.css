@@ -1,4 +1,4 @@
-.digrAddrStoreMode .nostoreOnly {
+﻿.digrAddrStoreMode .nostoreOnly {
     display:none;
 }
 
@@ -8,4 +8,275 @@
 
 .digrAddrReadOnly .digrDetLabeledItem {
     pointer-events: none;    
-} 
+}
+
+
+/* === HLAVNÍ OBAL === */
+#digrDetailCont {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 14px;
+    color: #333;
+    background-color: #fff;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* === TLAČÍTKA SAVE / CANCEL === */
+.digrDetActionButtons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.digrActionBtn {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.digrCancelActionBtn {
+    background-color: #e74c3c;
+}
+
+.digrSaveActionBtn {
+    background-color: #2ecc71;
+}
+
+.digrActionBtn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.digrActionBtn i {
+    color: white;
+    font-size: 18px;
+}
+
+/* === HLAVIČKA PANELU === */
+.digrDetHeadPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background-color: #f7f9fc;
+    border-radius: 10px;
+    border: 1px solid #e2e6ec;
+}
+
+/* === NÁZEV FIRMY === */
+#digrDetName {
+    font-size: 26px;
+    font-weight: 700;
+    padding: 10px 14px;
+    background-color: #eef3fa;
+    color: #2b3a55;
+    border-left: 5px solid #3e3a72;
+    border-radius: 4px;
+}
+
+/* === SEKČNÍ BLOK S TAGY === */
+.digrDetTagsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+    .digrDetTagsSection > label {
+        font-weight: 600;
+        font-size: 14px;
+        color: #444;
+    }
+
+/* === ŘÁDEK S TAGY A PLUS === */
+.digrTagsRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+/* === LISTY ŠTÍTKŮ (sys + man) === */
+.digrDetTagList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Skrytí šablony */
+.lt-template {
+    display: none !important;
+}
+
+/* === TAG === */
+.digrTagItem {
+    background-color: #dce8f9;
+    color: #2b3a55;
+    padding: 4px 10px;
+    font-size: 13px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+    .digrTagItem i {
+        font-size: 12px;
+        color: #555;
+        cursor: pointer;
+    }
+
+/* === PLUS BUTTON === */
+.digrAddTagButton {
+    font-size: 16px;
+    color: #3e3a72;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .digrAddTagButton:hover {
+        color: #000;
+    }
+
+/* === AUTOSUGGEST PANEL (digrAddTagPanel) === */
+.digrAddTagPanel {
+    margin-top: 4px;
+}
+
+    .digrAddTagPanel .autocomplete {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 6px;
+    }
+
+    .digrAddTagPanel input {
+        border: none;
+        outline: none;
+        font-size: 14px;
+        flex-grow: 1;
+    }
+
+
+/* === INFO PANEL (LEVÁ POLOVINA) === */
+/* === INFO PANEL === */
+/* === INFO PANEL === */
+.digrDetInfoPanel {
+    width: 49%;
+    display: inline-block;
+    vertical-align: top;
+    box-sizing: border-box;
+    padding: 16px;
+    background-color: #f9fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e6ec;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+    .digrDetInfoPanel {
+        width: 100%;
+    }
+}
+
+/* === KATEGORIE === */
+.digrDetLabeledItem > label {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+    display: block;
+    color: #2b3a55;
+}
+
+.digrDetCategoriesCont {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.digrDetCategory {
+    background: #e3eaf5;
+    color: #2b3a55;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 14px;
+}
+
+/* === ŘÁDEK S DVOJICÍ POLOŽEK === */
+.digrDetRow {
+    display: flex;
+    gap: 4%;
+    margin-bottom: 8px;
+}
+
+    /* Každá polovina (checkboxy i info pole) */
+    .digrDetRow > div {
+        flex: 1;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+/* === CHECKBOXY === */
+.digrStoreEshopCheckboxesCont {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.digrSeCboxCont {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+    .digrSeCboxCont input[type="checkbox"] {
+        accent-color: #3e3a72;
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+
+/* === POLOŽKA S LABEL + READONLY TEXTEM === */
+.digrDetLabeledItem50 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .digrDetLabeledItem50 label {
+        font-weight: 600;
+        font-size: 13px;
+        color: #2b3a55;
+        min-width: 50px;
+        text-align: right;
+    }
+
+    .digrDetLabeledItem50 .digrROtext {
+        flex-grow: 1;
+        padding: 5px 8px;
+        background-color: #f0f2f5;
+        border: 1px dashed #ccc;
+        border-radius: 5px;
+        font-size: 13px;
+        color: #333;
+        line-height: 1.4;
+    }
+
+/* === OZ (kurzíva) === */
+.digrSalesRepBox {
+    font-style: italic;
+}
