@@ -149,14 +149,15 @@
         </div>
     </div>
 
-        <!--
-        <div class="digrDetSection100 digrDetTabs">
-            <div class="digrDetTabsHead" data-bind="itemsSource:detailTabs" data-key="text">
-                <div class="lt-template digrDetTab" data-bind="text:text;class.activeTab:isActive" event-bind="click:activateDetailTab(text)"></div>
+    <div class="digrDetSection100 digrDetTabs">        
+        <div class="digrDetTabsHead tabPanelHeadersContainer" data-bind="itemsSource:detailTabs" data-key="text">
+            <div class="lt-template digrDetTab tabControlTabHead" data-bind="class.tabControlActiveTab:isActive" event-bind="click:activateDetailTab(text)">
+                <div data-bind="text:text" class="tabControlHeadTitle"></div>
             </div>
-            <div class="digrDetTabContent" data-bind="fill-by:currentTabContentControl"></div>
         </div>
-            -->
+        <div class="digrDetTabContent" data-bind="fill-by:currentTabContentControl"></div>
+    </div>
+
     </div>
 
     <script>

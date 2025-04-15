@@ -261,6 +261,10 @@ div.searchPanel {
     cursor:pointer;    
 }
 
+.tabControlTabHead.tabControlActiveTab {
+    background-color: #00bfff !important;
+}
+
 .hidden {
     display: none !important;
 }
