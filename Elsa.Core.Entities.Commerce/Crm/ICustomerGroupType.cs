@@ -21,5 +21,8 @@ namespace Elsa.Core.Entities.Commerce.Crm
         bool IsDisabled { get; set; }
 
         bool? RequiresSalesRep { get; set; }
+
+        [NVarchar(100, true)]
+        string DefaultPaymentMethod { get; set; }
     }
 }

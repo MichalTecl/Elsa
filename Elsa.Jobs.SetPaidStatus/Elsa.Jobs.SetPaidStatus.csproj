@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\20210824_001_configInvoiceToBeAutoPaid.sql" />
+    <Content Include="SQL\20250415_001_SetupInvoiceDefaultPaymentMethod.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
