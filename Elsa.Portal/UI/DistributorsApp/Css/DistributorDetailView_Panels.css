@@ -124,6 +124,7 @@
 
 .storeNameAndDelCont {
     display: flex;
+    padding-top: 3px;
 }
 
 .addressDeleteButton {

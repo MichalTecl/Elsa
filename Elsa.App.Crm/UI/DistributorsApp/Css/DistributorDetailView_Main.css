@@ -26,43 +26,6 @@ input {
 }
 
 /* === TLAČÍTKA SAVE / CANCEL === */
-.digrDetActionButtons {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 4px;
-}
-
-.digrActionBtn {
-    width: 42px;
-    height: 42px;
-    border-radius: 8px;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-}
-
-.digrCancelActionBtn {
-    background-color: #e74c3c;
-}
-
-.digrSaveActionBtn {
-    background-color: #2ecc71;
-}
-
-.digrActionBtn:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-}
-
-.digrActionBtn i {
-    color: white;
-    font-size: 18px;
-}
-
-/* === HLAVIČKA PANELU === */
 .digrDetHeadPanel {
     display: flex;
     flex-direction: column;
@@ -73,14 +36,76 @@ input {
     border: 1px solid #e2e6ec;
 }
 
+/* Tlačítka a nadpis vedle sebe */
+#digrTitleAndButtons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+
+/* Tlačítka */
+.digrDetActionButtons {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* Tlačítka styl */
+.digrActionBtn {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: #e0e6ed;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.digrCancelActionBtn {
+    background-color: #99a;
+}
+
+.digrCancelActionBtn:hover {
+    background-color: #9a9;
+}
+
+.digrCancelActionBtn.digrCancelChanges {
+    background-color: #e74c3c;
+}
+
+.digrCancelActionBtndigrCancelChanges:hover {
+    background-color: #d63c2e;
+}
+
+.digrSaveActionBtn {
+    background-color: #2ecc71;
+}
+
+    .digrSaveActionBtn:hover {
+        background-color: #27ae60;
+    }
+
+.digrActionBtn i {
+    color: white;
+    font-size: 18px;
+}
+
+/* Nadpis roztažený doprava */
 #digrDetName {
     font-size: 26px;
     font-weight: 700;
     padding: 10px 14px;
-    background-color: #eef3fa;
+    background: linear-gradient(to right, #eef3fa 0%, rgba(238,243,250,0.6) 70%, rgba(238,243,250,0) 100%);
     color: #2b3a55;
-    border-left: 5px solid #3e3a72;
+    border-left: 3px solid #3e3a72;
     border-radius: 4px;
+    flex-grow: 1;
+    margin-left: 20px;
 }
 
 .digrDetTagsSection {
@@ -89,11 +114,11 @@ input {
     gap: 6px;
 }
 
-.digrDetTagsSection > label {
-    font-weight: 600;
-    font-size: 14px;
-    color: #444;
-}
+    .digrDetTagsSection > label {
+        font-weight: 600;
+        font-size: 14px;
+        color: #444;
+    }
 
 .digrTagsRow {
     display: flex;
@@ -124,11 +149,11 @@ input {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.digrTagItem i {
-    font-size: 12px;
-    color: #555;
-    cursor: pointer;
-}
+    .digrTagItem i {
+        font-size: 12px;
+        color: #555;
+        cursor: pointer;
+    }
 
 .digrAddTagButton {
     font-size: 16px;
@@ -137,28 +162,27 @@ input {
     transition: color 0.2s;
 }
 
-.digrAddTagButton:hover {
-    color: #000;
-}
+    .digrAddTagButton:hover {
+        color: #000;
+    }
 
 .digrAddTagPanel {
     margin-top: 4px;
 }
 
-.digrAddTagPanel .autocomplete {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px;
-    border: 1px solid #ccc;
-    background: #fff;
-    border-radius: 6px;
-}
+    .digrAddTagPanel .autocomplete {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 6px;
+    }
 
-.digrAddTagPanel input {
-    border: none;
-    outline: none;
-    font-size: 14px;
-    flex-grow: 1;
-}
-
+    .digrAddTagPanel input {
+        border: none;
+        outline: none;
+        font-size: 14px;
+        flex-grow: 1;
+    }

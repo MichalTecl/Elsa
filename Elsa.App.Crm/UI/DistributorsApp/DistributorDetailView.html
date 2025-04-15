@@ -2,17 +2,20 @@
     
     <div class="digrDetHeadPanel">
         <div id="digrTitleAndButtons">
-            <div class="digrDetSection100 digrDetActionButtons">
-                <button class="digrActionBtn digrCancelActionBtn" event-bind="click:VM.closeDetail">
-                    <i class="fas fa-window-close"></i>
-                </button>
-                <button class="digrActionBtn digrSaveActionBtn" event-bind="click:save" data-bind="class!.hidden:isDirty">
-                    <i class="fas fa-check-square"></i>
-                </button>
+            <div class="digrDetTitleRow stackLeft">
+                <div class="digrDetActionButtons stackLeft">
+                    <button class="digrActionBtn digrCancelActionBtn" data-bind="class.digrCancelChanges:isDirty" event-bind="click:VM.closeDetail">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <button class="digrActionBtn digrSaveActionBtn" event-bind="click:save" data-bind="class!.hidden:isDirty">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+                <div id="digrDetName" data-bind="text:detail.Name"></div>
             </div>
-            <div id="digrDetName" data-bind="text:detail.Name"></div>
         </div>
-        
+
+
 
         <div class="digrDetTagsSection">
             <label>Štítky</label>
