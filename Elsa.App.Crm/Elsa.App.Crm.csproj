@@ -149,7 +149,8 @@
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
-    <Content Include="UI\DistributorsApp\DistributorDetailView.css" />
+    <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Panels.css" />
+    <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Main.css" />
     <Content Include="UI\DistributorsApp\DistributorDetailView.html" />
     <Content Include="UI\DistributorsApp\DistributorGrid.html" />
     <Content Include="UI\DistributorsApp\Distributors.css" />

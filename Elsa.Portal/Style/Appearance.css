@@ -10,7 +10,7 @@ input:not([type]), input[type="text"], input[type="password"], input[type="numbe
     max-width: 250px;
     width: 100%;
     vertical-align: baseline;
-    background-color: rgb(250, 255, 189) !important;
+    background-color: rgb(250, 255, 189);
 }
 
 input[type="number"].hasUnit {

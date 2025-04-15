@@ -1,0 +1,192 @@
+﻿.digrDetRowWrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.digrDetInfoPanel {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 18px;
+    background: #f0f8ff; /* jemně modrý podklad */
+    border-radius: 14px;
+    border: 1px solid #c7d7e5;
+    display: flex;
+    flex-direction: column;
+    margin-top: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.3s ease;
+}
+
+    .digrDetInfoPanel:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+@media (min-width: 900px) {
+    .digrDetInfoPanel {
+        width: calc(50% - 5px);
+    }
+}
+
+.digrDetLabeledItem50 {
+    display: flex;
+    flex-direction: column;
+}
+
+.digrDetRow {
+    display: flex;
+    margin-top: 6px;
+    gap: 8px;
+}
+
+    .digrDetRow > div {
+        flex: 1;
+    }
+
+.digrDetCategoriesCont {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 7px;
+}
+
+.digrDetCategory {
+    background: linear-gradient(to bottom right, #b8e2ff, #a5ccf3);
+    color: #004c84;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 14px;
+    transition: background-color 0.3s;
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+    .digrDetCategory:hover {
+        background-color: #92c8f3;
+    }
+
+.digrStoreEshopCheckboxesCont {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 16px;
+}
+
+.digrSeCboxCont {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    background: #eaf3ff;
+    padding: 5px 10px;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px #d0e4f5;
+}
+
+    .digrSeCboxCont input[type="checkbox"] {
+        accent-color: #2765aa;
+        transform: scale(1.15);
+        cursor: pointer;
+    }
+
+.digrDetAddressesHead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .digrDetAddressesHead select {
+        padding: 7px 12px;
+        font-size: 14px;
+        border: 1px solid #c4d6e3;
+        border-radius: 6px;
+        background-color: #ffffff;
+        flex-grow: 1;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .digrDetAddressesHead select:focus {
+            border-color: #6cb4ff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(108, 180, 255, 0.2);
+        }
+
+.digrDetAddAddressButton {
+    font-size: 20px;
+    color: #2b3a55;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .digrDetAddAddressButton:hover {
+        color: #000;
+    }
+
+.storeNameAndDelCont {
+    display: flex;
+}
+
+.addressDeleteButton {
+    color: #d63031;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+/* INPUTY */
+input {
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-size: 14px;
+    border: 1px solid #ccd8e2;
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+    /* EDITOVATELNÉ INPUTY */
+    input:not([readonly]) {
+        background-color: #ffffff;
+        border: 1px solid #9bb7d4;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+        input:not([readonly]):focus {
+            border-color: #5aa9f4;
+            background-color: #eef7ff;
+            box-shadow: 0 0 0 2px rgba(90, 169, 244, 0.25);
+            outline: none;
+        }
+
+    /* READONLY INPUTY */
+    input[readonly] {
+        background-color: #f0f4f9 !important;
+        color: #444 !important;
+        border-color: #ccd2da !important;
+        font-style: normal !important;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+/* LABELY */
+.digrDetInfoPanel label {
+    margin-bottom: 4px !important;
+    margin-top: 4px !important;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a3a5d;
+}
+
+@media (max-width: 899px) {
+    .digrDetRow {
+        flex-direction: column;
+    }
+
+        .digrDetRow > div {
+            width: 100%;
+        }
+
+    .digrDetInfoPanel {
+        padding: 14px;
+    }
+
+    .digrDetLabeledItem50 {
+        margin-bottom: 10px;
+    }
+}

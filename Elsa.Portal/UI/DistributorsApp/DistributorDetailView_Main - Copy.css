@@ -1,15 +1,15 @@
-﻿.digrAddrStoreMode .nostoreOnly {
-    display:none;
+﻿/* === STAVY PANELU === */
+.digrAddrStoreMode .nostoreOnly {
+    display: none;
 }
 
 .digrAddrReadOnly .storeOnly {
-    display:none;
+    display: none;
 }
 
 .digrAddrReadOnly .digrDetLabeledItem {
-    pointer-events: none;    
+    pointer-events: none;
 }
-
 
 /* === HLAVNÍ OBAL === */
 #digrDetailCont {
@@ -20,14 +20,14 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 /* === TLAČÍTKA SAVE / CANCEL === */
 .digrDetActionButtons {
     display: flex;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 }
 
 .digrActionBtn {
@@ -71,7 +71,6 @@
     border: 1px solid #e2e6ec;
 }
 
-/* === NÁZEV FIRMY === */
 #digrDetName {
     font-size: 26px;
     font-weight: 700;
@@ -82,7 +81,6 @@
     border-radius: 4px;
 }
 
-/* === SEKČNÍ BLOK S TAGY === */
 .digrDetTagsSection {
     display: flex;
     flex-direction: column;
@@ -95,7 +93,6 @@
         color: #444;
     }
 
-/* === ŘÁDEK S TAGY A PLUS === */
 .digrTagsRow {
     display: flex;
     flex-wrap: wrap;
@@ -103,19 +100,16 @@
     gap: 8px;
 }
 
-/* === LISTY ŠTÍTKŮ (sys + man) === */
 .digrDetTagList {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-/* Skrytí šablony */
 .lt-template {
     display: none !important;
 }
 
-/* === TAG === */
 .digrTagItem {
     background-color: #dce8f9;
     color: #2b3a55;
@@ -134,7 +128,6 @@
         cursor: pointer;
     }
 
-/* === PLUS BUTTON === */
 .digrAddTagButton {
     font-size: 16px;
     color: #3e3a72;
@@ -146,7 +139,6 @@
         color: #000;
     }
 
-/* === AUTOSUGGEST PANEL (digrAddTagPanel) === */
 .digrAddTagPanel {
     margin-top: 4px;
 }
@@ -168,14 +160,15 @@
         flex-grow: 1;
     }
 
+.digrDetRowWrap {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
 
-/* === INFO PANEL (LEVÁ POLOVINA) === */
-/* === INFO PANEL === */
-/* === INFO PANEL === */
-.digrDetInfoPanel {
+.digrDetInfoPanel,
+.digrDetAddressPanel {
     width: 49%;
-    display: inline-block;
-    vertical-align: top;
     box-sizing: border-box;
     padding: 16px;
     background-color: #f9fafc;
@@ -187,19 +180,52 @@
 }
 
 @media (max-width: 900px) {
-    .digrDetInfoPanel {
+    .digrDetInfoPanel,
+    .digrDetAddressPanel {
         width: 100%;
     }
 }
 
-/* === KATEGORIE === */
-.digrDetLabeledItem > label {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 6px;
-    display: block;
-    color: #2b3a55;
+.digrDetLabeledItem,
+.digrDetLabeledItem50 {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
+
+    .digrDetLabeledItem > label,
+    .digrDetLabeledItem50 > label {
+        font-weight: 600;
+        font-size: 13px;
+        color: #2b3a55;
+    }
+
+    .digrROtext,
+    .digrDetLabeledItem50 input[type="text"],
+    .digrDetAddressCont input[type="text"] {
+        padding: 6px 10px;
+        font-size: 13px;
+        background-color: #f0f2f5;
+        border: 1px solid #d0d4dc;
+        border-radius: 5px;
+        color: #333;
+        line-height: 1.4;
+        min-height: 32px;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+.digrSalesRepBox {
+    font-style: italic;
+}
+
+.digrDetRow {
+    display: flex;
+    gap: 16px;
+}
+
+    .digrDetRow > div {
+        flex: 1;
+    }
 
 .digrDetCategoriesCont {
     display: flex;
@@ -216,21 +242,6 @@
     border-radius: 14px;
 }
 
-/* === ŘÁDEK S DVOJICÍ POLOŽEK === */
-.digrDetRow {
-    display: flex;
-    gap: 4%;
-    margin-bottom: 8px;
-}
-
-    /* Každá polovina (checkboxy i info pole) */
-    .digrDetRow > div {
-        flex: 1;
-        min-width: 0;
-        box-sizing: border-box;
-    }
-
-/* === CHECKBOXY === */
 .digrStoreEshopCheckboxesCont {
     display: flex;
     align-items: center;
@@ -250,33 +261,46 @@
         cursor: pointer;
     }
 
-/* === POLOŽKA S LABEL + READONLY TEXTEM === */
-.digrDetLabeledItem50 {
+.digrDetAddressesHead {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
-    .digrDetLabeledItem50 label {
-        font-weight: 600;
-        font-size: 13px;
-        color: #2b3a55;
-        min-width: 50px;
-        text-align: right;
-    }
-
-    .digrDetLabeledItem50 .digrROtext {
+    .digrDetAddressesHead select {
+        padding: 6px 10px;
+        font-size: 14px;
+        border: 1px solid #ccd2da;
+        border-radius: 6px;
+        background-color: #fff;
         flex-grow: 1;
-        padding: 5px 8px;
-        background-color: #f0f2f5;
-        border: 1px dashed #ccc;
-        border-radius: 5px;
-        font-size: 13px;
-        color: #333;
-        line-height: 1.4;
     }
 
-/* === OZ (kurzíva) === */
-.digrSalesRepBox {
-    font-style: italic;
+.digrDetAddAddressButton {
+    font-size: 18px;
+    color: #3e3a72;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .digrDetAddAddressButton:hover {
+        color: #000;
+    }
+
+.addressDeleteButton {
+    margin-left: 6px;
+    color: #c0392b;
+    cursor: pointer;
+}
+
+.digrAddrStoreMode .storeOnly,
+.digrAddrReadOnly .nostoreOnly {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.digrAddrStoreMode .nostoreOnly,
+.digrAddrReadOnly .storeOnly {
+    display: none;
 }

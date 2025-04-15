@@ -4,9 +4,9 @@
   display: inline-block;
 }
 
-input[type=text] {
-  background-color: #f1f1f1;
-  width: 100%;
+.autocomplete input[type=text] {
+    background-color: #f1f1f1;
+    width: 100%;
 }
 
 .autocomplete input[type=submit] {
