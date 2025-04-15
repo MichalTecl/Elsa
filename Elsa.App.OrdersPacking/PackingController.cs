@@ -155,13 +155,13 @@ namespace Elsa.App.OrdersPacking
                 var blocker = _orderRepository.TryGetProcessBlockMessage(orderId, "Packing");
                 if (!string.IsNullOrWhiteSpace(blocker))
                 {
-                    throw new InvalidOperationException($"Objednavku nelze zabalit: {blocker}");
+                    throw new InvalidOperationException($"Objednávku nelze zabalit: {blocker}");
                 }
 
                 var order = _orderRepository.GetOrder(orderId);
                 if (order == null)
                 {
-                    throw new InvalidOperationException("Objednavka nenalezena");
+                    throw new InvalidOperationException("Objednávka nenalezena");
                 }
                 
                 var mapped = MapOrder(order);

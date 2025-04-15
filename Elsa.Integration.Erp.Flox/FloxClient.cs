@@ -147,20 +147,36 @@ namespace Elsa.Integration.Erp.Flox
             return ordersModel.Orders.Orders.FirstOrDefault(o => o.OrderNumber == orderNumber);
         }
 
-        public void MakeOrderSent(IPurchaseOrder po)
+        public void MakeOrderSent(IPurchaseOrder po, Action<string> warning)
         {
-            _log.Info($"Zacinam nastavovat objednavku {po.OrderNumber} jako odeslanou");
+            _log.Info($"Začínám nastavovat objednávku {po.OrderNumber} jako odeslanou");
 
             if (!_config.EnableWriteOperations)
             {
-                _log.Error($"!!! Flox - MarkOrderPaid({po.OrderNumber}) - neaktivni operace");
+                _log.Error($"!!! Flox - MarkOrderPaid({po.OrderNumber}) - neaktivní operace");
                 return;
             }
             
             try
             {
-                GenerateInvoice(po.OrderNumber);
-                SendInvoiceToCustomer(po.ErpOrderId);
+                try
+                {
+                    GenerateInvoice(po.OrderNumber);
+
+                    try 
+                    {
+                        SendInvoiceToCustomer(po.ErpOrderId);
+                    }
+                    catch(Exception ex)
+                    {
+                        warning($"Chyba při odesílání faktury: {ex.Message}");
+                    }                    
+                }
+                catch(Exception ex)
+                {
+                    warning($"Chyba při vytváření faktury: {ex.Message}");
+                }
+                
                 ChangeOrderStatus(po.ErpOrderId, FloxOrderStatuses.Completed);
             }
             catch (Exception ex)
@@ -256,7 +272,7 @@ namespace Elsa.Integration.Erp.Flox
         private void GenerateInvoice(string orderNum)
         {
             EnsureSession();
-            
+
             var timeStamp = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
             var url = ActionUrl($"/erp/orders/invoices/finalize/{orderNum}?arf={_csrfToken}&_dc={timeStamp}");
             _log.Info($"Incializuji generovani faktury ve Floxu: {url}");
@@ -267,8 +283,8 @@ namespace Elsa.Integration.Erp.Flox
                 _log.Error($"Generovani faktury selhalo. Request={url}, Response={result.OriginalMessage}");
                 throw new Exception(result.OriginalMessage);
             }
-            
-            _log.Info($"Generovani fatktury OK OrderNum={orderNum}");
+
+            _log.Info($"Generovani fatktury OK OrderNum={orderNum}");            
         }
 
         public void SendInvoiceToCustomer(string orderId)

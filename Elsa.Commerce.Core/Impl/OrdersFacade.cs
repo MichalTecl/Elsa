@@ -158,7 +158,7 @@ namespace Elsa.Commerce.Core.Impl
                 {
                     order = PerformErpActionSafe(
                         order,
-                        (e, o) => e.MakeOrderSent(o),
+                        (e, o) => e.MakeOrderSent(o, warn => throw new Exception(warn)),
                         synced =>
                             {
                                 if (synced.OrderStatusId != OrderStatus.Sent.Id)
@@ -219,10 +219,14 @@ namespace Elsa.Commerce.Core.Impl
                     {
                         try
                         {
-
                             order = PerformErpActionSafe(
                                 order,
-                                (e, o) => e.MakeOrderSent(o),
+                                (e, o) => e.MakeOrderSent(o, warn =>
+                                {
+                                    SendPackingMail(o,
+                                        $"Objednávku {order.OrderNumber} {order.CustomerName} je třeba překontrolovat",
+                                        $"V průběhu dokončování objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: \"{warn}\". \r\nTato chyba nemusí bránit vyřízení objednávky, je ale třeba zkontrolovat ve Floxu, že je vše v pořádku (vydána faktura, faktura odeslána, stav objednávky...)");
+                                }),
                                 synced =>
                                 {
                                     if (synced.OrderStatusId != OrderStatus.Sent.Id)
@@ -235,7 +239,7 @@ namespace Elsa.Commerce.Core.Impl
                         catch (Exception ex)
                         {
                             _log.Error($"Chyba pri posilani zabalene objednavky", ex);
-                            _mailSender.Send(order.PackingUser?.EMail ?? _session.User.EMail, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
+                            SendPackingMail(order, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
                                 $"Pozor - při dokončení balení objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: '{ex.Message}'\r\nZkontrolujte objednávku ručně.");
 
                             _orderRepository.SetProcessBlock(order, OrderProcessingStageNames.Packing, "Předchozí pokus o zabalení této objednávky selhal - je třeba ji odbavit v systému Flox");
@@ -514,6 +518,15 @@ namespace Elsa.Commerce.Core.Impl
                 _log.Error($"Getting order from ERP failed: {ex.Message}", ex);
                 return order;
             }
+        }
+
+        private void SendPackingMail(IPurchaseOrder order, string subject, string body)
+        {
+            _log.Info($"Sending order packing related mail: {subject}");
+
+            _mailSender.Send(order.PackingUser?.EMail ?? _session.User.EMail
+                , subject
+                , body);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace Elsa.Commerce.Core
 
         DateTime ObtainOrderLastChange(string orderNumber);
 
-        void MakeOrderSent(IPurchaseOrder po);
+        void MakeOrderSent(IPurchaseOrder po, Action<string> warning);
 
         IEnumerable<IErpCustomerModel> LoadCustomers();
 
