@@ -156,6 +156,7 @@
     <Content Include="UI\DistributorsApp\Distributors.css" />
     <Content Include="UI\DistributorsApp\Distributors.VM.js" />
     <Content Include="UI\DistributorsApp\DistributorsAppPage.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.css" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.VM.js" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.html" />

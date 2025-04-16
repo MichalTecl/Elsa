@@ -1,4 +1,4 @@
-input:not([type]), input[type="text"], input[type="password"], input[type="number"], input[type="date"] {
+﻿input:not([type]), input[type="text"], input[type="password"], input[type="number"], input[type="date"] {
     height: 2.14285714em;
     line-height: 1.4285714285714;
     padding: 4px 5px;
@@ -226,44 +226,60 @@ div.searchPanel {
   width:100%;
 }
 
-.tabPanelHeadersContainer{
-    display:flex;
-    width:100%;    
-    padding-top:10px;
-    border-bottom:#00bfff 10px solid;  
-    flex-direction:row;  
-    align-items:flex-end;
+.tabPanelHeadersContainer {
+    display: flex;
+    width: 100%;
+    padding-top: 10px;
+    border-bottom: 10px solid #00bfff;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 6px;
+    background-color: #f6fafd;
 }
 
+/* Všechny záložky */
 .tabControlTabHead {
-    font-size:1.2em;
-    font-weight:bold;
-    padding:10px;
-    padding-left:15px;
-    padding-right:15px;
-    border-top-left-radius:2px;
-    border-top-right-radius:2px;
-    margin-right:4px;
-    margin-left:4px;    
-    min-width:140px;
-    align-self:flex-end;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 10px 16px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    min-width: 140px;
+    align-self: flex-end;
+    color: #1a3a5d; /* tmavý text */
+    transition: background-color 0.2s;
+    margin-left: 0; /* default */
 }
 
-.tabControlTabHead[active-tab="1"]{
-    background-color:#00bfff;
+/* První záložka má navíc odsazení zleva */
+.tabControlTabHead:first-child {
+    margin-left: 6px;
 }
 
-.tabControlTabHead:not([active-tab="1"]){
-    background-color:#008ccc;
-    padding:7px;
-    padding-left:15px;
-    padding-right:15px;
-    cursor:pointer;    
+/* Aktivní záložka */
+.tabControlTabHead[active-tab="1"] {
+    background-color: #00bfff;
+    box-shadow: none;
+    z-index: 2;
 }
 
-.tabControlTabHead.tabControlActiveTab {
-    background-color: #00bfff !important;
+/* Neaktivní záložky */
+.tabControlTabHead:not([active-tab="1"]) {
+    background-color: #008ccc;
+    cursor: pointer;
+    opacity: 1;
 }
+
+/* Hover – stejná výška jako aktivní záložka, žádné odskočení */
+.tabControlTabHead:not([active-tab="1"]):hover {
+    background-color: #00a6e0;
+}
+
+/* Titulek */
+.tabControlHeadTitle {
+    white-space: nowrap;
+}
+
 
 .hidden {
     display: none !important;

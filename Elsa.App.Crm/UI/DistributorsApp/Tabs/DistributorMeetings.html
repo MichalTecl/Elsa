@@ -1,10 +1,13 @@
 ﻿<div id="distrMeetingsPanel">
 
     <div id="distrNewMeetingPanel">
-        <div id="distrNewMeetingCategories" data-bind="itemsSource:meetingCategories;class.hidden:editingMeeting" data-key="Id">
-            <div class="lt-template distrNewMeetingButton" event-bind="click:newMeetingClick(Id)">
-                <i data-bind="class:IconClass"></i>
-                <div class="distrNewMeetingButtonTitle" data-bind="text:Title"></div>
+        <div id="distrNewMeetingButtonsCont">
+            <div>Naplánovat:</div>
+            <div id="distrNewMeetingCategories" data-bind="itemsSource:meetingCategories;class.hidden:editingMeeting" data-key="Id">
+                <div class="lt-template distrNewMeetingButton" event-bind="click:newMeetingClick(Id)">
+                    <i data-bind="class:IconClass"></i>
+                    <div class="distrNewMeetingButtonTitle" data-bind="text:Title"></div>
+                </div>
             </div>
         </div>
 
@@ -111,3 +114,4 @@
 
         });
 </script>
+<link href="/UI/DistributorsApp/Tabs/DistributorMeetings.css" rel="stylesheet" />

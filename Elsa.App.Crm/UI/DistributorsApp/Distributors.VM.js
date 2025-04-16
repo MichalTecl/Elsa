@@ -52,7 +52,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
         self.detailTabs.forEach(t => {
             const thisOne = t.text === text;
-            t.isActive = thisOne;
+            t.isActive = thisOne ? 1 : 0;
 
             if (thisOne) {
 

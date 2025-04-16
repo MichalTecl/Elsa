@@ -1,0 +1,50 @@
+﻿#distrNewMeetingButtonsCont {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+    font-weight: 600;
+    color: #2b3a55;
+    font-size: 14px;
+}
+
+/* wrapper na tlačítka */
+#distrNewMeetingCategories {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* jednotlivé tlačítko */
+.distrNewMeetingButton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: #eaf4ff;
+    border: 1px solid #c8ddef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    font-size: 14px;
+    color: #2b3a55;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+    .distrNewMeetingButton:hover {
+        background-color: #d8ebff;
+        transform: translateY(-1px);
+    }
+
+    /* ikona */
+    .distrNewMeetingButton i {
+        font-size: 16px;
+        color: #0074cc;
+    }
+
+/* text v buttonu */
+.distrNewMeetingButtonTitle {
+    font-weight: 500;
+    white-space: nowrap;
+}
