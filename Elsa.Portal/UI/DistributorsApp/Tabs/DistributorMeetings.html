@@ -61,7 +61,7 @@
     </div>
 
     <div id="distrMeetingsList" data-key="Id" data-bind="itemsSource:meetings">
-        <div class="lt-template distrMeetingListItem">
+        <div class="lt-template distrMeetingListItem" data-bind="class.open:isOpen">
             <div class="distrMeetingItemHead stackLeft" event-bind="click:openMeetingDetail(Id)">
                 <i data-bind="class:CategoryIconClass; style.color:StatusTypeColor"></i>
                 <div class="distrMeetingItemDt" data-bind="text:previewDt"></div>
