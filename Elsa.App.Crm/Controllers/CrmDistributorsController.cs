@@ -1,4 +1,4 @@
-﻿using Elsa.App.Crm.Model;
+using Elsa.App.Crm.Model;
 using Elsa.App.Crm.Repositories;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Crm;
@@ -6,6 +6,7 @@ using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Commerce;
 using Robowire.RoboApi;
 using Robowire.RobOrm.Core;
 using System;
@@ -107,6 +108,20 @@ namespace Elsa.App.Crm.Controllers
 
                 tx.Commit();
             }
+        }
+
+        public DistributorOrderInfoPage GetOrders(int distributorId, long? pageKey)
+        {
+            const int pageSize = 10;
+
+            var rows = _db.Sql()
+                .Call("GetDistributorOrdersOverview")
+                .WithParam("@customerId", distributorId)
+                .WithParam("@pageSize", pageSize)
+                .WithParam("@lastSeenId", pageKey)
+                .AutoMap<DistributorOrderInfo>();
+
+            return new DistributorOrderInfoPage(rows, pageSize);
         }
 
         protected override void OnBeforeCall()

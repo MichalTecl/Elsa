@@ -1,4 +1,4 @@
-﻿
+
 var app = app || {};
 app.Distributors = app.Distributors || {};
 app.Distributors.VM = app.Distributors.VM || function(){
@@ -283,7 +283,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
             self.detail.sysTags = sysTags.sort((a, b) => a.Priority - b.Priority);
             self.detail.addedTags = [];
             self.detail.removedTags = [];
-
+            self.detail.reportUrl = "/crmReporting/GetDistributorReport?distributorId=" + self.detail.Id;
 
         });
     };

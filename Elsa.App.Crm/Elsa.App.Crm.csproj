@@ -77,6 +77,7 @@
     <Compile Include="Model\CustomerRelatedItem.cs" />
     <Compile Include="Model\CustomerViewModel.cs" />
     <Compile Include="Model\DistributorModelBase.cs" />
+    <Compile Include="Model\DistributorOrderInfo.cs" />
     <Compile Include="Model\DistributorViewModel.cs" />
     <Compile Include="Model\SalesRepresentativeModel.cs" />
     <Compile Include="Model\SalesTrendTick.cs" />
@@ -145,6 +146,8 @@
     <Content Include="SQL\20250211_006_getDistributorsSales.sql" />
     <Content Include="SQL\20250218_001_LoadDistributorDetail.sql" />
     <Content Include="SQL\20250408_002_initialData.sql" />
+    <Content Include="SQL\20250420_001_vwOrderPriceInfo.sql" />
+    <Content Include="SQL\20250420_002_GetDistributorOrdersOverview.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
@@ -161,6 +164,8 @@
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.VM.js" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.css" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorOrders.css" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorOrders.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
   <ItemGroup />

@@ -1,4 +1,4 @@
-﻿<div id="digrDetailControlCont">
+<div id="digrDetailControlCont">
     
     <div class="digrDetHeadPanel">
         <div id="digrTitleAndButtons">
@@ -11,7 +11,13 @@
                         <i class="fas fa-check"></i>
                     </button>
                 </div>
-                <div id="digrDetName" data-bind="text:detail.Name"></div>
+                <div class="digrDetNameAndDlIcons">
+                    <a id="digrReportDlLink" class="digrExcelLink" title="Stáhnout přehled spolupráce"
+                       data-bind="href:detail.reportUrl">
+                        <i class="fas fa-file-excel"></i>
+                    </a>
+                    <div id="digrDetName" data-bind="text:detail.Name"></div>
+                </div>
             </div>
         </div>
 

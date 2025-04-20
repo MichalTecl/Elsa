@@ -1,0 +1,21 @@
+<div id="dordsContainer">
+    Objednavky
+</div>
+<script>
+    app.DistributorOrders = app.DistributorOrders || {};
+    app.DistributorOrders.VM = app.DistributorOrders.VM || function () {
+
+        const self = this;
+
+    };
+
+    app.DistributorOrders.vm = app.DistributorOrders.vm || new app.DistributorOrders.VM();
+</script>
+<script>
+    lt.element("dordsContainer")
+        .withModel("app.DistributorOrders.vm")
+        .attach(function () {
+
+        });
+</script>
+<link href="/UI/DistributorsApp/Tabs/DistributorOrders.css" rel="stylesheet" />

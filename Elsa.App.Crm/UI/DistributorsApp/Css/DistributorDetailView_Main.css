@@ -1,4 +1,4 @@
-﻿.digrAddrStoreMode .nostoreOnly {
+.digrAddrStoreMode .nostoreOnly {
     display: none;
 }
 
@@ -186,3 +186,19 @@ input {
         font-size: 14px;
         flex-grow: 1;
     }
+
+.digrDetNameAndDlIcons {
+    position: relative;
+}
+
+.digrExcelLink {
+    position: absolute;
+    top: -10px; /* posun nahoru – uprav podle výšky vašeho řádku */
+    left: 30px; /* posun doprava – uprav podle odsazení textu */
+    color: rgba(40, 69, 167, 0.5);
+    font-size: 1.2em;
+}
+
+.digrDetName {
+    margin-left: 0; /* nebo ponechat stávající odsazení */
+}
