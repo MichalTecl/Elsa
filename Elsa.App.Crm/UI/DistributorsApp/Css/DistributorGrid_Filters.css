@@ -1,0 +1,116 @@
+#digrFilters {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    background: #f8fbfd;
+    border: 1px solid #e0e7ef;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-family: sans-serif;
+    font-size: 14px;
+}
+
+/* Každý řádek */
+.digrFiltersRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* Textový filtr – celý řádek */
+#digrFilterText {
+    flex: 1 1 100%;
+}
+
+    /* Text input */
+    #digrFilterText input[type="text"] {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ccd7e0;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+/* Štítky – wrap do řádku */
+#digrFilterTags {
+    flex: 1 1 100%;
+}
+
+.digrTagFilters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.digrFilterTag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Výběrové pole – kategorie, OZ, třídění */
+#digrFilterGroups,
+#digrFilterSalesRep,
+#digrFilterSortOption {
+    flex: 1 1 220px;
+}
+
+.digrFiltersSection select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ccd7e0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Checkbox “Zahrnout zrušené” */
+#digrFilterIncludeDeleted {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Hledat tlačítko */
+#butSearch {
+    padding: 8px 18px;
+    min-width: 120px;
+    background: #00bfff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    justify-content: center;
+}
+
+    #butSearch:hover {
+        background: #009acb;
+    }
+
+/* Popisky */
+.digrFiltersSection label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: block;
+    color: #1f2d3d;
+    font-size: 14px;
+}
+
+.digrFilterTag,
+#digrFilterIncludeDeleted {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .digrFilterTag label,
+    #digrFilterIncludeDeleted label {
+        margin: 0;
+        display: inline;
+    }

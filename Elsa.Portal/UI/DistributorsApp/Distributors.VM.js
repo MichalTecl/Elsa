@@ -102,6 +102,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
         updater(key, value);
 
         console.log(self.filter);
+
+        self.search();
     };
 
     self.search = () => {
