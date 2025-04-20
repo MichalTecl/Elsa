@@ -1,4 +1,4 @@
-﻿.digrDetRowWrap {
+.digrDetRowWrap {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -190,4 +190,15 @@ input {
     .digrDetLabeledItem50 {
         margin-bottom: 10px;
     }
+}
+
+.digrDetInfoPanel label i {
+    font-size: 13px;
+    color: #2b3a55;
+    margin-left: 6px;
+    cursor:pointer;
+}
+
+.digrDetInfoPanel label:hover i {
+    color: #000;
 }

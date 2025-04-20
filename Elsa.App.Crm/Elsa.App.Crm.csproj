@@ -148,6 +148,7 @@
     <Content Include="SQL\20250408_002_initialData.sql" />
     <Content Include="SQL\20250420_001_vwOrderPriceInfo.sql" />
     <Content Include="SQL\20250420_002_GetDistributorOrdersOverview.sql" />
+    <Content Include="SQL\20250420_003_LoadAllDistributors.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

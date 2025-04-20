@@ -143,8 +143,13 @@
                 <!-- GPS, WWW -->
                 <div class="digrDetRow storeOnly">
                     <div class="digrDetLabeledItem50">
-                        <label>GPS</label>
-                        <input type="text" data-bind="value:selectedAddress.Gps" event-bind="change:VM.updateAddress('Gps', this.value)" />
+                        
+                        <label event-bind="click:onGpsPickerClick(VM)">
+                            GPS
+                            <i class="fas fa-map-marker-alt fa-button"></i>
+                        </label>
+                                                
+                        <input type="text" lt-name="gpsTb" data-bind="value:selectedAddress.Gps" event-bind="change:VM.updateAddress('Gps', this.value)" />
                     </div>
                     <div class="digrDetLabeledItem50">
                         <label>WWW</label>
@@ -168,7 +173,7 @@
 
     <script>
         lt.element("digrDetailControlCont")
-            .attach(function (digrTagPickerCont, digrTagPickerInput) {
+            .attach(function (digrTagPickerCont, digrTagPickerInput, gpsTb) {
 
                 this.bind(function (detail) {
                     app.ui.autosuggest(digrTagPickerCont,
@@ -180,6 +185,47 @@
                             this.closeTagPicker();
                         }
                     );
+
+                    if (!gpsTb["isGpsPicker"]) {
+                        gpsTb["isGpsPicker"] = true;
+
+                        function normalizeGpsgpsTb(value) {
+                            const raw = value.trim();
+
+                            // Regex pro formát "48.9855N, 14.4552E" apod.
+                            const regex = /^([+-]?\d+(?:\.\d+)?)[\s°]*([nNsS]),?[\s]*([+-]?\d+(?:\.\d+)?)[\s°]*([eEwW])$/;
+
+                            const match = raw.match(regex);
+                            if (match) {
+                                let lat = parseFloat(match[1]);
+                                let latDir = match[2].toUpperCase();
+                                let lon = parseFloat(match[3]);
+                                let lonDir = match[4].toUpperCase();
+
+                                if (latDir === 'S') lat = -Math.abs(lat);
+                                if (latDir === 'N') lat = Math.abs(lat);
+                                if (lonDir === 'W') lon = -Math.abs(lon);
+                                if (lonDir === 'E') lon = Math.abs(lon);
+
+                                return `${lat}, ${lon}`;
+                            }
+
+                            return null;
+                        }
+
+                        gpsTb.addEventListener('input', () => {
+                            const normalized = normalizeGpsgpsTb(gpsTb.value);
+                            if (normalized) gpsTb.value = normalized;
+                        });
+
+                        gpsTb.addEventListener('paste', (event) => {
+                            setTimeout(() => {
+                                const normalized = normalizeGpsgpsTb(gpsTb.value);
+                                if (normalized) gpsTb.value = normalized;
+                            }, 10);
+                        });
+
+                    }
                 });
 
                 this.save = () => app.Distributors.vm.saveDetail();
@@ -192,6 +238,20 @@
                     lt.notify();
                 }
                 this.activateDetailTab = (text) => app.Distributors.vm.activateTab(text);
+
+                this.onGpsPickerClick = (vm) => {
+                                        
+
+                    const store = vm.selectedAddress;
+
+                    if (!store)
+                        return;
+
+                    const url = "https://www.mapy.cz?q=" + encodeURIComponent(store.Address + ', ' + store.City);
+                    window.open(url, '_blank');
+                    
+
+                };
             });
     </script>
 

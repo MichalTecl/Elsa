@@ -64,26 +64,26 @@
                 </div>
                 <div class="gridBody" data-bind="itemsSource:data" data-key="Id">
                     <div class="lt-template gridRow">
-                        <div class="cell10">
-                            <a data-bind="text:Name" event-bind="click:openDetail(Id)"></a>
+                        <div class="cell10 digrDetailLinkCell">
+                            <a data-bind="text:Name" class="digrLinkSameWin" event-bind="click:openDetail(Id)"></a>
                             <a class="digrOutNewWin" target="_blank" data-bind="href:detailLink"> <i class="fas fa-window-restore"></i></a>
                         </div>
 
-                        <div class="cell10">
+                        <div class="cell10 digrGroupsCell">
                             <div data-bind="itemsSource:customerGroups" data-key="Id" class="digrCustGroupsContainer stackLeft">
                                 <div class="lt-template digrCustGroupItem" data-bind="text:ErpGroupName"></div>
                             </div>
                         </div>
 
-                        <div class="cell20">
+                        <div class="cell20 digrTagsCell">
                             <div data-bind="itemsSource:tags" data-key="Id" class="digrCustTagsContainer stackLeft">
                                 <div class="lt-template digrCustTagItem" data-bind="text:Name"></div>
                             </div>
                         </div>
                                                 
-                        <div class="cell5" data-bind="text:TotalOrdersTaxedPrice"></div>
+                        <div class="cell5 digrTotalPriceCell" data-bind="text:TotalOrdersPriceF"></div>
                         
-                        <div class="cell10">
+                        <div class="cell10 digrTrendCell">
                             <div data-bind="itemsSource:TrendModel" data-key="id" class="digrTrendView">
                                 <div data-bind="style.height:height;class.digrTrendItemEmpty:IsEmpty;title:symbol" class="lt-template digrTrendItem"></div>
                             </div>
