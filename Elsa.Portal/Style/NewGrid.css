@@ -1,0 +1,147 @@
+.grid2 {
+    overflow-x: auto;
+    max-width: 100%;
+    border: 1px solid #dce4ec;
+    border-radius: 6px;
+    background: white;
+}
+
+    /* === GRID ROW === */
+    .grid2 .gridRow {
+        display: flex !important;
+        flex-wrap: nowrap;
+        background: #fff;
+        align-items: stretch;
+    }
+
+    /* === HLAVIČKA === */
+    .grid2 .gridHead > div {
+        font-weight: 600;
+        background: #f3f6fa;
+        color: #1a3a5d;
+        padding: 6px 8px;
+        border-top: 1px solid #dce4ec;
+        border-bottom: 1px solid #dce4ec;
+        display: flex;
+        align-items: center;
+    }
+
+    /* === BĚŽNÁ BUŇKA === */
+    .grid2 .gridRow > div {
+        font-size: 14px;
+        padding: 6px 8px;
+        border-top: 1px solid #eef1f5;
+        border-left: 1px solid #eef1f5;
+        line-height: 1.4;
+        display: flex !important;
+        align-items: center;
+        justify-content: start;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: left;
+        max-height: 2.4em; /* výška pro 1 řádek */
+        transition: max-height 0.2s ease;
+    }
+
+        /* POSLEDNÍ BUŇKA V ŘÁDKU */
+        .grid2 .gridRow > div:last-child {
+            border-right: 1px solid #eef1f5;
+        }
+
+    /* === HOVER EFEKT CELÉHO ŘÁDKU === */
+    .grid2 .gridRow:hover {
+        background-color: #f0f9ff;
+    }
+
+        .grid2 .gridRow:hover > div {
+            background-color: transparent;
+        }
+
+    /* === HLAVIČKA ZŮSTÁVÁ STEJNÁ NA HOVER === */
+    .grid2 .gridHead:hover > div {
+        background-color: #f3f6fa !important;    
+    }
+
+    /* === OMEZENÍ ZBYTEČNÉHO HOVER STYLU NA BUŇKY === */
+    .grid2 .gridRow > div:hover {
+        background-color: inherit;
+        cursor: default;
+        box-shadow: none !important;
+        z-index: auto;
+        width: auto;
+        transition: none;
+    }
+
+    /* === CELL1 – PEVNÁ 20px ŠÍŘKA VŠUDE === */
+    .grid2 .cell1 {
+        width: 20px;
+        min-width: 20px;
+        max-width: 20px;
+        flex: 0 0 20px;
+    }
+
+        .grid2 .cell1:hover {
+            background-color: inherit !important;
+            box-shadow: none !important;
+        }
+
+    /* === POMĚROVÉ SLUPCE A LA WPF === */
+    .grid2 .cell5 {
+        flex: 5 1 0;
+        min-width: 60px;
+        max-width: none !important;
+    }
+
+    .grid2 .cell10 {
+        flex: 10 1 0;
+        min-width: 100px;
+        max-width: none !important;
+    }
+
+    .grid2 .cell15 {
+        flex: 15 1 0;
+        min-width: 130px;
+        max-width: none !important;
+    }
+
+    .grid2 .cell20 {
+        flex: 20 1 0;
+        min-width: 160px;
+        max-width: none !important;
+    }
+
+    .grid2 .cell25 {
+        flex: 25 1 0;
+        min-width: 180px;
+        max-width: none !important;
+    }
+
+    .grid2 .cell30 {
+        flex: 30 1 0;
+        min-width: 200px;
+        max-width: none !important;
+    }
+
+    .grid2 .cell40 {
+        flex: 40 1 0;
+        min-width: 240px;
+        max-width: none !important;
+    }
+
+
+    .grid2 .gridRow:hover > div {
+        white-space: normal;
+        overflow: visible;
+        max-height: 10em; /* dostatečně velká hodnota pro rozbalení */
+    }
+
+    .grid2 .gridHead > div {
+        padding: 6px 8px !important;
+        margin: 0 !important;
+    }
+
+    .grid2 .gridHead:hover > div {
+        padding: 6px 8px !important;
+        margin: 0 !important;
+    }

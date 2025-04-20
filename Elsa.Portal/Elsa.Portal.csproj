@@ -143,6 +143,7 @@
     <Content Include="SQL\20230713_001_DisableOrderHistoryTrigger.sql" />
     <Content Include="SQL\20230801_001_SetupWidgetsUserRights.sql" />
     <Content Include="SQL\20230801_002_SetupAdminRights.sql" />
+    <Content Include="Style\NewGrid.css" />
     <Content Include="Style\PaperForms.css" />
     <Content Include="UI\Controls\Accounting\FixedCostIssueActionButton.html" />
     <Content Include="UI\Controls\Common\Autosuggest.css" />
