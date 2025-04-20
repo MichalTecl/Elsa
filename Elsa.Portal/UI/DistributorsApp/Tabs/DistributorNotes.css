@@ -1,0 +1,124 @@
+/* === OBAL CELÉHO BLOKU === */
+#digrNotesPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+/* === VSTUPNÍ POLE NOVÉ POZNÁMKY === */
+#digrNewNotePanel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: #f8fbfd;
+    border: 1px solid #dce4ec;
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+/* Textarea */
+#digrNewNoteTextPanel textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccd8e4;
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Tlačítka */
+#digrNewNoteControls {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+    #digrNewNoteControls button {
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    #digrNewNoteControls .cancelButton {
+        background-color: #e0e6ed;
+        color: #333;
+    }
+
+    #digrNewNoteControls .confirmButton {
+        background-color: #00bfff;
+        color: white;
+    }
+
+        #digrNewNoteControls .confirmButton:hover {
+            background-color: #00a6e5;
+        }
+
+/* === SEZNAM POZNÁMEK === */
+#digrNotesList {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Jedna poznámka */
+.digrNoteItem {
+    background-color: #ffffff;
+    border: 1px solid #dce4ec;
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* Hlavička poznámky */
+
+.digrNoteHead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-start; /* 👉 zarovnání doleva */
+}
+
+/* Datum a autor */
+.digrNoteDt {
+    font-weight: 500;
+    color: #2b3a55;
+}
+
+.digrNoteAuthor {
+    font-style: italic;
+}
+
+/* Delete button */
+.digrNoteHead .fa-trash-alt {
+    font-size: 14px;
+    color: #c0392b;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .digrNoteHead .fa-trash-alt:hover {
+        color: #e74c3c;
+    }
+
+/* Tělo poznámky */
+.digrNoteBody {
+    white-space: pre-wrap;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+}

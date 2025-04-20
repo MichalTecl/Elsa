@@ -194,3 +194,194 @@ textarea[lt-name="meetingText"] {
     box-shadow: 0 2px 6px rgba(0, 191, 255, 0.15);
     transition: all 0.2s;
 }
+
+/* ===== OBAL CELÉHO EDIT PANELU ===== */
+#distrCurrentMeeting {
+    background-color: #f8fbfd;
+    border: 1px solid #d0e3f0;
+    border-radius: 10px;
+    padding: 16px;
+    margin: 16px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== FORMULÁŘOVÝ BLOK ===== */
+#distrCurrentMeetingForm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Jeden řádek formuláře */
+.dcmRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+/* ===== TYP A NÁZEV SCHŮZKY ===== */
+.distrFormCategory {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2b3a55;
+}
+
+    .distrFormCategory i {
+        font-size: 16px;
+        color: #0074cc;
+    }
+
+/* Název schůzky – input */
+#currMeetingTitle {
+    flex-grow: 1;
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccd8e4;
+    background-color: #fffde7;
+}
+
+/* ===== DATUMY ===== */
+input[type="datetime-local"] {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccd8e4;
+    background-color: #fff;
+    flex: 1 1 200px;
+}
+
+/* ===== TEXT SCHŮZKY ===== */
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccd8e4;
+    resize: vertical;
+    background-color: #fff;
+    min-height: 100px;
+}
+
+/* ===== ÚČASTNÍCI ===== */
+#distrCurrMeetingParticipants {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.dcmParticipantItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: #e9f3fa;
+    font-size: 13px;
+    color: #2b3a55;
+    margin: 4px 4px 0 0;
+}
+
+.participantRemoveButton {
+    color: #999;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .participantRemoveButton:hover {
+        color: #d63031;
+    }
+
+/* Přidání účastníka */
+#newParticipantSelector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+#newParticipantName {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccd8e4;
+    font-size: 14px;
+}
+
+#newParticipantSelector i {
+    color: #2ecc71;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* ===== STAV SELECT ===== */
+#dcmStatusSelect {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccd8e4;
+    background-color: #fff;
+    min-width: 160px;
+}
+
+/* ===== BUTTONY SAVE / CANCEL ===== */
+#distrCurrentMeetingControls {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+#distrCurrentMeetingControls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+#distrCurrentMeetingControls button i {
+    font-size: 16px;
+}
+
+#distrCurrentMeetingControls button:first-child {
+    background-color: #e0e6ed;
+    color: #333;
+}
+
+#distrCurrentMeetingControls button:last-child {
+    background-color: #00bfff;
+    color: #fff;
+}
+
+#distrCurrentMeetingControls button:last-child:hover {
+    background-color: #00a3df;
+}
+
+.dcmRow input[type="datetime-local"] {
+    flex: 1 1 180px;
+    min-width: 140px;
+}
+
+/* Mobilní přizpůsobení */
+@media (max-width: 600px) {
+    .dcmRow input[type="datetime-local"] {
+        flex: 1 1 100%;
+    }
+
+    .dcmRow label {
+        width: 100%;
+        margin-top: 6px;
+    }
+}

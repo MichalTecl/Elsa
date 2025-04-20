@@ -130,6 +130,16 @@
         };
 
         self.openMeetingDetail = (id) => {
+
+            const nowOpen = self.meetings.find(m => m.isOpen);
+
+            if (!!nowOpen) {
+                nowOpen.isOpen = false;
+
+                if (nowOpen.Id === id)
+                    return;
+            }
+            
             self.meetings.forEach(m => m.isOpen = m.Id === id);
         };
 

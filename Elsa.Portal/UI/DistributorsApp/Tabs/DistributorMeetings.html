@@ -2,7 +2,7 @@
 
     <div id="distrNewMeetingPanel">
         <div id="distrNewMeetingButtonsCont">
-            <div>Naplánovat:</div>
+            <div data-bind="class.hidden:editingMeeting">Naplánovat:</div>
             <div id="distrNewMeetingCategories" data-bind="itemsSource:meetingCategories;class.hidden:editingMeeting" data-key="Id">
                 <div class="lt-template distrNewMeetingButton" event-bind="click:newMeetingClick(Id)">
                     <i data-bind="class:IconClass"></i>
@@ -26,6 +26,10 @@
                     <input type="datetime-local" data-bind="value:currentMeeting.StartDt" event-bind="change:updateModel('StartDt', this.value)" />
                     <label>Do</label>
                     <input type="datetime-local" data-bind="value:currentMeeting.EndDt" event-bind="change:updateModel('EndDt', this.value)" />
+                    <label>Stav</label>
+                    <select id="dcmStatusSelect" data-bind="itemsSource:meetingStatusTypes;value:currentMeeting.StatusTypeId" data-key="Id" event-bind="change:updateModel('StatusTypeId', this.value)">
+                        <option class="lt-template" data-bind="value:Id; text:Title; style.color:ColorHex"></option>
+                    </select>
                 </div>
                 <div class="dcmRow">
                     <textarea data-bind="value:currentMeeting.Text" event-bind="change:updateModel('Text', this.value)"></textarea>
@@ -42,19 +46,13 @@
                     <div id="newParticipantSelector" class="autocomplete" data-bind="class!.hidden:addingParticipant">
                         <input id="newParticipantName" />
                         <i class="fas fa-check-square" event-bind="click:addParticipant($newParticipantName.value)"></i>
-                    </div> 
-                    <div class="dcmRow">
-                        <label>Stav</label>
-                        <select id="dcmStatusSelect" data-bind="itemsSource:meetingStatusTypes;value:currentMeeting.StatusTypeId" data-key="Id" event-bind="change:updateModel('StatusTypeId', this.value)">
-                            <option class="lt-template" data-bind="value:Id; text:Title; style.color:ColorHex"></option>
-                        </select>
-                    </div>
+                    </div>                    
                 </div>
             </div>
 
             <div id="distrCurrentMeetingControls">
-                <button event-bind="click:cancelEdit()"></button>
-                <button event-bind="click:saveMeeting()"></button>
+                <button event-bind="click:cancelEdit()"><i class="fas fa-times"></i></button>
+                <button event-bind="click:saveMeeting()"><i class="fas fa-check"></i></button>
             </div>
         </div>
 
