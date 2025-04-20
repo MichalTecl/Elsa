@@ -39,9 +39,11 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.isDetailPage = false;
     self.isGridPage = false;
 
-    self.detailTabs = [        
+    self.detailTabs = [
+        { "text": "Objednávky", "control": "DistributorOrders" },   
         { "text": "Schůzky", "control": "DistributorMeetings" },
         { "text": "Poznámky", "control": "DistributorNotes" },
+        
     ];
 
     self.currentTabContentControl = null;

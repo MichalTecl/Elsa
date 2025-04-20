@@ -1,0 +1,144 @@
+#dordsContainer {
+    max-width: 1300px;
+    margin-left: 0;
+    margin-right: auto;
+}
+
+@media (max-width: 600px) {
+    #dordsOrdersTableHead .dordsTableCell {
+        font-size: 0; 
+    }
+}
+
+#dordsOrdersTable {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 12px rgba(30,60,100,0.10);
+    overflow: hidden;
+    margin: 16px 0;
+}
+
+#dordsOrdersTableHead {
+    display: flex;
+    background: #f3f6fa; /* světlá, technická šedobílá */
+    color: #1a3a5d; /* tmavší neutrální modrošedá */
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-bottom: 1px solid #dbe5ee;
+}
+
+.dordsTableColumnHead {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+    color: #445566;
+}
+
+.dordsColDate {
+    flex-basis: 120px;
+    flex-shrink: 0;
+}
+
+.dordsColOrderNum {
+    flex-basis: 110px;
+    flex-shrink: 0;
+}
+
+.dordsColPrice {
+    flex-basis: 130px;
+    flex-shrink: 0;
+}
+
+.dordsColStatus {
+    flex-basis: 100px;
+    flex-shrink: 0;
+}
+
+.dordsColDiscounts {
+    flex: 2;
+}
+
+.dordsOrderRow {
+    display: flex;
+    border-bottom: 1px solid #e8f4fc;
+    padding: 13px 18px;
+    align-items: center;
+    transition: background 0.13s;
+    font-size: 15px;
+}
+
+    .dordsOrderRow:last-child {
+        border-bottom: none;
+    }
+
+    .dordsOrderRow:hover {
+        background: #f4fbff;
+    }
+
+.dordsTableCell {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Pro mobilní zobrazení - zalomit do dvou řádků */
+@media (max-width: 700px) {
+    #dordsOrdersTableHead, .dordsOrderRow {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        row-gap: 2px;
+        column-gap: 12px;
+        padding: 9px 8px;
+        font-size: 14px;
+    }
+
+    .dordsTableColumnHead, .dordsTableCell {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        padding-bottom: 2px;
+    }
+
+    .dordsColDate, .dordsColOrderNum, .dordsColPrice, .dordsColStatus, .dordsColDiscounts {
+        flex: unset !important;
+        min-width: 0 !important;
+    }
+}
+
+.dordsColDiscounts {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dordsColOrderNum {
+    font-weight: 600;
+}
+
+#dordsNextPageButt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto 0 auto;
+    padding: 10px 24px;
+    background: #00bfff;
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 999px;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    transition: background 0.2s;
+    line-height: 1.2; /* fix možného vertikálního posunu */
+    height: 42px; /* můžeš doladit, ale tohle bývá sweet spot */
+    min-width: 100px;
+}
+
+    #dordsNextPageButt:hover {
+        background: #00a4d6;
+    }

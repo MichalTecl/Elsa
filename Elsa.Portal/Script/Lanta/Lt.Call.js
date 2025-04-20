@@ -1,4 +1,4 @@
-﻿var lanta = lanta || {};
+var lanta = lanta || {};
 lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
 
     var self = this;
@@ -59,6 +59,8 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
                     errorHandler("Nepodařilo se spojit se serverem, opakujte akci později...");
                     return;
                 }
+
+                console.error("Failed request to:" + xmlHttp.responseURL);
 
                 errorHandler(xmlHttp.status + ": " + xmlHttp.responseText);
                 return;

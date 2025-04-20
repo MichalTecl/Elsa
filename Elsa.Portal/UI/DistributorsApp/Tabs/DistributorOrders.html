@@ -1,12 +1,64 @@
 <div id="dordsContainer">
-    Objednavky
+    <div id="dordsOrdersTable">
+        <div id="dordsOrdersTableHead">
+            <div class="dordsTableCell dordsTableColumnHead dordsColDate">Datum</div>
+            <div class="dordsTableCell dordsTableColumnHead dordsColOrderNum">#</div>
+            <div class="dordsTableCell dordsTableColumnHead dordsColPrice">Cena bez DPH</div>
+            <div class="dordsTableCell dordsTableColumnHead dordsColStatus">Stav</div>
+            <div class="dordsTableCell dordsTableColumnHead dordsColDiscounts">Slevy</div>
+        </div>
+    
+        <div id="dordsOrderList" data-bind="itemsSource:orders" data-key="Id">
+            <div class="lt-template dordsOrderRow">
+                <div class="dordsTableCell dordsColDate" data-bind="text:PurchaseDateF"></div>
+                <div class="dordsTableCell dordsColOrderNum" data-bind="text:OrderNumber"></div>
+                <div class="dordsTableCell dordsColPrice" data-bind="text:PriceWithoutTaxF"></div>
+                <div class="dordsTableCell dordsColStatus" data-bind="text:Status"></div>
+                <div class="dordsTableCell dordsColDiscounts" data-bind="text:Discounts"></div>
+            </div>
+        </div>
+    </div>
+    <button id="dordsNextPageButt" data-bind="class!.hidden:canReadMore" event-bind="click:VM.readMore">Starší</button>
 </div>
+
 <script>
     app.DistributorOrders = app.DistributorOrders || {};
     app.DistributorOrders.VM = app.DistributorOrders.VM || function () {
 
         const self = this;
 
+        self.orders = [];
+        self.canReadMore = false;
+
+        let customerId = null;
+        let nextPageKey = null;
+
+        const receiveOrders = (page) => {
+            nextPageKey = page.NextPageKey;
+            self.canReadMore = !!nextPageKey;
+
+            page.Data.forEach(o => self.orders.push(o));
+        };
+
+        const load = () => {
+            lt.api("/CrmDistributors/GetOrders")
+                .query({ "distributorId": customerId, "pageKey": nextPageKey })
+                .get(receiveOrders);
+        };
+
+        app.Distributors.vm.withCustomerId((cid) => {
+            customerId = cid;
+
+            self.orders = [];
+            self.canReadMore = false;
+
+            if (!customerId)
+                return;
+
+            load();
+        });        
+
+        self.readMore = load;
     };
 
     app.DistributorOrders.vm = app.DistributorOrders.vm || new app.DistributorOrders.VM();

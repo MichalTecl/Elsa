@@ -1,11 +1,14 @@
-﻿var lt = lt || {};
+var lt = lt || {};
 lanta.CoreOps = lanta.CoreOps || {};
 
 lanta.Extensions = lanta.Extensions || {};
 
 lanta.Extensions.defaultErrorHandler = lanta.Extensions.defaultErrorHandler || function(error) {
     console.error(error);
-    alert(error.message || error);
+
+    const text = (error.message || error || "?").toString();
+
+    alert(text);
 };
 
 window.onbeforeunload = function () {
