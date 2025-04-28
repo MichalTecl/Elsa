@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="SQL\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj" />
+    <ProjectReference Include="..\Robowire\Robowire.Common.Expressions\Robowire.Common.Expressions.csproj" />
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj" />
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj" />
+    <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj" />
+  </ItemGroup>
+
+</Project>

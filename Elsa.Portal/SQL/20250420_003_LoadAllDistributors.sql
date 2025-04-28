@@ -17,7 +17,7 @@ BEGIN
 	   passedMeeting.meetingDt LastContactDt,
 	   futureMeeting.meetingDt FutureContactDt,		   
 	   ISNULL(allOrders.TotalOrdersCount, 0) TotalOrdersCount,
-	   ISNULL(allOrders.TotalOrdersUnaxedPrice, 0) TotalOrdersUnaxedPrice	   
+	   ISNULL(allOrders.TotalOrdersUnaxedPrice, 0) TotalOrdersUntaxedPrice	   
 
   FROM Customer c
 

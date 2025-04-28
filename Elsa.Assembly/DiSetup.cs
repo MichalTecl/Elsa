@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
@@ -24,6 +24,7 @@ using Elsa.Apps.ScheduledJobs;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration;
 using Elsa.Common;
+using Elsa.Common.DbUtils;
 using Elsa.Common.EntityComments;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -127,6 +128,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(ChatGptRegistry).Assembly);
                     s.ScanAssembly(typeof(EntityCommentsRegistry).Assembly);
                     s.ScanAssembly(typeof(EshopMappingRegistry).Assembly);
+                    s.ScanAssembly(typeof(DbUtilsRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 

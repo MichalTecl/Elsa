@@ -62,6 +62,10 @@
       <Project>{b09c721a-b22e-47a6-bc6b-9cd9155e174a}</Project>
       <Name>Elsa.Apps.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.DbUtils\Elsa.Common.DbUtils.csproj">
+      <Project>{814630a6-2d97-4b0b-aab4-151a3b0dd05d}</Project>
+      <Name>Elsa.Common.DbUtils</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
       <Project>{736fc43f-5a58-4c27-b194-37e40301cfbc}</Project>
       <Name>Elsa.Common.Interfaces</Name>

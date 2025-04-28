@@ -208,12 +208,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BwApiClient", "BwApiClient\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Common.EntityComments", "Elsa.Common.EntityComments\Elsa.Common.EntityComments.csproj", "{C9136906-286D-4C0C-896E-D3A06E41C947}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Apps.EshopMapping", "Elsa.Apps.EshopMapping\Elsa.Apps.EshopMapping.csproj", "{0914F404-3BD4-4E57-9F5A-3AA79899BE9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Apps.EshopMapping", "Elsa.Apps.EshopMapping\Elsa.Apps.EshopMapping.csproj", "{0914F404-3BD4-4E57-9F5A-3AA79899BE9A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E16B55C3-49C7-4397-914F-9B3D7B9F14E7}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Common.DbUtils", "Elsa.Common.DbUtils\Elsa.Common.DbUtils.csproj", "{814630A6-2D97-4B0B-AAB4-151A3B0DD05D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -533,6 +535,10 @@ Global
 		{0914F404-3BD4-4E57-9F5A-3AA79899BE9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0914F404-3BD4-4E57-9F5A-3AA79899BE9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0914F404-3BD4-4E57-9F5A-3AA79899BE9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{814630A6-2D97-4B0B-AAB4-151A3B0DD05D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{814630A6-2D97-4B0B-AAB4-151A3B0DD05D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{814630A6-2D97-4B0B-AAB4-151A3B0DD05D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{814630A6-2D97-4B0B-AAB4-151A3B0DD05D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -630,6 +636,7 @@ Global
 		{B0E5393A-7922-41C9-836D-1B9637692FB5} = {9A3EA0C7-2DD3-4A32-ADED-527F45DC0526}
 		{C9136906-286D-4C0C-896E-D3A06E41C947} = {FC61D761-EDCC-4BEF-9B3B-06957ACCFAE6}
 		{0914F404-3BD4-4E57-9F5A-3AA79899BE9A} = {456527A3-2BE8-4010-8AC6-187539CE484D}
+		{814630A6-2D97-4B0B-AAB4-151A3B0DD05D} = {FC61D761-EDCC-4BEF-9B3B-06957ACCFAE6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}
