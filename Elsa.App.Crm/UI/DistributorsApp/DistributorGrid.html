@@ -43,10 +43,9 @@
             </div>
 
             <div class="digrFiltersRow">
-                <div class="digrExFiltersExpander" event-bind="click:VM.toggleExFiltersExpansion()">
-                    <i class="fas fa-filter"></i>
-                    <i class="fas fa-chevron-right" data-bind="class.hidden:exFiltersExpanded"></i>
-                    <i class="fas fa-chevron-down" data-bind="class!.hidden:exFiltersExpanded"></i>
+                <div class="digrExFiltersExpander">
+                    <i class="fas fa-filter digrFilterButtonAddNew" data-bind="class.hidden:exFiltersExpanded" event-bind="click:VM.addFilter()"></i>
+                    <i class="fas fa-filter digrFilterButtonAsIcon" data-bind="class!.hidden:exFiltersExpanded"></i>
                 </div>
                 <div class="digrExFiltersContainer" data-bind="class!.hidden:exFiltersExpanded" fill-by="/UI/DistributorsApp/ExFilters.html">                    
                 </div>

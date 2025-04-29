@@ -45,6 +45,11 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.editedExFilter = null;
     self.editingExFilter = false;
 
+    const checkFiltersExpansion = () => {
+        self.exFiltersExpanded = self.exFilterGroups.length > 0;
+        lt.notify();
+    };
+
     self.editFilter = (filterId) => {
                 
         for (const g of self.exFilterGroups) {
@@ -81,6 +86,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 
         self.editFilter(filter.id);
         self.changeCurrentExFilterType(null);
+
+        checkFiltersExpansion();
     };
 
     self.changeCurrentExFilterType = (typeTitle) => {
@@ -134,9 +141,11 @@ app.Distributors.VM = app.Distributors.VM || function(){
                     self.exFilterGroups.splice(i, 1);
                 }
 
-                return;
+                break;
             }
         }
+
+        checkFiltersExpansion();
     };
 
     const validateExFilter = (filter, callback) => {
