@@ -63,7 +63,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
         self.editedExFilter = null;
         self.editingExFilter = false;
-    };
+     };
 
     self.addFilter = (groupId) => {
         let group = self.exFilterGroups.find(g => g.id === groupId);
@@ -121,7 +121,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
             }
 
             self.editedExFilter = null;
-            self.editingExFilter = false;            
+            self.editingExFilter = false;          
+
+            self.search();
         });
     };
 
@@ -148,6 +150,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         }
 
         checkFiltersExpansion();
+        self.search();
     };
 
     const validateExFilter = (filter, callback) => {
@@ -292,6 +295,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     const load = (page) => {
+
+        self.filter.DistributorFilters = self.exFilterGroups;
 
         lt.api("/CrmDistributors/getDistributors")
             .query({                

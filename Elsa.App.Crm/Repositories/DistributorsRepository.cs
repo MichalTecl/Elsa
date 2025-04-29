@@ -1,7 +1,8 @@
-﻿using Elsa.App.Crm.Model;
+using Elsa.App.Crm.Model;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Common.Utils.TextMatchers;
 using Elsa.Core.Entities.Commerce.Crm;
@@ -9,6 +10,7 @@ using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 
 namespace Elsa.App.Crm.Repositories
 {
@@ -18,21 +20,29 @@ namespace Elsa.App.Crm.Repositories
         private readonly ICache _cache;
         private readonly ISession _session;
         private readonly ICustomerRepository _customerRepository;
+        private readonly DistributorFiltersRepository _distributorFilters;
+        private readonly ILog _log;
 
-        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository)
+        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository, DistributorFiltersRepository distributorFilters, ILog log)
         {
             _database = database;
             _cache = cache;
             _session = session;
             _customerRepository = customerRepository;
+            _distributorFilters = distributorFilters;
+            _log = log;
         }
 
         public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
         {
+            _log.Info($"Received distributors query");
+
+            var idsByDistributorFilters = GetIdIndexByDistributorFilters(filter);
+
             var disabledGroupIds = _cache
                 .ReadThrough(
-                    $"disabledCustomerGroupTypes_{_session.Project.Id}", 
-                    TimeSpan.FromMinutes(10), 
+                    $"disabledCustomerGroupTypes_{_session.Project.Id}",
+                    TimeSpan.FromMinutes(10),
                     () => new HashSet<int>(_customerRepository
                             .GetCustomerGroupTypes()
                             .Values
@@ -47,6 +57,9 @@ namespace Elsa.App.Crm.Repositories
 
             var all = GetAllDistributors().Where(d =>
             {
+                if (idsByDistributorFilters?.Contains(d.Id) == false)
+                    return false;
+
                 if (!matcher.Match(d.SearchTag))
                     return false;
 
@@ -65,8 +78,8 @@ namespace Elsa.App.Crm.Repositories
 
                 if (!filter.IncludeDisabled && d.CustomerGroupTypeIds.Any(cgId => disabledGroupIds.Contains(cgId)))
                     return false;
-                               
-                
+
+
                 return true;
             });
 
@@ -78,7 +91,7 @@ namespace Elsa.App.Crm.Repositories
 
             var result = all.ToList();
 
-            foreach(var a in result)
+            foreach (var a in result)
             {
                 if (trends.TryGetValue(a.Id, out var trend))
                     a.TrendModel = trend;
@@ -88,6 +101,74 @@ namespace Elsa.App.Crm.Repositories
 
             return result;
         }
+
+        private HashSet<int> GetIdIndexByDistributorFilters(DistributorGridFilter filter)
+        {
+            if (filter.DistributorFilters == null || filter.DistributorFilters.Count == 0)
+                return null;
+
+            _log.Info($"Distributors query has {filter.DistributorFilters.Count} distributor filter groups");
+
+            List<HashSet<int>> idGroups = new List<HashSet<int>>(filter.DistributorFilters.Count);
+
+            foreach (var orGroup in filter.DistributorFilters)
+            {
+                _log.Info($"Processing group:");
+
+                var idGroup = new HashSet<int>();
+                idGroups.Add(idGroup);
+
+                foreach (var dFilter in orGroup.Filters)
+                {
+                    _log.Info($"Executing filter {dFilter.Title}");
+
+                    try
+                    {
+                        var fResult = _distributorFilters.Execute(dFilter);
+                        _log.Info($"Execution result: RecordsCount={fResult.Ids.Count}");
+                        idGroup.AddRange(fResult.Ids);
+                        _log.Info($"Group has {idGroup.Count} of ids");
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.Error("Filter execution failed", ex);
+                        throw;
+                    }
+                }
+            }
+
+            _log.Info($"We have {idGroups.Count} of id groups, going to find ids included in all of them");
+
+            if (idGroups.Count == 1)
+                return idGroups[0];
+
+
+            idGroups = idGroups.OrderBy(g => g.Count).ToList();
+
+            var idsInAllExFilters = new HashSet<int>();
+
+            var firstGroup = idGroups.FirstOrDefault() ?? new HashSet<int>(0);
+
+            foreach (var id in firstGroup)
+            {
+                var found = true;
+                foreach (var idGroup in idGroups.Skip(1))
+                {
+                    if (!idGroup.Contains(id))
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+
+                if (found)
+                    idsInAllExFilters.Add(id);
+            }         
+
+            _log.Info($"Done. We got {idsInAllExFilters.Count} of ids from distributor fitlers");
+            return idsInAllExFilters;
+         }
+        
 
         public DistributorDetailViewModel GetDetail(int customerId)
         {            

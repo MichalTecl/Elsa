@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,5 +17,12 @@ namespace Elsa.App.Crm.Model
         public int? CustomerGroupTypeId { get; set; }
 
         public bool IncludeDisabled { get; set; }
+
+        public List<DistributorFiltersGroup> DistributorFilters { get; set; }
+    }
+
+    public class DistributorFiltersGroup 
+    {
+        public List<DistributorFilterModel> Filters { get; set; }
     }
 }
