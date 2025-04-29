@@ -73,7 +73,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
         const filter = {
             "id": (new Date()).getTime(),
-            "isValid":false
+            "isValid": false,
+            "error": "Nenastaveno"
         };
 
         group.filters.push(filter);
@@ -146,6 +147,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 filter.isValid = r.IsValid;
                 filter.error = r.ErrorMessage;
                 filter.recordsCount = r.NumberOfRecords;
+                filter.text = r.FilterText
 
                 if(!!callback)
                     callback(filter);

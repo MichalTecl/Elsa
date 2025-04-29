@@ -3,10 +3,22 @@
         <div class="lt-template digrFilterGroupListItem">
             <div class="stackLeft digrFilterRow">
                 <div class="digrFiltersList stackLeft" data-bind="itemsSource:filters" data-key="id">
-                    <div class="lt-template digrFilterItem">
-                        <div class="digrFilterTagName" data-bind="text:text" event-bind="click:editFilter(id)"></div>
-                    </div>
-                    <div class="digrOrSymbol">NEBO</div>
+                    <div class="lt-template stackLeft">
+                        <div class="digrFilterItem">
+                            <div class="digrfilterItemBody">
+                                <div class="digrFilterHeaderRow">
+                                    <div class="digrFilterTagName" data-bind="text:text" event-bind="click:editFilter(id)"></div>
+                                    <div class="digrFilterRecordsCount" data-bind="text:recordsCount"></div>
+                                </div>
+
+                                <div class="digrFilterErrorLabel" data-bind="class.hidden:isValid">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <div class="digrFilterErrorMessage" data-bind="text:error"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="digrOrSymbol">NEBO</div>
+                     </div>
                 </div>
                 <i class="fas fa-plus-square faButton addFilterToGroup" event-bind="click:addFilter(id)"></i>
             </div>
