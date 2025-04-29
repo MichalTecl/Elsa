@@ -91,8 +91,10 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.changeCurrentExFilterType = (typeTitle) => {
-        const template = self.allExFilters.find(f => f.Title === typeTitle) || self.allExFilters[0];
-        
+        const templateFilter = self.allExFilters.find(f => f.Title === typeTitle) || self.allExFilters[0];
+
+        const template = JSON.parse(JSON.stringify(templateFilter));
+
         Object.assign(self.editedExFilter, template);
 
         self.editedExFilter.Parameters.forEach(p => p.setValue = (v) => p.Value = v);

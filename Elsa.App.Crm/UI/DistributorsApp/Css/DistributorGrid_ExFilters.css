@@ -53,8 +53,7 @@
     margin-top: 12px;
     margin-bottom: 12px;
     font-weight: bold;
-    color: #444;
-    text-align: center;
+    color: #888;
 }
 
 .addFilterToGroup {
@@ -65,22 +64,75 @@
 }
 
 .digrFilterHeaderRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
 }
 
 .digrFilterTagName {
-  font-weight: bold;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .digrFilterRecordsCount {
-  font-size: 0.85em;
-  color: #555;
-  flex-shrink: 0;
+    font-size: 0.85em;
+    color: #555;
+    flex-shrink: 0;
+}
+
+
+/* 1. Styl jako tlaÄÃ­tko pro pÅ™idÃ¡nÃ­ filtru */
+.digrFilterButtonAddNew {
+    font-size: 16px;
+    color: #0d6efd;
+    background-color: #e8f0fe;
+    border-radius: 8px;
+    padding: 6px 10px;
+    cursor: pointer;
+    border: none;
+    box-shadow: inset 0 0 0 1px #c3dafe;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .digrFilterButtonAddNew:hover {
+        background-color: #d0e4ff;
+        color: #084298;
+        box-shadow: inset 0 0 0 1px #a3c3f5;
+    }
+
+    .digrFilterButtonAddNew i {
+        margin-right: 4px;
+    }
+
+
+/* 2. Styl jako pasivnÃ­ ikona */
+.digrFilterButtonAsIcon {
+    font-size: 18px;
+    color: #a0a0a0;
+    opacity: 0.6;
+}
+
+/* 3. VizuÃ¡lnÃ­ zvÃ½raznÄ›nÃ­ kontejneru s filtry */
+.digrExFiltersContainer {
+    border-radius: 10px;
+    padding: 12px 14px;
+    border: 1px solid #e1e8f0;
+    width: 100%;
+    background-color: #fefeff;
+}
+
+.digrExFiltersContainer {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.digrFilterRow {
+    flex-wrap: nowrap;
 }

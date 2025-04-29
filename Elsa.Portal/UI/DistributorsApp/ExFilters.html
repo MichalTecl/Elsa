@@ -4,10 +4,10 @@
             <div class="stackLeft digrFilterRow">
                 <div class="digrFiltersList stackLeft" data-bind="itemsSource:filters" data-key="id">
                     <div class="lt-template stackLeft">
-                        <div class="digrFilterItem">
+                        <div class="digrFilterItem" event-bind="click:editFilter(id)">
                             <div class="digrfilterItemBody">
                                 <div class="digrFilterHeaderRow">
-                                    <div class="digrFilterTagName" data-bind="text:text" event-bind="click:editFilter(id)"></div>
+                                    <div class="digrFilterTagName" data-bind="text:text" ></div>
                                     <div class="digrFilterRecordsCount" data-bind="text:recordsCount"></div>
                                 </div>
 

@@ -100,3 +100,11 @@
 .digrFdParamRow {
     margin-bottom: 12px;
 }
+
+@media (max-width: 480px) {
+    #filterEditOverlay > div {
+        width: 94%;
+        max-width: 100%;
+        padding: 20px 16px;
+    }
+}
