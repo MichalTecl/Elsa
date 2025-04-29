@@ -1,4 +1,4 @@
-﻿using Elsa.App.Crm.Entities;
+using Elsa.App.Crm.Entities;
 using Elsa.Core.Entities.Commerce.Crm;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ namespace Elsa.App.Crm.Model
 {
     public class CrmMetadata
     {
-        public CrmMetadata(List<IMeetingStatus> meetingStatusTypes, List<IMeetingStatusAction> meetingStatusActions, List<IMeetingCategory> meetingCategories, List<ICustomerTagType> customerTagTypes, List<ISalesRepresentative> salesRepresentatives, List<ICustomerGroupType> customerGroupTypes)
+        public CrmMetadata(List<IMeetingStatus> meetingStatusTypes, List<IMeetingStatusAction> meetingStatusActions, List<IMeetingCategory> meetingCategories, List<ICustomerTagType> customerTagTypes, List<ISalesRepresentative> salesRepresentatives, List<ICustomerGroupType> customerGroupTypes, List<DistributorFilterModel> distributorFilters)
         {
             MeetingStatusTypes = meetingStatusTypes;
             MeetingStatusActions = meetingStatusActions;
@@ -18,6 +18,7 @@ namespace Elsa.App.Crm.Model
             CustomerTagTypes = customerTagTypes;
             SalesRepresentatives = salesRepresentatives;
             CustomerGroupTypes = customerGroupTypes;
+            DistributorFilters = distributorFilters;
         }
 
         public List<IMeetingStatus> MeetingStatusTypes { get; }
@@ -26,5 +27,6 @@ namespace Elsa.App.Crm.Model
         public List<ICustomerTagType> CustomerTagTypes { get; }
         public List<ISalesRepresentative> SalesRepresentatives { get; }
         public List<ICustomerGroupType> CustomerGroupTypes { get; }
+        public List<DistributorFilterModel> DistributorFilters { get; }
     }
 }

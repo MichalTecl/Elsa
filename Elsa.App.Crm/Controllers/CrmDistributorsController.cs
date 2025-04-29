@@ -26,14 +26,16 @@ namespace Elsa.App.Crm.Controllers
         private readonly IUserRepository _userRepo;
         private readonly CustomerTagRepository _tagRepo;
         private readonly IDatabase _db;
+        private readonly DistributorFiltersRepository _distributorFilters;
 
-        public CrmDistributorsController(IWebSession webSession, ILog log, DistributorsRepository distributorsRepository, ICustomerRepository customerRepository, IUserRepository userRepo, CustomerTagRepository tagRepo, IDatabase db) : base(webSession, log)
+        public CrmDistributorsController(IWebSession webSession, ILog log, DistributorsRepository distributorsRepository, ICustomerRepository customerRepository, IUserRepository userRepo, CustomerTagRepository tagRepo, IDatabase db, DistributorFiltersRepository distributorFilters) : base(webSession, log)
         {
             _distributorsRepository = distributorsRepository;
             _customerRepository = customerRepository;
             _userRepo = userRepo;
             _tagRepo = tagRepo;
             _db = db;
+            _distributorFilters = distributorFilters;
         }
 
         public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
@@ -122,6 +124,19 @@ namespace Elsa.App.Crm.Controllers
                 .AutoMap<DistributorOrderInfo>();
 
             return new DistributorOrderInfoPage(rows, pageSize);
+        }
+        
+        public DistributorFilterValidationResult ValidateFilter(DistributorFilterModel filter)
+        {
+            try
+            {
+                var result = _distributorFilters.Execute(filter);
+                return new DistributorFilterValidationResult { IsValid = true, NumberOfRecords = result.Ids.Count, FilterText = result.FilterText  };
+            }
+            catch (Exception ex)
+            {
+                return new DistributorFilterValidationResult { IsValid = false, ErrorMessage = ex.Message }; 
+            }
         }
 
         protected override void OnBeforeCall()

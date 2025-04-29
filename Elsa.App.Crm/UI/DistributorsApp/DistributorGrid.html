@@ -43,6 +43,16 @@
             </div>
 
             <div class="digrFiltersRow">
+                <div class="digrExFiltersExpander" event-bind="click:VM.toggleExFiltersExpansion()">
+                    <i class="fas fa-filter"></i>
+                    <i class="fas fa-chevron-right" data-bind="class.hidden:exFiltersExpanded"></i>
+                    <i class="fas fa-chevron-down" data-bind="class!.hidden:exFiltersExpanded"></i>
+                </div>
+                <div class="digrExFiltersContainer" data-bind="class!.hidden:exFiltersExpanded" fill-by="/UI/DistributorsApp/ExFilters.html">                    
+                </div>
+            </div>
+
+            <div class="digrFiltersRow">
                 <button id="butSearch" event-bind="click:VM.search()"><i class="fas fa-search"></i></button>
 
                 <div class="digrFiltersSection" id="digrFilterIncludeDeleted">

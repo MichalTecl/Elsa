@@ -13,6 +13,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.allTags = [];
     self.allSalesReps = [];
     self.allSorters = [];
+    self.allExFilters = [];
 
     self.page = 1;
     self.pageSize = 20;
@@ -39,6 +40,56 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.isDetailPage = false;
     self.isGridPage = false;
 
+    self.exFiltersExpanded = false;
+    self.exFilterGroups = [];
+    self.editedExFilter = null;
+    self.editingExFilter = false;
+
+    self.editFilter = (filterId) => {
+                
+        for (const g of self.exFilterGroups) {
+            const filter = g.filters.find(f => f.id === filterId);
+            if (!!filter) {
+                self.editedExFilter = filter;
+                self.editingExFilter = true;
+                return;
+            }
+        }  
+
+        self.editedExFilter = null;
+        self.editingExFilter = false;
+    };
+
+    self.addFilter = (groupId) => {
+        let group = self.exFilterGroups.find(g => g.id === groupId);
+
+        if (!group) {
+            group = {
+                "id": (new Date()).getTime(),
+                "filters":[]
+            };
+            self.exFilterGroups.push(group);
+        }
+
+        const filter = {
+            "id": (new Date()).getTime(),
+            "isValid":false
+        };
+
+        group.filters.push(filter);
+                
+        self.editFilter(filter.id);
+        self.changeCurrentExFilterType(null);
+    };
+
+    self.changeCurrentExFilterType = (typeTitle) => {
+        const template = self.allExFilters.find(f => f.Title === typeTitle) || self.allExFilters[0];
+        
+        Object.assign(self.editedExFilter, template);
+
+        self.editedExFilter.Parameters.forEach(p => p.setValue = (v) => p.Value = v);
+    };
+
     self.detailTabs = [
         { "text": "Objednávky", "control": "DistributorOrders" },   
         { "text": "Schůzky", "control": "DistributorMeetings" },
@@ -47,6 +98,59 @@ app.Distributors.VM = app.Distributors.VM || function(){
     ];
 
     self.currentTabContentControl = null;
+
+    self.toggleExFiltersExpansion = () => {
+        self.exFiltersExpanded = !self.exFiltersExpanded;
+    };
+
+    self.closeFilter = () => {
+        validateExFilter(self.editedExFilter, (f) => {
+            if (!f.isValid) {
+                if (!window.confirm("Nastavení filtru je chybné (\"" + f.error + "\"). Opravdu jej chcete zavřít?"))
+                    return;
+            }
+
+            self.editedExFilter = null;
+            self.editingExFilter = false;            
+        });
+    };
+
+    self.deleteExFilter = (filterId) => {
+
+        if (!!self.editedExFilter && self.editedExFilter.id === filterId) {
+            self.editedExFilter = null;
+            self.editingExFilter = false;
+        }
+
+        for (let i = 0; i < self.exFilterGroups.length; i++) {
+            const g = self.exFilterGroups[i];
+            const filterIndex = g.filters.findIndex(f => f.id === filterId);
+
+            if (filterIndex !== -1) {                
+                g.filters.splice(filterIndex, 1);
+                                
+                if (g.filters.length === 0) {
+                    self.exFilterGroups.splice(i, 1);
+                }
+
+                return;
+            }
+        }
+    };
+
+    const validateExFilter = (filter, callback) => {
+
+        lt.api("/CrmDistributors/validateFilter")
+            .body(filter)
+            .post((r) => {
+                filter.isValid = r.IsValid;
+                filter.error = r.ErrorMessage;
+                filter.recordsCount = r.NumberOfRecords;
+
+                if(!!callback)
+                    callback(filter);
+            });
+    };
 
     self.activateTab = (text) => {
 
@@ -120,6 +224,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         self.allCustomerGroups = [{ ErpGroupName: "", Id: null }, ... m.CustomerGroupTypes];
         self.allTags = m.CustomerTagTypes;
         self.allSalesReps = [{ PublicName: "", Id: null }, ...m.SalesRepresentatives];
+        self.allExFilters = m.DistributorFilters;        
     };
 
     self.withMetadata = (consumer) => {

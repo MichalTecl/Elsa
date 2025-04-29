@@ -1,0 +1,58 @@
+<div id="digrExFiltersDashboard">
+    <div id="digrFilterGroupsList" data-bind="itemsSource:exFilterGroups" data-key="id">
+        <div class="lt-template digrFilterGroupListItem">
+            <div class="stackLeft digrFilterRow">
+                <div class="digrFiltersList stackLeft" data-bind="itemsSource:filters" data-key="id">
+                    <div class="lt-template digrFilterItem">
+                        <div class="digrFilterTagName" data-bind="text:text" event-bind="click:editFilter(id)"></div>
+                    </div>
+                    <div class="digrOrSymbol">NEBO</div>
+                </div>
+                <i class="fas fa-plus-square faButton addFilterToGroup" event-bind="click:addFilter(id)"></i>
+            </div>
+            <div class="digrAndSymbol">A TAKÉ</div>
+        </div>
+    </div>
+    <i class="fas fa-plus-square faButton addFilterToGroup" event-bind="click:addFilter()"></i>
+
+
+    <div id="filterEditOverlay" data-bind="class!.hidden:editingExFilter">
+        <div class="filterPopupCard">
+            <div class="digrFdRow digrFdHead">
+                <label>Typ filtru</label>
+                <select id="filterTypeSelect" data-bind="itemsSource:allExFilters;value:editedExFilter.Title" data-key="Title" event-bind="change:onTypeChanged(this.value)">
+                    <option class="lt-template digrDetAddresTypeOption" data-bind="text:Title; value:Title"></option>
+                </select>
+            </div>
+            <div class="digrFdRow digrFdDescription"data-bind="text:editedExFilter.Description">
+            </div>
+            <div class="digrFdRow digrFdParameters">
+                <div data-bind="itemsSource:editedExFilter.Parameters" data-key="Name">
+                    <div class="lt-template digrFdParamRow" data-bind="fill-by:Control">
+                    </div>
+                </div>
+            </div>
+            <div class="digrFdRow digrFdButtons">
+                <button class="digrFdDeleteButton" event-bind="click:VM.deleteExFilter(editedExFilter.id)"><i class="far fa-trash-alt"></i></button>
+                <button class="digrFdSaveButton" event-bind="click:VM.closeFilter()"><i class="fas fa-check"></i></button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    lt.element("digrExFiltersDashboard")
+        .withModel("app.Distributors.vm")
+        .attach(function () {
+
+            this.editFilter = (id) => app.Distributors.vm.editFilter(id);
+            this.addFilter = (groupId) => app.Distributors.vm.addFilter(groupId);
+
+            this.onTypeChanged = (typeTitle) => app.Distributors.vm.changeCurrentExFilterType(typeTitle);
+        });
+</script>
+
+<link href="/UI/DistributorsApp/Css/DistributorGrid_ExFilters.css" rel="stylesheet" />
+<link href="/UI/DistributorsApp/Css/DistributorGrid_ExFilters_Dialog.css" rel="stylesheet" />

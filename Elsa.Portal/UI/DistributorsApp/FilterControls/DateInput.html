@@ -1,0 +1,7 @@
+<div class="crmdfDynamicParamCont" id="dfp_{%GENERATE%}">
+    <label data-bind="text:Label"></label>
+    <input type="date" data-bind="value:Value" event-bind="input:VM.setValue(this.value)" />
+</div>
+<script>
+    lt.element("dfp_{%GENERATE%}").attach(function () { });
+</script>
