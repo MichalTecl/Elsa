@@ -155,13 +155,24 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     const validateExFilter = (filter, callback) => {
 
+        const unsetParam = filter.Parameters.find(p => p.Value === null || p.Value.length === 0);
+        if (!!unsetParam) {
+            filter.isValid = false;
+            filter.error = "Nejsou nastaveny všechny parametry";
+
+            if (!!callback)
+                callback(filter);
+
+            return;
+        }
+
         lt.api("/CrmDistributors/validateFilter")
             .body(filter)
             .post((r) => {
                 filter.isValid = r.IsValid;
                 filter.error = r.ErrorMessage;
                 filter.recordsCount = r.NumberOfRecords;
-                filter.text = r.FilterText
+                filter.text = r.FilterText.length < 35 ? r.FilterText : filter.Title;
 
                 if(!!callback)
                     callback(filter);

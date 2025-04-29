@@ -27,11 +27,12 @@
             <label>Štítky</label>
 
             <div class="digrTagsRow">
+                <i class="fas fa-cogs editTagsButton" event-bind="click:editTags()"></i>
                 <div class="digrDetTagList digrDetSysTagList" data-bind="itemsSource:detail.sysTags" data-key="Id">
                     <div class="lt-template digrTagItem digrSysTagItem" data-bind="text:Name"></div>
                 </div>
                 <div class="digrDetTagList digrDetManTagList" data-bind="itemsSource:detail.manTags" data-key="Id">
-                    <div class="lt-template digrTagItem digrManTagItem">
+                    <div class="lt-template digrTagItem digrManTagItem" data-bind="cssClass:CssClass">
                         <i class="fas fa-times faButton" event-bind="click:removeTag(Id)"></i>
                         <div data-bind="text:Name"></div>
                     </div>
@@ -167,9 +168,9 @@
             </div>
         </div>
         <div class="digrDetTabContent" data-bind="fill-by:currentTabContentControl"></div>
-    </div>
-
-    </div>
+    </div>    
+    
+ </div>
 
     <script>
         lt.element("digrDetailControlCont")
@@ -227,6 +228,8 @@
 
                     }
                 });
+
+                this.editTags = () => app.Distributors.CustomerTagEditor.vm.open();
 
                 this.save = () => app.Distributors.vm.saveDetail();
 

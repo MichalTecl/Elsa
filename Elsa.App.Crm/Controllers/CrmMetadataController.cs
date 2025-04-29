@@ -7,6 +7,7 @@ using Elsa.Common.Logging;
 using Robowire.RoboApi;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,6 +42,28 @@ namespace Elsa.App.Crm.Controllers
                 _salesRepRepository.GetSalesRepresentatives(null).ToList(),
                 _customerRepository.GetCustomerGroupTypes().Select(kv => kv.Value).ToList(),
                 _distributorFiltersRepository.GetFilters());
+        }
+
+        public void SaveTag(int? id, string name, string cssClass)
+        {
+            if (id == null)
+            {
+                _customerTagRepository.CreateTagType(name, name, 1, false, cssClass);
+            }
+            else
+            {
+                _customerTagRepository.UpdateTagType(id.Value, name, name, 1, false, cssClass);
+            }
+        }
+
+        public void DeleteTag(int id) 
+        {
+            _customerTagRepository.DeleteTagType(id);
+        }
+
+        public int CountTagAssignments(int id)
+        {
+            return _customerTagRepository.GetAssignmentsCount(id);
         }
     }
 }

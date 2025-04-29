@@ -44,9 +44,7 @@
     gap: 4px;
 }
 
-.digrTagsCell .digrCustTagItem {
-    background-color: #fcefe3;
-    color: #9a5000;
+.digrTagsCell .digrCustTagItem {    
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 12px;

@@ -1,0 +1,144 @@
+<div id="customerTagEditorUi" >
+    <div id="customerTagEditorOverlay" data-bind="class!.hidden:popupOpen">
+        <div class="customerTagEditorPopup">
+            <div class="customerTagEditorPopupHead ctedSection">
+                <i class="far fa-window-close" event-bind="click:VM.close()"></i>
+            </div>
+            <div class="customerTagsListContainer ctedSection">
+                <div class="ctdTagsList" data-bind="itemsSource:tags" data-key="Id">
+                    <div class="lt-template">
+                        <div data-bind="class.hidden:isOpen;text:Name" class="ctedHead" event-bind="click:openTag(VM)"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    app = app || {};
+    app.Distributors = app.Distributors || {};
+    app.Distributors.CustomerTagEditor = app.Distributors.CustomerTagEditor || {};
+    app.Distributors.CustomerTagEditor.VM = app.Distributors.CustomerTagEditor.VM || function () {
+
+        const self = this;
+
+        self.binder = 1;
+
+        self.popupOpen = false;
+        self.tags = [];
+        self.allCssClasses = [];
+
+        self.open = () => {
+
+            loadTags(() => {                
+                self.popupOpen = true;
+            });
+
+            collectCssClasses();
+        };
+
+        self.close = () => {
+            self.popupOpen = false;
+            lt.notify();
+        };
+
+        self.openTag = (vm) => {
+            self.cancelTagEdit();
+            vm.isOpen = true;
+        };
+
+        self.newTag = () => {
+            const tag = {
+                "isOpen": true,
+                "Name": "",
+                "CssClass": self.allCssClasses.find(c => true)
+            };
+
+            self.tags.unshift(tag);
+            self.openTag(tag);
+        };
+
+        self.saveTag = (vm) => {
+            lt.api("/CrmMetadata/SaveTag")
+                .query({ "id": vm.Id, "name": vm.Name, "cssClass": vm.CssClass })
+                .post(() => loadTags());
+        };
+
+        self.deleteTag = (vm) => {
+            lt.api("/CrmMetadata/CountTagAssignments")
+                .query({ "id": vm.Id })
+                .get((count) => {
+                    if (count > 0) {
+                        const confirmDelete = confirm(`Štítek ${vm.Name} je propojen s ${count} kontakty. Opravdu jej chcete smazat?`);
+                        if (!confirmDelete) return;
+                    }
+
+                    lt.api("/CrmMetadata/deleteTag")
+                        .query({ "id": vm.Id })
+                        .post(() => loadTags());
+                });
+        };
+
+        self.changeCssClass = (vm) => {
+            let cinx = (self.allCssClasses.indexOf(vm.CssClass) + 1) % self.allCssClasses.length;
+            vm.CssClass = self.allCssClasses[cinx];
+        };
+
+        self.cancelTagEdit = () => {
+            self.tags.forEach(t => t.isOpen = false);
+
+            const unsavedTag = self.tags.find(t => !t.Id);
+            if (!!unsavedTag) {
+                const inx = self.tags.indexOf(unsavedTag);
+                self.tags.splice(inx, 1);
+            }
+        }
+
+        const receiveTags = (tags) => {
+            self.tags = tags;
+            self.cancelTagEdit();
+        };
+
+        const loadTags = (callback) => {
+            lt.api("/crmMetadata/get")
+                .get(md => {
+                    receiveTags(md.CustomerTagTypes);
+
+                    if(!!callback)
+                        callback();
+                });
+        }
+
+        const collectCssClasses = () => {
+            if (self.allCssClasses.length > 0)
+                return;
+
+            for (const sheet of document.styleSheets) {
+                try {
+                    for (const rule of sheet.cssRules || []) {
+                        if (rule.selectorText && rule.selectorText.startsWith('.crmDistributorTag_')) {
+                            self.allCssClasses.push(rule.selectorText);
+                        }
+                    }
+
+                    if (self.allCssClasses.length > 0)
+                        return;
+
+                } catch (e) {
+                    // Some stylesheets (like cross-origin ones) may throw a security error
+                    console.warn('Cannot access stylesheet:', sheet.href);
+                }
+            }
+        };
+    };
+    app.Distributors.CustomerTagEditor.vm = app.Distributors.CustomerTagEditor.vm || new app.Distributors.CustomerTagEditor.VM();
+
+    lt.element("customerTagEditorUi")
+        .withModel("app.Distributors.CustomerTagEditor.vm")
+        .attach(function () {
+            this.bind((binder) => {
+                Object.assign(this, app.Distributors.CustomerTagEditor.vm);
+            });
+        });
+</script>
+<link href="/UI/DistributorsApp/Css/CustomerTagsEditor.css" rel="stylesheet" />

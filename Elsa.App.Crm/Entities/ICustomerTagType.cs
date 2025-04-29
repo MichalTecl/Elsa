@@ -1,4 +1,4 @@
-﻿using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -26,6 +26,9 @@ namespace Elsa.App.Crm.Entities
         bool CanBeAssignedManually { get; set; }
 
         [NVarchar(100, true)]
-        string OptionGroup {  get; set; }        
+        string OptionGroup {  get; set; }
+
+        [NVarchar(100, true)]
+        string CssClass { get; set; }
     }
 }

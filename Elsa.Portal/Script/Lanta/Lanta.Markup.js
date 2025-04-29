@@ -1,4 +1,4 @@
-﻿var lanta = lanta || {};
+var lanta = lanta || {};
 lanta.Markup = lanta.Markup || {};
 
 lanta.Markup.attributeSetters = lanta.Markup.attributeSetters || [];
@@ -217,7 +217,27 @@ if (lanta.Markup.attributeSetters.length === 0) {
         return true;
     });
 
+    //cssClass
+    lanta.Markup.attributeSetters.push(function (target, propertyName, value) {
 
+        if (propertyName.indexOf("cssClass") !== 0) {
+            return false;
+        }
+
+        const oldBoundValue = target["__ltBoundCssClass"];
+        if (!!oldBoundValue && oldBoundValue !== value) {
+            if (target.classList.contains(oldBoundValue)) {
+                target.classList.remove(oldBoundValue);
+            }
+        }
+
+        if (!target.classList.contains(value)) {
+            target["__ltBoundCssClass"] = value;
+            target.classList.add(value);
+        }
+
+        return true;
+    });
 };
 
 lanta.Markup.createElementUid = lanta.Markup.createElementUid || function () {

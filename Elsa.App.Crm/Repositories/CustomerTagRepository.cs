@@ -1,7 +1,9 @@
-﻿using Elsa.App.Crm.Entities;
+using Elsa.App.Crm.Entities;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
@@ -16,16 +18,18 @@ namespace Elsa.App.Crm.Repositories
         private readonly IDatabase _database;
         private readonly ISession _session;
         private readonly ICache _cache;
+        private readonly ILog _log;
 
         private readonly AutoRepo<ICustomerTagType> _tagTypeRepo;
-        
-        public CustomerTagRepository(IDatabase database, ISession session, ICache cache)
+
+        public CustomerTagRepository(IDatabase database, ISession session, ICache cache, ILog log)
         {
             _database = database;
             _session = session;
             _cache = cache;
 
             _tagTypeRepo = new AutoRepo<ICustomerTagType>(session, database, cache);
+            _log = log;
         }
 
         public List<ICustomerTagType> GetTagTypes(bool assignableOnly, bool allAuthors = false)
@@ -35,7 +39,7 @@ namespace Elsa.App.Crm.Repositories
                 && ((!t.ForAuthorOnly) || allAuthors || (t.AuthorId == _session.User.Id))).ToList();
         }
 
-        public ICustomerTagType CreateTagType(string name, string description, int priority, bool isPrivate)
+        public ICustomerTagType CreateTagType(string name, string description, int priority, bool isPrivate, string cssClass)
         {
             var existing = GetTagTypes(false, !isPrivate).FirstOrDefault(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
@@ -50,10 +54,11 @@ namespace Elsa.App.Crm.Repositories
                 t.Priority = priority;
                 t.CanBeAssignedManually = true;
                 t.ForAuthorOnly = isPrivate;
+                t.CssClass = cssClass;
             });
         }
 
-        public ICustomerTagType UpdateTagType(int typeId, string name, string description, int priority, bool isPrivate)
+        public ICustomerTagType UpdateTagType(int typeId, string name, string description, int priority, bool isPrivate, string cssClass)
         {
             var concurrent = GetTagTypes(false, false).FirstOrDefault(t => 
                t.Id != typeId  // another record
@@ -78,6 +83,7 @@ namespace Elsa.App.Crm.Repositories
                 t.Priority = priority;
                 t.CanBeAssignedManually = true;
                 t.ForAuthorOnly = isPrivate;
+                t.CssClass = cssClass;
             });            
         }        
 
@@ -153,6 +159,33 @@ namespace Elsa.App.Crm.Repositories
 
                     return result;
                 });
+        }
+
+        internal void DeleteTagType(int id)
+        {
+            _log.Info($"Deletion of tag Id={id} requested");
+
+            using (var tx = _database.OpenTransaction())
+            {
+                var assignments = _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id).Execute().ToList();
+
+                _database.Delete(assignments);
+
+                _log.Info($"Deleted {assignments.Count} of assignments");
+
+                var tagType = _database.SelectFrom<ICustomerTagType>().Where(t => t.Id == id).Execute().FirstOrDefault().Ensure();
+
+                _log.Info($"Deleting tag {tagType.Name}");
+
+                _database.Delete(tagType);
+
+                tx.Commit();
+            }
+        }
+
+        internal int GetAssignmentsCount(int id)
+        {
+            return _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id).Execute().Count();
         }
     }
 }
