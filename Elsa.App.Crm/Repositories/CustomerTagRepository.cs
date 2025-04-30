@@ -95,44 +95,58 @@ namespace Elsa.App.Crm.Repositories
             return GetTagTypes(true, acrossUsers).Where(tt => assignments.Contains(tt.Id)).ToList();
         }
 
-        public void Assign(int customerId, int tagTypeId)
+        public int Assign(int[] customerIds, int tagTypeId)
         {
-            var tagType = GetTagTypes(true).FirstOrDefault(tt => tt.Id == tagTypeId) ?? throw new ArgumentException($"Cannot assign tag type id {tagTypeId}");
+            var result = 0;
 
-            var current = GetCustomerTags(customerId, false);
+            using (var tx = _database.OpenTransaction())
+            {
+                var tagType = GetTagTypes(true).FirstOrDefault(tt => tt.Id == tagTypeId) ?? throw new ArgumentException($"Cannot assign tag type id {tagTypeId}");
 
-            if (current.Any(t => t.Id == tagTypeId))
-                return;
+                var existingAssignments = GetAllTagAssignments();
 
-            var concurrent = current.FirstOrDefault(t => t.OptionGroup != null && t.OptionGroup.Equals(tagType.OptionGroup));
-            if (concurrent != null)
-                throw new ArgumentException($"Štítek \"{tagType.Name}\" není možné přiřadit zákazníkovi, který má zároveň štítek \"{concurrent.Name}\" (oba štítky jsou ve stejné skupině \"{concurrent.OptionGroup}\")");
+                foreach (var customerId in customerIds)
+                {                    
+                    if (existingAssignments.TryGetValue(customerId, out var alreadyHasTags) && alreadyHasTags.Contains(tagTypeId))
+                        continue;
 
-            var rec = _database.New<ICustomerTagAssignment>();
-            rec.CustomerId = customerId;
-            rec.TagTypeId = tagTypeId;
-            rec.AssignDt = DateTime.Now;
-            rec.AuthorId = _session.User.Id;
+                    var rec = _database.New<ICustomerTagAssignment>();
+                    rec.CustomerId = customerId;
+                    rec.TagTypeId = tagTypeId;
+                    rec.AssignDt = DateTime.Now;
+                    rec.AuthorId = _session.User.Id;
 
-            _database.Save(rec);
+                    _database.Save(rec);
 
+                    result++;
+                }
+
+                tx.Commit();
+            }
+            
             _cache.Remove(AssignmentsCacheKey);
+
+            return result;
         }
-
-        public void Unassign(int customerId, int tagTypeId)
+                
+        public int Unassign(int[] customerIds, int tagTypeId)
         {
-            var tagType = GetTagTypes(true).FirstOrDefault(tt => tt.Id == tagTypeId) ?? throw new ArgumentException($"Cannot unassign tag type id {tagTypeId}");
+            var result = 0;
 
-            var current = GetCustomerTags(customerId, false);
+            var assignments = GetAllTagAssignments();
 
-            if (current.All(t => t.Id != tagTypeId))
-                return;
+            foreach (var customerId in customerIds) 
+            {
+                if (!assignments.TryGetValue(customerId, out var hasTags) || !hasTags.Contains(tagTypeId))
+                    continue;
 
-            var assignment = _database.SelectFrom<ICustomerTagAssignment>().Where(t => t.CustomerId == customerId && t.TagTypeId == tagTypeId).Take(1).Execute().Single();
-
-            _database.Delete(assignment);
-
+                var assignment = _database.SelectFrom<ICustomerTagAssignment>().Where(t => t.CustomerId == customerId && t.TagTypeId == tagTypeId).Take(1).Execute().Single();
+                _database.Delete(assignment);
+                result++;
+            }
+            
             _cache.Remove(AssignmentsCacheKey);
+            return result;
         }
 
         private string AssignmentsCacheKey => $"customerTagAssignments_{_session.Project.Id}";

@@ -18,7 +18,7 @@ namespace Elsa.App.Crm.Model
 
         public bool IncludeDisabled { get; set; }
 
-        public List<DistributorFiltersGroup> DistributorFilters { get; set; }
+        public List<DistributorFiltersGroup> ExFilterGroups { get; set; }
     }
 
     public class DistributorFiltersGroup 

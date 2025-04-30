@@ -114,3 +114,148 @@
         margin: 0;
         display: inline;
     }
+
+.digrFiltersRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.digrBulkTaggerIcon {
+    margin-left: auto; /* << klíčové pro zarovnání doprava */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .digrBulkTaggerIcon .fa-rocket {
+        font-size: 20px;
+        color: #ff5722;
+        cursor: pointer;
+        transition: transform 0.2s ease, color 0.2s ease;
+        padding: 6px;
+        border-radius: 6px;
+        background-color: #fff3e0;
+        border: 1px solid #ffc107;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+        .digrBulkTaggerIcon .fa-rocket:hover {
+            color: #d84315;
+            background-color: #ffe0b2;
+        }
+
+/* === CELÝ PANEL === */
+.digrFiltersRow.bulkTaggingRow {
+    background: #fff8ec;
+    border: 1px solid #f0d6b6;
+    border-radius: 10px;
+    padding: 6px;
+    margin-top: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    font-family: sans-serif;
+    font-size: 14px;
+    display: block;
+    text-align: left;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    position: relative;
+    box-sizing: border-box;
+}
+
+
+.bulkTaggingRowTop {
+    display: block;
+}
+
+.bulkTaggingCloseButton {
+    color: #999;
+    font-size: 16px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    display: inline-block;
+}
+
+    .bulkTaggingCloseButton:hover {
+        color: #000;
+    }
+
+/* === FORMULÁŘ === */
+.bulkTaggingSetupPanel {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-width: 100%;
+    box-sizing: border-box;    
+    padding: 10px;
+}
+
+/* === TEXTY === */
+.bulkTaggingSetupText {
+    white-space: nowrap;
+    font-weight: 500;
+    color: #333;
+    flex-shrink: 0;
+}
+
+/* === RADIO === */
+.bulkTaggignSetupRadios {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+    .bulkTaggignSetupRadios input[type="radio"] {
+        margin-left: 8px;
+    }
+
+/* === INPUT === */
+.bulkTaggingTagInputWrap {
+    flex: 1 1 auto;
+    max-width: 200px;
+    min-width: 140px;
+}
+
+    .bulkTaggingTagInputWrap input[type="text"] {
+        width: 100%;
+        padding: 6px 10px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        height: 32px;
+        background: #fefefe;
+        box-sizing: border-box;
+    }
+
+/* === TLAČÍTKO === */
+.bulkTaggingRunbutton {
+    flex-shrink: 0;
+    background-color: #f7941e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-size: 16px;
+    height: 32px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+    .bulkTaggingRunbutton:hover {
+        background-color: #e87d00;
+    }
+
+/* === RESPONSIVE === */
+@media (max-width: 500px) {
+    .bulkTaggingSetupPanel {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}

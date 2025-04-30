@@ -33,7 +33,7 @@ namespace Elsa.App.Crm.Repositories
             _log = log;
         }
 
-        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
+        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int? pageSize, int? page, string sorterId, bool idsOnly = false)
         {
             _log.Info($"Received distributors query");
 
@@ -50,7 +50,7 @@ namespace Elsa.App.Crm.Repositories
                             .Select(cg => cg.Id)
                             ));
 
-            var trends = GetTrendIndex();
+            var trends = idsOnly ? null : GetTrendIndex();
             var emptyTrend = new List<SalesTrendTick>(0);
 
             var matcher = SearchTagMatcher.GetMatcher(filter.TextFilter);
@@ -83,20 +83,28 @@ namespace Elsa.App.Crm.Repositories
                 return true;
             });
 
-            var sorter = DistributorSorting.Sortings.FirstOrDefault(s => s.Id == sorterId) ?? DistributorSorting.Sortings.First();
+            if (!string.IsNullOrEmpty(sorterId))
+            {
+                var sorter = DistributorSorting.Sortings.FirstOrDefault(s => s.Id == sorterId) ?? DistributorSorting.Sortings.First();
+                all = sorter.Sorter(all);
+            }
 
-            all = sorter.Sorter(all);
-
-            all = all.Skip(pageSize * (page - 1)).Take(pageSize);
+            if (pageSize != null && page != null)
+            {
+                all = all.Skip(pageSize.Value * (page.Value - 1)).Take(pageSize.Value);
+            }
 
             var result = all.ToList();
 
-            foreach (var a in result)
+            if (!idsOnly)
             {
-                if (trends.TryGetValue(a.Id, out var trend))
-                    a.TrendModel = trend;
-                else
-                    a.TrendModel = emptyTrend;
+                foreach (var a in result)
+                {
+                    if (trends.TryGetValue(a.Id, out var trend))
+                        a.TrendModel = trend;
+                    else
+                        a.TrendModel = emptyTrend;
+                }
             }
 
             return result;
@@ -104,14 +112,14 @@ namespace Elsa.App.Crm.Repositories
 
         private HashSet<int> GetIdIndexByDistributorFilters(DistributorGridFilter filter)
         {
-            if (filter.DistributorFilters == null || filter.DistributorFilters.Count == 0)
+            if (filter.ExFilterGroups == null || filter.ExFilterGroups.Count == 0)
                 return null;
 
-            _log.Info($"Distributors query has {filter.DistributorFilters.Count} distributor filter groups");
+            _log.Info($"Distributors query has {filter.ExFilterGroups.Count} distributor filter groups");
 
-            List<HashSet<int>> idGroups = new List<HashSet<int>>(filter.DistributorFilters.Count);
+            List<HashSet<int>> idGroups = new List<HashSet<int>>(filter.ExFilterGroups.Count);
 
-            foreach (var orGroup in filter.DistributorFilters)
+            foreach (var orGroup in filter.ExFilterGroups)
             {
                 _log.Info($"Processing group:");
 

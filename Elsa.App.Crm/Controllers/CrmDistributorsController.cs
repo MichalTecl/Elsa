@@ -11,6 +11,7 @@ using Robowire.RoboApi;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -95,10 +96,10 @@ namespace Elsa.App.Crm.Controllers
                 }
 
                 if (rq.AddedTags != null)
-                    rq.AddedTags.ForEach(t => _tagRepo.Assign(customer.Id, t));
+                    rq.AddedTags.ForEach(t => _tagRepo.Assign(new[] { customer.Id }, t));
 
                 if (rq.RemovedTags != null)
-                    rq.RemovedTags.ForEach(t => _tagRepo.Unassign(customer.Id, t));
+                    rq.RemovedTags.ForEach(t => _tagRepo.Unassign(new[] { customer.Id }, t));
 
                 foreach (var storeAddress in rq.ChangedAddresses.Where(a => a.IsDeleted))
                     _distributorsRepository.DeleteStore(customer.Id, storeAddress.AddressName);
@@ -151,6 +152,25 @@ namespace Elsa.App.Crm.Controllers
         {
             EnsureUserRight(CrmUserRights.DistributorsApp);
             base.OnBeforeCall();
+        }
+
+        public int DoBulkTaggigng(DistributorGridFilter filter, string tagName, bool set)
+        {
+            var tag = _tagRepo.GetTagTypes(true).FirstOrDefault(t => t.Name == tagName);
+            if (tag == null)
+                throw new ArgumentException("Štítek neexistuje, nebo nelze použít.");
+
+            var ids = _distributorsRepository.GetDistributors(filter, -1, -1, null, true).Select(d => d.Id).ToArray();
+
+            if (set)
+                return _tagRepo.Assign(ids, tag.Id);
+            else
+                return _tagRepo.Unassign(ids, tag.Id);            
+        }
+
+        public int CountFilterResults(DistributorGridFilter filter)
+        {
+            return _distributorsRepository.GetDistributors(filter, -1, -1, null, true).Count;
         }
     }
 }

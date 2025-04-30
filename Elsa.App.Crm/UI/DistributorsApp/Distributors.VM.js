@@ -29,7 +29,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
         Tags: [],
         SalesRepresentativeId: null,
         CustomerGroupTypeId: null,
-        IncludeDisabled: false
+        IncludeDisabled: false,
+        ExFilterGroups: []
     };
 
     self.isDetailOpen = false;
@@ -41,8 +42,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.isDetailPage = false;
     self.isGridPage = false;
 
-    self.exFiltersExpanded = false;
-    self.exFilterGroups = [];
+    self.exFiltersExpanded = false;    
     self.editedExFilter = null;
     self.editingExFilter = false;
 
@@ -50,14 +50,70 @@ app.Distributors.VM = app.Distributors.VM || function(){
         self.bulkTaggingOpen = true;
     };
 
+    self.closeBulkTagging = () => {
+        self.bulkTaggingOpen = false;
+    }
+
+    const countFilterResults = (callback) => {
+        lt.api("/CrmDistributors/CountFilterResults")
+            .body(self.filter)
+            .post(callback);
+    };
+
+
+    const doBulkTagging = (tagName, set, callback) => {
+        lt.api("/CrmDistributors/doBulkTagging")
+            .query({ "tagName": tagName, "set": set })
+            .body(self.filter)
+            .post((count) => {
+                self.load();
+                callback(count);
+            });
+    }
+
+    self.startBulkTagging = (tagName, set) => {
+
+        countFilterResults((recordsCount) => {
+
+            if (recordsCount === 0) {
+                alert("Aktuální filtr vybírá 0 záznamů - akce nebude spuštěna");
+                return;
+            }
+
+            let msg = "Prosím o kontrolu: " + recordsCount.toString() + " ";
+
+            if (recordsCount === 1)
+                msg += "velkoodběrateli bude ";
+            else
+                msg += "velkoodběratelům bude";
+
+            if (set)
+                msg += "nastaven štítek ";
+            else
+                msg += "odebrán štítek ";
+
+            msg += tagName;
+
+            msg += ". Spustit?";
+
+            if (!window.confirm(msg))
+                return;
+
+            doBulkTagging(tagName, set, (count) => {
+                alert("Hotovo. Bylo změněno " + count + " záznamů velkoodběratelů.");
+            });
+        });
+
+    };
+
     const checkFiltersExpansion = () => {
-        self.exFiltersExpanded = self.exFilterGroups.length > 0;
+        self.exFiltersExpanded = self.filter.ExFilterGroups.length > 0;
         lt.notify();
     };
 
     self.editFilter = (filterId) => {
                 
-        for (const g of self.exFilterGroups) {
+        for (const g of self.filter.ExFilterGroups) {
             const filter = g.filters.find(f => f.id === filterId);
             if (!!filter) {
                 self.editedExFilter = filter;
@@ -71,14 +127,14 @@ app.Distributors.VM = app.Distributors.VM || function(){
      };
 
     self.addFilter = (groupId) => {
-        let group = self.exFilterGroups.find(g => g.id === groupId);
+        let group = self.filter.ExFilterGroups.find(g => g.id === groupId);
 
         if (!group) {
             group = {
                 "id": (new Date()).getTime(),
                 "filters":[]
             };
-            self.exFilterGroups.push(group);
+            self.filter.ExFilterGroups.push(group);
         }
 
         const filter = {
@@ -139,15 +195,15 @@ app.Distributors.VM = app.Distributors.VM || function(){
             self.editingExFilter = false;
         }
 
-        for (let i = 0; i < self.exFilterGroups.length; i++) {
-            const g = self.exFilterGroups[i];
+        for (let i = 0; i < self.filter.ExFilterGroups.length; i++) {
+            const g = self.filter.ExFilterGroups[i];
             const filterIndex = g.filters.findIndex(f => f.id === filterId);
 
             if (filterIndex !== -1) {                
                 g.filters.splice(filterIndex, 1);
                                 
                 if (g.filters.length === 0) {
-                    self.exFilterGroups.splice(i, 1);
+                    self.filter.ExFilterGroups.splice(i, 1);
                 }
 
                 break;
@@ -312,8 +368,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     const load = (page) => {
 
-        self.filter.DistributorFilters = self.exFilterGroups;
-
+        
         lt.api("/CrmDistributors/getDistributors")
             .query({                
                 "pageSize": self.pageSize || 10,
@@ -618,6 +673,10 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
                 return true;
             }).sort((a, b) => b.Priority - a.Priority).map(i => i.Name))));
+    };
+
+    self.getAllTags = (qry, callback) => {
+        self.withMetadata((md) => callback(md.CustomerTagTypes.sort((a, b) => b.Priority - a.Priority).map(i => i.Name)));
     };
 
     self.closeDetail = () => {

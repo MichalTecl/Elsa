@@ -57,23 +57,30 @@
                 <div class="digrFiltersSection" id="digrFilterIncludeDeleted">
                     <input type="checkbox" class="digrFilterIncludeDisabledCb" event-bind="change:setFilter('direct', 'IncludeDisabled', this.checked)" />
                     <label>Zahrnout zrušené</label>
-                    <div class="digrBulkTaggerIcon">
-                        <i class="fas fa-rocket faButtonNew bulkTaggingOpenButton" data-bind="class.hidden:bulkTaggingOpen" event-bind="click:openBulkTagging()"></i>
-                    </div>
+                </div>
+
+                <div class="digrBulkTaggerIcon">
+                    <i class="fas fa-rocket faButtonNew bulkTaggingOpenButton" data-bind="class.hidden:bulkTaggingOpen" event-bind="click:openBulkTagging()"></i>
                 </div>
 
             </div>
 
-            <div class="digrFiltersRow" data-bind="class!.hidden:bulkTaggingOpen">
-                <i class="fas fa-rocket faButtonNew bulkTaggingCloseButton" event-bind="click:closeBulkTagging()"></i>
-                <div class="bulkTaggingSetupPanel stackLeft">
+            <div class="digrFiltersRow bulkTaggingRow" data-bind="class!.hidden:bulkTaggingOpen">
+                <div class="bulkTaggingRowTop">
+                    <i class="fas fa-times faButtonNew bulkTaggingCloseButton" event-bind="click:closeBulkTagging()"></i>
+                </div>
+
+                <div class="bulkTaggingSetupPanel">
                     <div class="bulkTaggingSetupText">Všem odpovídajícím kontaktům</div>
                     <div class="bulkTaggignSetupRadios">
-                        <input type="radio" name="rbBulkTagging" id="rbbtgSet" /><label for="rbbtgSet">nastavit</label>
-                        <input type="radio" name="rbBulkTagging" id="rbbtgSet" /><label for="rbbtgSet">odebrat</label>
+                        <input type="radio" name="rbBulkTagging" id="rbbtgSet" checked /><label for="rbbtgSet">nastavit</label>
+                        <input type="radio" name="rbBulkTagging" id="rbbtgRemove" /><label for="rbbtgSet">odebrat</label>
                     </div>
                     <div class="bulkTaggingSetupText">štítek</div>
-
+                    <div class="bulkTaggingTagInputWrap autocomplete" id="bulkTaggingTagFinder">
+                        <input type="text" id="bulkTaggingTagNameInput" />
+                    </div>
+                    <button class="bulkTaggingRunbutton" event-bind="click:startBulkTagging($bulkTaggingTagNameInput.value, $rbbtgSet.checked, rbbtgRemove.checked)"><i class="fas fa-play"></i></button>
                 </div>
 
             </div>
@@ -132,8 +139,8 @@
 <script>
     lt.element("digrMainCont")
         .withModel("app.Distributors.vm")
-        .attach(function (digrTextFilter) {
-
+        .attach(function (digrTextFilter, bulkTaggingTagFinder) {
+                        
             digrTextFilter.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
                     this.dispatchEvent(new Event('change'));
@@ -155,7 +162,26 @@
 
             this.openBulkTagging = () => {
                 app.Distributors.vm.openBulkTagging();
+
+                app.ui.autosuggest(bulkTaggingTagFinder, app.Distributors.vm.getAllTags);
             };
+
+            this.startBulkTagging = (tagName, set, remove) => {
+
+                if (!tagName) {
+                    alert("Není vybrán štítek");
+                    return;
+                }
+
+                if (set === remove) {
+                    alert("Není vybrána akce (nastavit/odebrat)");
+                    return;
+                }
+
+                app.Distributors.vm.startBulkTagging(tagName, set);
+            }
+
+            this.closeBulkTagging = () => app.Distributors.vm.closeBulkTagging();
 
         });
 </script>
