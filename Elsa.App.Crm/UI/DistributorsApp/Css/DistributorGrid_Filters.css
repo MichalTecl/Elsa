@@ -11,14 +11,14 @@
     font-size: 14px;
 }
 
-/* Každý řádek */
+/* KaÅ¾dÃ½ Å™Ã¡dek */
 .digrFiltersRow {
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
 }
 
-/* Textový filtr – celý řádek */
+/* TextovÃ½ filtr â€“ celÃ½ Å™Ã¡dek */
 #digrFilterText {
     flex: 1 1 100%;
 }
@@ -32,7 +32,7 @@
         font-size: 14px;
     }
 
-/* Štítky – wrap do řádku */
+/* Å tÃ­tky â€“ wrap do Å™Ã¡dku */
 #digrFilterTags {
     flex: 1 1 100%;
 }
@@ -49,7 +49,7 @@
     gap: 6px;
 }
 
-/* Výběrové pole – kategorie, OZ, třídění */
+/* VÃ½bÄ›rovÃ© pole â€“ kategorie, OZ, tÅ™Ã­dÄ›nÃ­ */
 #digrFilterGroups,
 #digrFilterSalesRep,
 #digrFilterSortOption {
@@ -64,14 +64,14 @@
     font-size: 14px;
 }
 
-/* Checkbox “Zahrnout zrušené” */
+/* Checkbox â€œZahrnout zruÅ¡enÃ©â€ */
 #digrFilterIncludeDeleted {
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-/* Hledat tlačítko */
+/* Hledat tlaÄÃ­tko */
 #butSearch {
     padding: 8px 18px;
     min-width: 120px;
@@ -122,7 +122,7 @@
 }
 
 .digrBulkTaggerIcon {
-    margin-left: auto; /* << klíčové pro zarovnání doprava */
+    margin-left: auto; /* << klÃ­ÄovÃ© pro zarovnÃ¡nÃ­ doprava */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -145,7 +145,7 @@
             background-color: #ffe0b2;
         }
 
-/* === CELÝ PANEL === */
+/* === CELÃ PANEL === */
 .digrFiltersRow.bulkTaggingRow {
     background: #fff8ec;
     border: 1px solid #f0d6b6;
@@ -183,7 +183,7 @@
         color: #000;
     }
 
-/* === FORMULÁŘ === */
+/* === FORMULÃÅ˜ === */
 .bulkTaggingSetupPanel {
     display: flex;
     justify-content: flex-start;
@@ -191,7 +191,7 @@
     flex-wrap: wrap;
     gap: 12px;
     max-width: 100%;
-    box-sizing: border-box;    
+    box-sizing: border-box;
     padding: 10px;
 }
 
@@ -233,7 +233,7 @@
         box-sizing: border-box;
     }
 
-/* === TLAČÍTKO === */
+/* === TLAÄŒÃTKO === */
 .bulkTaggingRunbutton {
     flex-shrink: 0;
     background-color: #f7941e;
@@ -258,4 +258,18 @@
         align-items: flex-start;
         gap: 8px;
     }
+}
+
+input[type="radio"] + label {
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+}
+
+input[type="radio"]:checked + label {
+    opacity: 1;
+}
+
+input[type="radio"]:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
 }

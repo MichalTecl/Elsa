@@ -23,7 +23,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.isDirty = false;
 
     self.sorterId = null;
-
+        
     self.filter = {
         TextFilter: null,
         Tags: [],
@@ -46,6 +46,17 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.editedExFilter = null;
     self.editingExFilter = false;
 
+    self.tagFilterVisible = false;
+        
+    self.setTagFilter = (text) => {
+
+        self.tagFilterVisible = text !== null && text.trim().length > 0;
+
+        var matcher = new TextMatcher(text);
+
+        self.allTags.forEach(t => t.isHidden = !matcher.match(t.Name, true));            
+    };
+
     self.openBulkTagging = () => {
         self.bulkTaggingOpen = true;
     };
@@ -66,7 +77,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
             .query({ "tagName": tagName, "set": set })
             .body(self.filter)
             .post((count) => {
-                self.load();
+                self.search();
                 callback(count);
             });
     }

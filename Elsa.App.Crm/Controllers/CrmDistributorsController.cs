@@ -154,13 +154,13 @@ namespace Elsa.App.Crm.Controllers
             base.OnBeforeCall();
         }
 
-        public int DoBulkTaggigng(DistributorGridFilter filter, string tagName, bool set)
+        public int DoBulkTagging(DistributorGridFilter filter, string tagName, bool set)
         {
             var tag = _tagRepo.GetTagTypes(true).FirstOrDefault(t => t.Name == tagName);
             if (tag == null)
                 throw new ArgumentException("Štítek neexistuje, nebo nelze použít.");
 
-            var ids = _distributorsRepository.GetDistributors(filter, -1, -1, null, true).Select(d => d.Id).ToArray();
+            var ids = _distributorsRepository.GetDistributors(filter, null, null, null, true).Select(d => d.Id).ToArray();
 
             if (set)
                 return _tagRepo.Assign(ids, tag.Id);
@@ -170,7 +170,7 @@ namespace Elsa.App.Crm.Controllers
 
         public int CountFilterResults(DistributorGridFilter filter)
         {
-            return _distributorsRepository.GetDistributors(filter, -1, -1, null, true).Count;
+            return _distributorsRepository.GetDistributors(filter, null, null, null, true).Count;
         }
     }
 }
