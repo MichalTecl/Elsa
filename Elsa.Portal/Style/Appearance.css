@@ -154,6 +154,27 @@ div.searchPanel {
     opacity:1;
 }
 
+.faButtonNew {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;    
+    border-radius: 50%;
+    background-color: transparent;
+    color: #666;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 14px;
+    border: none;
+}
+
+.faButtonNew:hover {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+
 .modal {
     display: none; 
     position: fixed; /* Stay in place */

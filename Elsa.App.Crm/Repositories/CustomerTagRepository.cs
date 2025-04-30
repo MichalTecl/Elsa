@@ -169,7 +169,7 @@ namespace Elsa.App.Crm.Repositories
             {
                 var assignments = _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id).Execute().ToList();
 
-                _database.Delete(assignments);
+                _database.DeleteAll(assignments);
 
                 _log.Info($"Deleted {assignments.Count} of assignments");
 

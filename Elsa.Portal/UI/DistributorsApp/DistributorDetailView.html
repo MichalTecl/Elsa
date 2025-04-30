@@ -24,10 +24,13 @@
 
 
         <div class="digrDetTagsSection">
-            <label>Štítky</label>
+            <div class="labelAndIconWrap">
+                <label>Štítky</label>
+                <i class="fas fa-cogs editTagsButton faButtonNew" event-bind="click:editTags()"></i>
+            </div>
 
             <div class="digrTagsRow">
-                <i class="fas fa-cogs editTagsButton" event-bind="click:editTags()"></i>
+
                 <div class="digrDetTagList digrDetSysTagList" data-bind="itemsSource:detail.sysTags" data-key="Id">
                     <div class="lt-template digrTagItem digrSysTagItem" data-bind="text:Name"></div>
                 </div>
