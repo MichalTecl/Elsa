@@ -47,7 +47,7 @@
                     <i class="fas fa-filter digrFilterButtonAddNew" data-bind="class.hidden:exFiltersExpanded" event-bind="click:VM.addFilter()"></i>
                     <i class="fas fa-filter digrFilterButtonAsIcon" data-bind="class!.hidden:exFiltersExpanded"></i>
                 </div>
-                <div class="digrExFiltersContainer" data-bind="class!.hidden:exFiltersExpanded" fill-by="/UI/DistributorsApp/ExFilters.html">                    
+                <div class="digrExFiltersContainer" data-bind="class!.hidden:exFiltersExpanded" fill-by="/UI/DistributorsApp/ExFilters.html">
                 </div>
             </div>
 
@@ -57,55 +57,73 @@
                 <div class="digrFiltersSection" id="digrFilterIncludeDeleted">
                     <input type="checkbox" class="digrFilterIncludeDisabledCb" event-bind="change:setFilter('direct', 'IncludeDisabled', this.checked)" />
                     <label>Zahrnout zrušené</label>
+                    <div class="digrBulkTaggerIcon">
+                        <i class="fas fa-rocket faButtonNew bulkTaggingOpenButton" data-bind="class.hidden:bulkTaggingOpen" event-bind="click:openBulkTagging()"></i>
+                    </div>
                 </div>
+
+            </div>
+
+            <div class="digrFiltersRow" data-bind="class!.hidden:bulkTaggingOpen">
+                <i class="fas fa-rocket faButtonNew bulkTaggingCloseButton" event-bind="click:closeBulkTagging()"></i>
+                <div class="bulkTaggingSetupPanel stackLeft">
+                    <div class="bulkTaggingSetupText">Všem odpovídajícím kontaktům</div>
+                    <div class="bulkTaggignSetupRadios">
+                        <input type="radio" name="rbBulkTagging" id="rbbtgSet" /><label for="rbbtgSet">nastavit</label>
+                        <input type="radio" name="rbBulkTagging" id="rbbtgSet" /><label for="rbbtgSet">odebrat</label>
+                    </div>
+                    <div class="bulkTaggingSetupText">štítek</div>
+
+                </div>
+
             </div>
 
         </div>
 
-        <div class="grid2">
-            <div id="digrGrid">
-                <div class="gridRow gridHead">
-                    <div class="cell10">Jméno</div>
-                    <div class="cell10">Kategorie</div>
-                    <div class="cell20">Štítky</div>                    
-                    <div class="cell5">$$$</div>
-                    <div class="cell10">Trend</div>
-                </div>
-                <div class="gridBody" data-bind="itemsSource:data" data-key="Id">
-                    <div class="lt-template gridRow">
-                        <div class="cell10 digrDetailLinkCell">
-                            <a data-bind="text:Name" class="digrLinkSameWin" event-bind="click:openDetail(Id)"></a>
-                            <a class="digrOutNewWin" target="_blank" data-bind="href:detailLink"> <i class="fas fa-window-restore"></i></a>
-                        </div>
-
-                        <div class="cell10 digrGroupsCell">
-                            <div data-bind="itemsSource:customerGroups" data-key="Id" class="digrCustGroupsContainer stackLeft">
-                                <div class="lt-template digrCustGroupItem" data-bind="text:ErpGroupName"></div>
+            <div class="grid2">
+                <div id="digrGrid">
+                    <div class="gridRow gridHead">
+                        <div class="cell10">Jméno</div>
+                        <div class="cell10">Kategorie</div>
+                        <div class="cell20">Štítky</div>
+                        <div class="cell5">$$$</div>
+                        <div class="cell10">Trend</div>
+                    </div>
+                    <div class="gridBody" data-bind="itemsSource:data" data-key="Id">
+                        <div class="lt-template gridRow">
+                            <div class="cell10 digrDetailLinkCell">
+                                <a data-bind="text:Name" class="digrLinkSameWin" event-bind="click:openDetail(Id)"></a>
+                                <a class="digrOutNewWin" target="_blank" data-bind="href:detailLink"> <i class="fas fa-window-restore"></i></a>
                             </div>
-                        </div>
 
-                        <div class="cell20 digrTagsCell">
-                            <div data-bind="itemsSource:tags" data-key="Id" class="digrCustTagsContainer stackLeft">
-                                <div class="lt-template digrCustTagItem" data-bind="text:Name;cssClass:CssClass"></div>
+                            <div class="cell10 digrGroupsCell">
+                                <div data-bind="itemsSource:customerGroups" data-key="Id" class="digrCustGroupsContainer stackLeft">
+                                    <div class="lt-template digrCustGroupItem" data-bind="text:ErpGroupName"></div>
+                                </div>
                             </div>
-                        </div>
-                                                
-                        <div class="cell5 digrTotalPriceCell" data-bind="text:TotalOrdersPriceF"></div>
-                        
-                        <div class="cell10 digrTrendCell">
-                            <div data-bind="itemsSource:TrendModel" data-key="id" class="digrTrendView">
-                                <div data-bind="style.height:height;class.digrTrendItemEmpty:IsEmpty;title:symbol" class="lt-template digrTrendItem"></div>
-                            </div>
-                        </div>
 
+                            <div class="cell20 digrTagsCell">
+                                <div data-bind="itemsSource:tags" data-key="Id" class="digrCustTagsContainer stackLeft">
+                                    <div class="lt-template digrCustTagItem" data-bind="text:Name;cssClass:CssClass"></div>
+                                </div>
+                            </div>
+
+                            <div class="cell5 digrTotalPriceCell" data-bind="text:TotalOrdersPriceF"></div>
+
+                            <div class="cell10 digrTrendCell">
+                                <div data-bind="itemsSource:TrendModel" data-key="id" class="digrTrendView">
+                                    <div data-bind="style.height:height;class.digrTrendItemEmpty:IsEmpty;title:symbol" class="lt-template digrTrendItem"></div>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="digrGridButtons">
+                <button event-bind="click:VM.load()" data-bind="class!.hidden:canReadMore">Načíst více</button>
+            </div>
         </div>
-        <div class="digrGridButtons">
-            <button event-bind="click:VM.load()" data-bind="class!.hidden:canReadMore">Načíst více</button>
-        </div>        
-    </div>
     <div id="digrDetailCont" fill-by="/UI/DistributorsApp/DistributorDetailView.html" data-bind="class!.hidden:isDetailOpen"></div>
 </div>
 
@@ -133,6 +151,10 @@
             this.openDetail = (customerId) => {
                 window.location.hash = 'customerId=' + customerId;
                 return false;
+            };
+
+            this.openBulkTagging = () => {
+                app.Distributors.vm.openBulkTagging();
             };
 
         });

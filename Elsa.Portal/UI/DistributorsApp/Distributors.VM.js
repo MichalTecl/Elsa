@@ -18,6 +18,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.page = 1;
     self.pageSize = 20;
     self.canReadMore = false;
+    self.bulkTaggingOpen = false;
 
     self.isDirty = false;
 
@@ -44,6 +45,10 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.exFilterGroups = [];
     self.editedExFilter = null;
     self.editingExFilter = false;
+
+    self.openBulkTagging = () => {
+        self.bulkTaggingOpen = true;
+    };
 
     const checkFiltersExpansion = () => {
         self.exFiltersExpanded = self.exFilterGroups.length > 0;
