@@ -1,4 +1,4 @@
-﻿using Elsa.Common.Caching;
+using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
@@ -117,6 +117,8 @@ namespace Elsa.Common.Data
 
             if (entity is IHasAuthor auth && entity.Id < 1)
                 auth.AuthorId = _session.User.Id;
+
+            _database.Save(entity);
 
             ClearCache();
         }

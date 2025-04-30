@@ -4,7 +4,10 @@
             <div class="customerTagEditorPopupHead ctedSection">
                 <i class="far fa-window-close" event-bind="click:VM.close()"></i>
             </div>
-            <div class="customerTagsListContainer ctedSection">
+            <div class="customerTagEditorPopupHead ctedSection">
+                <button class="ctedNewTagButton" event-bind="click:addTag()">Nový štítek</button>
+            </div>
+            <div id="ctedTagsListScroller" class="customerTagsListContainer ctedSection">
                 <div class="ctdTagsList" data-bind="itemsSource:tags" data-key="Id">
                     <div class="lt-template">
                         <div data-bind="class.hidden:isOpen;text:Name;cssClass:CssClass" class="ctedItemHead" event-bind="click:openTag(VM)"></div>
@@ -72,6 +75,7 @@
 
         self.newTag = () => {
             const tag = {
+                "Id": -1,
                 "isOpen": true,
                 "Name": "",
                 "CssClass": self.allCssClasses.find(c => true)
@@ -83,7 +87,7 @@
 
         self.saveTag = (vm) => {
             lt.api("/CrmMetadata/SaveTag")
-                .query({ "id": vm.Id, "name": vm.Name, "cssClass": vm.CssClass })
+                .query({ "id": vm.Id < 1 ? null : vm.Id, "name": vm.Name, "cssClass": vm.CssClass })
                 .post(() => loadTags());
         };
 
@@ -158,7 +162,7 @@
 
     lt.element("customerTagEditorUi")
         .withModel("app.Distributors.CustomerTagEditor.vm")
-        .attach(function (customerTagEditorOverlay) {
+        .attach(function (customerTagEditorOverlay, ctedTagsListScroller) {
 
             let vm = null;
 
@@ -173,6 +177,15 @@
             this.cancelTagEdit = () => vm.cancelTagEdit();
             this.updateTagName = (tag, name) => tag.Name = name; 
 
+            this.addTag = () => {
+                vm.newTag();
+
+                ctedTagsListScroller.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            };
+            
             customerTagEditorOverlay.addEventListener("click", function (e) {
 
                 const popup = customerTagEditorOverlay.querySelector(".customerTagEditorPopup");

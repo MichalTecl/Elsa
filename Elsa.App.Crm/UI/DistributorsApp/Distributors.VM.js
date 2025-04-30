@@ -616,16 +616,32 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.closeDetail = () => {
-        if (self.isDetailPage) {
-            window.close(); 
-        } else {
 
+        const closeToBack = () => {
             if (self.isDirty) {
                 if (!confirm("Máte neuložené změny. Opravdu chcete pokračovat?"))
                     return;
             }
             resetDetail();
-        }
+        };
+                               
+        if (self.isDetailPage) {
+            try {
+                window.close();
+
+                setTimeout(() => {
+                    
+                    if (!window.closed) {
+                        closeToBack();
+                    }
+                }, 200); 
+
+            } catch {
+                closeToBack();
+            }
+        } else {
+            closeToBack();
+        }        
     };
 
     window.addEventListener("beforeunload", (event) => {
@@ -673,6 +689,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
             // Aktualizace URL bez reloadu stránky
             history.replaceState(null, "", newHash ? `#${newHash}` : window.location.pathname);
+        }
+        else {
+            window.location.href = "/UI/DistributorsApp/DistributorsAppPage.html";
         }
     };
 
