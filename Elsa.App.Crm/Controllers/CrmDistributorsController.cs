@@ -86,6 +86,14 @@ namespace Elsa.App.Crm.Controllers
             {
                 var customer = _customerRepository.GetCustomer(rq.CustomerId).Ensure("Invalid CstomerId");
 
+                if (customer.HasStore != rq.HasStore || customer.HasEshop != rq.HasEshop)
+                {
+                    customer.HasEshop = rq.HasEshop;
+                    customer.HasStore = rq.HasStore;
+
+                    _db.Save(customer);
+                }
+
                 if (rq.AddedTags != null)
                     rq.AddedTags.ForEach(t => _tagRepo.Assign(customer.Id, t));
 
