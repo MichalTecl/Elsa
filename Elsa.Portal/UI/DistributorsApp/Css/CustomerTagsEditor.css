@@ -1,0 +1,227 @@
+#customerTagEditorOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.customerTagEditorPopup {
+    background: #fff;
+    border-radius: 12px;
+    width: 480px;
+    max-width: 90vw;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+}
+
+.customerTagEditorPopupHead {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 16px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+}
+
+    .customerTagEditorPopupHead i {
+        font-size: 20px;
+        color: #666;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+        .customerTagEditorPopupHead i:hover {
+            color: #e00;
+        }
+
+.customerTagsListContainer {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.ctdTagsList .lt-template {
+    margin-bottom: 10px;
+}
+
+.ctedHead {
+    background-color: #eef2f5;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 15px;
+}
+
+    .ctedHead:hover {
+        background-color: #dde3e9;
+    }
+
+
+/* Základní styl pro hlavičku štítku */
+.ctedItemHead {
+    padding: 10px 14px;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    margin-bottom: 6px;
+}
+
+/* Editor štítku */
+.ctedItemEditor {
+    background-color: #f0f2f4;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+/* První řádek (paletka + input) */
+.ctedItemEditorRow {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+/* Paletka vlevo */
+.tagStyleSwitchIcon {
+    font-size: 18px;
+    color: #444;
+    cursor: pointer;
+    margin-right: 4px;
+}
+
+/* Input s barvou štítku jako pozadím */
+.ctedTagInputWrapper {
+    flex: 1;
+    border-radius: 6px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+}
+
+/* Samotný input – transparentní, ale čitelný */
+.ctedTagNameInp {
+    width: 100%;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none;
+    font-size: 14px;
+    color: inherit !important;
+}
+
+/* Druhý řádek – delete vlevo, tlačítka napravo */
+.ctedItemEditorRow:last-child {
+    justify-content: space-between;
+}
+
+/* Koš vlevo */
+.ctedTagDeleteButton {
+    color: #c33;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Tlačítka pro zrušení/uložení */
+.ctagCancelButton,
+.ctagSaveTagButton {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 6px;
+}
+
+    .ctagCancelButton i {
+        color: #666;
+    }
+
+    .ctagSaveTagButton i {
+        color: #2c8a3a;
+    }
+
+/* Paletka - barevnější vzhled */
+.tagStyleSwitchIcon {
+    font-size: 18px;
+    color: #6a1b9a;
+    background-color: #f3e5f5;
+    padding: 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+    .tagStyleSwitchIcon:hover {
+        background-color: #e1bee7;
+    }
+
+/* Koš vlevo, výrazně červený */
+.ctedTagDeleteButton {
+    color: white;
+    background-color: #e53935;
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .ctedTagDeleteButton:hover {
+        background-color: #c62828;
+    }
+
+/* Tlačítka Cancel / Save zarovnaná vpravo */
+.ctedItemEditorRow:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Wrapper pro pravou část s tlačítky */
+.ctedEditButtonsRight {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* Hezčí buttony */
+.ctagCancelButton,
+.ctagSaveTagButton {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ctagCancelButton {
+    background-color: #e0e0e0;
+    color: #555;
+}
+
+    .ctagCancelButton:hover {
+        background-color: #d5d5d5;
+    }
+
+.ctagSaveTagButton {
+    background-color: #2e7d32;
+    color: white;
+}
+
+    .ctagSaveTagButton:hover {
+        background-color: #1b5e20;
+    }

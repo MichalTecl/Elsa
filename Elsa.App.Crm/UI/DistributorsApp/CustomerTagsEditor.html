@@ -7,7 +7,30 @@
             <div class="customerTagsListContainer ctedSection">
                 <div class="ctdTagsList" data-bind="itemsSource:tags" data-key="Id">
                     <div class="lt-template">
-                        <div data-bind="class.hidden:isOpen;text:Name" class="ctedHead" event-bind="click:openTag(VM)"></div>
+                        <div data-bind="class.hidden:isOpen;text:Name;cssClass:CssClass" class="ctedItemHead" event-bind="click:openTag(VM)"></div>
+                        <div data-bind="class!.hidden:isOpen" class="ctedItemEditor">
+                            <div class="ctedItemEditorRow">
+                                <i class="fas fa-palette tagStyleSwitchIcon" event-bind="click:changeCssClass(VM)"></i>
+                                <div class="ctedTagInputWrapper" data-bind="cssClass:CssClass">
+                                    <input style="background-color:transparent !important; border:none !important; color:inherit !important" type="text" class="ctedTagNameInp" data-bind="value:Name;cssClass:CssClass" event-bind="input:updateTagName(VM, this.value)" />
+                                </div>
+                            </div>
+                            <div class="ctedItemEditorRow">
+                                <i class="fas fa-trash-alt ctedTagDeleteButton" event-bind="click:deleteTag(VM)"></i>
+
+                                <div class="ctedEditButtonsRight">
+                                    <button class="ctagCancelButton" event-bind="click:cancelTagEdit()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+
+                                    <button class="ctagSaveTagButton" event-bind="click:saveTag(VM)">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            
+                        </div>
                     </div>
                 </div>
             </div>
@@ -117,7 +140,7 @@
                 try {
                     for (const rule of sheet.cssRules || []) {
                         if (rule.selectorText && rule.selectorText.startsWith('.crmDistributorTag_')) {
-                            self.allCssClasses.push(rule.selectorText);
+                            self.allCssClasses.push(rule.selectorText.trim().substring(1));
                         }
                     }
 
@@ -135,9 +158,28 @@
 
     lt.element("customerTagEditorUi")
         .withModel("app.Distributors.CustomerTagEditor.vm")
-        .attach(function () {
+        .attach(function (customerTagEditorOverlay) {
+
+            let vm = null;
+
             this.bind((binder) => {
-                Object.assign(this, app.Distributors.CustomerTagEditor.vm);
+                vm = app.Distributors.CustomerTagEditor.vm;
+                Object.assign(this, vm);
+            });
+
+            this.deleteTag = (tag) => vm.deleteTag(tag);
+            this.changeCssClass = (tag) => vm.changeCssClass(tag);
+            this.closeTag = (tag) => vm.saveTag(tag);
+            this.cancelTagEdit = () => vm.cancelTagEdit();
+            this.udateTagName = (tag, name) => tag.Name = name; 
+
+            customerTagEditorOverlay.addEventListener("click", function (e) {
+
+                const popup = customerTagEditorOverlay.querySelector(".customerTagEditorPopup");
+
+                if (!popup.contains(e.target)) {
+                    vm.close();
+                }
             });
         });
 </script>
