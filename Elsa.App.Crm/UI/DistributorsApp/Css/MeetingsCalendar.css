@@ -166,22 +166,90 @@
 }
 
 .icsLinkWrap {
-    padding-left: 20px;
-    padding-top: 15px
+    padding: 8px 16px;
+    text-align: center;
 }
 
-.icsLinkWrap a {
-    display: inline-block;
-    background-color: #007bff;
-    color: white;
-    padding: 10px 16px;
-    border-radius: 6px;
-    font-weight: bold;
-    text-decoration: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    transition: background-color 0.2s ease;
-}
+    .icsLinkWrap a {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        max-width: 100%;
+    }
 
-.icsLinkWrap a:hover {
-    background-color: #0056b3;
+        .icsLinkWrap a:hover {
+            background-color: #0056b3;
+        }
+
+@media (max-width: 600px) {
+    #meetingGroupsList {
+        padding: 8px;
+        gap: 16px;
+    }
+
+    .meetingGroupItem {
+        padding: 8px 10px;
+    }
+
+    .mgiMeetingItemHead {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        word-break: break-word;
+    }
+
+    .mgiDayWrap,
+    .mgiMeetingTime,
+    .mgiDistributorWrap,
+    .mgiIconWrap,
+    .mgiMeetingTitle,
+    .mgiMeetingParticipantsList {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .mgiDistributorName,
+    .mgiMeetingTitle,
+    .mgiMeetingParticipantName {
+        white-space: normal !important;
+        overflow-wrap: break-word;
+    }
+
+    .mgiMeetingParticipantName {
+        font-size: 11px;
+        padding: 2px 4px;
+        margin: 0;
+    }
+
+    .mgiMeetingParticipantsList {
+        flex-wrap: wrap;
+        gap: 2px;
+    }
+
+    .mgiMeetingStatusButtonsRow {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+        .mgiMeetingStatusButtonsRow button {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+    .icsLinkWrap a {
+        display: block;
+        text-align: center;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .icsLinkWrap {
+        padding: 0;
+        max-width: 100%;
+    }
 }
