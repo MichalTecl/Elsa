@@ -1,4 +1,4 @@
-﻿app.DistributorMeetings = app.DistributorMeetings || {
+app.DistributorMeetings = app.DistributorMeetings || {
     VM: function() {
         const self = this;
         const crm = app.Distributors.vm;
@@ -143,10 +143,15 @@
             self.meetings.forEach(m => m.isOpen = m.Id === id);
         };
 
-        self.setMeetingStatus = (meetingId, statusTypeId) => lt
+        self.setMeetingStatus = (meetingId, statusTypeId, callback) => lt
             .api("/CrmMeetings/setMeetingStatus")
             .query({ "meetingId": meetingId, "statusTypeId": statusTypeId })
-            .post(receiveMeetings);
+            .post(m => {
+                receiveMeetings(m);
+
+                if (!!callback)
+                    callback();
+            });
 
         self.meetingTextChange = (meetingId, text) => {
             const meeting = self.meetings.find(m => m.Id === meetingId);

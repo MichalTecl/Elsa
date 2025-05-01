@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,5 +40,7 @@ namespace Elsa.Commerce.Core.Crm
 
         void AddCustomerNote(int customerId, string text);
         void DeleteCustomerNote(int noteId);
+
+        Dictionary<int, string> GetDistributorNameIndex();
     }
 }

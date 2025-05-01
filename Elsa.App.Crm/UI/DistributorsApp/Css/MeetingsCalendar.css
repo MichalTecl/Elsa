@@ -1,0 +1,187 @@
+/* === OBECNÃ STRUKTURA === */
+#meetingGroupsList {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 16px;
+    font-family: sans-serif;
+}
+
+/* === SKUPINA === */
+.meetingGroupItem {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 16px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.mgiNameWrap {
+    margin-bottom: 10px;
+}
+
+.mgiNameLabel {
+    font-weight: bold;
+    font-size: 16px;
+    color: #222;
+}
+
+/* === DEN === */
+.mgiDaysWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* vÄ›tÅ¡Ã­ mezera mezi dny */
+}
+
+.mgiDayItem {
+    display: flex;
+    flex-direction: column;
+}
+
+/* === SEZNAM MEETINGÅ® === */
+.mgiMeetingsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* vertikÃ¡lnÃ­ mezera mezi meetingy */
+    padding-left: 8px;
+}
+
+/* === MEETING === */
+.meetingItem {
+    display: flex;
+    flex-direction: column;
+    border-left: 3px solid #007bff20;
+    padding-left: 6px;
+}
+
+.mgiMeetingItemHead {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    text-align: left;
+}
+
+.mgiDayWrap {
+    min-width: 90px;
+    font-weight: bold;
+}
+
+/* pouze prvnÃ­ meeting ve dni zobrazÃ­ den */
+.mgiMeetingsList .meetingItem:not(:first-child) .mgiMeetingDay {
+    display: none;
+}
+
+.mgiMeetingDay {
+    font-weight: bold;
+    color: #444;
+    white-space: nowrap;
+    display: inline-block;
+    min-width: 90px;
+}
+
+    .mgiMeetingDay:empty::before {
+        content: "";
+        display: inline-block;
+        width: 100%;
+    }
+
+.mgiMeetingTime {
+    font-family: monospace;
+    color: #333;
+}
+
+.mgiDistributorWrap {
+    flex-shrink: 0;
+}
+
+.mgiDistributorName {
+    color: #007bff;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: unset;
+}
+
+    .mgiDistributorName:hover {
+        text-decoration: underline;
+    }
+
+.mgiIconWrap {
+    display: flex;
+    align-items: center;
+}
+
+.mgiMeetingTitle {
+    font-style: italic;
+    color: #666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* === PARTICIPANTI === */
+.mgiMeetingParticipantsList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.mgiMeetingParticipantName {
+    background: #f1f1f1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #888;
+    margin-left: 4px;
+}
+
+/* === TLAÄŒÃTKA === */
+.mgiMeetingActions {
+    margin-top: 6px;
+}
+
+.mgiMeetingStatusButtonsRow button {
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: white;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+    .mgiMeetingStatusButtonsRow button i {
+        font-size: 14px;
+    }
+
+.mgiDaysList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.icsLinkWrap {
+    padding-left: 20px;
+    padding-top: 15px
+}
+
+.icsLinkWrap a {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s ease;
+}
+
+.icsLinkWrap a:hover {
+    background-color: #0056b3;
+}

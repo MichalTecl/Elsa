@@ -8,10 +8,20 @@
                 </div>
             </div>
 
-            <div class="digrFiltersRow">
-                <div class="digrFiltersSection" id="digrFilterTags">
+            <div class="digrFiltersRow">                
+                <div class="digrFiltersSection stackLeft" id="digrFilterTags" >
+                    <div id="digrTagsFilter" class="stackLeft">
+                        <i class="fas fa-search faButtonNew" id="digrTagsFilterIcon" event-bind="click:setFocus($digrTagsFilterInput)"></i>
+                        <input type="text" id="digrTagsFilterInput" event-bind="input:VM.setTagFilter(this.value)" data-bind="class!.hidden:tagFilterVisible" />
+                        <style>
+                            #digrTagsFilter:hover #digrTagsFilterInput,
+                            #digrTagsFilterInput:focus {
+                                display: block !important;
+                            }
+                        </style>
+                    </div>
                     <div class="digrTagFilters" data-bind="itemsSource:allTags" data-key="Id">
-                        <div class="lt-template digrFilterTag">
+                        <div class="lt-template digrFilterTag" data-bind="class.hidden:isHidden">
                             <input type="checkbox" event-bind="change:setFilter('tag', Id, this.checked)" />
                             <label data-bind="text:Name"></label>
                         </div>
@@ -179,6 +189,10 @@
                 }
 
                 app.Distributors.vm.startBulkTagging(tagName, set);
+            }
+
+            this.setFocus = (e) => {
+                setTimeout(() => e.focus(), 0);
             }
 
             this.closeBulkTagging = () => app.Distributors.vm.closeBulkTagging();

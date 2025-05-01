@@ -1,4 +1,4 @@
-﻿using Elsa.Common.Utils;
+using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Crm;
 using Newtonsoft.Json;
@@ -107,6 +107,7 @@ namespace Elsa.App.Crm.Model
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
+        public string CustomerName { get; set; }
         public string StartDt { get; set; }
         public string EndDt { get; set; }
         public string Title { get; set; }
@@ -116,7 +117,11 @@ namespace Elsa.App.Crm.Model
         public string CategoryIconClass { get; set; }
         public string Author { get; set; }
         public int ExpectedDurationMinutes { get; set; }
+        public string TimeGroup { get; set; }
+        public string TimeGroupClass { get; set; }
         public List<MeetingStatusActionViewModel> Actions { get; set; } = new List<MeetingStatusActionViewModel>();
         public List<MeetingParticipantViewModel> Participants { get; set; } = new List<MeetingParticipantViewModel>();
+        public string Day { get; set; }
+        public string Time { get; set; }
     }
 }

@@ -1,0 +1,182 @@
+<ElsaBody>
+    <div class="icsLinkWrap">
+        <a href="/crmmeetings/geticsfile">Vložit do kalendáře na tomto zařízení</a>
+    </div>
+
+    <div id="meetingsCalendarUi">
+        <div class="mtcSection">
+            <div id="meetingGroupsList" data-bind="itemsSource:groups" data-key="timeClass">
+                <div class="lt-template meetingGroupItem" data-bind="cssClass:timeClass">
+                    <div class="mgiNameWrap">
+                        <div class="mgiNameLabel" data-bind="text:name"></div>
+                    </div>
+                    <div class="mgiDaysWrap">
+                        <div class="mgiDaysList" data-bind="itemsSource:days" data-key="text">
+                            <div class="lt-template mgiDayItem">
+                                <div class="mgiMeetingsList" data-bind="itemsSource:meetings" data-key="Id">
+
+                                    <div class="lt-template meetingItem">
+                                        <div class="mgiMeetingItemHead">
+                                            <div class="mgiDayWrap">
+                                                <div class="mgiMeetingDay" data-bind="text:Day"></div>
+                                            </div>
+                                            <div class="mgiMeetingTime" data-bind="text:Time"></div>
+                                            <div class="mgiDistributorWrap">
+                                                <a class="mgiDistributorName" target="_blank" data-bind="href:customerUrl; text:CustomerName"></a>
+                                            </div>
+                                            <div class="mgiIconWrap">
+                                                <i data-bind="class:CategoryIconClass; style.color:StatusTypeColor"></i>
+                                            </div>
+                                            <div class="mgiMeetingTitle" data-bind="text:Title"></div>
+
+                                            <div class="mgiMeetingParticipantsList" data-bind="itemsSource:Participants" data-key="UserId">
+                                                <div class="lt-template mgiMeetingParticipant">
+                                                    <div class="mgiMeetingParticipantName" data-bind="text:UserName"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mgiMeetingActions">
+                                            <div class="mgiMeetingStatusButtonsRow stackLeft" data-bind="itemsSource:Actions" data-key="Id">
+                                                <button class="lt-template stackLeft" data-bind="style.backgroundColor:StatusTypeColor" event-bind="click:setMeetingStatus(meetingId, StatusTypeId)">
+                                                    <i data-bind="class:StatusTypeIconClass"></i>
+                                                    <div data-bind="text:Title"></div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* today & tomorrow we are not showing date */
+        .mtGrpToday .mgiDayWrap {
+            display: none;
+        }
+
+        .mtGrpTomorrow .mgiDayWrap {
+            display: none;
+        }
+
+        /* we are showing date only for the first day */
+        .mgiMeetingsList .meetingItem:not(:first-child) .mgiMeetingDay {
+            display: none;
+        }
+
+        .mtGrpThisWeek {
+        }
+
+        .mtGrpThisWeek {
+        }
+
+        .mtGrpNextWeek {
+        }
+
+        /* only for passed meetings show buttons */
+        .mgiMeetingActions {
+            display: none;
+        }
+
+        .mtGrpPassed .mgiMeetingActions {
+            display: block;
+        }
+
+        .mtGrpPassed .mgiNameWrap {
+            display: none;
+        }
+
+        .mtGrpPassed .mgiMeetingTime {
+            display: none;
+        }
+
+        .mtGrpPassed .mgiMeetingDay {
+            display: block !important;
+        }
+
+        .mtGrpPassed .mgiMeetingsList {
+            gap: 0 !important;
+        }
+
+        .mtGrpPassed .mgiDaysList {
+            display: flex;
+            flex-direction: column;
+            gap: 0 !important;
+        }
+
+        .mtGrpPassed .meetingItem {
+            margin-bottom: 30px;
+            margin-top: 0px;
+        }
+    </style>
+
+    <script>
+
+        app = app || {};
+        app.meetingCalendarVm = app.meetingCalendarVm || new function () {
+
+            const self = this;
+
+            self.groups = [];
+
+            const receiveMeetings = (meetings) => {
+
+                self.groups = [];
+
+                meetings.forEach(meeting => {
+                    let group = self.groups.find(g => g.timeClass === meeting.TimeGroupClass);
+                    if (!group) {
+                        group = {
+                            "name": meeting.TimeGroup,
+                            "timeClass": meeting.TimeGroupClass,
+                            "days": []
+                        };
+
+                        self.groups.push(group);
+                    }
+
+                    let day = group.days.find(d => d.text === meeting.Day);
+                    if (!day) {
+                        day = {
+                            "text": meeting.Day,
+                            "meetings": []
+                        };
+
+                        group.days.push(day);
+                    }
+
+                    day.meetings.push(meeting);
+
+                    meeting.customerUrl = "/UI/DistributorsApp/DistributorsAppPage.html?customerId=" + meeting.CustomerId;
+                    meeting.Actions.forEach(a => a.meetingId = meeting.Id);
+                });
+            };
+
+            self.loadMeetings = () => {
+                lt.api("/crmMeetings/getMyMeetings")
+                    .get(receiveMeetings);
+            };
+
+            self.loadMeetings();
+        };
+
+        lt.element("meetingsCalendarUi")
+            .withModel("app.meetingCalendarVm")
+            .attach(function () {
+                this.setMeetingStatus = (meetingId, statusTypeId) => app.DistributorMeetings.vm.setMeetingStatus(meetingId, statusTypeId, () => {
+                    app.meetingCalendarVm.loadMeetings();
+                });
+            });
+
+
+
+    </script>
+    <link href="Css/MeetingsCalendar.css" rel="stylesheet" />
+    <script src="Distributors.VM.js"></script>
+    <script src="Tabs/DistributorMeetings.VM.js"></script>
+
+</ElsaBody>

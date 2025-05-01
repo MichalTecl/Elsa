@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -19,6 +19,7 @@ using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Crm;
 using Elsa.Core.Entitites.Crm;
+using Microsoft.SqlServer.Server;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using Robowire.RobOrm.Core;
 
@@ -609,6 +610,23 @@ namespace Elsa.Commerce.Core.Repositories
                 .Where(c => c.Id == id)
                 .Execute()
                 .FirstOrDefault();
+        }
+
+        public Dictionary<int, string> GetDistributorNameIndex()
+        {
+            return _cache.ReadThrough("distributorNameIndex"
+                , TimeSpan.FromHours(1)
+                , () => {
+
+                    var result = new Dictionary<int, string>();
+
+                    _database
+                    .Sql()
+                    .Execute("select c.Id, c.Name from Customer c where c.IsCompany = 1 Or c.IsDistributor = 1")
+                    .ReadRows<int, string>((id, name) => result[id] = name);
+
+                    return result;
+                });
         }
     }
 }

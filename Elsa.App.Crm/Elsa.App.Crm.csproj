@@ -81,6 +81,7 @@
     <Compile Include="Model\DistributorModelBase.cs" />
     <Compile Include="Model\DistributorOrderInfo.cs" />
     <Compile Include="Model\DistributorViewModel.cs" />
+    <Compile Include="Model\MeetingsOverview.cs" />
     <Compile Include="Model\SalesRepresentativeModel.cs" />
     <Compile Include="Model\SalesTrendTick.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -171,6 +172,7 @@
     <Content Include="UI\DistributorsApp\Css\DistributorGrid_Filters.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorGrid_grid.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorTagStyles.css" />
+    <Content Include="UI\DistributorsApp\Css\MeetingsCalendar.css" />
     <Content Include="UI\DistributorsApp\CustomerTagsEditor.html" />
     <Content Include="UI\DistributorsApp\DistributorDetailView.html" />
     <Content Include="UI\DistributorsApp\DistributorGrid.html" />
@@ -180,6 +182,7 @@
     <Content Include="UI\DistributorsApp\ExFilters.html" />
     <Content Include="UI\DistributorsApp\FilterControls\DateInput.html" />
     <Content Include="UI\DistributorsApp\FilterControls\TextBox.html" />
+    <Content Include="UI\DistributorsApp\MeetingsCalendar.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.css" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.VM.js" />

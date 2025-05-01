@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -10,7 +10,10 @@ using System.Text.RegularExpressions;
 namespace Elsa.Common.Utils
 {
     public static class StringUtil
-    {        
+    {
+
+        private static readonly CultureInfo _czCulture = new CultureInfo("cs-CZ");
+
         private static readonly Dictionary<char, char> s_searchStringReplacements = new Dictionary<char, char>()
                                                                             {
                                                                                     { 'á', 'a' },
@@ -434,9 +437,27 @@ namespace Elsa.Common.Utils
             return dateTime.ToString("yyyy-MM-ddTHH:mm");
         }
 
+        public static string FormatDate_DayNameDdMm(DateTime date)
+        {
+            return date.ToString("dddd d.M", _czCulture);
+        }
+
         public static DateTime ParseUiInputDateTime(string input)
         {
             return DateTime.ParseExact(input, "yyyy-MM-ddTHH:mm", CultureInfo.CurrentCulture);
+        }
+
+        public static string Capitalize(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            return char.ToUpper(text[0]) + text.Substring(1).ToLower();
+        }
+
+        public static string FormatTimeHhMm(DateTime startDt)
+        {
+            return startDt.ToString("HH:mm");
         }
     }
 }

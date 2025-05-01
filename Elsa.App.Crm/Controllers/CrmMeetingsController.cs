@@ -1,7 +1,8 @@
-﻿using Elsa.App.Crm.Entities;
+using Elsa.App.Crm.Entities;
 using Elsa.App.Crm.Model;
 using Elsa.App.Crm.Repositories;
 using Elsa.Commerce.Core;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,12 +25,14 @@ namespace Elsa.App.Crm.Controllers
         private readonly CustomerMeetingsRepository _meetingsRepository;
         private readonly IUserRepository _userRepository;
         private readonly IDatabase _db;
+        private readonly ICustomerRepository _customerRepository;
 
-        public CrmMeetingsController(IWebSession webSession, ILog log, CustomerMeetingsRepository meetingsRepository, IUserRepository userRepository, IDatabase db) : base(webSession, log)
+        public CrmMeetingsController(IWebSession webSession, ILog log, CustomerMeetingsRepository meetingsRepository, IUserRepository userRepository, IDatabase db, ICustomerRepository customerRepository) : base(webSession, log)
         {
             _meetingsRepository = meetingsRepository;
             _userRepository = userRepository;
             _db = db;
+            _customerRepository = customerRepository;
         }
 
         public List<CustomerMeetingViewModel> GetMeetings(int customerId)
@@ -100,7 +104,7 @@ namespace Elsa.App.Crm.Controllers
                 _db.Save(dbRecord);
 
                 // Add missing participants
-                foreach(var uiParticipant in model.Participants)
+                foreach (var uiParticipant in model.Participants)
                     if (!dbRecord.Participants.Any(dbParticipant => dbParticipant.ParticipantId == uiParticipant.UserId))
                     {
                         var bridge = _db.New<IMeetingParticipant>();
@@ -111,8 +115,8 @@ namespace Elsa.App.Crm.Controllers
                     }
 
                 // Remove invalid participants
-                foreach(var dbParticipant in dbRecord.Participants)
-                    if(!model.Participants.Any(uiParticipant => uiParticipant.UserId == dbParticipant.ParticipantId))
+                foreach (var dbParticipant in dbRecord.Participants)
+                    if (!model.Participants.Any(uiParticipant => uiParticipant.UserId == dbParticipant.ParticipantId))
                     {
                         _db.Delete(dbParticipant);
                     }
@@ -121,6 +125,110 @@ namespace Elsa.App.Crm.Controllers
             }
 
             return GetMeetings(model.CustomerId);
+        }
+
+        public MeetingsOverview GetMyMeetingsOverview()
+        {
+            var types = GetMeetingTimeDeciders().ToDictionary(d => d, d => 0);
+
+            var meetings = _meetingsRepository
+                .GetParticipantMeetings(WebSession.User.Id, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(16))
+                .Where(m => m.Status.ActionExpected).ToList();
+
+            var allKeys = types.Keys.ToList();
+
+            foreach (var m in meetings)
+            {
+                if (!m.Status.ActionExpected)
+                    continue;
+
+                var meetDt = m.StartDt;
+
+                foreach (var k in allKeys)
+                {
+                    if (k.from <= meetDt && k.to >= meetDt)
+                    {
+                        types[k] = types[k] + 1;
+                    }
+                }
+            }
+
+            var text = string.Join(", ", types
+                .Where(kv => kv.Value > 0)
+                .OrderBy(kv => kv.Key.order)
+                .Select(kv => $"{kv.Value} {kv.Key.text}"));
+
+            return new MeetingsOverview
+            {
+                Text = text,
+                IsWarning = false
+            };
+        }
+        
+        public FileResult GetIcsFile()
+        {
+            var meetings = _meetingsRepository.GetParticipantMeetings(WebSession.User.Id, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(32));
+
+            var sb = new StringBuilder();
+            sb.AppendLine("BEGIN:VCALENDAR");
+            sb.AppendLine("VERSION:2.0");
+            sb.AppendLine("PRODID:https://robotelsa.com/");
+            sb.AppendLine();
+
+            foreach(var meeting in meetings)
+            {
+                sb.AppendLine("BEGIN:VEVENT");
+                sb.AppendLine($"UID:crmevent{meeting.Id}@robotelsa.com");
+
+                if (!string.IsNullOrWhiteSpace(meeting.Title))
+                    sb.AppendLine($"SUMMARY:{meeting.Title.Replace("\r","").Replace("\n","").Trim()}");
+
+                if (!string.IsNullOrWhiteSpace(meeting.Text))
+                    sb.AppendLine($"DESCRIPTION:{meeting.Text.Replace("\r", "").Replace("\n", "").Trim()}");
+
+                sb.Append("DTSTAMP:").AppendLine(DateTime.Now.ToUniversalTime().ToString("yyyyMMdd'T'HHmmss'Z'"));
+                sb.Append("DTSTART:").AppendLine(meeting.StartDt.ToUniversalTime().ToString("yyyyMMdd'T'HHmmss'Z'"));
+                sb.Append("DTSEND:").AppendLine(meeting.EndDt.ToUniversalTime().ToString("yyyyMMdd'T'HHmmss'Z'"));
+
+                sb.AppendLine("END:VEVENT");
+                sb.AppendLine();
+            }
+
+            sb.AppendLine("END:VCALENDAR");
+
+            return new FileResult("crmElsa.ics", Encoding.UTF8.GetBytes(sb.ToString()), "text/calendar; charset=utf-8");
+        }
+
+        public List<CustomerMeetingViewModel> GetMyMeetings()
+        {
+            var meetings = _meetingsRepository.GetParticipantMeetings(WebSession.User.Id, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(32));
+
+            return MapMeetings(meetings.Where(m => m.Status.ActionExpected).OrderBy(m => m.StartDt)).ToList();
+        }
+
+        private static IEnumerable<(int order, DateTime from, DateTime to, string text, string grpClass)> GetMeetingTimeDeciders()
+        {
+            var now = DateTime.Now;
+            var todayStart = now.Date;
+            var todayEnd = todayStart.AddDays(1);
+            var tomorrowStart = todayEnd;
+            var tomorrowEnd = tomorrowStart.AddDays(1);
+            var startOfThisWeek = todayStart.AddDays(-(int)todayStart.DayOfWeek + (int)DayOfWeek.Monday);
+            var startOfNextWeek = startOfThisWeek.AddDays(7);
+            var endOfNextWeek = startOfNextWeek.AddDays(7);
+
+            int order = 0;
+
+            (int order, DateTime from, DateTime to, string text, string grpClass) Def(DateTime from, DateTime to, string label, string grpClass)
+            {
+                return (order++, from, to, label, grpClass);
+            }
+
+            yield return Def(todayStart, todayEnd, "dnes", "mtGrpToday");
+            yield return Def(tomorrowStart, tomorrowEnd, "zítra", "mtGrpTomorrow");
+            yield return Def(tomorrowEnd, startOfNextWeek, "tento týden", "mtGrpThisWeek");
+            yield return Def(startOfNextWeek, endOfNextWeek, "příští týden", "mtGrpNextWeek");
+            yield return Def(DateTime.MinValue, todayStart, "neuzavřených", "mtGrpPassed");
         }
 
         private T MapStatus<T>(List<IMeetingStatus> index, T vm) where T : StatusVmBase
@@ -139,18 +247,24 @@ namespace Elsa.App.Crm.Controllers
 
         private IEnumerable<CustomerMeetingViewModel> MapMeetings(IEnumerable<IMeeting> records)
         {
+            var deciders = GetMeetingTimeDeciders().ToList();
+
             var userIndex = _userRepository.GetUserIndex();
             var meetingStatusIndex = _meetingsRepository.GetMeetingStatusTypes();
             var actionsIndex = _meetingsRepository.GetMeetingStatusActions(null).OrderBy(a => a.SortOrder).ToList();
             var categoryIndex = _meetingsRepository.GetAllMeetingCategories();
+            var customerIndex = _customerRepository.GetDistributorNameIndex();
 
             foreach (var record in records)
             {
                 var category = categoryIndex.First(c => c.Id == record.MeetingCategoryId);
+                var decider = deciders.FirstOrDefault(d => d.from <= record.StartDt && d.to > record.EndDt);
 
                 var model = new CustomerMeetingViewModel
                 {
                     Id = record.Id,
+                    Day = StringUtil.FormatDate_DayNameDdMm(record.StartDt),
+                    Time = StringUtil.FormatTimeHhMm(record.StartDt),
                     StartDt = StringUtil.FormatDateTimeForUiInput(record.StartDt),
                     EndDt = StringUtil.FormatDateTimeForUiInput(record.EndDt),
                     Title = record.Title,
@@ -161,7 +275,10 @@ namespace Elsa.App.Crm.Controllers
                     CategoryName = category.Title,
                     CategoryIconClass = category.IconClass,
                     CustomerId = record.CustomerId,
-                    ExpectedDurationMinutes = category.ExpectedDurationMinutes
+                    ExpectedDurationMinutes = category.ExpectedDurationMinutes,
+                    CustomerName = customerIndex.TryGetValue(record.CustomerId, out var customerName) ? customerName : "?",
+                    TimeGroup = StringUtil.Capitalize(decider.text),
+                    TimeGroupClass = decider.grpClass
                 };
                                 
                 MapStatus(meetingStatusIndex, model);
@@ -186,5 +303,11 @@ namespace Elsa.App.Crm.Controllers
         {
             return MapMeetings(new[] { meeting }).Single();
         }
+
+        
+
+
+
+
     }
 }

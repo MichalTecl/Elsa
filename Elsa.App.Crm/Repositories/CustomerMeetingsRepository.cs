@@ -1,4 +1,4 @@
-﻿using Elsa.App.Crm.Entities;
+using Elsa.App.Crm.Entities;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
@@ -71,6 +71,21 @@ namespace Elsa.App.Crm.Repositories
                 .Take(1)
                 .Execute()
                 .FirstOrDefault();
+        }
+
+        public List<IMeeting> GetParticipantMeetings(int participantId, DateTime fromDt, DateTime toDt)
+        {
+            var now = DateTime.Now;
+
+            return _database.SelectFrom<IMeeting>()
+                .Join(m => m.Customer)
+                .Join(m => m.Participants)
+                .Join(m => m.Status)
+                .Where(m => m.Participants.Each().ParticipantId == participantId)
+                .Where(m => m.StartDt >= fromDt && m.StartDt <= toDt)
+                .OrderByDesc(m => m.StartDt)
+                .Execute()
+                .ToList();
         }
     }
 }

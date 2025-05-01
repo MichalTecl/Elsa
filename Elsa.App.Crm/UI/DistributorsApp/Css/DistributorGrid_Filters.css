@@ -273,3 +273,34 @@ input[type="radio"]:focus:not(:focus-visible) {
     outline: none;
     box-shadow: none;
 }
+
+#digrTagsFilter {
+    display: flex;
+    align-items: center;
+    position: relative;
+    gap: 6px;
+    margin-right: 10px;
+}
+
+#digrTagsFilterIcon {
+    cursor: pointer;
+    color: #555;
+    font-size: 15px;
+}
+
+#digrTagsFilterInput {
+    display: none;
+    padding: 4px 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    transition: width 0.2s ease, opacity 0.2s ease;
+    width: 160px;
+    opacity: 1;
+}
+
+    #digrTagsFilter:hover #digrTagsFilterInput,
+    #digrTagsFilterInput:not(.hidden) {
+        display: inline-block;
+    }

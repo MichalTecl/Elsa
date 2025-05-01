@@ -1,4 +1,4 @@
-﻿
+
 <div class="panel w1" id="crmWidget">
     <div class="panelHead">
         <div class="panelTitle">CRM</div>
@@ -11,6 +11,11 @@
             <a href="/UI/DistributorsApp/DistributorsAppPage.html">Velkoodběratelé</a>
         </div>
 
+        <div class="actionTile restricted-DistributorsApp" id="meetingsTile">
+            <i class="far fa-calendar-alt actionTileIcon"></i>
+            <a id="meetingsLink" href="/UI/DistributorsApp/MeetingsCalendar.html">...</a>
+        </div>
+
         <div class="actionTile">
             <i class="fas fa-table actionTileIcon"></i>
             <a href="/UI/CrmReporting/CrmReporting.html">Velkoobchod - Reporty</a>
@@ -18,7 +23,15 @@
 
     </div>
     <script>
-    </script>
+</script>
 </div>
 <link href="/UI/Inspector/Inspector.css" rel="stylesheet" />
+<script>
+    lt.element("meetingsTile").attach(function (meetingsLink) {
 
+        const loadOverview = () => lt.api("/crmMeetings/getMyMeetingsOverview").get((t) => meetingsLink.innerHTML = ("Schůzky: " + t.Text).trim());
+
+        setTimeout(loadOverview, 100);
+
+    });
+</script>
