@@ -47,6 +47,69 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.editingExFilter = false;
 
     self.tagFilterVisible = false;
+
+    self.savedFilters = [];
+
+    const receiveSavedFilters = (f) => { self.savedFilters = f; };
+
+    const loadSavedFilters = () => lt.api("/crmCustomFilters/getSavedFilters").get(receiveSavedFilters);
+    loadSavedFilters();
+    
+    self.saveCurrentFilter = (name) => {
+        lt.api("/crmCustomFilters/saveFilter")
+            .query({ "name": name })
+            .body(self.filter)
+            .post(receiveSavedFilters);
+    };
+
+    const visitAllExFilters = (visitor) => {
+        self.filter.ExFilterGroups.forEach(fg => fg.Filters.forEach(f => visitor(f)));
+    };
+
+    const applySavedFilter = (filter) => {
+        self.filter = filter;
+
+        self.editedExFilter = null;
+        self.editingExFilter = false;
+                
+        checkFiltersExpansion();
+
+        let objId = (new Date()).getTime();
+
+        self.filter.ExFilterGroups.forEach(g => {
+            g.id = g.id || (objId++);
+            g.Filters.forEach(f => f.id = f.id || (objId++));
+        });
+
+        visitAllExFilters(f => f.isValid = false);
+        
+        const whenAllFiltersValid = (f) => {
+
+            if (!f.isValid)
+                return;
+
+            let invalidFound = false;
+
+            visitAllExFilters(f => { if (!f.isValid) { invalidFound = true; } });
+
+            if (!invalidFound)
+                self.search();
+        };
+
+        visitAllExFilters(f => {
+            validateExFilter(f, whenAllFiltersValid)
+        });
+
+        self.allTags.forEach(t => {
+            t.isSelected = (self.filter.Tags.indexOf(t.Id) > -1);
+        });
+    };
+
+    self.loadSavedFilter = (id) => {
+        lt.api("/crmCustomFilters/loadFilter")
+            .query({ "id": id })
+            .get(applySavedFilter);
+    };
         
     self.setTagFilter = (text) => {
 
@@ -133,7 +196,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.editFilter = (filterId) => {
                 
         for (const g of self.filter.ExFilterGroups) {
-            const filter = g.filters.find(f => f.id === filterId);
+            const filter = g.Filters.find(f => f.id === filterId);
             if (!!filter) {
                 self.editedExFilter = filter;
                 self.editingExFilter = true;
@@ -151,7 +214,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         if (!group) {
             group = {
                 "id": (new Date()).getTime(),
-                "filters":[]
+                "Filters":[]
             };
             self.filter.ExFilterGroups.push(group);
         }
@@ -163,7 +226,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
             "IsInverted":false,
         };
 
-        group.filters.push(filter);
+        group.Filters.push(filter);
                 
         self.editFilter(filter.id);
         self.changeCurrentExFilterType(null);
@@ -218,12 +281,12 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
         for (let i = 0; i < self.filter.ExFilterGroups.length; i++) {
             const g = self.filter.ExFilterGroups[i];
-            const filterIndex = g.filters.findIndex(f => f.id === filterId);
+            const filterIndex = g.Filters.findIndex(f => f.id === filterId);
 
             if (filterIndex !== -1) {                
-                g.filters.splice(filterIndex, 1);
+                g.Filters.splice(filterIndex, 1);
                                 
-                if (g.filters.length === 0) {
+                if (g.Filters.length === 0) {
                     self.filter.ExFilterGroups.splice(i, 1);
                 }
 
@@ -279,27 +342,31 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.activateTab(self.detailTabs[0].text);
-
-    const updateFilterArray = (array, value, shouldBeIncluded) => {
-
-            var inx = array.indexOf(value);
-
-            if ((inx > -1) == shouldBeIncluded)
-                return;
-
-        if (shouldBeIncluded)
-                array.push(value);
-            else
-                array.splice(inx, 1);
-    };
-
+            
     const filterUpdaters = {
         "direct": (k, v) => self.filter[k] = v,
         "text": (k, v) => self.filter.TextFilter = v,
-        "salesRep": (k, v) => self.filter.SalesRepresentativeId = v,
-        "tag": (k, v) => updateFilterArray(self.filter.Tags, k, v),
+        "salesRep": (k, v) => self.filter.SalesRepresentativeId = v,        
         "customerGroup": (k, v) => self.filter.CustomerGroupTypeId = v,
         "sorter": (k, v) => self.sorterId = v,
+    };
+
+    self.updateTagFilter = (tagId, value) => {
+
+        const indexOfTagId = self.filter.Tags.indexOf(tagId);
+
+        if (!!value) {
+            if (indexOfTagId === -1)
+                self.filter.Tags.push(tagId);
+        } else {
+            if (indexOfTagId > -1)
+                self.filter.Tags.splice(indexOfTagId, 1);
+        }
+
+        const tagModel = self.allTags.find(t => t.Id == tagId);
+        tagModel.isSelected = value;
+
+        self.search();
     };
 
     self.load = () => {
@@ -698,6 +765,10 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     self.getAllTags = (qry, callback) => {
         self.withMetadata((md) => callback(md.CustomerTagTypes.sort((a, b) => b.Priority - a.Priority).map(i => i.Name)));
+    };
+
+    self.getSavedFilterNames = (qry, callback) => {
+        callback(self.savedFilters.map(f => f.Name));
     };
 
     self.closeDetail = () => {

@@ -1,7 +1,9 @@
+using Elsa.App.Crm.Entities;
 using Elsa.App.Crm.Model;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.DbUtils;
+using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Robowire.RobOrm.Core;
 using System;
@@ -20,13 +22,15 @@ namespace Elsa.App.Crm.Repositories
         private readonly ICache _cache;
         private readonly IProcedureLister _procedureLister;
         private readonly ICustomerRepository _customerRepository;
+        private readonly ISession _session;
 
-        public DistributorFiltersRepository(IDatabase db, ICache cache, IProcedureLister procedureLister, ICustomerRepository customerRepository)
+        public DistributorFiltersRepository(IDatabase db, ICache cache, IProcedureLister procedureLister, ICustomerRepository customerRepository, ISession session)
         {
             _db = db;
             _cache = cache;
             _procedureLister = procedureLister;
             _customerRepository = customerRepository;
+            _session = session;
         }
 
         public List<DistributorFilterModel> GetFilters()
@@ -93,6 +97,52 @@ namespace Elsa.App.Crm.Repositories
                     return result;
                 });
         }
+
+        public List<ICustomDistributorFilter> GetCustomFilters()
+        {
+            return _cache.ReadThrough(GetSavedFiltersCacheKey(),
+                TimeSpan.FromHours(1),
+                () => _db.SelectFrom<ICustomDistributorFilter>()
+                .Where(f => f.AuthorId == _session.User.Id)
+                .Execute()
+                .ToList());
+        }
+
+        public void DeleteCustomFilter(int id)
+        {
+            var filter = GetCustomFilters().FirstOrDefault(f => f.Id == id).Ensure();
+
+            _db.Delete(filter);
+            _cache.Remove(GetSavedFiltersCacheKey());
+        }
+
+        public void SaveCustomFilter(int? id, string name, string jsonData)
+        {
+            var sameName = GetCustomFilters().FirstOrDefault(f => f.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+            if (sameName != null && sameName.Id != id)
+                throw new ArgumentException($"Pod stejným názvem už byl uložen jiný filtr");
+
+            ICustomDistributorFilter record = null;
+            if (id != null)
+            {
+                record = GetCustomFilters().FirstOrDefault(f => f.Id == id).Ensure();
+            }
+
+            record = record ?? _db.New<ICustomDistributorFilter>(f =>
+            {
+                f.Created = DateTime.Now;
+                f.AuthorId = _session.User.Id;                
+            });
+
+            record.Name = name;
+            record.JsonData = jsonData;
+
+            _db.Save(record);
+
+            _cache.Remove(GetSavedFiltersCacheKey());
+        }
+
+        private string GetSavedFiltersCacheKey() => $"savedCrmFilters_{_session.User.Id}";
 
         private HashSet<int> GetAllUnfilteredDistributorIds()
         {

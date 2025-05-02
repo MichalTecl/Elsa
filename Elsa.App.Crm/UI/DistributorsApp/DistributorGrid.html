@@ -2,9 +2,23 @@
     <div id="digrGridCont" data-bind="class.hidden:isDetailOpen">
         <div id="digrFilters">
             <div class="digrFiltersRow">
+                <div class="digrCustomFiltersRow">
+                    <div class="digrSaveLoadWrap">
+                        <div class="digrSavedFilterLoadPanel">
+                            <div class="autocomplete" id="savedFiltersPickerContainer">
+                                <input type="text" id="savedFiltersPicker" event-bind="change:loadSavedFilter(this.value)" />
+                            </div>
+                            <i class="far fa-folder-open faButtonNew" event-bind="click:VM.showSavedFiltersPicker()"></i>
+                        </div>
+
+                        <i class="far fa-save faButtonNew" event-bind="click:saveCurrentFilter()"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="digrFiltersRow">
                 <div class="digrFiltersSection" id="digrFilterText">
                     <label>Text</label>
-                    <input type="text" id="digrTextFilter" event-bind="change:setFilter('text', '', this.value)" />
+                    <input type="text" id="digrTextFilter" data-bind="value:filter.TextFilter" event-bind="change:setFilter('text', '', this.value)" />
                 </div>
             </div>
 
@@ -22,13 +36,14 @@
                     </div>
                     <div class="digrTagFilters" data-bind="itemsSource:allTags" data-key="Id">
                         <div class="lt-template digrFilterTag" data-bind="class.hidden:isHidden">
-                            <input type="checkbox" event-bind="change:setFilter('tag', Id, this.checked)" />
+                            <input type="checkbox" data-bind="checked:isSelected" event-bind="change:updateTagFilter(Id, this.checked)" />
                             <label data-bind="text:Name"></label>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!--
             <div class="digrFiltersRow">
                 <div class="digrFiltersSection" id="digrFilterGroups">
                     <label>Kategorie</label>
@@ -51,6 +66,7 @@
                     </select>
                 </div>
             </div>
+            -->
 
             <div class="digrFiltersRow digrExFiltersRow">
                 <div class="digrExFiltersExpander">
@@ -65,7 +81,7 @@
                 <button id="butSearch" event-bind="click:VM.search()"><i class="fas fa-search"></i></button>
 
                 <div class="digrFiltersSection" id="digrFilterIncludeDeleted">
-                    <input type="checkbox" class="digrFilterIncludeDisabledCb" event-bind="change:setFilter('direct', 'IncludeDisabled', this.checked)" />
+                    <input type="checkbox" class="digrFilterIncludeDisabledCb" data-bind="checked:filter.IncludeDisabled" event-bind="change:setFilter('direct', 'IncludeDisabled', this.checked)" />
                     <label>Zahrnout zrušené</label>
                 </div>
 
@@ -149,7 +165,7 @@
 <script>
     lt.element("digrMainCont")
         .withModel("app.Distributors.vm")
-        .attach(function (digrTextFilter, bulkTaggingTagFinder) {
+        .attach(function (digrTextFilter, bulkTaggingTagFinder, savedFiltersPickerContainer) {
                         
             digrTextFilter.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
@@ -164,6 +180,7 @@
             setTimeout(() => digrTextFilter.focus(), 10);
 
             this.setFilter = (type, key, value) => app.Distributors.vm.updateFilter(type, key, value);
+            this.updateTagFilter = (id, checked) => app.Distributors.vm.updateTagFilter(id, checked);
 
             this.openDetail = (customerId) => {
                 window.location.hash = 'customerId=' + customerId;
@@ -197,6 +214,20 @@
 
             this.closeBulkTagging = () => app.Distributors.vm.closeBulkTagging();
 
+            this.saveCurrentFilter = () => {
+                const name = window.prompt("Zvolte název, pod kterým se filtr uloží", app.Distributors.vm.filter.Name || "");
+
+                if (!name)
+                    return;
+
+                app.Distributors.vm.saveCurrentFilter(name);
+            };
+
+            this.bind(function (savedFilters) {
+                app.ui.autosuggest(savedFiltersPickerContainer, app.Distributors.vm.getSavedFilterNames);
+            });
+                        
+            this.loadSavedFilter = (name) => alert(name);
         });
 </script>
 

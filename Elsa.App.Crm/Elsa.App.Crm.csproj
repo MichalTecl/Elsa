@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\CrmCustomFiltersController.cs" />
     <Compile Include="Controllers\CrmDistributorsController.cs" />
     <Compile Include="Controllers\CrmMeetingsController.cs" />
     <Compile Include="Controllers\CrmMetadataController.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="CrmUserRights.cs" />
     <Compile Include="CustomersController.cs" />
     <Compile Include="DataReporting\DatasetLoader.cs" />
+    <Compile Include="Entities\ICustomDistributorFilter.cs" />
     <Compile Include="Entities\ICustomerGroupMapping.cs" />
     <Compile Include="Entities\ICustomerStore.cs" />
     <Compile Include="Entities\ICustomerTagAssignment.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Entities\ISalesRepCustomer.cs" />
     <Compile Include="Entities\ISalesRepresentative.cs" />
     <Compile Include="Model\CrmMetadata.cs" />
+    <Compile Include="Model\CustomFilterInfo.cs" />
     <Compile Include="Model\DistributorChangeRequestModel.cs" />
     <Compile Include="Model\DistributorDetailViewModel.cs" />
     <Compile Include="Model\DistributorFilterModel.cs" />
