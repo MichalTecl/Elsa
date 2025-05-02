@@ -32,11 +32,18 @@
         <div class="filterPopupCard">
             <div class="digrFdRow digrFdHead">
                 <label>Typ filtru</label>
-                <select id="filterTypeSelect" data-bind="itemsSource:allExFilters;value:editedExFilter.Title" data-key="Title" event-bind="change:onTypeChanged(this.value)">
-                    <option class="lt-template digrDetAddresTypeOption" data-bind="text:Title; value:Title"></option>
-                </select>
+                <div class="fakeDropdowWrap">
+                    <div class="invertedFilterDropdownLabel" data-bind="class!.hidden:editedExFilter.Inverted">Ne</div>
+                    <select id="filterTypeSelect" data-bind="itemsSource:allExFilters;value:editedExFilter.Title" data-key="Title" event-bind="change:onTypeChanged(this.value)">
+                        <option class="lt-template digrDetAddresTypeOption" data-bind="text:Title; value:Title"></option>
+                    </select>
+                </div>
             </div>
             <div class="digrFdRow digrFdDescription"data-bind="text:editedExFilter.Description">
+            </div>
+            <div class="digrFdRow digrFdInvertCbWrap">
+                <input type="checkbox" data-bind="checked:editedExFilter.Inverted" event-bind="change:changeFilterInverted(editedExFilter, this.checked)" />
+                <label>Invertovat</label>
             </div>
             <div class="digrFdRow digrFdParameters">
                 <div data-bind="itemsSource:editedExFilter.Parameters" data-key="Name">
@@ -63,6 +70,8 @@
             this.addFilter = (groupId) => app.Distributors.vm.addFilter(groupId);
 
             this.onTypeChanged = (typeTitle) => app.Distributors.vm.changeCurrentExFilterType(typeTitle);
+
+            this.changeFilterInverted = (filter, inverted) => app.Distributors.vm.changeFilterInverted(filter, inverted);
         });
 </script>
 

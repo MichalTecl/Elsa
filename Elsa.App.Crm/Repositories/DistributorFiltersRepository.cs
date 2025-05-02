@@ -1,4 +1,5 @@
 using Elsa.App.Crm.Model;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.DbUtils;
 using Elsa.Common.Utils;
@@ -18,12 +19,14 @@ namespace Elsa.App.Crm.Repositories
         private readonly IDatabase _db;
         private readonly ICache _cache;
         private readonly IProcedureLister _procedureLister;
+        private readonly ICustomerRepository _customerRepository;
 
-        public DistributorFiltersRepository(IDatabase db, ICache cache, IProcedureLister procedureLister)
+        public DistributorFiltersRepository(IDatabase db, ICache cache, IProcedureLister procedureLister, ICustomerRepository customerRepository)
         {
             _db = db;
             _cache = cache;
             _procedureLister = procedureLister;
+            _customerRepository = customerRepository;
         }
 
         public List<DistributorFilterModel> GetFilters()
@@ -69,6 +72,12 @@ namespace Elsa.App.Crm.Repositories
 
                     var ids = new HashSet<int>(call.MapRows<int>(dr => dr.GetInt32(0)));
 
+                    if (clientData.Inverted)
+                    {
+                        var allIds = GetAllUnfilteredDistributorIds();
+                        ids = new HashSet<int>(allIds.Where(i => !ids.Contains(i)));
+                    }
+
                     var result = new FilterExecutionResult { Ids = ids };
 
                     if (filter.HasFilterTextParameter)
@@ -80,9 +89,16 @@ namespace Elsa.App.Crm.Repositories
                     {
                         result.FilterText = $"{clientData.Title} {string.Join(",", clientData.Parameters.Select(p => StringUtil.Limit(p.Value, 20, "...")))}";
                     }
-
+                                        
                     return result;
                 });
+        }
+
+        private HashSet<int> GetAllUnfilteredDistributorIds()
+        {
+            return _cache.ReadThrough("AllUnfilteredDistributors", TimeSpan.FromMinutes(5), () => {
+                return _customerRepository.GetDistributorNameIndex().Keys.ToHashSet();
+            });
         }
     }
 }

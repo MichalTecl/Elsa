@@ -38,6 +38,9 @@ namespace Elsa.App.Crm.Model
 
         public string Title { get; set; }
         public string Description { get; set; }
+
+        public bool Inverted { get; set; }
+
         public List<DistributorFilterParameter> Parameters { get; } = new List<DistributorFilterParameter>();
 
         public bool HasFilterTextParameter { get; set; }
@@ -46,7 +49,7 @@ namespace Elsa.App.Crm.Model
         {
             var paramStr = string.Join(",", Parameters.Select(p => $"{p.Name}:{p.Value}"));
 
-            return $"crmfilter:{Title}_{ProcedureName}({paramStr})";
+            return $"crmfilter:{Title}_{ProcedureName}{(Inverted ? "!" : "")}({paramStr})";
         }
     }
 

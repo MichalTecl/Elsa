@@ -57,6 +57,14 @@ app.Distributors.VM = app.Distributors.VM || function(){
         self.allTags.forEach(t => t.isHidden = !matcher.match(t.Name, true));            
     };
 
+    self.changeFilterInverted = (filter, inverted) => {
+        filter.Inverted = inverted;
+    };
+
+    self.toggleExFilterInverted = (filter) => {
+        self.changeFilterInverted(!filter.Inverted);
+    };
+        
     self.openBulkTagging = () => {
         self.bulkTaggingOpen = true;
     };
@@ -151,7 +159,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
         const filter = {
             "id": (new Date()).getTime(),
             "isValid": false,
-            "error": "Nenastaveno"
+            "error": "Nenastaveno",
+            "IsInverted":false,
         };
 
         group.filters.push(filter);
@@ -168,6 +177,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         const template = JSON.parse(JSON.stringify(templateFilter));
 
         Object.assign(self.editedExFilter, template);
+        self.editedExFilter.IsInverted = false;
 
         self.editedExFilter.Parameters.forEach(p => p.setValue = (v) => p.Value = v);
     };
@@ -244,7 +254,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 filter.isValid = r.IsValid;
                 filter.error = r.ErrorMessage;
                 filter.recordsCount = r.NumberOfRecords;
-                filter.text = r.FilterText.length < 35 ? r.FilterText : filter.Title;
+                filter.text = (filter.Inverted ? "Ne" : "") + (r.FilterText.length < 35 ? r.FilterText : filter.Title);
 
                 if(!!callback)
                     callback(filter);
