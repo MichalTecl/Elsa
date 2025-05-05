@@ -95,9 +95,16 @@ namespace Elsa.App.Crm.Repositories
             return GetTagTypes(true, acrossUsers).Where(tt => assignments.Contains(tt.Id)).ToList();
         }
 
-        public int Assign(int[] customerIds, int tagTypeId)
+        /// <summary>
+        /// returns list of Ids where new assignment was created
+        /// </summary>
+        /// <param name="customerIds"></param>
+        /// <param name="tagTypeId"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public List<int> Assign(int[] customerIds, int tagTypeId)
         {
-            var result = 0;
+            var result = new List<int>(customerIds.Length);
 
             using (var tx = _database.OpenTransaction())
             {
@@ -118,7 +125,7 @@ namespace Elsa.App.Crm.Repositories
 
                     _database.Save(rec);
 
-                    result++;
+                    result.Add(customerId);
                 }
 
                 tx.Commit();
@@ -129,9 +136,15 @@ namespace Elsa.App.Crm.Repositories
             return result;
         }
                 
-        public int Unassign(int[] customerIds, int tagTypeId)
+        /// <summary>
+        /// returns list of customerIds where existing assignment was removed
+        /// </summary>
+        /// <param name="customerIds"></param>
+        /// <param name="tagTypeId"></param>
+        /// <returns></returns>
+        public List<int> Unassign(int[] customerIds, int tagTypeId)
         {
-            var result = 0;
+            var result = new List<int>(customerIds.Length);
 
             var assignments = GetAllTagAssignments();
 
@@ -142,10 +155,12 @@ namespace Elsa.App.Crm.Repositories
 
                 var assignment = _database.SelectFrom<ICustomerTagAssignment>().Where(t => t.CustomerId == customerId && t.TagTypeId == tagTypeId).Take(1).Execute().Single();
                 _database.Delete(assignment);
-                result++;
+                
+                result.Add(assignment.CustomerId);
             }
             
             _cache.Remove(AssignmentsCacheKey);
+
             return result;
         }
 

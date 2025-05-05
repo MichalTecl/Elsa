@@ -1,3 +1,4 @@
+using Elsa.App.Crm.CrmApp;
 using Elsa.App.Crm.DataReporting;
 using Elsa.App.Crm.Repositories;
 using Robowire;
@@ -19,6 +20,7 @@ namespace Elsa.App.Crm
             setup.For<CustomerTagRepository>().Use<CustomerTagRepository>();
             setup.For<DistributorsRepository>().Use<DistributorsRepository>();
             setup.For<DistributorFiltersRepository>().Use<DistributorFiltersRepository>();
+            setup.For<CrmRobotExecutor>().Use<CrmRobotExecutor>();
         }
     }
 }

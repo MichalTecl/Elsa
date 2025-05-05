@@ -42,6 +42,7 @@ using Elsa.Jobs.AutomaticQueries;
 using Elsa.Jobs.BuildStoresMap;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.Common.EntityChangeProcessing;
+using Elsa.Jobs.CrmRobots;
 using Elsa.Jobs.DbBackup;
 using Elsa.Jobs.ExternalSystemsDataPush;
 using Elsa.Jobs.FinancialReportsGeneration;
@@ -129,6 +130,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(EntityCommentsRegistry).Assembly);
                     s.ScanAssembly(typeof(EshopMappingRegistry).Assembly);
                     s.ScanAssembly(typeof(DbUtilsRegistry).Assembly);
+                    s.ScanAssembly(typeof(CrmRobotsRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 

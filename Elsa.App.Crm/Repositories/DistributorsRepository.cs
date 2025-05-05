@@ -228,7 +228,7 @@ namespace Elsa.App.Crm.Repositories
             _database.Save(store);
         }
 
-        private List<DistributorGridRowModel> GetAllDistributors()
+        public List<DistributorGridRowModel> GetAllDistributors()
         {
             return _database.Sql().Call("LoadAllDistributors")
                 .WithParam("@projectId", _session.Project.Id)

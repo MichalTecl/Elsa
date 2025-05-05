@@ -163,9 +163,9 @@ namespace Elsa.App.Crm.Controllers
             var ids = _distributorsRepository.GetDistributors(filter, null, null, null, true).Select(d => d.Id).ToArray();
 
             if (set)
-                return _tagRepo.Assign(ids, tag.Id);
+                return _tagRepo.Assign(ids, tag.Id).Count;
             else
-                return _tagRepo.Unassign(ids, tag.Id);            
+                return _tagRepo.Unassign(ids, tag.Id).Count;            
         }
 
         public int CountFilterResults(DistributorGridFilter filter)

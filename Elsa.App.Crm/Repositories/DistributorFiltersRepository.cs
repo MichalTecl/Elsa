@@ -5,12 +5,14 @@ using Elsa.Common.Caching;
 using Elsa.Common.DbUtils;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Windows.Input;
 
 namespace Elsa.App.Crm.Repositories
 {
@@ -144,11 +146,49 @@ namespace Elsa.App.Crm.Repositories
 
         private string GetSavedFiltersCacheKey() => $"savedCrmFilters_{_session.User.Id}";
 
+        public List<ICrmRobot> GetAllRobots(bool activeOnly)
+        {
+            return _cache.ReadThrough("crmRobots", TimeSpan.FromHours(1), () => {
+
+                var query = _db.SelectFrom<ICrmRobot>();
+
+                if (activeOnly) {
+                    var now = DateTime.Now;
+
+                    query = query
+                    .Where(r => r.ActiveFrom <= now)
+                    .Where(r => r.ActiveTo == null || r.ActiveTo >= now);
+                }
+
+                return query.Execute().ToList();
+            });
+        }
+
+        public ICrmRobot SaveRobot(int? id, Action<ICrmRobot> setup)
+        {
+            var record = (id == null 
+                            ? _db.New<ICrmRobot>() 
+                            : _db.SelectFrom<ICrmRobot>()
+                                .Where(r => r.Id == id)
+                                .Execute()
+                                .FirstOrDefault())
+                         .Ensure();
+
+            setup(record);
+
+            _db.Save(record);
+
+            _cache.Remove("crmRobots");
+
+            return record;
+        }
+
         private HashSet<int> GetAllUnfilteredDistributorIds()
         {
             return _cache.ReadThrough("AllUnfilteredDistributors", TimeSpan.FromMinutes(5), () => {
                 return _customerRepository.GetDistributorNameIndex().Keys.ToHashSet();
             });
         }
+        
     }
 }

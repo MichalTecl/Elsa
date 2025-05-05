@@ -59,6 +59,7 @@
     <Compile Include="CrmUserRights.cs" />
     <Compile Include="CustomersController.cs" />
     <Compile Include="DataReporting\DatasetLoader.cs" />
+    <Compile Include="Entities\ICrmRobot.cs" />
     <Compile Include="Entities\ICustomDistributorFilter.cs" />
     <Compile Include="Entities\ICustomerGroupMapping.cs" />
     <Compile Include="Entities\ICustomerStore.cs" />
@@ -195,7 +196,9 @@
     <Content Include="UI\DistributorsApp\Tabs\DistributorOrders.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Jobs\CrmRobotsRunner\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
