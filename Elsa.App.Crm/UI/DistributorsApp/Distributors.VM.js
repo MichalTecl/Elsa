@@ -110,6 +110,10 @@ app.Distributors.VM = app.Distributors.VM || function(){
             .query({ "id": id })
             .get(applySavedFilter);
     };
+
+    self.importSavedFilter = (filter) => {
+        applySavedFilter(filter);
+    };
         
     self.setTagFilter = (text) => {
 

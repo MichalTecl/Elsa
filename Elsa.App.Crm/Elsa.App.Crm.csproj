@@ -55,10 +55,13 @@
     <Compile Include="Controllers\CrmDistributorsController.cs" />
     <Compile Include="Controllers\CrmMeetingsController.cs" />
     <Compile Include="Controllers\CrmMetadataController.cs" />
+    <Compile Include="Controllers\CrmRobotsController.cs" />
+    <Compile Include="CrmApp\CrmRobotExecutor.cs" />
     <Compile Include="CrmApp\CustomerDataFacade.cs" />
     <Compile Include="CrmUserRights.cs" />
-    <Compile Include="CustomersController.cs" />
+    <Compile Include="Controllers\CustomersController.cs" />
     <Compile Include="DataReporting\DatasetLoader.cs" />
+    <Compile Include="Entities\CrmEntitiesExtensions.cs" />
     <Compile Include="Entities\ICrmRobot.cs" />
     <Compile Include="Entities\ICustomDistributorFilter.cs" />
     <Compile Include="Entities\ICustomerGroupMapping.cs" />
@@ -73,6 +76,7 @@
     <Compile Include="Entities\ISalesRepCustomer.cs" />
     <Compile Include="Entities\ISalesRepresentative.cs" />
     <Compile Include="Model\CrmMetadata.cs" />
+    <Compile Include="Model\CrmRobotModel.cs" />
     <Compile Include="Model\CustomFilterInfo.cs" />
     <Compile Include="Model\DistributorChangeRequestModel.cs" />
     <Compile Include="Model\DistributorDetailViewModel.cs" />
@@ -168,6 +172,9 @@
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
+    <Content Include="UI\DistributorsApp\CrmRobots.VM.js" />
+    <Content Include="UI\DistributorsApp\RobotSetupPopup.html" />
+    <Content Include="UI\DistributorsApp\RobotsPopup.html" />
     <Content Include="UI\DistributorsApp\Css\CustomerTagsEditor.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Panels.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Main.css" />
@@ -177,6 +184,8 @@
     <Content Include="UI\DistributorsApp\Css\DistributorGrid_grid.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorTagStyles.css" />
     <Content Include="UI\DistributorsApp\Css\MeetingsCalendar.css" />
+    <Content Include="UI\DistributorsApp\Css\RobotsPopup.css" />
+    <Content Include="UI\DistributorsApp\Css\RobotsSetupPopup.css" />
     <Content Include="UI\DistributorsApp\CustomerTagsEditor.html" />
     <Content Include="UI\DistributorsApp\DistributorDetailView.html" />
     <Content Include="UI\DistributorsApp\DistributorGrid.html" />
@@ -196,9 +205,7 @@
     <Content Include="UI\DistributorsApp\Tabs\DistributorOrders.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Jobs\CrmRobotsRunner\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -8,8 +8,7 @@ namespace Elsa.Jobs.CrmRobots
     public class CrmRobotsRegistry : IRobowireRegistry
     {
         public void Setup(IContainerSetup setup)
-        {
-            throw new NotImplementedException();
+        {            
         }
     }
 }

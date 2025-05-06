@@ -150,7 +150,9 @@ namespace Elsa.App.Crm.Repositories
         {
             return _cache.ReadThrough("crmRobots", TimeSpan.FromHours(1), () => {
 
-                var query = _db.SelectFrom<ICrmRobot>();
+                var query = _db.SelectFrom<ICrmRobot>()
+                .Join(r => r.Author)
+                .OrderBy(r => r.SequenceOrder);
 
                 if (activeOnly) {
                     var now = DateTime.Now;
@@ -166,17 +168,42 @@ namespace Elsa.App.Crm.Repositories
 
         public ICrmRobot SaveRobot(int? id, Action<ICrmRobot> setup)
         {
-            var record = (id == null 
-                            ? _db.New<ICrmRobot>() 
+            ICrmRobot record;
+            using (var tx = _db.OpenTransaction())
+            {
+                record = (id == null
+                            ? _db.New<ICrmRobot>()
                             : _db.SelectFrom<ICrmRobot>()
                                 .Where(r => r.Id == id)
                                 .Execute()
                                 .FirstOrDefault())
-                         .Ensure();
+                            .Ensure();
 
-            setup(record);
+                if (record.AuthorId == default)
+                    record.AuthorId = _session.User.Id;
 
-            _db.Save(record);
+                if (record.ActiveFrom == default)
+                    record.ActiveFrom = DateTime.Now;
+
+                if (record.Created == default)
+                    record.Created = DateTime.Now;
+
+                if (record.SequenceOrder == default)
+                {
+                    var all = GetAllRobots(false);
+                    if (all.Count > 0)
+                        record.SequenceOrder = all.Max(r => r.SequenceOrder) + 1;
+                }
+
+                record.Description = record.Description ?? string.Empty;
+                record.NotifyMailList = record.NotifyMailList ?? string.Empty;
+
+                setup(record);
+
+                _db.Save(record);
+
+                tx.Commit();
+            }
 
             _cache.Remove("crmRobots");
 

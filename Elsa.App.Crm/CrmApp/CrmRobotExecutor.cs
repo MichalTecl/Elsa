@@ -34,12 +34,10 @@ namespace Elsa.App.Crm.CrmApp
             _customerTags = customerTags;
         }
 
-        public List<RobotExecutionResult> Execute(int robotId)
+        public void Execute(int robotId, List<RobotExecutionResult> target)
         {
             var tagIndex = _customerTags.GetTagTypes(false, false).ToDictionary(t => t.Id, t => t);
-
-            var result = new List<RobotExecutionResult>();
-                        
+                                    
             _log.Info($"Loading robot data by id={robotId}");
             var robot = _filtersRepository.GetAllRobots(false).FirstOrDefault(r => r.Id == robotId).Ensure();
 
@@ -55,8 +53,14 @@ namespace Elsa.App.Crm.CrmApp
 
             var allDistributors = _distributorsRepository.GetAllDistributors();
 
-            void trySetTag(int customerId, int tagTypeId, bool remove)
+            int removalsCount = 0;
+            int addsCount = 0;
+
+            void trySetTag(int customerId, int? tagTypeId, bool remove)
             {
+                if (tagTypeId == null)
+                    return;
+
                 var distributor = allDistributors.FirstOrDefault(d => d.Id == customerId);
                 if (distributor == null)
                 {
@@ -64,29 +68,36 @@ namespace Elsa.App.Crm.CrmApp
                     return;
                 }
                                 
-                if(distributor.TagTypeIds.Contains(tagTypeId) != remove)
+                if(distributor.TagTypeIds.Contains(tagTypeId.Value) != remove)
                 {
                     return;
                 }
 
-                if (!tagIndex.TryGetValue(tagTypeId, out var tagModel))
+                if (!tagIndex.TryGetValue(tagTypeId.Value, out var tagModel))
                     throw new InvalidOperationException($"Invalid tag type id '{tagTypeId}'");
 
-                result.Add(new RobotExecutionResult 
-                {
-                    RobotId = robotId,
-                    RobotName = robot.Name,
-                    CustomerName = distributor.Name,
-                    TagTypeName = tagModel.Name,
-                    Added = !remove
-                });
+                var result = target.FirstOrDefault(t => t.RobotId == robot.Id && t.TagTypeId == tagTypeId);
 
+                if(result == null)
+                {
+                    result = new RobotExecutionResult(robot.Id, tagTypeId.Value);
+                    target.Add(result);
+                }
+                                
                 _log.Info($"Going to {(remove ? "un" : "")}assing tag TagTypeId={tagTypeId}, Name='{tagModel.Name}' {(remove ? "from" : "to")} customer Id={distributor.Id} Name={distributor.Name}");
 
                 if (remove)
-                    _customerTags.Unassign(new[] { distributor.Id }, tagTypeId);
+                {
+                    _customerTags.Unassign(new[] { distributor.Id }, tagTypeId.Value);
+                    result.RemovedCustomers.Add(distributor.Id);
+                    removalsCount++;
+                }
                 else
-                    _customerTags.Assign(new[] { distributor.Id }, tagTypeId);
+                {
+                    _customerTags.Assign(new[] { distributor.Id }, tagTypeId.Value);
+                    result.AddedCustomers.Add(distributor.Id);
+                    addsCount++;
+                }
             }
                         
             foreach (var distributor in allDistributors)
@@ -94,45 +105,32 @@ namespace Elsa.App.Crm.CrmApp
                 if (filterMatchingIds.Contains(distributor.Id))
                 {
                     // Match
-
-                    if (robot.FilterMatchSetsTag)
-                    {
-                        trySetTag(distributor.Id, robot.TagTypeId, false);
-                    }
-
-                    if (robot.FilterMatchRemovesTag)
-                    {
-                        trySetTag(distributor.Id, robot.TagTypeId, true);
-                    }                  
+                    trySetTag(distributor.Id, robot.FilterMatchSetsTagTypeId, false);
+                    trySetTag(distributor.Id, robot.FilterMatchRemovesTagTypeId, true);
                 }
                 else
                 {
                     // Unmatch
-
-                    if (robot.FilterUnmatchSetsTag)
-                    {
-                        trySetTag(distributor.Id, robot.TagTypeId, false);
-                    }
-
-                    if (robot.FilterUnmatchRemovesTags)
-                    {
-                        trySetTag(distributor.Id, robot.TagTypeId, true);
-                    }
+                    trySetTag(distributor.Id, robot.FilterUnmatchSetsTagTypeId, false);                    
+                    trySetTag(distributor.Id, robot.FilterUnmatchRemovesTagTypeId, true);
                 }
             }
 
-            _log.Info($"Robot {robot.Name} executed, result = {result.Count} changes");
-
-            return result;
+            _log.Info($"Robot {robot.Name} executed, {addsCount} customer-tag pair(s) assigned; {removalsCount} customer-tag pair(s) unassigned");
         }
 
         public class RobotExecutionResult
         {
-            public int RobotId { get; set; }
-            public string RobotName { get; set; }
-            public string CustomerName { get; set; }
-            public string TagTypeName { get; set; }
-            public bool Added { get; set; }
+            public RobotExecutionResult(int robotId, int tagTypeId)
+            {
+                RobotId = robotId;
+                TagTypeId = tagTypeId;
+            }
+
+            public int RobotId { get; }
+            public int TagTypeId { get; }
+            public List<int> AddedCustomers { get; } = new List<int>();
+            public List<int> RemovedCustomers { get; } = new List<int>();
         }
 
     }

@@ -14,4 +14,8 @@
     <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="SQL\" />
+  </ItemGroup>
+
 </Project>

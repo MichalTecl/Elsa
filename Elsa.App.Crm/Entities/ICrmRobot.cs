@@ -13,15 +13,25 @@ namespace Elsa.App.Crm.Entities
     {
         [NVarchar(1000, false)]
         string Description { get; set; }        
-        int TagTypeId { get; set; }
-        ICustomerTagType CustomerTagType { get; }
-        bool FilterMatchSetsTag { get; set; }
-        bool FilterUnmatchRemovesTags { get; set; }
-        bool FilterMatchRemovesTag {  get; set; }
-        bool FilterUnmatchSetsTag { get; set; }
+
+        int? FilterMatchSetsTagTypeId { get; set; }
+        ICustomerTagType FilterMatchSetsTagType { get; }
+
+        int? FilterUnmatchSetsTagTypeId { get; set; }
+        ICustomerTagType FilterUnmatchSetsTagType { get; }
+
+        int? FilterMatchRemovesTagTypeId { get; set; }
+        ICustomerTagType FilterMatchRemovesTagType { get; }
+
+        int? FilterUnmatchRemovesTagTypeId { get; set; }
+        ICustomerTagType FilterUnmatchRemovesTagType { get; }
+
         [NVarchar(1000, true)]
         string NotifyMailList { get; set; }
+
         DateTime ActiveFrom { get; set; }
         DateTime? ActiveTo { get; set; }
+
+        int SequenceOrder { get; set; }
     }
 }
