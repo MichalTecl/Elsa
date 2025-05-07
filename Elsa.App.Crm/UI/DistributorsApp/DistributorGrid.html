@@ -3,16 +3,16 @@
         <div id="digrFilters">
             <div class="digrFiltersRow">
                 <div class="digrCustomFiltersRow">
-                    <div class="digrSaveLoadWrap">
-                        <div class="digrSavedFilterLoadPanel">
-                            <div class="autocomplete" id="savedFiltersPickerContainer">
-                                <input type="text" id="savedFiltersPicker" event-bind="change:loadSavedFilter(this.value)" />
-                            </div>
-                            <i class="far fa-folder-open faButtonNew" event-bind="click:VM.showSavedFiltersPicker()"></i>
-                        </div>
-
+                    <div class="digrSavedFiltersButtonsWrap">
                         <i class="far fa-save faButtonNew" event-bind="click:saveCurrentFilter()"></i>
+                        <i class="far fa-folder-open faButtonNew" event-bind="click:VM.showSavedFiltersPicker()"></i>
                     </div>
+                    <div class="digrSavedFiltersFlatListWrap">
+                        <div class="digrSavedFiltersFlatList" data-bind="itemsSource:savedFilters" data-key="Id">
+                            <div class="lt-template digrSavedFiltersFlatListItem" data-bind="text:Name; class.digrSavedFiltersFlatListItemActive:isActive" event-bind="click:loadSavedFilter(Id)"></div> 
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
             <div class="digrFiltersRow">
@@ -42,32 +42,7 @@
                     </div>
                 </div>
             </div>
-
-            <!--
-            <div class="digrFiltersRow">
-                <div class="digrFiltersSection" id="digrFilterGroups">
-                    <label>Kategorie</label>
-                    <select class="digrCustomerGroupFilters" data-bind="itemsSource:allCustomerGroups" data-key="Id" event-bind="change:setFilter('customerGroup', '', this.value)">
-                        <option class="lt-template digrCustomerGroupFilterOption" data-bind="text:ErpGroupName; value:Id"></option>
-                    </select>
-                </div>
-
-                <div class="digrFiltersSection" id="digrFilterSalesRep">
-                    <label>OZ</label>
-                    <select class="digrSrepSelect" data-bind="itemsSource:allSalesReps" data-key="Id" event-bind="change:setFilter('salesRep', '', this.value)">
-                        <option class="lt-template digrSalesRepSelectOption" data-bind="text:PublicName;value:Id"></option>
-                    </select>
-                </div>
-
-                <div class="digrFiltersSection" id="digrFilterSortOption">
-                    <label>Třídění</label>
-                    <select class="digrSortTypeSelect" data-bind="itemsSource:allSorters" data-key="Id" event-bind="change:setFilter('sorter', '', this.value)">
-                        <option class="lt-template digrSorterTypeOption" data-bind="text:Text;value:Id"></option>
-                    </select>
-                </div>
-            </div>
-            -->
-
+                        
             <div class="digrFiltersRow digrExFiltersRow">
                 <div class="digrExFiltersExpander">
                     <i class="fas fa-filter digrFilterButtonAddNew" data-bind="class.hidden:exFiltersExpanded" event-bind="click:VM.addFilter()"></i>
@@ -167,7 +142,7 @@
 <script>
     lt.element("digrMainCont")
         .withModel("app.Distributors.vm")
-        .attach(function (digrTextFilter, bulkTaggingTagFinder, savedFiltersPickerContainer) {
+        .attach(function (digrTextFilter, bulkTaggingTagFinder) {
                         
             digrTextFilter.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
@@ -224,12 +199,8 @@
 
                 app.Distributors.vm.saveCurrentFilter(name);
             };
-
-            this.bind(function (savedFilters) {
-                app.ui.autosuggest(savedFiltersPickerContainer, app.Distributors.vm.getSavedFilterNames);
-            });
                         
-            this.loadSavedFilter = (name) => alert(name);
+            this.loadSavedFilter = (id) => app.Distributors.vm.loadSavedFilter(id);
         });
 </script>
 <script src="/UI/DistributorsApp/CrmRobots.VM.js"></script>

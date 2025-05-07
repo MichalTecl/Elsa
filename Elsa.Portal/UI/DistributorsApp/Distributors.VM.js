@@ -3,7 +3,7 @@ var app = app || {};
 app.Distributors = app.Distributors || {};
 app.Distributors.VM = app.Distributors.VM || function(){
     const self = this;
-
+        
     let metadataConsumersQueue = [];
     let __metadata = null;
 
@@ -50,28 +50,82 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     self.savedFilters = [];
 
-    const receiveSavedFilters = (f) => { self.savedFilters = f; };
+    const withFiltersUsageData = (callback) => {
+        const filtersUsageStoredItemKey = "savedFiltersUsageHistory";
+        const usageData = JSON.parse(window.localStorage.getItem(filtersUsageStoredItemKey) || '{}');;
 
-    const loadSavedFilters = () => lt.api("/crmCustomFilters/getSavedFilters").get(receiveSavedFilters);
-    loadSavedFilters();
-    
-    self.saveCurrentFilter = (name) => {
-        lt.api("/crmCustomFilters/saveFilter")
-            .query({ "name": name })
-            .body(self.filter)
-            .post(receiveSavedFilters);
+        let toSave = false;
+
+        const getter = (id) => usageData["f" + id];
+
+        const setter = (id, value) => {
+            toSave = true;
+            usageData["f" + id] = value;
+        };
+
+        callback(getter, setter);
+
+        if (toSave) {
+            window.localStorage.setItem(filtersUsageStoredItemKey, JSON.stringify(usageData));
+            sortSavedFilters();
+        }
+    }
+
+    const markSavedFilterUsed = (filterId) => {
+        withFiltersUsageData((_, setter) => {
+            setter(filterId, Date.now())
+        }); 
+
+        self.savedFilters.forEach(f => f.isActive = f.Id === filterId);
+    }
+
+    const sortSavedFilters = () => {
+
+        withFiltersUsageData((getter, _) => {
+
+            let minUsg = Date.now();
+
+            self.savedFilters.forEach((f, inx) => {
+                let lastUse = getter(f.Id);
+
+                if (!!lastUse) {
+
+                    if (minUsg > lastUse) {
+                        minUsg = lastUse;
+                    }
+
+                } else {
+                    lastUse = minUsg - inx;
+                }
+
+                f.lastUsed = lastUse;
+            });
+
+            self.savedFilters.sort((a, b) => b.lastUsed - a.lastUsed);
+        });       
+    }
+
+    const receiveSavedFilters = (f) => {
+        self.savedFilters = f;
+
+        sortSavedFilters();
     };
 
-    const visitAllExFilters = (visitor) => {
-        self.filter.ExFilterGroups.forEach(fg => fg.Filters.forEach(f => visitor(f)));
+    self.loadSavedFilter = (id) => {
+
+        markSavedFilterUsed(id);
+
+        lt.api("/crmCustomFilters/loadFilter")
+            .query({ "id": id })
+            .get(f => applySavedFilter(f, id));
     };
 
-    const applySavedFilter = (filter) => {
+    const applySavedFilter = (filter, filterId) => {
         self.filter = filter;
 
         self.editedExFilter = null;
         self.editingExFilter = false;
-                
+
         checkFiltersExpansion();
 
         let objId = (new Date()).getTime();
@@ -82,7 +136,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         });
 
         visitAllExFilters(f => f.isValid = false);
-        
+
         const whenAllFiltersValid = (f) => {
 
             if (!f.isValid)
@@ -92,8 +146,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
             visitAllExFilters(f => { if (!f.isValid) { invalidFound = true; } });
 
-            if (!invalidFound)
-                self.search();
+            if (!invalidFound) {
+                self.search(filterId);
+            }
         };
 
         visitAllExFilters(f => {
@@ -104,13 +159,30 @@ app.Distributors.VM = app.Distributors.VM || function(){
             t.isSelected = (self.filter.Tags.indexOf(t.Id) > -1);
         });
     };
+    
+    const loadSavedFilters = () => lt.api("/crmCustomFilters/getSavedFilters").silent().get(receiveSavedFilters);
+    loadSavedFilters();
+    
+    self.saveCurrentFilter = (name) => {
+                
+        lt.api("/crmCustomFilters/saveFilter")
+            .query({ "name": name })
+            .body(self.filter)
+            .post(filters => {
 
-    self.loadSavedFilter = (id) => {
-        lt.api("/crmCustomFilters/loadFilter")
-            .query({ "id": id })
-            .get(applySavedFilter);
+                const thisFilter = filters.find(f => f.Name === name);
+                if (!!thisFilter) {
+                    markSavedFilterUsed(thisFilter.Id);
+                }
+
+                receiveSavedFilters(filters);
+            });
     };
 
+    const visitAllExFilters = (visitor) => {
+        self.filter.ExFilterGroups.forEach(fg => fg.Filters.forEach(f => visitor(f)));
+    };
+        
     self.importSavedFilter = (filter) => {
         applySavedFilter(filter);
     };
@@ -390,7 +462,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         self.search();
     };
 
-    self.search = () => {
+    self.search = (savedFilterId) => {
         self.page = 0;
         self.canReadMore = false;
         self.data = [];
@@ -398,6 +470,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
         lt.notify();
 
         self.load();
+
+        self.savedFilters.forEach(f => f.isActive = f.Id === savedFilterId);
     };
 
     const receiveMetadata = (m) => {

@@ -304,3 +304,65 @@ input[type="radio"]:focus:not(:focus-visible) {
     #digrTagsFilterInput:not(.hidden) {
         display: inline-block;
     }
+
+
+.digrCustomFiltersRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid #ccc;
+    background-color: #f9f9f9;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.digrSavedFiltersButtonsWrap {
+    display: flex;
+    flex-shrink: 0;
+    gap: 4px;
+}
+
+    .digrSavedFiltersButtonsWrap .faButtonNew {
+        font-size: 16px;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+        cursor: pointer;
+        color: #333;
+        margin: 0 !important; /* odstraní případné marginy ikon */
+    }
+
+        .digrSavedFiltersButtonsWrap .faButtonNew:hover {
+            background-color: #e0e0e0;
+        }
+
+.digrSavedFiltersFlatListWrap {
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.digrSavedFiltersFlatList {
+    display: flex;
+    gap: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.digrSavedFiltersFlatListItem {
+    background-color: #e1f5fe;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: background-color 0.2s ease;
+}
+
+.digrSavedFiltersFlatListItem:hover,
+.digrSavedFiltersFlatListItemActive {
+    background-color: #b3e5fc;
+}
