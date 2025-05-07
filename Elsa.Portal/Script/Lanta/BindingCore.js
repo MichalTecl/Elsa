@@ -1,4 +1,4 @@
-﻿var lanta = lanta || {};
+var lanta = lanta || {};
 lanta.BindingCore = lanta.BindingCore || {};
 
 lanta.BindingCore.subscribeNotificationsCallback = lanta.BindingCore.subscribeNotificationsCallback ||
@@ -155,6 +155,10 @@ lanta.BindingCore.defaultRelativeSourceFactory = lanta.BindingCore.defaultRelati
 
     return lt.getViewModel(owner);
 
+};
+
+lanta.BindingCore.windowRelativeSourceFactory = lanta.BindingCore.windowRelativeSourceFactory || function (owner, expression) {
+    return window;
 };
 
 lanta.BindingCore.defaultExpressionEvaluator = lanta.BindingCore.defaultExpressionEvaluator || function (owner, expression, relativeSourceFactory) {

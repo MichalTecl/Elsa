@@ -1,0 +1,9 @@
+<div class="crmdfDynamicParamCont" id="dfp_{%GENERATE%}">
+    <label data-bind="text:Label"></label>
+    <select data-key="Id" data-bind="itemsSource:#app.Distributors.vm.allSalesReps; value:Value" event-bind="change:VM.setValue(this.value)">
+        <option class="lt-template" data-bind="text:PublicName;value:PublicName"></option>
+    </select>          
+</div>
+<script>
+    lt.element("dfp_{%GENERATE%}").attach(function () { });
+</script>

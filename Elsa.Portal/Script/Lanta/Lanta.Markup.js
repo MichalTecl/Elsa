@@ -309,7 +309,14 @@ lanta.Markup.bindExpression = lanta.Markup.bindExpression || function(owner, ele
 		var to = parts[0].trim();
 		var from = parts[1].trim();
 
-		var param = lanta.BindingCore.createParameter(from);
+        var relSrcFactory = null;
+
+        if (from.indexOf('#') === 0) {
+            from = from.substring(1);
+            relSrcFactory = lanta.BindingCore.windowRelativeSourceFactory;
+        }
+
+        var param = lanta.BindingCore.createParameter(from, relSrcFactory);
 
 	    var marker = lanta.Markup.getElementMarker(element);
 	    var fn = new Function(["_value"], " var target = lanta.Markup.getChildByMarker(this, '" + marker + "'); if (!!target) { lanta.Markup.setValue(target, '" + to + "', _value); }\r\n//# sourceURL="+to+"_"+from+".js");

@@ -1,15 +1,15 @@
-/* --- OVERLAY: ztmavenÃ­ pozadÃ­ a vystÅ™edÄ›nÃ­ modalu --- */
+/* --- OVERLAY: ztmavenÃƒÂ­ pozadÃƒÂ­ a vystÃ…â„¢edÃ„â€ºnÃƒÂ­ modalu --- */
 #filterEditOverlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.5); /* ztmavenÃ© pozadÃ­ */
+    background-color: rgba(0, 0, 0, 0.5); /* ztmavenÃƒÂ© pozadÃƒÂ­ */
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
 
-    /* --- OBSAHOVÃ KARTA --- */
+    /* --- OBSAHOVÃƒÂ KARTA --- */
     #filterEditOverlay > div {
         background: white;
         border-radius: 12px;
@@ -41,6 +41,11 @@
     background-color: transparent;
 }
 
+    .digrFdHead select:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
 .digrFdHead.inverted select {
     text-transform: lowercase;
 }
@@ -70,7 +75,7 @@
     font-weight: bold;
 }
 
-/* --- POZNÃMKA / POPIS --- */
+/* --- POZNÃƒÂMKA / POPIS --- */
 .digrFdDescription {
     background: #f9f9f9;
     border-left: 4px solid #007bff;
@@ -87,7 +92,7 @@
 }
 
 
-/* --- VSTUPNÃ POLE --- */
+/* --- VSTUPNÃƒÂ POLE --- */
 .digrFdParamRow input[type="text"],
 .digrFdParamRow input[type="date"] {
     width: 100%;
@@ -99,7 +104,7 @@
     box-sizing: border-box;
 }
 
-/* --- TLAÄŒÃTKA --- */
+/* --- TLAÃ„Å’ÃƒÂTKA --- */
 .digrFdButtons {
     display: flex;
     justify-content: space-between;

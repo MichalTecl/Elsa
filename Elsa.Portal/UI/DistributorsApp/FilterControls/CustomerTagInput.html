@@ -1,0 +1,11 @@
+<div class="crmdfDynamicParamCont" id="dfp_{%GENERATE%}">
+    <label data-bind="text:Label"></label>
+    <div class="autocomplete" lt-name="acpt">
+        <input type="text" data-bind="value:Value" event-bind="input:VM.setValue(this.value)" />
+    </div>
+</div>
+<script>
+    lt.element("dfp_{%GENERATE%}").attach(function (acpt) {
+        app.ui.autosuggest(acpt, app.Distributors.vm.getAllTags);
+    });
+</script>

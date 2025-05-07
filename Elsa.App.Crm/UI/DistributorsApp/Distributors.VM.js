@@ -278,6 +278,10 @@ app.Distributors.VM = app.Distributors.VM || function(){
             if (!!filter) {
                 self.editedExFilter = filter;
                 self.editingExFilter = true;
+
+                if (self.editedExFilter.Parameters)
+                    self.editedExFilter.Parameters.forEach(p => p.setValue = (v) => p.Value = v);
+
                 return;
             }
         }  
@@ -324,10 +328,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.detailTabs = [
-        { "text": "Objednávky", "control": "DistributorOrders" },   
-        { "text": "Schůzky", "control": "DistributorMeetings" },
         { "text": "Poznámky", "control": "DistributorNotes" },
-        
+        { "text": "Objednávky", "control": "DistributorOrders" },   
+        { "text": "Schůzky", "control": "DistributorMeetings" },       
     ];
 
     self.currentTabContentControl = null;
@@ -389,13 +392,15 @@ app.Distributors.VM = app.Distributors.VM || function(){
             return;
         }
 
+        const firstLetterLower = (t) => (!t) ? t : t.substring(0, 1).toLowerCase() + t.substring(1);
+
         lt.api("/CrmDistributors/validateFilter")
             .body(filter)
             .post((r) => {
                 filter.isValid = r.IsValid;
                 filter.error = r.ErrorMessage;
                 filter.recordsCount = r.NumberOfRecords;
-                filter.text = (filter.Inverted ? "Ne" : "") + (r.FilterText.length < 35 ? r.FilterText : filter.Title);
+                filter.text = (filter.Inverted ? "Ne" : "") + firstLetterLower(r.FilterText.length < 35 ? r.FilterText : filter.Title);
 
                 if(!!callback)
                     callback(filter);
