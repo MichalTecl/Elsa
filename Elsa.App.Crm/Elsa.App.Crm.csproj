@@ -173,8 +173,7 @@
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
     <Content Include="UI\DistributorsApp\CrmRobots.VM.js" />
-    <Content Include="UI\DistributorsApp\RobotSetupPopup.html" />
-    <Content Include="UI\DistributorsApp\RobotsPopup.html" />
+    <Content Include="UI\DistributorsApp\Parts\RobotsPopup.html" />
     <Content Include="UI\DistributorsApp\Css\CustomerTagsEditor.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Panels.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Main.css" />
@@ -185,7 +184,6 @@
     <Content Include="UI\DistributorsApp\Css\DistributorTagStyles.css" />
     <Content Include="UI\DistributorsApp\Css\MeetingsCalendar.css" />
     <Content Include="UI\DistributorsApp\Css\RobotsPopup.css" />
-    <Content Include="UI\DistributorsApp\Css\RobotsSetupPopup.css" />
     <Content Include="UI\DistributorsApp\CustomerTagsEditor.html" />
     <Content Include="UI\DistributorsApp\DistributorDetailView.html" />
     <Content Include="UI\DistributorsApp\DistributorGrid.html" />
@@ -196,6 +194,7 @@
     <Content Include="UI\DistributorsApp\FilterControls\DateInput.html" />
     <Content Include="UI\DistributorsApp\FilterControls\TextBox.html" />
     <Content Include="UI\DistributorsApp\MeetingsCalendar.html" />
+    <Content Include="UI\DistributorsApp\Parts\SavedFiltersPopup.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.css" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.VM.js" />

@@ -49,7 +49,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.tagFilterVisible = false;
 
     self.savedFilters = [];
-
+          
     const withFiltersUsageData = (callback) => {
         const filtersUsageStoredItemKey = "savedFiltersUsageHistory";
         const usageData = JSON.parse(window.localStorage.getItem(filtersUsageStoredItemKey) || '{}');;
@@ -119,6 +119,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
             .query({ "id": id })
             .get(f => applySavedFilter(f, id));
     };
+
+    self.deleteSavedFilter = (id) => lt.api("/crmCustomFilters/deleteFilter").query({ id }).post(receiveSavedFilters);
 
     const applySavedFilter = (filter, filterId) => {
         self.filter = filter;

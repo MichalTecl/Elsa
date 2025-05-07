@@ -1,0 +1,25 @@
+.popupOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* tmavý průhledný */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.popupOverlay.open {
+    display: flex !important;
+}
+
+.popupOverlay .popupBody {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    max-width: 90%;
+    max-height: 85%;
+    width: auto;
+    height: auto;
+    box-sizing: border-box;
+}

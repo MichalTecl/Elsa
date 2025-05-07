@@ -366,3 +366,53 @@ input[type="radio"]:focus:not(:focus-visible) {
 .digrSavedFiltersFlatListItemActive {
     background-color: #b3e5fc;
 }
+
+#savedFiltersPopup {
+    max-width: 680px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Seznam s fixní výškou a scrollbarem */
+.digrSavedFiltersFullList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Vnitřní layout řádku */
+.digrSavedFilterFullListItemBody {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0; /* nutné pro správný text-overflow v children */
+}
+
+/* Ikona koše */
+.digrSavedFilterItemActionsWrapper {
+    flex-shrink: 0;
+}
+
+    .digrSavedFilterItemActionsWrapper .faButtonNew {
+        font-size: 14px;
+        color: #888;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+        .digrSavedFilterItemActionsWrapper .faButtonNew:hover {
+            color: #d32f2f;
+        }
+
+/* Název filtru */
+.digrSavedFilterName {
+    flex-grow: 1;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

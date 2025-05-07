@@ -5,7 +5,7 @@
                 <div class="digrCustomFiltersRow">
                     <div class="digrSavedFiltersButtonsWrap">
                         <i class="far fa-save faButtonNew" event-bind="click:saveCurrentFilter()"></i>
-                        <i class="far fa-folder-open faButtonNew" event-bind="click:VM.showSavedFiltersPicker()"></i>
+                        <i class="far fa-folder-open faButtonNew" event-bind="click:openSavedFilters()"></i>
                     </div>
                     <div class="digrSavedFiltersFlatListWrap">
                         <div class="digrSavedFiltersFlatList" data-bind="itemsSource:savedFilters" data-key="Id">
@@ -133,8 +133,12 @@
         </div>
     </div>
     <div id="digrDetailCont" fill-by="/UI/DistributorsApp/DistributorDetailView.html" data-bind="class!.hidden:isDetailOpen"></div>
-    <div id="digrRobotsPopupCont" fill-by="/UI/DistributorsApp/RobotsPopup.html"></div>
-    <div id="digrRobotSetupPopupCont" fill-by="/UI/DistributorsApp/RobotSetupPopup.html"></div>
+    
+    <div id="digrRobotsPopupCont" class="popupOverlay" fill-by-lazy="/UI/DistributorsApp/Parts/RobotsPopup.html"></div>
+    
+    <div id="savedFiltersPopupCont" class="popupOverlay" fill-by-lazy="/UI/DistributorsApp/Parts/SavedFiltersPopup.html">        
+    </div>
+
 </div>
 
 
@@ -142,8 +146,10 @@
 <script>
     lt.element("digrMainCont")
         .withModel("app.Distributors.vm")
-        .attach(function (digrTextFilter, bulkTaggingTagFinder) {
-                        
+        .attach(function (digrTextFilter, bulkTaggingTagFinder, savedFiltersPopupCont) {
+
+            this.openSavedFilters = () => Popup.open(savedFiltersPopupCont);
+
             digrTextFilter.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
                     this.dispatchEvent(new Event('change'));
@@ -154,6 +160,7 @@
                 this.select();
             });
 
+            
             setTimeout(() => digrTextFilter.focus(), 10);
 
             this.setFilter = (type, key, value) => app.Distributors.vm.updateFilter(type, key, value);
@@ -200,7 +207,17 @@
                 app.Distributors.vm.saveCurrentFilter(name);
             };
                         
-            this.loadSavedFilter = (id) => app.Distributors.vm.loadSavedFilter(id);
+            this.loadSavedFilter = (id) => {
+                app.Distributors.vm.loadSavedFilter(id);
+                Popup.close(savedFiltersPopupCont);
+            };
+
+            this.deleteSavedFilter = (filter) => {
+                if (confirm("Opravdu smazat " + filter.Name + "?")) {
+                    app.Distributors.vm.deleteSavedFilter(filter.Id);
+                }
+
+            };
         });
 </script>
 <script src="/UI/DistributorsApp/CrmRobots.VM.js"></script>

@@ -1,0 +1,17 @@
+<div class="popupBody" id="savedFiltersPopup">
+    <div class="digrSavedFiltersFullList" data-bind="itemsSource:savedFilters" data-key="Id">
+        <div class="lt-template digrSavedFiltersFlatListItem" data-bind="class.digrSavedFiltersFlatListItemActive:isActive">
+            <div class="digrSavedFilterFullListItemBody">
+                <div class="digrSavedFilterItemActionsWrapper">
+                    <i class="far fa-trash-alt faButtonNew" event-bind="click:deleteSavedFilter(VM)"></i>
+                </div>
+                <div class="digrSavedFilterName" event-bind="click:loadSavedFilter(Id)" data-bind="text:Name"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    lt.element("savedFiltersPopup")
+        .withModel("app.Distributors.vm")
+        .attach(function () { });
+</script>

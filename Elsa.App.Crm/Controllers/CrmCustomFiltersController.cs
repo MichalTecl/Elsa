@@ -53,6 +53,11 @@ namespace Elsa.App.Crm.Controllers
             return JsonConvert.DeserializeObject<DistributorGridFilter>(record.JsonData);
         }
 
+        public List<CustomFilterInfo> DeleteFilter(int id)
+        {
+            _filtersRepository.DeleteCustomFilter(id);
+            return GetSavedFilters();
+        }
 
     }
 }

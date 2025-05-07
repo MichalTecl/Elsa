@@ -159,6 +159,8 @@
     <Content Include="UI\Controls\Common\MaterialList\MaterialListVm.js" />
     <Content Include="UI\Controls\Common\PickItemDialog.html" />
     <Content Include="UI\Controls\Common\PickItemDialog.js" />
+    <Content Include="UI\Controls\Common\Popups\Popup.js" />
+    <Content Include="UI\Controls\Common\Popups\Popups.css" />
     <Content Include="UI\Controls\Common\TabControl.js" />
     <Content Include="UI\Controls\Common\wintersnow.html" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.css" />
