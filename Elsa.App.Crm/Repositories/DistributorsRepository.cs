@@ -171,15 +171,15 @@ namespace Elsa.App.Crm.Repositories
 
                 if (found)
                     idsInAllExFilters.Add(id);
-            }         
+            }
 
             _log.Info($"Done. We got {idsInAllExFilters.Count} of ids from distributor fitlers");
             return idsInAllExFilters;
-         }
-        
+        }
+
 
         public DistributorDetailViewModel GetDetail(int customerId)
-        {            
+        {
             return _database
                 .Sql()
                 .Call("LoadDistributorDetail")
@@ -216,11 +216,11 @@ namespace Elsa.App.Crm.Repositories
         public void SaveStore(int customerId, string addressName, Action<ICustomerStore> change)
         {
             var store = GetStores(customerId)
-                .FirstOrDefault(s => s.SystemRecordName == addressName) 
+                .FirstOrDefault(s => s.SystemRecordName == addressName)
                 ?? _database.New<ICustomerStore>(s =>
                 {
                     s.SystemRecordName = addressName;
-                    s.CustomerId = customerId;                    
+                    s.CustomerId = customerId;
                 });
 
             change(store);
@@ -260,7 +260,7 @@ namespace Elsa.App.Crm.Repositories
                 return trends.ToDictionary(t => t.Key, t => t.Value.GetModel().ToList());
             });
         }
-                
+
         public class DistributorSorting
         {
             public static readonly DistributorSorting[] Sortings = new[]
@@ -284,4 +284,5 @@ namespace Elsa.App.Crm.Repositories
             public Func<IEnumerable<DistributorGridRowModel>, IEnumerable<DistributorGridRowModel>> Sorter { get; }
         }
     }
+
 }

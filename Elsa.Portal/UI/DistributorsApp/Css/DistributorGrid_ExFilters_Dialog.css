@@ -1,15 +1,15 @@
-/* --- OVERLAY: ztmavení pozadí a vystředění modalu --- */
+/* --- OVERLAY: ztmavenÃ­ pozadÃ­ a vystÅ™edÄ›nÃ­ modalu --- */
 #filterEditOverlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.5); /* ztmavené pozadí */
+    background-color: rgba(0, 0, 0, 0.5); /* ztmavenÃ© pozadÃ­ */
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
 }
 
-    /* --- OBSAHOVÁ KARTA --- */
+    /* --- OBSAHOVÃ KARTA --- */
     #filterEditOverlay > div {
         background: white;
         border-radius: 12px;
@@ -35,13 +35,42 @@
 /* --- SELECT (typ filtru) --- */
 .digrFdHead select {
     width: 100%;
-    padding: 8px;
     font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    border: none !important;
+    margin-left: -4px;
+    background-color: transparent;
 }
 
-/* --- POZNÁMKA / POPIS --- */
+.digrFdHead.inverted select {
+    text-transform: lowercase;
+}
+
+.digrFdInvertCbWrap {
+    display: flex;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    align-items: center;
+}
+
+    .digrFdInvertCbWrap input[type="checkbox"] {
+        vertical-align: middle;
+        margin-top: -1px;
+    }
+
+.fakeDropdowWrap {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: flex;
+    padding: 8px;
+}
+
+.invertedFilterDropdownLabel {
+    margin-top: 1px;
+    color: red;
+    font-weight: bold;
+}
+
+/* --- POZNÃMKA / POPIS --- */
 .digrFdDescription {
     background: #f9f9f9;
     border-left: 4px solid #007bff;
@@ -50,15 +79,15 @@
     font-size: 13px;
     line-height: 1.5;
     max-height: 100px;
-    overflow-y: auto;    
+    overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
     overflow-wrap: break-word;
-    display: block; 
+    display: block;
 }
 
 
-/* --- VSTUPNÍ POLE --- */
+/* --- VSTUPNÃ POLE --- */
 .digrFdParamRow input[type="text"],
 .digrFdParamRow input[type="date"] {
     width: 100%;
@@ -70,7 +99,7 @@
     box-sizing: border-box;
 }
 
-/* --- TLAČÍTKA --- */
+/* --- TLAÄŒÃTKA --- */
 .digrFdButtons {
     display: flex;
     justify-content: space-between;
