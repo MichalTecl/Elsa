@@ -18,7 +18,10 @@ app.CrmRobots = (self) => {
         lt.api("/crmrobots/getRobots").get(receiveRobots);
     };
 
-    
+    self.editRobot = (robot) => {
+        self.lastEditedRobot = robot;
+        self.isEditingRobot = true;
+    };    
 
     self.createNewRobot = () => {
 
@@ -54,6 +57,11 @@ app.CrmRobots = (self) => {
             });
 
     }; 
+
+    self.changeRobotActivity = (robotId, activate) => lt
+        .api("/CrmRobots/ChangeRobotActive")
+        .query({ robotId, activate })
+        .post(receiveRobots);
 
     self.filterRobots = (query) => {
 

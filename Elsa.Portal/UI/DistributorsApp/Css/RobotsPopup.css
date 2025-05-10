@@ -1,4 +1,4 @@
-/* === ZÁKLAD POPUPU === */
+/* === POPUP === */
 #robotsPopup.popupBody {
     position: relative;
     background: white;
@@ -12,9 +12,22 @@
     flex-direction: column;
     gap: 16px;
     font-family: sans-serif;
+    max-height: 85vh;
+    overflow: hidden;
 }
 
-/* === FORMULÁŘOVÉ ŘÁDKY === */
+/* === VNITŘEK POPUPU === */
+#robotsPopupBody {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* ========================================================= */
+/* === EDITAČNÍ FORMULÁŘ ROBOTA =========================== */
+/* ========================================================= */
+
 #robotEditPanel {
     display: flex;
     flex-direction: column;
@@ -27,7 +40,6 @@
     gap: 8px;
 }
 
-    /* === INPUTY A TEXTAREA === */
     .robotEditFormRow input,
     .robotEditFormRow textarea {
         width: 100%;
@@ -44,7 +56,7 @@
         min-height: 60px;
     }
 
-/* === ŠTÍTKY === */
+/* Štítky */
 .reTagsSetupPanel {
     display: flex;
     flex-direction: column;
@@ -65,7 +77,6 @@
     gap: 4px;
 }
 
-/* === POPISKY === */
 .reTagsBigLabel {
     font-weight: bold;
     font-size: 14px;
@@ -76,7 +87,7 @@
     font-size: 13px;
 }
 
-/* === TLAČÍTKA === */
+/* Tlačítka */
 .reFormButtons {
     display: flex;
     justify-content: space-between;
@@ -114,12 +125,19 @@
                 background-color: #0069d9;
             }
 
-/* === PLUS BUTTON === */
+/* ========================================================= */
+/* === SEZNAM ROBOTŮ A TLAČÍTKO + ========================= */
+/* ========================================================= */
+
+#robotsList {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
 .rbEdNewBotButtonWrapper {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    z-index: 1;
+    margin-bottom: 12px;
 }
 
 #rbEdNewRobot {
@@ -128,13 +146,90 @@
     font-size: 24px;
     color: #28a745;
     cursor: pointer;
+    padding: 4px;
+    transition: color 0.2s;
 }
 
     #rbEdNewRobot:hover {
         color: #218838;
     }
 
-/* === RESPONSIVE PRO MOBILY === */
+#robotListBody {
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+}
+
+.robotListItem {
+    background: #f9f9f9;
+    border-radius: 6px;
+    padding: 8px 12px;
+    transition: background 0.2s;
+}
+
+    .robotListItem:hover {
+        background: #f0f0f0;
+    }
+
+    .robotListItem.rliInactive {
+        opacity: 0.5;
+    }
+
+.rliRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.rliOrderCell {
+    width: 48px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.robotListItemName {
+    flex-grow: 1;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    color: #222;
+    transition: color 0.2s;
+}
+
+    .robotListItemName:hover {
+        color: #007bff;
+        text-decoration: underline;
+    }
+
+.rliStartStopCell {
+    width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.faButtonNew {
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .faButtonNew:hover {
+        color: #000;
+    }
+
+/* ========================================================= */
+/* === RESPONSIVE MOBILNÍ VERZE ============================ */
+/* ========================================================= */
+
 @media (max-width: 600px) {
     #robotsPopup.popupBody {
         max-width: 95%;
@@ -155,8 +250,23 @@
             justify-content: center;
         }
 
-    .rbEdNewBotButtonWrapper {
-        top: 12px;
-        right: 12px;
+    .rliRow {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .rliOrderCell,
+    .rliStartStopCell {
+        width: auto;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .robotListItemName {
+        font-size: 16px;
+    }
+
+    #robotListBody {
+        padding-right: 0;
     }
 }
