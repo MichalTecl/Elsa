@@ -270,3 +270,11 @@
         padding-right: 0;
     }
 }
+
+#robotEditPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
