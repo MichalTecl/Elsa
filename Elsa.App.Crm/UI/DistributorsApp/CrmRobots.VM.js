@@ -2,11 +2,11 @@ app = app || {};
 app.CrmRobots = (self) => {
 
     self.robots = [];
+    self.isEditingRobot = false;
     self.lastEditedRobot = null;
-    self.robotsPopupOpen = false;
     self.robotsFilter = null;
     self.robotSetupPopupOpen = false;
-
+        
     const receiveRobots = (robots) => {
         self.robots = robots;        
 
@@ -18,15 +18,42 @@ app.CrmRobots = (self) => {
         lt.api("/crmrobots/getRobots").get(receiveRobots);
     };
 
-    self.openRobotsPopup = () => {
-        self.robotsPopupOpen = true;
-    }
+    
 
-    self.closeRobotsPopup = () => {
-        self.robotsPopupOpen = false;
+    self.createNewRobot = () => {
 
-        self.filterRobots(null);
-    }
+        self.lastEditedRobot = {
+            "Name": "",
+            "Description":""
+        }
+
+        self.isEditingRobot = true;
+    };
+
+    self.cancelRobotEdit = () => {
+
+        const reload = !!self.lastEditedRobot.Id;
+
+        self.lastEditedRobot = null;
+        self.isEditingRobot = false;
+
+        if (reload)
+            loadRobots();
+    };
+
+    self.saveRobot = () => {
+
+        const robot = self.lastEditedRobot;
+        robot.Filter = app.Distributors.vm.filter;
+
+        lt.api("/CrmRobots/saveRobot")
+            .body(robot)
+            .post(robots => {
+                receiveRobots(robots);
+                self.cancelRobotEdit();
+            });
+
+    }; 
 
     self.filterRobots = (query) => {
 
@@ -42,23 +69,7 @@ app.CrmRobots = (self) => {
             .query({ robotId, direction })
             .post(receiveRobots);
     }
-
-    self.editRobot = (robotVm) => {
-        self.lastEditedRobot = robotVm;
-        app.Distributors.app.importSavedFilter(robotVm.Filter);
-
-        self.closeRobotsPopup();
-    };
-
-    self.openRobotSetup = () => {        
-        self.lastEditedRobot = self.lastEditedRobot || {};
-        self.robotSetupPopupOpen = true;
-    };
-
-    self.cancelRobotSetup = () => {
-        self.robotSetupPopupOpen = false;
-    };
-
+        
     loadRobots();
 };
 

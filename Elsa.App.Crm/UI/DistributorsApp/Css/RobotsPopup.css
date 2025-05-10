@@ -1,0 +1,162 @@
+/* === ZÁKLAD POPUPU === */
+#robotsPopup.popupBody {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    max-width: 680px;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-family: sans-serif;
+}
+
+/* === FORMULÁŘOVÉ ŘÁDKY === */
+#robotEditPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.robotEditFormRow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+    /* === INPUTY A TEXTAREA === */
+    .robotEditFormRow input,
+    .robotEditFormRow textarea {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .robotEditFormRow textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
+
+/* === ŠTÍTKY === */
+.reTagsSetupPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.reTagsSetupRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.reTagsSetupHalfRow {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* === POPISKY === */
+.reTagsBigLabel {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.reTagsSmallLabel {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* === TLAČÍTKA === */
+.reFormButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+    .reFormButtons button {
+        padding: 10px 16px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s ease;
+    }
+
+        .reFormButtons button.cancel {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+            .reFormButtons button.cancel:hover {
+                background-color: #ddd;
+            }
+
+        .reFormButtons button.save {
+            background-color: #007bff;
+            color: white;
+        }
+
+            .reFormButtons button.save:hover {
+                background-color: #0069d9;
+            }
+
+/* === PLUS BUTTON === */
+.rbEdNewBotButtonWrapper {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 1;
+}
+
+#rbEdNewRobot {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #28a745;
+    cursor: pointer;
+}
+
+    #rbEdNewRobot:hover {
+        color: #218838;
+    }
+
+/* === RESPONSIVE PRO MOBILY === */
+@media (max-width: 600px) {
+    #robotsPopup.popupBody {
+        max-width: 95%;
+        padding: 16px;
+    }
+
+    .reTagsSetupHalfRow {
+        flex: 1 1 100%;
+    }
+
+    .reFormButtons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+        .reFormButtons button {
+            width: 100%;
+            justify-content: center;
+        }
+
+    .rbEdNewBotButtonWrapper {
+        top: 12px;
+        right: 12px;
+    }
+}

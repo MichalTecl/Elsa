@@ -1,9 +1,95 @@
-<div id="robotsPopup" class="popupOverlay hidden" data-bind="class!.hidden:robotsPopupOpen">
+<div id="robotsPopup" class="popupBody">
+    <div class="rbEdNewBotButtonWrapper" data-bind="class.hidden:isEditingRobot">
+        <button id="rbEdNewRobot" event-bind="click:createRobot()"><i class="fas fa-plus-square"></i></button>
+    </div>
+    <div id="robotEditPanel" data-bind="class!.hidden:isEditingRobot">
 
+        <div class="robotEditFormRow">
+            <input placeholder="Název robota" type="text" data-bind="value:lastEditedRobot.Name" id="tbRobotName" event-bind="input:updateVm(VM, 'Name', this.value)" />
+        </div>
+
+        <div class="robotEditFormRow">
+            <textarea placeholder="Popis" data-bind="value:lastEditedRobot.Description" id="tbRobotDescription" event-bind="input:updateVm(VM, 'Description', this.value)"></textarea>
+        </div>
+
+        <div class="robotEditFormRow">
+            <div class="reTagsSetupPanel">
+                <div class="reTagsSetupRow">
+                    <label class="reTagsBigLabel">Zákazníkům, kteří splní podmínky:</label>
+                </div>
+                <div class="reTagsSetupRow">
+                    <div class="reTagsSetupHalfRow">
+                        <label class="reTagsSmallLabel">Nastaví štítek</label>
+                        <div class="autocomplete reTagPicker">
+                            <input type="text" data-bind="value:lastEditedRobot.MatchSetsTagTypeName" id="tbMatchSetsTagTypeName"
+                                   event-bind="change:updateVm(VM, 'MatchSetsTagTypeName', this.value)"/>
+                        </div>
+                    </div>
+                    <div class="reTagsSetupHalfRow">
+                        <label class="reTagsSmallLabel">Odebere štítek</label>
+                        <div class="autocomplete reTagPicker">
+                            <input type="text" data-bind="value:lastEditedRobot.MatchRemovesTagTypeName" id="tbMatchRemovesTagTypeName"
+                                   event-bind="change:updateVm(VM, 'MatchRemovesTagTypeName', this.value)"
+                                   />
+                        </div>
+                    </div>
+                </div>
+                <div class="reTagsSetupRow">
+                    <laberl class="reTagsBigLabel">Zákazníkům, kteří nesplní podmínky:</laberl>
+                </div>
+                <div class="reTagsSetupRow">
+                    <div class="reTagsSetupHalfRow">
+                        <label class="reTagsSmallLabel">Nastaví štítek</label>
+                        <div class="autocomplete reTagPicker">
+                            <input type="text" data-bind="value:lastEditedRobot.UnmatchSetsTagTypeName" id="tbUnmatchSetsTagTypeName"
+                                   event-bind="change:updateVm(VM, 'UnmatchSetsTagTypeName', this.value)"/>
+                        </div>
+                    </div>
+                    <div class="reTagsSetupHalfRow">
+                        <label class="reTagsSmallLabel">Odebere štítek</label>
+                        <div class="autocomplete reTagPicker">
+                            <input type="text" data-bind="value:lastEditedRobot.UnmatchRemovesTagTypeName" id="tbUnmatchRemovesTagTypeName" 
+                                   event-bind="change:updateVm(VM, 'UnmatchRemovesTagTypeName', this.value)"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="robotEditFormRow">
+            <label class="reTagsBigLabel">Při změně štítků poslat e-mail adresám:</label>
+            <input placeholder="mail1@... ,mail2., ..." data-bind="text:lastEditedRobot.MailRecipientsCsv" id="tbMailRecipients"
+                   event-bind="input:updateVm(VM, 'MailRecipientsCsv', this.value)"/>
+        </div>
+
+        <div class="robotEditFormRow">
+            <div class="reFormButtons">
+                <button class="cancel" event-bind="click:VM.cancelRobotEdit()">
+                    <i class="fas fa-times"></i> Zrušit
+                </button>
+                <button class="save" event-bind="click:VM.saveRobot()">
+                    <i class="fas fa-check"></i> Uložit
+                </button>
+            </div>
+        </div>
+
+    </div>
 </div>
+
 <script>
     lt.element("robotsPopup")
         .withModel("app.Distributors.vm")
-        .attach(function () { });
+        .attach(function () {
+
+            this.updateVm = (vm, propertyName, value) => {
+                app.Distributors.vm.lastEditedRobot[propertyName] = value;
+            };
+
+            this.bind(function (robots) {
+                this.querySelectorAll(".reTagPicker").forEach(p => app.ui.autosuggest(p, app.Distributors.vm.getAllTags));
+            });
+
+            this.createRobot = () => app.Distributors.vm.createNewRobot();
+        });
 </script>
 <link href="Css/RobotsPopup.css" rel="stylesheet" />

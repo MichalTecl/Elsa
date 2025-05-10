@@ -126,6 +126,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
 }
 
     .digrBulkTaggerIcon .fa-rocket {
@@ -362,10 +363,10 @@ input[type="radio"]:focus:not(:focus-visible) {
     transition: background-color 0.2s ease;
 }
 
-.digrSavedFiltersFlatListItem:hover,
-.digrSavedFiltersFlatListItemActive {
-    background-color: #b3e5fc;
-}
+    .digrSavedFiltersFlatListItem:hover,
+    .digrSavedFiltersFlatListItemActive {
+        background-color: #b3e5fc;
+    }
 
 #savedFiltersPopup {
     max-width: 680px;
@@ -416,3 +417,21 @@ input[type="radio"]:focus:not(:focus-visible) {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
+.digrBulkTaggerIcon .fa-robot {
+    font-size: 20px;
+    color: #2196f3;
+    cursor: pointer;
+    transition: transform 0.2s ease, color 0.2s ease;
+    padding: 6px;
+    border-radius: 6px;
+    background-color: #e3f2fd;
+    border: 1px solid #64b5f6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+    .digrBulkTaggerIcon .fa-robot:hover {
+        color: #1565c0;
+        background-color: #bbdefb;
+    }

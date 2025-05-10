@@ -14,6 +14,7 @@ namespace Elsa.App.Crm.Model
         public string Author { get; set; }
         public bool IsActive { get; set; }
         public List<string> MailRecipients { get; set; } = new List<string>();
+        public string MailRecipientsCsv { get; set; }
         public DistributorGridFilter Filter { get; set; } = new DistributorGridFilter();
         public string MatchSetsTagTypeName { get; set; }
         public string UnmatchSetsTagTypeName { get; set; }

@@ -61,6 +61,7 @@
                 </div>
 
                 <div class="digrBulkTaggerIcon">
+                    <i class="fas fa-robot faButtonNew robotsPopupOpenBut" event-bind="click:openRobots()" ></i>
                     <i class="fas fa-rocket faButtonNew bulkTaggingOpenButton" data-bind="class.hidden:bulkTaggingOpen" event-bind="click:openBulkTagging()"></i>
                 </div>
 
@@ -146,9 +147,10 @@
 <script>
     lt.element("digrMainCont")
         .withModel("app.Distributors.vm")
-        .attach(function (digrTextFilter, bulkTaggingTagFinder, savedFiltersPopupCont) {
+        .attach(function (digrTextFilter, bulkTaggingTagFinder, savedFiltersPopupCont, digrRobotsPopupCont) {
 
             this.openSavedFilters = () => Popup.open(savedFiltersPopupCont);
+            this.openRobots = () => Popup.open(digrRobotsPopupCont);
 
             digrTextFilter.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
