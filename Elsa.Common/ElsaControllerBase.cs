@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Web;
 using System.Web.Routing;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -27,6 +28,11 @@ namespace Elsa.Common
         public bool OnRequest(object controller, RequestContext request)
         {
             return false;
+        }
+
+        protected string MapPath(string url)
+        {
+            return HttpContext.Current.Request.MapPath(url);
         }
 
         public T ObtainParameterValue<T>(

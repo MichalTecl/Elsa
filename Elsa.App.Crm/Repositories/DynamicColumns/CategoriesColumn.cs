@@ -9,6 +9,8 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 {
     public class CategoriesColumn : DynamicColumnBase
     {
+        public override int DisplayOrder => 20;
+
         public override string Id => "Groups";
 
         public override string Title => "Kategorie";

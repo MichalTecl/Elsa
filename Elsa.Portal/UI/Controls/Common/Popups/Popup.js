@@ -2,10 +2,16 @@ var Popup = (() => {
     
     const openOverlays = [];
 
-    function open(overlay) {
+    function open(overlay, closeCallback) {
         if (!overlay) return;
+
         overlay.classList.add("open");
-        
+
+        if (!!closeCallback) {
+            overlay.closeCallbacks = overlay.closeCallbacks || [];
+            overlay.closeCallbacks.push(closeCallback);
+        }
+
         const onClick = (e) => {
             if (!overlay.contains(e.target)) return;
             if (e.target.closest(".popupBody")) return;
@@ -45,6 +51,10 @@ var Popup = (() => {
             openOverlays.splice(ooinx, 1);
 
         overlay.classList.remove("open");
+
+        if (!!overlay.closeCallbacks) {
+            overlay.closeCallbacks.forEach(c => c());
+        }
     }
 
     return {

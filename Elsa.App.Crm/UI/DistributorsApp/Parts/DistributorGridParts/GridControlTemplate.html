@@ -1,0 +1,17 @@
+<div id="digrGrid">
+    <div class="gridRow gridHead">
+        {headers}
+    </div>
+    <div class="gridBody" data-bind="itemsSource:data" data-key="Id">
+        <div class="lt-template gridRow">
+            {cells}
+        </div>
+    </div>
+</div>
+<script>
+	lt.element("digrGrid")
+	  .withModel("app.Distributors.vm")
+        .attach(function () {
+            console.log("Dynamic grid loaded");
+        });
+</script>

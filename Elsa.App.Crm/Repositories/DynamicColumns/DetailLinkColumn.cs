@@ -9,14 +9,18 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 {
     public class DetailLinkColumn : DynamicColumnBase
     {
-        public override string Id => "DetailLink";
+        public override int DisplayOrder => 0;
+
+        public static string DetailLinkColumnName = "DetailLink";
+
+        public override string Id => DetailLinkColumnName;
 
         public override string Title => "Jméno";
 
         public override string BoundProperty => "Name";
 
         public override string CellClass => "cell10";
-
+                
         public override Task PopulateAsync(List<DistributorGridRowModel> rows)
         {
             return Task.CompletedTask;

@@ -9,6 +9,8 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 {
     public class TotalOrdersColumn : DynamicColumnBase
     {
+        public override int DisplayOrder => 40;
+
         public override string Id => "TotalPrice";
 
         public override string Title => "Tržby celkem";

@@ -49,7 +49,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.tagFilterVisible = false;
 
     self.savedFilters = [];
-          
+
+              
     const withFiltersUsageData = (callback) => {
         const filtersUsageStoredItemKey = "savedFiltersUsageHistory";
         const usageData = JSON.parse(window.localStorage.getItem(filtersUsageStoredItemKey) || '{}');;

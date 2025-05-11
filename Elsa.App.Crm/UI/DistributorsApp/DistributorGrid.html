@@ -53,6 +53,8 @@
             </div>
 
             <div class="digrFiltersRow">
+                <button id="butColumns" event-bind="click:openColumnsPopup()"><i class="fas fa-th"></i></button>
+
                 <button id="butSearch" event-bind="click:VM.search()"><i class="fas fa-search"></i></button>
 
                 <div class="digrFiltersSection" id="digrFilterIncludeDeleted">
@@ -89,50 +91,28 @@
 
         </div>
 
-        <div class="grid2">
-            <div id="digrGrid">
-                <div class="gridRow gridHead">
-                    <div class="cell10">Jméno</div>
-                    <div class="cell10">Kategorie</div>
-                    <div class="cell20">Štítky</div>
-                    <div class="cell5">$$$</div>
-                    <div class="cell10">Trend</div>
-                </div>
-                <div class="gridBody" data-bind="itemsSource:data" data-key="Id">
-                    <div class="lt-template gridRow">
-                        <div class="cell10 digrDetailLinkCell">
-                            <a data-bind="text:Name" class="digrLinkSameWin" event-bind="click:openDetail(Id)"></a>
-                            <a class="digrOutNewWin" target="_blank" data-bind="href:detailLink"> <i class="fas fa-window-restore"></i></a>
-                        </div>
-
-                        <div class="cell10 digrGroupsCell">
-                            <div data-bind="itemsSource:customerGroups" data-key="Id" class="digrCustGroupsContainer stackLeft">
-                                <div class="lt-template digrCustGroupItem" data-bind="text:ErpGroupName"></div>
-                            </div>
-                        </div>
-
-                        <div class="cell20 digrTagsCell">
-                            <div data-bind="itemsSource:tags" data-key="Id" class="digrCustTagsContainer stackLeft">
-                                <div class="lt-template digrCustTagItem" data-bind="text:Name;cssClass:CssClass"></div>
-                            </div>
-                        </div>
-
-                        <div class="cell5 digrTotalPriceCell" data-bind="text:TotalOrdersPriceF"></div>
-
-                        <div class="cell10 digrTrendCell">
-                            <div data-bind="itemsSource:TrendModel" data-key="id" class="digrTrendView">
-                                <div data-bind="style.height:height;class.digrTrendItemEmpty:IsEmpty;title:symbol" class="lt-template digrTrendItem"></div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
+        <div class="grid2" data-bind="fill-by:gridControlUrl">
+            
         </div>
         <div class="digrGridButtons">
             <button event-bind="click:VM.load()" data-bind="class!.hidden:canReadMore">Načíst více</button>
         </div>
     </div>
+
+    <div id="columnsPopup" class="popupOverlay">
+        <div class="popupBody">
+            <div class="colList" data-bind="itemsSource:filter.gridColumns" data-key="id">
+                <div class="lt-template gridColumnListItem">
+                    <input type="checkbox" data-bind="checked:isSelected" event-bind="change:VM.change(this.checked)" />
+                    <label data-bind="text:title"></label>
+                </div> 
+            </div>
+            <div class="setButtonWrapper">
+                <button event-bind="click:closeColumnsPopup()"><i class="fas fa-check"></i></button>
+            </div>
+        </div>
+    </div>
+
     <div id="digrDetailCont" fill-by="/UI/DistributorsApp/DistributorDetailView.html" data-bind="class!.hidden:isDetailOpen"></div>
     
     <div id="digrRobotsPopupCont" class="popupOverlay" fill-by-lazy="/UI/DistributorsApp/Parts/RobotsPopup.html"></div>
@@ -147,7 +127,7 @@
 <script>
     lt.element("digrMainCont")
         .withModel("app.Distributors.vm")
-        .attach(function (digrTextFilter, bulkTaggingTagFinder, savedFiltersPopupCont, digrRobotsPopupCont) {
+        .attach(function (digrTextFilter, bulkTaggingTagFinder, savedFiltersPopupCont, digrRobotsPopupCont, columnsPopup) {
 
             this.openSavedFilters = () => Popup.open(savedFiltersPopupCont);
             this.openRobots = () => Popup.open(digrRobotsPopupCont);
@@ -220,9 +200,16 @@
                 }
 
             };
+
+            this.openColumnsPopup = () => {
+                Popup.open(columnsPopup, () => app.Distributors.vm.onColumnsSelected()); 
+            };
+
+            this.closeColumnsPopup = () => Popup.close(columnsPopup);
         });
 </script>
 <script src="/UI/DistributorsApp/CrmRobots.VM.js"></script>
+<script src="/UI/DistributorsApp/DynamicColumns.VM.js"></script>
 
 <link href="/UI/DistributorsApp/Css/DistributorGrid_Filters.css" rel="stylesheet" />
 <link href="/UI/DistributorsApp/Css/DistributorGrid_grid.css" rel="stylesheet" />

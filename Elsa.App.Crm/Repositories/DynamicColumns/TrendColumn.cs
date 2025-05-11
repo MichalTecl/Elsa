@@ -9,6 +9,7 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 {
     public class TrendColumn : DynamicColumnBase
     {
+        public override int DisplayOrder => 50;
         public override string Id => "Trend";
 
         public override string Title => "Trend";

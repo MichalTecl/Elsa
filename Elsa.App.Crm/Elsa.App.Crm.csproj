@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Controllers\CrmCustomFiltersController.cs" />
     <Compile Include="Controllers\CrmDistributorsController.cs" />
+    <Compile Include="Controllers\CrmDynamicColumnsController.cs" />
     <Compile Include="Controllers\CrmMeetingsController.cs" />
     <Compile Include="Controllers\CrmMetadataController.cs" />
     <Compile Include="Controllers\CrmRobotsController.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Repositories\DistributorFiltersRepository.cs" />
     <Compile Include="Repositories\DistributorsRepository.cs" />
     <Compile Include="Repositories\DynamicColumns\CategoriesColumn.cs" />
+    <Compile Include="Repositories\DynamicColumns\ColumnFactory.cs" />
     <Compile Include="Repositories\DynamicColumns\DetailLinkColumn.cs" />
     <Compile Include="Repositories\DynamicColumns\DynamicColumnBase.cs" />
     <Compile Include="Repositories\DynamicColumns\TagsColumn.cs" />
@@ -120,6 +122,10 @@
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj">
       <Project>{736FC43F-5A58-4C27-B194-37E40301CFBC}</Project>
       <Name>Elsa.Common.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Common.Noml\Elsa.Common.Noml.csproj">
+      <Project>{3c44767f-b6ab-4add-87f7-ef28051f5fd3}</Project>
+      <Name>Elsa.Common.Noml</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj">
       <Project>{D4607E8C-A5D2-423A-8C78-56B188C567ED}</Project>
@@ -179,10 +185,12 @@
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
     <Content Include="UI\DistributorsApp\CrmRobots.VM.js" />
+    <Content Include="UI\DistributorsApp\DynamicColumns.VM.js" />
     <Content Include="UI\DistributorsApp\FilterControls\CustomerTagInput.html" />
     <Content Include="UI\DistributorsApp\FilterControls\SalesRepSelect.html" />
     <Content Include="UI\DistributorsApp\FilterControls\CustomerGroupSelect.html" />
     <Content Include="UI\DistributorsApp\FilterControls\NumberInput.html" />
+    <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\GridControlTemplate.html" />
     <Content Include="UI\DistributorsApp\Parts\RobotsPopup.html" />
     <Content Include="UI\DistributorsApp\Css\CustomerTagsEditor.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Panels.css" />

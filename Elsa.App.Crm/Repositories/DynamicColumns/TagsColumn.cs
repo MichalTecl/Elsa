@@ -9,6 +9,7 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 {
     public class TagsColumn : DynamicColumnBase
     {
+        public override int DisplayOrder => 10;
         public override string Id => "Tags";
 
         public override string Title => "Štítky";
