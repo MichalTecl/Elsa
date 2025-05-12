@@ -76,6 +76,29 @@ namespace Elsa.Common.Data
             ClearCache();
         }
 
+        public T Upsert(int? id, Action<T> setup)
+        {
+            T record = default;
+            using (var tx = _database.OpenTransaction())
+            {
+                record = GetAll().FirstOrDefault(r => r.Id == id);
+
+                if (record == null)
+                    record = _database.New<T>();
+
+                setup(record);
+
+                _database.Save(record);
+
+                tx.Commit();
+            }
+
+            ClearCache();
+
+            return record;
+        }
+
+        /*
         public T UpdateSingle(Action<T> update, Func<T, bool> where)
         {
             T record = default;
@@ -95,6 +118,7 @@ namespace Elsa.Common.Data
         }
 
         public T UpdateSingle(int id, Action<T> update) => UpdateSingle(update, t => t.Id == id);
+        */
 
         public void DeleteWhere(Func<T, bool> where)
         {

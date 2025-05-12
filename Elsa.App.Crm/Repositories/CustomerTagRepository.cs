@@ -21,78 +21,92 @@ namespace Elsa.App.Crm.Repositories
         private readonly ILog _log;
 
         private readonly AutoRepo<ICustomerTagType> _tagTypeRepo;
+        private readonly AutoRepo<ICustomerTagTypeGroup> _tagTypeGroupRepo;
+        private readonly AutoRepo<ICustomerTagTransition> _transitionRepo;
 
         public CustomerTagRepository(IDatabase database, ISession session, ICache cache, ILog log)
         {
             _database = database;
             _session = session;
             _cache = cache;
-
-            _tagTypeRepo = new AutoRepo<ICustomerTagType>(session, database, cache);
             _log = log;
+
+            _tagTypeRepo = new AutoRepo<ICustomerTagType>(session, database, cache, (db, q) => q.OrderBy(r => r.Name));
+            _tagTypeGroupRepo = new AutoRepo<ICustomerTagTypeGroup>(session, database, cache);
+            _transitionRepo = new AutoRepo<ICustomerTagTransition>(session, database, cache);
         }
 
-        public List<ICustomerTagType> GetTagTypes(bool assignableOnly, bool allAuthors = false)
+        private void ClearMetadataCache()
         {
-            return _tagTypeRepo.GetAll()
-                .Where(t => ((!assignableOnly) || t.CanBeAssignedManually)
-                && ((!t.ForAuthorOnly) || allAuthors || (t.AuthorId == _session.User.Id))).ToList();
+            _cache.Remove("customerTagGroups");
         }
 
-        public ICustomerTagType CreateTagType(string name, string description, int priority, bool isPrivate, string cssClass)
+        public TagGroup GetGroupData(int groupId)
         {
-            var existing = GetTagTypes(false, !isPrivate).FirstOrDefault(t => t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return GetData().FirstOrDefault(g => g.Group.Id == groupId);
+        }
 
-            if (existing != null) 
-            {
-                throw new ArgumentException($"Štítek \"{name}\" již existuje");
-            }
+        public List<TagGroup> GetData()
+        {
+            return _cache.ReadThrough("customerTagGroups", TimeSpan.FromHours(1), () => {
 
-            return _tagTypeRepo.Create(t => {
-                t.Name = name;
-                t.Description = description;
-                t.Priority = priority;
-                t.CanBeAssignedManually = true;
-                t.ForAuthorOnly = isPrivate;
-                t.CssClass = cssClass;
+                var allGroups = _tagTypeGroupRepo.GetAll();
+                var allTags = _database.SelectFrom<ICustomerTagType>().Execute().ToList();
+                var allTransitions = _database.SelectFrom<ICustomerTagTransition>().Execute().ToList();
+
+                var result = new List<TagGroup>(allGroups.Count);
+
+                foreach(var grp in allGroups)
+                {
+                    var groupModel = new TagGroup(grp);
+                    result.Add(groupModel);
+
+                    ICustomerTagType tag = null;
+                    while((tag = allTags.FirstOrDefault(t => t.GroupId == grp.Id)) != null)
+                    {
+                        allTags.Remove(tag);
+                        groupModel.Tags.Add(tag);
+
+                        ICustomerTagTransition transition = null;
+
+                        while((transition = allTransitions.FirstOrDefault(t => t.SourceTagTypeId == tag.Id)) != null)
+                        {
+                            allTransitions.Remove(transition);
+                            groupModel.Transitions.Add(transition);
+                        }
+                    }
+                }
+
+                return result;            
             });
         }
 
-        public ICustomerTagType UpdateTagType(int typeId, string name, string description, int priority, bool isPrivate, string cssClass)
+        public List<ICustomerTagTypeGroup> GetGroups()
         {
-            var concurrent = GetTagTypes(false, false).FirstOrDefault(t => 
-               t.Id != typeId  // another record
-            && t.Name.Equals(name, StringComparison.OrdinalIgnoreCase) // same name
-            && ((!isPrivate) // we are making it public
-                || (!t.ForAuthorOnly) // concurrent one is public
-                || (t.AuthorId == _session.User.Id) // or is of the same user
-                ));
+            return GetData().Select(d => d.Group).ToList();
+        }
 
-            if (concurrent != null)
-                throw new ArgumentException($"Štítek \"{name}\" již existuje");
+        public List<ICustomerTagTypeGroup> SaveGroup(int? id, string name)
+        {
+            _tagTypeGroupRepo.Upsert(id, r => r.Name = name);
 
-            return _tagTypeRepo.UpdateSingle(typeId, t => 
-            {
-                if ((!t.ForAuthorOnly) && (isPrivate))
-                {
-                    throw new ArgumentException("Štítek viditelný všem uživatelům nelze změnit na soukromý");
-                }
+            ClearMetadataCache();
 
-                t.Name = name;
-                t.Description = description;
-                t.Priority = priority;
-                t.CanBeAssignedManually = true;
-                t.ForAuthorOnly = isPrivate;
-                t.CssClass = cssClass;
-            });            
-        }        
-
+            return GetGroups();
+        }
+               
+        
+        public List<ICustomerTagType> GetTagTypes(int? groupId)
+        {
+            return GetData().Where(g => groupId == null || g.Group.Id == groupId).SelectMany(g => g.Tags).ToList();
+        }
+              
         public List<ICustomerTagType> GetCustomerTags(int customerId, bool acrossUsers = false)
         {
             if(!GetAllTagAssignments().TryGetValue(customerId, out var assignments))
                 return new List<ICustomerTagType>(0);
 
-            return GetTagTypes(true, acrossUsers).Where(tt => assignments.Contains(tt.Id)).ToList();
+            return GetTagTypes(null).Where(tt => assignments.Contains(tt.Id)).ToList();
         }
 
         /// <summary>
@@ -106,31 +120,12 @@ namespace Elsa.App.Crm.Repositories
         {
             var result = new List<int>(customerIds.Length);
 
-            using (var tx = _database.OpenTransaction())
-            {
-                var tagType = GetTagTypes(true).FirstOrDefault(tt => tt.Id == tagTypeId) ?? throw new ArgumentException($"Cannot assign tag type id {tagTypeId}");
+            _database.Sql().Call("AssignTagToCustomers")
+                .WithParam("@authorId", _session.User.Id)
+                .WithParam("@tagTypeId", tagTypeId)
+                .WithStructuredParam("@customerIds", "IntTable", customerIds, new[] { "Id" }, i => new object[] { i })
+                .ReadRows(r => result.Add(r.GetInt32(0)));
 
-                var existingAssignments = GetAllTagAssignments();
-
-                foreach (var customerId in customerIds)
-                {                    
-                    if (existingAssignments.TryGetValue(customerId, out var alreadyHasTags) && alreadyHasTags.Contains(tagTypeId))
-                        continue;
-
-                    var rec = _database.New<ICustomerTagAssignment>();
-                    rec.CustomerId = customerId;
-                    rec.TagTypeId = tagTypeId;
-                    rec.AssignDt = DateTime.Now;
-                    rec.AuthorId = _session.User.Id;
-
-                    _database.Save(rec);
-
-                    result.Add(customerId);
-                }
-
-                tx.Commit();
-            }
-            
             _cache.Remove(AssignmentsCacheKey);
 
             return result;
@@ -196,6 +191,9 @@ namespace Elsa.App.Crm.Repositories
 
             using (var tx = _database.OpenTransaction())
             {
+                var transitions = _database.SelectFrom<ICustomerTagTransition>().Where(t => t.SourceTagTypeId == id || t.TargetTagTypeId == id).Execute().ToList();
+                _database.DeleteAll(transitions);
+
                 var assignments = _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id).Execute().ToList();
 
                 _database.DeleteAll(assignments);
@@ -210,11 +208,26 @@ namespace Elsa.App.Crm.Repositories
 
                 tx.Commit();
             }
+
+            ClearMetadataCache();
         }
 
         internal int GetAssignmentsCount(int id)
         {
             return _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id).Execute().Count();
+        }
+
+        public class TagGroup
+        {
+            public ICustomerTagTypeGroup Group { get; }
+
+            public TagGroup(ICustomerTagTypeGroup group)
+            {
+                Group = group;
+            }
+
+            public List<ICustomerTagType> Tags { get; } = new List<ICustomerTagType>();
+            public List<ICustomerTagTransition> Transitions { get; } = new List<ICustomerTagTransition>();
         }
     }
 }

@@ -57,6 +57,7 @@
     <Compile Include="Controllers\CrmMeetingsController.cs" />
     <Compile Include="Controllers\CrmMetadataController.cs" />
     <Compile Include="Controllers\CrmRobotsController.cs" />
+    <Compile Include="Controllers\CustomerTagDesignerController.cs" />
     <Compile Include="CrmApp\CrmRobotExecutor.cs" />
     <Compile Include="CrmApp\CustomerDataFacade.cs" />
     <Compile Include="CrmUserRights.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Entities\ICustomerTagAssignment.cs" />
     <Compile Include="Entities\ICustomerTagTransition.cs" />
     <Compile Include="Entities\ICustomerTagType.cs" />
+    <Compile Include="Entities\ICustomerTagTypeGroup.cs" />
     <Compile Include="Entities\IMeeting.cs" />
     <Compile Include="Entities\IMeetingCategory.cs" />
     <Compile Include="Entities\IMeetingParticipant.cs" />
@@ -79,6 +81,8 @@
     <Compile Include="Entities\ISalesRepresentative.cs" />
     <Compile Include="Model\CrmMetadata.cs" />
     <Compile Include="Model\CrmRobotModel.cs" />
+    <Compile Include="Model\CustomerTagTypeGroupModel.cs" />
+    <Compile Include="Model\CustomerTagTypeModel.cs" />
     <Compile Include="Model\CustomFilterInfo.cs" />
     <Compile Include="Model\DistributorChangeRequestModel.cs" />
     <Compile Include="Model\DistributorDetailViewModel.cs" />
@@ -181,6 +185,7 @@
     <Content Include="SQL\20250429_001_crmfilter_hasTag.sql" />
     <Content Include="SQL\20250429_003_crmfilter_orderedProductInPeriod.sql" />
     <Content Include="SQL\20250507_001_crmfilters.sql" />
+    <Content Include="SQL\20250515_001_AssignTagToCustomers.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

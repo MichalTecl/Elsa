@@ -38,29 +38,12 @@ namespace Elsa.App.Crm.Controllers
                 _customerMeetingsRepository.GetMeetingStatusTypes(),
                 _customerMeetingsRepository.GetMeetingStatusActions(null),
                 _customerMeetingsRepository.GetAllMeetingCategories(),
-                _customerTagRepository.GetTagTypes(false, false),
+                _customerTagRepository.GetTagTypes(null),
                 _salesRepRepository.GetSalesRepresentatives(null).ToList(),
                 _customerRepository.GetCustomerGroupTypes().Select(kv => kv.Value).ToList(),
                 _distributorFiltersRepository.GetFilters());
         }
-
-        public void SaveTag(int? id, string name, string cssClass)
-        {
-            if (id == null)
-            {
-                _customerTagRepository.CreateTagType(name, name, 1, false, cssClass);
-            }
-            else
-            {
-                _customerTagRepository.UpdateTagType(id.Value, name, name, 1, false, cssClass);
-            }
-        }
-
-        public void DeleteTag(int id) 
-        {
-            _customerTagRepository.DeleteTagType(id);
-        }
-
+                
         public int CountTagAssignments(int id)
         {
             return _customerTagRepository.GetAssignmentsCount(id);

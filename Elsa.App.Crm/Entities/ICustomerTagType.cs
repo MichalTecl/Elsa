@@ -13,22 +13,18 @@ namespace Elsa.App.Crm.Entities
     [Entity]
     public interface ICustomerTagType : IIntIdEntity, IProjectRelatedEntity, IHasAuthor
     {
-        bool ForAuthorOnly { get; set; }
-
         [NVarchar(100, false)]
         string Name { get; set; }
 
         [NVarchar(1000, false)]
         string Description { get; set; }
-
-        int Priority { get; set; }
-
-        bool CanBeAssignedManually { get; set; }
-
-        [NVarchar(100, true)]
-        string OptionGroup {  get; set; }
-
+                
         [NVarchar(100, true)]
         string CssClass { get; set; }
+
+        bool IsRoot { get; set; }
+
+        int GroupId { get; set; }
+        ICustomerTagTypeGroup Group { get; }
     }
 }
