@@ -125,6 +125,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     const applySavedFilter = (filter, filterId) => {
         self.filter = filter;
+        self.onColumnsSelected(true);
 
         self.editedExFilter = null;
         self.editingExFilter = false;
@@ -153,9 +154,11 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 self.search(filterId);
             }
         };
-
+                
         visitAllExFilters(f => {
             validateExFilter(f, whenAllFiltersValid)
+        }, () => {            
+            self.search();
         });
 
         self.allTags.forEach(t => {
@@ -182,8 +185,18 @@ app.Distributors.VM = app.Distributors.VM || function(){
             });
     };
 
-    const visitAllExFilters = (visitor) => {
-        self.filter.ExFilterGroups.forEach(fg => fg.Filters.forEach(f => visitor(f)));
+    const visitAllExFilters = (visitor, noFiltersAction) => {
+
+        let found = false;
+
+        self.filter.ExFilterGroups.forEach(fg => fg.Filters
+            .forEach(f => {
+                visitor(f);
+                found = true;
+            }));
+
+        if (!found && !!noFiltersAction)
+            noFiltersAction();
     };
         
     self.importSavedFilter = (filter) => {
@@ -471,6 +484,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.search = (savedFilterId) => {
+
+        console.log("Search initiated");
+
         self.page = 0;
         self.canReadMore = false;
         self.data = [];

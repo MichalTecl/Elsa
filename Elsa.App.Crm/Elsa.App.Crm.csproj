@@ -68,6 +68,7 @@
     <Compile Include="Entities\ICustomerGroupMapping.cs" />
     <Compile Include="Entities\ICustomerStore.cs" />
     <Compile Include="Entities\ICustomerTagAssignment.cs" />
+    <Compile Include="Entities\ICustomerTagTransition.cs" />
     <Compile Include="Entities\ICustomerTagType.cs" />
     <Compile Include="Entities\IMeeting.cs" />
     <Compile Include="Entities\IMeetingCategory.cs" />

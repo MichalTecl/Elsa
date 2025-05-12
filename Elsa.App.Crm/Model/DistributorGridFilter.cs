@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,26 @@ namespace Elsa.App.Crm.Model
         public bool IncludeDisabled { get; set; }
 
         public List<DistributorFiltersGroup> ExFilterGroups { get; set; }
+
+        [JsonProperty("gridColumns")]
+        public List<GridColumnModel> GridColumns { get; set; } = new List<GridColumnModel>();
     }
 
     public class DistributorFiltersGroup 
     {
         public List<DistributorFilterModel> Filters { get; set; }
     }
+
+    public class GridColumnModel
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("title")]        
+        public string Title { get; set; }
+
+        [JsonProperty("isSelected")]
+        public bool IsSelected { get; set; }
+    }
+
 }

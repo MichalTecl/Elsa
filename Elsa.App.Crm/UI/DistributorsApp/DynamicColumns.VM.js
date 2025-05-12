@@ -34,7 +34,7 @@ app.DynamicColumns = (self) => {
     const loadColumnList = () => lt.api("/CrmDynamicColumns/GetColumns").get(receiveColumnList);
     loadColumnList();
 
-    self.onColumnsSelected = () => {
+    self.onColumnsSelected = (doNotInitiateSearch) => {
         const query = self.filter.gridColumns.filter(c => c.isSelected).map(c => c.id).join(","); 
         const gridUrl = "/CrmDynamicColumns/getGridHtml?query=" + encodeURIComponent(query);
 
@@ -42,7 +42,9 @@ app.DynamicColumns = (self) => {
             return;
 
         self.gridControlUrl = gridUrl;
-        app.Distributors.vm.search();
+
+        if (!doNotInitiateSearch)
+            app.Distributors.vm.search();
 
         localStorage.setItem("distributorGridSelectedColumns", query);
     };
