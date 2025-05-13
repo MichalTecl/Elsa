@@ -123,7 +123,7 @@ namespace Elsa.App.Crm.Controllers
             });
         }
 
-        public List<CustomerTagTypeNodeModel> SaveTag(int groupId, int? parentTagId, CustomerTagTypeNodeModel model)
+        public List<CustomerTagTypeNodeModel> SaveTag(int groupId, int? parentTagId, CustomerTagTypeModel model)
         {
             using (var tx = _db.OpenTransaction())
             {

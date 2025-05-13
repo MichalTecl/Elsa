@@ -1,4 +1,4 @@
-﻿var lanta = lanta || {};
+var lanta = lanta || {};
 lanta.ViewLoading = lanta.ViewLoading || {};
 lanta.ViewLoading.cache = lanta.ViewLoading.cache || {};
 lanta.ViewLoading.makeScriptsLive = lanta.ViewLoading.makeScriptsLive ||
@@ -141,4 +141,19 @@ lt.replaceBy = lt.replaceBy || function (placeholder, src, callback) {
 
 lt.fillBy = lt.fillBy || function (placeholder, src, callback) {
     lanta.ViewLoading.loader(placeholder, src, "fill-by", callback);
+};
+
+lt.resolveLazyLoads = lt.resolveLazyLoads || function (root) {
+    let needsRebind = false;
+    [...root.querySelectorAll("[fill-by-lazy]"), root].forEach(el => {
+        if (el.hasAttribute("fill-by-lazy")) {
+            el.setAttribute("fill-by", el.getAttribute("fill-by-lazy"));
+            el.removeAttribute("fill-by-lazy");
+            needsRebind = true;
+        }
+    });
+
+    if (needsRebind) {
+        lt.notify(root);
+    }
 };

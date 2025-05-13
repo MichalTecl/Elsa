@@ -21,18 +21,7 @@ var Popup = (() => {
 
         overlay.addEventListener("click", onClick);
 
-        let needsRebind = false;
-        [...overlay.querySelectorAll("[fill-by-lazy]"), overlay].forEach(el => {
-            if (el.hasAttribute("fill-by-lazy")) {
-                el.setAttribute("fill-by", el.getAttribute("fill-by-lazy"));
-                el.removeAttribute("fill-by-lazy");
-                needsRebind = true;
-            }
-        });
-
-        if (needsRebind) {
-            lt.notify(overlay);
-        }
+        lt.resolveLazyLoads(overlay);
 
         openOverlays.push(overlay);
     }

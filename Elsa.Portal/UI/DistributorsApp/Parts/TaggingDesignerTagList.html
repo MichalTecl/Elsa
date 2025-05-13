@@ -1,0 +1,36 @@
+<div class="ctdTagListLevel" data-bind="itemsSource:tags" data-key="instanceId">
+    <div class="lt-template ctdTagListItem">
+        <div class="ctdTagItemHeadRow">
+            <div class="ctdTagItemParentConnector" data-bind="class.hidden:isRoot">
+                <i class="fas fa-unlink faButtonNew" event-bind="VM.detachFromParent()"></i>
+            </div>
+            <div class="ctdTagItemEditButtons">
+                <i class="fas fa-pencil-alt faButtonNew" data-bind="class.hidden:isEditing" event-bind="click:VM.edit()"></i>
+                <i class="fas fa-times faButtonNew" data-bind="class!.hidden:isEditing" event-bind="click:VM.cancelEdit()"></i>
+            </div>
+            <div class="ctdTagNameRow">
+                <div class="ctdTagName" data-bind="text:name;cssClass:cssClass;class.hidden:isEditing"></div>
+                <div class="ctdTagNameEditWrapper" event-bind="class!.hidden:isEditing">
+                    <div class="ctdTagNameEdit" data-bind="cssClass:cssClass;">
+                        <input style="background-color:transparent !important; border:none !important; color:inherit !important" type="text" class="ctagNameEditTextbox" data-bind="value:name" event-bind="input:VM.updateName(this.value)" />
+                    </div>
+                    <i class="fas fa-palette tagStyleSwitchIcon" event-bind="click:VM.changeCssClass()"></i>
+                </div>
+            </div>
+            
+            <div class="ctdTagExpansionButtons">
+                <i class="fas fa-chevron-down" data-bind="class!.hidden:isOpen" event-bind="click:VM.open()"></i>
+                <i class="fas fa-chevron-right" data-bind="class.hidden:isOpen" event-bind="click:VM.close()"></i>
+            </div>
+        </div>
+        
+        <div class="ctdTagEditButtonsRow" data-bind="class!.hidden:isEditing">
+            <div class="paletteButtonWrap">
+
+            </div>
+            <div class="cancelSaveButtonWrap">
+
+            </div>
+        </div>
+    </div>
+</div>

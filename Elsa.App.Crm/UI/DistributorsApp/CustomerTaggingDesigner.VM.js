@@ -2,9 +2,230 @@ app = app || {};
 app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
     "VM": function () {
 
-        const self = this;
+        let allCssClasses = [];
 
+        const self = this;
         self.binder = 1;
+
+        let tagData = [];
+
+        self.tags = [];
+
+        const receiveTags = (tags) => {
+            tagData = tags;
+
+            updateTagList(null, self.tags, tagData.filter(t => t.IsRoot).map(t => t.Id));            
+        };
+
+        const loadTags = () => call("LoadTags").get(receiveTags);
+
+        const updateTagList = (parentTag, list, ids) => {
+
+            // 1. remove tags not contained in ids
+            for (let i = list.length - 1; i >= 0; i--) {
+                if (ids.indexOf(list[i].id) === -1) {
+                    list.splice(i, 1);
+                }
+            }
+
+            // 2. add/update tags by new ids
+            ids.forEach(id => {
+                const tagModel = getTagModel(parentTag, list, id);
+                tagModel.update();
+            });
+        };
+
+        const getTagModel = (parentTag, source, id) => {
+
+            let tagModel = (id == null) ? null : source.find(t => t.id === id);
+
+            if (!tagModel) {
+                tagModel =
+                {
+                    "id": id,
+                    "isRoot": true,
+                    "parentTag": parentTag,
+                    "instanceId": crypto.randomUUID(),
+                    "tags": [],
+                    "tagsIds": [],
+                    "isOpen": false,
+                    "canOpen": false,   
+                    "isEditing": false,
+                    "newNodeParentList": null,
+                    "firstParentId": null,
+                    "childPickerOpen": false
+                };
+
+                tagModel.update = () => {
+
+                    const tagRecord = tagData.find(t => t.Id === tagModel.id);
+                    if (!tagRecord) {
+                        throw new Error("No source data for tagId=" + tagModel.id);
+                    }
+
+                    tagModel.name = tagRecord.Name;
+                    tagModel.cssClass = tagRecord.CssClass;
+                    tagModel.description = tagRecord.Description;
+                    tagModel.isRoot = tagRecord.IsRoot;
+
+                    tagModel.tagsIds = tagRecord.TransitionsTo;
+
+                    if (tagModel.isOpen) {
+                        updateTagList(tagModel, tagModel.tags, tagModel.tagsIds);
+                    } else {
+                        tagModel.tags = [];
+                    }
+
+                    tagModel.canOpen = (!!tagModel.id); // !id => means it is not saved, so we cannot add tags
+
+                    if (!!tagModel.id) {
+                        tagModel.newNodeParentList = null;
+                    }
+
+                    return true;
+                };
+
+                tagModel.open = () => {
+                    tagModel.isOpen = true;
+                    tagModel.update();
+                };
+
+                tagModel.close = () => {
+                    tagModel.isOpen = false;
+                };
+
+                tagModel.edit = () => {
+                    tagModel.isEditing = true;
+                };
+
+                tagModel.save = () => {
+
+                    tagModel.cancelEdit();
+
+                    call("saveTag")
+                        .query({ "parentTagId": tagModel.firstParentId })
+                        .body({
+                            "Id": tagModel.id,
+                            "Name": tagModel.name,
+                            "CssClass": tagModel.cssClass,
+                            "Description": tagModel.description
+                        })
+                        .post(receiveTags);
+                };
+
+                tagModel.updateName = (v) => tagModel.name = v;
+
+                tagModel.changeCssClass = () => {
+                    let cinx = (allCssClasses.indexOf(tagModel.cssClass) + 1) % self.allCssClasses.length;
+                    tagModel.cssClass = self.allCssClasses[cinx];
+                };
+
+                tagModel.openChildPicker = () => tagModel.childPickerOpen = true;
+                tagModel.closeChildPicker = () => tagModel.childPickerOpen = false;
+
+                tagModel.attachChild = (childTagName) => {
+
+                    const tag = tagData.find(t => t.Name === childTagName);
+                    if (!tag)
+                        return;
+
+                    call("SetTransition").query({ "sourceId": tagModel.id, "targetId": tag.Id }).post(receiveTags);
+
+                    tagModel.closeChildPicker();
+                };
+
+                tagModel.detachFromParent = () => {
+                    if (!tagModel.parentTag)
+                        return;
+
+                    call("RemoveTransition").query({ "sourceId": tagModel.parentTag.id, "targetId": tagModel.id }).post(receiveTags);
+                };
+
+                tagModel.cancelEdit = () => {
+                    tagModel.isEditing = false;
+                    tagModel.childPickerOpen = false;
+
+                    if (!tagModel.id) {
+                        // new one - we have to discard it
+
+                        let index;
+
+                        if (!tagModel.newNodeParentList || (index = tagModel.newNodeParentList.indexOf(tagModel) === -1)) {
+                            throw new Error("Unexpected state of graph :(");
+                        }
+
+                        tagModel.newNodeParentList.splice(index, 1);                        
+
+                        return;
+                    }
+
+                    tagModel.update();
+                };
+
+                source.push(tagModel);
+            }
+
+            return tagModel;
+        };
+
+        const findTagUiModel = (predicate, sourceList) => {
+
+            sourceList = sourceList || self.tags;
+
+            for (let tag of sourceList) {
+                if (predicate(tag))
+                    return tag;
+
+                let res = findTagUiModel(predicate, tag.tags);
+                if (!!res)
+                    return res;
+            }
+
+            return null;
+        };
+
+        self.createTag = (parentTagUiModel) => {
+
+            let list = self.tags;
+
+            if (!!parentTagUiModel) {
+                list = parentTagUiModel.tags;
+            }
+
+            let model = getTagModel(parentTagUiModel, list, null);
+            model.newNodeParentList = list;
+            model.isEditing = true;
+
+            if (!!parentTagUiModel) {
+                model.firstParentId = parentTagUiModel.id;
+            }
+        };
+
+        const collectCssClasses = () => {
+            if (allCssClasses.length > 0)
+                return;
+
+            for (const sheet of document.styleSheets) {
+                try {
+                    for (const rule of sheet.cssRules || []) {
+                        if (rule.selectorText && rule.selectorText.startsWith('.crmDistributorTag_')) {
+                            allCssClasses.push(rule.selectorText.trim().substring(1));
+                        }
+                    }
+
+                    if (allCssClasses.length > 0)
+                        return;
+
+                } catch (e) {
+                    console.warn('Cannot access stylesheet:', sheet.href);
+                }
+            }
+        };
+
+        setTimeout(collectCssClasses, 500);
+        loadTags();
+
+        /**** GROUPS *******************************/
 
         self.groups = [];
         self.groupsFilter = null;
@@ -15,6 +236,11 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
         self.openGroup = (id) => {
             self.activeGroup = self.groups.find(g => g.Id === id);
             self.hasActiveGroup = !!self.activeGroup;
+            self.tags.splice(0, self.tags.length);
+
+            if (!!self.activeGroup) {
+                loadTags(self.activeGroup.Id);
+            }            
         };
 
         self.closeGroup = () => {

@@ -225,6 +225,7 @@
     <Content Include="UI\DistributorsApp\FilterControls\TextBox.html" />
     <Content Include="UI\DistributorsApp\MeetingsCalendar.html" />
     <Content Include="UI\DistributorsApp\Parts\SavedFiltersPopup.html" />
+    <Content Include="UI\DistributorsApp\Parts\TaggingDesignerTagList.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.css" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.VM.js" />

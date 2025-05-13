@@ -1,4 +1,4 @@
-﻿var lt = lt || {};
+var lt = lt || {};
 lanta.itemsGeneration = lanta.itemsGeneration || {};
 
 lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
@@ -33,6 +33,7 @@ lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
 
             if (position >= children.length - 1) {
                 container.appendChild(element);
+                lt.resolveLazyLoads(element);
                 return;
             }
 
@@ -42,6 +43,7 @@ lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
             }
 
             container.insertBefore(element, nextChild);
+            lt.resolveLazyLoads(element);
         };
 
         this.generate = function(container, itemTemplate, collection, keyGenerator, controller) {
