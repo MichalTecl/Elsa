@@ -1,0 +1,114 @@
+/* Wrapper styl */
+#ctdGroupsListPanel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+/* Vyhledávání */
+.ctdSearchWrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#ctdGroupFilterText {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    font-size: 14px;
+}
+
+.ctdSearchWrapper i {
+    background: #f0f0f0;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+    color: #555;
+}
+
+/* Tlačítko pro přidání */
+.ctdNewbuttonWrapper {
+    margin-bottom: 10px;
+}
+
+#ctdNewGroupButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+    #ctdNewGroupButton i {
+        margin-right: 2px;
+    }
+
+/* Seznam skupin */
+.ctdGroupListWrapper {
+    flex: 1;
+    overflow-y: auto;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+/* Jednotlivé skupiny */
+.ctdGroupListItem {
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+    .ctdGroupListItem:hover {
+        background-color: #f9f9f9;
+    }
+
+.ctdGroupItemRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.ctdFolderClosed,
+.ctdFolderOpen {
+    font-size: 16px;
+    color: #888;
+}
+
+/* Název skupiny */
+.ctdGroupName {
+    font-weight: bold;
+    font-size: 15px;
+    color: #333;
+}
+
+/* Náhledy tagů */
+.ctdGroupSrchTagView {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-left: 24px;
+    margin-top: 2px;
+}
+
+.ctdSearchTagPreview {
+    background-color: #f0f0f0;
+    color: #555;
+    font-size: 13px;
+    padding: 2px 6px;
+    margin-right: 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

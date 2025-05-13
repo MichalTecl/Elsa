@@ -29,7 +29,7 @@ namespace Elsa.App.Crm.Controllers
 
         public List<CrmRobotModel> GetRobots()
         {
-            var tagIndex = _tags.GetTagTypes(false, true).ToDictionary(t => t.Id, t => t.Name);
+            var tagIndex = _tags.GetTagTypes(null).ToDictionary(t => t.Id, t => t.Name);
             var allMapped = _filters.GetAllRobots(false)
                 .Select(r => MapRobot(r, tagIndex))
                 .OrderBy(r => r.IsActive ? 0 : 1)
@@ -94,7 +94,7 @@ namespace Elsa.App.Crm.Controllers
 
         public List<CrmRobotModel> SaveRobot(CrmRobotModel model)
         {
-            var tagIdIndex = _tags.GetTagTypes(false, true).ToDictionary(t => t.Name, t => t.Id);
+            var tagIdIndex = _tags.GetTagTypes(null).ToDictionary(t => t.Name, t => t.Id);
 
             int? getTagId(string tagName)
             {

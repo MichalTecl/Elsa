@@ -82,7 +82,7 @@
     <Compile Include="Model\CrmMetadata.cs" />
     <Compile Include="Model\CrmRobotModel.cs" />
     <Compile Include="Model\CustomerTagTypeGroupModel.cs" />
-    <Compile Include="Model\CustomerTagTypeModel.cs" />
+    <Compile Include="Model\CustomerTagTypeNodeModel.cs" />
     <Compile Include="Model\CustomFilterInfo.cs" />
     <Compile Include="Model\DistributorChangeRequestModel.cs" />
     <Compile Include="Model\DistributorDetailViewModel.cs" />
@@ -191,6 +191,12 @@
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
     <Content Include="UI\DistributorsApp\CrmRobots.VM.js" />
+    <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_main.css" />
+    <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_tagTree.css" />
+    <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_groups.css" />
+    <Content Include="UI\DistributorsApp\CustomerTaggingDesigner.html" />
+    <Content Include="UI\DistributorsApp\CustomerTaggingDesigner.VM.js" />
+    <Content Include="UI\DistributorsApp\CustomerTagsDesignerPage.html" />
     <Content Include="UI\DistributorsApp\DynamicColumns.VM.js" />
     <Content Include="UI\DistributorsApp\FilterControls\CustomerTagInput.html" />
     <Content Include="UI\DistributorsApp\FilterControls\SalesRepSelect.html" />

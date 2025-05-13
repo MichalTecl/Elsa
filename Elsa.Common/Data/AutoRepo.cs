@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Elsa.Common.Data
@@ -21,6 +22,9 @@ namespace Elsa.Common.Data
         private readonly Func<IDatabase, IQueryBuilder<T>, IQueryBuilder<T>> _selectQueryModifier;
         private readonly TimeSpan? _cacheTtl;
         private readonly string _cacheKeySuffix;
+
+        private static readonly object _boundKeysLock = new object();
+        private static readonly HashSet<string> _boundCacheKeys = new HashSet<string>();
 
         public AutoRepo(ISession session, 
             IDatabase database, 
@@ -41,7 +45,17 @@ namespace Elsa.Common.Data
                
         public string CacheKey { get; }
 
-        public List<T> GetAll()
+        public string BindCacheKey(string key)
+        {
+            lock (_boundKeysLock)
+            {
+                _boundCacheKeys.Add(key);
+            }
+
+            return key;
+        }
+
+        public IReadOnlyCollection<T> GetAll()
         {
             var getter = _database.SelectFrom<T>();
 
@@ -52,12 +66,23 @@ namespace Elsa.Common.Data
                 getter = getter.Where(i => ((IProjectRelatedEntity)i).ProjectId == _session.Project.Id);
 
             if (_cacheTtl == null)
-                return getter.Execute().ToList();
+                return getter.Execute().ToList().AsReadOnly();
 
-            return _cache.ReadThrough(CacheKey, _cacheTtl.Value, () => getter.Execute().ToList());
+            return _cache.ReadThrough(CacheKey, _cacheTtl.Value, () => {
+                return getter.Execute().ToList().AsReadOnly();
+                });
         }
-         
-        public void ClearCache() => _cache.Remove(CacheKey);
+
+        public void ClearCache() 
+        {
+            lock (_boundKeysLock)
+            {
+                foreach (var bk in _boundCacheKeys)
+                    _cache.Remove(bk);
+            }
+
+            _cache.Remove(CacheKey); 
+        }
 
         public void UpdateWhere(Action<T> update, Func<T, bool> where)
         {
@@ -97,29 +122,7 @@ namespace Elsa.Common.Data
 
             return record;
         }
-
-        /*
-        public T UpdateSingle(Action<T> update, Func<T, bool> where)
-        {
-            T record = default;
-            using (var tx = _database.OpenTransaction())
-            {
-                record = GetAll().Single(where);
-                update(record);
                 
-                _database.Save(record);
-
-                tx.Commit();                
-            }
-
-            ClearCache();
-
-            return record;
-        }
-
-        public T UpdateSingle(int id, Action<T> update) => UpdateSingle(update, t => t.Id == id);
-        */
-
         public void DeleteWhere(Func<T, bool> where)
         {
             using (var tx = _database.OpenTransaction())

@@ -231,7 +231,7 @@ namespace Elsa.App.Crm.Controllers
             yield return Def(DateTime.MinValue, todayStart, "neuzavřených", "mtGrpPassed");
         }
 
-        private T MapStatus<T>(List<IMeetingStatus> index, T vm) where T : StatusVmBase
+        private T MapStatus<T>(IEnumerable<IMeetingStatus> index, T vm) where T : StatusVmBase
         {
             var st = index.FirstOrDefault(s => s.Id == vm.StatusTypeId);
 

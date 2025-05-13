@@ -36,7 +36,7 @@ namespace Elsa.App.Crm.CrmApp
 
         public void Execute(int robotId, List<RobotExecutionResult> target)
         {
-            var tagIndex = _customerTags.GetTagTypes(false, false).ToDictionary(t => t.Id, t => t);
+            var tagIndex = _customerTags.GetTagTypes(null).ToDictionary(t => t.Id, t => t);
                                     
             _log.Info($"Loading robot data by id={robotId}");
             var robot = _filtersRepository.GetAllRobots(false).FirstOrDefault(r => r.Id == robotId).Ensure();

@@ -35,24 +35,28 @@ namespace Elsa.App.Crm.Repositories
             _tagTypeGroupRepo = new AutoRepo<ICustomerTagTypeGroup>(session, database, cache);
             _transitionRepo = new AutoRepo<ICustomerTagTransition>(session, database, cache);
         }
-
-        private void ClearMetadataCache()
-        {
-            _cache.Remove("customerTagGroups");
-        }
-
+                
         public TagGroup GetGroupData(int groupId)
         {
             return GetData().FirstOrDefault(g => g.Group.Id == groupId);
         }
 
+        public string BindMetadataCacheKey(string key)
+        {
+            _transitionRepo.BindCacheKey(key);
+            _tagTypeRepo.BindCacheKey(key);
+            _tagTypeGroupRepo.BindCacheKey(key);
+
+            return key;
+        }
+
         public List<TagGroup> GetData()
         {
-            return _cache.ReadThrough("customerTagGroups", TimeSpan.FromHours(1), () => {
+            return _cache.ReadThrough(BindMetadataCacheKey("customerTagGroups"), TimeSpan.FromHours(1), () => {
 
                 var allGroups = _tagTypeGroupRepo.GetAll();
-                var allTags = _database.SelectFrom<ICustomerTagType>().Execute().ToList();
-                var allTransitions = _database.SelectFrom<ICustomerTagTransition>().Execute().ToList();
+                var allTags = new List<ICustomerTagType>(_tagTypeRepo.GetAll());
+                var allTransitions = new List<ICustomerTagTransition>(_transitionRepo.GetAll());
 
                 var result = new List<TagGroup>(allGroups.Count);
 
@@ -81,6 +85,45 @@ namespace Elsa.App.Crm.Repositories
             });
         }
 
+        public Dictionary<int, string> GetGroupsSearchTags()
+        {
+            return _cache.ReadThrough(BindMetadataCacheKey("groupsSearchTagIndex"), TimeSpan.FromHours(1), () =>
+            {
+                var groups = _tagTypeGroupRepo.GetAll();
+
+                var result = new Dictionary<int, string>();
+
+                int groupId = -1;
+                var sb = new StringBuilder();
+
+                void CloseGroup()
+                {
+                    if (groupId < 1 || sb.Length == 0)
+                        return;
+
+                    result.Add(groupId, sb.ToString());
+                    sb.Clear();
+                }
+
+                foreach (var tag in _tagTypeRepo.GetAll().OrderBy(t => t.GroupId))
+                {
+                    if (tag.GroupId != groupId)
+                    {
+                        CloseGroup();
+
+                        groupId = tag.GroupId;
+                        sb.Append(groups.Single(g => g.Id == groupId).Name);
+                    }
+
+                    sb.Append("|").Append(tag.Name);
+                }
+
+                CloseGroup();
+
+                return result;
+            });
+        }
+
         public List<ICustomerTagTypeGroup> GetGroups()
         {
             return GetData().Select(d => d.Group).ToList();
@@ -89,8 +132,6 @@ namespace Elsa.App.Crm.Repositories
         public List<ICustomerTagTypeGroup> SaveGroup(int? id, string name)
         {
             _tagTypeGroupRepo.Upsert(id, r => r.Name = name);
-
-            ClearMetadataCache();
 
             return GetGroups();
         }
@@ -208,13 +249,111 @@ namespace Elsa.App.Crm.Repositories
 
                 tx.Commit();
             }
-
-            ClearMetadataCache();
         }
 
         internal int GetAssignmentsCount(int id)
         {
             return _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id).Execute().Count();
+        }
+
+        public ICustomerTagType SaveTag(int groupId, int? id, Action<ICustomerTagType> setup)
+        {
+            return _tagTypeRepo.Upsert(id, t => { 
+                
+                if (t.AuthorId == 0)
+                {
+                    t.AuthorId = _session.User.Id;                    
+                }
+
+                t.ProjectId = _session.Project.Id;
+
+                if (id == null)
+                {
+                    t.IsRoot = true;
+                    t.GroupId = groupId;
+                }
+
+                var originalGroupId = t.GroupId;
+                
+                setup(t);
+
+                if (t.GroupId != originalGroupId || t.GroupId != groupId) 
+                {
+                    throw new ArgumentException("Není možné přesouvat štítky mezi skupinami");
+                }
+
+                var existing = _tagTypeRepo.GetAll().FirstOrDefault(ex => ex.Name.Equals(t.Name, StringComparison.InvariantCultureIgnoreCase));
+                if (existing != null && (id == null || id != existing.Id))
+                    throw new ArgumentException($"Štítek s názvem '{t.Name}' již existuje");
+
+                if (string.IsNullOrEmpty(t.Description))
+                    t.Description = t.Name;
+
+                if (string.IsNullOrEmpty(t.Name))
+                    throw new ArgumentException("Štítek musí mít název");
+
+                if (string.IsNullOrEmpty(t.CssClass))
+                    throw new ArgumentException("Štítek musí mít třídu stylu");
+                
+            });
+        }
+
+        public void SetTagTransition(int sourceId, int targetId, bool throwIfExsits)
+        {
+            if (sourceId == targetId)
+                throw new ArgumentException("Štítek nemůže přejít sám na sebe");
+
+            using(var tx = _database.OpenTransaction())
+            {
+                var sourceTag = _tagTypeRepo.Get(sourceId);
+                var targetTag = _tagTypeRepo.Get(targetId);
+
+                if (sourceTag.GroupId != targetTag.GroupId)
+                    throw new ArgumentException("Není možné propojovat štítky napříč skupinami");
+
+                var existingTransition = _transitionRepo.GetAll().FirstOrDefault(ex => ex.SourceTagTypeId == sourceId && ex.TargetTagTypeId == targetId);
+                if (existingTransition != null)
+                {
+                    if (!throwIfExsits)
+                    {
+                        tx.Commit();
+                        return;
+                    }
+
+                    throw new ArgumentException($"Přechod {sourceTag.Name} -> {targetTag.Name} již existuje");
+                }
+
+                if (targetTag.IsRoot)
+                {
+                    targetTag.IsRoot = false;
+                    _tagTypeRepo.Save(targetTag);
+                }
+
+                tx.Commit();
+            }
+        }
+
+        public void RemoveTagTransition(int sourceId, int targetId)
+        {
+            using (var tx = _database.OpenTransaction())
+            {
+                var sourceTag = _tagTypeRepo.Get(sourceId);
+                var targetTag = _tagTypeRepo.Get(targetId);
+               
+                var existingTransition = _transitionRepo.GetAll().FirstOrDefault(ex => ex.SourceTagTypeId == sourceId && ex.TargetTagTypeId == targetId);
+                if (existingTransition == null)
+                    return;
+
+                var hasOtherParent = _transitionRepo.GetAll().Any(t => t.SourceTagTypeId != sourceId && t.TargetTagTypeId == targetId);
+                
+                if (!targetTag.IsRoot && !hasOtherParent)
+                {
+                    targetTag.IsRoot = true;
+                    _tagTypeRepo.Save(targetTag);
+                }
+
+                tx.Commit();
+            }
         }
 
         public class TagGroup

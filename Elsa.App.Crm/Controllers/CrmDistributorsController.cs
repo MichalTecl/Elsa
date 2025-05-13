@@ -156,7 +156,7 @@ namespace Elsa.App.Crm.Controllers
 
         public int DoBulkTagging(DistributorGridFilter filter, string tagName, bool set)
         {
-            var tag = _tagRepo.GetTagTypes(true).FirstOrDefault(t => t.Name == tagName);
+            var tag = _tagRepo.GetTagTypes(null).FirstOrDefault(t => t.Name == tagName);
             if (tag == null)
                 throw new ArgumentException("Štítek neexistuje, nebo nelze použít.");
 

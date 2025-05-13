@@ -35,9 +35,9 @@ namespace Elsa.App.Crm.Controllers
         public CrmMetadata Get()
         {
             return new CrmMetadata(
-                _customerMeetingsRepository.GetMeetingStatusTypes(),
+                _customerMeetingsRepository.GetMeetingStatusTypes().ToList(),
                 _customerMeetingsRepository.GetMeetingStatusActions(null),
-                _customerMeetingsRepository.GetAllMeetingCategories(),
+                _customerMeetingsRepository.GetAllMeetingCategories().ToList(),
                 _customerTagRepository.GetTagTypes(null),
                 _salesRepRepository.GetSalesRepresentatives(null).ToList(),
                 _customerRepository.GetCustomerGroupTypes().Select(kv => kv.Value).ToList(),

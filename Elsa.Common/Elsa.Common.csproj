@@ -71,6 +71,7 @@
     <Compile Include="DataIndex.cs" />
     <Compile Include="Data\AdapterBase.cs" />
     <Compile Include="Data\AutoRepo.cs" />
+    <Compile Include="Data\AutoRepoExtensions.cs" />
     <Compile Include="DoNotLogAttribute.cs" />
     <Compile Include="DoNotLogParamsAttribute.cs" />
     <Compile Include="ElsaControllerBase.cs" />

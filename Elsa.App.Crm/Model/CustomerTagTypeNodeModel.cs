@@ -8,17 +8,19 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Elsa.App.Crm.Model
-{
-    public class CustomerTagTypeModel 
+{    
+    public class CustomerTagTypeModel
     {
-        public int Id { get; set; }
-        public string Name { get; set; }        
-        public string CssClass { get; set; }        
+        public int? Id { get; set; }
+        public string Name { get; set; }
+        public string CssClass { get; set; }       
+        public string Description { get; set; }
+    }
 
+    public class CustomerTagTypeNodeModel : CustomerTagTypeModel
+    {        
         public bool IsRoot { get; set; }
-
-        public int? FirstRootId { get; set; }
-
+        public int? AnyRootId { get; set; }
         public List<int> TransitionsTo { get; } = new List<int>();
         public List<int> TransitonsFrom { get; } = new List<int>();
         public List<int> AllTransitionParents { get; } = new List<int>();

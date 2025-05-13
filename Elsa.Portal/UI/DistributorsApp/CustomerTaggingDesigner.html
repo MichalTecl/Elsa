@@ -1,0 +1,79 @@
+<script src="/UI/DistributorsApp/CustomerTaggingDesigner.VM.js"></script>
+
+<div id="customerTaggingDesigner">
+    <div id="ctdGroupsListPanel" data-bind="class.hidden:hasActiveGroup">
+        <div class="ctdSearchWrapper">
+            <input id="ctdGroupFilterText" data-bind="value:groupsFilter" event-bind="change:VM.filterGroups(this.value)" />
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="ctdNewbuttonWrapper">
+            <button id="ctdNewGroupButton" event-bind="click:newGroup()"><i class="fas fa-plus"></i></button>
+        </div>
+        <div class="ctdGroupListWrapper">
+            <div id="ctdGroupsList" data-bind="itemsSource:groups" data-key="Id">
+                <div class="lt-template ctdGroupListItem" data-bind="class.hidden:isHidden" >
+                    <div class="ctdGroupItemRow">
+                        <i class="far fa-folder ctdFolderClosed"></i>
+                        <i class="far fa-folder-open ctdFolderOpen"></i>
+                        <div class="ctdGroupName" data-bind="text:Name" event-bind="click:openGroup(Id)"></div>
+                    </div>
+                    <div class="ctdGroupItemRow">
+                        <div class="ctdGroupSrchTagView" data-bind="itemsSource:searchTags" data-key="tag">
+                            <div class="lt-template ctdSearchTagPreview" data-bind="text:tag"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .ctdGroupListItem .ctdFolderOpen {
+        display: none;
+    }
+
+    .ctdGroupListItem .ctdGroupSrchTagView {
+        display: none;
+    }
+
+    .ctdGroupListItem:hover .ctdFolderOpen {
+        display: block;
+    }
+
+    .ctdGroupListItem:hover .ctdFolderClosed {
+        display: none;
+    }
+
+    .ctdGroupListItem:hover .ctdGroupSrchTagView {
+        display: block;
+    }
+
+</style>
+<script>
+    lt.element("customerTaggingDesigner")
+        .withModel("app.CustomerTaggingDesigner.vm")
+        .attach(function () {
+            const self = this;
+            
+            this.bind(function (binder) {
+
+                const vm = app.CustomerTaggingDesigner.vm;
+
+                self.newGroup = () => {
+                    const ngname = prompt("Název nové skupiny štítků:");
+                    if (!ngname)
+                        return;
+
+                    vm.createGroup(ngname);
+                };
+
+                self.openGroup = (id) => vm.openGroup(id);
+                
+
+            });
+        });
+</script>
+
+<link href="/UI/DistributorsApp/Css/CustomerTaggingDesigner_groups.css" rel="stylesheet" />
+<link href="/UI/DistributorsApp/Css/CustomerTaggingDesigner_main.css" rel="stylesheet" />
+<link href="/UI/DistributorsApp/Css/CustomerTaggingDesigner_tagTree.css" rel="stylesheet" />

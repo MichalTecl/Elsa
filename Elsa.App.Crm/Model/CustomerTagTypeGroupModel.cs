@@ -10,5 +10,6 @@ namespace Elsa.App.Crm.Model
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string SearchTag { get; set; }
     }
 }

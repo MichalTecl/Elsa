@@ -141,7 +141,7 @@ namespace Elsa.Jobs.CrmRobots
 
             var texts = new Dictionary<RobotExecutionResult, string>();
 
-            var tagIndex = _customerTagRepository.GetTagTypes(false, true).ToDictionary(r => r.Id, r => r);
+            var tagIndex = _customerTagRepository.GetTagTypes(null).ToDictionary(r => r.Id, r => r);
             var customerNameIndex = _customerRepository.GetDistributorNameIndex();
 
             foreach(var result in allResults.Where(r => r.AddedCustomers.Count > 0 || r.RemovedCustomers.Count > 0))

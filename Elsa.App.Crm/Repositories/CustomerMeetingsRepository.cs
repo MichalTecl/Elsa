@@ -35,12 +35,12 @@ namespace Elsa.App.Crm.Repositories
             _distributorsRepo = distributorsRepo;
         }
 
-        public List<IMeetingCategory> GetAllMeetingCategories()
+        public IReadOnlyCollection<IMeetingCategory> GetAllMeetingCategories()
         {
             return _meetingCategoryRepo.GetAll();
         }
 
-        public List<IMeetingStatus> GetMeetingStatusTypes()
+        public IReadOnlyCollection<IMeetingStatus> GetMeetingStatusTypes()
         {
             return _meetingStautsTypeRepo.GetAll();
         }
