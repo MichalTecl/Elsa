@@ -114,7 +114,8 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                             "Id": tagModel.id,
                             "Name": tagModel.name,
                             "CssClass": tagModel.cssClass,
-                            "Description": tagModel.description
+                            "Description": tagModel.description,
+                            "DaysToWarning": tagModel.daysToWarning,
                         })
                         .post((tags) => {
                             tagModel.cancelEdit();
@@ -123,18 +124,21 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                 };
 
                 tagModel.updateName = (v) => tagModel.name = v;
-                tagModel.updateDaysToWarning = (hasDtw, strValue) => {
-                    let value = 0;
-                    if (hasDtw) {
-                        value = parseInt(strValue);
-                        if (isNaN(value) || value <= 0) {
-                            alert("Neplatná hodnota '" + strValue + "'");
-                            return;
-                        }
-                    }
+                tagModel.updateDaysToWarning = (strValue) => {
+                    let value = parseInt(strValue);
+                    if (isNaN(value))
+                        value = 0;
 
                     tagModel.daysToWarning = value;
                     tagModel.hasDaysToWarning = tagModel.daysToWarning > 0;
+                };
+
+                tagModel.toggleDaysToWarning = () => {
+                    if (tagModel.hasDaysToWarning) {
+                        tagModel.updateDaysToWarning(0);
+                    } else {
+                        tagModel.updateDaysToWarning(7);
+                    }
                 };
 
                 tagModel.changeCssClass = () => {

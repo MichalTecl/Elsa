@@ -31,6 +31,12 @@
                         <div class="ctdTagNameEdit" data-bind="cssClass:cssClass;">
                             <input style="background-color:transparent !important; color:inherit !important" type="text" class="ctagNameEditTextbox" data-bind="value:name" event-bind="input:VM.updateName(this.value)" />
                         </div>
+                        <div class="ctdTimerEditPanel">
+                            <i class="far fa-clock" event-bind="click:VM.toggleDaysToWarning()"></i>
+                            <div class="ctdDtwCaption" data-bind="class!.hidden:hasDaysToWarning">Upozornit po</div>
+                            <input type="number" step="1" min="1" data-bind="value:daysToWarning;class!.hidden:hasDaysToWarning" event-bind="input:VM.updateDaysToWarning(this.value)" />
+                            <div class="ctdDtwCaption"  data-bind="class!.hidden:hasDaysToWarning">dnů</div>
+                        </div>
                     </div>
                 </div>
                 <div class="ctdItemEditorRow" data-bind="class!.hidden:isEditing">
