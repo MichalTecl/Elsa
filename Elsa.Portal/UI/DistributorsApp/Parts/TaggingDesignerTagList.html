@@ -22,7 +22,9 @@
             <div class="ctdTagItemHeadColumn ctdTagEditPanel">
                 <div class="ctdTagNameRow">
                     <div class="ctdTagName" data-bind="text:name;cssClass:cssClass;class.hidden:isEditing" event-bind="click:VM.edit()"></div>
+                                        
                     <div class="ctdTagExpansionButtons" data-bind="class.hidden:isEditing">
+                        <i class="far fa-clock ctdDtwIcon" data-bind="class!.hidden:hasDaysToWarning"></i>
                         <i class="fas fa-chevron-down" data-bind="class!.hidden:isOpen" event-bind="click:VM.close()"></i>
                         <i class="fas fa-chevron-right" data-bind="class.hidden:isOpen" event-bind="click:VM.open()"></i>
                     </div>
@@ -35,12 +37,12 @@
                             <i class="far fa-clock" event-bind="click:VM.toggleDaysToWarning()"></i>
                             <div class="ctdDtwCaption" data-bind="class!.hidden:hasDaysToWarning">Upozornit po</div>
                             <input type="number" step="1" min="1" data-bind="value:daysToWarning;class!.hidden:hasDaysToWarning" event-bind="input:VM.updateDaysToWarning(this.value)" />
-                            <div class="ctdDtwCaption"  data-bind="class!.hidden:hasDaysToWarning">dnů</div>
+                            <div class="ctdDtwCaption" data-bind="class!.hidden:hasDaysToWarning">dnů</div>
                         </div>
                     </div>
                 </div>
                 <div class="ctdItemEditorRow" data-bind="class!.hidden:isEditing">
-                    <i class="fas fa-trash-alt ctedTagDeleteButton" event-bind="click:VM.delete()"></i>
+                    <i class="fas fa-trash-alt ctedTagDeleteButton" event-bind="click:VM.delete()" data-bind="class!.hidden:canDelete"></i>
 
                     <div class="ctdEditButtonsRight">
                         <button class="ctagCancelButton" event-bind="click:VM.cancelEdit()">

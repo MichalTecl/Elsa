@@ -63,7 +63,8 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                     "isEditing": false,                    
                     "firstParentId": null,
                     "childPickerOpen": false,
-                    "treeLevel": parentTag ? parentTag.treeLevel + 1 : 1
+                    "treeLevel": parentTag ? parentTag.treeLevel + 1 : 1,
+                    "canDelete": !!id,
                 };
 
                 tagModel.update = () => {

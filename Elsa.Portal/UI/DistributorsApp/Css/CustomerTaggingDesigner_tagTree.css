@@ -125,10 +125,10 @@
         font-size: 14px;
     }
 
-/* === Editor Ã…â„¢ÃƒÂ¡dek Ã¢â‚¬â€œ rozloÃ…Â¾enÃƒÂ­ === */
+
 .ctdItemEditorRow {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     margin-top: 6px;
     padding-right: 8px;
@@ -252,4 +252,32 @@
     margin-top: 4px;
     border-radius: 5px;
     align-items: center;
+}
+
+.ctdSubActionsCont {
+    display: flex;
+    background-color: #eef7;
+    margin-top: 4px;
+    border-radius: 5px;
+    align-items: center;
+}
+
+.ctdTimerEditPanel {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
+}
+
+    .ctdTimerEditPanel input {
+        max-width: 50px !important;
+    }
+
+.ctdDtwIcon {
+    color: #bb3 !important;
+    background-color: black;
+    border-radius: 10px;
+    font-size: 11px !important;
+    margin-left: -18px;
+    margin-top: -18px;
 }
