@@ -1,4 +1,5 @@
 using Elsa.App.Crm.Entities;
+using Elsa.App.Crm.Model;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
@@ -200,6 +201,15 @@ namespace Elsa.App.Crm.Repositories
             return result;
         }
 
+        public IReadOnlyCollection<CustomerTagAssignmentInfo> GetAssignments(IEnumerable<int> customerIds)
+        {
+            return _database.Sql()
+                .Call("LoadTagAssignmentsInfo")
+                .WithStructuredParam("@customerIds", "IntTable", customerIds, new[] { "Id" }, i => new object[] { i })
+                .AutoMap<CustomerTagAssignmentInfo>()
+                .AsReadOnly();
+        }
+
         private string AssignmentsCacheKey => $"customerTagAssignments_{_session.Project.Id}";
 
         private Dictionary<int, List<int>> GetAllTagAssignments()
@@ -367,6 +377,26 @@ namespace Elsa.App.Crm.Repositories
 
                 tx.Commit();
             }
+        }
+
+        internal List<ICustomerTagType> GetPossibleTransitions(int customerId, int tagTypeId)
+        {
+            var result = new List<ICustomerTagType>();
+
+            foreach(var group in GetData())
+            {
+                if(!group.Tags.Any(t => t.Id == tagTypeId))                
+                    continue;
+
+                var transitions = group.Transitions.Where(t => t.SourceTagTypeId == tagTypeId);
+
+                foreach(var tran in transitions)
+                {
+                    result.Add(group.Tags.FirstOrDefault(t => t.Id == tran.TargetTagTypeId));
+                }
+            }
+
+            return result;
         }
 
         public class TagGroup

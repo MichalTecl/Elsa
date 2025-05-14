@@ -18,12 +18,11 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 
         public override string CellClass => "cell10";
 
-        public override Task PopulateAsync(List<DistributorGridRowModel> rows)
+        public override void Populate(List<DistributorGridRowModel> rows)
         {
-            return Task.CompletedTask;
         }
 
-        public override string GetCellControl(string columnId, string cellClass, string boundProperty)
+        public override string GetCellControl(string columnId, string cellClass, string boundProperty, Func<string, string> loadTemplate)
         {
             return @"<div class=""cell10 digrTrendCell"">
     <div data-bind=""itemsSource:TrendModel"" data-key=""id"" class=""digrTrendView"">

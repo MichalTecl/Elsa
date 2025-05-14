@@ -466,7 +466,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         self.search();
     };
 
-    self.load = () => {
+    self.load = () => {        
         load(self.page + 1);
     };
 
@@ -558,6 +558,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     const load = (page) => {
 
+        console.log("Loading - page=" + page);
         
         lt.api("/CrmDistributors/getDistributors")
             .query({                
@@ -850,19 +851,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.getAttachableTags = (qry, callback) => {
-
-        self.withMetadata((md) =>
-            callback(self.detail.attachableTags || (self.detail.attachableTags = md.CustomerTagTypes.filter(tag => {
-
-                if (!tag.CanBeAssignedManually)
-                    return false;
-
-                const existing = self.detail.manTags.find(et => et.Id === tag.Id);
-                if (!!existing)
-                    return false;
-
-                return true;
-            }).sort((a, b) => b.Priority - a.Priority).map(i => i.Name))));
+        self.getAllTags(qry, callback);        
     };
 
     self.getAllTags = (qry, callback) => {

@@ -20,15 +20,14 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
         public override string BoundProperty => "Name";
 
         public override string CellClass => "cell10";
-                
-        public override Task PopulateAsync(List<DistributorGridRowModel> rows)
-        {
-            return Task.CompletedTask;
-        }
 
-        public override string GetCellControl(string columnId, string cellClass, string boundProperty)
+        public override string GetCellControl(string columnId, string cellClass, string boundProperty, Func<string, string> loadTemplate)
         {
             return $"<div class=\"cell10 digrDetailLinkCell\">\r\n    <a data-bind=\"text:Name\" class=\"digrLinkSameWin\" event-bind=\"click:openDetail(Id)\"></a>\r\n    <a class=\"digrOutNewWin\" target=\"_blank\" data-bind=\"href:detailLink\"> <i class=\"fas fa-window-restore\"></i></a>\r\n</div>";
+        }
+
+        public override void Populate(List<DistributorGridRowModel> rows)
+        {            
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿var app = app || {};
+var app = app || {};
 app.CrmReporting = app.CrmReporting || {};
 app.CrmReporting.VM = app.CrmReporting.VM ||
 

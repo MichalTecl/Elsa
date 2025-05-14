@@ -1,4 +1,5 @@
 using Elsa.App.Crm.Model;
+using Elsa.App.Crm.Repositories.DynamicColumns;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
@@ -22,8 +23,9 @@ namespace Elsa.App.Crm.Repositories
         private readonly ICustomerRepository _customerRepository;
         private readonly DistributorFiltersRepository _distributorFilters;
         private readonly ILog _log;
+        private readonly ColumnFactory _columnFactory;
 
-        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository, DistributorFiltersRepository distributorFilters, ILog log)
+        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository, DistributorFiltersRepository distributorFilters, ILog log, ColumnFactory columnFactory)
         {
             _database = database;
             _cache = cache;
@@ -31,6 +33,7 @@ namespace Elsa.App.Crm.Repositories
             _customerRepository = customerRepository;
             _distributorFilters = distributorFilters;
             _log = log;
+            _columnFactory = columnFactory;
         }
 
         public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int? pageSize, int? page, string sorterId, bool idsOnly = false)
@@ -98,6 +101,13 @@ namespace Elsa.App.Crm.Repositories
 
             if (!idsOnly)
             {
+                var columns = _columnFactory.GetColumns(filter.GridColumns.Where(c => c.IsSelected).Select(c => c.Id).ToArray());
+                
+                foreach (var c in columns)
+                {
+                    c.Populate(result);
+                }
+
                 foreach (var a in result)
                 {
                     if (trends.TryGetValue(a.Id, out var trend))

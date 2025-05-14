@@ -19,9 +19,8 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 
         public override string CellClass => "cell5";
 
-        public override Task PopulateAsync(List<DistributorGridRowModel> rows)
+        public override void Populate(List<DistributorGridRowModel> rows)
         {
-            return Task.CompletedTask;
         }
     }
 }

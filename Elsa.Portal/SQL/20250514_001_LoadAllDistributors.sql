@@ -44,8 +44,7 @@ BEGIN
 				cta.CustomerId,
 				STRING_AGG(cta.TagTypeId, ',') AS TagTypesCsv
 			FROM CustomerTagAssignment cta
-			JOIN CustomerTagType ctt ON (cta.TagTypeId = ctt.Id)
-			WHERE ((ctt.ForAuthorOnly = 0) OR (ctt.AuthorId = @userId))
+			JOIN CustomerTagType ctt ON (cta.TagTypeId = ctt.Id)			
 			GROUP BY cta.CustomerId) tags ON (tags.CustomerId = c.Id)
 
    LEFT JOIN(SELECT cg.CustomerId, STRING_AGG(cgt.Id, ',') CustomerGroupTypesCsv

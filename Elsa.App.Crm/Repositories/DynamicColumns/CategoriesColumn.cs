@@ -18,19 +18,18 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
         public override string BoundProperty => "";
 
         public override string CellClass => "cell10";
-
-        public override Task PopulateAsync(List<DistributorGridRowModel> rows)
-        {
-            return Task.CompletedTask;
-        }
-
-        public override string GetCellControl(string columnId, string cellClass, string boundProperty)
+        
+        public override string GetCellControl(string columnId, string cellClass, string boundProperty, Func<string, string> loadTemplate)
         {
             return @"<div class=""cell10 digrGroupsCell"">
                         <div data-bind=""itemsSource:customerGroups"" data-key=""Id"" class=""digrCustGroupsContainer stackLeft"">
                             <div class=""lt-template digrCustGroupItem"" data-bind=""text:ErpGroupName""></div>
                         </div>
                     </div>";
+        }
+
+        public override void Populate(List<DistributorGridRowModel> rows)
+        {            
         }
     }
 }

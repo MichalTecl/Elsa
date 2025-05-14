@@ -32,9 +32,10 @@ namespace Elsa.App.Crm.Controllers
 
         public HtmlResult GetGridHtml(string query)
         {
+#if (!DEBUG)
             return _cache.ReadThrough($"dynCols_{query}", TimeSpan.FromHours(1), () =>
             {
-
+#endif
                 var colNames = (string.IsNullOrWhiteSpace(query) ? DetailLinkColumn.DetailLinkColumnName : query.Trim()).Split(',');
                 var templatePath = MapPath("/UI/DistributorsApp/Parts/DistributorGridParts/GridControlTemplate.html");
                 var template = File.ReadAllText(templatePath);
@@ -45,7 +46,7 @@ namespace Elsa.App.Crm.Controllers
                 foreach (var column in _columnFactory.GetColumns(colNames))
                 {
                     column.RenderHead(headSb);
-                    column.RenderCell(cellsSb);
+                    column.RenderCell(MapPath, cellsSb);
                 }
 
                 var sb = new StringBuilder(template);
@@ -53,7 +54,9 @@ namespace Elsa.App.Crm.Controllers
                 sb.Replace("{cells}", cellsSb.ToString());
 
                 return new HtmlResult(sb.ToString());
-            });
+#if (!DEBUG)
+        });        
+#endif
         }
     }
 }

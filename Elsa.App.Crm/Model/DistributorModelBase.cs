@@ -1,4 +1,4 @@
-﻿using Elsa.Common.Utils;
+using Elsa.Common.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -31,5 +31,7 @@ namespace Elsa.App.Crm.Model
         public List<int> CustomerGroupTypeIds => _customerGroupTypeIds;
 
         public List<int> SalesRepIds => _salesRepIds;
+
+        public List<CustomerTagAssignmentInfo> TagAssignments { get; } = new List<CustomerTagAssignmentInfo>();
     }
 }

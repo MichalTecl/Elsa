@@ -9,6 +9,13 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 {
     public class TagsColumn : DynamicColumnBase
     {
+        private readonly CustomerTagRepository _customerTagRepository;
+
+        public TagsColumn(CustomerTagRepository customerTagRepository)
+        {
+            _customerTagRepository = customerTagRepository;
+        }
+
         public override int DisplayOrder => 10;
         public override string Id => "Tags";
 
@@ -18,18 +25,19 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 
         public override string CellClass => "cell20";
 
-        public override Task PopulateAsync(List<DistributorGridRowModel> rows)
+        public override void Populate(List<DistributorGridRowModel> rows)
         {
-            return Task.CompletedTask;
+            var assignments = _customerTagRepository.GetAssignments(rows.Select(x => x.Id));
+
+            foreach (var row in rows)
+            {
+                row.TagAssignments.AddRange(assignments.Where(a => a.CustomerId == row.Id));
+            }
         }
 
-        public override string GetCellControl(string columnId, string cellClass, string boundProperty)
+        public override string GetCellControl(string columnId, string cellClass, string boundProperty, Func<string, string> loadTemplate)
         {
-            return @"<div class=""cell20 digrTagsCell"">
-                        <div data-bind=""itemsSource:tags"" data-key=""Id"" class=""digrCustTagsContainer stackLeft"">
-                            <div class=""lt-template digrCustTagItem"" data-bind=""text:Name;cssClass:CssClass""></div>
-                        </div>
-                    </div>";
+            return loadTemplate("TagsColumnTemplate");
         }
     }
 }
