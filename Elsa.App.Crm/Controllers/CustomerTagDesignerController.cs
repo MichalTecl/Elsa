@@ -66,6 +66,7 @@ namespace Elsa.App.Crm.Controllers
                         Name = tag.Name,
                         CssClass = tag.CssClass,
                         IsRoot = tag.IsRoot,
+                        DaysToWarning = tag.DaysToWarning ?? 0
                     };
 
                     result.Add(model);
@@ -123,6 +124,12 @@ namespace Elsa.App.Crm.Controllers
             });
         }
 
+        public List<CustomerTagTypeNodeModel> DeleteTag(int groupId, int tagId)
+        {
+            _tagRepository.DeleteTagType(tagId);
+            return LoadTags(groupId);
+        }
+
         public List<CustomerTagTypeNodeModel> SaveTag(int groupId, int? parentTagId, CustomerTagTypeModel model)
         {
             using (var tx = _db.OpenTransaction())
@@ -132,6 +139,7 @@ namespace Elsa.App.Crm.Controllers
                     t.Name = model.Name;
                     t.CssClass = model.CssClass;
                     t.Description = model.Description;
+                    t.DaysToWarning = model.DaysToWarning == 0 ? null : (int?)model.DaysToWarning;
                 });
 
                 if (parentTagId != null) 

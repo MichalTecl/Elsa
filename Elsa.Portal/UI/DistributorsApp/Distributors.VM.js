@@ -866,7 +866,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.getAllTags = (qry, callback) => {
-        self.withMetadata((md) => callback(md.CustomerTagTypes.sort((a, b) => b.Priority - a.Priority).map(i => i.Name)));
+        self.withMetadata((md) => callback(md.CustomerTagTypes.map(i => i.Name)));
     };
 
     self.getSavedFilterNames = (qry, callback) => {

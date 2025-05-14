@@ -15,6 +15,8 @@ namespace Elsa.App.Crm.Model
         public string Name { get; set; }
         public string CssClass { get; set; }       
         public string Description { get; set; }
+
+        public int DaysToWarning { get; set; }
     }
 
     public class CustomerTagTypeNodeModel : CustomerTagTypeModel

@@ -26,6 +26,20 @@
             </div>
         </div>
     </div>
+
+    <div class="ctdGroupContentPanel" data-bind="class!.hidden:hasActiveGroup">
+        <div class="ctdGroupContentPanelHead">
+            <i class="fas fa-caret-square-left faButtonNew" event-bind="click:VM.closeGroup()"></i>
+            <div class="ctdGroupContentTitle" data-bind="text:activeGroup.Name"></div>
+        </div>
+        <div class="ctdNewbuttonWrapper">
+            <button id="ctdNewGroupButton" event-bind="click:VM.createTag()"><i class="fas fa-plus"></i></button>
+        </div>
+        
+        <div class="ctdGroupTagListContainer" fill-by="/UI/DistributorsApp/Parts/TaggingDesignerTaglist.html"></div>
+
+    </div>
+
 </div>
 <style>
     .ctdGroupListItem .ctdFolderOpen {
@@ -77,3 +91,4 @@
 <link href="/UI/DistributorsApp/Css/CustomerTaggingDesigner_groups.css" rel="stylesheet" />
 <link href="/UI/DistributorsApp/Css/CustomerTaggingDesigner_main.css" rel="stylesheet" />
 <link href="/UI/DistributorsApp/Css/CustomerTaggingDesigner_tagTree.css" rel="stylesheet" />
+<link href="/UI/DistributorsApp/Css/DistributorTagStyles.css" rel="stylesheet" />

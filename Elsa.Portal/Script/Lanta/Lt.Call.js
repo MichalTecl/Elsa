@@ -154,7 +154,7 @@ lanta.ApiCallBuilder = lanta.ApiCallBuilder || function (url) {
 
                 var value = qry[key];
                 if (value === null || value === undefined) {
-                    continue;
+                    value = "";
                 }
 
                 if (queryString.length > 0) {

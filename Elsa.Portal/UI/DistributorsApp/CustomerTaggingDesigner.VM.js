@@ -6,10 +6,20 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
 
         const self = this;
         self.binder = 1;
+        self.treeLevel = 0;
 
         let tagData = [];
 
         self.tags = [];
+
+        const call = (action) => {
+            let rq = lt.api("/CustomerTagDesigner/" + action);
+
+            if (!!self.activeGroup)
+                rq = rq.query({ "groupId": self.activeGroup.Id });
+
+            return rq;
+        };
 
         const receiveTags = (tags) => {
             tagData = tags;
@@ -35,7 +45,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
             });
         };
 
-        const getTagModel = (parentTag, source, id) => {
+        const getTagModel = (parentTag, source, id, placeToBeginning) => {
 
             let tagModel = (id == null) ? null : source.find(t => t.id === id);
 
@@ -44,16 +54,16 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                 {
                     "id": id,
                     "isRoot": true,
-                    "parentTag": parentTag,
+                    "parentTagInstanceId": parentTag ? parentTag.instanceId : null,
                     "instanceId": crypto.randomUUID(),
                     "tags": [],
                     "tagsIds": [],
                     "isOpen": false,
                     "canOpen": false,   
-                    "isEditing": false,
-                    "newNodeParentList": null,
+                    "isEditing": false,                    
                     "firstParentId": null,
-                    "childPickerOpen": false
+                    "childPickerOpen": false,
+                    "treeLevel": parentTag ? parentTag.treeLevel + 1 : 1
                 };
 
                 tagModel.update = () => {
@@ -66,9 +76,10 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                     tagModel.name = tagRecord.Name;
                     tagModel.cssClass = tagRecord.CssClass;
                     tagModel.description = tagRecord.Description;
-                    tagModel.isRoot = tagRecord.IsRoot;
-
+                    tagModel.isRoot = !tagModel.parentTagInstanceId;
                     tagModel.tagsIds = tagRecord.TransitionsTo;
+                    tagModel.daysToWarning = tagRecord.DaysToWarning;
+                    tagModel.hasDaysToWarning = tagModel.daysToWarning > 0;
 
                     if (tagModel.isOpen) {
                         updateTagList(tagModel, tagModel.tags, tagModel.tagsIds);
@@ -77,11 +88,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                     }
 
                     tagModel.canOpen = (!!tagModel.id); // !id => means it is not saved, so we cannot add tags
-
-                    if (!!tagModel.id) {
-                        tagModel.newNodeParentList = null;
-                    }
-
+                                        
                     return true;
                 };
 
@@ -96,12 +103,11 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
 
                 tagModel.edit = () => {
                     tagModel.isEditing = true;
+                    tagModel.isOpen = false;
                 };
 
                 tagModel.save = () => {
-
-                    tagModel.cancelEdit();
-
+                                       
                     call("saveTag")
                         .query({ "parentTagId": tagModel.firstParentId })
                         .body({
@@ -110,18 +116,36 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                             "CssClass": tagModel.cssClass,
                             "Description": tagModel.description
                         })
-                        .post(receiveTags);
+                        .post((tags) => {
+                            tagModel.cancelEdit();
+                            receiveTags(tags);
+                        });
                 };
 
                 tagModel.updateName = (v) => tagModel.name = v;
+                tagModel.updateDaysToWarning = (hasDtw, strValue) => {
+                    let value = 0;
+                    if (hasDtw) {
+                        value = parseInt(strValue);
+                        if (isNaN(value) || value <= 0) {
+                            alert("Neplatná hodnota '" + strValue + "'");
+                            return;
+                        }
+                    }
+
+                    tagModel.daysToWarning = value;
+                    tagModel.hasDaysToWarning = tagModel.daysToWarning > 0;
+                };
 
                 tagModel.changeCssClass = () => {
-                    let cinx = (allCssClasses.indexOf(tagModel.cssClass) + 1) % self.allCssClasses.length;
-                    tagModel.cssClass = self.allCssClasses[cinx];
+                    let cinx = (allCssClasses.indexOf(tagModel.cssClass) + 1) % allCssClasses.length;
+                    tagModel.cssClass = allCssClasses[cinx];
                 };
 
                 tagModel.openChildPicker = () => tagModel.childPickerOpen = true;
                 tagModel.closeChildPicker = () => tagModel.childPickerOpen = false;
+
+                tagModel.createChildTag = () => self.createTag(tagModel);
 
                 tagModel.attachChild = (childTagName) => {
 
@@ -135,10 +159,12 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                 };
 
                 tagModel.detachFromParent = () => {
-                    if (!tagModel.parentTag)
+                    if (!tagModel.parentTagInstanceId)
                         return;
 
-                    call("RemoveTransition").query({ "sourceId": tagModel.parentTag.id, "targetId": tagModel.id }).post(receiveTags);
+                    const parentTag = findTagUiModel(t => t.instanceId === tagModel.parentTagInstanceId);
+
+                    call("RemoveTransition").query({ "sourceId": parentTag.id, "targetId": tagModel.id }).post(receiveTags);
                 };
 
                 tagModel.cancelEdit = () => {
@@ -147,14 +173,22 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
 
                     if (!tagModel.id) {
                         // new one - we have to discard it
-
+                                                
                         let index;
 
-                        if (!tagModel.newNodeParentList || (index = tagModel.newNodeParentList.indexOf(tagModel) === -1)) {
+                        let parentList = self.tags;
+
+                        if (tagModel.parentTagInstanceId) {
+                            const parentTag = findTagUiModel(t => t.instanceId === tagModel.parentTagInstanceId);
+                            if (!!parentTag)
+                                parentList = parentTag.tags;
+                        }
+
+                        if ((index = parentList.indexOf(tagModel)) === -1) {
                             throw new Error("Unexpected state of graph :(");
                         }
 
-                        tagModel.newNodeParentList.splice(index, 1);                        
+                        parentList.splice(index, 1);                        
 
                         return;
                     }
@@ -162,7 +196,18 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                     tagModel.update();
                 };
 
-                source.push(tagModel);
+                tagModel.delete = () => {
+                    if (!confirm("Opravdu chcete smazat štítek \"" + tagModel.name + "\?"))
+                        return;
+
+                    call("DeleteTag").query({ "tagId": tagModel.id }).post(receiveTags);
+                };
+
+                if (!placeToBeginning) {
+                    source.push(tagModel);
+                } else {
+                    source.unshift(tagModel);
+                }
             }
 
             return tagModel;
@@ -192,9 +237,13 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                 list = parentTagUiModel.tags;
             }
 
-            let model = getTagModel(parentTagUiModel, list, null);
-            model.newNodeParentList = list;
+            let model = getTagModel(parentTagUiModel, list, null, !parentTagUiModel);
+
+            model.name = "";
+            model.cssClass = "crmDistributorTag_default";
             model.isEditing = true;
+            model.isOpen = false;
+            model.isRoot = !parentTagUiModel;
 
             if (!!parentTagUiModel) {
                 model.firstParentId = parentTagUiModel.id;
@@ -222,8 +271,12 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
             }
         };
 
+        self.getAllTagNames = (qry, callback) => {
+            callback(tagData.map(t => t.Name));
+        };
+
         setTimeout(collectCssClasses, 500);
-        loadTags();
+        
 
         /**** GROUPS *******************************/
 
@@ -239,7 +292,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
             self.tags.splice(0, self.tags.length);
 
             if (!!self.activeGroup) {
-                loadTags(self.activeGroup.Id);
+                loadTags();
             }            
         };
 
@@ -270,14 +323,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
             self.groups.forEach(g => g.isHidden = !matcher.match(g.SearchTag, true));
         };
 
-        const call = (action) => {
-            let rq = lt.api("/CustomerTagDesigner/" + action);
-
-            if (!!self.activeGroup)
-                rq = rq.query({ "groupId": self.activeGroup.Id });
-
-            return rq;
-        };
+        
 
         self.getGroups();
     }

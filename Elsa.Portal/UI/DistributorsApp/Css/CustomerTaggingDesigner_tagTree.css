@@ -1,0 +1,255 @@
+/* === ZÃƒÂ¡kladnÃƒÂ­ layout === */
+.ctdTagListLevel {
+    margin-left: 40px;
+    padding-left: 12px;
+    position: relative;
+}
+
+    .ctdTagListLevel[data-depth="0"] {
+        margin-left: 0px;
+    }
+
+    .ctdTagListLevel[data-depth="1"] {
+        margin-left: 20px;
+    }
+
+/* === KaÃ…Â¾dÃƒÂ½ tag item === */
+.ctdTagListItem {
+    /* margin: 6px 0; */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    -border-left: 1px solid #99A;
+}
+
+/* === Head row === */
+.ctdTagItemHeadRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 1px;
+}
+
+
+/* === Ikony editace / expand === */
+.ctdTagItemEditButtons i,
+.ctdTagExpansionButtons i {
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s;
+}
+
+    .ctdTagItemEditButtons i:hover,
+    .ctdTagExpansionButtons i:hover {
+        color: #000;
+    }
+
+/* === Panel pro editaci (obaluje jmÃƒÂ©no + tlaÃ„ÂÃƒÂ­tka) === */
+.ctdTagEditPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: box-shadow 0.2s, border 0.2s;
+    margin-top: 6px;
+}
+
+.ctdTagListItemEditing .ctdTagEditPanel {
+    background-color: #f5f9ff;
+    border: 1px solid #3399ff;
+    border-radius: 6px;
+    padding: 6px 8px;
+    box-shadow: 0 0 4px #99cfff;
+}
+
+.ctdTagEditPanel:focus-within {
+    box-shadow: 0 0 6px #66aaff;
+    border-radius: 6px;
+}
+
+/* === NÃƒÂ¡zev Ã…Â¡tÃƒÂ­tku === */
+.ctdTagNameRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ctdTagName {
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    .ctdTagName:hover {
+        outline: 1px dashed rgba(0, 0, 0, 0.2);
+        outline-offset: 2px;
+    }
+
+/* === Input === */
+.ctdTagNameEditWrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ctdTagNameEdit input {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 14px;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 300px;
+    box-sizing: border-box;
+}
+
+/* === Ikona pro zmÃ„â€ºnu stylu === */
+.tagStyleSwitchIcon {
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .tagStyleSwitchIcon:hover {
+        color: #000;
+    }
+
+/* === Expand/Collapse Ã…Â¡ipky pÃ…â„¢ÃƒÂ­mo za Ã…Â¡tÃƒÂ­tkem === */
+.ctdTagExpansionButtons {
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+}
+
+    .ctdTagExpansionButtons i {
+        font-size: 14px;
+    }
+
+/* === Editor Ã…â„¢ÃƒÂ¡dek Ã¢â‚¬â€œ rozloÃ…Â¾enÃƒÂ­ === */
+.ctdItemEditorRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    padding-right: 8px;
+    gap: 12px;
+}
+
+/* === KoÃ…Â¡ vlevo === */
+.ctedTagDeleteButton {
+    color: #c00;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: auto;
+}
+
+/* === TlaÃ„ÂÃƒÂ­tka vpravo === */
+.ctdEditButtonsRight {
+    display: flex;
+    gap: 8px;
+}
+
+.ctagCancelButton,
+.ctagSaveTagButton {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+    .ctagCancelButton:hover {
+        background-color: #ffe5e5;
+        border-color: #cc0000;
+    }
+
+    .ctagSaveTagButton:hover {
+        background-color: #e5ffe5;
+        border-color: #009900;
+    }
+
+/* === Sub-container pro dÃ„â€ºti === */
+
+
+.ctdTagListLevel[data-depth="1"] .ctdSubContainer {
+    border-left: 1px solid #99A;
+}
+
+.ctdTagItemParentConnector {
+    height: 29px;
+    display: flex;
+    color: #99A;
+}
+
+.ctdSubtagRuleCont {
+    width: 8px;
+}
+
+.ctdSubtagRuleContTopHalf {
+    width: 100%;
+    height: 50%;
+    border-bottom: 1px dotted;
+    border-left: 1px solid #99A;
+}
+
+.ctdSubtagRuleContBottomHalf {
+    width: 100%;
+    height: 50%;
+    border-left: 1px solid #99A;
+}
+
+.ctdSubtagUnlinkCont {
+    display: flex;
+    align-items: center;
+}
+
+    .ctdSubtagUnlinkCont > i {
+        font-size: 10px !important;
+        margin-left: -5px;
+        margin-right: -6px;
+    }
+
+.ctdSubtagArrowTailCont {
+    width: 7px;
+    height: 100%;
+}
+
+.ctdSubtagArrowTail {
+    height: 50%;
+    width: 100%;
+    border-bottom: 1px dotted #99A;
+}
+
+.ctdSubtagArrowCont {
+    display: flex;
+    height: 100%;
+    align-items: center;
+}
+
+.ctdLastSubLevelRow {
+    margin-left: 32px;
+}
+
+.ctdTagListLevel[data-depth="1"] .ctdLastSubLevelRow {
+    margin-left: 52px !important;
+}
+
+.ctdLastSubLevelRowRulerCont {
+    width: 30px;
+}
+
+    .ctdLastSubLevelRowRulerCont > .ctdSubtagRuleContTopHalf {
+        border-bottom-left-radius: 10px;
+        border-bottom: 1px solid;
+    }
+
+
+.ctdSubActionsCont {
+    display: flex;
+    background-color: #eef7;
+    margin-top: 4px;
+    border-radius: 5px;
+    align-items: center;
+}

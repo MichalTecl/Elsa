@@ -232,23 +232,28 @@ namespace Elsa.App.Crm.Repositories
 
             using (var tx = _database.OpenTransaction())
             {
-                var transitions = _database.SelectFrom<ICustomerTagTransition>().Where(t => t.SourceTagTypeId == id || t.TargetTagTypeId == id).Execute().ToList();
-                _database.DeleteAll(transitions);
+                var robots = _database.SelectFrom<ICrmRobot>().Where(r => r.FilterMatchSetsTagTypeId == id || r.FilterUnmatchSetsTagTypeId == id || r.FilterMatchRemovesTagTypeId == id || r.FilterUnmatchRemovesTagTypeId == id).Execute().ToList();
+                if (robots.Count > 0)
+                {
+                    throw new ArgumentException($"Nelze smazat štítek, prootže jej používají tito roboti: {string.Join(", ", robots.Select(r => r.Name))}");
+                }
+
+                _transitionRepo.DeleteWhere(t => t.SourceTagTypeId == id || t.TargetTagTypeId == id);
 
                 var assignments = _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id).Execute().ToList();
 
-                _database.DeleteAll(assignments);
+                if (assignments.Count > 0)
+                {
+                    _database.DeleteAll(assignments);
+                    _cache.Remove(AssignmentsCacheKey);                    
+                }
 
-                _log.Info($"Deleted {assignments.Count} of assignments");
-
-                var tagType = _database.SelectFrom<ICustomerTagType>().Where(t => t.Id == id).Execute().FirstOrDefault().Ensure();
-
-                _log.Info($"Deleting tag {tagType.Name}");
-
-                _database.Delete(tagType);
-
+                _tagTypeRepo.DeleteWhere(t => t.Id == id);
+                                
                 tx.Commit();
             }
+
+            
         }
 
         internal int GetAssignmentsCount(int id)
@@ -323,10 +328,16 @@ namespace Elsa.App.Crm.Repositories
                     throw new ArgumentException($"Přechod {sourceTag.Name} -> {targetTag.Name} již existuje");
                 }
 
+                var transition = _database.New<ICustomerTagTransition>();
+                transition.AuthorId = _session.User.Id;
+                transition.SourceTagTypeId = sourceId;
+                transition.TargetTagTypeId = targetId;
+                _transitionRepo.Save(transition);
+
                 if (targetTag.IsRoot)
                 {
                     targetTag.IsRoot = false;
-                    _tagTypeRepo.Save(targetTag);
+                    _tagTypeRepo.Save(targetTag);                
                 }
 
                 tx.Commit();
@@ -351,6 +362,8 @@ namespace Elsa.App.Crm.Repositories
                     targetTag.IsRoot = true;
                     _tagTypeRepo.Save(targetTag);
                 }
+
+                _transitionRepo.DeleteWhere(t => t.Id == existingTransition.Id);
 
                 tx.Commit();
             }
