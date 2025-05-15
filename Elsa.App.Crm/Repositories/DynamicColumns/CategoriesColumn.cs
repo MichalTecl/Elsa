@@ -1,4 +1,5 @@
 using Elsa.App.Crm.Model;
+using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Elsa.App.Crm.Repositories.DynamicColumns
 {
-    public class CategoriesColumn : DynamicColumnBase
+    public class CategoriesColumn : SimpleDynamicColumnBase
     {
         public override int DisplayOrder => 20;
 

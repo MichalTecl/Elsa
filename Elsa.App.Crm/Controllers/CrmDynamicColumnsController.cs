@@ -1,4 +1,5 @@
 using Elsa.App.Crm.Repositories.DynamicColumns;
+using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
@@ -25,9 +26,9 @@ namespace Elsa.App.Crm.Controllers
             _cache = cache;
         }
 
-        public List<ColumnFactory.ColumnInfo> GetColumns()
+        public List<ColumnInfo> GetColumns()
         {
-            return _columnFactory.GetAllColumnNames();
+            return _columnFactory.GetAllDefinedColumns();
         }
 
         public HtmlResult GetGridHtml(string query)
@@ -45,7 +46,7 @@ namespace Elsa.App.Crm.Controllers
 
                 foreach (var column in _columnFactory.GetColumns(colNames))
                 {
-                    column.RenderHead(headSb);
+                    column.RenderHead(MapPath, headSb);
                     column.RenderCell(MapPath, cellsSb);
                 }
 

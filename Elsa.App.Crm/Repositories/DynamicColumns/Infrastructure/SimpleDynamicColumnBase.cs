@@ -7,20 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Elsa.App.Crm.Repositories.DynamicColumns
+namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
 {
-
-
-    public abstract class DynamicColumnBase
+    public abstract class SimpleDynamicColumnBase : IDynamicColumnProvider
     {
         public abstract int DisplayOrder { get; }
         public abstract string Id { get; }
         public abstract string Title { get; }
         public abstract string BoundProperty { get; }
         public abstract string CellClass { get; }
-
         public virtual bool CanSort { get; } = true;
-
         public virtual void RenderHead(StringBuilder sb)
         {
             sb.AppendLine(GetHeadControl(Id, CellClass, BoundProperty));
@@ -60,6 +56,25 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
         {
         }
 
-        //public abstract void Sort(List<DistributorGridRowModel> rows, bool descending);
+        public IReadOnlyCollection<ColumnInfo> GetAvailableColumns()
+        {
+            return new List<ColumnInfo> { 
+                new ColumnInfo(DisplayOrder, Id, Title) }.AsReadOnly();
+        }
+
+        public void RenderCell(string columnId, Func<string, string> mapPath, StringBuilder sb)
+        {
+            RenderCell(mapPath, sb);
+        }
+
+        public void RenderHead(string columnId, Func<string, string> mapPath, StringBuilder sb)
+        {
+            RenderHead(sb);
+        }
+
+        public void Populate(string columnId, List<DistributorGridRowModel> rows)
+        {
+            Populate(rows);
+        }
     }
 }

@@ -1,3 +1,4 @@
+using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
 using Robowire;
 using System;
 using System.Collections.Generic;
@@ -29,30 +30,35 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
                 if (_columnTypes.Count > 0)
                     return;
 
-                var baseType = typeof(DynamicColumnBase);
+                var baseType = typeof(IDynamicColumnProvider);
                 var colNamespace = baseType.Namespace;
 
-                var instances = new List<DynamicColumnBase>();
+                var instances = new List<IDynamicColumnProvider>();
 
                 foreach (var type in baseType.Assembly
                     .GetTypes()
                     .Where(t =>
-                           t.Namespace == colNamespace
-                        && !t.IsAbstract
+                        !t.IsAbstract
                         && baseType.IsAssignableFrom(t)))
                 {
-                    var instace = locator.InstantiateNow(type) as DynamicColumnBase;
+                    var instace = locator.InstantiateNow(type) as IDynamicColumnProvider;
                     if (instace == null)
                         continue;
 
                     instances.Add(instace);
                 }
 
-                foreach (var inst in instances.OrderBy(i => i.DisplayOrder))
+                var allCols = new List<ColumnInfo>();
+                foreach (var inst in instances)
                 {
-                    _columnTypes[inst.Id] = inst.GetType();
-                    _orderedColumns.Add(new ColumnInfo { Id = inst.Id, Title = inst.Title });
+                    foreach(var columnInfo in inst.GetAvailableColumns())
+                    {
+                        _columnTypes.Add(columnInfo.Id, inst.GetType());
+                        allCols.Add(columnInfo);
+                    }
                 }
+
+                _orderedColumns.AddRange(allCols.OrderBy(c => c.DisplayOrder));
 
                 _initialized = true;
             }
@@ -62,14 +68,14 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
             }
         }
 
-        public List<DynamicColumnBase> GetColumns(string[] names)
+        public List<DynamicColumnWrapper> GetColumns(string[] ids)
         {
             if (!_initialized)
             {
                 _lock.EnterReadLock();
                 try
                 {
-                    return GetColumns(names);
+                    return GetColumns(ids);
                 }
                 finally
                 {
@@ -77,27 +83,31 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
                 }
             }
 
-            var result = new List<DynamicColumnBase>(names.Length);
+            var definitions = GetAllDefinedColumns();
+            var result = new List<DynamicColumnWrapper>(ids.Length);
 
-            foreach (var name in names)
+            foreach (var columnId in ids)
             {
-                if (!_columnTypes.TryGetValue(name, out var type))
-                    throw new ArgumentException($"Unknown column '{name}'");
+                if (!_columnTypes.TryGetValue(columnId, out var type))
+                    throw new ArgumentException($"Unknown column '{columnId}'");
 
-                result.Add((DynamicColumnBase)_serviceLocator.InstantiateNow(type));
+                var definition = definitions.Single(d => d.Id == columnId);
+                var provider = (IDynamicColumnProvider)_serviceLocator.InstantiateNow(type);
+
+                result.Add(new DynamicColumnWrapper(definition, provider));
             }
 
-            return result.OrderBy(r => r.DisplayOrder).ToList();
+            return result.OrderBy(r => r.Column.DisplayOrder).ToList();
         }
 
-        public List<ColumnInfo> GetAllColumnNames()
+        public List<ColumnInfo> GetAllDefinedColumns()
         {
             if (!_initialized)
             {
                 _lock.EnterReadLock();
                 try
                 {
-                    return GetAllColumnNames();
+                    return GetAllDefinedColumns();
                 }
                 finally
                 {
@@ -106,12 +116,6 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
             }
 
             return _orderedColumns;
-        }
-
-        public class ColumnInfo
-        {
-            public string Id { get; set; }
-            public string Title { get; set; }
-        }
+        }        
     }
 }

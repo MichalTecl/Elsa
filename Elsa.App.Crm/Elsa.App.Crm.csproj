@@ -108,10 +108,14 @@
     <Compile Include="Repositories\CustomerTagRepository.cs" />
     <Compile Include="Repositories\DistributorFiltersRepository.cs" />
     <Compile Include="Repositories\DistributorsRepository.cs" />
+    <Compile Include="Repositories\DynamicColumns\Infrastructure\ColumnInfo.cs" />
+    <Compile Include="Repositories\DynamicColumns\Infrastructure\DynamicColumnWrapper.cs" />
+    <Compile Include="Repositories\DynamicColumns\Infrastructure\IDynamicColumnProvider.cs" />
     <Compile Include="Repositories\DynamicColumns\CategoriesColumn.cs" />
     <Compile Include="Repositories\DynamicColumns\ColumnFactory.cs" />
     <Compile Include="Repositories\DynamicColumns\DetailLinkColumn.cs" />
-    <Compile Include="Repositories\DynamicColumns\DynamicColumnBase.cs" />
+    <Compile Include="Repositories\DynamicColumns\Infrastructure\SimpleDynamicColumnBase.cs" />
+    <Compile Include="Repositories\DynamicColumns\SalesStatsColumnsProvider.cs" />
     <Compile Include="Repositories\DynamicColumns\TagsColumn.cs" />
     <Compile Include="Repositories\DynamicColumns\TotalOrdersColumn.cs" />
     <Compile Include="Repositories\DynamicColumns\TrendColumn.cs" />
@@ -188,6 +192,8 @@
     <Content Include="SQL\20250507_001_crmfilters.sql" />
     <Content Include="SQL\20250514_002_LoadTagAssignmentsInfo.sql" />
     <Content Include="SQL\20250515_001_AssignTagToCustomers.sql" />
+    <Content Include="SQL\20250515_001_vwOrderVocMoc.sql" />
+    <Content Include="SQL\20250515_003_CrmLoadSalesStats.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
