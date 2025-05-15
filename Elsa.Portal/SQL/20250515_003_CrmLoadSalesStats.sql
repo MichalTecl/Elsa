@@ -52,16 +52,20 @@ BEGIN
     Final AS (
         SELECT 
             *,
+            -- Procentuální změna: tento rok vs minulý (podle větší z obou)
             CASE 
-                WHEN Voc_LastYear = 0 AND Voc_ThisYear > 0 THEN -100
-                WHEN Voc_LastYear = 0 AND Voc_ThisYear = 0 THEN 0
-                ELSE CAST(ROUND((Voc_ThisYear - Voc_LastYear) * 100.0 / NULLIF(Voc_LastYear, 0), 0) AS INT)
+                WHEN Voc_ThisYear = 0 AND Voc_LastYear = 0 THEN 0
+                ELSE CAST(ROUND(
+                    (Voc_ThisYear - Voc_LastYear) * 100.0 / 
+                    NULLIF(IIF(ABS(Voc_ThisYear) > ABS(Voc_LastYear), Voc_ThisYear, Voc_LastYear), 0), 0) AS INT)
             END AS Voc_ThisVsLastYear_Pct,
 
+            -- Procentuální změna: posledních 12M vs předchozích 12M (podle větší z obou)
             CASE 
-                WHEN Voc_Prev12M = 0 AND Voc_Last12M > 0 THEN -100
-                WHEN Voc_Prev12M = 0 AND Voc_Last12M = 0 THEN 0
-                ELSE CAST(ROUND((Voc_Last12M - Voc_Prev12M) * 100.0 / NULLIF(Voc_Prev12M, 0), 0) AS INT)
+                WHEN Voc_Last12M = 0 AND Voc_Prev12M = 0 THEN 0
+                ELSE CAST(ROUND(
+                    (Voc_Last12M - Voc_Prev12M) * 100.0 / 
+                    NULLIF(IIF(ABS(Voc_Last12M) > ABS(Voc_Prev12M), Voc_Last12M, Voc_Prev12M), 0), 0) AS INT)
             END AS Voc_Last12VsPrev12_Pct
         FROM Aggregated
     )

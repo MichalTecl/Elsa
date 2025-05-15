@@ -62,7 +62,7 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 
         public void RenderCell(string columnId, Func<string, string> mapPath, StringBuilder sb)
         {
-            sb.AppendLine("<div class=\"cell5\" data-bind=\"text:DynamicColumns.{columnId}\"></div>");
+            sb.AppendLine($"<div class=\"cell5\" data-bind=\"text:DynamicColumns.{columnId}\"></div>");
         }
 
         public void RenderHead(string columnId, Func<string, string> mapPath, StringBuilder sb)
@@ -93,10 +93,11 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
                         
                         if(rowData == null)
                         {
-                            rowData = new Dictionary<string, int>();
-                            rowData.Add(name, value);
+                            rowData = new Dictionary<string, int>();                            
                             result.Add(rowReader.GetInt32(0), rowData);
                         }
+
+                        rowData.Add(name, value);
                     }
                 });
 

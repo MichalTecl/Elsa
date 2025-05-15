@@ -21,6 +21,6 @@ namespace Elsa.App.Crm.Model
         public string SearchTag { get; set; }
         public List<SalesTrendTick> TrendModel { get; set; }
 
-        public Dictionary<string, object> DynamicColumns { get; set; }
+        public Dictionary<string, object> DynamicColumns { get; } = new Dictionary<string, object>();
     }
 }
