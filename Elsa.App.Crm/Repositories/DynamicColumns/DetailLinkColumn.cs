@@ -30,5 +30,10 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
         public override void Populate(List<DistributorGridRowModel> rows)
         {            
         }
+
+        protected override Func<DistributorGridRowModel, IComparable> GetSorter()
+        {
+            return m => m.Name;
+        }
     }
 }

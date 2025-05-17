@@ -23,6 +23,10 @@ namespace Elsa.App.Crm.Model
 
         [JsonProperty("gridColumns")]
         public List<GridColumnModel> GridColumns { get; set; } = new List<GridColumnModel>();
+
+        public string SortBy { get; set; }
+
+        public bool SortDescending { get; set; }
     }
 
     public class DistributorFiltersGroup 

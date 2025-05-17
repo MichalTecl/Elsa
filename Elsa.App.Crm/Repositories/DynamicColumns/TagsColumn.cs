@@ -26,6 +26,8 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 
         public override string CellClass => "cell20";
 
+        public override bool CanSort => false;
+
         public override void Populate(List<DistributorGridRowModel> rows)
         {
             var assignments = _customerTagRepository.GetAssignments(rows.Select(x => x.Id));
@@ -39,6 +41,11 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
         public override string GetCellControl(string columnId, string cellClass, string boundProperty, Func<string, string> loadTemplate)
         {
             return loadTemplate("TagsColumnTemplate");
+        }
+
+        protected override Func<DistributorGridRowModel, IComparable> GetSorter()
+        {
+            throw new NotSupportedException();
         }
     }
 }

@@ -1,4 +1,3 @@
-using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
 using Robowire;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Elsa.App.Crm.Repositories.DynamicColumns
+namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
 {
     public class ColumnFactory
     {

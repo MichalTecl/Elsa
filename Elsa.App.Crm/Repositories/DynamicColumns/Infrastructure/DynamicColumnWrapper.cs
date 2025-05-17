@@ -17,9 +17,9 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
             _provider = provider;
         }
 
-        public void Populate(List<DistributorGridRowModel> rows)
+        public void Populate(List<DistributorGridRowModel> rows, bool? sortDescending)
         {
-            _provider.Populate(Column.Id, rows);
+            _provider.Populate(Column.Id, rows, sortDescending);
         }
 
         public void RenderCell(Func<string, string> mapPath, StringBuilder sb)

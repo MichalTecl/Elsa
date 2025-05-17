@@ -90,3 +90,166 @@
 .digrTrendItemEmpty {
     background-color: transparent !important;
 }
+
+/* === OBSAH BUNĚK GRIDU === */
+
+/* Odkaz na detail zákazníka */
+.digrDetailLinkCell .digrLinkSameWin {
+    font-weight: 500;
+    color: #1a3a5d;
+    text-decoration: none;
+}
+
+    .digrDetailLinkCell .digrLinkSameWin:hover {
+        text-decoration: underline;
+    }
+
+.digrDetailLinkCell .digrOutNewWin {
+    margin-left: 6px;
+    color: #666;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+    .digrDetailLinkCell .digrOutNewWin:hover {
+        opacity: 1;
+    }
+
+/* Kategorie (Customer Groups) */
+.digrGroupsCell .digrCustGroupsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.digrGroupsCell .digrCustGroupItem {
+    background-color: #eaf2f8;
+    color: #1a3a5d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Štítky (Tags) */
+.digrTagsCell .digrCustTagsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.digrTagsCell .digrCustTagItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    vertical-align: middle;
+    text-align: center;
+    /* 💡 Jemný stín pro plastický efekt */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+
+/* Cena celkem */
+.digrTotalPriceCell {
+    text-align: right;
+    font-weight: 500;
+    color: #2c3e50;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Trend */
+.digrTrendCell .digrTrendView {
+    display: flex;
+    align-items: flex-end;
+    height: 24px;
+    width: 100%;
+    gap: 2px;
+    background: #f0f3f8;
+    border-radius: 2px;
+    padding: 2px 4px;
+}
+
+.digrTrendItem {
+    width: 4px;
+    background-color: #3aad35;
+    border-radius: 1px;
+}
+
+.digrTrendItemEmpty {
+    background-color: transparent !important;
+}
+
+.grid2 .gridHead > div {
+    border-right: 1px solid #ccd6e4;
+}
+
+    /* Poslední buňka v hlavičce má už pravý okraj od layoutu, ten nenecháváme dvojitý */
+    .grid2 .gridHead > div:last-child {
+        border-right: none;
+    }
+
+/* Hlavičková buňka: horizontální layout s mezerou */
+.grid2 .gridHead > div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 6px 8px;
+    gap: 8px; /* mezera mezi textem a sorterem */
+}
+
+/* Text zarovnaný vlevo, může být více řádků */
+.grid2 .gridHeadTitle {
+    flex: 1;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3;
+    text-align: left;
+}
+
+/* Sorter vpravo nahoře, bez deformace */
+.grid2 .gridHeadSortingControl {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+/* Sorter má vypadat jako kliknutelné tlačítko */
+.grid2 .gridSortIconsWrap {
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+    /* Hover efekt */
+    .grid2 .gridSortIconsWrap:hover {
+        background-color: rgba(0, 0, 0, 0.05); /* lehce šedý */
+    }
+
+    /* NEAKTIVNÍ sorter – jemný */
+    .grid2 .gridSortIconsWrap i {
+        color: #b3c0d1;
+        font-size: 13px;
+        transition: all 0.2s ease;
+    }
+
+    /* AKTIVNÍ sorter – výrazný a zřetelný */
+    .grid2 .gridSortIconsWrap.gridSortIconsWrapActive {
+        background-color: #1a3a5d10; /* tmavě modrá s průhledností */
+        border-radius: 4px;
+        padding: 2px 4px;
+        box-shadow: 0 0 0 1px #1a3a5d20; /* jemný outline efekt */
+    }
+
+        .grid2 .gridSortIconsWrap.gridSortIconsWrapActive i {
+            color: #1a3a5d;
+            font-weight: bold;
+            font-size: 14px;
+        }

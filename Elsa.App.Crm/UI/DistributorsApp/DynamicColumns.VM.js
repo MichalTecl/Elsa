@@ -2,6 +2,7 @@ app = app || {};
 app.DynamicColumns = (self) => {
         
     self.gridControlUrl = null;
+    self.sorters = {};
 
     const receiveColumnList = (columns) => {
         self.filter.gridColumns = columns.map((column, index) => {
@@ -43,10 +44,43 @@ app.DynamicColumns = (self) => {
 
         self.gridControlUrl = gridUrl;
 
+        self.filter.gridColumns.map(c => c.id).forEach(col => {
+            self.sorters[col] = self.sorters[col] || {
+                "isActive": false,
+                "descending": false
+            };
+        });
+
         if (!doNotInitiateSearch)
             app.Distributors.vm.search();
 
         localStorage.setItem("distributorGridSelectedColumns", query);
+    };
+
+    self.updateSortingModel = () => {
+        for (const columnId in self.sorters) {
+            if (columnId === self.filter.SortBy) {
+                self.sorters[columnId].isActive = true;
+                self.sorters[columnId].descending = self.filter.SortDescending;
+            } else {
+                self.sorters[columnId].isActive = false;
+                self.sorters[columnId].descending = false;
+            }
+        }
+    };
+
+    self.changeGridSorting = (columnId) => {
+
+        if (self.filter.SortBy === columnId) {
+            self.filter.SortDescending = !self.filter.SortDescending;
+        } else {
+            self.filter.SortBy = columnId;
+            self.filter.SortDescending = false;
+        }
+
+        self.search();
+
+        self.updateSortingModel();
     };
 };
 

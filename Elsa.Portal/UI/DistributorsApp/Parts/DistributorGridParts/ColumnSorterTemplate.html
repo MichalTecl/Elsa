@@ -1,0 +1,8 @@
+<div class="gridHeadSortingControl" data-bind="class!.hidden:sorters.{columnId}.canSort">
+    <div class="gridSortIconsWrap" 
+         data-bind="class.gridSortIconsWrapActive:sorters.{columnId}.isActive"
+         event-bind="click:changeSorting('{columnId}')">
+        <i class="fas fa-sort-amount-down-alt" data-bind="class.hidden:sorters.{columnId}.descending"></i>
+        <i class="fas fa-sort-amount-down-alt" data-bind="class!.hidden:sorters.{columnId}.descending"></i>
+    </div>
+</div>

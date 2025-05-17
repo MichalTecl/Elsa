@@ -17,11 +17,7 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
         public abstract string BoundProperty { get; }
         public abstract string CellClass { get; }
         public virtual bool CanSort { get; } = true;
-        public virtual void RenderHead(StringBuilder sb)
-        {
-            sb.AppendLine(GetHeadControl(Id, CellClass, BoundProperty));
-        }
-
+        
         public virtual void RenderCell(Func<string, string> mapPath, StringBuilder sb)
         {
             string mapper(string columnControlName) 
@@ -44,14 +40,9 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
         {
             return $"<div class=\"{CellClass} digr{Id}Cell\" data-bind=\"text:{boundProperty}\"></div>";
         } 
-
-        public virtual string GetHeadControl(string columnId, string cellClass, string boundProperty)
-        {
-            return $"<div class=\"{CellClass}\">{Title}</div>";
-        }
-
+                
         public abstract void Populate(List<DistributorGridRowModel> rows);
-
+                
         public virtual void InjectModelScript(StringBuilder target, Func<string, string> loadTempate)
         {
         }
@@ -62,19 +53,28 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
                 new ColumnInfo(DisplayOrder, Id, Title) }.AsReadOnly();
         }
 
-        public void RenderCell(string columnId, Func<string, string> mapPath, StringBuilder sb)
+        public virtual void RenderCell(string columnId, Func<string, string> mapPath, StringBuilder sb)
         {
             RenderCell(mapPath, sb);
         }
 
-        public void RenderHead(string columnId, Func<string, string> mapPath, StringBuilder sb)
+        public virtual void RenderHead(string columnId, Func<string, string> mapPath, StringBuilder sb)
         {
-            RenderHead(sb);
+            ColumnHeadControlLoader.Render(columnId, Title, CellClass, CanSort, mapPath, sb);
         }
 
-        public void Populate(string columnId, List<DistributorGridRowModel> rows)
+        public void Populate(string columnId, List<DistributorGridRowModel> rows, bool? sortDescending)
         {
             Populate(rows);
+
+            if (sortDescending != null)
+            {                
+                rows.Sort(DistributorGridRowModel.GetComparer(GetSorter(), sortDescending.Value));
+            }
         }
+
+        protected abstract Func<DistributorGridRowModel, IComparable> GetSorter();
+
+        
     }
 }

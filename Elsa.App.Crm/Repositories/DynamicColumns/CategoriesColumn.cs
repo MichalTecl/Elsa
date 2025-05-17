@@ -19,6 +19,8 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
         public override string BoundProperty => "";
 
         public override string CellClass => "cell10";
+
+        public override bool CanSort => false;
         
         public override string GetCellControl(string columnId, string cellClass, string boundProperty, Func<string, string> loadTemplate)
         {
@@ -31,6 +33,11 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 
         public override void Populate(List<DistributorGridRowModel> rows)
         {            
+        }
+
+        protected override Func<DistributorGridRowModel, IComparable> GetSorter()
+        {
+            throw new NotSupportedException();
         }
     }
 }

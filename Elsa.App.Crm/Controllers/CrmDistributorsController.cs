@@ -39,9 +39,9 @@ namespace Elsa.App.Crm.Controllers
             _distributorFilters = distributorFilters;
         }
 
-        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page, string sorterId)
+        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int pageSize, int page)
         {
-            return _distributorsRepository.GetDistributors(filter, pageSize, page, sorterId);
+            return _distributorsRepository.GetDistributors(filter, pageSize, page);
         }
 
         public DistributorSorting[] GetSortingTypes() => DistributorSorting.Sortings;
@@ -160,7 +160,7 @@ namespace Elsa.App.Crm.Controllers
             if (tag == null)
                 throw new ArgumentException("Štítek neexistuje, nebo nelze použít.");
 
-            var ids = _distributorsRepository.GetDistributors(filter, null, null, null, true).Select(d => d.Id).ToArray();
+            var ids = _distributorsRepository.GetDistributors(filter, null, null, true).Select(d => d.Id).ToArray();
 
             if (set)
                 return _tagRepo.Assign(ids, tag.Id).Count;
@@ -170,7 +170,7 @@ namespace Elsa.App.Crm.Controllers
 
         public int CountFilterResults(DistributorGridFilter filter)
         {
-            return _distributorsRepository.GetDistributors(filter, null, null, null, true).Count;
+            return _distributorsRepository.GetDistributors(filter, null, null, true).Count;
         }
     }
 }

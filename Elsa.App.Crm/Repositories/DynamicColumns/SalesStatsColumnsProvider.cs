@@ -47,7 +47,7 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
             return _columns;
         }
 
-        public void Populate(string columnId, List<DistributorGridRowModel> rows)
+        public void Populate(string columnId, List<DistributorGridRowModel> rows, bool? sortDescending)
         {
             var data = GetData();
 
@@ -58,6 +58,11 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
                 else
                     row.DynamicColumns[columnId] = 0;
             }
+
+            if (sortDescending != null)
+            {
+                rows.Sort(DistributorGridRowModel.GetComparer(r => (int)r.DynamicColumns[columnId], sortDescending.Value));
+            }
         }
 
         public void RenderCell(string columnId, Func<string, string> mapPath, StringBuilder sb)
@@ -67,7 +72,8 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 
         public void RenderHead(string columnId, Func<string, string> mapPath, StringBuilder sb)
         {
-            sb.AppendLine($"<div class=\"cell5\">{_columnIndex[columnId].Title}</div>");
+            ColumnHeadControlLoader.Render(columnId, _columnIndex[columnId].Title, "cell5", true, mapPath, sb);
+
         }
 
         private Dictionary<int, Dictionary<string, int>> GetData()

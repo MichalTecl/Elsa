@@ -1,5 +1,5 @@
 using Elsa.App.Crm.Model;
-using Elsa.App.Crm.Repositories.DynamicColumns;
+using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
@@ -36,7 +36,7 @@ namespace Elsa.App.Crm.Repositories
             _columnFactory = columnFactory;
         }
 
-        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int? pageSize, int? page, string sorterId, bool idsOnly = false)
+        public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int? pageSize, int? page, bool idsOnly = false)
         {
             _log.Info($"Received distributors query");
 
@@ -82,30 +82,44 @@ namespace Elsa.App.Crm.Repositories
                 if (!filter.IncludeDisabled && d.CustomerGroupTypeIds.Any(cgId => disabledGroupIds.Contains(cgId)))
                     return false;
 
-
                 return true;
-            });
-
-            if (!string.IsNullOrEmpty(sorterId))
+            })
+                .ToList();
+                        
+            List<DynamicColumnWrapper> dynColumns = null;
+            if (!idsOnly)
             {
-                var sorter = DistributorSorting.Sortings.FirstOrDefault(s => s.Id == sorterId) ?? DistributorSorting.Sortings.First();
-                all = sorter.Sorter(all);
+                dynColumns = _columnFactory.GetColumns(filter.GridColumns.Where(c => c.IsSelected).Select(c => c.Id).ToArray());
+
+                if (!string.IsNullOrWhiteSpace(filter.SortBy))
+                {
+                    var sortCol = dynColumns.FirstOrDefault(c => c.Column.Id == filter.SortBy);
+                    if (sortCol == null)
+                    {
+                        _log.Error($"Invalid SortBy '{filter.SortBy}'");
+                        filter.SortBy = null;
+                    }
+
+                    sortCol.Populate(all, filter.SortDescending);
+                }
             }
 
             if (pageSize != null && page != null)
             {
-                all = all.Skip(pageSize.Value * (page.Value - 1)).Take(pageSize.Value);
+                all = all.Skip(pageSize.Value * (page.Value - 1)).Take(pageSize.Value).ToList();
             }
 
             var result = all.ToList();
 
+            
+
             if (!idsOnly)
             {
-                var columns = _columnFactory.GetColumns(filter.GridColumns.Where(c => c.IsSelected).Select(c => c.Id).ToArray());
+                var columns = _columnFactory.GetColumns(filter.GridColumns.Where(c => c.IsSelected && (c.Id != filter.SortBy)).Select(c => c.Id).ToArray());
                 
                 foreach (var c in columns)
                 {
-                    c.Populate(result);
+                    c.Populate(result, null);
                 }
 
                 foreach (var a in result)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Elsa.App.Crm.Repositories.DynamicColumns.ColumnFactory;
+using static Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure.ColumnFactory;
 
 namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
 {
@@ -16,7 +16,7 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
 
         void RenderHead(string columnId, Func<string, string> mapPath, StringBuilder sb);
 
-        void Populate(string columnId, List<DistributorGridRowModel> rows);
+        void Populate(string columnId, List<DistributorGridRowModel> rows, bool? sortDescending);
     }
 }
 

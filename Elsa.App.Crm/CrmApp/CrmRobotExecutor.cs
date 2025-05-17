@@ -47,7 +47,7 @@ namespace Elsa.App.Crm.CrmApp
 
             _log.Info("Filter deserialised, executing:");
 
-            var filterMatchingIds = _distributorsRepository.GetDistributors(filter, null, null, null, true).Select(r => r.Id).ToList();
+            var filterMatchingIds = _distributorsRepository.GetDistributors(filter, null, null, true).Select(r => r.Id).ToList();
 
             _log.Info($"Got {filterMatchingIds.Count} of ids, starting processing...");
 

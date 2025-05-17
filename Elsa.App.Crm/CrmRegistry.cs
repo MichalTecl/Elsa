@@ -1,7 +1,7 @@
 using Elsa.App.Crm.CrmApp;
 using Elsa.App.Crm.DataReporting;
 using Elsa.App.Crm.Repositories;
-using Elsa.App.Crm.Repositories.DynamicColumns;
+using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
 using Robowire;
 using System;
 using System.Collections.Generic;

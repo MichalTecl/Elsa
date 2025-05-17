@@ -125,6 +125,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     const applySavedFilter = (filter, filterId) => {
         self.filter = filter;
+        self.updateSortingModel();
         self.onColumnsSelected(true);
 
         self.editedExFilter = null;

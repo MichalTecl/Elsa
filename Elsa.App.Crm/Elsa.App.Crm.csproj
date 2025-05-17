@@ -108,11 +108,12 @@
     <Compile Include="Repositories\CustomerTagRepository.cs" />
     <Compile Include="Repositories\DistributorFiltersRepository.cs" />
     <Compile Include="Repositories\DistributorsRepository.cs" />
+    <Compile Include="Repositories\DynamicColumns\Infrastructure\ColumnHeadControlLoader.cs" />
     <Compile Include="Repositories\DynamicColumns\Infrastructure\ColumnInfo.cs" />
     <Compile Include="Repositories\DynamicColumns\Infrastructure\DynamicColumnWrapper.cs" />
     <Compile Include="Repositories\DynamicColumns\Infrastructure\IDynamicColumnProvider.cs" />
     <Compile Include="Repositories\DynamicColumns\CategoriesColumn.cs" />
-    <Compile Include="Repositories\DynamicColumns\ColumnFactory.cs" />
+    <Compile Include="Repositories\DynamicColumns\Infrastructure\ColumnFactory.cs" />
     <Compile Include="Repositories\DynamicColumns\DetailLinkColumn.cs" />
     <Compile Include="Repositories\DynamicColumns\Infrastructure\SimpleDynamicColumnBase.cs" />
     <Compile Include="Repositories\DynamicColumns\SalesStatsColumnsProvider.cs" />
@@ -212,6 +213,7 @@
     <Content Include="UI\DistributorsApp\FilterControls\CustomerGroupSelect.html" />
     <Content Include="UI\DistributorsApp\FilterControls\NumberInput.html" />
     <Content Include="UI\DistributorsApp\Parts\CustomerTagAssignmentControl.html" />
+    <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\ColumnHeadSorterTemplate.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\DynamicColumns\TagsColumnTemplate.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\DynamicColumns\TagsColumnTemplate.js" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\GridControlTemplate.html" />

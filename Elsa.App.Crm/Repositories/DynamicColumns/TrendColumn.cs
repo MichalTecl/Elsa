@@ -19,6 +19,8 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
 
         public override string CellClass => "cell10";
 
+        public override bool CanSort => false;
+
         public override void Populate(List<DistributorGridRowModel> rows)
         {
         }
@@ -30,6 +32,11 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns
         <div data-bind=""style.height:height;class.digrTrendItemEmpty:IsEmpty;title:symbol"" class=""lt-template digrTrendItem""></div>
     </div>
 </div>";
+        }
+
+        protected override Func<DistributorGridRowModel, IComparable> GetSorter()
+        {
+            throw new NotSupportedException();
         }
     }
 }
