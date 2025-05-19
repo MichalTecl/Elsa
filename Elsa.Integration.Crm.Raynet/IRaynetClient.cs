@@ -1,4 +1,4 @@
-﻿using Elsa.Integration.Crm.Raynet.Model;
+using Elsa.Integration.Crm.Raynet.Model;
 using System.Collections.Generic;
 
 namespace Elsa.Integration.Crm.Raynet
@@ -23,6 +23,7 @@ namespace Elsa.Integration.Crm.Raynet
         RnResponse<long> CreateContactSource(string code);
         RnResponse<List<BusinessCaseModel>> GetBusinessCases(string name = null);
         RnResponse<Dictionary<string, List<CustomFieldDefinitionModel>>> GetCustomFieldTypes();
+        RnResponse<List<Activity>> GetActivities(int offset = 0, int limit = 1000);
 
         T ReadCustomField<T>(IHasCustomFields entity, string customFieldLabel);
     }

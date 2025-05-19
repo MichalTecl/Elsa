@@ -1,12 +1,14 @@
-﻿using System;
+using Elsa.Integration.Crm.Raynet;
+using Elsa.Integration.Crm.Raynet.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using Elsa.Integration.Crm.Raynet;
-using Elsa.Integration.Crm.Raynet.Model;
+using System.Xml.Linq;
 
 namespace Elsa.Integration.Crm.Raynet
 {
@@ -146,6 +148,13 @@ namespace Elsa.Integration.Crm.Raynet
                 return default;
 
             return (value is T converted) ? converted : default;                
+        }
+
+        public RnResponse<List<Activity>> GetActivities(int offset = 0, int limit = 1000)
+        {
+            var url = $"https://app.raynet.cz/api/v2/activity/?offset={offset}&limit={limit}";
+
+            return _protocol.Call<RnResponse<List<Activity>>>(HttpMethod.Get, url);
         }
     }
 }

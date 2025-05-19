@@ -1,4 +1,4 @@
-﻿insert into MeetingStatus (Title, ColorHex, IconClass, ProjectId, ActionExpected)
+insert into MeetingStatus (Title, ColorHex, IconClass, ProjectId, ActionExpected)
 select *
   from (
 	select N'Plán' Title, N'#1E90FF' ColorHex, 'far fa-calendar-alt' IconClass, 1 ProjectId, 1 ActionExpected union
@@ -14,7 +14,8 @@ insert into MeetingCategory (Title,  IconClass, InitialStatusId, ProjectId, Expe
 select *
   from (
 	select N'Telefonát' Title, 'fas fa-phone' IconClass, @defaultStatusId InitialStatusId, 1  ProjectId, 15 ExpectedDurationMinutes union
-	select N'Schůzka' Title,  'fas fa-coffee' IconClass, @defaultStatusId InitialStatusId, 1  ProjectId, 60 ExpectedDurationMinutes 
+	select N'Schůzka' Title,  'fas fa-coffee' IconClass, @defaultStatusId InitialStatusId, 1  ProjectId, 60 ExpectedDurationMinutes union
+    select N'E-Mail' Title,  'fas fa-envelope' IconClass, @defaultStatusId InitialStatusId, 1  ProjectId, 1 ExpectedDurationMinutes
   ) x
   where not exists (select top 1 1 from MeetingCategory ems where ems.Title = x.Title);
 

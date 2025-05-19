@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Elsa.Common.DbUtils\Elsa.Common.DbUtils.csproj" />
     <ProjectReference Include="..\Elsa.Integration.Crm.Raynet\Elsa.Integration.Crm.Raynet.csproj" />
     <ProjectReference Include="..\Elsa.Test.Utils\Elsa.Test.Utils.csproj" />
   </ItemGroup>

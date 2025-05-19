@@ -1,4 +1,4 @@
-﻿using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Common;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
 using System;
@@ -26,7 +26,7 @@ namespace Elsa.App.Crm.Entities
         [NVarchar(255, false)]
         string Title { get; set; }
 
-        [NVarchar(255, false)]
+        [NVarchar(2000, false)]
         string Text { get; set; }
     }
 }
