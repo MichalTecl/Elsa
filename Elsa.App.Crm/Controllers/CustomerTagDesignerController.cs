@@ -66,7 +66,8 @@ namespace Elsa.App.Crm.Controllers
                         Name = tag.Name,
                         CssClass = tag.CssClass,
                         IsRoot = tag.IsRoot,
-                        DaysToWarning = tag.DaysToWarning ?? 0
+                        DaysToWarning = tag.DaysToWarning ?? 0,
+                        RequiresNote = tag.RequiresNote == true
                     };
 
                     result.Add(model);
@@ -140,6 +141,7 @@ namespace Elsa.App.Crm.Controllers
                     t.CssClass = model.CssClass;
                     t.Description = model.Description;
                     t.DaysToWarning = model.DaysToWarning == 0 ? null : (int?)model.DaysToWarning;
+                    t.RequiresNote = model.RequiresNote;
                 });
 
                 if (parentTagId != null) 

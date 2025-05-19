@@ -1,5 +1,6 @@
-﻿using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Common;
 using Robowire.RobOrm.Core;
+using Robowire.RobOrm.SqlServer.Attributes;
 using System;
 
 namespace Elsa.App.Crm.Entities
@@ -10,5 +11,10 @@ namespace Elsa.App.Crm.Entities
         int TagTypeId { get; set; }
         ICustomerTagType TagType { get; }
         DateTime AssignDt { get; set; }
+
+        DateTime? UnassignDt { get; set; }
+
+        [NVarchar(2000, true)]
+        string Note { get; set; }
     }
 }

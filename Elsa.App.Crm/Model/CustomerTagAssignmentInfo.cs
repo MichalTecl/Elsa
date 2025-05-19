@@ -47,6 +47,8 @@ namespace Elsa.App.Crm.Model
                 return (AssignDt.AddDays(DaysToWarning.Value) > DateTime.Now);
             } 
         }        
+
+        public string Note { get; set; }
     }
 
     public class TagTransitionInfo : CustomerTagTypeInfo

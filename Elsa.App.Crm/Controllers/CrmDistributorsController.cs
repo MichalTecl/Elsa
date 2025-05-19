@@ -96,7 +96,7 @@ namespace Elsa.App.Crm.Controllers
                 }
 
                 if (rq.AddedTags != null)
-                    rq.AddedTags.ForEach(t => _tagRepo.Assign(new[] { customer.Id }, t));
+                    rq.AddedTags.ForEach(t => _tagRepo.Assign(new[] { customer.Id }, t, null));
 
                 if (rq.RemovedTags != null)
                     rq.RemovedTags.ForEach(t => _tagRepo.Unassign(new[] { customer.Id }, t));
@@ -154,7 +154,7 @@ namespace Elsa.App.Crm.Controllers
             base.OnBeforeCall();
         }
 
-        public int DoBulkTagging(DistributorGridFilter filter, string tagName, bool set)
+        public int DoBulkTagging(DistributorGridFilter filter, string tagName, bool set, string note)
         {
             var tag = _tagRepo.GetTagTypes(null).FirstOrDefault(t => t.Name == tagName);
             if (tag == null)
@@ -163,7 +163,7 @@ namespace Elsa.App.Crm.Controllers
             var ids = _distributorsRepository.GetDistributors(filter, null, null, true).Select(d => d.Id).ToArray();
 
             if (set)
-                return _tagRepo.Assign(ids, tag.Id).Count;
+                return _tagRepo.Assign(ids, tag.Id, note).Count;
             else
                 return _tagRepo.Unassign(ids, tag.Id).Count;            
         }

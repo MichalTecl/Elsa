@@ -94,7 +94,14 @@ namespace Elsa.App.Crm.CrmApp
                 }
                 else
                 {
-                    _customerTags.Assign(new[] { distributor.Id }, tagTypeId.Value);
+                    string assignmentNote = null;
+                    
+                    if(_customerTags.GetTagTypes(null).FirstOrDefault(tt => tt.Id == tagTypeId).RequiresNote == true)
+                    {
+                        assignmentNote = $"Nastavil robot {robot.Name}";
+                    }
+                    
+                    _customerTags.Assign(new[] { distributor.Id }, tagTypeId.Value, assignmentNote);
                     result.AddedCustomers.Add(distributor.Id);
                     addsCount++;
                 }

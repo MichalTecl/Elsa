@@ -158,13 +158,14 @@ namespace Elsa.App.Crm.Repositories
         /// <param name="tagTypeId"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public List<int> Assign(int[] customerIds, int tagTypeId)
+        public List<int> Assign(int[] customerIds, int tagTypeId, string note)
         {
             var result = new List<int>(customerIds.Length);
 
             _database.Sql().Call("AssignTagToCustomers")
                 .WithParam("@authorId", _session.User.Id)
                 .WithParam("@tagTypeId", tagTypeId)
+                .WithParam("@note", note)
                 .WithStructuredParam("@customerIds", "IntTable", customerIds, new[] { "Id" }, i => new object[] { i })
                 .ReadRows(r => result.Add(r.GetInt32(0)));
 
@@ -190,9 +191,21 @@ namespace Elsa.App.Crm.Repositories
                 if (!assignments.TryGetValue(customerId, out var hasTags) || !hasTags.Contains(tagTypeId))
                     continue;
 
-                var assignment = _database.SelectFrom<ICustomerTagAssignment>().Where(t => t.CustomerId == customerId && t.TagTypeId == tagTypeId).Take(1).Execute().Single();
-                _database.Delete(assignment);
-                
+                var assignment = _database.SelectFrom<ICustomerTagAssignment>()
+                    .Where(t => t.CustomerId == customerId 
+                                && t.TagTypeId == tagTypeId 
+                                && t.UnassignDt == null).Take(1).Execute().Single();
+
+                if (assignment.Note != null)
+                {
+                    assignment.UnassignDt = DateTime.Now;
+                    _database.Save(assignment);
+                }
+                else
+                {
+                    _database.Delete(assignment);
+                }
+
                 result.Add(assignment.CustomerId);
             }
             
@@ -217,7 +230,9 @@ namespace Elsa.App.Crm.Repositories
             return _cache.ReadThrough(AssignmentsCacheKey, TimeSpan.FromMinutes(10),
                 () =>
                 {
-                    var all = _database.SelectFrom<ICustomerTagAssignment>().Join(a => a.Customer).Where(a => a.Customer.ProjectId == _session.Project.Id).Execute();
+                    var all = _database.SelectFrom<ICustomerTagAssignment>().Join(a => a.Customer)
+                    .Where(a => a.Customer.ProjectId == _session.Project.Id
+                             && a.UnassignDt == null).Execute();
 
                     var result = new Dictionary<int, List<int>>();
 
@@ -268,7 +283,7 @@ namespace Elsa.App.Crm.Repositories
 
         internal int GetAssignmentsCount(int id)
         {
-            return _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id).Execute().Count();
+            return _database.SelectFrom<ICustomerTagAssignment>().Where(a => a.TagTypeId == id && a.UnassignDt == null).Execute().Count();
         }
 
         public ICustomerTagType SaveTag(int groupId, int? id, Action<ICustomerTagType> setup)

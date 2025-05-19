@@ -191,6 +191,8 @@
     <Content Include="SQL\20250429_001_crmfilter_hasTag.sql" />
     <Content Include="SQL\20250429_003_crmfilter_orderedProductInPeriod.sql" />
     <Content Include="SQL\20250507_001_crmfilters.sql" />
+    <Content Include="SQL\20250519_003_AssignTagToCustomers - added note.sql" />
+    <Content Include="SQL\20250519_002_LoadTagAssignmentsInfo - added note.sql" />
     <Content Include="SQL\20250514_002_LoadTagAssignmentsInfo.sql" />
     <Content Include="SQL\20250515_001_AssignTagToCustomers.sql" />
     <Content Include="SQL\20250515_001_vwOrderVocMoc.sql" />

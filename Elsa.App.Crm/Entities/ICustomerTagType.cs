@@ -28,5 +28,7 @@ namespace Elsa.App.Crm.Entities
         ICustomerTagTypeGroup Group { get; }
 
         int? DaysToWarning { get; set; }
+
+        bool? RequiresNote { get; set; }
     }
 }

@@ -81,6 +81,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                     tagModel.tagsIds = tagRecord.TransitionsTo;
                     tagModel.daysToWarning = tagRecord.DaysToWarning;
                     tagModel.hasDaysToWarning = tagModel.daysToWarning > 0;
+                    tagModel.requiresNote = !!tagRecord.RequiresNote;
 
                     if (tagModel.isOpen) {
                         updateTagList(tagModel, tagModel.tags, tagModel.tagsIds);
@@ -117,6 +118,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                             "CssClass": tagModel.cssClass,
                             "Description": tagModel.description,
                             "DaysToWarning": tagModel.daysToWarning,
+                            "RequiresNote": tagModel.requiresNote
                         })
                         .post((tags) => {
                             tagModel.cancelEdit();
@@ -133,6 +135,8 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                     tagModel.daysToWarning = value;
                     tagModel.hasDaysToWarning = tagModel.daysToWarning > 0;
                 };
+
+                tagModel.updateRequiresNote = (v) => tagModel.requiresNote = !!v;
 
                 tagModel.toggleDaysToWarning = () => {
                     if (tagModel.hasDaysToWarning) {

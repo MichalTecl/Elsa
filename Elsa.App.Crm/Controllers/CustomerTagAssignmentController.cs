@@ -27,9 +27,9 @@ namespace Elsa.App.Crm.Controllers
             return _customerTagRepository.GetAssignments(new[] { customerId });
         }
 
-        public IReadOnlyCollection<CustomerTagAssignmentInfo> Assign(int customerId, int tagTypeId) 
+        public IReadOnlyCollection<CustomerTagAssignmentInfo> Assign(int customerId, int tagTypeId, string note) 
         {
-            _customerTagRepository.Assign(new[] { customerId }, tagTypeId);
+            _customerTagRepository.Assign(new[] { customerId }, tagTypeId, note);
             return _customerTagRepository.GetAssignments(new[] { customerId });
         }    
         
@@ -45,7 +45,8 @@ namespace Elsa.App.Crm.Controllers
                 TagTypeName = t.Name,
                 FromTagTypeId = tagTypeId,
                 DaysToWarning = t.DaysToWarning ?? 0,
-                TagTypeGroupId = t.GroupId
+                TagTypeGroupId = t.GroupId,
+                RequiresNote = t.RequiresNote == true
             })
                 .ToList();
         }

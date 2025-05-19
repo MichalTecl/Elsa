@@ -39,6 +39,12 @@
                             <input type="number" step="1" min="1" data-bind="value:daysToWarning;class!.hidden:hasDaysToWarning" event-bind="input:VM.updateDaysToWarning(this.value)" />
                             <div class="ctdDtwCaption" data-bind="class!.hidden:hasDaysToWarning">dnů</div>
                         </div>
+                        <div class="ctdTagFlagsEditPanel">
+                            <div class="ctdTagFlagItem">
+                                <input type="checkbox" data-bind="checked:requiresNote" event-bind="change:VM.updateRequiresNote(this.value)" />
+                                <label>Vyžaduje poznámku</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="ctdItemEditorRow" data-bind="class!.hidden:isEditing">
