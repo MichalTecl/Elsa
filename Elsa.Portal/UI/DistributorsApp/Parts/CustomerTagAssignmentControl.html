@@ -68,14 +68,16 @@
                     assignment.Transitions.forEach(t => {
                         t.doTransition = assignment.doTransition;
                         t.onTagAssignmentChanged = assignment.onTagAssignmentChanged;
+                        t.noteInputOpen = false;
+                        t.note = null;
+                        t.updateNote = (v) => t.note = v;
                     });
 
                     Popup.open(targetPicker);
                 });
         };
 
-        self.transitionSelected = (transition) => {
-
+        const saveTransition = (transition) => {
             if (transition.doTransition) {
                 transition.doTransition(transition);
                 Popup.close(targetPicker);
@@ -83,13 +85,33 @@
             }
 
             lt.api("/CustomerTagAssignment/assign")
-                .query({ "customerId": transition.CustomerId, "tagTypeId": transition.TagTypeId })
+                .query({ "customerId": transition.CustomerId, "tagTypeId": transition.TagTypeId, "note": transition.note })                
                 .post((assignments) => {
-                    receiveNewAssignments(transition, assignments);                    
+                    receiveNewAssignments(transition, assignments);
                     Popup.close(targetPicker);
                 });
-
         };
+
+        self.transitionSelected = (transition) => {
+
+            if (transition.RequiresNote) {
+                transition.noteInputOpen = true;
+                return;
+            }
+
+            saveTransition(transition);
+        };
+
+        self.transitionWithNoteSelected = (transition) => {
+
+            if ((!transition.note) || (transition.note.length < 5)) {
+                alert("Poznámka musí mít alespoň 5 znaků");
+                return;
+            }
+
+            saveTransition(transition);
+        };
+        
     });
 </script>
 <link href="/UI/DistributorsApp/Css/CustomerTagAssignmentControl.css" rel="stylesheet" />
