@@ -48,3 +48,121 @@
     border-radius: 50px;
     border: 2px solid orange;
 }
+
+
+.tagTransitionNoteInputPanel {
+    margin-top: 10px;
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: hidden;
+    max-width: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: max-width 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+    /* Když není .hidden (tedy panel je otevřený) */
+    .tagTransitionNoteInputPanel:not(.hidden) {
+        max-width: 600px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* .hidden musí zůstat kvůli logice zobrazení */
+    .tagTransitionNoteInputPanel.hidden {
+        display: none !important;
+    }
+
+    .tagTransitionNoteInputPanel label {
+        font-weight: 600;
+        font-size: 15px;
+        color: #333;
+    }
+
+    .tagTransitionNoteInputPanel textarea {
+        width: 100%;
+        min-width: 600px;
+        min-height: 80px;
+        resize: vertical;
+        padding: 10px 12px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-family: inherit;
+        box-sizing: border-box;
+        background: white;
+    }
+
+.tagTransitionNoteInputPanelButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+    .tagTransitionNoteInputPanelButtons button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.1s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .tagTransitionNoteInputPanelButtons button i {
+            font-size: 14px;
+        }
+
+/* Cancel button */
+.ttranCancelButton {
+    background: #f44336;
+    color: white;
+}
+
+    .ttranCancelButton:hover {
+        background: #d32f2f;
+        transform: translateY(-1px);
+    }
+
+/* Save button */
+.tranSaveTagButton {
+    background: #4caf50;
+    color: white;
+}
+
+    .tranSaveTagButton:hover {
+        background: #388e3c;
+        transform: translateY(-1px);
+    }
+
+/* Mobilní přizpůsobení */
+@media (max-width: 620px) {
+    .tagTransitionNoteInputPanel:not(.hidden) {
+        max-width: 100%;
+    }
+
+    .tagTransitionNoteInputPanel textarea {
+        min-width: 100%;
+        font-size: 16px;
+    }
+
+    .tagTransitionNoteInputPanelButtons {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+        .tagTransitionNoteInputPanelButtons button {
+            width: 100%;
+        }
+}

@@ -57,6 +57,12 @@
 
             if (!!assignment.Transitions) {
                 Popup.open(targetPicker);
+
+                assignment.Transitions.forEach(t => {
+                    t.isHidden = false;
+                    t.noteInputOpen = false;
+                });
+
                 return;
             }
 
@@ -70,17 +76,27 @@
                         t.onTagAssignmentChanged = assignment.onTagAssignmentChanged;
                         t.noteInputOpen = false;
                         t.note = null;
+                        t.isHidden = false;
                         t.updateNote = (v) => t.note = v;
                     });
 
                     Popup.open(targetPicker);
+
+                    self.showOnly = (transition) => {
+                        if (!transition) {
+                            assignment.Transitions.forEach(t => t.isHidden = false);
+                            return;
+                        }
+
+                        assignment.Transitions.forEach(t => t.isHidden = t != transition);
+                    };
                 });
         };
 
         const saveTransition = (transition) => {
             if (transition.doTransition) {
                 transition.doTransition(transition);
-                Popup.close(targetPicker);
+                Popup.close();
                 return;
             }
 
@@ -88,7 +104,7 @@
                 .query({ "customerId": transition.CustomerId, "tagTypeId": transition.TagTypeId, "note": transition.note })                
                 .post((assignments) => {
                     receiveNewAssignments(transition, assignments);
-                    Popup.close(targetPicker);
+                    Popup.close();
                 });
         };
 
@@ -96,6 +112,7 @@
 
             if (transition.RequiresNote) {
                 transition.noteInputOpen = true;
+                self.showOnly(transition);
                 return;
             }
 
@@ -111,7 +128,16 @@
 
             saveTransition(transition);
         };
-        
+
+        self.cancelNoteInput = (transition) => {
+            transition.noteInputOpen = false;
+            self.showOnly(null);
+        }
+
+        self.confirmNote = (transition) => {
+            saveTransition(transition);
+            transition.noteInputOpen = false;
+        };
     });
 </script>
 <link href="/UI/DistributorsApp/Css/CustomerTagAssignmentControl.css" rel="stylesheet" />

@@ -1,5 +1,23 @@
 <div id="tranTarg_{%GENERATE%}" class="tagTransitionTargetSelectCont" data-bind="itemsSource:Transitions" data-key="TagTypeId">
-    <div class="tagTransitionTargetSelectItem lt-template" data-bind="text:TagTypeName;cssClass:TagTypeCssClass" event-bind="click:transitionSelected(VM)"></div>
+    <div class=" lt-template" >
+        <div class="tagTransitionTargetSelectName tagTransitionTargetSelectItem"
+             data-bind="text:TagTypeName;cssClass:TagTypeCssClass;class.hidden:isHidden" 
+             event-bind="click:transitionSelected(VM)">
+        </div>
+        <div class="tagTransitionNoteInputPanel" data-bind="class!.hidden:noteInputOpen">
+            <label>Poznámka</label>
+            <textarea data-bind="value:note" event-bind="input:VM.updateNote(this.value)"></textarea>
+            <div class="tagTransitionNoteInputPanelButtons">
+                <button class="ttranCancelButton" event-bind="click:cancelNoteInput(VM)">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <button class="tranSaveTagButton" event-bind="click:confirmNote(VM)">
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
     lt.element("tranTarg_{%GENERATE%}").attach(function () { });

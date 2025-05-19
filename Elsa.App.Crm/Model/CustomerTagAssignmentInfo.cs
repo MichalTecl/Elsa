@@ -16,6 +16,7 @@ namespace Elsa.App.Crm.Model
         public int? DaysToWarning { get; set; }
         public bool HasTransitions { get; set; }
         public int TagTypeGroupId { get; set; }
+        public bool RequiresNote { get; set; }
     }
 
     public class CustomerTagAssignmentInfo : CustomerTagTypeInfo
