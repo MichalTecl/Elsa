@@ -7,6 +7,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using Robowire.RoboApi;
 using Robowire.RobOrm.Core;
 using System;
@@ -154,18 +155,26 @@ namespace Elsa.App.Crm.Controllers
             base.OnBeforeCall();
         }
 
-        public int DoBulkTagging(DistributorGridFilter filter, string tagName, bool set, string note)
+        public int DoBulkTagging(BulkTaggingRequest rq)
         {
-            var tag = _tagRepo.GetTagTypes(null).FirstOrDefault(t => t.Name == tagName);
+            if ((rq.Filter == null) == (rq.CustomerIds == null || rq.CustomerIds.Count == 0))
+                throw new ArgumentException("Request must define CustomerIds or Filter");
+
+            var tag = _tagRepo.GetTagTypes(null).FirstOrDefault(t => t.Id == rq.TagTypeId);
             if (tag == null)
                 throw new ArgumentException("Štítek neexistuje, nebo nelze použít.");
 
-            var ids = _distributorsRepository.GetDistributors(filter, null, null, true).Select(d => d.Id).ToArray();
+            if (rq.Set && tag.RequiresNote == true && string.IsNullOrEmpty(rq.Note))
+                throw new InvalidOperationException($"Štítek {tag.Name} vyžaduje textovou poznámku");
 
-            if (set)
-                return _tagRepo.Assign(ids, tag.Id, note).Count;
+            int[] customerIds = (rq.Filter == null) 
+                ? rq.CustomerIds.ToArray() 
+                : _distributorsRepository.GetDistributors(rq.Filter, null, null, true).Select(d => d.Id).ToArray();
+
+            if (rq.Set)
+                return _tagRepo.Assign(customerIds.ToArray(), tag.Id, rq.Note).Count;
             else
-                return _tagRepo.Unassign(ids, tag.Id).Count;            
+                return _tagRepo.Unassign(customerIds.ToArray(), tag.Id).Count;
         }
 
         public int CountFilterResults(DistributorGridFilter filter)

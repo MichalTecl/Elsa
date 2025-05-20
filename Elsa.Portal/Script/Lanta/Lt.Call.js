@@ -272,6 +272,49 @@ lt.api.UsageManager = lt.api.UsageManager || function() {
     var pendingOpsCounter = 0; 
     var handlers = [];
 
+    var idleHandlers = [];
+
+    let idleTimer = null;
+
+    let lastActivityEndTime = 0;
+
+    const checkIdle = () => {
+
+        if (pendingOpsCounter > 0)
+            return; // we are busy
+
+        const idleMsecs = Date.now() - lastActivityEndTime;
+
+        const handlersToRemove = [];
+
+        idleHandlers.forEach(h => {
+            if (h(idleMsecs))
+                handlersToRemove.push(h);
+        });
+
+        handlersToRemove.forEach(h => self.unsubscribeIdleHandler(h));
+    };
+
+    const manageIdleTimer = () => {
+
+        if (idleHandlers.length === 0) {
+
+            // no handlers
+
+            if (!!idleTimer) {
+                // but timer is running
+                window.clearInterval(idleTimer);
+                idleTimer = null;
+            }
+
+            return;
+        }
+
+        if (!idleTimer) {
+            idleTimer = window.setInterval(checkIdle, 100);
+        }
+    };
+
     var notifyHandlers = function(busy) {
       for (var i = 0; i < handlers.length; i++) {
           var h = handlers[i];
@@ -296,12 +339,29 @@ lt.api.UsageManager = lt.api.UsageManager || function() {
         if (pendingOpsCounter < 0) {
             pendingOpsCounter = 0;
         }
+
+        lastActivityEndTime = Date.now();
     };
 
     self.subscribeBusyHandler = function(handler) {
         handlers.push(handler);
         handler(pendingOpsCounter > 0);
     };    
+
+    self.subscribeIdleHandler = function (handler) {
+        if (idleHandlers.indexOf(handler) === -1)
+            idleHandlers.push(handler);
+
+        manageIdleTimer();
+    };
+
+    self.unsubscribeIdleHandler = function (handler) {
+        const hindex = idleHandlers.indexOf(handler);
+        if (hindex > -1)
+            idleHandlers.splice(hindex, 1);
+
+        manageIdleTimer();
+    }
 };
 
 lt.api.usageManager = lt.api.usageManager || new lt.api.UsageManager();

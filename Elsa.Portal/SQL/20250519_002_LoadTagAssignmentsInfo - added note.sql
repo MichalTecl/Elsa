@@ -23,6 +23,7 @@ BEGIN
 	  JOIN [User] u ON (asg.AuthorId = u.Id)
 	  LEFT JOIN (SELECT ctt.SourceTagTypeId, MIN(ctt.Id) x
 				   FROM CustomerTagTransition ctt  
-				  GROUP BY ctt.SourceTagTypeId) trans ON (trans.SourceTagTypeId = asg.TagTypeId)        
+				  GROUP BY ctt.SourceTagTypeId) trans ON (trans.SourceTagTypeId = asg.TagTypeId)   
+      WHERE asg.UnassignDt IS NULL;
 
 END  

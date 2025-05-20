@@ -7,6 +7,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
     let metadataConsumersQueue = [];
     let __metadata = null;
 
+    self.dataLoadBlocked = true;
+    self.dataLoadRequested = false;
+
     self.data = [];
 
     self.allCustomerGroups = [];
@@ -19,6 +22,11 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.pageSize = 20;
     self.canReadMore = false;
     self.bulkTaggingOpen = false;
+
+    const bulkTaggingTitleDefault = "Všem odpovídajícím kontaktům";
+    const bulkTaggingTitleSelection = "Všem označeným kontaktům";
+
+    self.bulkTaggingDynamicTitle = bulkTaggingTitleDefault;
 
     self.isDirty = false;
 
@@ -220,8 +228,19 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.toggleExFilterInverted = (filter) => {
         self.changeFilterInverted(!filter.Inverted);
     };
+
+    self.onDataCheckChanged = () => {
+        const hasSelection = !!(self.data.find(r => !!r.isChecked));
+        self.bulkTaggingDynamicTitle = hasSelection ? bulkTaggingTitleSelection : bulkTaggingTitleDefault;
+
+        if (hasSelection)
+            self.bulkTaggingOpen = true;
+    };
         
     self.openBulkTagging = () => {
+
+        self.onDataCheckChanged();
+
         self.bulkTaggingOpen = true;
     };
 
@@ -235,20 +254,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
             .post(callback);
     };
 
+    const confirmBulkTagging = (model, callback) => {
 
-    const doBulkTagging = (tagName, set, callback) => {
-        lt.api("/CrmDistributors/doBulkTagging")
-            .query({ "tagName": tagName, "set": set })
-            .body(self.filter)
-            .post((count) => {
-                self.search();
-                callback(count);
-            });
-    }
-
-    self.startBulkTagging = (tagName, set) => {
-
-        countFilterResults((recordsCount) => {
+        const userInteraction = (recordsCount) => {
 
             if (recordsCount === 0) {
                 alert("Aktuální filtr vybírá 0 záznamů - akce nebude spuštěna");
@@ -260,25 +268,78 @@ app.Distributors.VM = app.Distributors.VM || function(){
             if (recordsCount === 1)
                 msg += "velkoodběrateli bude ";
             else
-                msg += "velkoodběratelům bude";
+                msg += "velkoodběratelům bude ";
 
-            if (set)
+            if (model.Set)
                 msg += "nastaven štítek ";
             else
                 msg += "odebrán štítek ";
 
-            msg += tagName;
+            msg += model.tagName;
 
             msg += ". Spustit?";
 
             if (!window.confirm(msg))
                 return;
 
-            doBulkTagging(tagName, set, (count) => {
-                alert("Hotovo. Bylo změněno " + count + " záznamů velkoodběratelů.");
-            });
-        });
+            callback();
+        }
 
+        if (!!model.Filter) {
+            countFilterResults(userInteraction);
+        } else {
+            userInteraction(model.CustomerIds.length);
+        }
+    };
+
+    const obtainTagAssignmentData = (tagName, model, callback) => {
+        self.withMetadata((md) => {
+            const tag = md.CustomerTagTypes.find(t => t.Name.toLowerCase() === tagName.toLowerCase());
+
+            if (!tag) {
+                alert("Štítek " + tagName + " nenalezen.");
+                return;
+            }
+
+            model.tagName = tag.Name;
+            model.TagTypeId = tag.Id;
+
+            let note = "";
+
+            if (model.Set && tag.RequiresNote) {
+                note = window.prompt("Štítek " + tag.Name + " vyžaduje poznámku:");
+                if (!note)
+                    return;
+            }
+
+            model.Note = note;
+
+            callback(model);
+        });
+    };
+
+    self.startBulkTagging = (tagName, set) => {
+
+        const model = {
+            "Set":set
+        };
+
+        const selectedContactIds = self.data.filter(d => !!d.isChecked).map(d => d.Id);
+        if (selectedContactIds.length > 0) {
+            model.CustomerIds = selectedContactIds;
+
+        } else {
+            model.Filter = self.filter;
+        }
+
+        obtainTagAssignmentData(tagName, model, (model) => confirmBulkTagging(model, () => {
+            lt.api("/CrmDistributors/doBulkTagging")
+                .body(model)
+                .post((count) => {
+                    self.search();
+                    alert("Hotovo. Bylo změněno " + count + " záznamů velkoodběratelů.");
+                });
+        }));
     };
 
     const checkFiltersExpansion = () => {
@@ -485,7 +546,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.search = (savedFilterId) => {
-
+                
         console.log("Search initiated");
 
         self.page = 0;
@@ -553,11 +614,36 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 }
 
                 self.data.push(d);
-            });           
+            });      
+
+            self.onDataCheckChanged();
+
         });
     };
 
     const load = (page) => {
+
+        if (self.dataLoadBlocked) {
+            console.log("data loading postponed");
+
+            if (!self.dataLoadRequested) {
+                self.dataLoadRequested = true;
+
+                lt.api.usageManager.subscribeIdleHandler((idleMsecs) => {
+
+                    if (idleMsecs > 250) {
+                        self.dataLoadBlocked = false;
+                        self.search();
+
+                        return true;
+                    }
+                });
+            }
+            
+            return;
+        }
+
+        self.dataLoadRequested = false;
 
         console.log("Loading - page=" + page);
         

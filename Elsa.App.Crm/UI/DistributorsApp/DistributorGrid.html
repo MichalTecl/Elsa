@@ -75,7 +75,7 @@
                 </div>
 
                 <div class="bulkTaggingSetupPanel">
-                    <div class="bulkTaggingSetupText">Všem odpovídajícím kontaktům</div>
+                    <div class="bulkTaggingSetupText" data-bind="text:bulkTaggingDynamicTitle"></div>
                     <div class="bulkTaggignSetupRadios">
                         <input type="radio" name="rbBulkTagging" id="rbbtgSet" checked /><label for="rbbtgSet">nastavit</label>
                         <input type="radio" name="rbBulkTagging" id="rbbtgRemove" /><label for="rbbtgSet">odebrat</label>
@@ -154,10 +154,12 @@
             };
 
             this.openBulkTagging = () => {
-                app.Distributors.vm.openBulkTagging();
-
-                app.ui.autosuggest(bulkTaggingTagFinder, app.Distributors.vm.getAllTags);
+                app.Distributors.vm.openBulkTagging();                
             };
+
+            this.bind((bulkTaggingOpen) => {
+                app.ui.autosuggest(bulkTaggingTagFinder, app.Distributors.vm.getAllTags);
+            });
 
             this.startBulkTagging = (tagName, set, remove) => {
 

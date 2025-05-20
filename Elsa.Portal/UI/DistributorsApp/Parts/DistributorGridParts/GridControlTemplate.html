@@ -1,9 +1,13 @@
 <div id="digrGrid">
     <div class="gridRow gridHead">
+        <div class="cell1"></div>
         {headers}
     </div>
     <div class="gridBody" data-bind="itemsSource:data" data-key="Id">
         <div class="lt-template gridRow">
+            <div class="cell1 digrRowCheckCell">
+                <input type="checkbox" data-bind="checked:isChecked" event-bind="change:check(VM, this.checked)" />
+            </div>
             {cells}
         </div>
     </div>
@@ -13,5 +17,11 @@
 	  .withModel("app.Distributors.vm")
         .attach(function () {
             console.log("Dynamic grid loaded");
+
+            this.check = (vm, val) => {
+                vm.isChecked = val;
+                app.Distributors.vm.onDataCheckChanged();
+            };
+
         });
 </script>

@@ -13,8 +13,11 @@ BEGIN
 	INSERT INTO @toAssign
 	SELECT i.Id
 	  FROM @customerIds i
-	 WHERE NOT EXISTS(SELECT TOP 1 1 FROM CustomerTagAssignment ex WHERE ex.TagTypeId = @tagTypeId AND ex.CustomerId = i.Id);
-
+	 WHERE NOT EXISTS(SELECT TOP 1 1 
+                        FROM CustomerTagAssignment ex 
+                       WHERE ex.TagTypeId = @tagTypeId 
+                         AND ex.CustomerId = i.Id 
+                         AND ex.UnassignDt IS NULL);
     
 	/* 2. Delete assignments by transition */
     /* 2.1 - delete assignments w/o note */
