@@ -1,20 +1,32 @@
-<div id="tranTarg_{%GENERATE%}" class="tagTransitionTargetSelectCont" data-bind="itemsSource:Transitions" data-key="TagTypeId">
-    <div class=" lt-template" >
-        <div class="tagTransitionTargetSelectName tagTransitionTargetSelectItem"
-             data-bind="text:TagTypeName;cssClass:TagTypeCssClass;class.hidden:isHidden" 
-             event-bind="click:transitionSelected(VM)">
+<div id="tranTarg_{%GENERATE%}">
+    <div class="tagAssignmentInfoPanel">
+        <div class="taipRow">
+            <div class="taipAssignDt" data-bind="text:Assigned"></div>
+            <div class="taipAssignAuthor" data-bind="text:AssignedBy"></div>
         </div>
-        <div class="tagTransitionNoteInputPanel" data-bind="class!.hidden:noteInputOpen">
-            <label>Poznámka</label>
-            <textarea data-bind="value:note" event-bind="input:VM.updateNote(this.value)"></textarea>
-            <div class="tagTransitionNoteInputPanelButtons">
-                <button class="ttranCancelButton" event-bind="click:cancelNoteInput(VM)">
-                    <i class="fas fa-times"></i>
-                </button>
+        <div class="taipRow">
+            <pre data-bind="text:Note"></pre>
+        </div>
+    </div>
 
-                <button class="tranSaveTagButton" event-bind="click:confirmNote(VM)">
-                    <i class="fas fa-check"></i>
-                </button>
+    <div class="tagTransitionTargetSelectCont" data-bind="itemsSource:Transitions;class!.hidden:HasTransitions" data-key="TagTypeId">
+        <div class=" lt-template">
+            <div class="tagTransitionTargetSelectName tagTransitionTargetSelectItem"
+                 data-bind="text:TagTypeName;cssClass:TagTypeCssClass;class.hidden:isHidden"
+                 event-bind="click:transitionSelected(VM)">
+            </div>
+            <div class="tagTransitionNoteInputPanel" data-bind="class!.hidden:noteInputOpen">
+                <label>Poznámka</label>
+                <textarea data-bind="value:note" event-bind="input:VM.updateNote(this.value)"></textarea>
+                <div class="tagTransitionNoteInputPanelButtons">
+                    <button class="ttranCancelButton" event-bind="click:cancelNoteInput(VM)">
+                        <i class="fas fa-times"></i>
+                    </button>
+
+                    <button class="tranSaveTagButton" event-bind="click:confirmNote(VM)">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

@@ -1,10 +1,12 @@
 
 <div id="tagassignments_{%GENERATE%}" data-bind="itemsSource:TagAssignments" data-key="TagTypeId" class="ctacTagsContainer">
-    <div class="lt-template ctacTagItem" data-bind="cssClass:TagTypeCssClass">
+    <div class="lt-template ctacTagItem" data-bind="cssClass:TagTypeCssClass" >
         <i class="fas fa-times ctacRemoveTag" data-bind="class.hidden:HasTransitions" event-bind="click:removeTag(VM)"></i>
         <div lt-name="targetPicker" class="popupOverlay"></div>
+        <i class="fas fa-comment ctacComment" data-bind="class!.hidden:Note" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
         <div data-bind="text:TagTypeName" event-bind="click:openTransitionPopup(VM, $targetPicker)"></div>
-        <i class="fas fa-bell ctacBell" data-bind="class!.hidden:HasTimeoutWarning"></i>
+        <i class="fas fa-bell ctacBell" data-bind="class!.hidden:HasTimeoutWarning" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
+        <i class="fas fa-project-diagram ctacTransitionsMarker" data-bind="class!.hidden:HasTransitions" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
     </div>
 </div>
 
@@ -46,10 +48,7 @@
         };
 
         self.openTransitionPopup = (assignment, targetPicker) => {
-
-            if (!assignment.HasTransitions)
-                return;
-
+            
             if (!targetPicker.initialized) {
                 targetPicker.initialized = true;
                 targetPicker.innerHTML = "<div class=\"popupBody\" fill-by-lazy=\"/UI/DistributorsApp/Parts/TagTransitionTargetSelect.html\"></div>";

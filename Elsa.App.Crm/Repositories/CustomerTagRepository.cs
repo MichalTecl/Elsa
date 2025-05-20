@@ -165,7 +165,7 @@ namespace Elsa.App.Crm.Repositories
             _database.Sql().Call("AssignTagToCustomers")
                 .WithParam("@authorId", _session.User.Id)
                 .WithParam("@tagTypeId", tagTypeId)
-                .WithParam("@note", note)
+                .WithParam("@note", string.IsNullOrWhiteSpace(note) ? null : note)
                 .WithStructuredParam("@customerIds", "IntTable", customerIds, new[] { "Id" }, i => new object[] { i })
                 .ReadRows(r => result.Add(r.GetInt32(0)));
 
