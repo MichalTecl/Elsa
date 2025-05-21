@@ -1,4 +1,4 @@
-﻿using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Attributes;
@@ -18,5 +18,7 @@ namespace Elsa.App.Crm.Entities
         string IconClass { get; set; }
         
         bool ActionExpected { get; set; }
+
+        bool? MeansCancelled { get; set; }
     }
 }

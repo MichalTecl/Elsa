@@ -404,6 +404,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.detailTabs = [
+        { "text": "Historie", "control": "DistributorHistory"},
         { "text": "Poznámky", "control": "DistributorNotes" },
         { "text": "Objednávky", "control": "DistributorOrders" },   
         { "text": "Schůzky", "control": "DistributorMeetings" },       

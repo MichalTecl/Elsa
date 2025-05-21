@@ -181,5 +181,10 @@ namespace Elsa.App.Crm.Controllers
         {
             return _distributorsRepository.GetDistributors(filter, null, null, true).Count;
         }
+
+        public IReadOnlyCollection<CustomerHistoryEntryModel> GetCustomerHistory(int customerId)
+        {
+            return _distributorsRepository.GetCustomerHistory(customerId, false, true);
+        }
     }
 }

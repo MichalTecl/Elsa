@@ -3,86 +3,67 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
 {
     public class ColumnFactory
     {
-        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        // Use a simple static lock for thread-safe one-time initialization
+        private static readonly object _initLock = new object();
         private static readonly Dictionary<string, Type> _columnTypes = new Dictionary<string, Type>();
-        private static List<ColumnInfo> _orderedColumns = new List<ColumnInfo>();
+        private static readonly List<ColumnInfo> _orderedColumns = new List<ColumnInfo>();
         private static bool _initialized = false;
 
         private readonly IServiceLocator _serviceLocator;
 
         public ColumnFactory(IServiceLocator locator)
         {
-            _serviceLocator = locator;
+            _serviceLocator = locator ?? throw new ArgumentNullException(nameof(locator));
+            EnsureInitialized(locator);
+        }
 
-            if (_initialized || !_lock.TryEnterWriteLock(1))
+        private static void EnsureInitialized(IServiceLocator locator)
+        {
+            if (_initialized)
                 return;
 
-            try
+            lock (_initLock)
             {
-                if (_columnTypes.Count > 0)
+                if (_initialized)
                     return;
 
                 var baseType = typeof(IDynamicColumnProvider);
-                var colNamespace = baseType.Namespace;
 
                 var instances = new List<IDynamicColumnProvider>();
 
                 foreach (var type in baseType.Assembly
                     .GetTypes()
-                    .Where(t =>
-                        !t.IsAbstract
-                        && baseType.IsAssignableFrom(t)))
+                    .Where(t => !t.IsAbstract && baseType.IsAssignableFrom(t)))
                 {
-                    var instace = locator.InstantiateNow(type) as IDynamicColumnProvider;
-                    if (instace == null)
+                    var instance = locator.InstantiateNow(type) as IDynamicColumnProvider;
+                    if (instance == null)
                         continue;
 
-                    instances.Add(instace);
+                    instances.Add(instance);
                 }
 
                 var allCols = new List<ColumnInfo>();
                 foreach (var inst in instances)
                 {
-                    foreach(var columnInfo in inst.GetAvailableColumns())
+                    foreach (var columnInfo in inst.GetAvailableColumns())
                     {
-                        _columnTypes.Add(columnInfo.Id, inst.GetType());
+                        _columnTypes[columnInfo.Id] = inst.GetType();
                         allCols.Add(columnInfo);
                     }
                 }
 
                 _orderedColumns.AddRange(allCols.OrderBy(c => c.DisplayOrder));
-
                 _initialized = true;
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
             }
         }
 
         public List<DynamicColumnWrapper> GetColumns(string[] ids)
         {
-            if (!_initialized)
-            {
-                _lock.EnterReadLock();
-                try
-                {
-                    return GetColumns(ids);
-                }
-                finally
-                {
-                    _lock.ExitReadLock();
-                }
-            }
-
-            var definitions = GetAllDefinedColumns();
             var result = new List<DynamicColumnWrapper>(ids.Length);
 
             foreach (var columnId in ids)
@@ -90,7 +71,10 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
                 if (!_columnTypes.TryGetValue(columnId, out var type))
                     throw new ArgumentException($"Unknown column '{columnId}'");
 
-                var definition = definitions.Single(d => d.Id == columnId);
+                var definition = _orderedColumns.SingleOrDefault(d => d.Id == columnId);
+                if (definition == null)
+                    throw new ArgumentException($"Column definition not found for '{columnId}'");
+
                 var provider = (IDynamicColumnProvider)_serviceLocator.InstantiateNow(type);
 
                 result.Add(new DynamicColumnWrapper(definition, provider));
@@ -101,20 +85,8 @@ namespace Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure
 
         public List<ColumnInfo> GetAllDefinedColumns()
         {
-            if (!_initialized)
-            {
-                _lock.EnterReadLock();
-                try
-                {
-                    return GetAllDefinedColumns();
-                }
-                finally
-                {
-                    _lock.ExitReadLock();
-                }
-            }
-
-            return _orderedColumns;
-        }        
+            // Return a copy to prevent external modification
+            return _orderedColumns.ToList();
+        }
     }
 }

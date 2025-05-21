@@ -228,28 +228,87 @@
     transition: background-color 0.2s ease;
 }
 
-    /* Hover efekt */
-    .grid2 .gridSortIconsWrap:hover {
-        background-color: rgba(0, 0, 0, 0.05); /* lehce šedý */
+/* Hover efekt */
+.grid2 .gridSortIconsWrap:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* lehce šedý */
+}
+
+/* NEAKTIVNÍ sorter – jemný */
+.grid2 .gridSortIconsWrap i {
+    color: #b3c0d1;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+/* AKTIVNÍ sorter – výrazný a zřetelný */
+.grid2 .gridSortIconsWrap.gridSortIconsWrapActive {
+    background-color: #1a3a5d10; /* tmavě modrá s průhledností */
+    border-radius: 4px;
+    padding: 2px 4px;
+    box-shadow: 0 0 0 1px #1a3a5d20; /* jemný outline efekt */
+}
+
+.grid2 .gridSortIconsWrap.gridSortIconsWrapActive i {
+    color: #1a3a5d;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.digrMeetingColumnCellCont {
+    position: relative;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 4px 8px;
+    max-width: 100%;
+    cursor: default;
+}
+
+/* Rychlý náhled – jedna řádka */
+.digrMeetingInlinePreview {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    gap: 6px;
+}
+
+    /* Ikona */
+    .digrMeetingInlinePreview i {
+        color: #007bff;
+        flex-shrink: 0;
     }
 
-    /* NEAKTIVNÍ sorter – jemný */
-    .grid2 .gridSortIconsWrap i {
-        color: #b3c0d1;
-        font-size: 13px;
-        transition: all 0.2s ease;
-    }
+/* Datum */
+.digrMeetingColumnCellDt {
+    font-weight: bold;
+    color: #333;
+    flex-shrink: 0;
+}
 
-    /* AKTIVNÍ sorter – výrazný a zřetelný */
-    .grid2 .gridSortIconsWrap.gridSortIconsWrapActive {
-        background-color: #1a3a5d10; /* tmavě modrá s průhledností */
-        border-radius: 4px;
-        padding: 2px 4px;
-        box-shadow: 0 0 0 1px #1a3a5d20; /* jemný outline efekt */
-    }
+/* Text zkrácený v řádku */
+.digrMeetingColumnCellText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-grow: 1;
+}
 
-        .grid2 .gridSortIconsWrap.gridSortIconsWrapActive i {
-            color: #1a3a5d;
-            font-weight: bold;
-            font-size: 14px;
-        }
+/* Plný text – výchozí stav: skrytý */
+.digrMeetingFullText {
+    display: none;
+    color: #444;
+    white-space: pre-line;
+    margin-top: 2px;
+}
+
+/* Hover logika */
+.digrMeetingColumnCellCont:hover .digrMeetingInlinePreview {
+    display: none;
+}
+
+.digrMeetingColumnCellCont:hover .digrMeetingFullText {
+    display: block;
+}
+
+

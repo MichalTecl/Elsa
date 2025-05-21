@@ -1,0 +1,53 @@
+<div id="ucuhiPanel" class="ucuhiPanel">
+    <div id="ucuhiList" data-bind="itemsSource:customerHistory" data-key="uid">
+        <div class="lt-template ucuhiItemRow">
+            <div class=ucuhiRow ucuhiMainRow">
+                <div class="ucuhiRowLeft">
+                    <div class="ucuhiEventDtF" data-bind="text:EventDtF"></div>
+                    <div class="ucuhiIcon">
+                        <i data-bind="class:IconCssClass"></i>
+                    </div>
+                    <div class="ucuhiTitleWrap">
+                        <div data-bind="text:Title;class:TitleCssClass"></div>
+                    </div>
+                </div>
+                <div class="ucuhiAuthor" data-bind="text:Author"></div>
+            </div>
+            <div class="ucuhiRow ucuhiTextRow">
+                <pre class="ucuhiText" data-bind="text:Text"></pre>
+            </div>
+        </div> 
+    </div>
+</div>
+<script>
+    lt.element("ucuhiPanel")
+        .attach(function () {
+            const self = this;
+            const crm = app.Distributors.vm;
+
+            const receiveHistory = (h) => {
+
+                const vm = lt.getViewModel(self);
+                if (!vm)
+                    return;
+
+                vm.customerHistory = h;
+                vm.customerHistory.forEach(h => h.uid = h.EventDt + h.Title + h.Text);
+
+            };
+
+            crm.withCustomerId((cid) => {
+
+                if (!cid)
+                    return;
+
+                lt.api("/CrmDistributors/getCustomerhistory")
+                    .query({ "customerId": cid })
+                    .get(receiveHistory);
+
+            });        
+
+        });
+</script>
+
+<link href="/UI/DistributorsApp/Css/UnifiedCustomerHistoryView.css" rel="stylesheet" />

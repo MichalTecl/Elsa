@@ -23,9 +23,9 @@ namespace Elsa.App.Crm.Repositories
         private readonly ICustomerRepository _customerRepository;
         private readonly DistributorFiltersRepository _distributorFilters;
         private readonly ILog _log;
-        private readonly ColumnFactory _columnFactory;
+        private readonly Lazy<ColumnFactory> _columnFactory;
 
-        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository, DistributorFiltersRepository distributorFilters, ILog log, ColumnFactory columnFactory)
+        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository, DistributorFiltersRepository distributorFilters, ILog log, Lazy<ColumnFactory> columnFactory)
         {
             _database = database;
             _cache = cache;
@@ -89,7 +89,7 @@ namespace Elsa.App.Crm.Repositories
             List<DynamicColumnWrapper> dynColumns = null;
             if (!idsOnly)
             {
-                dynColumns = _columnFactory.GetColumns(filter.GridColumns.Where(c => c.IsSelected).Select(c => c.Id).ToArray());
+                dynColumns = _columnFactory.Value.GetColumns(filter.GridColumns.Where(c => c.IsSelected).Select(c => c.Id).ToArray());
 
                 if (!string.IsNullOrWhiteSpace(filter.SortBy))
                 {
@@ -115,7 +115,7 @@ namespace Elsa.App.Crm.Repositories
 
             if (!idsOnly)
             {
-                var columns = _columnFactory.GetColumns(filter.GridColumns.Where(c => c.IsSelected && (c.Id != filter.SortBy)).Select(c => c.Id).ToArray());
+                var columns = _columnFactory.Value.GetColumns(filter.GridColumns.Where(c => c.IsSelected && (c.Id != filter.SortBy)).Select(c => c.Id).ToArray());
                 
                 foreach (var c in columns)
                 {
@@ -258,6 +258,25 @@ namespace Elsa.App.Crm.Repositories
                 .WithParam("@projectId", _session.Project.Id)
                 .WithParam("@userId", _session.User.Id)
                 .AutoMap<DistributorGridRowModel>();
+        }
+
+        public IReadOnlyCollection<CustomerHistoryEntryModel> GetCustomerHistory(int customerId, bool lastOnly, bool timeDesc)
+        {
+            var sql = "SELECT * FROM vwCustomerEvents e WHERE e.CustomerId={0}";
+
+            if (lastOnly)
+                sql += " AND e.IsLastEvent=1";
+            else
+            {
+                sql += " ORDER BY e.EventDt";
+
+                if (timeDesc)
+                    sql += " DESC";
+            }
+
+            return _database.Sql().ExecuteWithParams(sql, customerId)
+                .AutoMap<CustomerHistoryEntryModel>()
+                .AsReadOnly();
         }
 
         private Dictionary<int, List<SalesTrendTick>> GetTrendIndex()

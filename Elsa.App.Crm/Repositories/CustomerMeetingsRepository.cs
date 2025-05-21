@@ -1,4 +1,5 @@
 using Elsa.App.Crm.Entities;
+using Elsa.App.Crm.Model;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
@@ -71,6 +72,21 @@ namespace Elsa.App.Crm.Repositories
                 .Take(1)
                 .Execute()
                 .FirstOrDefault();
+        }
+
+        public IReadOnlyDictionary<int, ClosestMeetingsInfoModel> GetMeetingsInfo()
+        {
+            // there could be multiple meetings at same time
+            var result = new Dictionary<int, ClosestMeetingsInfoModel>();
+
+            foreach (var m in _database.Sql()
+                .Call("CrmGridGetMeetingsColumns")
+                .AutoMap<ClosestMeetingsInfoModel>())
+            {
+                result[m.CustomerId] = m;
+            }
+               
+            return result;
         }
 
         public List<IMeeting> GetParticipantMeetings(int participantId, DateTime fromDt, DateTime toDt)

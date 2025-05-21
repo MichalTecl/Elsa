@@ -83,6 +83,7 @@
     <Compile Include="Model\BulkTaggingRequest.cs" />
     <Compile Include="Model\CrmMetadata.cs" />
     <Compile Include="Model\CrmRobotModel.cs" />
+    <Compile Include="Model\CustomerHistoryEntryModel.cs" />
     <Compile Include="Model\CustomerTagAssignmentInfo.cs" />
     <Compile Include="Model\CustomerTagTypeGroupModel.cs" />
     <Compile Include="Model\CustomerTagTypeNodeModel.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Model\DistributorModelBase.cs" />
     <Compile Include="Model\DistributorOrderInfo.cs" />
     <Compile Include="Model\DistributorViewModel.cs" />
+    <Compile Include="Model\MeetingInfoModel.cs" />
     <Compile Include="Model\MeetingsOverview.cs" />
     <Compile Include="Model\SalesRepresentativeModel.cs" />
     <Compile Include="Model\SalesTrendTick.cs" />
@@ -117,6 +119,7 @@
     <Compile Include="Repositories\DynamicColumns\Infrastructure\ColumnFactory.cs" />
     <Compile Include="Repositories\DynamicColumns\DetailLinkColumn.cs" />
     <Compile Include="Repositories\DynamicColumns\Infrastructure\SimpleDynamicColumnBase.cs" />
+    <Compile Include="Repositories\DynamicColumns\MeetingColumnsProvider.cs" />
     <Compile Include="Repositories\DynamicColumns\SalesStatsColumnsProvider.cs" />
     <Compile Include="Repositories\DynamicColumns\TagsColumn.cs" />
     <Compile Include="Repositories\DynamicColumns\TotalOrdersColumn.cs" />
@@ -199,6 +202,10 @@
     <Content Include="SQL\20250515_001_AssignTagToCustomers.sql" />
     <Content Include="SQL\20250515_001_vwOrderVocMoc.sql" />
     <Content Include="SQL\20250515_003_CrmLoadSalesStats.sql" />
+    <Content Include="SQL\20250520_003_vwCustomerEvents.sql" />
+    <Content Include="SQL\20250521_004_updateMeetingStatus.sql" />
+    <Content Include="SQL\20250521_005_crmfilter_hasPastMeeting.sql" />
+    <Content Include="SQL\20250521_005_CrmGridGetMeetingsColumns.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
@@ -208,6 +215,7 @@
     <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_main.css" />
     <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_tagTree.css" />
     <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_groups.css" />
+    <Content Include="UI\DistributorsApp\Css\UnifiedCustomerHistoryView.css" />
     <Content Include="UI\DistributorsApp\CustomerTaggingDesigner.html" />
     <Content Include="UI\DistributorsApp\CustomerTaggingDesigner.VM.js" />
     <Content Include="UI\DistributorsApp\CustomerTagsDesignerPage.html" />
@@ -245,6 +253,8 @@
     <Content Include="UI\DistributorsApp\Parts\SavedFiltersPopup.html" />
     <Content Include="UI\DistributorsApp\Parts\TaggingDesignerTagList.html" />
     <Content Include="UI\DistributorsApp\Parts\TagTransitionTargetSelect.html" />
+    <Content Include="UI\DistributorsApp\Parts\UnifiedCustomerHistoryView.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorHistory.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.css" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.VM.js" />

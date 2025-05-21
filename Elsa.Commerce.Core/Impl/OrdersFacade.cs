@@ -1,4 +1,4 @@
-﻿using Elsa.Commerce.Core.Model;
+using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
@@ -212,6 +212,10 @@ namespace Elsa.Commerce.Core.Impl
                 {
                     order.OrderStatusId = OrderStatus.Sent.Id;
                     _database.Save(order);
+
+                    _log.Info($"Creating OrderProcessingBlocker {OrderProcessingStageNames.BatchesAssignment} for order {order.Id} {order.OrderNumber}");
+
+                    _orderRepository.SetProcessBlock(order, OrderProcessingStageNames.BatchesAssignment, $"Byl zahájen proces finalizace objednávky");
                 }
                 else
                 {

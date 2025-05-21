@@ -108,6 +108,9 @@
     <Content Include="SQL\20230819_001_xrep_b2c_orders_mail_price.sql" />
     <Content Include="SQL\20240813_003_xrep_salesB2bB2c.sql" />
     <Content Include="SQL\20240911_001_xrep_productSales.sql" />
+    <Content Include="SQL\20250521_002_PureBatchPriceCalculation.sql" />
+    <Content Include="SQL\20250521_003_UpdatePureBatchPriceCalculation.sql" />
+    <Content Include="SQL\20250521_004_xrep_productUnitCosts.sql" />
     <Content Include="UI\Reporting\Reporting.VM.js" />
     <Content Include="UI\Reporting\ReportListPage.html" />
   </ItemGroup>

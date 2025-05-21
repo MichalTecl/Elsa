@@ -1,0 +1,1 @@
+UPDATE MeetingStatus SET MeansCancelled = 1 WHERE Title = N'Zrušeno';
