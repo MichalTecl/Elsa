@@ -477,7 +477,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 filter.isValid = r.IsValid;
                 filter.error = r.ErrorMessage;
                 filter.recordsCount = r.NumberOfRecords;
-                filter.text = (filter.Inverted ? "Ne" : "") + firstLetterLower(r.FilterText.length < 35 ? r.FilterText : filter.Title);
+                filter.text = (filter.Inverted ? "Ne" : "") + firstLetterLower(r.FilterText.length < 100 ? r.FilterText : filter.Title);
 
                 if(!!callback)
                     callback(filter);
