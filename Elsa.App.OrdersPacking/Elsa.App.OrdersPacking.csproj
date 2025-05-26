@@ -123,6 +123,7 @@
     <Content Include="SQL\20250212_001_GetOrdersToReview.sql" />
     <Content Include="SQL\20250519_001_GetOrdersToReview.sql" />
     <Content Include="SQL\20250521_001_sp_deallocateUnpackOrderBatches.sql" />
+    <Content Include="SQL\20250522_001_GetOrdersToReview.sql" />
     <Content Include="UI\Inspector\ActionControls\OrderPacking\OrderNoteDetailView.html" />
     <Content Include="UI\OrdersReview\OrdersReview.css" />
     <Content Include="UI\OrdersReview\OrdersReview.html" />

@@ -356,7 +356,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 self.editingExFilter = true;
 
                 if (self.editedExFilter.Parameters)
-                    self.editedExFilter.Parameters.forEach(p => p.setValue = (v) => p.Value = v);
+                    self.editedExFilter.Parameters.forEach(p => p.setValue = (v) => {
+                        p.Value = v;
+                    });
 
                 return;
             }
@@ -400,7 +402,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
         Object.assign(self.editedExFilter, template);
         self.editedExFilter.IsInverted = false;
 
-        self.editedExFilter.Parameters.forEach(p => p.setValue = (v) => p.Value = v);
+        self.editedExFilter.Parameters.forEach(p => p.setValue = p.setValue || ((v) => {
+            p.Value = v;
+        }));
     };
 
     self.detailTabs = [
