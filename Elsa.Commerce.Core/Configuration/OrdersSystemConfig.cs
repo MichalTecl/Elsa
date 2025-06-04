@@ -1,4 +1,4 @@
-﻿using Elsa.Common.Configuration;
+using Elsa.Common.Configuration;
 using System.Collections.Generic;
 
 namespace Elsa.Commerce.Core.Configuration
@@ -11,6 +11,9 @@ namespace Elsa.Commerce.Core.Configuration
 
         [ConfigEntry("OrdersPacking.MarkOrdersSentAsync", ConfigEntryScope.Project, ConfigEntryScope.Global)]
         public bool MarkOrdersSentAsync { get; set; }
+
+        [ConfigEntry("OrdersPacking.FailureAdminMails", ConfigEntryScope.Project)]
+        public List<string> PackingFailureAdminMails { get; set; }
 
         [ConfigEntry("OrderProcessing.UseWeight", "false", ConfigEntryScope.User, ConfigEntryScope.Project, ConfigEntryScope.Global)]
         public bool UseOrderWeight { get; set; }

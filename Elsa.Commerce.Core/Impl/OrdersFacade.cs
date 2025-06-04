@@ -1,3 +1,4 @@
+using Elsa.Commerce.Core.Configuration;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common.Caching;
@@ -29,6 +30,7 @@ namespace Elsa.Commerce.Core.Impl
         private readonly IMailSender _mailSender;
         private readonly ICache _cache;
         private readonly IAdHocOrdersSyncProvider _adhocOrdersSyncProvider;
+        private readonly OrdersSystemConfig _packingConfig;
 
         public OrdersFacade(
             IPurchaseOrderRepository orderRepository,
@@ -37,7 +39,7 @@ namespace Elsa.Commerce.Core.Impl
             ISession session,
             IPaymentRepository paymentRepository,
             ILog log,
-            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository, IMailSender mailSender, ICache cache, IAdHocOrdersSyncProvider adhocOrdersSyncProvider)
+            IMaterialBatchFacade batchFacade, IKitProductRepository kitProductRepository, IMailSender mailSender, ICache cache, IAdHocOrdersSyncProvider adhocOrdersSyncProvider, OrdersSystemConfig packingConfig)
         {
             _orderRepository = orderRepository;
             _database = database;
@@ -50,6 +52,7 @@ namespace Elsa.Commerce.Core.Impl
             _mailSender = mailSender;
             _cache = cache;
             _adhocOrdersSyncProvider = adhocOrdersSyncProvider;
+            _packingConfig = packingConfig;
         }
 
         public IPurchaseOrder SetOrderPaid(long orderId, long? paymentId)
@@ -528,9 +531,24 @@ namespace Elsa.Commerce.Core.Impl
         {
             _log.Info($"Sending order packing related mail: {subject}");
 
-            _mailSender.Send(order.PackingUser?.EMail ?? _session.User.EMail
-                , subject
-                , body);
+            var receivers = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(order.PackingUser?.EMail))
+                receivers.Add(order.PackingUser.EMail);
+            else 
+                receivers.Add(_session.User.EMail);
+
+            if (_packingConfig.PackingFailureAdminMails != null)
+                receivers.AddRange(_packingConfig.PackingFailureAdminMails);
+
+            foreach(var receiver in receivers.Where(r => !string.IsNullOrWhiteSpace(r)).Distinct())
+            {
+                _log.Info($"Sending packing mail to {receiver}");
+
+                _mailSender.Send(receiver
+                    , subject
+                    , body);
+            }            
         }
     }
 }
