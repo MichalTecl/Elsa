@@ -1,4 +1,4 @@
-﻿<div id="mlUi">
+<div id="mlUi">
     <div>
         <div class="tabPanelHeadersContainer">
             <div class="stackLeft" data-bind="itemsSource:inventories" data-key="Id">
@@ -36,7 +36,7 @@
                 <div class="cell5">Dostupné</div>
                 <div class="cell5">Minimum</div>
                 <div class="cell10" data-bind="class!.hidden:showSupplier">Dodavatel</div>
-                <div class="cell5" data-bind="class!.hidden:showSupplier">Objednáno</div>
+                <div class="cell10" data-bind="class!.hidden:showSupplier">Objednáno</div>
                 <div class="cell40">Šarže</div>
             </div>
             <div data-bind="itemsSource:report" data-key="MaterialId">
@@ -67,7 +67,7 @@
                     </div>
                     <div class="cell10 matlevSupplierCell" data-bind="class!.hidden:displaySupplier" event-bind="click:onSupplierClick(SupplierName, SupplierEmail, SupplierPhone)"><a data-bind="text:SupplierName"></a></div>
 
-                    <div class="cell5 stackLeft orderDtCell" data-bind="class!.hidden:displaySupplier;title:DelayedOrderMessage">
+                    <div class="cell10 stackLeft orderDtCell" data-bind="class!.hidden:displaySupplier;title:DelayedOrderMessage">
                         <div class="stackLeft">
 
                             <i class="fas fa-clock icoOrdTimeouted" data-bind="class!.hidden:DelayedOrder;title:DelayedOrderMessage"></i>
