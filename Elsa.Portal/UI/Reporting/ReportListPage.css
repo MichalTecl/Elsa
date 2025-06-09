@@ -1,0 +1,70 @@
+#reportListUi {
+    background-color: #f9f9fb;
+    padding: 1rem;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    color: #2c2c2c;
+}
+
+.reportTypeRowCont {
+    border: 1px solid #d6d6e0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+    .reportTypeRowCont:hover {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+.reportTypeItemHead {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+    .reportTypeItemHead a {
+        text-decoration: none;
+        color: #0056b3;
+        transition: color 0.2s;
+    }
+
+        .reportTypeItemHead a:hover {
+            color: #003e80;
+            text-decoration: underline;
+        }
+
+.reportExpander {
+    margin-right: 10px;
+}
+
+.faButton {
+    color: #6c757d;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+    .faButton:hover {
+        transform: scale(1.15);
+        color: #343a40;
+    }
+
+.reportTypeDetailCont {
+    padding: 10px 14px;
+    border-top: 1px solid #eee;
+    background-color: #fafafa;
+    font-size: 14px;
+    color: #555;
+}
+
+    .reportTypeDetailCont pre {
+        margin: 0;
+        white-space: pre-wrap;
+        font-family: "Segoe UI", sans-serif;
+        line-height: 1.5;
+    }

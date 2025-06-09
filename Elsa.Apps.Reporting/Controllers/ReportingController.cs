@@ -1,4 +1,4 @@
-﻿using Elsa.Apps.Reporting.Model;
+using Elsa.Apps.Reporting.Model;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -52,18 +52,25 @@ namespace Elsa.Apps.Reporting.Controllers
             {
                 DynamicColumnNamesProcessor.SetDynamicColumnNames(report);
 
-                bytes = GetXlsData(rt.Code, report);
+                bytes = GetXlsData(rt, report);
             }
 
             return new FileResult(StringUtil.SanitizeFileName($"{rt.Title}.xlsx"), bytes);
         }
 
-        private byte[] GetXlsData(string title, DataTable table)
+        private byte[] GetXlsData(ReportTypeModel type, DataTable table)
         {
             using (var package = new ExcelPackage())
             {
-                var sheet = package.Workbook.Worksheets.Add(title);
-                sheet.Cells["A1"].LoadFromDataTable(table, true);
+                var reportSheet = package.Workbook.Worksheets.Add(type.Title.Limit(100));
+                reportSheet.Cells["A1"].LoadFromDataTable(table, true);
+
+                var metadataSheet = package.Workbook.Worksheets.Add("Metadata");
+                metadataSheet.Cells["A1"].Value = "Vygenerováno";
+                metadataSheet.Cells["B1"].Value = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+
+                metadataSheet.Cells["A2"].Value = "Popis";
+                metadataSheet.Cells["B2"].Value = type.Note;
 
                 return package.GetAsByteArray();         
             }

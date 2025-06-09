@@ -113,6 +113,7 @@
     <Content Include="SQL\20250521_004_xrep_productUnitCosts.sql" />
     <Content Include="SQL\20250529_001_UpdatePureBatchPriceCalculation_fix.sql" />
     <Content Include="UI\Reporting\Reporting.VM.js" />
+    <Content Include="UI\Reporting\ReportListPage.css" />
     <Content Include="UI\Reporting\ReportListPage.html" />
   </ItemGroup>
   <ItemGroup>
