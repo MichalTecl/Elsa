@@ -240,11 +240,19 @@ namespace Elsa.Commerce.Core.Repositories
 
             trg.Phone = TrackChange("Telefon", t => t.Phone, s => s.Phone);
             
-            if (!trg.IsRegistered)
+            if (trg.IsRegistered != src.IsRegistered)
             {
-                LogChange("Datum registrace", trg.RegistrationDt, DateTime.Now);
-                trg.IsRegistered = true;
-                trg.RegistrationDt = DateTime.Now;                
+                if (src.IsRegistered)
+                {
+                    LogChange("Datum registrace", trg.RegistrationDt, DateTime.Now);
+                    trg.IsRegistered = true;
+                    trg.RegistrationDt = DateTime.Now;
+                }
+                else
+                {
+                    LogChange("Zrusena registrace", trg.RegistrationDt, DateTime.Now);
+                    trg.IsRegistered = false;                    
+                }                
             }
 
             trg.IsDistributor = TrackChange("Velkoodběratel", t => t.IsDistributor, s => s.IsDistributor);

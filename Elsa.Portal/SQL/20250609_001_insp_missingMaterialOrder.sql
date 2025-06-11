@@ -27,7 +27,7 @@ BEGIN
 	  WHERE NOT EXISTS(SELECT TOP 1 1 
 	                     FROM MaterialBatch mb
 						WHERE mb.MaterialId = moe.MaterialId
-						  AND mb.Created > moe.InsertDt)
+						  AND mb.Created > moe.InsertDt)	  
     )
 
 	SELECT N'Nedošlo k nasladnění suroviny' IssueType,
@@ -36,6 +36,7 @@ BEGIN
 		    + N': bylo očekáváno naskladnění do '
 			+ FORMAT(cte.FulfillLimit, 'dd.MM.yyyy') Message	
   FROM cte
+  WHERE cte.fulfillLimit < GETDATE()
 
 
 

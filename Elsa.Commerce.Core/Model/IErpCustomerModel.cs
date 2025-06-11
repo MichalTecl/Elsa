@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,5 +43,7 @@ namespace Elsa.Commerce.Core.Model
         bool IsDisabled { get; }
 
         string SalesRepresentativeEmail { get; }
+
+        bool IsRegistered { get; set; }
     }
 }

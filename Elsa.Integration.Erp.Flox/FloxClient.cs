@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -229,6 +229,10 @@ namespace Elsa.Integration.Erp.Flox
             parsed = PersonsDoc.Parse(exportString, true);
             result.AddRange(parsed.Select(i => new ErpPersonModel(i, cgIndex)));
 
+            // vsichni exportovani jsou registrovani
+            foreach (var registeredCustomer in result)
+                registeredCustomer.IsRegistered = true;
+
             _log.Info($"Collected {result.Count} of Persons + Companies records");
 
             _log.Info("Requesting newsletter subscribers export");
@@ -254,7 +258,7 @@ namespace Elsa.Integration.Erp.Flox
                     {
                         Email = subscriber,
                         Active = 1,
-                        Newsletter = 1
+                        Newsletter = 1                        
                     }, null);
 
                     result.Add(customer);
@@ -484,15 +488,15 @@ namespace Elsa.Integration.Erp.Flox
                         "dataSubset",
                         "a:0:{}")
                     .Field("data", string.Empty)
-                    .Field("massFilter", string.Empty)
+                    .Field("massFilter", "a:2:{s:12:\"unregistered\";s:2:\"on\";s:10:\"registered\";s:2:\"on\";}")
                     .Field("downloadToken", CalcDownloadToken())
                     .Call();
 
-            var parsed = NewsletterSubscriptionsModel.Parse(exportString);
+             var parsed = NewsletterSubscriptionsModel.Parse(exportString);
 
-            return parsed.Select(i => i.Email).ToList();
+            return parsed.Where(s => s.IsConfirmedSubscriber).Select(i => i.Email).ToList();
         }
-
+                
         public IEnumerable<IErpOrderModel> LoadOrdersSnapshot(DateTime from, DateTime? to = null)
         {
             return LoadOrders(from, to, null, null);

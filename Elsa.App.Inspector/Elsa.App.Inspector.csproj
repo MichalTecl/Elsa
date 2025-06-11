@@ -165,6 +165,7 @@
     <Content Include="SQL\20241021_001_insp_kitProductNoteCheck.sql" />
     <Content Include="SQL\20241211_001_insp_abandonedBatchRemains.sql" />
     <Content Include="SQL\20250415_001_insp_unexpectedPaymentMethod.sql" />
+    <Content Include="SQL\20250610_001_insp_untrimmedProductName.sql" />
     <Content Include="UI\Inspector\ActionControls\Ignore.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneMonth.html" />
     <Content Include="UI\Inspector\ActionControls\PostponeOneWeek.html" />

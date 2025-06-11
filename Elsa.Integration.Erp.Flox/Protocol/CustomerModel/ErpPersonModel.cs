@@ -1,4 +1,4 @@
-﻿using Elsa.Commerce.Core;
+using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Crm;
@@ -88,6 +88,8 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         public string CompanyRegistrationId { get; }
 
         public string SalesRepresentativeEmail { get; }
+
+        public bool IsRegistered { get; set; }
 
         private static string NormalizePhoneNumber(string srcPhone)
         {

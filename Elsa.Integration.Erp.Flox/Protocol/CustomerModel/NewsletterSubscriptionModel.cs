@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -55,6 +55,13 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
 
         [XmlElement("subscribed_when")]
         public string SubscriptionDtString { get; set; }
+
+        [XmlElement("valid_consent")]
+        public string IsConfirmedSubscriberRaw { get; set; }
+
+        public bool IsConfirmedSubscriber => (!string.IsNullOrWhiteSpace(IsConfirmedSubscriberRaw)) 
+                                            && int.TryParse(IsConfirmedSubscriberRaw, out var val) 
+                                            && val == 1;
 
         [XmlIgnore]
         public DateTime SubscriptionDt 
