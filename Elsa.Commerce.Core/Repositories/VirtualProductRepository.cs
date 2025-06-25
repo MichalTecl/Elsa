@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -286,7 +286,7 @@ namespace Elsa.Commerce.Core.Repositories
 
             placedName = placedName.Trim();
 
-            if (!string.IsNullOrWhiteSpace(mapping.ItemName) && (mapping.ItemName.Trim() != placedName))
+            if (!string.IsNullOrWhiteSpace(mapping.ItemName) && (!mapping.ItemName.Trim().Equals(placedName, StringComparison.InvariantCultureIgnoreCase)))
             {
                 return false;
             }

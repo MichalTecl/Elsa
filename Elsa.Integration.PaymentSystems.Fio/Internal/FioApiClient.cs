@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,6 +23,14 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
 
         public IEnumerable<AccountStatementModel.FioPayment> LoadPayments(string token, DateTime from, DateTime to)
         {
+
+            var historyDays = (DateTime.Now - from).TotalDays;
+            if (historyDays > 89)
+            {
+                from = DateTime.Now.AddDays(-89);
+                m_log.Info($"Requested period starts more than 90 days ago, which is not permitted by FIO - moving startDt to {from}");
+            }
+
             m_log.Info($"Obtaining fio last access time");
             DateTime lastAccess;
             lock (s_dictionaryLock)
@@ -47,7 +55,7 @@ namespace Elsa.Integration.PaymentSystems.Fio.Internal
 
             var deser = new JsonSerializer();
 
-            var url = $"https://www.fio.cz/ib_api/rest/periods/{token}/{@from:yyyy-MM-dd}/{to:yyyy-MM-dd}/transactions.json";
+            var url = $"https://fioapi.fio.cz/v1/rest/periods/{token}/{@from:yyyy-MM-dd}/{to:yyyy-MM-dd}/transactions.json";
 
             const int attemptsCount = 4;
             PaymentsReportModel report = null;
