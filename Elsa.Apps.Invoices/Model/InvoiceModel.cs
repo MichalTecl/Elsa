@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Elsa.Apps.CommonData.ExcelInterop;
 using XlsSerializer.Core.Attributes;
@@ -28,13 +28,18 @@ namespace Elsa.Apps.Invoices.Model
         public string SupplierName { get; set; }
 
         [XlsCell("B5", numberFormat: "0.00")]
+        [Label("Cena dopravy")]
+        public decimal ShipmentPrice { get; set; }
+
+        [XlsCell("B6", numberFormat: "0.00")]
         [Label("Celk. cena")]
         public decimal TotalPrice { get; set; }
 
-        [XlsCell("C5")]
+        [XlsCell("C6")]
         [Formula("=VLOOKUP(B4, DATA_Suppliers!A1:B9999, 2, FALSE)")]
         [Label("Měna", LabelLocation.Top)]
         public string Currency { get; set; }
+
         #endregion
 
         #region Items

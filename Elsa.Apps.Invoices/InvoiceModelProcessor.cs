@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -66,6 +66,12 @@ namespace Elsa.Apps.Invoices
             {
                 throw new InvalidOperationException($"Položka \"{noPriced.MaterialName}\" nemá cenu nebo mnozstvi");
             }
+                        
+            var itemsTotal = validItems.Sum(i => i.Price);
+            var pdiff = Math.Abs((itemsTotal + model.ShipmentPrice) - model.TotalPrice);
+            if (pdiff > 0.1m)
+                throw new InvalidOperationException($"Součet cen položek + cena dopravy neodpovídá celkové ceně");
+
 
             decimal priceFactor = model.TotalPrice / validItems.Sum(i => i.Price);
             
