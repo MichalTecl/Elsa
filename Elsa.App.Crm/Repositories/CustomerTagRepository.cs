@@ -414,6 +414,60 @@ namespace Elsa.App.Crm.Repositories
             return result;
         }
 
+        internal void DeleteGroup(int groupId)
+        {
+            using (var tx = _database.OpenTransaction())
+            {
+                var tags = _database.SelectFrom<ICustomerTagType>()
+                    .Where(t => t.GroupId == groupId).Execute().ToList();
+
+                foreach (var tag in tags)
+                    DeleteTagType(tag.Id);
+
+                _tagTypeGroupRepo.DeleteWhere(g => g.Id == groupId);
+
+                tx.Commit();
+            }
+        }
+
+        internal GroupDeleteInfo GetGroupDeleteInfo(int groupId)
+        {
+            var group = GetGroupData(groupId);
+            if (group == null)
+                return new GroupDeleteInfo { Message = "Skupina nenalezena" };
+
+            if (!group.Tags.Any())
+                return new GroupDeleteInfo { CanDelete = true };
+
+            var assignedTags = _database.SelectFrom<ICustomerTagAssignment>()
+                                        .Join(ta => ta.TagType)
+                                        .Where(a => a.TagType.GroupId == groupId)
+                                        .Execute()
+                                        .Select(ta => ta.TagType)
+                                        .Distinct()
+                                        .ToList();
+
+            if (assignedTags.Any())
+            {
+                var tagNames = StringUtil.Limit(string.Join(", ", assignedTags.Select(t => t.Name).Distinct()), 100, "...");
+
+                return new GroupDeleteInfo
+                {
+                    CanDelete = true,
+                    NeedsConfirmation = true,
+                    Message = $"POZOR - chystáte se smazat skupinu {group.Group.Name}, obsahující štítky přiřazené zákazníkům ({tagNames}). Opravdu chcete pokračovat?",
+                };
+            }
+
+            return new GroupDeleteInfo
+            {
+                CanDelete = true,
+                NeedsConfirmation = true,
+                Message = $"Opravdu chcete smazat skupinu {group.Group.Name}, včetně {group.Tags.Count} štítků?"
+            };
+
+        }
+
         public class TagGroup
         {
             public ICustomerTagTypeGroup Group { get; }

@@ -29,8 +29,13 @@
 
     <div class="ctdGroupContentPanel" data-bind="class!.hidden:hasActiveGroup">
         <div class="ctdGroupContentPanelHead">
-            <i class="fas fa-caret-square-left faButtonNew" event-bind="click:VM.closeGroup()"></i>
-            <div class="ctdGroupContentTitle" data-bind="text:activeGroup.Name"></div>
+            <div class="ctdGroupContentPanelHeadLeft">
+                <i class="fas fa-caret-square-left faButtonNew" event-bind="click:VM.closeGroup()"></i>
+                <div class="ctdGroupContentTitle" data-bind="text:activeGroup.Name"></div>
+            </div>
+            <div class="ctdGroupContentPanelHeadRight">
+                <i class="fas fa-trash-alt" event-bind="click:VM.deleteGroup()"></i>
+            </div>
         </div>
         <div class="ctdNewTagButtonWrapper">
             <button id="ctdNewGroupButton" event-bind="click:VM.createTag()"><i class="fas fa-plus"></i></button>

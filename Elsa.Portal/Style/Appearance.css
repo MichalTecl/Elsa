@@ -333,26 +333,29 @@ div.searchPanel {
 }
 
 #busyOverlay {
-  position:absolute;
-  left:0;
-  top:0;
-  right:0;
-  background-color:black;
-  cursor: wait;
+    position: absolute;
+    inset: 0;
+    background-color: black;
+    z-index: 9999;
+    cursor: wait;    
+    transition: opacity 500ms ease-out 0.5s; /* !!! zpoždění je tady, ne v třídě */
 }
 
+/* Aktivní stav */
 .shownOverlay {
-    transition: opacity 500ms ease-out 600ms;
+    pointer-events: all;
     visibility: visible;
-    opacity: 0.2; 
+    opacity: 0.2; /* tady nedělej žádný delay – ten už máme výše */
 }
 
-.hiddenOverlay {
-    display: none;
-    transition: opacity 20ms ease-in 0;
+/* Skrytí */
+.hiddenOverlay {    
     visibility: hidden;
     opacity: 0;
+    transition-delay: 0s; /* pro případ, že zmizí dřív, ať nečeká na fadeout */
 }
+
+
 
 .disabled {
     pointer-events: none;

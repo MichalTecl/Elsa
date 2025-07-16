@@ -99,6 +99,7 @@
     <Compile Include="Model\DistributorModelBase.cs" />
     <Compile Include="Model\DistributorOrderInfo.cs" />
     <Compile Include="Model\DistributorViewModel.cs" />
+    <Compile Include="Model\GroupDeleteInfo.cs" />
     <Compile Include="Model\MeetingInfoModel.cs" />
     <Compile Include="Model\MeetingsOverview.cs" />
     <Compile Include="Model\SalesRepresentativeModel.cs" />
@@ -206,6 +207,8 @@
     <Content Include="SQL\20250521_004_updateMeetingStatus.sql" />
     <Content Include="SQL\20250521_005_crmfilter_hasPastMeeting.sql" />
     <Content Include="SQL\20250521_005_CrmGridGetMeetingsColumns.sql" />
+    <Content Include="SQL\20250716_001_tagType_DropUnusedColumns.sql" />
+    <Content Include="SQL\20250716_002_removeOldFilters.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

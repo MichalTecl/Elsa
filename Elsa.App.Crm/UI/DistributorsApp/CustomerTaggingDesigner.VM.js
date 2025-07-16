@@ -310,6 +310,25 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
             self.hasActiveGroup = !!self.activeGroup;
         }
 
+        self.deleteGroup = () => {
+            if (!self.activeGroup)
+                return;
+
+            call("getGroupDeleteInfo").get((delInfo) => {
+
+                if (!delInfo.CanDelete) {
+                    alert(delInfo.Message || "Nelze smazat");
+                    return;
+                }
+
+                if (delInfo.NeedsConfirmation && (!confirm(delInfo.Message))) {                    
+                    return;
+                }
+
+                call("deleteGroup").post(self.getGroups);
+            });
+        };
+
         self.filterGroups = (filter) => {
             self.groupsFilter = filter;
             updateGroupsView();

@@ -1,7 +1,7 @@
 .ctdGroupContentPanelHead {
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between; /* rozdělí levou a pravou část */
     padding: 10px 16px;
     background-color: #f8f9fb;
     border-bottom: 1px solid #d4d8dd;
@@ -13,17 +13,24 @@
     z-index: 10;
 }
 
-    /* Ikona zpět */
-    .ctdGroupContentPanelHead .faButtonNew {
-        font-size: 18px;
-        color: #555;
-        cursor: pointer;
-        transition: color 0.2s;
-    }
+/* Levá část: šipka + název */
+.ctdGroupContentPanelHeadLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* mezera mezi šipkou a názvem */
+}
 
-        .ctdGroupContentPanelHead .faButtonNew:hover {
-            color: #000;
-        }
+/* Ikona zpět */
+.ctdGroupContentPanelHead .faButtonNew {
+    font-size: 18px;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+    .ctdGroupContentPanelHead .faButtonNew:hover {
+        color: #000;
+    }
 
 /* Název skupiny */
 .ctdGroupContentTitle {
@@ -32,10 +39,14 @@
     color: #333;
 }
 
-.ctdNewTagButtonWrapper {
-    padding: 10px;
-    padding-left: 15px;
-    border-bottom: 1px solid #eee;
-    width: 100%;
-    margin-bottom: 5px;
+/* Pravá část – ikona koše */
+.ctdGroupContentPanelHeadRight i {
+    font-size: 18px;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.2s;
 }
+
+    .ctdGroupContentPanelHeadRight i:hover {
+        color: #000;
+    }

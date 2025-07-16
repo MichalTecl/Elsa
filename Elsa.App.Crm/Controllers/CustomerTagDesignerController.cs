@@ -168,5 +168,15 @@ namespace Elsa.App.Crm.Controllers
 
             return LoadTags(groupId);
         }
+
+        public GroupDeleteInfo GetGroupDeleteInfo(int groupId)
+        {
+            return _tagRepository.GetGroupDeleteInfo(groupId);
+        }
+
+        public void DeleteGroup(int groupId)
+        {
+            _tagRepository.DeleteGroup(groupId);
+        }
     }    
 }
