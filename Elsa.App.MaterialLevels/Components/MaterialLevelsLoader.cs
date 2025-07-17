@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Elsa.App.MaterialLevels.Components.Model;
@@ -54,7 +54,11 @@ namespace Elsa.App.MaterialLevels.Components
             // user repo cache fill :(
             m_userRepository.GetAllUsers();
 
-            var supplierOrderLimits = m_supplierRepository.GetSuppliers().GroupBy(s => s.Name).ToDictionary(s => s.Key, s => new { Lim = s.Min(t => t.OrderFulfillDays ?? 9999), Name = s.Min(x => x.Name) });
+            var supplierOrderLimits = m_supplierRepository
+                .GetSuppliers()
+                .Where(s => (s.OrderFulfillDays ?? 0) > 0)
+                .GroupBy(s => s.Name)
+                .ToDictionary(s => s.Key, s => new { Lim = s.Min(t => t.OrderFulfillDays ?? 9999), Name = s.Min(x => x.Name) });
 
             m_database.Sql().Call("GetMaterialLevelsReport").WithParam("@inventoryId", inventoryId).WithParam("@projectId", m_session.Project.Id)
                 .ReadRows<int,string, string, int, decimal, string, string, string, DateTime?, int?>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone, orderDt, orderUserId)=>
@@ -141,31 +145,39 @@ namespace Elsa.App.MaterialLevels.Components
                     // we are under threshold, but another batch is ordered
                     r.WarningLevel = WarningLevel.Low;
 
-                    Func<string> limitInfo = null;
+                    string limitInfo = null;
                     int ffLimitDays = 99999;
                     if ((material.OrderFulfillDays ?? 0) > 0)
                     {
-                        limitInfo = () => $"Limit je {material.OrderFulfillDays} dnů pro materiál {material.Name}";
+                        limitInfo = $"Limit je {material.OrderFulfillDays} dnů pro materiál {material.Name}";
                         ffLimitDays = material.OrderFulfillDays.Value;
                     }
                     else if (supplierOrderLimits.TryGetValue(r.SupplierName, out var supplierInfo))
                     {
-                        limitInfo = () => $"Limit je {supplierInfo.Lim} dnů pro dodavatele {supplierInfo.Name}";
+                        limitInfo = $"Limit je {supplierInfo.Lim} dnů pro dodavatele {supplierInfo.Name}";
                         ffLimitDays = supplierInfo.Lim;
+                    }
+                    else
+                    {
+                        limitInfo = "Dodavatel ani materiál nemají nastavený limit pro naskladnění - za limit se považuje 30 dnů";
+                        ffLimitDays = 30;
                     }
 
                     DateTime orderDelaylimit;
                     if ((orderDelaylimit = r.RawOrderDt.Value.AddDays(ffLimitDays)) < DateTime.Now)
                     {
-                        r.DelayedOrderMessage = $"Naskladnění bylo očekáváno do {StringUtil.FormatDate(orderDelaylimit)}. ({limitInfo()})";
+                        r.DelayedOrderMessage = $"Naskladnění bylo očekáváno do {StringUtil.FormatDate(orderDelaylimit)}. ({limitInfo})";
                         r.WarningLevel = WarningLevel.High;
                         r.DelayedOrder = true;
-                    }                    
+                    }
+                    else
+                    {
+                        r.DelayedOrderMessage = limitInfo;
+                    }
                 }
                 else
                 {
                     // we are under threshold
-
                     r.WarningLevel = WarningLevel.High;
                 }
             }

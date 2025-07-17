@@ -121,6 +121,7 @@
     <Content Include="SQL\20200422-003 vwBatchAvailableAmount.sql" />
     <Content Include="SQL\20250211_003_vwBatchAvailableAmountWithoutSpentBatches.sql" />
     <Content Include="SQL\20250609_001_insp_missingMaterialOrder.sql" />
+    <Content Include="SQL\20250717_001_alter_insp_missingMaterialOrder.sql" />
     <Content Include="UI\Controls\MaterialLevels\MaterialLevels.css" />
     <Content Include="UI\Controls\MaterialLevels\MaterialLevelsDetail.html" />
   </ItemGroup>
