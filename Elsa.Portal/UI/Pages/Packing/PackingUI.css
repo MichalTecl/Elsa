@@ -1,4 +1,4 @@
-﻿html,body
+html,body
 {
     height: 100%;
     padding: 0;
@@ -81,8 +81,15 @@
 }
 
 .noteBody {
-    font-size:0.9em;
-    opacity:0.7;
+    font-size: 0.9em;
+    opacity: 0.7;
+    white-space: normal; 
+    word-wrap: break-word; 
+    overflow-wrap: break-word; 
+}
+
+.noteSectionExpander {
+    opacity:0.5;
 }
 
 .orderDiscountsPanel {

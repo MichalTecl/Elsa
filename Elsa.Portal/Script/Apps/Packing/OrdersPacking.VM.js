@@ -1,8 +1,11 @@
-﻿var app = app || {};
+var app = app || {};
 app.ordersPacking = app.ordersPacking || {};
 app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     var self = this;
+
+    self.customerNoteExpanded = true;
+    self.internalNoteExpanded = true;
 
     self.currentOrder = null;
     self.currentQuery = "";
@@ -15,8 +18,11 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     var loadInternalNote = function (orderId) {
 
         var setNote = function (text) {
-            self.currentOrder.InternalNote = text;
-            self.currentOrder.hasInternalNote = (self.currentOrder.InternalNote) && (self.currentOrder.InternalNote.length > 0);
+
+            if (!!text)
+                self.currentOrder.InternalNote = text;
+
+            self.currentOrder.hasInternalNote = !!((!!self.currentOrder.InternalNote) && (self.currentOrder.InternalNote.length > 0));
             self.currentOrder.displayInternalNote = self.currentOrder.hasInternalNote;
         };
 
@@ -25,6 +31,8 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             setNote(noteText);
             lt.notify();
             return;
+        } else {
+            setNote(null);
         }
 
 
@@ -204,6 +212,9 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         order.hasInternalNote = false;
         order.displayInternalNote = true;
         order.hasDiscount = (!!order.DiscountsText) && (order.DiscountsText) && (order.DiscountsText.length > 0);
+
+        self.customerNoteExpanded = true;
+        self.internalNoteExpanded = true;
 
         var localOrderRecord = getLocalOrderRecord(order.OrderId, false, null);
 

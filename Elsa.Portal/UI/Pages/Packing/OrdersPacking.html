@@ -61,13 +61,24 @@
                             <div class="discountText" data-bind="text:currentOrder.DiscountsText"></div>
                         </div>
                         <div id="customerNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.hasCustomerNote">
-                            <div id="customerNoteTitle" class="noteTitle">Vzkaz od zákazníka</div>
-                            <pre id="customerNoteBody" class="noteBody" data-bind="text:currentOrder.CustomerNote"></pre>
+                            <div id="customerNoteTitle" class="noteTitle">
+                                <i class="far fa-minus-square noteSectionExpander" data-bind="class!.hidden:customerNoteExpanded" event-bind="click:toggleCustomerNoteExpansion()"></i>
+                                <i class="far fa-plus-square noteSectionExpander" data-bind="class.hidden:customerNoteExpanded" event-bind="click:toggleCustomerNoteExpansion()"></i>
+                                <span>Vzkaz od zákazníka</span>
+                            </div>
+                            <pre id="customerNoteBody" class="noteBody" data-bind="text:currentOrder.CustomerNote;class!.hidden:customerNoteExpanded"></pre>
                         </div>
                         <div id="internalNotePanel" class="noteContainer" data-bind="class!.hidden:currentOrder.displayInternalNote;class.pulseAnimation:currentOrder.hasInternalNote">
-                            <div id="internalNoteTitle" class="noteTitle">Interní poznámka</div>
+                            
+                            <div id="internalNoteTitle" class="noteTitle">
+                                <i class="far fa-minus-square noteSectionExpander" data-bind="class!.hidden:internalNoteExpanded" event-bind="click:toggleInternalNoteExpansion()"></i>
+                                <i class="far fa-plus-square noteSectionExpander" data-bind="class.hidden:internalNoteExpanded" event-bind="click:toggleInternalNoteExpansion()"></i>
+                                <span>Interní poznámka</span>
+                            </div>
                             <div data-bind="class!.hidden:loadingInternalNote">Načítám...</div>
-                            <p id="internalNoteBody" class="noteBody" data-bind="text:currentOrder.InternalNote;class.hidden:loadingInternalNote"></p>
+                            <span data-bind="class!.hidden:internalNoteExpanded">
+                                <p id="internalNoteBody" class="noteBody" data-bind="text:currentOrder.InternalNote;class.hidden:loadingInternalNote"></p>
+                            </span>
                         </div>
                     </div>
                     <div id="orderItemsContainer">
@@ -148,7 +159,7 @@
             lt.generate(batchAssignmentList, batchItemTemplate, BatchAssignment);
 
         });
-
+                
         var onBatchNumberEntered = function(model, query, orderItemId, allocatedQuantity) {
             app.ordersPacking.vm.setBatch(model, query);
         };
@@ -203,6 +214,10 @@
         .attach(function (orderSearchPanel, orderViewPanel, tbSearch, orderOverviewPanel, itemsList, itemTemplate, kitGroupTemplate, kitItemTemplate, progressBar, ordersList, orderTemplate) {
 
             var self = this;
+
+            self.toggleCustomerNoteExpansion = () => app.ordersPacking.vm.customerNoteExpanded = !app.ordersPacking.vm.customerNoteExpanded;
+            self.toggleInternalNoteExpansion = () => app.ordersPacking.vm.internalNoteExpanded = !app.ordersPacking.vm.internalNoteExpanded;
+
 
             var focusSearch = function() {
                 setTimeout(function() {
