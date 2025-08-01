@@ -21,6 +21,11 @@
             <a href="/UI/DistributorsApp/CustomerTagsDesignerPage.html">Editor štítků</a>
         </div>
 
+        <div class="actionTile" id="customersImportTile" event-bind="click:importCustomers()" style="cursor:pointer">
+            <i class="fas fa-arrow-down actionTileIcon"></i>
+            <a>Importovat zákazníky z Floxu</a>
+        </div>
+
         <div class="actionTile">
             <i class="fas fa-table actionTileIcon"></i>
             <a href="/UI/CrmReporting/CrmReporting.html">Velkoobchod - Reporty</a>
@@ -38,5 +43,13 @@
 
         setTimeout(loadOverview, 100);
 
+    });
+
+    lt.element("customersImportTile").attach(function () {
+        this.importCustomers = () => {
+            lt.api("/customers/importCustomers").get(() => {
+                alert("Hotovo");
+            });
+        };
     });
 </script>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +8,10 @@ using Elsa.App.Crm.Model;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
-
+using Elsa.Jobs.SyncErpCustomers;
 using Robowire.RoboApi;
 
 namespace Elsa.App.Crm
@@ -20,12 +21,16 @@ namespace Elsa.App.Crm
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly IUserRepository _userRepository;
+        private readonly CustomersSyncJob _customersSyncJob;
+        private readonly ICache _cache;
 
-        public CustomersController(IWebSession webSession, ILog log, ICustomerRepository customerRepository, IUserRepository userRepository)
+        public CustomersController(IWebSession webSession, ILog log, ICustomerRepository customerRepository, IUserRepository userRepository, CustomersSyncJob customersSyncJob, ICache cache)
             : base(webSession, log)
         {
             _customerRepository = customerRepository;
             _userRepository = userRepository;
+            _customersSyncJob = customersSyncJob;
+            _cache = cache;
         }
 
         public CustomerViewModel GetCustomer(string email)
@@ -47,6 +52,12 @@ namespace Elsa.App.Crm
         public void SnoozeCustomer(int customerId)
         {
             _customerRepository.SnoozeCustomer(customerId);
+        }
+
+        public void ImportCustomers()
+        {
+            _customersSyncJob.Run(null);
+            _cache.Clear();
         }
     }
 }

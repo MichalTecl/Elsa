@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CustomersSyncJob.cs" />
+    <Compile Include="CustomersSyncJobRegistry.cs" />
     <Compile Include="Mailchimp\MailchimpClient.cs" />
     <Compile Include="Mailchimp\MailchimpClientConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -65,6 +66,10 @@
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj">
       <Project>{5EF07762-137B-4BF7-8199-5961768FCAEC}</Project>
       <Name>Elsa.Jobs.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj">
+      <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>
+      <Name>Robowire</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

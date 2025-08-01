@@ -15,32 +15,51 @@ namespace Elsa.Jobs.SyncErpCustomers
 {
     public class CustomersSyncJob : IExecutableJob
     {
-        private readonly IErpClientFactory m_erpClientFactory;
-        private readonly ICustomerRepository m_customerRepository;
-        private readonly ILog m_log;
+        private readonly IErpClientFactory _erpClientFactory;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly ILog _log;
 
         public CustomersSyncJob(IErpClientFactory erpClientFactory, ICustomerRepository customerRepository, ILog log)
         {
-            m_erpClientFactory = erpClientFactory;
-            m_customerRepository = customerRepository;
-            m_log = log;
+            _erpClientFactory = erpClientFactory;
+            _customerRepository = customerRepository;
+            _log = log;
         }
+
+        private static readonly Mutex _mutex = new Mutex();
 
         public void Run(string customDataJson)
         {
-            //m_customerRepository.SyncShadowCustomers();
+            bool acquired = false;
 
-            m_log.Info("Starting synchronization of customers from ERP");
-            foreach (var erp in m_erpClientFactory.GetAllErpClients())
+            try
             {
-                var erpCustomerModels = erp.LoadCustomers().ToList();
-                if (!erpCustomerModels.Any())
+                acquired = _mutex.WaitOne(TimeSpan.FromSeconds(5));
+                if (!acquired)
                 {
-                    continue;
+                    throw new InvalidOperationException("Právě probíhá import zákazníků, opakujte akci později.");
                 }
 
-                m_customerRepository.SyncCustomers(erpCustomerModels);
-            }            
+                _log.Info("Starting synchronization of customers from ERP");
+                foreach (var erp in _erpClientFactory.GetAllErpClients())
+                {
+                    var erpCustomerModels = erp.LoadCustomers().ToList();
+                    if (!erpCustomerModels.Any())
+                    {
+                        continue;
+                    }
+
+                    _customerRepository.SyncCustomers(erpCustomerModels);
+                }
+            }
+            finally
+            {
+                if (acquired)
+                {
+                    _mutex.ReleaseMutex();
+                }
+            }
         }
+
     }
 }
