@@ -191,6 +191,8 @@
     <Content Include="SQL\202500218_002_LoadCustomerAddresses.sql" />
     <Content Include="SQL\20250129_002_insp_missingSalesRep.sql" />
     <Content Include="SQL\20250205_001_IntTable.sql" />
+    <Content Include="SQL\20250805_003_AssignTagToCustomers - fix.sql" />
+    <Content Include="SQL\20250805_002_vwOrderVocMoc - fix.sql" />
     <Content Include="SQL\20250520_001_LoadDistributorDetail - unassignDt.sql" />
     <Content Include="SQL\20250514_001_LoadAllDistributors.sql" />
     <Content Include="SQL\20250211_006_getDistributorsSales.sql" />
@@ -213,6 +215,7 @@
     <Content Include="SQL\20250521_005_CrmGridGetMeetingsColumns.sql" />
     <Content Include="SQL\20250716_001_tagType_DropUnusedColumns.sql" />
     <Content Include="SQL\20250716_002_removeOldFilters.sql" />
+    <Content Include="SQL\20250805_001_GetDistributorOrdersOverview_fix.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

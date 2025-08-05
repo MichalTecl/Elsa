@@ -50,5 +50,24 @@ namespace Elsa.App.Crm.Controllers
             })
                 .ToList();
         }
+
+        public TagTransitionInfo CreateRootLevelTransiton(int customerId, string tagTypeName)
+        {
+            // TODO - tady by bylo celkem spravne kontrolovat, jestli je transition na cilovy tag pro zakaznika valdini, ale to je tbd...
+
+            var tag = _customerTagRepository.GetTagTypes(null).FirstOrDefault(t => t.Name == tagTypeName) ?? throw new ArgumentException("Neznamy nazev tagu");
+
+            var transition = new TagTransitionInfo
+            {
+                TagTypeId = tag.Id,
+                CustomerId = customerId,
+                TagTypeName = tagTypeName,
+                TagTypeCssClass = tag.CssClass,
+                RequiresNote = tag.RequiresNote == true,
+                TagTypeGroupId = tag.GroupId
+            };
+
+            return transition;
+        }
     }
 }

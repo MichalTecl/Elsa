@@ -1,4 +1,4 @@
-﻿using BwApiClient.Model;
+using BwApiClient.Model;
 using BwApiClient.Model.Data;
 using BwApiClient.Model.Enums;
 using BwApiClient.Model.Inputs;
@@ -82,7 +82,7 @@ namespace BwApiClient
                                                       , o => o.invoices
                                                       , o => o.preinvoices
                                                       , o => o.sum
-                                                      , o => o.items.With(i => i.product)
+                                                      , o => o.items.With(i => i.product)                                                      
                                                       )));
         public async Task<PaginatedList<Order>> GetOrders(DateTime? changedAfter = null, int? orderStatusId = null, int? listOffset = null, OrderSorting orderSorting = OrderSorting.last_change, Direction sortDirection = Direction.DESC)
         {

@@ -30,24 +30,20 @@
             </div>
 
             <div class="digrTagsRow">
-
-                <div class="digrDetTagList digrDetSysTagList" data-bind="itemsSource:detail.sysTags" data-key="Id">
-                    <div class="lt-template digrTagItem digrSysTagItem" data-bind="text:Name"></div>
+                
+                <div data-bind="singleItemSource:detail">
+                    <div class="lt-template" data-bind="something:fake" fill-by="/UI/DistributorsApp/Parts/CustomerTagAssignmentControl.html"></div>
                 </div>
+
                 <div class="digrDetTagList digrDetManTagList" data-bind="itemsSource:detail.manTags" data-key="Id">
                     <div class="lt-template digrTagItem digrManTagItem" data-bind="cssClass:CssClass">
                         <i class="fas fa-times faButton" event-bind="click:removeTag(Id)"></i>
                         <div data-bind="text:Name"></div>
                     </div>
                 </div>
-                <i class="fas fa-plus-circle faButton digrAddTagButton" data-bind="class.hidden:tagPickerActive" event-bind="click:openTagPicker()"></i>
+               
             </div>
-            <div class="digrAddTagPanel">
-                <div lt-name="digrTagPickerCont" class="stackLeft autocomplete" data-bind="class!.hidden:tagPickerActive">
-                    <i class="fas fa-times faButton" event-bind="click:closeTagPicker()"></i>
-                    <input id="digrTagPickerInput" />
-                </div>
-            </div>
+            
         </div>
     </div>
 
@@ -177,19 +173,10 @@
 
     <script>
         lt.element("digrDetailControlCont")
-            .attach(function (digrTagPickerCont, digrTagPickerInput, gpsTb) {
+            .attach(function (gpsTb) {
 
                 this.bind(function (detail) {
-                    app.ui.autosuggest(digrTagPickerCont,
-                        app.Distributors.vm.getAttachableTags,
-                        null,
-                        null,
-                        (pickedTagName) => {
-                            app.Distributors.vm.addTag(pickedTagName);
-                            this.closeTagPicker();
-                        }
-                    );
-
+                    
                     if (!gpsTb["isGpsPicker"]) {
                         gpsTb["isGpsPicker"] = true;
 
@@ -237,16 +224,10 @@
                 this.save = () => app.Distributors.vm.saveDetail();
 
                 this.removeTag = (id) => app.Distributors.vm.removeTag(id);
-                this.openTagPicker = () => app.Distributors.vm.tagPickerActive = true;
-                this.closeTagPicker = () => {
-                    digrTagPickerInput.value = "";
-                    app.Distributors.vm.tagPickerActive = false;
-                    lt.notify();
-                }
+                
                 this.activateDetailTab = (text) => app.Distributors.vm.activateTab(text);
 
-                this.onGpsPickerClick = (vm) => {
-                                        
+                this.onGpsPickerClick = (vm) => {                                       
 
                     const store = vm.selectedAddress;
 
@@ -255,8 +236,6 @@
 
                     const url = "https://www.mapy.cz?q=" + encodeURIComponent(store.Address + ', ' + store.City);
                     window.open(url, '_blank');
-                    
-
                 };
             });
     </script>

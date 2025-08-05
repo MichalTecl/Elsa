@@ -1,4 +1,4 @@
-﻿using BwApiClient.Model.Data;
+using BwApiClient.Model.Data;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Integration.Erp.Flox.Protocol.OrderModel;
@@ -36,7 +36,7 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection.Model
 
         public string PreInvId => GetLatestPreinvoice()?.id ?? "?";
 
-        public string Price => _source.sum?.value.ToString();
+        public string Price => (_source.vat_summary ?? throw new InvalidOperationException("Missing vat_summary")).Sum(vs => vs.tax_base).ToString();
 
         public string PriceWithVat => _source.sum?.value.ToString();
 
@@ -241,7 +241,7 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection.Model
                 if (_source.customer == null) throw new ArgumentNullException(nameof(_source.customer));
                 if (_source.price_elements == null) throw new ArgumentNullException(nameof(_source.price_elements));
                 if (_source.items == null) throw new ArgumentNullException(nameof(_source.items));
-
+                if (_source.vat_summary == null || _source.vat_summary.Count == 0) throw new ArgumentNullException(nameof(_source.vat_summary));
 
                 CheckNotNull(OrderNumber, nameof(OrderNumber));
                 CheckNotNull(DueDate, nameof(DueDate));                

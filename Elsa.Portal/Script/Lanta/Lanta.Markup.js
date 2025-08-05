@@ -124,13 +124,16 @@ if (lanta.Markup.attributeSetters.length === 0) {
 	    return true;
 	});
     
-    //itemsSource
-    lanta.Markup.attributeSetters.push(function(target, propertyName, value) {
-        if (propertyName.toLowerCase() !== "itemssource") {
+    //itemsSource, singleItemSource
+    lanta.Markup.attributeSetters.push(function (target, propertyName, value) {
+
+        const isSingleItemMode = propertyName.toLowerCase() === "singleitemsource";
+
+        if ((!isSingleItemMode) && (propertyName.toLowerCase() !== "itemssource")) {
             return false;
         }
-        
-        if ((!value) || (!value.length) || (value.length === 0)) {
+
+        if ((!isSingleItemMode) && ((!value) || (!value.length) || (value.length === 0))) {
             if (!target["__ltItemTemplate"]) {
                 return true;
             }
@@ -141,15 +144,25 @@ if (lanta.Markup.attributeSetters.length === 0) {
             container["__ltItemTemplate"] = itemTemplate;
 
             var keySelector = null;
+                        
             if (!(keySelector = container["__ltItemKeySelector"])) {
                 var keyPropertyName = container.getAttribute("data-key");
                 if (!keyPropertyName) {
-                    container.innerHTML = "ATTRIBUTE DATA-KEY NOT FOUND";
-                    return true;
+
+                    if (!isSingleItemMode) {
+                        container.innerHTML = "ATTRIBUTE DATA-KEY NOT FOUND";
+                        return true;
+                    } else {
+                        keySelector = new Function("__itemVm", "return 1");
+                    }
                 }
 
-                keySelector = new Function("__itemVm", "return __itemVm['" + keyPropertyName + "']");
+                keySelector = keySelector || new Function("__itemVm", "return __itemVm['" + keyPropertyName + "']");
                 container["__ltItemKeySelector"] = keySelector;
+            }
+
+            if (isSingleItemMode) {
+                collection = (!!collection) ? [collection] : [];
             }
 
             lt.generate(container, itemTemplate, collection, keySelector);

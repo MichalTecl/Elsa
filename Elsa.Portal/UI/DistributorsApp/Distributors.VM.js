@@ -713,8 +713,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         };
 
         lt.api("/CrmDistributors/save").body(model).post(() => {
-            self.isDirty = false;
-            self.closeDetail();
+            self.isDirty = false;            
         });
     };
 
@@ -807,7 +806,11 @@ app.Distributors.VM = app.Distributors.VM || function(){
             search(self.detail.addresses);
         }
 
-        self.isDirty = result;
+        if (result) {
+            self.saveDetail();
+            self.isDirty = false;
+        }
+                
         lt.notify();
     };
 

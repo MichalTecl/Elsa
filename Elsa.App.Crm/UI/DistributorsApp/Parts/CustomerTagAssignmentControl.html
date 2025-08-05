@@ -1,24 +1,78 @@
 
-<div id="tagassignments_{%GENERATE%}" data-bind="itemsSource:TagAssignments" data-key="TagTypeId" class="ctacTagsContainer">
-    <div class="lt-template ctacTagItem" data-bind="cssClass:TagTypeCssClass" >
-        <i class="fas fa-times ctacRemoveTag" data-bind="class.hidden:HasTransitions" event-bind="click:removeTag(VM)"></i>
-        <div lt-name="targetPicker" class="popupOverlay"></div>
-        <i class="fas fa-comment ctacComment" data-bind="class!.hidden:Note" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
-        <div data-bind="text:TagTypeName" event-bind="click:openTransitionPopup(VM, $targetPicker)"></div>
-        <i class="fas fa-bell ctacBell" data-bind="class!.hidden:HasTimeoutWarning" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
-        <i class="fas fa-project-diagram ctacTransitionsMarker" data-bind="class!.hidden:HasTransitions" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
+<div id="tagassignments_{%GENERATE%}" class="stackLeft">
+    <i class="fas fa-plus-circle faButton digrAddTagButton" event-bind="click:openTagPicker()"></i>
+    <div data-bind="itemsSource:TagAssignments" data-key="TagTypeId" class="ctacTagsContainer">
+        <div class="lt-template ctacTagItem" data-bind="cssClass:TagTypeCssClass">
+            <i class="fas fa-times ctacRemoveTag" data-bind="class.hidden:HasTransitions" event-bind="click:removeTag(VM)"></i>
+            <div lt-name="targetPicker" class="popupOverlay"></div>            
+            <div data-bind="text:TagTypeName" event-bind="click:openTransitionPopup(VM, $targetPicker)"></div>
+            <i class="fas fa-bell ctacBell" data-bind="class!.hidden:HasTimeoutWarning" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
+            <i class="fas fa-project-diagram ctacTransitionsMarker" data-bind="class!.hidden:HasTransitions" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
+        </div>
+    </div>
+    <div id="tagPickerPopup" class="popupOverlay">
+        <div class="popupBody">
+            <div lt-name="digrTagPickerCont" class="stackLeft autocomplete">
+                <i class="fas fa-times faButton" event-bind="click:closeTagPicker()"></i>
+                <input id="digrTagPickerInput" />
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    lt.element("tagassignments_{%GENERATE%}").attach(function () {
+    lt.element("tagassignments_{%GENERATE%}").attach(function (digrTagPickerCont, digrTagPickerInput, tagPickerPopup) {
 
         const self = this;
 
         let collection = null;
 
+
+
+        self.openTagPicker = () => Popup.open(tagPickerPopup);
+        self.closeTagPicker = () => {
+            digrTagPickerInput.value = "";
+            Popup.close(tagPickerPopup);
+            lt.notify();
+        }
+
         this.bind(function (TagAssignments) {
             collection = TagAssignments;
+
+            app.ui.autosuggest(digrTagPickerCont,
+                app.Distributors.vm.getAttachableTags,
+                null,
+                null,
+                (pickedTagName) => {
+
+                    const customer = lt.getViewModel(self);
+
+                    lt.api("/CustomerTagAssignment/CreateRootLevelTransiton")
+                        .query({ "customerId": customer.Id, "tagTypeName": pickedTagName })
+                        .get((transition) => {
+                            if (transition.RequiresNote) {
+                                const note = prompt("Štítek " + transition.TagTypeName + " vyžaduje poznámku");
+                                if (!note) {
+                                    return;
+                                }
+
+                                transition.note = note;
+
+                                saveTransition(transition);
+                            }
+                        });
+
+                    /*
+                    lt.api("/CustomerTagAssignment/assign")
+                        .query({ "customerId": customer.Id, "tagTypeId": transition.TagTypeId, "note": transition.note })
+                        .post((assignments) => {
+                            receiveNewAssignments(transition, assignments);
+                            Popup.close();
+                        });
+                    */
+                    self.closeTagPicker();
+                }
+            );
         });
 
         const receiveNewAssignments = (assignment, assignments) => {
@@ -52,6 +106,7 @@
             if (!targetPicker.initialized) {
                 targetPicker.initialized = true;
                 targetPicker.innerHTML = "<div class=\"popupBody\" fill-by-lazy=\"/UI/DistributorsApp/Parts/TagTransitionTargetSelect.html\"></div>";
+                console.log("picker initialized");
             }
 
             if (!!assignment.Transitions) {
@@ -111,7 +166,10 @@
 
             if (transition.RequiresNote) {
                 transition.noteInputOpen = true;
-                self.showOnly(transition);
+
+                if (!!self.showOnly)
+                    self.showOnly(transition);
+
                 return;
             }
 

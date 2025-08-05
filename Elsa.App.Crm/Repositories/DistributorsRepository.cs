@@ -7,6 +7,7 @@ using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Common.Utils.TextMatchers;
 using Elsa.Core.Entities.Commerce.Crm;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,9 @@ namespace Elsa.App.Crm.Repositories
         private readonly DistributorFiltersRepository _distributorFilters;
         private readonly ILog _log;
         private readonly Lazy<ColumnFactory> _columnFactory;
+        private readonly CustomerTagRepository _tagRepository;
 
-        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository, DistributorFiltersRepository distributorFilters, ILog log, Lazy<ColumnFactory> columnFactory)
+        public DistributorsRepository(IDatabase database, ICache cache, ISession session, ICustomerRepository customerRepository, DistributorFiltersRepository distributorFilters, ILog log, Lazy<ColumnFactory> columnFactory, CustomerTagRepository tagRepository)
         {
             _database = database;
             _cache = cache;
@@ -34,6 +36,7 @@ namespace Elsa.App.Crm.Repositories
             _distributorFilters = distributorFilters;
             _log = log;
             _columnFactory = columnFactory;
+            _tagRepository = tagRepository;
         }
 
         public List<DistributorGridRowModel> GetDistributors(DistributorGridFilter filter, int? pageSize, int? page, bool idsOnly = false)
@@ -204,13 +207,17 @@ namespace Elsa.App.Crm.Repositories
 
         public DistributorDetailViewModel GetDetail(int customerId)
         {
-            return _database
+            var detail = _database
                 .Sql()
                 .Call("LoadDistributorDetail")
                 .WithParam("@projectId", _session.Project.Id)
                 .WithParam("@customerId", customerId)
                 .AutoMap<DistributorDetailViewModel>()
                 .FirstOrDefault();
+
+            detail.TagAssignments.AddRange(_tagRepository.GetAssignments(new int[] { customerId }));
+
+            return detail;
         }
 
         public List<DistributorAddressViewModel> GetDistributorAddresses(int customerId)

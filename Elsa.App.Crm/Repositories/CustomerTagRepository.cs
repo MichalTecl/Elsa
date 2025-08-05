@@ -143,7 +143,7 @@ namespace Elsa.App.Crm.Repositories
             return GetData().Where(g => groupId == null || g.Group.Id == groupId).SelectMany(g => g.Tags).ToList();
         }
               
-        public List<ICustomerTagType> GetCustomerTags(int customerId, bool acrossUsers = false)
+        public List<ICustomerTagType> GetCustomerTags(int customerId)
         {
             if(!GetAllTagAssignments().TryGetValue(customerId, out var assignments))
                 return new List<ICustomerTagType>(0);
