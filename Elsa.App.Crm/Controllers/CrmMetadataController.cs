@@ -41,7 +41,8 @@ namespace Elsa.App.Crm.Controllers
                 _customerTagRepository.GetTagTypes(null),
                 _salesRepRepository.GetSalesRepresentatives(null).ToList(),
                 _customerRepository.GetCustomerGroupTypes().Select(kv => kv.Value).ToList(),
-                _distributorFiltersRepository.GetFilters());
+                _distributorFiltersRepository.GetFilters(),
+                _customerTagRepository.GetGroups());
         }
                 
         public int CountTagAssignments(int id)

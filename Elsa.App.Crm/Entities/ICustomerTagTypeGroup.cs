@@ -14,5 +14,7 @@ namespace Elsa.App.Crm.Entities
     {
         [NVarchar(100,false)]
         string Name { get; set; }
+
+        int? DisplayOrder { get; set; }
     }
 }

@@ -23,6 +23,20 @@
             </div>
 
             <div class="digrFiltersRow">
+
+                <div class="digrFiltersSection stackLeft" id="digrFilterTagGroups">
+                    <div id="digrTagsFilter" class="stackLeft">
+                        <i class="far fa-folder"></i>
+                    </div>
+                    <div class="digrTagFilters" data-bind="itemsSource:allTagGroups" data-key="Id">
+                        <div class="lt-template digrFilterTag" >
+                            <input type="checkbox" data-bind="checked:isSelected" event-bind="change:updateTagGroupFilter(Id, this.checked)" />
+                            <label data-bind="text:Name"></label>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="digrFiltersSection stackLeft" id="digrFilterTags">
                     <div id="digrTagsFilter" class="stackLeft">
                         <i class="fas fa-search faButtonNew" id="digrTagsFilterIcon" event-bind="click:setFocus($digrTagsFilterInput)"></i>
@@ -147,6 +161,7 @@
 
             this.setFilter = (type, key, value) => app.Distributors.vm.updateFilter(type, key, value);
             this.updateTagFilter = (id, checked) => app.Distributors.vm.updateTagFilter(id, checked);
+            this.updateTagGroupFilter = (id, checked) => app.Distributors.vm.updateTagGroupFilter(id, checked);
 
             this.openDetail = (customerId) => {
                 window.location.hash = 'customerId=' + customerId;

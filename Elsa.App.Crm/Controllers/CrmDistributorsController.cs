@@ -44,9 +44,7 @@ namespace Elsa.App.Crm.Controllers
         {
             return _distributorsRepository.GetDistributors(filter, pageSize, page);
         }
-
-        public DistributorSorting[] GetSortingTypes() => DistributorSorting.Sortings;
-
+                
         public DistributorDetailViewModel GetDetail(int customerId) => _distributorsRepository.GetDetail(customerId);
 
         public List<DistributorAddressViewModel> GetAddresses(int customerId) => _distributorsRepository.GetDistributorAddresses(customerId);

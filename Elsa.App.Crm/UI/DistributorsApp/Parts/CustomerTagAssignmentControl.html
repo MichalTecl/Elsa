@@ -2,14 +2,15 @@
 <div id="tagassignments_{%GENERATE%}" class="stackLeft">
     <i class="fas fa-plus-circle faButton digrAddTagButton" event-bind="click:openTagPicker()"></i>
     <div data-bind="itemsSource:TagAssignments" data-key="TagTypeId" class="ctacTagsContainer">
-        <div class="lt-template ctacTagItem" data-bind="cssClass:TagTypeCssClass">
+        <div class="lt-template ctacTagItem" data-bind="cssClass:TagTypeCssClass;class.hidden:isFilteredHidden">
             <i class="fas fa-times ctacRemoveTag" data-bind="class.hidden:HasTransitions" event-bind="click:removeTag(VM)"></i>
             <div lt-name="targetPicker" class="popupOverlay"></div>            
             <div data-bind="text:TagTypeName" event-bind="click:openTransitionPopup(VM, $targetPicker)"></div>
             <i class="fas fa-bell ctacBell" data-bind="class!.hidden:HasTimeoutWarning" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
             <i class="fas fa-project-diagram ctacTransitionsMarker" data-bind="class!.hidden:HasTransitions" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
-        </div>
+        </div>    
     </div>
+    <div id="hiddenTagsInfo"></div>
     <div id="tagPickerPopup" class="popupOverlay">
         <div class="popupBody">
             <div lt-name="digrTagPickerCont" class="stackLeft autocomplete">
@@ -21,7 +22,7 @@
 </div>
 
 <script>
-    lt.element("tagassignments_{%GENERATE%}").attach(function (digrTagPickerCont, digrTagPickerInput, tagPickerPopup) {
+    lt.element("tagassignments_{%GENERATE%}").attach(function (digrTagPickerCont, digrTagPickerInput, tagPickerPopup, hiddenTagsInfo) {
 
         const self = this;
 
@@ -57,9 +58,9 @@
                                 }
 
                                 transition.note = note;
-
-                                saveTransition(transition);
                             }
+
+                            saveTransition(transition);
                         });
 
                     /*
@@ -73,6 +74,30 @@
                     self.closeTagPicker();
                 }
             );
+
+            let hiddenTags = 0;
+            let shownTags = 0;
+
+            collection.forEach(tag => {
+                tag.isFilteredHidden = app.Distributors.vm.filter.TagGroups.indexOf(tag.TagTypeGroupId) === -1;
+
+                if (tag.isFilteredHidden)
+                    hiddenTags++;
+                else
+                    shownTags++;
+            });
+                        
+            if (hiddenTags === 0) {
+                hiddenTagsInfo.style.visibility = 'collapse';
+            } else {
+                hiddenTagsInfo.style.visibility = 'visible';
+
+                if (shownTags > 0) {
+                    hiddenTagsInfo.innerHTML = "( + " + hiddenTags + " skrytých štítků)";
+                } else {
+                    hiddenTagsInfo.innerHTML = "(" + hiddenTags + " skrytých štítků)";
+                }                
+            }
         });
 
         const receiveNewAssignments = (assignment, assignments) => {

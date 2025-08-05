@@ -14,9 +14,9 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     self.allCustomerGroups = [];
     self.allTags = [];
-    self.allSalesReps = [];
-    self.allSorters = [];
+    self.allSalesReps = [];    
     self.allExFilters = [];
+    self.allTagGroups = [];
 
     self.page = 1;
     self.pageSize = 20;
@@ -38,7 +38,8 @@ app.Distributors.VM = app.Distributors.VM || function(){
         SalesRepresentativeId: null,
         CustomerGroupTypeId: null,
         IncludeDisabled: false,
-        ExFilterGroups: []
+        ExFilterGroups: [],
+        TagGroups: []
     };
 
     self.isDetailOpen = false;
@@ -57,8 +58,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.tagFilterVisible = false;
 
     self.savedFilters = [];
-
-              
+                      
     const withFiltersUsageData = (callback) => {
         const filtersUsageStoredItemKey = "savedFiltersUsageHistory";
         const usageData = JSON.parse(window.localStorage.getItem(filtersUsageStoredItemKey) || '{}');;
@@ -130,7 +130,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.deleteSavedFilter = (id) => lt.api("/crmCustomFilters/deleteFilter").query({ id }).post(receiveSavedFilters);
-
+        
     const applySavedFilter = (filter, filterId) => {
         self.filter = filter;
         self.updateSortingModel();
@@ -172,6 +172,12 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
         self.allTags.forEach(t => {
             t.isSelected = (self.filter.Tags.indexOf(t.Id) > -1);
+        });
+
+        applyTagGroupsSelection();
+
+        self.allTagGroups.forEach(tg => {
+            tg.isSelected = self.filter.TagGroups.indexOf(tg.Id) > -1;
         });
     };
     
@@ -533,6 +539,32 @@ app.Distributors.VM = app.Distributors.VM || function(){
         self.search();
     };
 
+    const applyTagGroupsSelection = () => {
+        self.allTags.forEach(tag => {
+            const activeGroupIndex = self.filter.TagGroups.indexOf(tag.GroupId);
+
+            tag.isHidden = activeGroupIndex === -1;
+
+            if (tag.isHidden) {
+                self.updateTagFilter(tag.Id, false);
+            }
+        });
+    };
+
+    self.updateTagGroupFilter = (groupId, value) => {
+        const indexOfGroupId = self.filter.TagGroups.indexOf(groupId);
+
+        if (!!value) {
+            if (indexOfGroupId === -1)
+                self.filter.TagGroups.push(groupId);
+        } else {
+            if (indexOfGroupId > -1)
+                self.filter.TagGroups.splice(indexOfGroupId, 1);
+        }
+
+        applyTagGroupsSelection();
+    };
+
     self.load = () => {        
         load(self.page + 1);
     };
@@ -569,7 +601,12 @@ app.Distributors.VM = app.Distributors.VM || function(){
         self.allCustomerGroups = [{ ErpGroupName: "", Id: null }, ... m.CustomerGroupTypes];
         self.allTags = m.CustomerTagTypes;
         self.allSalesReps = [{ PublicName: "", Id: null }, ...m.SalesRepresentatives];
-        self.allExFilters = m.DistributorFilters;        
+        self.allExFilters = m.DistributorFilters;
+        self.allTagGroups = m.CustomerTagTypeGroups;
+
+        self.allTagGroups.forEach(tg => {
+            self.updateTagGroupFilter(tg.Id, false);
+        });
     };
 
     self.withMetadata = (consumer) => {
@@ -1007,10 +1044,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     /** Initialization **************************************************/
 
-    
-
-    lt.api("/CrmDistributors/getSortingTypes").get(st => self.allSorters = st);
-
+            
     const resetDetail = () => {
         self.isDetailOpen = false;
         self.detail = null;

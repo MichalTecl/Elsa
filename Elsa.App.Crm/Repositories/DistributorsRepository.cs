@@ -203,8 +203,7 @@ namespace Elsa.App.Crm.Repositories
             _log.Info($"Done. We got {idsInAllExFilters.Count} of ids from distributor fitlers");
             return idsInAllExFilters;
         }
-
-
+        
         public DistributorDetailViewModel GetDetail(int customerId)
         {
             var detail = _database
@@ -310,29 +309,7 @@ namespace Elsa.App.Crm.Repositories
                 return trends.ToDictionary(t => t.Key, t => t.Value.GetModel().ToList());
             });
         }
-
-        public class DistributorSorting
-        {
-            public static readonly DistributorSorting[] Sortings = new[]
-            {
-                new DistributorSorting("default", "Název A-Z", recs => recs.OrderBy(i => i.Name)),
-                new DistributorSorting("idDesc", "Od nejnovějšího", recs => recs.OrderByDescending(i => i.Id)),
-                new DistributorSorting("futureContactAsc", "Nejbližší plánovaný kontakt", recs => recs.Where(i => i.FutureContactDt != null).OrderBy(i => i.FutureContactDt)),
-                new DistributorSorting("pastContactAsc", "Nejdéle od kontaktu", recs => recs.Where(i => i.LastContactDt != null).OrderBy(i => i.LastContactDt)),
-                new DistributorSorting("pastContactDesc", "Nejčerstvější kontakt", recs => recs.Where(i => i.LastContactDt != null).OrderByDescending(i => i.LastContactDt)),
-            };
-
-            private DistributorSorting(string id, string text, Func<IEnumerable<DistributorGridRowModel>, IEnumerable<DistributorGridRowModel>> sorter)
-            {
-                Id = id;
-                Text = text;
-                Sorter = sorter;
-            }
-
-            public string Id { get; }
-            public string Text { get; }
-            public Func<IEnumerable<DistributorGridRowModel>, IEnumerable<DistributorGridRowModel>> Sorter { get; }
-        }
+        
     }
 
 }

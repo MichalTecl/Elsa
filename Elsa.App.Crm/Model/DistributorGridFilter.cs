@@ -27,6 +27,8 @@ namespace Elsa.App.Crm.Model
         public string SortBy { get; set; }
 
         public bool SortDescending { get; set; }
+
+        public List<int> TagGroups { get; set; } = new List<int>();
     }
 
     public class DistributorFiltersGroup 
@@ -43,6 +45,14 @@ namespace Elsa.App.Crm.Model
         public string Title { get; set; }
 
         [JsonProperty("isSelected")]
+        public bool IsSelected { get; set; }
+    }
+
+    public class TagGroup
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int DisplayOrder { get; set; }
         public bool IsSelected { get; set; }
     }
 
