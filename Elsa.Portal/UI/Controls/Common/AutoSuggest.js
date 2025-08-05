@@ -74,6 +74,7 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
 
     var inp = input[0];
     inp.customizer = customizer;
+    inp.setAttribute("autocomplete", "off");
     
     /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/

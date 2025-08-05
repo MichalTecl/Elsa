@@ -311,4 +311,10 @@
     display: block;
 }
 
+.digrTagsCell .digrAddTagButton {
+    visibility: hidden;
+}
 
+.digrTagsCell:hover .digrAddTagButton {
+    visibility: visible;
+}
