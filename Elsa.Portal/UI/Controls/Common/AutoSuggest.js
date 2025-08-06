@@ -128,9 +128,11 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
                                 if ("createEvent" in document) {
                                     var evt = document.createEvent("HTMLEvents");
                                     evt.initEvent("change", false, true);
+                                    evt.initEvent("input", false, true);
                                     inp.dispatchEvent(evt);
                                 } else {
                                     inp.fireEvent("onchange");
+                                    inp.fireEvent("oninput");
                                 }
 
                                 if (!!pickCallback)
@@ -172,9 +174,11 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
                 if ("createEvent" in document) {
                     var evt = document.createEvent("HTMLEvents");
                     evt.initEvent("change", false, true);
+                    evt.initEvent("input", false, true);
                     inp.dispatchEvent(evt);
                 } else {
                     inp.fireEvent("onchange");
+                    inp.fireEvent("oninput");
                 }
                                 
                 /* Close all autocomplete lists: */

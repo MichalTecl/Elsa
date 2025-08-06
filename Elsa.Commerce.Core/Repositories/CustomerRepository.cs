@@ -56,6 +56,17 @@ namespace Elsa.Commerce.Core.Repositories
 
                 SyncCustomer(src, trg, changeLogGroupingTag);
             }
+
+            try
+            {
+                _log.Info("Calling PopulateContactPersons");
+                _database.Sql().Call("PopulateContactPersons").NonQuery();
+                _log.Info("PopulateContactPersons done");
+            }
+            catch(Exception ex)
+            {
+                _log.Error("PopulateContactPersons failed", ex);
+            }
         }
 
         public void SyncShadowCustomers()

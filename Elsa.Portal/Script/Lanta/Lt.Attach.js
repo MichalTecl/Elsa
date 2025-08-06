@@ -1,4 +1,4 @@
-﻿lanta.ControlBuilder = function() {
+lanta.ControlBuilder = function() {
 
     var self = this;
     var elements = [];
@@ -110,6 +110,53 @@
         }
 		
         return { attach: self.attach };
+    };
+
+    this.attachModel = function (controller) {
+
+        if (!controller.hasOwnProperty('prototype'))
+            throw new Error("Arrow function not allowed here!");
+
+        if (elements.length !== 1)
+            throw new Error("attachModel requires exactly one element");
+
+        var element = elements[0];
+
+        try {
+
+            controllerFunction = controller || function () { };
+
+            element["lt_element_controllers"] = element["lt_element_controllers"] || [];
+            element["lt_element_controllers"].push(controllerFunction);
+
+            element.bind = function (handler) {
+                var builder = new lanta.BindingCore.BindingBuilder(this, handler);
+                builder.bind();
+                return builder;
+            };
+
+            element.attribute = function (handler) {
+                this["lt_attribute_bindings"] = element["lt_attribute_bindings"] || [];
+                this["lt_attribute_bindings"].push(new lanta.AttributeBinding(this, handler));
+            };
+
+            element.bind.bind(element);
+
+            lanta.Markup.process(element);
+
+            lanta.FuncUtil.invoke(controllerFunction, element, lanta.CoreOps.seekElement);
+
+            const model = element;
+
+            var bindingProcessor = element["lt_element_binding_processor"];
+            if (!!bindingProcessor) {
+                lt.setViewModel(element, model);
+                
+                bindingProcessor.activate();
+            }
+        } catch (e) {
+            lanta.Extensions.defaultErrorHandler(e);
+        }
     };
 };
 

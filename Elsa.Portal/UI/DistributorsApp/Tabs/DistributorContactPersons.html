@@ -1,0 +1,116 @@
+<div id="contactPersonsTab">    
+    <div class="grid2">
+        <div class="gridRow gridHead">
+            <div class="cell1"></div>
+            <div class="cell10">Jméno</div>
+            <div class="cell10">E-Mail</div>
+            <div class="cell10">Telefon</div>
+            <div class="cell20">Poznámka</div>
+        </div>
+        <div data-bind="itemsSource:persons" data-key="Id">            
+            <div class="gridRow lt-template" lt-name="row">
+
+                <!-- Actions -->
+                <div class="cell1">
+                    <div data-bind="class.hidden:IsSystem">
+                        <i class="fas fa-pencil-alt faButtonNew" data-bind="class.hidden:editing" event-bind="click:edit(VM)"></i>
+                        <i class="fas fa-check faButtonNew" data-bind="class!.hidden:editing" event-bind="click:save(VM, $row)"></i>
+                    </div>
+                </div>
+
+                <!-- Name -->
+                <div class="cell10">
+                    <div data-bind="text:Name; class.hidden:editing"></div>
+                    <input autocomplete="off" data-bind="value:Name; class!.hidden:editing" update-model="Name:value" />
+                </div>
+
+                <!-- Email -->
+                <div class="cell10">
+                    <a data-bind="href:mailto; class.hidden:editing;text:Email"></a>
+                    <input autocomplete="off" data-bind="value:Email; class!.hidden:editing" update-model="Email:value" />
+                </div>
+
+                <!-- Phone -->
+                <div class="cell10">
+                    <div data-bind="text:Phone; class.hidden:editing"></div>
+                    <input autocomplete="off" data-bind="value:Phone; class!.hidden:editing" update-model="Phone:value" />
+                </div>
+
+                <!-- Note -->
+                <div class="cell20">
+                    <div data-bind="text:Note; class.hidden:editing"></div>
+                    <input autocomplete="off" data-bind="value:Note; class!.hidden:editing" update-model="Note:value" />
+                    <i class="fas fa-trash faButtonNew" data-bind="class!.hidden:editing" event-bind="click:delete(VM)"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button event-bind="click:add()">+</button>
+</div>
+<script>
+    lt.element("contactPersonsTab")
+        .attachModel(function () {
+
+            let customerId = null;
+
+            const self = this;
+
+            self.persons = [];
+
+            const receivePersons = (persons) => {
+
+                persons.forEach(p => {
+                    p.editing = false;
+                    p.mailto = "mailto:" + p.Email;
+                });
+
+                self.persons = persons;
+            };
+
+            const call = (method) => lt.api("/ContactPersons/" + method).query({ customerId });
+
+            app.Distributors.vm.withCustomerId((cid) => {
+                customerId = cid;
+
+                if (!!cid)
+                    call("Get").get(receivePersons);
+            });
+
+            self.edit = (vm) => {
+
+                self.persons.forEach(p => p.editing = p === vm);
+            }
+
+            self.add = () => {
+
+                const newPerson = {
+                    "Id":0,
+                    "Email" : "",
+                    "Name" : "sdf",
+                    "Phone" : "",
+                    "Note" : ""
+                };
+
+                self.persons.push(newPerson);
+
+                self.edit(newPerson);
+            };
+
+            self.save = (vm, root) => {
+
+                lt.updateModelByForm(vm, root);
+
+                call("save").body(vm).post(receivePersons);
+            };
+
+            self.delete = (vm) => {
+
+                if (!confirm("Opravdu smazat " + vm.Name + "?"))
+                    return;
+
+                call("delete").query({ "personId": vm.Id }).post(receivePersons);
+            }
+
+            self.updateModel = (model, prop, value) => model[prop] = value;
+        });
+</script>

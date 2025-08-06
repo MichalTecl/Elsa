@@ -112,3 +112,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.ctgGroupMovers {
+    gap: 4px;
+    opacity: 0.5;
+}

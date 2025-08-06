@@ -104,12 +104,14 @@
     <Compile Include="Core\IProjectRelatedEntity.cs" />
     <Compile Include="Crm\ICustomer.cs" />
     <Compile Include="Crm\ICustomerChangeLog.cs" />
+    <Compile Include="Crm\ICustomerContactPerson.cs" />
     <Compile Include="Crm\ICustomerEmailChange.cs" />
     <Compile Include="Crm\ICustomerGroup.cs" />
     <Compile Include="Crm\ICustomerGroupType.cs" />
     <Compile Include="Crm\ICustomerRelatedNote.cs" />
     <Compile Include="Crm\IDistributorSnooze.cs" />
     <Compile Include="Crm\INewsletterSubscriber.cs" />
+    <Compile Include="Crm\IPerson.cs" />
     <Compile Include="ElsaDbInstaller.cs" />
     <Compile Include="Extensions\AddressExtensions.cs" />
     <Compile Include="Extensions\MappedToOrderItemExtensions.cs" />

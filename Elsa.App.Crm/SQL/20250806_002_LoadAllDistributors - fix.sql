@@ -42,16 +42,18 @@ BEGIN
 				
 	LEFT JOIN (SELECT 
 				cta.CustomerId,
-				STRING_AGG(cta.TagTypeId, ',') AS TagTypesCsv
+				STRING_AGG(cta.TagTypeId, ',' 
+            ) WITHIN GROUP (ORDER BY ISNULL(tg.DisplayOrder, tg.Id)) AS TagTypesCsv
 			FROM CustomerTagAssignment cta
 			JOIN CustomerTagType ctt ON (cta.TagTypeId = ctt.Id)	
+			JOIN CustomerTagTypeGroup tg ON (ctt.GroupId = tg.Id)
             WHERE (cta.UnassignDt IS NULL OR cta.UnassignDt > GETDATE())
-			GROUP BY cta.CustomerId) tags ON (tags.CustomerId = c.Id)
+			GROUP BY cta.CustomerId			
+			) tags ON (tags.CustomerId = c.Id)
 
    LEFT JOIN(SELECT cg.CustomerId, STRING_AGG(cgt.Id, ',') CustomerGroupTypesCsv
 			  FROM CustomerGroup cg
-			  JOIN CustomerGroupType cgt ON (cgt.ErpGroupName = cg.ErpGroupName)
-             WHERE cgt.ProjectId = @projectId
+			  JOIN CustomerGroupType cgt ON (cgt.ErpGroupName = cg.ErpGroupName)             
 			GROUP BY cg.CustomerId) customerGroups ON (customerGroups.CustomerId = c.Id)
 
    LEFT JOIN (SELECT src.CustomerId, STRING_AGG(src.SalesRepId, ',') SalesRepIdsCsv
@@ -60,8 +62,7 @@ BEGIN
 			     AND ((src.ValidTo IS NULL) OR (src.ValidTo > GETDATE()))
 			   GROUP BY src.CustomerId) srep ON (srep.CustomerId = c.Id)
 
- WHERE c.ProjectId = @projectId
-   AND c.IsCompany = 1
+ WHERE c.IsCompany = 1
    AND c.IsDistributor = 1;
 	   
 	   

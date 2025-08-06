@@ -341,8 +341,19 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
             self.closeGroup();
             self.groups = groups;
 
-            self.groups.forEach(g => g.searchTags = g.SearchTag.split('|').slice(1).map(t => { return { "tag": t } }));
+            self.groups.forEach(g => {
+                g.searchTags = g.SearchTag.split('|').slice(1).map(t => { return { "tag": t } });
 
+                g.canMoveUp = true;
+                g.canMoveDown = true;
+            });
+
+            if (self.groups.length > 0)
+            {
+                self.groups[0].canMoveUp = false;
+                self.groups[self.groups.length - 1].canMoveDown = false;
+            }
+            
             updateGroupsView();
         };
         
@@ -350,10 +361,12 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
             const matcher = new TextMatcher(self.groupsFilter);
             self.groups.forEach(g => g.isHidden = !matcher.match(g.SearchTag, true));
         };
-
         
-
         self.getGroups();
+
+        self.moveGroup = (groupId, direction) => {
+            call("moveGroup").query({ groupId, direction }).get(receiveGroups);
+        };
     }
 };
 

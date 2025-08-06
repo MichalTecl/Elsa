@@ -81,6 +81,7 @@
     <Content Include="SQL\20220512_001_SubscribersMissingInMailchimp.sql" />
     <Content Include="SQL\20220512_002_xrep_newsletterSubscribers.sql" />
     <Content Include="SQL\20230902_001_CustomerGroupTypes.sql" />
+    <Content Include="SQL\20250806_005_PopulateContactPersons.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -414,6 +414,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
     };
 
     self.detailTabs = [
+        { "text": "Osoby", "control": "DistributorContactPersons"},
         { "text": "Historie", "control": "DistributorHistory"},
         { "text": "Poznámky", "control": "DistributorNotes" },
         { "text": "Objednávky", "control": "DistributorOrders" },   
@@ -521,7 +522,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
         "sorter": (k, v) => self.sorterId = v,
     };
 
-    self.updateTagFilter = (tagId, value) => {
+    self.updateTagFilter = (tagId, value, postponeSearch) => {
 
         const indexOfTagId = self.filter.Tags.indexOf(tagId);
 
@@ -536,19 +537,24 @@ app.Distributors.VM = app.Distributors.VM || function(){
         const tagModel = self.allTags.find(t => t.Id == tagId);
         tagModel.isSelected = value;
 
-        self.search();
+        if (!postponeSearch)
+            self.search();
     };
 
     const applyTagGroupsSelection = () => {
+
         self.allTags.forEach(tag => {
             const activeGroupIndex = self.filter.TagGroups.indexOf(tag.GroupId);
 
             tag.isHidden = activeGroupIndex === -1;
 
             if (tag.isHidden) {
-                self.updateTagFilter(tag.Id, false);
+                filterUpdated = true;
+                self.updateTagFilter(tag.Id, false, true);
             }
         });
+
+        self.search();
     };
 
     self.updateTagGroupFilter = (groupId, value) => {

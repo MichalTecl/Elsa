@@ -16,6 +16,10 @@
                         <i class="far fa-folder ctdFolderClosed"></i>
                         <i class="far fa-folder-open ctdFolderOpen"></i>
                         <div class="ctdGroupName" data-bind="text:Name" event-bind="click:openGroup(Id)"></div>
+                        <div class="ctgGroupMovers stackLeft">
+                            <i class="fas fa-arrow-down faButton" data-bind="class!.hidden:canMoveDown" event-bind="click:moveGroup(Id,1)"></i>
+                            <i class="fas fa-arrow-up faButton" data-bind="class!.hidden:canMoveUp" event-bind="click:moveGroup(Id,-1)"></i>
+                        </div>
                     </div>
                     <div class="ctdGroupItemRow">
                         <div class="ctdGroupSrchTagView" data-bind="itemsSource:searchTags" data-key="tag">
@@ -87,8 +91,8 @@
                 };
 
                 self.openGroup = (id) => vm.openGroup(id);
-                
 
+                self.moveGroup = (groupId, direction) => vm.moveGroup(groupId, direction);
             });
         });
 </script>

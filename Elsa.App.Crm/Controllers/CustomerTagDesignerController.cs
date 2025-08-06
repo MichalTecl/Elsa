@@ -40,6 +40,13 @@ namespace Elsa.App.Crm.Controllers
             }).ToList();
         }
 
+        public List<CustomerTagTypeGroupModel> MoveGroup(int groupId, int direction)
+        {
+            _tagRepository.MoveGroup(groupId, direction);
+
+            return GetGroups();
+        }
+
         public List<CustomerTagTypeGroupModel> SaveGroup(int? id, string name)
         {
             _tagRepository.SaveGroup(id, name);

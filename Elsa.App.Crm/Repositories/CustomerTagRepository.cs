@@ -55,7 +55,7 @@ namespace Elsa.App.Crm.Repositories
         {
             return _cache.ReadThrough(BindMetadataCacheKey("customerTagGroups"), TimeSpan.FromHours(1), () => {
 
-                var allGroups = _tagTypeGroupRepo.GetAll();
+                var allGroups = _tagTypeGroupRepo.GetAll().OrderBy(g => (g.DisplayOrder ?? g.Id)).ToList().AsReadOnly();
                 var allTags = new List<ICustomerTagType>(_tagTypeRepo.GetAll());
                 var allTransitions = new List<ICustomerTagTransition>(_transitionRepo.GetAll());
 
@@ -430,6 +430,29 @@ namespace Elsa.App.Crm.Repositories
             }
         }
 
+        internal void MoveGroup(int groupId, int direction)
+        {
+            var groups = GetGroups();
+
+            var theGroup = groups.FirstOrDefault(g => g.Id == groupId) ?? throw new ArgumentException(nameof(groupId));
+
+            var theGroupIndex = groups.IndexOf(theGroup);
+            
+            var targetIndex = theGroupIndex + direction;
+            if (targetIndex < 0 || targetIndex >= groups.Count)
+                return;
+
+            var target = groups[targetIndex];
+
+            var i = target.DisplayOrder ?? target.Id;
+
+            target.DisplayOrder = theGroup.DisplayOrder ?? theGroup.Id;
+            theGroup.DisplayOrder = i;
+
+            _tagTypeGroupRepo.Save(theGroup);
+            _tagTypeGroupRepo.Save(target);
+        }
+
         internal GroupDeleteInfo GetGroupDeleteInfo(int groupId)
         {
             var group = GetGroupData(groupId);
@@ -480,7 +503,7 @@ namespace Elsa.App.Crm.Repositories
 
             _cache.Remove(AssignmentsCacheKey);
         }
-
+                
         public class TagGroup
         {
             public ICustomerTagTypeGroup Group { get; }

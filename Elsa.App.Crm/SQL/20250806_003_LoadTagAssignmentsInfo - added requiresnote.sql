@@ -21,10 +21,12 @@ BEGIN
 	  FROM CustomerTagAssignment asg
 	  JOIN @customerIds cid ON (cid.Id = asg.CustomerId) 
 	  JOIN CustomerTagType ct ON (asg.TagTypeId = ct.Id)
+	  JOIN CustomerTagTypeGroup tg ON (tg.Id = ct.GroupId)
 	  JOIN [User] u ON (asg.AuthorId = u.Id)
 	  LEFT JOIN (SELECT ctt.SourceTagTypeId, MIN(ctt.Id) x
 				   FROM CustomerTagTransition ctt  
 				  GROUP BY ctt.SourceTagTypeId) trans ON (trans.SourceTagTypeId = asg.TagTypeId)   
-      WHERE asg.UnassignDt IS NULL;
+      WHERE asg.UnassignDt IS NULL
+	  ORDER BY ISNULL(tg.DisplayOrder, tg.Id);
 
-END  
+END

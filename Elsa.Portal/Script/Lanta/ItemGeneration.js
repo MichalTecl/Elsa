@@ -64,6 +64,11 @@ lanta.itemsGeneration.Generator = lanta.itemsGeneration.Generator ||
                     var keyDataItem = collection[keyItemIndex];
                     var keykey = (!keyGenerator) ? keyItemIndex : keyGenerator(keyDataItem);
 
+                    if (!keykey) {
+                        console.error("Source collction contains item without specified key. Generator=" + keyGenerator.toString(), keyDataItem);
+                        break;
+                    }
+
                     keyIndex[keykey] = 1;
                 }
 

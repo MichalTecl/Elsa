@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\ContactPersonsController.cs" />
     <Compile Include="Controllers\CrmCustomFiltersController.cs" />
     <Compile Include="Controllers\CrmDistributorsController.cs" />
     <Compile Include="Controllers\CrmDynamicColumnsController.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Entities\ISalesRepCustomer.cs" />
     <Compile Include="Entities\ISalesRepresentative.cs" />
     <Compile Include="Model\BulkTaggingRequest.cs" />
+    <Compile Include="Model\ContactPersonModel.cs" />
     <Compile Include="Model\CrmMetadata.cs" />
     <Compile Include="Model\CrmRobotModel.cs" />
     <Compile Include="Model\CustomerHistoryEntryModel.cs" />
@@ -267,6 +269,7 @@
     <Content Include="UI\DistributorsApp\Parts\TaggingDesignerTagList.html" />
     <Content Include="UI\DistributorsApp\Parts\TagTransitionTargetSelect.html" />
     <Content Include="UI\DistributorsApp\Parts\UnifiedCustomerHistoryView.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorContactPersons.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorHistory.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.css" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.html" />
