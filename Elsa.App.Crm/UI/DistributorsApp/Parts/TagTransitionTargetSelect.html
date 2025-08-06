@@ -1,12 +1,13 @@
 <div id="tranTarg_{%GENERATE%}">
-    <div class="tagAssignmentInfoPanel">
+    <div class="tagAssignmentInfoPanel" style="cursor:default">
         <div class="taipRow">
             <div class="taipAssignDt" data-bind="text:Assigned"></div>
             <div class="taipAssignAuthor" data-bind="text:AssignedBy"></div>
         </div>
-        <div class="taipRow">
+        <div class="taipRow">           
             <pre data-bind="text:Note"></pre>
-        </div>
+            <i class="fas fa-pencil-alt faButton" event-bind="click:editNote(VM)"></i>
+        </div>        
     </div>
 
     <div class="tagTransitionTargetSelectCont" data-bind="itemsSource:Transitions;class!.hidden:HasTransitions" data-key="TagTypeId">

@@ -131,7 +131,9 @@
         };
 
         self.openTransitionPopup = (assignment, targetPicker) => {
-            
+
+            assignment.CanEditNote = (assignment.RequiresNote || !!assignment.Note);
+
             if (!targetPicker.initialized) {
                 targetPicker.initialized = true;
                 targetPicker.innerHTML = "<div class=\"popupBody\" fill-by-lazy=\"/UI/DistributorsApp/Parts/TagTransitionTargetSelect.html\"></div>";
@@ -223,6 +225,18 @@
         self.confirmNote = (transition) => {
             saveTransition(transition);
             transition.noteInputOpen = false;
+        };
+
+        self.editNote = (assignment) => {
+            const nText = prompt("Nová poznámka", assignment.Note);
+            if (!nText)
+                return;
+
+            lt.api("/CustomerTagAssignment/ChangeAssignmentNote")
+                .query({ "customerId": assignment.CustomerId, "tagTypeId": assignment.TagTypeId, "note": nText })
+                .post(() => {
+                    assignment.Note = nText;
+                });
         };
     });
 </script>

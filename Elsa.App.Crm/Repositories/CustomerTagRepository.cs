@@ -468,6 +468,19 @@ namespace Elsa.App.Crm.Repositories
 
         }
 
+        internal void UpdateAssignmentNote(int customerId, int tagTypeId, string note)
+        {
+            var assignment = _database.SelectFrom<ICustomerTagAssignment>()
+                    .Where(t => t.CustomerId == customerId
+                                && t.TagTypeId == tagTypeId
+                                && t.UnassignDt == null).Take(1).Execute().FirstOrDefault() ?? throw new ArgumentException("Assignment does not exist");
+
+            assignment.Note = note;
+            _database.Save(assignment);
+
+            _cache.Remove(AssignmentsCacheKey);
+        }
+
         public class TagGroup
         {
             public ICustomerTagTypeGroup Group { get; }

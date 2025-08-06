@@ -69,5 +69,10 @@ namespace Elsa.App.Crm.Controllers
 
             return transition;
         }
+
+        public void ChangeAssignmentNote(int customerId, int tagTypeId, string note)
+        {
+            _customerTagRepository.UpdateAssignmentNote(customerId, tagTypeId, note);
+        }
     }
 }

@@ -214,7 +214,6 @@
     }
 
     .tagAssignmentInfoPanel pre {
-        background-color: #f1f1f1;
         color: #222222;
         padding: 12px;
         border-radius: 6px;
@@ -226,4 +225,5 @@
         line-height: 1.5;
         max-height: 100px;
         overflow-y: auto;
+        width: 100%;
     }
