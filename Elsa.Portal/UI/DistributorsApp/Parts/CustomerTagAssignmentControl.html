@@ -78,14 +78,18 @@
             let hiddenTags = 0;
             let shownTags = 0;
 
-            collection.forEach(tag => {
-                tag.isFilteredHidden = app.Distributors.vm.filter.TagGroups.indexOf(tag.TagTypeGroupId) === -1;
+            const doNotFilter = lt.findParentAttribute(this, "doNotFilterTags");
 
-                if (tag.isFilteredHidden)
-                    hiddenTags++;
-                else
-                    shownTags++;
-            });
+            if (!doNotFilter) {
+                collection.forEach(tag => {
+                    tag.isFilteredHidden = app.Distributors.vm.filter.TagGroups.indexOf(tag.TagTypeGroupId) === -1;
+
+                    if (tag.isFilteredHidden)
+                        hiddenTags++;
+                    else
+                        shownTags++;
+                });
+            }
                         
             if (hiddenTags === 0) {
                 hiddenTagsInfo.style.visibility = 'collapse';

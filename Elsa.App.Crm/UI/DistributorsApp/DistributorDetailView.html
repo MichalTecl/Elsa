@@ -32,7 +32,7 @@
             <div class="digrTagsRow">
                 
                 <div data-bind="singleItemSource:detail">
-                    <div class="lt-template" data-bind="something:fake" fill-by="/UI/DistributorsApp/Parts/CustomerTagAssignmentControl.html"></div>
+                    <div class="lt-template" data-bind="something:fake" doNotFilterTags="true" fill-by="/UI/DistributorsApp/Parts/CustomerTagAssignmentControl.html"></div>
                 </div>
 
                 <div class="digrDetTagList digrDetManTagList" data-bind="itemsSource:detail.manTags" data-key="Id">

@@ -218,15 +218,41 @@ input {
     overflow-x: auto;
     overflow-y: hidden;
     padding: 8px;
+    padding-top: 0px;
     border: 1px solid #ddd;
     border-radius: 6px;
     background: #fafbfd;
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
+
+#digrFilterTagGroups {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fafbfd;
+    border-bottom: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    width: 100%;
+}
+
+    #digrFilterTagGroups .digrFilterTag label {
+        font-weight: bold !important;
+    }
 
 .digrTagFilters {
     display: inline-block;
     white-space: nowrap;
     min-width: max-content;
+}
+
+#digrTagsFilter > i.fa-folder {
+    margin-left: 4px;
+    margin-right: 8px;
 }
 
 .digrFilterTag {

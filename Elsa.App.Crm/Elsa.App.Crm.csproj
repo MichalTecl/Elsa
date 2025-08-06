@@ -191,6 +191,8 @@
     <Content Include="SQL\202500218_002_LoadCustomerAddresses.sql" />
     <Content Include="SQL\20250129_002_insp_missingSalesRep.sql" />
     <Content Include="SQL\20250205_001_IntTable.sql" />
+    <Content Include="SQL\20250806_002_LoadAllDistributors - fix.sql" />
+    <Content Include="SQL\20250806_001_crmfilter_hasTag - fix.sql" />
     <Content Include="SQL\20250805_003_AssignTagToCustomers - fix.sql" />
     <Content Include="SQL\20250805_002_vwOrderVocMoc - fix.sql" />
     <Content Include="SQL\20250520_001_LoadDistributorDetail - unassignDt.sql" />

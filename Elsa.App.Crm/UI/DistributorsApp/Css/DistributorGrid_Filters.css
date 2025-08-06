@@ -95,7 +95,7 @@
 
 /* Popisky */
 .digrFiltersSection label {
-    font-weight: 600;
+    font-weight: 200;
     margin-bottom: 4px;
     display: block;
     color: #1f2d3d;
@@ -119,6 +119,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    row-gap: 0;
 }
 
 .digrBulkTaggerIcon {
@@ -444,20 +445,20 @@ input[type="radio"]:focus:not(:focus-visible) {
     padding-top: 12px;
 }
 
-.setButtonWrapper button {
-    width: 36px;
-    height: 36px;
-    border: none;
-    border-radius: 6px;
-    background-color: #4CAF50; /* jemná zelená */
-    color: white;
-    font-size: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
+    .setButtonWrapper button {
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 6px;
+        background-color: #4CAF50; /* jemná zelená */
+        color: white;
+        font-size: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+    }
 
-.setButtonWrapper button:hover {
-    background-color: #43a047;
-    transform: scale(1.05);
-}
+        .setButtonWrapper button:hover {
+            background-color: #43a047;
+            transform: scale(1.05);
+        }

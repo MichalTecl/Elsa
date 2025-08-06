@@ -1,4 +1,4 @@
-﻿function getChildrenWithSelf(root) {
+function getChildrenWithSelf(root) {
     var result = [];
 
     if (!!root) {
@@ -11,3 +11,16 @@
 
     return result;
 }
+
+var lt = lt || {};
+lt.findParentAttribute = lt.findParentAttribute || ((currentElement, attributeName) => {
+
+    while (currentElement) {
+        if (currentElement.hasAttribute && currentElement.hasAttribute(attributeName)) {
+            return currentElement.getAttribute(attributeName);
+        }
+        currentElement = currentElement.parentElement;
+    }
+
+    return null
+});
