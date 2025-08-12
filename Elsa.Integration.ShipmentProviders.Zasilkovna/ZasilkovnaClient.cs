@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,10 +26,10 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
         const string DPD_PICKUP_CODE = "50101";
         const string DPD_PRIVATE_CODE = "40054";
 
-        private readonly WebFormsClient m_formsClient;
+        private readonly WebFormsClient _formsClient;
 
-        private readonly IErpClientFactory m_erpClientFactory;
-        private readonly IOrderWeightCalculator m_orderWeightCalculator;
+        private readonly IErpClientFactory _erpClientFactory;
+        private readonly IOrderWeightCalculator _orderWeightCalculator;
 
         public static readonly string[] ZasilkovnaColIndex = new[] {  "Vyhrazeno",
                                                                         "Číslo objednávky",
@@ -59,30 +59,30 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                                                                         "DPD_Služba",
                                                                         "DPD_VýdejníMísto"   };
 
-        private BranchesDocument m_branches;
+        private BranchesDocument _branches;
 
-        private readonly ILog m_log;
-        private readonly ZasilkovnaClientConfig m_config;
-        private readonly IDatabase m_database;
-        private readonly ICache m_cache;
-        private readonly ISession m_session;
+        private readonly ILog _log;
+        private readonly ZasilkovnaClientConfig _config;
+        private readonly IDatabase _database;
+        private readonly ICache _cache;
+        private readonly ISession _session;
 
         public ZasilkovnaClient(ILog log, ZasilkovnaClientConfig config, IErpClientFactory erpClientFactory, IDatabase database, ICache cache, ISession session, IOrderWeightCalculator orderWeightCalculator)
         {
-            m_log = log;
-            m_config = config;
-            m_erpClientFactory = erpClientFactory;
-            m_database = database;
-            m_cache = cache;
-            m_session = session;
-            m_orderWeightCalculator = orderWeightCalculator;
-            m_formsClient = new WebFormsClient(log);
+            _log = log;
+            _config = config;
+            _erpClientFactory = erpClientFactory;
+            _database = database;
+            _cache = cache;
+            _session = session;
+            _orderWeightCalculator = orderWeightCalculator;
+            _formsClient = new WebFormsClient(log);
         }
 
         public byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders, bool uniFormat = false)
         {
             var orderList = orders.ToList();
-            m_log.Info($"Zacinam vytvareni dokumentu pro Zasilkovnu, zdroj = {orderList.Count} objednavek");
+            _log.Info($"Zacinam vytvareni dokumentu pro Zasilkovnu, zdroj = {orderList.Count} objednavek");
 
             using (var stream = new MemoryStream())
             using (var streamWriter = new StreamWriter(stream, Encoding.UTF8))
@@ -140,18 +140,18 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             throw new InvalidOperationException("Unexpected order without Erp");
                         }
 
-                        var erpClient = m_erpClientFactory.GetErpClient(order.ErpId.Value);
+                        var erpClient = _erpClientFactory.GetErpClient(order.ErpId.Value);
                         var trackingNumber = erpClient.GetPackingReferenceNumber(order);
 
                         decimal? weight = null;
 
                         try
                         {
-                            weight = m_orderWeightCalculator.GetWeight(order);
+                            weight = _orderWeightCalculator.GetWeight(order);
                         }
                         catch (Exception e)
                         {
-                            m_log.Error($"Weight calc failed", e);
+                            _log.Error($"Weight calc failed", e);
                         }
                                                 
                         // not sure about Version 4 used by Elsa, but ver. 6 is documented here: https://docs.packetery.com/03-creating-packets/01-csv-import.html
@@ -172,7 +172,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             .CellMan(StringUtil.FormatDecimal(order.PriceWithVat)) //10 Hodnota zásilky
                             .CellOpt(StringUtil.FormatDecimal(weight)) //11 Hmotnost zásilky
                             .Cell(!uniFormat, pobockaId) //12 Cílová pobočka
-                            .CellMan(/*"biorythme.cz"*/m_config.ClientName) //13 Odesilatel
+                            .CellMan(/*"biorythme.cz"*/_config.ClientName) //13 Odesilatel
                             .CellMan(0) //14 Obsah 18+
                             .CellOpt(null) //15 Zpožděný výdej                            
                             ; 
@@ -266,11 +266,11 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 
                 if (deliveryName == mapped) 
                 {
-                    m_log.Error($"Shipment method mapping loop '{deliveryName}'");
+                    _log.Error($"Shipment method mapping loop '{deliveryName}'");
                     break;
                 }
 
-                m_log.Info($"Appplied shipment method mapping: '{deliveryName}' -> '{mapped}'");
+                _log.Info($"Appplied shipment method mapping: '{deliveryName}' -> '{mapped}'");
                 deliveryName = mapped;
             }
 
@@ -279,7 +279,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             var key = deliveryName.ToLowerInvariant().Trim();
             if (!index.TryGetValue(key, out var id)) 
             {
-                m_log.Error($"Delivery name was '{originalDeliveryName}', mapped by rules to '{deliveryName}'. Not found in the index by '{key}'. Index.Count={index.Count}");
+                _log.Error($"Delivery name was '{originalDeliveryName}', mapped by rules to '{deliveryName}'. Not found in the index by '{key}'. Index.Count={index.Count}");
 
                 throw new Exception(string.Format("Neexistující způsob dopravy \"{0}\"", originalDeliveryName));
             }
@@ -289,9 +289,9 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 
         private Dictionary<string, string> GetShipMethodIdIndex() 
         {
-            return m_cache.ReadThrough("zasilkovnaShipMethodIndex", TimeSpan.FromSeconds(10), () => {
+            return _cache.ReadThrough("zasilkovnaShipMethodIndex", TimeSpan.FromSeconds(10), () => {
 
-                var fromDatabase = m_database.SelectFrom<IZasilkovnaShipMapping>().Execute();
+                var fromDatabase = _database.SelectFrom<IZasilkovnaShipMapping>().Execute();
                 var result = new Dictionary<string, string>();
 
                 foreach (var dbRecord in fromDatabase)
@@ -316,20 +316,20 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 
         private void SaveShipMethod(Tuple<string, string> srcRec)
         {
-            var matchingRecs = m_database.SelectFrom<IZasilkovnaShipMapping>().Where(m => m.Name == srcRec.Item1).Execute().ToList();
+            var matchingRecs = _database.SelectFrom<IZasilkovnaShipMapping>().Where(m => m.Name == srcRec.Item1).Execute().ToList();
             foreach(var mrec in matchingRecs) 
             {
-                m_log.Error($"WARN - Detected shipmentId change - '{mrec.Name}' [{mrec.ZasilkovnaId}] -> [{srcRec.Item1}]");
-                m_database.Delete(mrec);
+                _log.Error($"WARN - Detected shipmentId change - '{mrec.Name}' [{mrec.ZasilkovnaId}] -> [{srcRec.Item1}]");
+                _database.Delete(mrec);
             }
 
-            var newMap = m_database.New<IZasilkovnaShipMapping>();
+            var newMap = _database.New<IZasilkovnaShipMapping>();
             newMap.ZasilkovnaId = srcRec.Item2;
             newMap.Name = srcRec.Item1;
 
-            m_database.Save(newMap);
+            _database.Save(newMap);
 
-            m_log.Info($"Zasilkova Shipment Method index added: {newMap.ZasilkovnaId} : {newMap.Name}");
+            _log.Info($"Zasilkova Shipment Method index added: {newMap.ZasilkovnaId} : {newMap.Name}");
         }
 
         private IEnumerable<Tuple<string, string>> GetBranchIndexFromZasilkovna() 
@@ -339,6 +339,8 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             {
                 var n = branch.Name.Trim().ToLowerInvariant();
                 var l = branch.LabelName.Trim().ToLowerInvariant();
+
+                yield return new Tuple<string, string>($"{n} {branch.Id}", branch.Id);
 
                 yield return new Tuple<string, string>(n, branch.Id);
 
@@ -360,7 +362,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 
             try
             {
-                var html = m_formsClient.GetString(url);
+                var html = _formsClient.GetString(url);
 
                 var thIndex = html.IndexOf(orderNoHeader, StringComparison.Ordinal);
                 if (thIndex < 0)
@@ -379,7 +381,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             }
             catch(WebException ex)
             {                
-                m_log.Error("Chyba při hledání čísla zásilky v Zásilkovně", ex);
+                _log.Error("Chyba při hledání čísla zásilky v Zásilkovně", ex);
                 return null;
             }
         }
@@ -388,18 +390,18 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
         {
             try
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
-                    m_database.DeleteFrom<IShipmentMethodMapping>(q => q.Where(m => m.ProjectId == m_session.Project.Id));
+                    _database.DeleteFrom<IShipmentMethodMapping>(q => q.Where(m => m.ProjectId == _session.Project.Id));
 
                     foreach (var map in mapping)
                     {
-                        var entity = m_database.New<IShipmentMethodMapping>();
+                        var entity = _database.New<IShipmentMethodMapping>();
                         entity.Source = map.Key.Trim();
                         entity.Target = map.Value.Trim();
-                        entity.ProjectId = m_session.Project.Id;
+                        entity.ProjectId = _session.Project.Id;
 
-                        m_database.Save(entity);
+                        _database.Save(entity);
                     }
 
                     tx.Commit();
@@ -408,22 +410,22 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
             }
             finally
             {
-                m_cache.Remove($"shipmentMethodsMap_{m_session.Project.Id}");
+                _cache.Remove($"shipmentMethodsMap_{_session.Project.Id}");
             }
         }
 
         public Dictionary<string, string> GetShipmentMethodsMapping()
         {
-            return m_cache.ReadThrough($"shipmentMethodsMap_{m_session.Project.Id}", TimeSpan.FromHours(1), () =>
+            return _cache.ReadThrough($"shipmentMethodsMap_{_session.Project.Id}", TimeSpan.FromHours(1), () =>
             {
-                return m_database.SelectFrom<IShipmentMethodMapping>()
-                    .Where(m => m.ProjectId == m_session.Project.Id).Execute().ToDictionary(m => m.Source, m => m.Target);
+                return _database.SelectFrom<IShipmentMethodMapping>()
+                    .Where(m => m.ProjectId == _session.Project.Id).Execute().ToDictionary(m => m.Source, m => m.Target);
             });
         }
 
         private BranchesDocument GetBranches()
         {
-            return m_branches ?? (m_branches = BranchesDocument.Download(m_config.ApiToken));
+            return _branches ?? (_branches = BranchesDocument.DownloadV5(_log, _config.ApiToken));
         }
 
         private static string GetPobockaId(IPurchaseOrder order)

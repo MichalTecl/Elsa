@@ -1,4 +1,6 @@
-﻿using System;
+using Elsa.Common.Logging;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,48 +14,9 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.Model
     [XmlRoot("export", Namespace = "http://www.zasilkovna.cz/api/v3/branch")]
     public class BranchesDocument
     {
-        //private static readonly Dictionary<string, string> s_poboNameMapping = new Dictionary<string, string>();
-
-        //static BranchesDocument()
-        //{
-        //    s_poboNameMapping.Add("Česká pošta - BALÍK DO RUKY", "Česká pošta");
-        //    s_poboNameMapping.Add("Česká republika - KURÝR (DPD)", "Česká republika DPD");
-        //    s_poboNameMapping.Add("SLOVENSKO - Kurýr", "Slovensko GLS");
-        //    s_poboNameMapping.Add("SLOVENSKO - Slovenská pošta", "Slovenská pošta");
-        //}
-
         [XmlElement("branches")]
         public BranchesList BranchesList { get; set; }
-
-        //public string GetPobockaId(string deliveryName, IDictionary<string, string> shipmentMethodsMapping)
-        //{
-        //    deliveryName = deliveryName.Trim();
-
-        //    string mapped;
-        //    if (!shipmentMethodsMapping.TryGetValue(deliveryName, out mapped))
-        //    {
-        //        mapped = deliveryName;
-        //    }
-        //    //if (!s_poboNameMapping.TryGetValue(deliveryName, out mapped))
-        //    //{
-        //    //    mapped = deliveryName;
-        //    //}
-
-            
-
-        //    var record = BranchesList.Branches.FirstOrDefault(i => i.Name.Equals(mapped, StringComparison.InvariantCultureIgnoreCase))
-        //              ?? BranchesList.Branches.FirstOrDefault(i => i.LabelName.Equals(mapped, StringComparison.InvariantCultureIgnoreCase));
-
-        //    if (record == null)
-        //    {
-        //        throw new Exception(string.Format("Neexistující způsob dopravy \"{0}\"", mapped));
-        //    }
-
-        //    return record.Id;
-        //}
-
-
-                
+        
         public static BranchesDocument Download(string apiToken)
         {
             var request = WebRequest.CreateHttp($"http://www.zasilkovna.cz/api/v3/{apiToken}/branch.xml?type=address-delivery");
@@ -66,6 +29,69 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.Model
                 }
             }
         }
+
+        public static BranchesDocument DownloadV5(ILog log, string apiToken)
+        {
+            List<Branch> branches = new List<Branch>(1024);
+
+            //Download(log, "branch", apiToken, branches);
+            //Download(log, "box", apiToken, branches);
+            Download(log, "carrier", apiToken, branches);
+
+            return new BranchesDocument 
+            { 
+                BranchesList = new BranchesList 
+                {
+                    Branches = branches
+                }
+            };
+        }
+
+        private static void Download(ILog log, string typeName, string apiToken, List<Branch> branches)
+        {
+            var url = $"https://pickup-point.api.packeta.com/v5/{apiToken}/{typeName}/json";
+
+            var logUrl = url.Replace(apiToken, "__apiKey__");
+
+            log.Info($"Downloading {logUrl}");
+
+            try
+            {
+                var request = WebRequest.CreateHttp(url);
+                using (var stream = request.GetResponse().GetResponseStream())
+                {
+                    using (var reader = new StreamReader(stream, Encoding.UTF8, true))
+                    {
+                        var json = reader.ReadToEnd();
+                        log.SaveRequestProtocol("GET", logUrl, logUrl, json);
+
+                        var content = JsonConvert.DeserializeObject<List<Branch>>(json);
+
+                        log.Info($"Deserialized to {content.Count} items");
+
+                        foreach(var item in content)
+                        {
+                            var existingItem = branches.FirstOrDefault(ex => ex.Id == item.Id);
+                            if (existingItem == null)
+                            {
+                                branches.Add(item);
+                                continue;
+                            }
+
+                            if (existingItem.Name != item.Name || existingItem.LabelName != item.LabelName)
+                            {
+                                log.Error($"There is already a branch with Id={existingItem.Id}. ( {existingItem.Name}; {existingItem.LabelName} ) x ({item.Name}; {item.LabelName})");
+
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) 
+            {                
+                log.Error($"Failed: {logUrl}", ex);
+            }
+        } 
     }
 
     public class BranchesList
@@ -75,7 +101,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.Model
     }
 
     public class Branch
-    {
+    {        
         [XmlElement("id")]
         public string Id { get; set; }
 
