@@ -1,4 +1,4 @@
-﻿using Elsa.App.OrdersPacking.App;
+using Elsa.App.OrdersPacking.App;
 using Elsa.App.OrdersPacking.Model;
 using Elsa.Commerce.Core;
 using Elsa.Common;
@@ -46,6 +46,11 @@ namespace Elsa.App.OrdersPacking
             var order = _purchaseOrderRepository.GetOrder(orderId);
 
             return order.Items.ToList();
+        }
+
+        public int BulkReview()
+        {
+            return _orderReviewRepository.BulkReview();
         }
     }
 }

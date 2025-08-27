@@ -1,4 +1,4 @@
-﻿using Elsa.App.OrdersPacking.Entities;
+using Elsa.App.OrdersPacking.Entities;
 using Elsa.App.OrdersPacking.Model;
 using Elsa.Commerce.Core;
 using Elsa.Common.Caching;
@@ -58,6 +58,15 @@ namespace Elsa.App.OrdersPacking.App
             record.Note = note;
 
             _database.Save(record);
+        }
+
+        internal int BulkReview()
+        {
+            return _database
+                .Sql()
+                .Call("BulkReviewSentOrders")
+                .WithParam("@authorId", _session.User.Id)
+                .Scalar<int>();
         }
     }
 }

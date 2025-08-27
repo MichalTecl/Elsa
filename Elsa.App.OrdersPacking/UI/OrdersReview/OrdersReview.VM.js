@@ -1,4 +1,4 @@
-﻿var app = app || {};
+var app = app || {};
 app.OrdersReview = app.OrdersReview || {};
 app.OrdersReview.VM = app.OrdersReview.VM
 ||
@@ -23,6 +23,11 @@ function () {
     const load = () => lt.api("/OrdersReview/getOrders").get(receiveOrders);
 
     self.markReviewed = (orderId) => lt.api("/OrdersReview/markReviewed").query({ "orderId": orderId }).post(receiveOrders);
+
+    self.bulkReview = () => lt.api("/OrdersReview/bulkReview").post((count) => {
+        alert("hotovo. Hromadně potvrzeno " + count + " objednávek.");
+        load();
+    });
 
     self.loadItems = (model) => lt.api("/OrdersReview/getOrderItems").query({ "orderId": model.OrderId }).post((items) => {
         model.items = items;

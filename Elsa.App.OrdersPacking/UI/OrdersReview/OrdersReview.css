@@ -1,4 +1,4 @@
-﻿
+
 
 /* Kontejner objednávek */
 #orevOrdersList {
@@ -164,3 +164,23 @@
         .orevOrderInfoFoot button:hover {
             background: #388e3c;
         }
+
+#bulkReviewLink {
+    font-size: 0.65em;
+    background-color: #388e3c;
+    border-radius: 4px;
+    padding: 4px;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+#bulkReviewLink:hover {
+    opacity: 1;
+    color: white;
+}
+
+#reviewActionsMenu {
+    padding: 2px;
+    display: flex;
+    justify-content: flex-end;
+}

@@ -2,6 +2,9 @@
     <script src="OrdersReview.VM.js"></script>
 
     <div id="ordersReviewApp">
+        <div id="reviewActionsMenu">
+            <a id="bulkReviewLink" event-bind="click:VM.bulkReview()">Hromadně potvrdit všechny vyřízené</a>
+        </div>
 
         <div id="orevOrdersList" data-bind="itemsSource:orders" data-key="OrderId">
             <div class="lt-template orevOrderInfo">
