@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +14,7 @@ namespace Elsa.App.MaterialLevels
         {
             setup.For<IMaterialLevelsLoader>().Use<MaterialLevelsLoader>();
             setup.For<IInventoryWatchRepository>().Use<InventoryWatchRepository>();
+            setup.For<MaterialOrderingRepository>().Use<MaterialOrderingRepository>();
         }
     }
 }

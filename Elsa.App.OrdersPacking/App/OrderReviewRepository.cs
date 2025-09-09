@@ -38,6 +38,7 @@ namespace Elsa.App.OrdersPacking.App
                             || r.SelectionGroupId == null
                             || r.SelectionGroupItemId == null)
                         .Select(r => r.OrderId)
+                        .Distinct()
                         .ToList()
                 );
 

@@ -1,4 +1,4 @@
-﻿var app = app || {};
+var app = app || {};
 app.MaterialLevels = app.MaterialLevels || {};
 app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
 
@@ -59,6 +59,13 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
             model.displaySupplier = self.showSupplier;
             model.hasOrderDt = !!model.OrderDt;
             model.hasComment = !!model.CommentText;
+            model.hasDeadline = !!model.DeliveryDeadline;
+
+            model.data = { MaterialId: model.MaterialId };            
+            model.callback = () => {
+                self.refresh();
+                Popup.close();
+            };
 
             for (var j = 0; j < model.Batches.length; j++) {
                 var b = model.Batches[j];
@@ -297,6 +304,18 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
         applyFilter();
 
         self.displaySupplier(null, null);
+    };
+
+    self.deleteDeadline = function (materialId) {
+
+        if (!confirm("Smazat ručně nastavený limit dodání?"))
+            return;
+
+        lt.api("/MaterialAmountReport/deleteDeadline")
+            .query({ "materialId": materialId })
+            .post(function () {
+                self.refresh();
+            });
     };
 };
 

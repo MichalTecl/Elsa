@@ -1,4 +1,4 @@
-﻿using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Robowire.RobOrm.Core;
@@ -19,5 +19,9 @@ namespace Elsa.App.MaterialLevels.Entities
         DateTime InsertDt { get; set; }
         int UserId { get; set; }
         IUser User { get; }
+        DateTime? DeliveryDeadline {  get; set; }
+        DateTime? DeadlineSetDt { get; set; }
+        int? DeadlineSetUserId { get; set; }
+        IUser DeadlineSetUser { get; }
     }
 }

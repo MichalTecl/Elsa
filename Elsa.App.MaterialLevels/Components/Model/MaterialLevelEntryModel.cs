@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
@@ -52,6 +52,7 @@ namespace Elsa.App.MaterialLevels.Components.Model
         public string CommentText { get; set; }
         public DateTime? CommentDt { get; set; }
         public string CommentAuthorNick { get; set; }
+        public DateTime? DeliveryDeadline { get; set; }
 
         #endregion
 

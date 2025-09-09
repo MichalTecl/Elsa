@@ -61,7 +61,7 @@ namespace Elsa.App.MaterialLevels.Components
                 .ToDictionary(s => s.Key, s => new { Lim = s.Min(t => t.OrderFulfillDays ?? 9999), Name = s.Min(x => x.Name) });
 
             m_database.Sql().Call("GetMaterialLevelsReport").WithParam("@inventoryId", inventoryId).WithParam("@projectId", m_session.Project.Id)
-                .ReadRows<int,string, string, int, decimal, string, string, string, DateTime?, int?>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone, orderDt, orderUserId)=>
+                .ReadRows<int, string, string, int, decimal, string, string, string, DateTime?, int?, DateTime?>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone, orderDt, orderUserId, deliveryDeadline)=>
                 {
                     var entry = result.FirstOrDefault(r => r.MaterialId == materialId);
                     if (entry == null)
@@ -83,6 +83,7 @@ namespace Elsa.App.MaterialLevels.Components
                         entry.OrderDt = orderDt?.ToString(MaterialLevelEntryModel.OrderDtViewFormat);
                         entry.RawOrderDt = orderDt;
                         entry.OrderUser = orderUserId == null ? null : m_userRepository.GetUserNick(orderUserId.Value);
+                        entry.DeliveryDeadline = deliveryDeadline;
                     }
 
                     if (available == 0)
@@ -163,10 +164,17 @@ namespace Elsa.App.MaterialLevels.Components
                         ffLimitDays = 30;
                     }
 
-                    DateTime orderDelaylimit;
-                    if ((orderDelaylimit = r.RawOrderDt.Value.AddDays(ffLimitDays)) < DateTime.Now)
+                    var orderDelayLimit = r.RawOrderDt.Value.AddDays(ffLimitDays);
+
+                    if (r.DeliveryDeadline != null)
                     {
-                        r.DelayedOrderMessage = $"Naskladnění bylo očekáváno do {StringUtil.FormatDate(orderDelaylimit)}. ({limitInfo})";
+                        limitInfo = $"Limit naskladnění byl ručně nastaven na {StringUtil.FormatDate(r.DeliveryDeadline)} pro objednávku ze dne {r.OrderDt}";
+                        orderDelayLimit = r.DeliveryDeadline.Value;
+                    }
+
+                    if (orderDelayLimit < DateTime.Now)
+                    {
+                        r.DelayedOrderMessage = $"Naskladnění bylo očekáváno do {StringUtil.FormatDate(orderDelayLimit)}. ({limitInfo})";
                         r.WarningLevel = WarningLevel.High;
                         r.DelayedOrder = true;
                     }

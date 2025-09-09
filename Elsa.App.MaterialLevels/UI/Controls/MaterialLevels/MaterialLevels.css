@@ -1,4 +1,4 @@
-﻿.warnLevelClass2 > div {
+.warnLevelClass2 > div {
     background-color: #ffe0e0;
 }
 
@@ -171,4 +171,14 @@ div.orderDtView {
 
 .matLevelsMaterialCell:hover .matNoteEditButton {
     display: block !important;
+}
+
+.butSetDeadline {
+    margin-left:4px;
+    cursor:pointer;
+    display:none;
+}
+
+div.orderDtCell:hover .butSetDeadline {
+    display:block;
 }

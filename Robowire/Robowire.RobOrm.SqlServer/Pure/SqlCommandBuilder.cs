@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -385,6 +385,24 @@ namespace Robowire.RobOrm.SqlServer.Pure
                         GetFieldValue<T10>(row, 9)));
         }
 
+        public void ReadRows<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> rowCallback)
+        {
+            ReadRows(
+                row =>
+                    rowCallback(
+                        GetFieldValue<T1>(row, 0),
+                        GetFieldValue<T2>(row, 1),
+                        GetFieldValue<T3>(row, 2),
+                        GetFieldValue<T4>(row, 3),
+                        GetFieldValue<T5>(row, 4),
+                        GetFieldValue<T6>(row, 5),
+                        GetFieldValue<T7>(row, 6),
+                        GetFieldValue<T8>(row, 7),
+                        GetFieldValue<T9>(row, 8),
+                        GetFieldValue<T10>(row, 9),
+                        GetFieldValue<T11>(row, 10)));
+        }
+
         #endregion
 
         private static T GetFieldValue<T>(DbDataReader reader, int ordinal)
@@ -418,6 +436,6 @@ namespace Robowire.RobOrm.SqlServer.Pure
 
                 return result;
             });
-        }
+        }        
     }
 }

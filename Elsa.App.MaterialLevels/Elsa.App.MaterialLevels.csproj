@@ -49,6 +49,7 @@
     <Compile Include="Components\IMaterialLevelsLoader.cs" />
     <Compile Include="Components\InventoryWatchRepository.cs" />
     <Compile Include="Components\MaterialLevelsLoader.cs" />
+    <Compile Include="Components\MaterialOrderingRepository.cs" />
     <Compile Include="Components\Model\InventoryModel.cs" />
     <Compile Include="Components\Model\MaterialLevelEntryModel.cs" />
     <Compile Include="Controllers\MaterialAmountReportController.cs" />
@@ -122,6 +123,9 @@
     <Content Include="SQL\20250211_003_vwBatchAvailableAmountWithoutSpentBatches.sql" />
     <Content Include="SQL\20250609_001_insp_missingMaterialOrder.sql" />
     <Content Include="SQL\20250717_001_alter_insp_missingMaterialOrder.sql" />
+    <Content Include="SQL\20250909_001_GetMaterialLevelsReport_AddDeadline.sql" />
+    <Content Include="SQL\20250909_002_insp_missingMaterialOrder_addDeadline.sql" />
+    <Content Include="UI\Controls\MaterialLevels\InspectorActions\MaterialDeliveryExpectationPostpone.html" />
     <Content Include="UI\Controls\MaterialLevels\MaterialLevels.css" />
     <Content Include="UI\Controls\MaterialLevels\MaterialLevelsDetail.html" />
   </ItemGroup>

@@ -85,6 +85,15 @@
                                     <i class="fas fa-times faButton" id="butCleanFilter" event-bind="click:cancelOrderDtInput()"></i>
                                 </div>
                             </div>
+
+
+                            <i class="far fa-calendar-plus butSetDeadline" data-bind="class!.hidden:DelayedOrder" event-bind="click:showDeadlinePopup(VM, $popDeadlineOverlay, $popDeadlineBody)"></i>
+                            <div lt-name="popDeadlineOverlay" class="popupOverlay">
+                                <div class="popupBody" lt-name="popDeadlineBody" fill-by-lazy="/UI/Controls/MaterialLevels/InspectorActions/MaterialDeliveryExpectationPostpone.html">
+                                </div>
+                            </div>
+
+                            <i class="far fa-calendar-minus butSetDeadline" data-bind="class!.hidden:hasDeadline" event-bind="click:deleteDeadline(MaterialId)" ></i>                            
                         </div>
                     </div>
 
@@ -103,6 +112,8 @@
         </div>
     </div>
 </div>
+
+
 
 <script>
     lt.element("mlUi").withModel("app.MaterialLevels.vm").attach(function(tbFilter) {
@@ -184,6 +195,14 @@
             }
 
             app.MaterialLevels.vm.setMaterialComment(model.MaterialId, newComment);
+        };
+
+        this.showDeadlinePopup = function (vm, overlay, body) {
+            Popup.open(overlay);
+        };
+
+        this.deleteDeadline = function (materialId) {
+            app.MaterialLevels.vm.deleteDeadline(materialId);
         };
 
         app.MaterialLevels.vm.onInventorySelected(null);

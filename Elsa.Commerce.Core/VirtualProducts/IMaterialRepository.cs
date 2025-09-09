@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Elsa.Commerce.Core.VirtualProducts.Model;
@@ -41,7 +41,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         void SaveMaterialComment(int materialId, string comment, UserRight writeCommentUserRight);
 
-        IExtendedMaterialModel SetMaterialHidden(int id, bool hide, bool clearCache = true);
+        IExtendedMaterialModel SetMaterialHidden(int id, bool hide, bool clearCache = true);        
     }
 
     public interface IMaterialRepositoryWithPostponedCache : IMaterialRepository, IDisposable { }

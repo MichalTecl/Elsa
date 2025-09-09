@@ -1,0 +1,20 @@
+<div>
+    <div id="uctrlDeliveryPpn_{%GENERATE%}" class="matDelPostponeCont">
+        <div class="matDelLabel">Odložit očekávané doručení na:</div>
+        <button class="matDelPostponeActionButton" event-bind="click:postponeDelivery(7, data.MaterialId, callback)">Za týden</button>
+        <button class="matDelPostponeActionButton" event-bind="click:postponeDelivery(14, data.MaterialId, callback)">Za dva týdny</button>
+        <button class="matDelPostponeActionButton" event-bind="click:postponeDelivery(30, data.MaterialId, callback)">Za měsíc</button>
+    </div>
+        
+    <script>
+        lt.element("uctrlDeliveryPpn_{%GENERATE%}").attach(function () {
+
+            this.postponeDelivery = function (days, materialId, callback) {
+                lt.api("/MaterialAmountReport/setDeadline").query({ "materialId": materialId, "days": days }).post(function () {
+                    callback();
+                });
+
+            }
+        });
+    </script>
+</div>

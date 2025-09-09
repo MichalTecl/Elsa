@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Elsa.App.MaterialLevels.Components;
@@ -19,20 +19,22 @@ namespace Elsa.App.MaterialLevels.Controllers
     [Controller("MaterialAmountReport")]
     public class MaterialAmountReportController : ElsaControllerBase
     {
-        private readonly IMaterialLevelsLoader m_levelsLoader;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IInventoryWatchRepository m_inventoryWatchRepository;
-        private readonly IMaterialThresholdRepository m_materialThresholdRepository;
-        private readonly IUnitRepository m_unitRepository;
-                
+        private readonly IMaterialLevelsLoader _levelsLoader;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IInventoryWatchRepository _inventoryWatchRepository;
+        private readonly IMaterialThresholdRepository _materialThresholdRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly MaterialOrderingRepository _orderingRepository;
+
         public MaterialAmountReportController(IWebSession webSession, ILog log, IMaterialLevelsLoader levelsLoader,
-            IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IMaterialThresholdRepository materialThresholdRepository, IUnitRepository unitRepository) : base(webSession, log)
+            IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IMaterialThresholdRepository materialThresholdRepository, IUnitRepository unitRepository, MaterialOrderingRepository orderingRepository) : base(webSession, log)
         {
-            m_levelsLoader = levelsLoader;
-            m_materialRepository = materialRepository;
-            m_inventoryWatchRepository = inventoryWatchRepository;
-            m_materialThresholdRepository = materialThresholdRepository;
-            m_unitRepository = unitRepository;
+            _levelsLoader = levelsLoader;
+            _materialRepository = materialRepository;
+            _inventoryWatchRepository = inventoryWatchRepository;
+            _materialThresholdRepository = materialThresholdRepository;
+            _unitRepository = unitRepository;
+            _orderingRepository = orderingRepository;
         }
 
         public IEnumerable<MaterialLevelEntryModel> GetLevels(int inventoryId)
@@ -40,7 +42,7 @@ namespace Elsa.App.MaterialLevels.Controllers
             if (!HasUserRight(InventoryUserRights.MaterialLevels))
                 return new List<MaterialLevelEntryModel>(0);
 
-            return m_levelsLoader.Load(inventoryId);
+            return _levelsLoader.Load(inventoryId);
         }
 
         public IEnumerable<InventoryModel> GetInventories(bool quick)
@@ -48,7 +50,7 @@ namespace Elsa.App.MaterialLevels.Controllers
             if (!HasUserRight(InventoryUserRights.MaterialLevels))
                 return new List<InventoryModel>(0);
 
-            return m_levelsLoader.GetInventories();
+            return _levelsLoader.GetInventories();
         }
 
         public IEnumerable<InventoryModel> GetUnwatchedInventories()
@@ -56,7 +58,7 @@ namespace Elsa.App.MaterialLevels.Controllers
             if (!HasUserRight(InventoryUserRights.MaterialLevels))
                 return new List<InventoryModel>(0);
 
-            return m_inventoryWatchRepository.GetUnwatchedInventories().Select(i => new InventoryModel(null)
+            return _inventoryWatchRepository.GetUnwatchedInventories().Select(i => new InventoryModel(null)
             {
                 Id = i.Id,
                 Name = i.Name
@@ -67,7 +69,7 @@ namespace Elsa.App.MaterialLevels.Controllers
         {
             EnsureUserRight(InventoryUserRights.MaterialLevels);
 
-            m_inventoryWatchRepository.WatchInventory(inventoryId);
+            _inventoryWatchRepository.WatchInventory(inventoryId);
 
             return GetInventories(false);
         }
@@ -76,7 +78,7 @@ namespace Elsa.App.MaterialLevels.Controllers
         {
             EnsureUserRight(InventoryUserRights.MaterialLevels);
 
-            m_inventoryWatchRepository.UnwatchInventory(inventoryId);
+            _inventoryWatchRepository.UnwatchInventory(inventoryId);
             return GetInventories(false);
         }
 
@@ -86,26 +88,26 @@ namespace Elsa.App.MaterialLevels.Controllers
 
             if (string.IsNullOrEmpty(thresholdText))
             {
-                m_materialThresholdRepository.DeleteThreshold(materialId);
+                _materialThresholdRepository.DeleteThreshold(materialId);
                 return;
             }
 
             var thresholdEntry = MaterialEntry.Parse(thresholdText, true);
 
-            var thresholdUnit = m_unitRepository.GetUnitBySymbol(thresholdEntry.UnitName);
+            var thresholdUnit = _unitRepository.GetUnitBySymbol(thresholdEntry.UnitName);
             if (thresholdUnit == null)
             {
                 throw new InvalidOperationException($"Neznámý symbol jednotky \"{thresholdEntry.UnitName}\"");
             }
 
-            m_materialThresholdRepository.SaveThreshold(materialId,
+            _materialThresholdRepository.SaveThreshold(materialId,
                 thresholdEntry.Amount,
                 thresholdUnit.Id);
         }
 
         public void SetComment(int materialId, string text)
         {
-            m_materialRepository.SaveMaterialComment(materialId, text, InventoryUserRights.MaterialCommentsEdit);
+            _materialRepository.SaveMaterialComment(materialId, text, InventoryUserRights.MaterialCommentsEdit);
         }
 
         public string SetOrderDt(int materialId, string value)
@@ -119,9 +121,23 @@ namespace Elsa.App.MaterialLevels.Controllers
                 parsed = DateTime.ParseExact(value, "yyyy-MM-dd", null);
             }
 
-            m_materialRepository.SaveOrderDt(materialId, parsed);
+            _materialRepository.SaveOrderDt(materialId, parsed);
 
             return parsed?.ToString(MaterialLevelEntryModel.OrderDtViewFormat) ?? string.Empty;
+        }
+
+        public void SetDeadline(int materialId, int days)
+        {
+            EnsureUserRight(InventoryUserRights.MaterialLevelsChangeOrderDt);
+
+            _orderingRepository.SetOrderDeliveryDeadline(materialId, DateTime.Now.AddDays(days).Date);
+        }
+
+        public void DeleteDeadline(int materialId)
+        {
+            EnsureUserRight(InventoryUserRights.MaterialLevelsChangeOrderDt);
+
+            _orderingRepository.SetOrderDeliveryDeadline(materialId, null);
         }
     }
 }
