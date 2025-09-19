@@ -41,6 +41,9 @@
         };
 
         const load = () => {
+
+            console.log("Loading distributor orders - pageKey=" + nextPageKey);
+
             lt.api("/CrmDistributors/GetOrders")
                 .query({ "distributorId": customerId, "pageKey": nextPageKey })
                 .get(receiveOrders);
@@ -51,6 +54,7 @@
 
             self.orders = [];
             self.canReadMore = false;
+            nextPageKey = null;
 
             if (!customerId)
                 return;

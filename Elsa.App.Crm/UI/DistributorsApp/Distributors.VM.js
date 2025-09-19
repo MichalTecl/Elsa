@@ -553,7 +553,7 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 self.updateTagFilter(tag.Id, false, true);
             }
         });
-
+                
         self.search();
     };
 
@@ -568,7 +568,22 @@ app.Distributors.VM = app.Distributors.VM || function(){
                 self.filter.TagGroups.splice(indexOfGroupId, 1);
         }
 
+        const tagGroup = self.allTagGroups.find(tgr => tgr.Id == groupId);
+        if (!!tagGroup)
+            tagGroup.isSelected = !!value;
+
         applyTagGroupsSelection();
+    };
+
+    self.unwrapGroupWithTag = (tagName) => {
+
+        self.allTags
+            .filter(tag => tag.Name === tagName) // podle jmena tagu
+            .map(tag => tag.GroupId) // ziskat id skupiny
+            .filter(groupId => self.filter.TagGroups.indexOf(groupId) === -1) // jen pokud jeste neni aktivni
+            .forEach(groupId => {
+                self.updateTagGroupFilter(groupId, true);
+            });
     };
 
     self.load = () => {        
