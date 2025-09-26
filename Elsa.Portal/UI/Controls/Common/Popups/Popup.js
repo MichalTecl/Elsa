@@ -43,6 +43,7 @@ var Popup = (() => {
 
         if (!!overlay.closeCallbacks) {
             overlay.closeCallbacks.forEach(c => c());
+            overlay.closeCallbacks = [];
         }
     }
 

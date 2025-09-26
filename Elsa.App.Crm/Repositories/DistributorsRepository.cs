@@ -102,8 +102,10 @@ namespace Elsa.App.Crm.Repositories
                         _log.Error($"Invalid SortBy '{filter.SortBy}'");
                         filter.SortBy = null;
                     }
-
-                    sortCol.Populate(all, filter.SortDescending);
+                    else
+                    {
+                        sortCol.Populate(all, filter.SortDescending);
+                    }
                 }
             }
 

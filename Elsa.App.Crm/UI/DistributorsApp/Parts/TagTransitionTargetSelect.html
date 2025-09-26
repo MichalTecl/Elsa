@@ -7,7 +7,10 @@
         <div class="taipRow">           
             <pre data-bind="text:Note"></pre>
             <i class="fas fa-pencil-alt faButton" event-bind="click:editNote(VM)"></i>
-        </div>        
+        </div> 
+        <div class="taipRow" data-bind="class!.hidden:HasTimeoutText">
+            <div data-bind="text:TimeoutText; class.taipTimeoutWarn:HasTimeoutWarning"></div>
+        </div>
     </div>
 
     <div class="tagTransitionTargetSelectCont" data-bind="itemsSource:Transitions;class!.hidden:HasTransitions" data-key="TagTypeId">
@@ -33,5 +36,8 @@
     </div>
 </div>
 <script>
-    lt.element("tranTarg_{%GENERATE%}").attach(function () { });
+    lt.element("tranTarg_{%GENERATE%}").attach(function () {
+        this.bi
+        
+    });
 </script>

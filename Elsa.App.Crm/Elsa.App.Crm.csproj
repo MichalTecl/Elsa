@@ -221,6 +221,8 @@
     <Content Include="SQL\20250716_001_tagType_DropUnusedColumns.sql" />
     <Content Include="SQL\20250716_002_removeOldFilters.sql" />
     <Content Include="SQL\20250805_001_GetDistributorOrdersOverview_fix.sql" />
+    <Content Include="SQL\20250926_001_LoadAllDistributors_TotalOrdersUntaxedPrice.sql" />
+    <Content Include="SQL\20250926_002_crmfilter_hasTimeoutedTag.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

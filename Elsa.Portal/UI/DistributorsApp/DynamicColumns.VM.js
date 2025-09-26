@@ -11,8 +11,7 @@ app.DynamicColumns = (self) => {
                 "title": column.Title,
                 "isSelected": index === 0
             };
-
-            model.change = (newValue) => model.isSelected = !!newValue;
+                        
             return model;
         });
 
@@ -48,7 +47,11 @@ app.DynamicColumns = (self) => {
             self.sorters[col] = self.sorters[col] || {
                 "isActive": false,
                 "descending": false
-            };
+            };            
+        });
+
+        self.filter.gridColumns.forEach(col => {
+            col.change = (newValue) => col.isSelected = !!newValue;
         });
 
         if (!doNotInitiateSearch)

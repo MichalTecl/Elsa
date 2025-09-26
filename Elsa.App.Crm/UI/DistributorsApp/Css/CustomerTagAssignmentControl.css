@@ -227,3 +227,7 @@
         overflow-y: auto;
         width: 100%;
     }
+
+.taipTimeoutWarn {
+    color: #d32f2f;
+}

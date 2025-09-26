@@ -45,9 +45,33 @@ namespace Elsa.App.Crm.Model
                 if ((DaysToWarning ?? 0) < 1)
                     return false;
 
-                return (AssignDt.AddDays(DaysToWarning.Value) > DateTime.Now);
+                return (AssignDt.AddDays(DaysToWarning.Value).Date <= DateTime.Now.Date);
             } 
         }        
+
+        public string TimeoutText
+        {
+            get
+            {
+                if ((DaysToWarning ?? 0) < 1)
+                    return null;
+
+                var timeoutDt = AssignDt.AddDays(DaysToWarning.Value);
+
+                if (HasTimeoutWarning)
+                {   
+                    var daysOver = (DateTime.Now - timeoutDt).TotalDays;
+                    return $"Překročeno o {Math.Ceiling(daysOver)} dní";
+                }
+                else
+                {
+                    var daysLeft = (timeoutDt - DateTime.Now).TotalDays;
+                    return $"Zbývá {Math.Ceiling(daysLeft)} dní";
+                }
+            }
+        }
+
+        public bool HasTimeoutText => !string.IsNullOrEmpty(TimeoutText);
 
         public string Note { get; set; }
     }

@@ -5,8 +5,8 @@
         <div class="lt-template ctacTagItem" data-bind="cssClass:TagTypeCssClass;class.hidden:isFilteredHidden">
             <i class="fas fa-times ctacRemoveTag" data-bind="class.hidden:HasTransitions" event-bind="click:removeTag(VM)"></i>
             <div lt-name="targetPicker" class="popupOverlay"></div>            
-            <div data-bind="text:TagTypeName" event-bind="click:openTransitionPopup(VM, $targetPicker)"></div>
-            <i class="fas fa-bell ctacBell" data-bind="class!.hidden:HasTimeoutWarning" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
+            <div data-bind="text:TagTypeName;title:TimeoutText" event-bind="click:openTransitionPopup(VM, $targetPicker)"></div>
+            <i class="fas fa-bell ctacBell" data-bind="class!.hidden:HasTimeoutWarning;title:TimeoutText" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
             <i class="fas fa-project-diagram ctacTransitionsMarker" data-bind="class!.hidden:HasTransitions" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
         </div>    
     </div>
