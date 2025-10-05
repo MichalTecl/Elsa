@@ -207,10 +207,6 @@
       <Project>{9737fae0-50c6-4588-8c7b-db881e349585}</Project>
       <Name>Elsa.Integration.ChatGpt</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Elsa.Integration.Crm.Raynet\Elsa.Integration.Crm.Raynet.csproj">
-      <Project>{B3CA26E9-83BA-4752-AA9C-274FEFF325F6}</Project>
-      <Name>Elsa.Integration.Crm.Raynet</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Elsa.Integration.Erp.Flox\Elsa.Integration.Erp.Flox.csproj">
       <Project>{dc38d50d-1f5f-44c8-a273-6c57cf26974c}</Project>
       <Name>Elsa.Integration.Erp.Flox</Name>
@@ -262,10 +258,6 @@
     <ProjectReference Include="..\Elsa.Jobs.DbBackup\Elsa.Jobs.DbBackup.csproj">
       <Project>{AEBA83D2-BFAE-4A1D-B538-08F5460EC409}</Project>
       <Name>Elsa.Jobs.DbBackup</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Elsa.Jobs.ExternalSystemsDataPush\Elsa.Jobs.ExternalSystemsDataPush.csproj">
-      <Project>{A8267D1B-E60A-4473-90FF-8346B9E3D0B8}</Project>
-      <Name>Elsa.Jobs.ExternalSystemsDataPush</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.FinancialReportsGeneration\Elsa.Jobs.FinancialReportsGeneration.csproj">
       <Project>{4586C0D0-A123-4049-84DF-6A050A78D60B}</Project>

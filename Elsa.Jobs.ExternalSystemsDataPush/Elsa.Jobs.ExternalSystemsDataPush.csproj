@@ -10,9 +10,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj" />
-    <ProjectReference Include="..\Elsa.Integration.Crm.Raynet\Elsa.Integration.Crm.Raynet.csproj" />
     <ProjectReference Include="..\Elsa.Jobs.Common.EntityChangeProcessing\Elsa.Jobs.Common.EntityChangeProcessing.csproj" />
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ChangeProcessors\" />
   </ItemGroup>
 
 </Project>

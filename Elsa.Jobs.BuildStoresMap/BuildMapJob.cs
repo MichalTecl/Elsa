@@ -1,11 +1,9 @@
-﻿using Elsa.App.Crm;
+using Elsa.App.Crm;
 using Elsa.App.PublicFiles;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Crm;
-using Elsa.Integration.Crm.Raynet;
-using Elsa.Integration.Crm.Raynet.Model;
 using Elsa.Jobs.BuildStoresMap.Config;
 using Elsa.Jobs.Common;
 using Robowire.RobOrm.Core;
@@ -18,18 +16,14 @@ namespace Elsa.Jobs.BuildStoresMap
 {
     public class BuildMapJob : IExecutableJob
     {
-        private const string StorePrefix = "Prodejna";
-
-        private readonly IRaynetClient _raynet;
         private readonly IDatabase _db;
         private readonly ISession _session;
         private readonly ILog _log;
         private readonly IPublicFilesHelper _publicFiles;
         private readonly StoreMapConfig _config;
 
-        public BuildMapJob(IRaynetClient raynet, IDatabase db, ISession session, ILog log, IPublicFilesHelper publicFiles, StoreMapConfig config)
+        public BuildMapJob(IDatabase db, ISession session, ILog log, IPublicFilesHelper publicFiles, StoreMapConfig config)
         {
-            _raynet = raynet;
             _db = db;
             _session = session;
             _log = log;
@@ -70,119 +64,14 @@ namespace Elsa.Jobs.BuildStoresMap
                 {
                     _log.Error($"Valuable distributor {dbContact.Name} has no company registration id");
                     continue;
-                }
-
-                var raynetContacts = _raynet.GetContacts(regNumber: dbContact.CompanyRegistrationId);
-                if (raynetContacts.Data.Count != 1)
-                {
-                    _log.Error($"Valuable distributor {dbContact.Id} has {raynetContacts.Data.Count} contacts in Raynet");
-                    continue;
-                }
-
-                var detail = _raynet.GetContactDetail(raynetContacts.Data[0].Id.Value);
-                if (detail == null)
-                {
-                    _log.Error($"Valuable distributor {dbContact.Id} has no detail in Raynet");
-                    continue;
-                }
-
-                var eshop = _raynet.ReadCustomField<bool?>(detail.Data, "E-shop") == true;
-                var store = _raynet.ReadCustomField<bool?>(detail.Data, "Kamenná prodejna") == true;
-
-                var changed = false;
-                if (dbContact.HasEshop != eshop)
-                {
-                    dbContact.HasEshop = eshop;
-                    changed = true;
-                }
-
-                if (dbContact.HasStore != store)
-                {
-                    dbContact.HasStore = store;
-                    changed = true;
-                }
-
-                if (changed)
-                {
-                    _db.Save(dbContact);
-                    _log.Info($"Valuable distributor {dbContact.Name} updated: HasEshop={dbContact.HasEshop}, HasStore={dbContact.HasStore}");
-                }   
-
-                var savedCustomerStores = dbStores.Where(s => s.CustomerId == dbContact.Id).ToList();
-                var raynetStores = detail.Data.Addresses.Where(a => a.Address.Name.StartsWith(StorePrefix)).ToList();
-                                
-                foreach(var savedStore in savedCustomerStores)
-                {
-                    var rnStore = raynetStores.FirstOrDefault(rs => rs.Address.Name == savedStore.SystemRecordName);
-                    if (rnStore == null)
-                    {
-                        _db.Delete(savedStore);
-                        _log.Info($"Store {savedStore.SystemRecordName} - {savedStore.Name} deleted for customer {detail.Data.Name}");
-
-                        continue;
-                    }
-
-                    if (MapStore(detail.Data, savedStore))
-                    {
-                        _db.Save(savedStore);
-                        _log.Info($"Store {savedStore.SystemRecordName} - {savedStore.Name} updated for customer {detail.Data.Name}");
-                    }                    
-                }
-
-                foreach(var rnStore in raynetStores)
-                {
-                    if (savedCustomerStores.Any(s => s.SystemRecordName == rnStore.Address.Name))
-                    {
-                        continue;
-                    }
-
-                    var newStore = _db.New<ICustomerStore>();
-                    newStore.CustomerId = dbContact.Id;
-                    newStore.SystemRecordName = rnStore.Address.Name;
-                    MapStore(detail.Data, newStore);
-                    
-                    _db.Save(newStore);
-                    _log.Info($"Store {newStore.SystemRecordName} - {newStore.Name} added for customer {detail.Data.Name}");                    
                 }                
+
+                var savedCustomerStores = dbStores.Where(s => s.CustomerId == dbContact.Id).ToList();                                                                
             }
 
             GenerateCsv();
         }
-
-        private bool MapStore(ContactDetail contact, ICustomerStore target)
-        {
-            var sourceAddress = contact.Addresses.FirstOrDefault(a => a.Address.Name == target.SystemRecordName) 
-                ?? throw new Exception("No source address");
-
-            bool set(string source, Func<ICustomerStore, string> getter, Action<ICustomerStore, string> setter)
-            {
-                if (string.IsNullOrWhiteSpace(source))
-                {
-                    return false;
-                }
-
-                if (source != getter(target))
-                {
-                    setter(target, source);
-                    return true;
-                }
-
-                return false;
-            }
-
-            var name = sourceAddress.Address.Name.Substring(StorePrefix.Length).Trim();
-            if (string.IsNullOrWhiteSpace(name))
-                name = contact.Name;
-
-            return set(name, s => s.Name, (s,v) => s.Name = v)
-                | set(sourceAddress.Address.Street, s => s.Address, (s,v) => s.Address = v)
-                | set(sourceAddress.Address.City, s => s.City, (s,v) => s.City = v)
-                | set(sourceAddress.ContactInfo.Www ?? contact.Addresses.Select(a => a.ContactInfo?.Www).FirstOrDefault(w => !string.IsNullOrWhiteSpace(w)), s => s.Www, (s,v) => s.Www = v)
-                | set(name, s => s.PreviewName, (s, v) => s.PreviewName = v)
-                | set(sourceAddress.Address.Lat.ToString(), s => s.Lat, (s,v) => s.Lat =v)
-                | set(sourceAddress.Address.Lng.ToString(), s => s.Lon, (s, v) => s.Lon = v);               
-        }
-
+               
         private void GenerateCsv()
         {
             var customerName = _session.Project.Name;

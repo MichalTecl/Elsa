@@ -25,8 +25,6 @@ namespace Elsa.JobLauncher.Scheduler
         public static readonly ElsaJob LogReader =
             new ElsaJob("Log_Reader", 3, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(4, 0, 0) && eval.NowIsBetween(5, 22));
 
-        public static readonly ElsaJob DataPush = new ElsaJob("DATA_PUSH", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
-
         public static readonly ElsaJob StoreMap = new ElsaJob("STORE_MAP", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
         public static readonly ElsaJob CrmRobots = new ElsaJob("CRM_ROBOTS", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
@@ -54,7 +52,6 @@ namespace Elsa.JobLauncher.Scheduler
                 yield return Inspector;
 
                 yield return LogReader;
-                yield return DataPush;
                 yield return StoreMap;
                 yield return CrmRobots;
             }

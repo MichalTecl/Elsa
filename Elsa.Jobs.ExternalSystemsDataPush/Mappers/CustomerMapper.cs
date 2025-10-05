@@ -1,7 +1,6 @@
-﻿using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Crm;
 using Elsa.Core.Entities.Commerce.Extensions;
-using Elsa.Integration.Crm.Raynet.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
