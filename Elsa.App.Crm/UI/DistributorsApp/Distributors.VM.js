@@ -416,9 +416,10 @@ app.Distributors.VM = app.Distributors.VM || function(){
     self.detailTabs = [
         { "text": "Osoby", "control": "DistributorContactPersons"},
         { "text": "Historie", "control": "DistributorHistory"},
-        { "text": "Poznámky", "control": "DistributorNotes" },
+        //{ "text": "Poznámky", "control": "DistributorNotes" },
         { "text": "Objednávky", "control": "DistributorOrders" },   
         { "text": "Schůzky", "control": "DistributorMeetings" },       
+        { "text": "Log změn", "control": "DistributorChangeLog" }
     ];
 
     self.currentTabContentControl = null;

@@ -62,6 +62,7 @@
     <Compile Include="Adapters\SaleEventAllocationAdapter.cs" />
     <Compile Include="Configuration\OrdersSystemConfig.cs" />
     <Compile Include="Crm\ICustomerRepository.cs" />
+    <Compile Include="Crm\Model\CustomerChanges.cs" />
     <Compile Include="Crm\Model\CustomerOverview.cs" />
     <Compile Include="Crm\Model\ICommonCustomerInfo.cs" />
     <Compile Include="CurrencyRates\CurrencyConversionHelper.cs" />

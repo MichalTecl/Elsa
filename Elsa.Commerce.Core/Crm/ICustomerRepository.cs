@@ -42,5 +42,7 @@ namespace Elsa.Commerce.Core.Crm
         void DeleteCustomerNote(int noteId);
 
         Dictionary<int, string> GetDistributorNameIndex();
+
+        IEnumerable<CustomerChanges> GetCustomerChanges(int customerId);
     }
 }

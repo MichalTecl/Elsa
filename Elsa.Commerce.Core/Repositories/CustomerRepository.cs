@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -646,6 +647,33 @@ namespace Elsa.Commerce.Core.Repositories
 
                     return result;
                 });
+        }
+
+        public IEnumerable<CustomerChanges> GetCustomerChanges(int customerId)
+        {
+            var data = _database.SelectFrom<ICustomerChangeLog>()
+                .Join(c => c.Author)
+                .Where(c => c.CustomerId == customerId)
+                .OrderByDesc(c => c.ChangeDt)
+                .Execute()
+                .ToList();
+
+            var aggregated = new List<CustomerChanges>();
+
+            foreach(var change in data) 
+            {
+                var agg = aggregated.FirstOrDefault(a => a.Day.Date == change.ChangeDt.Date && a.Author == change.Author?.EMail);
+
+                if (agg == null)
+                {
+                    agg = new CustomerChanges { Author = change.Author.EMail, CustomerId = change.CustomerId, Day = change.ChangeDt.Date };
+                    aggregated.Add(agg);
+                }
+
+                agg.AddChange(change.Field, change.OldValue, change.NewValue);
+            }
+
+            return aggregated;
         }
     }
 }

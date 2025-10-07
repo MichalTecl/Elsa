@@ -1,3 +1,5 @@
+using Elsa.Common.Utils;
+using Elsa.Core.Entities.Commerce.Crm;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +20,25 @@ namespace Elsa.App.Crm.Entities
                 .Select(m => m.ToLowerInvariant())
                 .Concat(_allMailsPeek)
                 .Distinct();
+        }
+
+        public static EntityState GetState(this ICustomerStore store)
+        {
+            return new EntityState()
+                .Add("Název", store.Name)
+                .Add("Adresa", $"{store.Address} {store.City}")
+                .Add("WWW", store.Www)
+                .Add("GPS", $"{store.Lat}, {store.Lon}");
+        }
+
+        public static EntityState GetState(this IPerson person)
+        {
+            return new EntityState()
+                .Add("Jméno", person.Name)
+                .Add("Email", person.Email)
+                .Add("Telefon", person.Phone)
+                .Add("Adresa", person.Address)
+                .Add("Poznámka", person.Note);
         }
     }
 }

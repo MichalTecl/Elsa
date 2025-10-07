@@ -1,4 +1,6 @@
+using Elsa.App.Crm.Entities;
 using Elsa.App.Crm.Model;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Common;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
@@ -19,10 +21,12 @@ namespace Elsa.App.Crm.Controllers
     public class ContactPersonsController : ElsaControllerBase
     {        
         private readonly IDatabase _database;
-     
-        public ContactPersonsController(IWebSession webSession, ILog log, IDatabase database) : base(webSession, log)
+        private readonly ICustomerRepository _customerRepository;
+
+        public ContactPersonsController(IWebSession webSession, ILog log, IDatabase database, ICustomerRepository customerRepository) : base(webSession, log)
         {
-            _database = database;     
+            _database = database;
+            _customerRepository = customerRepository;
         }
 
         public IEnumerable<ContactPersonModel> Get(int customerId)
@@ -61,11 +65,17 @@ namespace Elsa.App.Crm.Controllers
                 {
                     person = _database.New<IPerson>();
                 }
-                                
+
+                var originalState = person.GetState();
+
                 person.Email = model.Email;
                 person.Phone = model.Phone;
                 person.Note = model.Note;
                 person.Name = model.Name;
+
+                person.GetState().FindChanges(originalState, (key, oldVal, newVal) => { 
+                    _customerRepository.LogCustomerChange(customerId, $"Změna kontaktní osoby {person.Name} - {key}", oldVal, newVal, Guid.NewGuid().ToString());
+                });
 
                 _database.Save(person);
 
@@ -111,6 +121,8 @@ namespace Elsa.App.Crm.Controllers
                 {
                     _database.DeleteAll(personBridges.Where(b => b.CustomerId == customerId));
                 }
+
+                _customerRepository.LogCustomerChange(customerId, "Smazání kontaktní osoby {personBridges.First().Person.Name}", null, DateTime.Now, Guid.NewGuid().ToString());
 
                 tx.Commit();
             }

@@ -1,5 +1,6 @@
 using Elsa.App.Crm.Entities;
 using Elsa.App.Crm.Model;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
@@ -20,12 +21,13 @@ namespace Elsa.App.Crm.Repositories
         private readonly ISession _session;
         private readonly ICache _cache;
         private readonly ILog _log;
+        private readonly ICustomerRepository _customerRepository;
 
         private readonly AutoRepo<ICustomerTagType> _tagTypeRepo;
         private readonly AutoRepo<ICustomerTagTypeGroup> _tagTypeGroupRepo;
         private readonly AutoRepo<ICustomerTagTransition> _transitionRepo;
 
-        public CustomerTagRepository(IDatabase database, ISession session, ICache cache, ILog log)
+        public CustomerTagRepository(IDatabase database, ISession session, ICache cache, ILog log, ICustomerRepository customerRepository)
         {
             _database = database;
             _session = session;
@@ -35,8 +37,9 @@ namespace Elsa.App.Crm.Repositories
             _tagTypeRepo = new AutoRepo<ICustomerTagType>(session, database, cache, (db, q) => q.OrderBy(r => r.Name));
             _tagTypeGroupRepo = new AutoRepo<ICustomerTagTypeGroup>(session, database, cache);
             _transitionRepo = new AutoRepo<ICustomerTagTransition>(session, database, cache);
+            _customerRepository = customerRepository;
         }
-                
+
         public TagGroup GetGroupData(int groupId)
         {
             return GetData().FirstOrDefault(g => g.Group.Id == groupId);
@@ -158,8 +161,10 @@ namespace Elsa.App.Crm.Repositories
         /// <param name="tagTypeId"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public List<int> Assign(int[] customerIds, int tagTypeId, string note)
+        public List<int> Assign(int[] customerIds, int tagTypeId, string note, string changeTrackingGroupingKey = null)
         {
+            changeTrackingGroupingKey = changeTrackingGroupingKey ?? Guid.NewGuid().ToString();
+
             var result = new List<int>(customerIds.Length);
 
             _database.Sql().Call("AssignTagToCustomers")
@@ -168,6 +173,13 @@ namespace Elsa.App.Crm.Repositories
                 .WithParam("@note", string.IsNullOrWhiteSpace(note) ? null : note)
                 .WithStructuredParam("@customerIds", "IntTable", customerIds, new[] { "Id" }, i => new object[] { i })
                 .ReadRows(r => result.Add(r.GetInt32(0)));
+
+            var tagName = _tagTypeRepo.Get(tagTypeId).Name;
+
+            foreach (var assignedCustomerId in result) 
+            {
+                _customerRepository.LogCustomerChange(assignedCustomerId, $"Štítek {tagName}", false, true, changeTrackingGroupingKey);
+            }
 
             _cache.Remove(AssignmentsCacheKey);
 
@@ -180,8 +192,10 @@ namespace Elsa.App.Crm.Repositories
         /// <param name="customerIds"></param>
         /// <param name="tagTypeId"></param>
         /// <returns></returns>
-        public List<int> Unassign(int[] customerIds, int tagTypeId)
+        public List<int> Unassign(int[] customerIds, int tagTypeId, string changeTrackingGroupingKey = null)
         {
+            changeTrackingGroupingKey = changeTrackingGroupingKey ?? Guid.NewGuid().ToString();
+
             var result = new List<int>(customerIds.Length);
 
             var assignments = GetAllTagAssignments();
@@ -210,6 +224,13 @@ namespace Elsa.App.Crm.Repositories
             }
             
             _cache.Remove(AssignmentsCacheKey);
+
+            var tagName = _tagTypeRepo.Get(tagTypeId).Name;
+
+            foreach (var assignedCustomerId in result)
+            {
+                _customerRepository.LogCustomerChange(assignedCustomerId, $"Štítek {tagName}", true, false, changeTrackingGroupingKey);
+            }
 
             return result;
         }

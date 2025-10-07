@@ -2,6 +2,7 @@ using Elsa.App.Crm.Model;
 using Elsa.App.Crm.Repositories;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Crm;
+using Elsa.Commerce.Core.Crm.Model;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -84,24 +85,36 @@ namespace Elsa.App.Crm.Controllers
 
             using(var tx = _db.OpenTransaction())
             {
+                var changeTrackingGroupingKey = Guid.NewGuid().ToString();
+
                 var customer = _customerRepository.GetCustomer(rq.CustomerId).Ensure("Invalid CstomerId");
 
                 if (customer.HasStore != rq.HasStore || customer.HasEshop != rq.HasEshop)
                 {
-                    customer.HasEshop = rq.HasEshop;
-                    customer.HasStore = rq.HasStore;
+                    if (customer.HasEshop != rq.HasEshop)
+                    {                        
+                        _customerRepository.LogCustomerChange(customer.Id, "E-Shop", customer.HasEshop, rq.HasEshop, changeTrackingGroupingKey);
+                        customer.HasEshop = rq.HasEshop;
+                    }
+
+                    if (customer.HasStore != rq.HasStore)
+                    {                        
+                        _customerRepository.LogCustomerChange(customer.Id, "Kamenná prodejna", customer.HasStore, rq.HasStore, changeTrackingGroupingKey);
+                        customer.HasStore = rq.HasStore;
+                    }
 
                     _db.Save(customer);
                 }
 
                 if (rq.AddedTags != null)
-                    rq.AddedTags.ForEach(t => _tagRepo.Assign(new[] { customer.Id }, t, null));
+                    rq.AddedTags.ForEach(t => _tagRepo.Assign(new[] { customer.Id }, t, null, changeTrackingGroupingKey));
+                
 
                 if (rq.RemovedTags != null)
-                    rq.RemovedTags.ForEach(t => _tagRepo.Unassign(new[] { customer.Id }, t));
+                    rq.RemovedTags.ForEach(t => _tagRepo.Unassign(new[] { customer.Id }, t, changeTrackingGroupingKey));
 
                 foreach (var storeAddress in rq.ChangedAddresses.Where(a => a.IsDeleted))
-                    _distributorsRepository.DeleteStore(customer.Id, storeAddress.AddressName);
+                    _distributorsRepository.DeleteStore(customer.Id, storeAddress.AddressName, changeTrackingGroupingKey);
                  
                 foreach(var address in rq.ChangedAddresses.Where(a => !a.IsDeleted))
                 {
@@ -113,7 +126,7 @@ namespace Elsa.App.Crm.Controllers
                         s.PreviewName = address.StoreName;
                         s.Lat = address.Lat;
                         s.Lon = address.Lon;
-                    });
+                    }, changeTrackingGroupingKey);
                 }
 
                 tx.Commit();
@@ -183,6 +196,11 @@ namespace Elsa.App.Crm.Controllers
         public IReadOnlyCollection<CustomerHistoryEntryModel> GetCustomerHistory(int customerId)
         {
             return _distributorsRepository.GetCustomerHistory(customerId, false, true);
+        }
+
+        public IEnumerable<CustomerChanges> GetChangeLog(int customerId)
+        {
+            return _customerRepository.GetCustomerChanges(customerId);
         }
     }
 }

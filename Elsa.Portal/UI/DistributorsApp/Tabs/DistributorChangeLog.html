@@ -1,0 +1,152 @@
+<div id="distrChangeLogTab">
+    <div id="dclList" data-bind="itemsSource:changes" data-key="Title">
+        <div class="dclListIrem lt-template">
+            <div class="dclListItemTitle" data-bind="text:Title"></div>
+                <div class="dclChangeDetailList" data-bind="itemsSource:Changes" data-key="Index">
+                <div class="dclChangeDetail lt-template">
+                    <div class="dclField" data-bind="text:Field"></div>
+                    <div class="dclFieldDDot">:</div>
+                    <div class="dclOldValue" data-bind="text:OldValue"></div>
+                    <div class="dclOldNewSeparator">=&gt;</div>
+                    <div class="dclNewValue" data-bind="text:NewValue"></div>
+                </div>                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("distrChangeLogTab")
+        .attachModel(function () { 
+
+            let customerId = null;
+
+            const self = this;
+
+            self.changes = [];
+
+            const receiveChanges = (changes) => {
+                self.changes = changes;
+            };
+
+            app.Distributors.vm.withCustomerId((cid) => {
+                customerId = cid;
+
+                if (!!cid) {
+                    lt.api("/crmdistributors/getChangeLog").query({ customerId }).get(receiveChanges);
+                }
+            });
+
+        })
+</script>
+<style>
+    .dclListIrem {
+        --bd: #e5e7eb;
+        --bg: #fff;
+        --row: #f8fafc;
+        --muted: #6b7280;
+        --old: #b42318;
+        --old-bg: #fdecec;
+        --new: #066e2e;
+        --new-bg: #e9f7ee;
+        background: var(--bg);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(16,24,40,.04);
+        overflow: hidden;
+        margin: 12px 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    /* Nadpis – jediný tučný prvek */
+    .dclListItemTitle {
+        font-weight: 700;
+        font-size: 14px;
+        padding: 10px 14px;
+        background: #f5f7fb;
+        border-bottom: 1px solid var(--bd);
+    }
+
+    /* Seznam změn */
+    .dclChangeDetailList {
+        padding: 8px 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    /* Jeden řádek změny – „console line“ */
+    .dclChangeDetail {
+        position: relative;
+        -background: var(--row);
+        -border: 1px solid var(--bd);
+        -border-radius: 8px;
+        padding: 0px 0px 0px 0px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+
+    /* Field – už NENÍ tučné, nemá pevnou šířku */
+    .dclField {
+        font-weight: 400;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* dvojtečka a šipka */
+    .dclFieldDDot,
+    .dclOldNewSeparator {
+        color: var(--muted);
+        opacity: .9;
+    }
+
+    /* tokeny hodnot – lehké „chip“ a barvy */
+    .dclOldValue,
+    .dclNewValue {
+        padding: 2px 8px;
+        border-radius: 6px;
+        line-height: 1.6;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    /* stará = červená, nová = zelená */
+    .dclOldValue {
+        color: var(--old);
+        background: var(--old-bg);
+        border-color: color-mix(in oklab, var(--old) 25%, white);
+    }
+
+    .dclNewValue {
+        color: var(--new);
+        background: var(--new-bg);
+        border-color: color-mix(in oklab, var(--new) 25%, white);
+    }
+
+        /* prázdné hodnoty: pomlčka */
+        .dclOldValue:empty::before,
+        .dclNewValue:empty::before {
+            content: "—";
+            color: var(--muted);
+            font-style: italic;
+        }
+
+    /* jemný hover, ne agresivní */
+    .dclChangeDetail:hover {
+        border-color: #d9dde6;
+        background: #f2f5fa;
+    }
+
+    /* drobná kompaktnost na hodně úzkých displejích */
+    @media (max-width:560px) {
+        .dclChangeDetail {
+            gap: 6px;
+            padding-left: 22px;
+        }
+    }
+
+</style>

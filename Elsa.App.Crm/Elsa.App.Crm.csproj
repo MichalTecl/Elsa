@@ -271,6 +271,7 @@
     <Content Include="UI\DistributorsApp\Parts\TaggingDesignerTagList.html" />
     <Content Include="UI\DistributorsApp\Parts\TagTransitionTargetSelect.html" />
     <Content Include="UI\DistributorsApp\Parts\UnifiedCustomerHistoryView.html" />
+    <Content Include="UI\DistributorsApp\Tabs\DistributorChangeLog.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorContactPersons.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorHistory.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorMeetings.css" />

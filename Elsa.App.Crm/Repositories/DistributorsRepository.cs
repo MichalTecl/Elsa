@@ -1,3 +1,4 @@
+using Elsa.App.Crm.Entities;
 using Elsa.App.Crm.Model;
 using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
 using Elsa.Commerce.Core.Crm;
@@ -238,14 +239,16 @@ namespace Elsa.App.Crm.Repositories
                 .Where(s => s.CustomerId == customerId).Execute().ToList();
         }
 
-        public void DeleteStore(int customerId, string addressName)
+        public void DeleteStore(int customerId, string addressName, string changeTrackingGroupingKey)
         {
             var store = GetStores(customerId).FirstOrDefault(s => s.SystemRecordName == addressName).Ensure("Invalid address name");
+
+            _customerRepository.LogCustomerChange(customerId, $"Prodejna {addressName} smazána", null, DateTime.Now, changeTrackingGroupingKey);
 
             _database.Delete(store);
         }
 
-        public void SaveStore(int customerId, string addressName, Action<ICustomerStore> change)
+        public void SaveStore(int customerId, string addressName, Action<ICustomerStore> change, string changeTrackingGroupingKey)
         {
             var store = GetStores(customerId)
                 .FirstOrDefault(s => s.SystemRecordName == addressName)
@@ -255,7 +258,14 @@ namespace Elsa.App.Crm.Repositories
                     s.CustomerId = customerId;
                 });
 
+            var originalState = store.GetState();
             change(store);
+            var changedState = store.GetState();
+
+            changedState.FindChanges(originalState, (key, oldVal, newVal) =>
+            {
+                _customerRepository.LogCustomerChange(customerId, $"Prodejna {addressName} - {key}", oldVal, newVal, changeTrackingGroupingKey);
+            });
 
             _database.Save(store);
         }
