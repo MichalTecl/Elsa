@@ -27,7 +27,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         [XlsColumn("E", "Název skupiny pro zákaznice", "@")]
         public string CustomerGroupTitle { get => _customerGroupTitle?.Trim(); set => _customerGroupTitle = value; }
 
-        [XlsColumn("F", "Název produktu pro zákazníce", "@")]
+        [XlsColumn("F", "Název produktu pro zákaznice", "@")]
         public string CustomerProductName { get => _customerProductName?.Trim(); set => _customerProductName = value; }
 
     }
