@@ -1,4 +1,4 @@
-﻿using Elsa.Apps.EshopMapping.Internal;
+using Elsa.Apps.EshopMapping.Internal;
 using Elsa.Apps.EshopMapping.Model;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web;
 
 namespace Elsa.Apps.EshopMapping.Controllers
 {
@@ -77,5 +78,46 @@ namespace Elsa.Apps.EshopMapping.Controllers
                 _facade.PeekOrders(placedName, GetErpId(), kit).Select(o => $"{o.OrderDt}  {o.OrderNumber}  {o.CustomerName}  {o.Status}")
                 );
         }
+
+        public string GetKitCode(int kitDefinitionId)
+        {
+            var kit = _kitProductRepository.GetKitDefinition(kitDefinitionId).Ensure();
+
+            /*
+             <p style="display: none;">
+            ##SADA{ 
+                "Mega deodorant (80 g v plastu)": [ "Citronová meduňka (bez sody)", "V cukrárně (bez sody)", "V lese najdeš se (bez sody)", "Citronová meduňka (se sodou)", "Růžová zahrada (se sodou)", "Levandulové pole (se sodou)", "Pačuli, máta, rozmarýn (se sodou)"], 
+                "Mega pleťový krém (60 ml)": ["Citronová meduňka (mastná pleť)", "Arganový olej, levandule (smíšená, normální pleť)", "Anti-pupínek (akné, problematická pleť)", "Smyslná a věrná sama sobě (suchá, zralá pleť)", "Kakaové máslo, vanilka (suchá, citlivá pleť)", "Olej z granátového jablka (citlivá pleť)"] 
+	            }
+            </p>
+             */
+
+            var sb = new StringBuilder();
+            sb.AppendLine("<p style=\"display: none;\">");
+            sb.AppendLine("##SADA{");
+
+            bool firstGroup = true;
+            foreach (var group in kit.SelectionGroups)
+            {
+                if (!firstGroup)
+                {
+                    sb.AppendLine(",");                    
+                }
+
+                firstGroup = false;
+                
+                sb.Append("  ")
+                   .Append(HttpUtility.JavaScriptStringEncode(group.InTextMarker, true))
+                   .Append(": [")
+                   .Append(string.Join(", ", group.Items.Select(i => HttpUtility.JavaScriptStringEncode(i.InTextMarker, true))))
+                   .Append("]");
+            }
+
+            sb.AppendLine().AppendLine("}");
+            sb.AppendLine("</p>");
+
+            return sb.ToString();
+        }
+
     }
 }

@@ -410,7 +410,9 @@ namespace Elsa.Commerce.Core.Repositories
                             KitName = kit.ItemName,
                             SelectionGroupName = group.Name,
                             ProductName = item.ItemName,
-                            Shortcut = item.Shortcut
+                            Shortcut = item.Shortcut,
+                            CustomerGroupTitle = group.InTextMarker,
+                            CustomerProductName = item.InTextMarker
                         });
 
             return result;
@@ -473,7 +475,7 @@ namespace Elsa.Commerce.Core.Repositories
                     dbKitDefinition = m_database.New<IKitDefinition>();
                     dbKitDefinition.ProjectId = m_session.Project.Id;
                     dbKitDefinition.ItemName = kit.Key;
-
+                    
                     m_database.Save(dbKitDefinition);
                 }
 
@@ -496,10 +498,13 @@ namespace Elsa.Commerce.Core.Repositories
                     var dbGroup = dbKitDefinition.SelectionGroups.FirstOrDefault(dbg => dbg.Name == xlsGroup.Key);
                     if (dbGroup == null)
                     {
+                        var xlsGroupInTextMarker = xlsGroup.Select(kg => kg.CustomerGroupTitle).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
+
                         m_log.Info($"\tSelection group '{xlsGroup.Key}' does not exist - creating");
                         dbGroup = m_database.New<IKitSelectionGroup>();
                         dbGroup.KitDefinitionId = dbKitDefinition.Id;
                         dbGroup.Name = xlsGroup.Key;
+                        dbGroup.InTextMarker = xlsGroupInTextMarker;
 
                         m_database.Save(dbGroup);
                     }
@@ -526,6 +531,7 @@ namespace Elsa.Commerce.Core.Repositories
                             dbItem.KitSelectionGroupId = dbGroup.Id;
                             dbItem.ItemName = xlsItem.ProductName;
                             dbItem.Shortcut = xlsItem.Shortcut ?? xlsItem.ProductName;
+                            dbItem.InTextMarker = string.IsNullOrWhiteSpace(xlsItem.CustomerProductName) ? null : xlsItem.CustomerProductName;
 
                             m_database.Save(dbItem);
                         }

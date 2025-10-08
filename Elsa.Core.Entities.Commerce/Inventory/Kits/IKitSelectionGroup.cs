@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +28,6 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Kits
         [NVarchar(256, true)]
         string InTextMarker { get; set; }
 
-        IEnumerable<IKitSelectionGroupItem> Items { get; }
+        IEnumerable<IKitSelectionGroupItem> Items { get; }        
     }
 }

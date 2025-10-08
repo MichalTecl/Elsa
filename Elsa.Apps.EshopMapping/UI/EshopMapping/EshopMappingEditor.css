@@ -1,4 +1,4 @@
-﻿/* Head */
+/* Head */
 #eshopMappingEditorHead {
     padding-bottom: 16px;
     padding-left: 30px;
@@ -411,4 +411,9 @@
 
 .emapKitDetailView .emapKitItem:hover .emapKitItemEditBut {
     display: block;
+}
+
+.emapKitCodeButton {
+    margin-left: 20px;
+    color: blue;
 }

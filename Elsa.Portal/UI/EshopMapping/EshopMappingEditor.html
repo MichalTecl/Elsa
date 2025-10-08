@@ -1,4 +1,4 @@
-﻿<div id="eshopMappingEditorUi">
+<div id="eshopMappingEditorUi">
     
 
     <div id="eshopMappingEditorHead">
@@ -106,7 +106,8 @@
                                     <div data-bind="text:text"></div>
                                     <i class="fas fa-info-circle faButton" data-bind="class!.hidden:hasDetail" event-bind="click:onAttributeDetailClick(detailUrl)"></i>
                                 </div>
-                            </div>                            
+                            </div>  
+                            <i class="far fa-file-code faButton emapKitCodeButton" title="HTML kód sady do schránky" event-bind="click:getKitCode(VM)" ></i>
                         </div>
                         <div class="emapKitContentCont">
                             <div class="emapKitList" data-bind="itemsSource:singleProduct.KitDefinition.SelectionGroups" data-key="Id">
@@ -237,6 +238,22 @@
         this.confirmKitItemEdit = (record, newItemName) => {
             record.isEditing = false;
             app.EshopMapping.vm.updateKitItem(record.Id, newItemName);
+        };
+
+        this.getKitCode = (vm) => {
+            const kitDefinitionId = vm.singleProduct.KitDefinition.Id;
+
+            lt.api("/eshopMapping/getKitCode")
+                .query({ kitDefinitionId })
+                .get(async (code) => {
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        alert("Kód byl zkopírován do schránky.");
+                    } catch (err) {
+                        console.error("Chyba při kopírování do schránky:", err);
+                        alert("Nepodařilo se zkopírovat kód.");
+                    }
+                });
         };
 
     });
