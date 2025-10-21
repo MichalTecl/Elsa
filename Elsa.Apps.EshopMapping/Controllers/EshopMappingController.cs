@@ -99,6 +99,9 @@ namespace Elsa.Apps.EshopMapping.Controllers
             bool firstGroup = true;
             foreach (var group in kit.SelectionGroups)
             {
+                if (!group.Items.Any(i => !string.IsNullOrEmpty(i.InTextMarker)))
+                    continue;
+
                 if (!firstGroup)
                 {
                     sb.AppendLine(",");                    
