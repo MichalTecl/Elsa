@@ -82,7 +82,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
         public byte[] GenerateShipmentRequestDocument(IEnumerable<IPurchaseOrder> orders, bool uniFormat = false)
         {
             var orderList = orders.ToList();
-            _log.Info($"Zacinam vytvareni dokumentu pro Zasilkovnu, zdroj = {orderList.Count} objednavek");
+            _log.Info($"Zacinam vytvareni dokumentu pro { (uniFormat ? "DPD" : "Zasilkovnu") }, zdroj = {orderList.Count} objednavek");
 
             using (var stream = new MemoryStream())
             using (var streamWriter = new StreamWriter(stream, Encoding.UTF8))
@@ -148,6 +148,10 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                         try
                         {
                             weight = _orderWeightCalculator.GetWeight(order);
+
+                            if (weight == null)
+                                _log.Error($"Weight == null for order Id={order.Id}");
+
                         }
                         catch (Exception e)
                         {
@@ -170,7 +174,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
                             .CellOpt(dobirkovaCastka) //8 Dobírková částka
                             .CellMan(order.Currency.Symbol) //9 Měna
                             .CellMan(StringUtil.FormatDecimal(order.PriceWithVat)) //10 Hodnota zásilky
-                            .CellOpt(StringUtil.FormatDecimal(weight)) //11 Hmotnost zásilky
+                            .CellOpt(StringUtil.FormatDecimal(weight ?? 1M, 2)) //11 Hmotnost zásilky
                             .Cell(!uniFormat, pobockaId) //12 Cílová pobočka
                             .CellMan(/*"biorythme.cz"*/_config.ClientName) //13 Odesilatel
                             .CellMan(0) //14 Obsah 18+

@@ -14,7 +14,7 @@ namespace Elsa.Common.Utils
 
         private static readonly CultureInfo _czCulture = new CultureInfo("cs-CZ");
 
-        private static readonly Dictionary<char, char> s_searchStringReplacements = new Dictionary<char, char>()
+        private static readonly Dictionary<char, char> _searchStringReplacements = new Dictionary<char, char>()
                                                                             {
                                                                                     { 'á', 'a' },
                                                                                     { 'č', 'c' },
@@ -111,7 +111,7 @@ namespace Elsa.Common.Utils
                 foreach (var chr in s.Trim().ToLowerInvariant())
                 {
                     char nChar;
-                    if (!s_searchStringReplacements.TryGetValue(chr, out nChar))
+                    if (!_searchStringReplacements.TryGetValue(chr, out nChar))
                     {
                         nChar = chr;
                     }
@@ -151,26 +151,35 @@ namespace Elsa.Common.Utils
             return s.LastOrDefault();
         }
 
-        public static string FormatDecimal(decimal n)
+        public static string FormatDecimal(decimal n, int decimalPlaces = -1)
         {
+            // -1 = bez omezení; jinak zaokrouhlit na 0–28 míst
+            if (decimalPlaces >= 0)
+            {
+                int dp = Math.Min(decimalPlaces, 28);
+                n = Math.Round(n, dp, MidpointRounding.AwayFromZero);
+            }
+
             var s = n.ToString(CultureInfo.InvariantCulture);
 
-            if (s.Contains(".") || s.Contains(","))
+            s = s.Replace(',', '.');
+
+            if (s.Contains('.'))
             {
-                s = s.TrimEnd('0');
+                s = s.TrimEnd('0').TrimEnd('.');
             }
-            
-            return s.TrimEnd('.');
+
+            return s;
         }
 
-        public static string FormatDecimal(decimal? n)
+        public static string FormatDecimal(decimal? n, int decimalPlaces = 99)
         {
             if (n == null)
             {
                 return null;
             }
 
-            return FormatDecimal(n.Value);
+            return FormatDecimal(n.Value, decimalPlaces);
         }
 
         public static string FormatDecimal(decimal n, CultureInfo culture)
