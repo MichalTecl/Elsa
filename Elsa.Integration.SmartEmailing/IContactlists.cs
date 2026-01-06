@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Elsa.Integration.SmartEmailing.Messages;
 using Mtecl.ApiClientBuilder;
-using SmartEmailingApi.Client.Messages;
 
-namespace SmartEmailingApi.Client
+namespace Elsa.Integration.SmartEmailing
 {
     // TODO should be possible to put /api/v3/contactlists to interface level?
     public interface IContactlists

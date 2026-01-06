@@ -1,8 +1,8 @@
-﻿using Mtecl.ApiClientBuilder;
-using SmartEmailingApi.Client.Messages;
+using Elsa.Integration.SmartEmailing.Messages;
+using Mtecl.ApiClientBuilder;
 using System.Threading.Tasks;
 
-namespace SmartEmailingApi.Client
+namespace Elsa.Integration.SmartEmailing
 {
     public interface ITests
     {

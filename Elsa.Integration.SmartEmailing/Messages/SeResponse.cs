@@ -1,6 +1,6 @@
-﻿using Mtecl.ApiClientBuilder.Abstract;
+using Mtecl.ApiClientBuilder.Abstract;
 
-namespace SmartEmailingApi.Client.Messages
+namespace Elsa.Integration.SmartEmailing.Messages
 {
     public class SeResponse : IInjectResponseData
     {
