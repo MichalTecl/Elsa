@@ -19,6 +19,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 
             setup.For<Zasilkovna4CsvGenerator>().Use<Zasilkovna4CsvGenerator>();
             setup.For<DpdCsvGenerator>().Use<DpdCsvGenerator>();
+            setup.For<Zasilkovna8CsvGenerator>().Use<Zasilkovna8CsvGenerator>();
         }
     }
 }

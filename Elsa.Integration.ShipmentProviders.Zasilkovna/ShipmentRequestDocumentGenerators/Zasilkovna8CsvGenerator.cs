@@ -13,7 +13,7 @@ using System.Xml.Linq;
 
 namespace Elsa.Integration.ShipmentProviders.Zasilkovna.ShipmentRequestDocumentGenerators
 {
-    public class Zasilkovna4CsvGenerator : IShipmentRequestDocumentGenerator
+    public class Zasilkovna8CsvGenerator : IShipmentRequestDocumentGenerator
     {
         public static readonly string[] ZasilkovnaColIndex = new[] {  "Vyhrazeno",
                                                                         "Číslo objednávky",
@@ -33,15 +33,10 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.ShipmentRequestDocumentG
                                                                         "Dodání poštou - Ulice",
                                                                         "Dodání poštou - Číslo domu",
                                                                         "Dodání poštou - Obec",
-                                                                        "Dodání poštou - PSČ",
+                                                                        "Dodání poštou - PSČ",            
+                                                                        //"Výdejní místo dopravce", // ID výdejního místa dopravce; 	při dodání na výdejní místo dopravce
                                                                         //"Expedovat zboží",
-                                                                        "Dodání poštou - Země",
-                                                                        "MobilBP",
-                                                                        "MobilP",
-                                                                        "KontaktniOs",
-                                                                        "Dobírka",
-                                                                        "DPD_Služba",
-                                                                        "DPD_VýdejníMísto"   };
+                                                                       };
 
         private readonly ILog _log;
         private readonly IErpClientFactory _erpClientFactory;
@@ -49,9 +44,9 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.ShipmentRequestDocumentG
         private readonly ZasilkovnaClientConfig _config;
         private readonly ZasilkovnaClient _zasilkovna;
 
-        public string Symbol => "zasilkovna4";
+        public string Symbol => "zasilkovna";
 
-        public Zasilkovna4CsvGenerator(ILog log, IErpClientFactory erpClientFactory, IOrderWeightCalculator orderWeightCalculator, ZasilkovnaClientConfig config, ZasilkovnaClient zasilkovna)
+        public Zasilkovna8CsvGenerator(ILog log, IErpClientFactory erpClientFactory, IOrderWeightCalculator orderWeightCalculator, ZasilkovnaClientConfig config, ZasilkovnaClient zasilkovna)
         {
             _log = log;
             _erpClientFactory = erpClientFactory;
@@ -64,9 +59,9 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.ShipmentRequestDocumentG
         {
             fileName = $"zasilkovna_{DateTime.Now:ddMMyyyy}.csv";
 
-            _log.Info($"Zacinam vytvareni dokumentu pro Zasilkovnu (ver. 4), zdroj = {orderList.Count} objednavek");
+            _log.Info($"Zacinam vytvareni dokumentu pro Zasilkovnu (ver. 8), zdroj = {orderList.Count} objednavek");
 
-            streamWriter.WriteLine("\"verze 4\"");
+            streamWriter.WriteLine("\"version 8\"");
             streamWriter.WriteLine();
 
             var generator = new CsvGenerator(streamWriter, ZasilkovnaColIndex, false, ',');
@@ -105,7 +100,6 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna.ShipmentRequestDocumentG
                     {
                         externalDeliveryProvider = true;
 
-                        //pobockaId = GetBranches().GetPobockaId(shipmentTitle, GetShipmentMethodsMapping());
                         pobockaId = _zasilkovna.GetPobockaId(shipmentTitle, _zasilkovna.GetShipmentMethodsMapping());
                     }
                     

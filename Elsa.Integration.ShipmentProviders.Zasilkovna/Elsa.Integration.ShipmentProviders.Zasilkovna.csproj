@@ -49,6 +49,7 @@
     <Compile Include="Registry.cs" />
     <Compile Include="ShipmentRequestDocumentGenerators\DpdCsvGenerator.cs" />
     <Compile Include="ShipmentRequestDocumentGenerators\ShipmentDataHelper.cs" />
+    <Compile Include="ShipmentRequestDocumentGenerators\Zasilkovna8CsvGenerator.cs" />
     <Compile Include="ShipmentRequestDocumentGenerators\Zasilkovna4CsvGenerator.cs" />
     <Compile Include="ZasilkovnaClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
