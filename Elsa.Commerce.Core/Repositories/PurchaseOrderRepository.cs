@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -177,6 +177,19 @@ namespace Elsa.Commerce.Core.Repositories
 
             var erp = m_erpClientFactory.GetErpClient(erpId);
 
+            for (int i = orders.Count - 1; i >= 0; i--)
+            {
+                var eOrd = orders[i];
+
+                var purDate = erp.Mapper.GetPurchaseDate(eOrd);
+                if ((DateTime.Now - purDate).TotalDays > 400)
+                {
+                    m_log.Error($"ERP exported order {eOrd.OrderNumber} which has purchase date older than 400 days ({purDate}). Removing from import.");
+
+                    orders.RemoveAt(i);
+                }
+            }
+
             var loadExistingFrom = orders.Min(o => erp.Mapper.GetPurchaseDate(o));
             var loadExistingTo = orders.Max(o => erp.Mapper.GetPurchaseDate(o));
 
@@ -186,16 +199,30 @@ namespace Elsa.Commerce.Core.Repositories
                 .Where(o => o.ProjectId == m_session.Project.Id)
                 .Where(o => o.ErpId == erpId)
                 .Where(o => o.PurchaseDate >= loadExistingFrom)
+                .OrderByDesc(o => o.Id)
                 .Execute()
-                .ToDictionary(o => o.OrderNumber, o => o);
+                .ToList();
 
-            m_log.Info($"Loaded {existingOrders.Count} existing records");
+            var existingOrdersIndex = new Dictionary<string, IPurchaseOrder>(existingOrders.Count);
+
+            foreach ( var order in existingOrders)
+            {
+                if (existingOrdersIndex.ContainsKey(order.OrderNumber))
+                {
+                    m_log.Error($"Duplicity order number found in the database: {order.OrderNumber}");
+                    continue;
+                }
+
+                existingOrdersIndex[order.OrderNumber] = order;
+            }
+
+            m_log.Info($"Loaded {existingOrdersIndex.Count} existing records");
 
             var dirtyOrders = new List<IErpOrderModel>(orders.Count);
 
             foreach(var o in orders)
             {
-                if(!existingOrders.TryGetValue(o.OrderNumber, out var existingOrder))
+                if(!existingOrdersIndex.TryGetValue(o.OrderNumber, out var existingOrder))
                 {
                     m_log.Info($"Order {o.OrderNumber} is new - adding to import");
                     dirtyOrders.Add(o);

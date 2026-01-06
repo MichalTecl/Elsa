@@ -154,6 +154,8 @@
     <Compile Include="SaleEvents\SaleEventAllocationDto.cs" />
     <Compile Include="SaleEvents\SaleEventRepository.cs" />
     <Compile Include="Shipment\IShipmentProvider.cs" />
+    <Compile Include="Shipment\IShipmentRequestDocumentGenerator.cs" />
+    <Compile Include="Shipment\ShipmentRequestGeneratorFactory.cs" />
     <Compile Include="StockEvents\IStockEventRepository.cs" />
     <Compile Include="StockEvents\StockEventRepository.cs" />
     <Compile Include="Units\AmountProcessor.cs" />

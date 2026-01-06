@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,14 +19,16 @@ namespace Elsa.App.Shipment
     [Controller("shipment")]
     public class ShipmentController : ElsaControllerBase
     {
-        private readonly IOrdersFacade m_ordersFacade;
-        private readonly IShipmentProvider m_shipmentProvider;
+        private readonly IOrdersFacade _ordersFacade;
+        private readonly IShipmentProvider _shipmentProvider;
+        private readonly ShipmentRequestGeneratorFactory _shipmentRequestGeneratorFactory;
 
-        public ShipmentController(IWebSession webSession, ILog log, IOrdersFacade ordersFacade, IShipmentProvider shipmentProvider)
+        public ShipmentController(IWebSession webSession, ILog log, IOrdersFacade ordersFacade, IShipmentProvider shipmentProvider, ShipmentRequestGeneratorFactory shipmentRequestGeneratorFactory)
             : base(webSession, log)
         {
-            m_ordersFacade = ordersFacade;
-            m_shipmentProvider = shipmentProvider;
+            _ordersFacade = ordersFacade;
+            _shipmentProvider = shipmentProvider;
+            _shipmentRequestGeneratorFactory = shipmentRequestGeneratorFactory;
         }
 
         public FileResult GetShipmentRequestDocument(bool uniFormat, string provider)
@@ -36,18 +38,24 @@ namespace Elsa.App.Shipment
             if (string.IsNullOrWhiteSpace(provider))
                 throw new ArgumentNullException(nameof(provider));
 
-            var orders = m_ordersFacade.GetAndSyncPaidOrders(provider).ToList();
+            var generator = _shipmentRequestGeneratorFactory.Get(provider);
 
-            var data = m_shipmentProvider.GenerateShipmentRequestDocument(orders, uniFormat);
+            var orders = _ordersFacade.GetAndSyncPaidOrders(provider).ToList();
 
-            var xname = uniFormat ? "DPD" : "zasilkovna";
+            using (var stream = new MemoryStream())
+            using (var streamWriter = new StreamWriter(stream, Encoding.UTF8))
+            {
+                generator.Generate(orders, streamWriter, out var fileName);
 
-            return new FileResult($"{xname}_{DateTime.Now:ddMMyyyy}.csv", data);
+                streamWriter.Flush();
+
+                return new FileResult(fileName, stream.ToArray());
+            }           
         }
 
         public HtmlResult GetShipmentMethodNamesList() 
         {
-            var methods = m_shipmentProvider.GetShipmentMethodsList();
+            var methods = _shipmentProvider.GetShipmentMethodsList();
             var sb = new StringBuilder();
                         
             foreach (var sm in methods.OrderBy(m => m).Distinct())
@@ -58,7 +66,7 @@ namespace Elsa.App.Shipment
 
         public MappingDocModel GetShipmentMapping()
         {
-            var mapping = m_shipmentProvider.GetShipmentMethodsMapping();
+            var mapping = _shipmentProvider.GetShipmentMethodsMapping();
 
             var sb = new StringBuilder();
             foreach (var map in mapping)
@@ -96,7 +104,7 @@ namespace Elsa.App.Shipment
                 map[parts[0]] = parts[1];
             }
 
-            m_shipmentProvider.SetShipmentMethodsMapping(map);
+            _shipmentProvider.SetShipmentMethodsMapping(map);
 
             return GetShipmentMapping();
         }

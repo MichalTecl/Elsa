@@ -68,7 +68,7 @@ namespace BwApiClient
             q => q.GetOrderList(
                 /*lang_code:*/ null,
                 /*status:*/ QueryVariable.Pass<int>("$statusId", true),
-                /*newer_from:*/ null,
+                /*newer_from:*/ null, //QueryVariable.Pass<DateTime>("$newer_from", true, "DateTime"),
                 /*changed_from:*/ QueryVariable.Pass<DateTime>("$changedAfter", true, "DateTime"),
                 /*@params:*/ QueryVariable.Pass<OrderParams>("$params"),
                 /*filter:*/ null).With(d => d.data.With(o => o.customer
@@ -96,6 +96,7 @@ namespace BwApiClient
 
             return await Execute(_ordersChangedAfterQuery
                                     .WithVariable("$changedAfter", changedAfter ?? DateTime.MinValue)
+                                    //.WithVariable("$newer_from", DateTime.Now.AddDays(-400))
                                     .WithVariable("$params", orderParams)
                                     .WithVariable("$statusId", orderStatusId));
         }

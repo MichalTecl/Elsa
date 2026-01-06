@@ -126,6 +126,7 @@
     <Content Include="SQL\20250618_001_GetOrdersToReview.sql" />
     <Content Include="SQL\20250522_001_GetOrdersToReview.sql" />
     <Content Include="SQL\20250827_001_BulkOrdersReview.sql" />
+    <Content Include="SQL\20251112_001_ParseKitNote.sql" />
     <Content Include="UI\Inspector\ActionControls\OrderPacking\OrderNoteDetailView.html" />
     <Content Include="UI\OrdersReview\OrdersReview.css" />
     <Content Include="UI\OrdersReview\OrdersReview.html" />

@@ -47,6 +47,9 @@
     <Compile Include="Entities\IZasilkovnaShipMapping.cs" />
     <Compile Include="Model\BranchesDocument.cs" />
     <Compile Include="Registry.cs" />
+    <Compile Include="ShipmentRequestDocumentGenerators\DpdCsvGenerator.cs" />
+    <Compile Include="ShipmentRequestDocumentGenerators\ShipmentDataHelper.cs" />
+    <Compile Include="ShipmentRequestDocumentGenerators\Zasilkovna4CsvGenerator.cs" />
     <Compile Include="ZasilkovnaClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZasilkovnaClientConfig.cs" />

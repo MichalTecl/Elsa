@@ -1,4 +1,4 @@
-﻿using Elsa.App.ImportExport;
+using Elsa.App.ImportExport;
 using Elsa.Commerce.Core.Crm;
 using Elsa.Commerce.Core.CurrencyRates;
 using Elsa.Commerce.Core.Impl;
@@ -8,6 +8,7 @@ using Elsa.Commerce.Core.Production.Recipes;
 using Elsa.Commerce.Core.Repositories;
 using Elsa.Commerce.Core.Repositories.Automation;
 using Elsa.Commerce.Core.SaleEvents;
+using Elsa.Commerce.Core.Shipment;
 using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -63,6 +64,10 @@ namespace Elsa.Commerce.Core
             setup.For<MaterialReportingGroupsImpExpModule>().Use<MaterialReportingGroupsImpExpModule>();
             setup.For<AbandonedBatchRulesImpExp>().Use<AbandonedBatchRulesImpExp>();
             setup.For<IUserNickProvider>().Import.FromFactory(sl => sl.Get<IUserRepository>());
+
+            setup.Collect<IShipmentRequestDocumentGenerator>();
+
+            setup.For<ShipmentRequestGeneratorFactory>().Use<ShipmentRequestGeneratorFactory>();
         }
     }
 }
