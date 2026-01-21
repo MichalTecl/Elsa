@@ -211,14 +211,13 @@ namespace Elsa.Commerce.Core.Impl
                     }
                 }
 
+                _log.Info($"Creating OrderProcessingBlocker {OrderProcessingStageNames.BatchesAssignment} for order {order.Id} {order.OrderNumber}");
+                _orderRepository.SetProcessBlock(order, OrderProcessingStageNames.BatchesAssignment, $"Byl zahájen proces finalizace objednávky");
+
                 if (order.ErpId == null)
                 {
                     order.OrderStatusId = OrderStatus.Sent.Id;
-                    _database.Save(order);
-
-                    _log.Info($"Creating OrderProcessingBlocker {OrderProcessingStageNames.BatchesAssignment} for order {order.Id} {order.OrderNumber}");
-
-                    _orderRepository.SetProcessBlock(order, OrderProcessingStageNames.BatchesAssignment, $"Byl zahájen proces finalizace objednávky");
+                    _database.Save(order);                    
                 }
                 else
                 {
@@ -549,6 +548,11 @@ namespace Elsa.Commerce.Core.Impl
                     , subject
                     , body);
             }            
+        }
+
+        public int ProcessOrderBatch(string processCode, int pageSize, DateTime historyStart, Func<IPurchaseOrder, bool> filter, Action<List<IPurchaseOrder>> process)
+        {
+            throw new NotImplementedException();
         }
     }
 }

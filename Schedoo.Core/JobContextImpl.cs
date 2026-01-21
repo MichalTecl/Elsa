@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -18,7 +18,7 @@ namespace Schedoo.Core
             
             m_status = new JobStatus(data.GetLastJobStarted(job), m_data.GetLastJobSucceeded(job), m_data.GetLastJobFailed(job));
 
-            m_log.Append($"Created context for {job.Uid}: ");
+            //m_log.Append($"Created context for {job.Uid}: ");
         }
 
         public bool NowIsBetween(int minHour, int maxHour)

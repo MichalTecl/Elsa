@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
@@ -22,5 +22,7 @@ namespace Elsa.Commerce.Core
 
         IPurchaseOrder ResolveSingleItemKitSelection(IPurchaseOrder entity);
         IPurchaseOrder EnsureActualizedOrder(IPurchaseOrder order);
+
+        int ProcessOrderBatch(string processCode, int pageSize, DateTime historyStart, Func<IPurchaseOrder, bool> filter, Action<List<IPurchaseOrder>> process);
     }
 }
