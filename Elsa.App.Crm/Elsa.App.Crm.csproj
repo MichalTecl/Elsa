@@ -223,6 +223,8 @@
     <Content Include="SQL\20250805_001_GetDistributorOrdersOverview_fix.sql" />
     <Content Include="SQL\20250926_001_LoadAllDistributors_TotalOrdersUntaxedPrice.sql" />
     <Content Include="SQL\20250926_002_crmfilter_hasTimeoutedTag.sql" />
+    <Content Include="SQL\20260126_002_insp_customerTagTimeouted.sql" />
+    <Content Include="SQL\20260127_003_crmfilter_hasTimeoutedTag_addTagType.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
@@ -281,6 +283,7 @@
     <Content Include="UI\DistributorsApp\Tabs\DistributorNotes.html" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorOrders.css" />
     <Content Include="UI\DistributorsApp\Tabs\DistributorOrders.html" />
+    <Content Include="UI\Inspector\ActionControls\CRM\OpenCustomerCard.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
   <ItemGroup />

@@ -1,0 +1,19 @@
+<span>
+    <button id="butOpen_{%GENERATE%}" event-bind="click:Open(issueId, data, callback)">
+        Otevřít detail VO
+    </button>
+    <script>
+        lt.element("butOpen_{%GENERATE%}").attach(function () {
+            this.Open = function (issueId, data, callback) {
+
+                const newTabUrl =
+                    "/UI/DistributorsApp/DistributorsAppPage.html?customerId=" + data.CustomerId;
+
+                // otevře URL v novém tabu
+                window.open(newTabUrl, "_blank");
+
+                callback();
+            }
+        });
+    </script>
+</span>
