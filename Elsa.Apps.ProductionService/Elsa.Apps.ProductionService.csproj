@@ -114,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\20240904_001_getOneClickProductionOptions.sql" />
+    <Content Include="SQL\20260127_001_insp_materialWithoutRecipe - addIgnore.sql" />
     <Content Include="SQL\20260121_001_insp_materialWithoutRecipe.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
