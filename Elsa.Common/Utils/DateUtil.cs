@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Elsa.Common.Utils
 {
@@ -6,20 +6,14 @@ namespace Elsa.Common.Utils
     {
         public static string FormatDateWithAgo(DateTime dt, bool includeTime = false)
         {
-            var days = (int)((DateTime.Now - dt).TotalDays);
+            var days = (DateTime.Today - dt.Date).Days;
 
-            var agoWord = string.Empty;
+            string agoWord;
 
             switch (days)
             {
                 case 0:
-                    agoWord = "dnes";
-
-                    if (includeTime)
-                    {
-                        agoWord = GetTimeText(dt);
-                    }
-
+                    agoWord = includeTime ? GetTimeText(dt) : "dnes";
                     break;
                 case 1:
                     agoWord = "včera";
