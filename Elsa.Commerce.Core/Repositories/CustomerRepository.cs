@@ -685,5 +685,24 @@ namespace Elsa.Commerce.Core.Repositories
                 .Execute()
                 .FirstOrDefault();
         }
+
+        public string GetOrderRelatedMessage(int customerId)
+        {
+            var messages = _database
+                .Sql()
+                .Execute(@"SELECT DISTINCT ctt.OrderPackingMessage
+                         FROM CustomerTagAssignment asi  
+                         JOIN CustomerTagType ctt ON (asi.TagTypeId = ctt.Id) 
+                         WHERE asi.CustomerId = @customerId
+                           AND ctt.OrderPackingMessage IS NOT NULL
+                           AND (asi.UnassignDt IS NULL OR asi.UnassignDt > GETDATE())")
+                .WithParam("@customerId", customerId)
+                .MapRows<string>(r => r.GetString(0));
+
+            if (messages.Count == 0)
+                return null;
+
+            return string.Join(Environment.NewLine, messages);
+        }
     }
 }

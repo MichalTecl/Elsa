@@ -43,10 +43,6 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         }
     };
 
-    var adjustServerKitItemObject = function(kitItem) {
-        
-    };
-
     var getLocalOrderRecord = function (orderId, createNew, update) {
 
         if (!orderId) {
@@ -144,16 +140,20 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         orderItem.isKit = (!!orderItem.KitItems) && (orderItem.KitItems.length > 0);
         orderItem.isChecked = checkedItems.indexOf(orderItem.ItemId) >= 0;
 
-        for (var i = 0; i < orderItem.BatchAssignment.length; i++) {
-            var message = orderItem.BatchAssignment[i].WarningMessage;
+        const adjustBatchAssignment = (batchAssignment) => {
+            for (var i = 0; i < batchAssignment.length; i++) {
+                var message = batchAssignment[i].WarningMessage;
 
-            if (!!message) {
-                alert(message);
+                if (!!message) {
+                    alert(message);
+                }
+
+                batchAssignment[i].hasPinnedMessage = batchAssignment[i].PinnedWarningMessage != null;
             }
+        };
 
-            orderItem.BatchAssignment[i].hasPinnedMessage = orderItem.BatchAssignment[i].PinnedWarningMessage != null;
-        }
-
+        adjustBatchAssignment(orderItem.BatchAssignment);
+                
         if (orderItem.isKit) {
 
             var lastKitIndex = -1;
@@ -162,7 +162,13 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             }
 
             for (var i = 0; i < orderItem.KitItems.length; i++) {
+                                
                 var kitItem = orderItem.KitItems[i];
+
+                if (kitItem.SelectedItem !== null && kitItem.SelectedItem.BatchAssignment !== null) {
+                    adjustBatchAssignment(kitItem.SelectedItem.BatchAssignment);
+                }
+
                 kitItem.uid = kitItem.GroupId + ":" + kitItem.KitItemIndex;
 
                 kitItem.hasSelectedItem = (!!kitItem.SelectedItem);
@@ -185,6 +191,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     var adjustServerOrderObject = function (order) {
         order.hasCustomerNote = (!!order.CustomerNote) && (order.CustomerNote.length > 0);
+        order.hasCustomerRelatedMessage = (!!order.CustomerRelatedMessage) && (order.CustomerRelatedMessage.length > 0);
         order.hasInternalNote = false;
         order.displayInternalNote = true;
         order.hasDiscount = (!!order.DiscountsText) && (order.DiscountsText) && (order.DiscountsText.length > 0);

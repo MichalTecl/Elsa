@@ -56,6 +56,11 @@
                         </div>
                     </div>
                     <div id="orderNotesPanel">
+
+                        <div id="customerRelatedMessagePanel" data-bind="class!.hidden:currentOrder.hasCustomerRelatedMessage">
+                            <pre id="customerRelatedMessage" data-bind="text:currentOrder.CustomerRelatedMessage"></pre>
+                        </div>
+
                         <div class="orderDiscountsPanel" data-bind="class!.hidden:currentOrder.hasDiscount">
                             <div class="discountTitle">Sleva:</div>
                             <div class="discountText" data-bind="text:currentOrder.DiscountsText"></div>

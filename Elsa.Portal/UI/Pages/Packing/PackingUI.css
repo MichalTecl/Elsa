@@ -467,3 +467,43 @@ div:last-child.batchItemTemplate {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
+#customerRelatedMessagePanel {
+    margin: 12px 0 16px;
+    padding: 14px 18px;
+    position: relative;
+    /* důležité, ale ne stres: jemná amber */
+    background: #fff6e8;
+    border: 1px solid #f3d3a6;
+    border-left: 6px solid #e7a84e;
+    border-radius: 6px;
+    /* aby to vystoupilo nad okolní obsah */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(255,255,255,0.6);
+}
+
+    /* jemný „pruh“ nahoře – přitáhne oko bez křiku */
+    #customerRelatedMessagePanel::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 4px;
+        background: linear-gradient(90deg, rgba(231,168,78,0.55), rgba(231,168,78,0.12));
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        pointer-events: none;
+    }
+
+#customerRelatedMessage {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    white-space: pre-wrap;
+    line-height: 1.55;
+    /* o fous větší a výraznější = čitelnější periferně */
+    font-size: 15px;
+    font-weight: 600;
+    color: #2a2a2a;
+}

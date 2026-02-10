@@ -46,5 +46,6 @@ namespace Elsa.Commerce.Core.Crm
         Dictionary<int, string> GetDistributorNameIndex();
 
         IEnumerable<CustomerChanges> GetCustomerChanges(int customerId);
+        string GetOrderRelatedMessage(int customerId);
     }
 }

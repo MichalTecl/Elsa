@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 using Elsa.App.OrdersPacking.Model;
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Configuration;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Shipment;
 using Elsa.Commerce.Core.VirtualProducts;
@@ -34,6 +35,7 @@ namespace Elsa.App.OrdersPacking
         private readonly IDatabase _database;
         private readonly OrdersSystemConfig _config;
         private readonly ICache _cache;
+        private readonly ICustomerRepository _customerRepository;
 
         public PackingController(
             IWebSession webSession,
@@ -45,7 +47,7 @@ namespace Elsa.App.OrdersPacking
             IErpClientFactory erpClientFactory,
             IMaterialBatchFacade batchFacade,
             IDatabase database,
-            IVirtualProductFacade virtualProductFacade, OrdersSystemConfig config, ICache cache)
+            IVirtualProductFacade virtualProductFacade, OrdersSystemConfig config, ICache cache, ICustomerRepository customerRepository)
             : base(webSession, log)
         {
             _orderRepository = orderRepository;
@@ -58,6 +60,7 @@ namespace Elsa.App.OrdersPacking
             _virtualProductFacade = virtualProductFacade;
             _config = config;
             _cache = cache;
+            _customerRepository = customerRepository;
         }
 
         public PackingOrderModel FindOrder(string number)
@@ -294,7 +297,13 @@ namespace Elsa.App.OrdersPacking
                                      Price = $"{StringUtil.FormatDecimal(entity.PriceWithVat)} {entity.Currency.Symbol}",
                                      PackingWarning = blocker
                                  };
-            
+
+            var customer = _customerRepository.GetCustomerByErpUid(entity.CustomerErpUid);
+            if (customer != null)
+            {
+                orderModel.CustomerRelatedMessage = _customerRepository.GetOrderRelatedMessage(customer.Id);
+            }
+
             foreach (var sourceItem in entity.Items.OrderBy(i => i.Id))
             {
                 var item = new PackingOrderItemModel
