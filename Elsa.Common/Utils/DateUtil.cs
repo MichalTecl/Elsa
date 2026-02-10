@@ -53,5 +53,22 @@ namespace Elsa.Common.Utils
             from = new DateTime(year, month, 1).Date;
             to = from.AddMonths(1).Date;
         }
+
+        public static int GetRemainingMonths(DateTime eventDate, DateTime? now = null) 
+        {
+            DateTime current = now ?? DateTime.Now;
+
+            int months =
+                (eventDate.Year - current.Year) * 12 +
+                (eventDate.Month - current.Month);
+
+            // pokud ještě nenastal den v cílovém měsíci, měsíc není celý
+            if (eventDate.Day < current.Day)
+            {
+                months--;
+            }
+
+            return months;
+        }
     }
 }

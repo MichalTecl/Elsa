@@ -34,32 +34,6 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         } else {
             setNote(null);
         }
-
-
-        /*
-        this (async load of internal note) was disabled with implementation of orders refreshing before each packing...
-        self.loadedIntNotes = {};
-
-        self.loadingInternalNote = true;
-        lt.notify();
-
-        
-        lt.api("/ordersPacking/getMostRecentInternalNote").silent().query({ "orderId": orderId }).get(function (note) {
-
-            console.log(note);
-
-            if ((!self.currentOrder) || (self.currentOrder.OrderId !== note.OrderId))
-                return; 
-
-            loadedIntNotes[orderId] = note.FieldValue;
-
-            setNote(note.FieldValue);
-
-            self.loadingInternalNote = false;           
-
-        });
-        */
-
     };
 
     var updateChecklistMode = function (items, mode) {
@@ -176,6 +150,8 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             if (!!message) {
                 alert(message);
             }
+
+            orderItem.BatchAssignment[i].hasPinnedMessage = orderItem.BatchAssignment[i].PinnedWarningMessage != null;
         }
 
         if (orderItem.isKit) {

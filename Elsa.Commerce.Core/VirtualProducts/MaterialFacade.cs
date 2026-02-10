@@ -17,13 +17,13 @@ namespace Elsa.Commerce.Core.VirtualProducts
 {
     public class MaterialFacade : IMaterialFacade
     {
-        private readonly IDatabase m_database;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly IUnitConversionHelper m_conversionHelper;
-        private readonly IVirtualProductRepository m_virtualProductRepository;
-        private readonly ISession m_session;
-        private readonly IMaterialThresholdRepository m_materialThresholdRepository;
+        private readonly IDatabase _database;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IUnitConversionHelper _conversionHelper;
+        private readonly IVirtualProductRepository _virtualProductRepository;
+        private readonly ISession _session;
+        private readonly IMaterialThresholdRepository _materialThresholdRepository;
 
         public MaterialFacade(IDatabase database,
             IMaterialRepository materialRepository,
@@ -33,96 +33,78 @@ namespace Elsa.Commerce.Core.VirtualProducts
             ISession session,
             IMaterialThresholdRepository materialThresholdRepository)
         {
-            m_database = database;
-            m_materialRepository = materialRepository;
-            m_unitRepository = unitRepository;
-            m_conversionHelper = conversionHelper;
-            m_virtualProductRepository = virtualProductRepository;
-            m_session = session;
-            m_materialThresholdRepository = materialThresholdRepository;
+            _database = database;
+            _materialRepository = materialRepository;
+            _unitRepository = unitRepository;
+            _conversionHelper = conversionHelper;
+            _virtualProductRepository = virtualProductRepository;
+            _session = session;
+            _materialThresholdRepository = materialThresholdRepository;
         }
 
-        public IExtendedMaterialModel ProcessMaterialEditRequest(int? materialId,
-            string name,
-            string nominalAmountText,
-            int materialInventoryId,
-            bool automaticBatches,
-            bool requiresPrice,
-            bool requiresProductionPrice,
-            bool requiresIncvoice,
-            bool requiresSupplierReference,
-            bool autofinalize,
-            bool canBeDigital,
-            IEnumerable<string> components,
-            string thresholdText,
-            int? daysBeforeWarnForUnused,
-            string unusedWarnMaterialType,
-            bool usageProlongsLifetime,
-            bool notAbandonedUntilNewerBatchUsed,
-            bool uniqueBatchNumbers,
-            int? orderFulfillDays,            
-            int? expirationMonths
-            )
+        public IExtendedMaterialModel ProcessMaterialEditRequest(MaterialEditRequestModel request)
         {
-            name = name?.Trim();
+            var name = request.MaterialName?.Trim();
 
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new InvalidOperationException("Materiál musí mít název");
             }
             
-            if (string.IsNullOrWhiteSpace(nominalAmountText))
+            if (string.IsNullOrWhiteSpace(request.NominalAmountText))
             {
                 throw new ArgumentException("Materiál musí mít vlastní množství a jednotku");
             }
             
-            var nominalAmountEntry = MaterialEntry.Parse(nominalAmountText, true);
+            var nominalAmountEntry = MaterialEntry.Parse(request.NominalAmountText, true);
 
             var nominalUnit = ValidateAmountUnit(nominalAmountEntry);
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var material = m_materialRepository.UpsertMaterial(
-                    materialId,
+                var material = _materialRepository.UpsertMaterial(
+                    request.MaterialId,
                     m =>
                     {
                         m.Name = name;
                         m.NominalAmount = nominalAmountEntry.Amount;
                         m.NominalUnitId = nominalUnit.Id;
-                        m.InventoryId = materialInventoryId;
-                        m.AutomaticBatches = automaticBatches;
-                        m.RequiresPrice = requiresPrice;
-                        m.RequiresProductionPrice = requiresProductionPrice;
-                        m.RequiresInvoiceNr = requiresIncvoice;
-                        m.RequiresSupplierReference = requiresSupplierReference;
-                        m.UseAutofinalization = autofinalize;
-                        m.CanBeDigitalOnly = canBeDigital;
-                        m.DaysBeforeWarnForUnused = daysBeforeWarnForUnused;
-                        m.UnusedWarnMaterialType = unusedWarnMaterialType;
-                        m.UsageProlongsLifetime = usageProlongsLifetime;
-                        m.NotAbandonedUntilNewerBatchUsed = notAbandonedUntilNewerBatchUsed;
-                        m.UniqueBatchNumbers = uniqueBatchNumbers;
-                        m.OrderFulfillDays = orderFulfillDays == 0 ? null : orderFulfillDays;
-                        m.ExpirationMonths = expirationMonths == 0 ? null : expirationMonths;
+                        m.InventoryId = request.MaterialInventoryId;
+                        m.AutomaticBatches = request.AutomaticBatches;
+                        m.RequiresPrice = request.RequiresPrice;
+                        m.RequiresProductionPrice = request.RequiresProductionPrice;
+                        m.RequiresInvoiceNr = request.RequiresInvoice;
+                        m.RequiresSupplierReference = request.RequiresSupplierReference;
+                        m.UseAutofinalization = request.Autofinalization;
+                        m.CanBeDigitalOnly = request.CanBeDigital;
+                        m.DaysBeforeWarnForUnused = request.DaysBeforeWarnForUnused;
+                        m.UnusedWarnMaterialType = string.IsNullOrWhiteSpace(request.UnusedWarnMaterialType) ? null : request.UnusedWarnMaterialType.Trim();
+                        m.UsageProlongsLifetime = request.UsageProlongsLifetime;
+                        m.NotAbandonedUntilNewerBatchUsed = request.NotAbandonedUntilNewerBatchUsed;
+                        m.UniqueBatchNumbers = request.UniqueBatchNumbers;
+                        m.OrderFulfillDays = request.OrderFulfillDays == 0 ? null : request.OrderFulfillDays;
+                        m.ExpirationMonths = request.ExpirationMonths == 0 ? null : request.ExpirationMonths;
+                        m.DistributorExpirationLimit = request.DistributorExpirationLimit == 0 ? null : request.DistributorExpirationLimit;
+                        m.RetailExpirationLimit = request.RetailExpirationLimit == 0 ? null : request.RetailExpirationLimit;
                     });
                 
-                if (thresholdText == null)
+                if (request.ThresholdText == null)
                 {
-                    m_materialThresholdRepository.DeleteThreshold(material.Id);
+                    _materialThresholdRepository.DeleteThreshold(material.Id);
                 }
                 else
                 {
                     try
                     {
-                        var thresholdEntry = MaterialEntry.Parse(thresholdText, true);
+                        var thresholdEntry = MaterialEntry.Parse(request.ThresholdText, true);
 
-                        var thresholdUnit = m_unitRepository.GetUnitBySymbol(thresholdEntry.UnitName);
+                        var thresholdUnit = _unitRepository.GetUnitBySymbol(thresholdEntry.UnitName);
                         if (thresholdUnit == null)
                         {
                             throw new InvalidOperationException($"Neznámý symbol jednotky \"{thresholdEntry.UnitName}\"");
                         }
 
-                        m_materialThresholdRepository.SaveThreshold(material.Id,
+                        _materialThresholdRepository.SaveThreshold(material.Id,
                             thresholdEntry.Amount,
                             thresholdUnit.Id);
                     }
@@ -133,15 +115,15 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 }
 
                 tx.Commit();
-                m_virtualProductRepository.CleanCache();
-                m_materialRepository.CleanCache();
-                return m_materialRepository.GetMaterialById(material.Id);
+                _virtualProductRepository.CleanCache();
+                _materialRepository.CleanCache();
+                return _materialRepository.GetMaterialById(material.Id);
             }
         }
 
         public MaterialSetupInfo GetMaterialInfo(string materialName)
         {
-            var material = m_materialRepository.GetMaterialByName(materialName);
+            var material = _materialRepository.GetMaterialByName(materialName);
             if (material == null)
             {
                 return null;
@@ -152,7 +134,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public MaterialSetupInfo GetMaterialInfo(int materialId)
         {
-            var material = m_materialRepository.GetMaterialById(materialId);
+            var material = _materialRepository.GetMaterialById(materialId);
             if (material == null)
             {
                 return null;
@@ -191,7 +173,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     for (var i = 1;; i++)
                     {
                         var e =
-                            m_database.SelectFrom<IMaterialBatch>()
+                            _database.SelectFrom<IMaterialBatch>()
                                 .Where(b => b.BatchNumber == versionedName)
                                 .Take(1)
                                 .Execute()
@@ -215,16 +197,16 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IEnumerable<MaterialSetupInfo> GetAllMaterialInfo()
         {
-            var allMaterials = m_materialRepository.GetAllMaterials(null, true).ToList();
+            var allMaterials = _materialRepository.GetAllMaterials(null, true).ToList();
 
             var basenames = new HashSet<string>(allMaterials.Where(m => m.AutomaticBatches).Select(m => $"{StringUtil.ConvertToBaseText(m.Name, '_', '_', 3)}_{DateTime.Now:yyyyMMdd}"));
 
             var mapped = new List<MaterialSetupInfo>(allMaterials.Count);
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var takenNames = m_database.SelectFrom<IMaterialBatch>()
-                    .Where(mb => mb.ProjectId == m_session.Project.Id).Where(mb => mb.BatchNumber.InCsv(basenames))
+                var takenNames = _database.SelectFrom<IMaterialBatch>()
+                    .Where(mb => mb.ProjectId == _session.Project.Id).Where(mb => mb.BatchNumber.InCsv(basenames))
                     .Execute()
                     .Select(n => n.BatchNumber)
                     .ToList();
@@ -247,7 +229,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         private IMaterialUnit ValidateAmountUnit(MaterialEntry nominalAmountEntry)
         {
-            var unit = m_unitRepository.GetUnitBySymbol(nominalAmountEntry.UnitName);
+            var unit = _unitRepository.GetUnitBySymbol(nominalAmountEntry.UnitName);
             if (unit == null)
             {
                 throw new ArgumentException($"Jednotka \"{nominalAmountEntry.UnitName}\" neexistuje");

@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Windows.Media.Animation;
+using Elsa.Commerce.Core.Crm;
 using Elsa.Commerce.Core.Model;
 using Elsa.Commerce.Core.Model.BatchPriceExpl;
 using Elsa.Commerce.Core.Production.Recipes;
@@ -30,23 +31,24 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 {
     public class MaterialBatchFacade : IMaterialBatchFacade, IBatchPriceBulkProvider
     {
-        private readonly ILog m_log;
-        private readonly IVirtualProductFacade m_virtualProductFacade;
-        private readonly IMaterialBatchRepository m_batchRepository;
-        private readonly IPurchaseOrderRepository m_orderRepository;
-        private readonly AmountProcessor m_amountProcessor;
-        private readonly ICache m_cache;
-        private readonly IDatabase m_database;
-        private readonly IPackingPreferredBatchRepository m_batchPreferrenceRepository;
-        private readonly IKitProductRepository m_kitProductRepository;
-        private readonly IUnitConversionHelper m_conversionHelper;
-        private readonly IMaterialThresholdRepository m_materialThresholdRepository;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly IStockEventRepository m_stockEventRepository;
-        private readonly ISession m_session;
-        private readonly IFixedCostRepository m_fixedCostRepository;
-        private readonly IRecipeRepository m_recipeRepository;
+        private readonly ILog _log;
+        private readonly IVirtualProductFacade _virtualProductFacade;
+        private readonly IMaterialBatchRepository _batchRepository;
+        private readonly IPurchaseOrderRepository _orderRepository;
+        private readonly AmountProcessor _amountProcessor;
+        private readonly ICache _cache;
+        private readonly IDatabase _database;
+        private readonly IPackingPreferredBatchRepository _batchPreferrenceRepository;
+        private readonly IKitProductRepository _kitProductRepository;
+        private readonly IUnitConversionHelper _conversionHelper;
+        private readonly IMaterialThresholdRepository _materialThresholdRepository;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IStockEventRepository _stockEventRepository;
+        private readonly ISession _session;
+        private readonly IFixedCostRepository _fixedCostRepository;
+        private readonly IRecipeRepository _recipeRepository;
+        private readonly ICustomerRepository _customerRepository;
 
         public MaterialBatchFacade(
             ILog log,
@@ -65,46 +67,48 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             IStockEventRepository stockEventRepository,
             ISession session,
             IFixedCostRepository fixedCostRepository,
-            IRecipeRepository recipeRepository)
+            IRecipeRepository recipeRepository,
+            ICustomerRepository customerRepository)
         {
-            m_log = log;
-            m_virtualProductFacade = virtualProductFacade;
-            m_batchRepository = batchRepository;
-            m_orderRepository = orderRepository;
-            m_amountProcessor = amountProcessor;
-            m_cache = cache;
-            m_database = database;
-            m_batchPreferrenceRepository = batchPreferrenceRepository;
-            m_kitProductRepository = kitProductRepository;
-            m_conversionHelper = conversionHelper;
-            m_materialThresholdRepository = materialThresholdRepository;
-            m_materialRepository = materialRepository;
-            m_unitRepository = unitRepository;
-            m_stockEventRepository = stockEventRepository;
-            m_session = session;
-            m_fixedCostRepository = fixedCostRepository;
-            m_recipeRepository = recipeRepository;
+            _log = log;
+            _virtualProductFacade = virtualProductFacade;
+            _batchRepository = batchRepository;
+            _orderRepository = orderRepository;
+            _amountProcessor = amountProcessor;
+            _cache = cache;
+            _database = database;
+            _batchPreferrenceRepository = batchPreferrenceRepository;
+            _kitProductRepository = kitProductRepository;
+            _conversionHelper = conversionHelper;
+            _materialThresholdRepository = materialThresholdRepository;
+            _materialRepository = materialRepository;
+            _unitRepository = unitRepository;
+            _stockEventRepository = stockEventRepository;
+            _session = session;
+            _fixedCostRepository = fixedCostRepository;
+            _recipeRepository = recipeRepository;
+            _customerRepository = customerRepository;
         }
 
         public void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity, out string batchChangeWarnMessage)
         {
             batchChangeWarnMessage = null;
-            
+                        
             var orderItem = GetAllOrderItems(order).FirstOrDefault(i => i.Id == orderItemId);
             if (orderItem == null)
             {
                 throw new InvalidOperationException("Invalid OrderItemId");
             }
 
-            var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, orderItem);
+            var materialAmount = _virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, orderItem);
             
-            var batch = m_batchRepository.GetBatchById(batchId);
+            var batch = _batchRepository.GetBatchById(batchId);
             if (batch == null)
             {
                 throw new InvalidOperationException("Invalid batch reference");
             }
 
-            if (material.MaterialId != batch.Batch.MaterialId)
+            if (materialAmount.MaterialId != batch.Batch.MaterialId)
             {
                 throw new InvalidOperationException("Batch material mismatch");
             }
@@ -118,25 +122,25 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 throw new InvalidOperationException($"Šarže '{batch.Batch?.BatchNumber}' je uzavřená");
             }
-
+                        
             ReleaseBatchAmountCache(batchId);
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var available = GetAvailableAmount(batchId);
 
-                var subtracted = m_amountProcessor.Subtract(
+                var subtracted = _amountProcessor.Subtract(
                     available,
-                    new Amount(assignmentQuantity, material.Amount.Unit));
+                    new Amount(assignmentQuantity, materialAmount.Amount.Unit));
 
                 if (subtracted.Value < 0m)
                 {
-                    throw new InvalidOperationException($"Požadované množství {new Amount(assignmentQuantity, material.Amount.Unit)} již není k dispozici v šarži {batch.Batch.BatchNumber}");
+                    throw new InvalidOperationException($"Požadované množství {new Amount(assignmentQuantity, materialAmount.Amount.Unit)} již není k dispozici v šarži {batch.Batch.BatchNumber}");
                 }
 
-                batchChangeWarnMessage = CheckChange(batchId, material);
+                batchChangeWarnMessage = CheckChange(batchId, materialAmount);
 
-                m_orderRepository.UpdateOrderItemBatch(orderItem, batchId, assignmentQuantity);
+                _orderRepository.UpdateOrderItemBatch(orderItem, batchId, assignmentQuantity);
 
                 tx.Commit();
 
@@ -150,16 +154,16 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 if (CheckBatchChange(material.MaterialId, batchId, out var oldBatchInfo))
                 {
-                    m_log.Info($"Possible batch change detected");
-                    var newBatchNr = m_batchRepository.GetBatchNumberById(batchId);
+                    _log.Info($"Possible batch change detected");
+                    var newBatchNr = _batchRepository.GetBatchNumberById(batchId);
                     if (newBatchNr == oldBatchInfo?.Item1)
                     {
-                        m_log.Info($"But the batch number is the same, so no change is needed (oldBatchId={oldBatchInfo?.Item2}, newBatchId={batchId})");
+                        _log.Info($"But the batch number is the same, so no change is needed (oldBatchId={oldBatchInfo?.Item2}, newBatchId={batchId})");
                         return null;
                     }
                     else if (oldBatchInfo == null)
                     {
-                        m_log.Info($"But there was no batch assigned yet, so no change warn needed");
+                        _log.Info($"But there was no batch assigned yet, so no change warn needed");
                         return null;
                     }
                     else
@@ -167,7 +171,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                         var oldBatchAmount = GetAvailableAmount(oldBatchInfo.Item2);
                         if (oldBatchAmount.IsZero)
                         {
-                            m_log.Info($"But the old batch was already spent, so no change warn needed");
+                            _log.Info($"But the old batch was already spent, so no change warn needed");
                             return null;
                         }
                         else
@@ -179,7 +183,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
             catch (Exception ex)
             {
-                m_log.Error("Error while checking batch change", ex);
+                _log.Error("Error while checking batch change", ex);
             }
 
             return null;
@@ -187,16 +191,16 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public Amount GetAvailableAmount(int batchId)
         {
-            return m_cache.ReadThrough(GetBatchAmountCacheKey(batchId), TimeSpan.FromMinutes(10), () =>
+            return _cache.ReadThrough(GetBatchAmountCacheKey(batchId), TimeSpan.FromMinutes(10), () =>
             {
                 var result = ExecBatchAmountProcedure(batchId, null).FirstOrDefault();
                 
                 if (result != null)
                 {
-                    return new Amount(result.Amount, m_unitRepository.GetUnit(result.UnitId));
+                    return new Amount(result.Amount, _unitRepository.GetUnit(result.UnitId));
                 }
 
-                var b = m_batchRepository.GetBatchById(batchId);
+                var b = _batchRepository.GetBatchById(batchId);
                 if (b == null)
                 {
                     throw new InvalidOperationException("Invalid entity reference");
@@ -208,8 +212,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public Amount GetAvailableAmount(BatchKey batchKey)
         {
-            var batches = m_batchRepository.GetBatches(batchKey);
-            return m_amountProcessor.Sum(batches.Select(b => GetAvailableAmount(b.Id)));
+            var batches = _batchRepository.GetBatches(batchKey);
+            return _amountProcessor.Sum(batches.Select(b => GetAvailableAmount(b.Id)));
         }
 
 
@@ -224,10 +228,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     return;
                 }
 
-                var flag = $"batchAmountCachePreloaded_for_project_{m_session.Project.Id}";
+                var flag = $"batchAmountCachePreloaded_for_project_{_session.Project.Id}";
 
                 var itsMe = Guid.NewGuid();
-                if (!m_cache.ReadThrough(flag, TimeSpan.FromMinutes(10), () => itsMe).Equals(itsMe))
+                if (!_cache.ReadThrough(flag, TimeSpan.FromMinutes(10), () => itsMe).Equals(itsMe))
                 {
                     //it returned another Guid so it was already preloaded in last 10 minutes
                     return;
@@ -237,8 +241,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                 foreach (var res in results)
                 {
-                    m_cache.ReadThrough(GetBatchAmountCacheKey(res.BatchId), TimeSpan.FromMinutes(10),
-                        () => new Amount(res.Amount, m_unitRepository.GetUnit(res.UnitId)));
+                    _cache.ReadThrough(GetBatchAmountCacheKey(res.BatchId), TimeSpan.FromMinutes(10),
+                        () => new Amount(res.Amount, _unitRepository.GetUnit(res.UnitId)));
                 }
             }
             finally
@@ -254,9 +258,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public BatchKey FindBatchBySearchQuery(int materialId, string query)
         {
-            var found = m_database.Sql()
+            var found = _database.Sql()
                 .Call("GetAvailableBatchesByNrLike")
-                .WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@projectId", _session.Project.Id)
                 .WithParam("@materialId", materialId)
                 .WithParam("@batchNrLike", $"%{query}")
                 .MapRows<string>(r => r.GetString(0))
@@ -282,9 +286,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             var preferrences = new HashSet<int>();
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var order = m_orderRepository.GetOrder(purchaseOrderId);
+                var order = _orderRepository.GetOrder(purchaseOrderId);
                 var allItems = GetAllOrderItems(order);
 
                 foreach (var item in allItems)
@@ -304,7 +308,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 {
                     if (GetAvailableAmount(pref).IsPositive)
                     {
-                        m_batchPreferrenceRepository.SetBatchPreferrence(new BatchKey(pref));
+                        _batchPreferrenceRepository.SetBatchPreferrence(new BatchKey(pref));
                     }
                 }
 
@@ -350,10 +354,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                 foreach (var toDel in group.Where(i => i.Id != sumAsig.Id))
                 {
-                    m_database.Delete(toDel);
+                    _database.Delete(toDel);
                 }
 
-                m_database.Save(sumAsig);
+                _database.Save(sumAsig);
             }
 
             return result;
@@ -364,7 +368,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             string batchNumber,
             decimal? requestNewAmount)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var item = GetAllOrderItems(order).FirstOrDefault(i => i.Id == orderItemId);
                 if (item == null)
@@ -380,7 +384,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     throw new InvalidOperationException("Invalid batch id");
                 }
                 
-                m_database.DeleteAll(oldAssignments);
+                _database.DeleteAll(oldAssignments);
             
                 foreach (var oldAssignment in oldAssignments)
                 {
@@ -395,10 +399,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             try
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     var existingComposition =
-                        m_database.SelectFrom<IMaterialBatchComposition>()
+                        _database.SelectFrom<IMaterialBatchComposition>()
                             .Where(c => (c.ComponentId == componentBatchId) && (c.CompositionId == parentBatchId))
                             .Execute()
                             .FirstOrDefault();
@@ -409,13 +413,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     }
 
 
-                    var composition = m_database.New<IMaterialBatchComposition>();
+                    var composition = _database.New<IMaterialBatchComposition>();
                     composition.CompositionId = parentBatchId;
                     composition.ComponentId = componentBatchId;
                     composition.Volume = amountToAssign.Value;
                     composition.UnitId = amountToAssign.Unit.Id;
 
-                    m_database.Save(composition);
+                    _database.Save(composition);
 
                     tx.Commit();
                 }
@@ -431,14 +435,14 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             try
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     var compositions =
-                        m_database.SelectFrom<IMaterialBatchComposition>()
+                        _database.SelectFrom<IMaterialBatchComposition>()
                             .Where(c => (c.ComponentId == componentBatchId) && (c.CompositionId == parentBatchId))
                             .Execute();
 
-                    m_database.DeleteAll(compositions);
+                    _database.DeleteAll(compositions);
 
                     tx.Commit();
                 }
@@ -456,7 +460,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             if (batchId == null)
             {
-                batches.AddRange(m_batchRepository.GetMaterialBatches(
+                batches.AddRange(_batchRepository.GetMaterialBatches(
                     DateTime.Now.AddYears(-1),
                     DateTime.Now.AddYears(1),
                     false,
@@ -464,7 +468,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             }
             else
             {
-                var batch = m_batchRepository.GetBatchById(batchId.Value).Ensure();
+                var batch = _batchRepository.GetBatchById(batchId.Value).Ensure();
                 if (batch.Batch.MaterialId != materialId)
                 {
                     throw new InvalidOperationException("Invalid entity reference");
@@ -486,11 +490,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     continue;
                 }
 
-                var amountToAllocate = m_amountProcessor.Min(requiredAmount, batchAvailableAmount);
+                var amountToAllocate = _amountProcessor.Min(requiredAmount, batchAvailableAmount);
 
                 yield return new Tuple<IMaterialBatch, Amount>(batch.Batch, amountToAllocate);
 
-                requiredAmount = m_amountProcessor.Subtract(requiredAmount, amountToAllocate);
+                requiredAmount = _amountProcessor.Subtract(requiredAmount, amountToAllocate);
             }
 
             if (requiredAmount.IsPositive && unresolvedAsNullBatch)
@@ -501,10 +505,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public void SetBatchLock(int batchId, bool lockValue, string note)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
 
-                var batch = m_batchRepository.GetBatchById(batchId)?.Batch;
+                var batch = _batchRepository.GetBatchById(batchId)?.Batch;
                 if (batch == null)
                 {
                     throw new InvalidOperationException("Pozadovana sarze neni dostupna");
@@ -525,7 +529,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 batch.LockDt = DateTime.Now;
                 batch.LockReason = note ?? string.Empty;
 
-                m_database.Save(batch);
+                _database.Save(batch);
 
                 tx.Commit();
             }
@@ -533,31 +537,31 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         
         public void DeleteBatch(int batchId)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var batch = m_batchRepository.GetBatchById(batchId);
+                var batch = _batchRepository.GetBatchById(batchId);
                 if (batch == null)
                 {
                     throw new InvalidOperationException("šarže neexistuje");
                 }
 
-                var relatedOrder = m_orderRepository.GetOrdersByMaterialBatch(batchId).FirstOrDefault(o => !OrderStatus.IsUnsuccessfullyClosed(o.OrderStatusId));
+                var relatedOrder = _orderRepository.GetOrdersByMaterialBatch(batchId).FirstOrDefault(o => !OrderStatus.IsUnsuccessfullyClosed(o.OrderStatusId));
                 if (relatedOrder != null)
                 {
                     throw new InvalidOperationException($"Není možné smazat šarži, protože byla již použita v objednávce {relatedOrder.OrderNumber}");
                 }
 
-                var dependeingBatch = m_batchRepository.GetCompositionsByComponentBatchId(batchId).FirstOrDefault();
+                var dependeingBatch = _batchRepository.GetCompositionsByComponentBatchId(batchId).FirstOrDefault();
                 if (dependeingBatch != null)
                 {
-                    var dependingBatchEntity = m_batchRepository.GetBatchById(dependeingBatch.CompositionId);
+                    var dependingBatchEntity = _batchRepository.GetBatchById(dependeingBatch.CompositionId);
                     throw new InvalidOperationException($"Není možné smazat šarži, protože je již součástí šarže {dependingBatchEntity.Batch.BatchNumber}");
                 }
 
-                var toDel = m_database.SelectFrom<IMaterialBatchComposition>().Where(c => c.CompositionId == batchId).Execute().ToList();
+                var toDel = _database.SelectFrom<IMaterialBatchComposition>().Where(c => c.CompositionId == batchId).Execute().ToList();
                 
-                m_database.DeleteAll(toDel);
-                m_database.Delete(batch.Batch);
+                _database.DeleteAll(toDel);
+                _database.Delete(batch.Batch);
 
                 foreach (var compo in toDel)
                 {
@@ -572,9 +576,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public void DeleteBatch(BatchKey batchKey)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                foreach (var b in m_batchRepository.GetBatches(batchKey))
+                foreach (var b in _batchRepository.GetBatches(batchKey))
                 {
                     DeleteBatch(b.Id);
                 }
@@ -595,7 +599,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         
         public IEnumerable<MaterialLevelModel> GetMaterialLevels(bool includeUnwatched = false)
         {
-            var materialIds = includeUnwatched ? m_materialRepository.GetAllMaterials(null, false).Select(m => m.Id) : m_materialThresholdRepository.GetAllThresholds().Select(t => t.MaterialId);
+            var materialIds = includeUnwatched ? _materialRepository.GetAllMaterials(null, false).Select(m => m.Id) : _materialThresholdRepository.GetAllThresholds().Select(t => t.MaterialId);
 
             foreach (var materialId in materialIds)
             {
@@ -607,10 +611,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             PreloadBatchAmountCache();
 
-            return m_cache.ReadThrough(GetMaterialLevelCacheKey(materialId), TimeSpan.FromDays(1),
+            return _cache.ReadThrough(GetMaterialLevelCacheKey(materialId), TimeSpan.FromDays(1),
                 () =>
                 {
-                    var material = m_materialRepository.GetMaterialById(materialId);
+                    var material = _materialRepository.GetMaterialById(materialId);
                     if (material == null)
                     {
                         return null;
@@ -618,20 +622,20 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     var amount = new Amount(0, material.NominalUnit);
 
                     var batches =
-                        m_batchRepository.GetBatchIds(DateTime.Now.AddYears(-10),
+                        _batchRepository.GetBatchIds(DateTime.Now.AddYears(-10),
                             DateTime.Now.AddYears(1),
                             materialId:material.Id);
 
                     foreach (var batchId in batches)
                     {
-                        amount = m_amountProcessor.Add(amount, GetAvailableAmount(batchId));
+                        amount = _amountProcessor.Add(amount, GetAvailableAmount(batchId));
                     }
                     
-                    var threshold = m_materialThresholdRepository.GetThreshold(materialId) ?? CreateFakeThreshold(material, amount);
+                    var threshold = _materialThresholdRepository.GetThreshold(materialId) ?? CreateFakeThreshold(material, amount);
 
                     var amountUnitThreshold =
-                        m_conversionHelper.ConvertAmount(
-                            new Amount(threshold.ThresholdQuantity, m_unitRepository.GetUnit(threshold.UnitId)),
+                        _conversionHelper.ConvertAmount(
+                            new Amount(threshold.ThresholdQuantity, _unitRepository.GetUnit(threshold.UnitId)),
                             amount.Unit.Id);
 
                     return new MaterialLevelModel
@@ -678,9 +682,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public int GetMaterialIdByBatchId(int batchId)
         {
-            return m_cache.ReadThrough($"batchMaterial{batchId}",
+            return _cache.ReadThrough($"batchMaterial{batchId}",
                 TimeSpan.FromHours(1), () =>
-                m_database.SelectFrom<IMaterialBatch>()
+                _database.SelectFrom<IMaterialBatch>()
                     .Where(b => b.Id == batchId)
                     .Execute()
                     .FirstOrDefault()?.MaterialId ?? -1);
@@ -688,13 +692,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public BatchEventAmountSuggestions GetEventAmountSuggestions(int eventTypeId, int batchId)
         {
-            var eventType = m_stockEventRepository.GetAllEventTypes().FirstOrDefault(e => e.Id == eventTypeId);
+            var eventType = _stockEventRepository.GetAllEventTypes().FirstOrDefault(e => e.Id == eventTypeId);
             if (eventType == null)
             {
                 return null;
             }
 
-            var batch = m_batchRepository.GetBatchById(batchId);
+            var batch = _batchRepository.GetBatchById(batchId);
             if (batch == null)
             {
                 return null;
@@ -719,7 +723,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public IEnumerable<IMaterialBatch> FindBatchesWithMissingInvoiceItem(int inventoryId)
         {
-            var ids = m_database.Sql().ExecuteWithParams(@"SELECT DISTINCT mb.Id
+            var ids = _database.Sql().ExecuteWithParams(@"SELECT DISTINCT mb.Id
             FROM MaterialBatch mb
                 INNER JOIN Material      m ON(m.Id = mb.MaterialId)
             WHERE mb.ProjectId = {0}
@@ -727,19 +731,19 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             AND NOT EXISTS(SELECT TOP 1 1
             FROM InvoiceFormItemMaterialBatch ib
                 WHERE ib.MaterialBatchId = mb.Id)",
-                m_session.Project.Id,
+                _session.Project.Id,
                 inventoryId).MapRows(r => r.GetInt32(0));
 
-            return ids.Select(id => m_batchRepository.GetBatchById(id).Batch);
+            return ids.Select(id => _batchRepository.GetBatchById(id).Batch);
         }
 
         public IEnumerable<IMaterialBatch> FindNotClosedBatches(int inventoryId, DateTime from, DateTime to, Func<IMaterialBatch, bool> filter = null)
         {
-            return m_batchRepository
+            return _batchRepository
                 .QueryBatches(q =>
                     q.Join(b => b.Material).Where(b => b.Material.InventoryId == inventoryId)
                         .Where(b => (b.Created >= from) && (b.Created < to)).Where(b => b.CloseDt == null)).Where(b => filter?.Invoke(b) != false)
-                .Select(b => m_batchRepository.GetBatchById(b.Id).Batch);
+                .Select(b => _batchRepository.GetBatchById(b.Id).Batch);
         }
         
         public BatchAccountingDate GetBatchAccountingDate(IMaterialBatch batch)
@@ -780,9 +784,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             var materialId = GetMaterialIdByBatchId(batchId);
             
-            m_cache.Remove(GetMaterialLevelCacheKey(materialId));
-            m_cache.Remove(GetBatchStatusCacheKey(batchId));
-            m_cache.Remove(GetBatchAmountCacheKey(batchId));
+            _cache.Remove(GetMaterialLevelCacheKey(materialId));
+            _cache.Remove(GetBatchStatusCacheKey(batchId));
+            _cache.Remove(GetBatchAmountCacheKey(batchId));
 
             InvalidateBatchesDependantCaches();
         }
@@ -793,7 +797,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             foreach (var orderItem in order.Items)
             {
-                var kitItems = m_kitProductRepository.GetKitForOrderItem(order, orderItem).ToList();
+                var kitItems = _kitProductRepository.GetKitForOrderItem(order, orderItem).ToList();
 
                 if (!kitItems.Any())
                 {
@@ -828,7 +832,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             
             foreach (var orderItem in items)
             {
-                var material = m_virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, orderItem);
+                var material = _virtualProductFacade.GetOrderItemMaterialForSingleUnit(order, orderItem);
 
                 var adHocPreferrence = orderItemBatchPreference;
                 if (adHocPreferrence?.Item1 != orderItem.Id)
@@ -842,13 +846,13 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 foreach (var assignment in orderItem.AssignedBatches)
                 {
                     var assignedAmount = new Amount(assignment.Quantity, material.Amount.Unit);
-                    amountToAllocate = m_amountProcessor.Subtract(amountToAllocate, assignedAmount);
+                    amountToAllocate = _amountProcessor.Subtract(amountToAllocate, assignedAmount);
 
                     result.Add(new OrderItemBatchAssignmentModel()
                     {
                         AssignedQuantity = assignment.Quantity,
                         MaterialBatchId = assignment.MaterialBatchId,
-                        BatchNumber = m_batchRepository.GetBatchById(assignment.MaterialBatchId)?.Batch?.BatchNumber,
+                        BatchNumber = _batchRepository.GetBatchById(assignment.MaterialBatchId)?.Batch?.BatchNumber,
                         OrderItemId = orderItem.Id,
                     });
                 }
@@ -860,34 +864,34 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                 }
 
                 //2. assignment by preferrence
-                var preferredBatchNumber = m_batchPreferrenceRepository.GetPrefferedBatchNumber(material.MaterialId);
+                var preferredBatchNumber = _batchPreferrenceRepository.GetPrefferedBatchNumber(material.MaterialId);
 
                 if (adHocPreferrence != null)
                 {
-                    preferredBatchNumber = adHocPreferrence.Item2.GetBatchNumber(m_batchRepository);
+                    preferredBatchNumber = adHocPreferrence.Item2.GetBatchNumber(_batchRepository);
                 }
 
                 if (preferredBatchNumber != null)
                 {
                     var preferredBatchesKey = new BatchKey(material.MaterialId, preferredBatchNumber);
-                    var preferredBatches = m_batchRepository.GetBatches(preferredBatchesKey).ToList();
+                    var preferredBatches = _batchRepository.GetBatches(preferredBatchesKey).ToList();
 
                     foreach (var preferredBatch in preferredBatches)
                     {
                         var availableBatchAmount = GetAvailableAmount(preferredBatch.Id);
                         if (availableBatchAmount.Value > 0m)
                         {
-                            var allocateByPreferrence = m_amountProcessor.Min(amountToAllocate, availableBatchAmount);
+                            var allocateByPreferrence = _amountProcessor.Min(amountToAllocate, availableBatchAmount);
 
                             if (adHocPreferrence != null)
                             {
                                 allocateByPreferrence =
-                                    m_amountProcessor.Min(
+                                    _amountProcessor.Min(
                                         new Amount(adHocPreferrence.Item3, material.Amount.Unit),
                                         allocateByPreferrence);
                             }
 
-                            amountToAllocate = m_amountProcessor.Subtract(amountToAllocate, allocateByPreferrence);
+                            amountToAllocate = _amountProcessor.Subtract(amountToAllocate, allocateByPreferrence);
 
                             var assignment = new OrderItemBatchAssignmentModel()
                             {
@@ -900,12 +904,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                             result.Add(assignment);
 
                             AssignOrderItemToBatch(preferredBatch.Id, order, orderItem.Id, allocateByPreferrence.Value, out var batchChangeWarnMessage);
-                            assignment.WarningMessage = batchChangeWarnMessage;
+                            assignment.WarningMessage = batchChangeWarnMessage;                            
                         }
 
                         if (availableBatchAmount.IsNotPositive)
                         {
-                            m_batchPreferrenceRepository.InvalidatePreferrenceByMaterialId(material.MaterialId);
+                            _batchPreferrenceRepository.InvalidatePreferrenceByMaterialId(material.MaterialId);
                         }
                     }
                 }
@@ -929,11 +933,40 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             {
                 if (doNotRetry)
                 {
-                    m_log.Error("Second attempt to AlignOrderBatches failed");
+                    _log.Error("Second attempt to AlignOrderBatches failed");
                 }
                 else
                 {
-                    return TryResolveBatchAssignmentsPrivate(m_orderRepository.GetOrder(order.Id), orderItemBatchPreference, true).ToList();
+                    return TryResolveBatchAssignmentsPrivate(_orderRepository.GetOrder(order.Id), orderItemBatchPreference, true).ToList();
+                }
+            }
+
+            foreach(var assignment in result)
+            {
+                if (assignment.MaterialBatchId == -1)
+                    continue;
+
+                var batch = _batchRepository.GetBatchById(assignment.MaterialBatchId);
+                if (batch == null)
+                    continue;
+
+                var material = batch.Batch.Material ?? _materialRepository.GetMaterialById(batch.Batch.MaterialId)?.Adaptee;
+
+                if (material.ExpirationMonths != null)
+                {
+                    var customer = _customerRepository.GetCustomerByErpUid(order.CustomerErpUid);
+                    var isDistributor = (customer?.IsDistributor == true);
+
+                    var expDate = batch.Batch.Created.AddMonths(material.ExpirationMonths.Value);
+
+                    var monthsToExpiration = DateUtil.GetRemainingMonths(expDate);
+
+                    var expLimit = (isDistributor ? (material.DistributorExpirationLimit ?? material.RetailExpirationLimit) : (material.RetailExpirationLimit ?? material.DistributorExpirationLimit)) ?? 0;
+
+                    if (monthsToExpiration <= expLimit)
+                    {
+                        assignment.PinnedWarningMessage = $"Zbývá {monthsToExpiration} měsíců do expirace. Limit pro {(isDistributor ? "velkoodběratele" : "maloodběratele")} je {expLimit} měs.";
+                    }
                 }
             }
 
@@ -944,7 +977,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             var batchPrice = GetBatchPrice(batch, provider);
 
-            var totalAmount = m_conversionHelper.ConvertAmount(new Amount(batchPrice.Batch.Volume, m_unitRepository.GetUnit(batchPrice.Batch.UnitId)), amount.Unit.Id);
+            var totalAmount = _conversionHelper.ConvertAmount(new Amount(batchPrice.Batch.Volume, _unitRepository.GetUnit(batchPrice.Batch.UnitId)), amount.Unit.Id);
             var pricePerUnit = batchPrice.TotalPriceInPrimaryCurrency / totalAmount.Value;
 
             return new Tuple<decimal, BatchPrice>(pricePerUnit * amount.Value, batchPrice);
@@ -952,11 +985,11 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public Amount GetNumberOfProducedProducts(int accountingDateYear, int accountingDateMonth, int inventoryId)
         {
-            var allBatches = m_database.SelectFrom<IMaterialBatch>().Join(b => b.Material)
-                .Where(b => b.ProjectId == m_session.Project.Id).Where(b => b.CloseDt == null)
+            var allBatches = _database.SelectFrom<IMaterialBatch>().Join(b => b.Material)
+                .Where(b => b.ProjectId == _session.Project.Id).Where(b => b.CloseDt == null)
                 .Where(b => b.Material.InventoryId == inventoryId).Execute();
 
-            return m_amountProcessor.Sum(allBatches.Where(b =>
+            return _amountProcessor.Sum(allBatches.Where(b =>
             {
                 var ad = GetBatchAccountingDate(b);
                 
@@ -969,7 +1002,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         public void ReleaseUnsentOrdersAllocations()
         {
             var releasedBatches = new List<int>();
-            m_database.Sql()
+            _database.Sql()
                 .Call("sp_deallocateUnpackOrderBatches")
                 .ReadRows<int>(i => releasedBatches.Add(i));
 
@@ -986,7 +1019,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         /// <param name="key"></param>
         public void CutOrderAllocation(long orderId, BatchKey key)
         {
-            var order = m_orderRepository.GetOrder(orderId).Ensure();
+            var order = _orderRepository.GetOrder(orderId).Ensure();
 
             if (OrderStatus.IsSent(order.OrderStatusId))
             {
@@ -1013,10 +1046,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
             
             if (!assignmentsToCut.Any())
             {
-                m_log.Error($"CutOrderAllocation - no allocations found orderId={orderId}, key={key?.ToString(this)}");
+                _log.Error($"CutOrderAllocation - no allocations found orderId={orderId}, key={key?.ToString(this)}");
             }
 
-            m_database.DeleteAll(assignmentsToCut);
+            _database.DeleteAll(assignmentsToCut);
 
             foreach (var cutBatchId in assignmentsToCut.Select(a => a.MaterialBatchId).Distinct())
             {
@@ -1026,15 +1059,15 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public IEnumerable<Tuple<int?, Amount>> ProposeAllocations(int materialId, string batchNumber, Amount requestedAmount)
         {
-            var query = m_database.SelectFrom<IMaterialBatch>()
+            var query = _database.SelectFrom<IMaterialBatch>()
                 .Where(b => b.CloseDt == null)
-                .Where(b => b.ProjectId == m_session.Project.Id)
+                .Where(b => b.ProjectId == _session.Project.Id)
                 .Where(b => b.MaterialId == materialId)
                 .OrderBy(b => b.Created);
 
             if (string.IsNullOrWhiteSpace(batchNumber))
             {
-                var material = m_materialRepository.GetMaterialById(materialId).Ensure();
+                var material = _materialRepository.GetMaterialById(materialId).Ensure();
                 if (!material.AutomaticBatches)
                 {
                     throw new InvalidOperationException("Chybi cislo sarze");
@@ -1061,9 +1094,9 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                     continue;
                 }
 
-                var allocatedFromThisBatch = m_amountProcessor.Min(available, requestedAmount);
+                var allocatedFromThisBatch = _amountProcessor.Min(available, requestedAmount);
 
-                requestedAmount = m_amountProcessor.Subtract(requestedAmount, allocatedFromThisBatch);
+                requestedAmount = _amountProcessor.Subtract(requestedAmount, allocatedFromThisBatch);
 
                 yield return new Tuple<int?, Amount>(b.Id, allocatedFromThisBatch);
             }
@@ -1086,8 +1119,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             var batchCreated = new Dictionary<string, DateTime>();
 
-            m_database.Sql().Call("GetMaterialResolution")
-                .WithParam("@projectId", m_session.Project.Id)
+            _database.Sql().Call("GetMaterialResolution")
+                .WithParam("@projectId", _session.Project.Id)
                 .WithParam("@materialId", materialId)
                 .WithParam("@createdBefore", batchesProducedBefore)
                 .WithParam("@ignoreExistenceOfThisBatch", ignoreExistenceOfBatchId)
@@ -1109,7 +1142,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
                             batchCreated[batchNumber.ToLowerInvariant()] =  dateA > created ? dateA : created;
                         }
 
-                        batchIdNumberAmount.Add(new Tuple<int, string, Amount>(batchId, batchNumber, new Amount(available, m_unitRepository.GetUnit(unitId))));
+                        batchIdNumberAmount.Add(new Tuple<int, string, Amount>(batchId, batchNumber, new Amount(available, _unitRepository.GetUnit(unitId))));
                     });
 
             if (!string.IsNullOrWhiteSpace(batchNumberOrNull) && batchNumberIsPreferrence)
@@ -1122,17 +1155,17 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             foreach (var src in batchIdNumberAmount)
             {
-                var canAllocateToThisBatch = m_amountProcessor.Min(demand, src.Item3);
+                var canAllocateToThisBatch = _amountProcessor.Min(demand, src.Item3);
                 batchIdNumberTotalAllocated.Add(new Tuple<int, string, Amount, Amount>(src.Item1, src.Item2, src.Item3, canAllocateToThisBatch));
 
-                demand = m_amountProcessor.Subtract(demand, canAllocateToThisBatch);
+                demand = _amountProcessor.Subtract(demand, canAllocateToThisBatch);
                 if ((!includeBatchesWithoutAllocation) && (!demand.IsPositive))
                 {
                     break;
                 }
             }
 
-            var result = new AllocationRequestResult(materialId, demand.IsNotPositive, m_amountProcessor.Sum(batchIdNumberTotalAllocated.Select(a => a.Item4)), demand);
+            var result = new AllocationRequestResult(materialId, demand.IsNotPositive, _amountProcessor.Sum(batchIdNumberTotalAllocated.Select(a => a.Item4)), demand);
 
             foreach (var batchNumber in batchIdNumberTotalAllocated.Select(b => b.Item2).Distinct())
             {
@@ -1143,8 +1176,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                 result.Allocations.Add(new BatchAllocation(
                     batchNumber, 
-                    m_amountProcessor.Sum(thisBatchNrAllocations.Select(a => a.Item3)),
-                    m_amountProcessor.Sum(thisBatchNrAllocations.Select(a => a.Item4)),
+                    _amountProcessor.Sum(thisBatchNrAllocations.Select(a => a.Item3)),
+                    _amountProcessor.Sum(thisBatchNrAllocations.Select(a => a.Item4)),
                     thisBatchNrAllocations.Select(a => new Tuple<int, Amount>(a.Item1, a.Item4)).ToList()
                     , dt));
             }
@@ -1156,10 +1189,10 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             var result = new List<PriceComponentModel>();
 
-            m_database.Sql().Call("GetBatchPriceComponents")
+            _database.Sql().Call("GetBatchPriceComponents")
                 .WithParam("@batchId", batchId)
-                .WithParam("@projectId", m_session.Project.Id)
-                .WithParam("@culture", m_session.Culture)
+                .WithParam("@projectId", _session.Project.Id)
+                .WithParam("@culture", _session.Culture)
                 .ReadRows<int, string, decimal, bool, int?>((bId, txt, val, wrn, sourceBatchId) => result.Add(new PriceComponentModel(bId)
                 {
                     IsWarning = wrn,
@@ -1196,7 +1229,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public IEnumerable<PriceComponentModel> GetPriceComponents(BatchKey key)
         {
-            var batches = m_batchRepository.GetBatches(key).Select(b => b.Id);
+            var batches = _batchRepository.GetBatches(key).Select(b => b.Id);
 
             var result = new List<PriceComponentModel>();
 
@@ -1239,15 +1272,15 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public IBatchPriceBulkProvider CreatPriceBulkProvider(DateTime from, DateTime to)
         {
-            return new BatchPriceBulkProvider(m_database, m_session, this, from, to);
+            return new BatchPriceBulkProvider(_database, _session, this, from, to);
         }
 
         private IList<BatchAmountProcedureResult> ExecBatchAmountProcedure(int? batchId, int? materialId)
         {
             var result = new List<BatchAmountProcedureResult>();
 
-            m_database.Sql().Call("CalculateBatchUsages")
-                .WithParam("@ProjectId", m_session.Project.Id)
+            _database.Sql().Call("CalculateBatchUsages")
+                .WithParam("@ProjectId", _session.Project.Id)
                 .WithParam("@batchId", batchId)
                 .WithParam("@materialId", materialId)
                 .ReadRows<int, int, decimal>((bId, unitId, amount) =>
@@ -1300,12 +1333,12 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
         public Tuple<int, string> GetBatchNumberAndMaterialIdByBatchId(int batchId)
         {
-            return m_batchRepository.GetBatchNumberAndMaterialIdByBatchId(batchId);
+            return _batchRepository.GetBatchNumberAndMaterialIdByBatchId(batchId);
         }
 
         private bool CheckBatchChange(int materialId, int newBatchId, out Tuple<string, int> oldBatch)
         {
-            var ckey = $"batchAssignments_{m_session.Project.Id}";
+            var ckey = $"batchAssignments_{_session.Project.Id}";
             //var currentAssignments = m_cache.ReadThrough<Dictionary<int, Tuple<string, int>>>(ckey, TimeSpan.FromHours(1),
             //    () => LoadCurrentBatchAssignments());
 
@@ -1313,8 +1346,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
             if ((!currentAssignments.TryGetValue(materialId, out oldBatch)) || (oldBatch.Item2 != newBatchId))
             {
-                m_log.Info($"Batch assignment change - now using '{newBatchId}' instead of previously used '{oldBatch?.Item2}'. (MaterialId={materialId})");
-                m_cache.Remove(ckey);
+                _log.Info($"Batch assignment change - now using '{newBatchId}' instead of previously used '{oldBatch?.Item2}'. (MaterialId={materialId})");
+                _cache.Remove(ckey);
                 return true;
             }
 
@@ -1325,7 +1358,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             var res = new Dictionary<int, Tuple<string, int>>();
 
-            m_database.Sql().Execute(@"SELECT mb.MaterialId, mb.BatchNumber, mb.Id BatchId
+            _database.Sql().Execute(@"SELECT mb.MaterialId, mb.BatchNumber, mb.Id BatchId
                                           FROM OrderItemMaterialBatch oimb
                                           JOIN MaterialBatch mb ON (oimb.MaterialBatchId = mb.Id)
                                           JOIN (SELECT  
@@ -1334,7 +1367,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 		                                          JOIN MaterialBatch mb ON (oimb.MaterialBatchId = mb.Id)
 		                                         GROUP BY mb.MaterialId) la ON (la.MaterialId = mb.MaterialId AND la.lastAss = oimb.AssignmentDt)
                                          WHERE mb.ProjectId = @projectId")
-                .WithParam("@projectId", m_session.Project.Id)
+                .WithParam("@projectId", _session.Project.Id)
                 .ReadRows<int, string, int>((materialId, batchNumber, batchId) => res[materialId] = new Tuple<string, int>(batchNumber, batchId));
 
             return res;
@@ -1343,7 +1376,7 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         public IEnumerable<OneClickProductionOption> GetOneClickProductionOptions()
         {
             var unfilteredOptions = LoadOneClickProdOptions();
-            var userRecipes = m_recipeRepository.GetRecipes();
+            var userRecipes = _recipeRepository.GetRecipes();
 
             foreach (var option in unfilteredOptions)
             {            
@@ -1358,20 +1391,20 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
         {
             var cacheKey = CreateCacheKeyDependantOnBatches("OneClickProductionOptions");
 
-            return m_cache.ReadThrough(cacheKey, TimeSpan.FromSeconds(10), () =>  
-                m_database.Sql().Call("GetOneClickProductionOptions")
-                    .WithParam("@projectId", m_session.Project.Id)
+            return _cache.ReadThrough(cacheKey, TimeSpan.FromSeconds(10), () =>  
+                _database.Sql().Call("GetOneClickProductionOptions")
+                    .WithParam("@projectId", _session.Project.Id)
                     .AutoMap<OneClickProductionOption>());
         }
 
         public string CreateCacheKeyDependantOnBatches(string suffix)
         {
-            return $"p{m_session.Project.Id}_dependsOnBatches::{suffix}";
+            return $"p{_session.Project.Id}_dependsOnBatches::{suffix}";
         }
 
         public void InvalidateBatchesDependantCaches()
         {
-            m_cache.RemoveByPrefix(CreateCacheKeyDependantOnBatches(string.Empty));
+            _cache.RemoveByPrefix(CreateCacheKeyDependantOnBatches(string.Empty));
         }
     }
 }

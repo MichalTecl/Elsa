@@ -141,6 +141,9 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public int? ExpirationMonths => Adaptee.ExpirationMonths;
 
+        public int? DistributorExpirationLimit => Adaptee.DistributorExpirationLimit;
+        public int? RetailExpirationLimit => Adaptee.RetailExpirationLimit;
+
         #endregion
     }
 }

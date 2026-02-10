@@ -1,13 +1,17 @@
-﻿<div class="batchAssignmentUi">
+<div class="batchAssignmentUi">
     <div lt-name="batchAssignmentList" class="batchAssignmentList restricted-OrderBatchAssignment">
         <div lt-name="batchItemTemplate" class="stackLeft batchItemTemplate">
             
             <div data-bind="text:AssignedQuantity; class!.hidden:IsSplit" class="batchAssignmentAmount" ></div>
             
-            <div lt-name="lblBatchNumber" event-bind="click:onChangeBatchClick($tbBatchSearch, $lblBatchNumber, VM);">
-                <div data-bind="text:BatchNumber"
-                     class="batchAssignmentBatchNr">
+            <div lt-name="lblBatchNumber" class="stackLeft" event-bind="click:onChangeBatchClick($tbBatchSearch, $lblBatchNumber, VM);">
+                <div data-bind="text:BatchNumber" class="batchAssignmentBatchNr"></div>
+
+                <div data-bind="class!.hidden:hasPinnedMessage" class="packingBatchPinnedMessageContainer">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="packingBatchPinnedMessageText" data-bind="text:PinnedWarningMessage"></div>
                 </div>
+
                 <i class="fas fa-question-circle" lt-name="icoEmpty" data-bind="class!.hidden:IsEmpty"></i>
             </div>
             

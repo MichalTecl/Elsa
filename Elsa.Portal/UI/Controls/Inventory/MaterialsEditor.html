@@ -99,6 +99,24 @@
                                            lt-name="tbExpiration"
                                            event-bind="change:onNamedPropChanged(VM, 'ExpirationMonths', this.value)" />
                                 </div>
+                                <div class="materialFlagEdit distributorExpirationLimitContainer">
+                                    <div class="stackLeft">
+                                        <label>Min. počet měsíců do expirace pro prodej VO</label>
+                                    </div>
+                                    <input type="number"
+                                           data-bind="value:DistributorExpirationLimit"
+                                           lt-name="tbExpiration"
+                                           event-bind="change:onNamedPropChanged(VM, 'DistributorExpirationLimit', this.value)" />
+                                </div>
+                                <div class="materialFlagEdit retailExpirationLimitContainer">
+                                    <div class="stackLeft">
+                                        <label>Min. počet měsíců do expirace pro prodej MO</label>
+                                    </div>
+                                    <input type="number"
+                                           data-bind="value:RetailExpirationLimit"
+                                           lt-name="tbExpiration"
+                                           event-bind="change:onNamedPropChanged(VM, 'RetailExpirationLimit', this.value)" />
+                                </div>
 
                                 <!-- abadnoned -->
                                 <div class="materialFlagEdit abandonedBatchesSetupContainer" style="margin-top:6px">
@@ -143,7 +161,7 @@
 
                                 </div>
 
-                               
+
                             </div>
 
                         </div>

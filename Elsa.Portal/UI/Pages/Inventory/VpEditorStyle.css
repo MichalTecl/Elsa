@@ -1,4 +1,4 @@
-﻿.mappablesEditor #mappablesList {
+.mappablesEditor #mappablesList {
 }
 
 #mappablesList .mappableContainer {
@@ -329,3 +329,47 @@ body, html {
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+
+/* =========================
+   Expirace – minimalistický layout
+   ========================= */
+
+.materialFlagEdit.expirationMonthsContainer,
+.materialFlagEdit.distributorExpirationLimitContainer,
+.materialFlagEdit.retailExpirationLimitContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+/* oddělení celé skupiny expirace od ostatních polí */
+.materialFlagEdit.expirationMonthsContainer {
+    margin-top: 24px;
+}
+
+.materialFlagEdit.retailExpirationLimitContainer {
+    margin-bottom: 24px;
+}
+
+    /* label vlevo */
+    .materialFlagEdit.expirationMonthsContainer .stackLeft,
+    .materialFlagEdit.distributorExpirationLimitContainer .stackLeft,
+    .materialFlagEdit.retailExpirationLimitContainer .stackLeft {
+        min-width: 320px; /* sjednotí zarovnání inputů */
+    }
+
+    .materialFlagEdit.expirationMonthsContainer label,
+    .materialFlagEdit.distributorExpirationLimitContainer label,
+    .materialFlagEdit.retailExpirationLimitContainer label {
+        margin: 0;
+        font-size: 13px;
+    }
+
+    /* input vpravo */
+    .materialFlagEdit.expirationMonthsContainer input,
+    .materialFlagEdit.distributorExpirationLimitContainer input,
+    .materialFlagEdit.retailExpirationLimitContainer input {
+        width: 80px;
+    }

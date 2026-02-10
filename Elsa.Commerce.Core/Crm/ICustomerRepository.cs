@@ -16,6 +16,8 @@ namespace Elsa.Commerce.Core.Crm
     {
         ICustomer GetCustomer(int id);
 
+        ICustomer GetCustomerByErpUid(string erpUid);
+
         void SyncCustomers(IEnumerable<IErpCustomerModel> source);
 
         void SyncShadowCustomers();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
@@ -12,7 +12,7 @@ namespace Elsa.Commerce.Core.Warehouse
 {
     public interface IMaterialBatchFacade : IBatchKeyResolver
     {
-        void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity, out string warnMessage);
+        //void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity, out string warnMessage);
 
         Amount GetAvailableAmount(int batchId);
 

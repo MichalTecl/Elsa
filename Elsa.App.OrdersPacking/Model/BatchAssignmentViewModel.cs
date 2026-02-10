@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +17,7 @@ namespace Elsa.App.OrdersPacking.Model
             AssignedQuantity = src.AssignedQuantity;
             BatchNumber = src.BatchNumber;
             WarningMessage = src.WarningMessage;
+            PinnedWarningMessage = src.PinnedWarningMessage;
         }
 
         public bool CanSplit { get; set; }

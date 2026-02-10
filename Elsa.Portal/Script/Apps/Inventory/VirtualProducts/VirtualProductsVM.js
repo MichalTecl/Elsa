@@ -341,33 +341,18 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
         
         var request = {
+            ...model,
+
             MaterialId: model.Id,
             MaterialName: model.Name,
-            NominalAmountText: model.nominalAmountText,
             MaterialInventoryId: self.currentMaterialInventory.Id,
-            AutomaticBatches: model.AutomaticBatches,
-            RequiresPrice: model.RequiresPrice,
-            RequiresProductionPrice: model.RequiresProductionPrice,
-            RequiresInvoice: model.RequiresInvoice,
-            RequiresSupplierReference:model.RequiresSupplierReference,
-            Materials: [],
-            HasThreshold: model.HasThreshold,
-            ThresholdText: model.ThresholdText,
-            Autofinalization: model.Autofinalize || (!!model.abdActionIsAutofinalize),
-            CanBeDigital: model.CanBeDigital,
-            DaysBeforeWarnForUnused: model.detectAbandoned ? model.DaysBeforeWarnForUnused : null,
-            UnusedWarnMaterialType: model.UnusedWarnMaterialType,
-            UsageProlongsLifetime: model.UsageProlongsLifetime,
-            UniqueBatchNumbers: model.UniqueBatchNumbers,
-            NotAbandonedUntilNewerBatchUsed: model.NotAbandonedUntilNewerBatchUsed,
-            OrderFulfillDays: model.OrderFulfillDays,
-            ExpirationMonths: model.ExpirationMonths
+            
+            Autofinalization: model.Autofinalize || !!model.abdActionIsAutofinalize,
+            DaysBeforeWarnForUnused: model.detectAbandoned
+                ? model.DaysBeforeWarnForUnused
+                : null
         };
-
-        for (var i = 0; i < model.materials.length; i++) {
-            request.Materials.push({ DisplayText: model.materials[i].displayText });
-        }
-
+                
         lt.api("/virtualProducts/saveMaterial").body(request).post(receiveSingleMaterial);
         
     };

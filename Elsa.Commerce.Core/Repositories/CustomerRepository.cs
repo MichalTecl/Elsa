@@ -675,5 +675,15 @@ namespace Elsa.Commerce.Core.Repositories
 
             return aggregated;
         }
+
+        public ICustomer GetCustomerByErpUid(string erpUid)
+        {
+            return _database
+                .SelectFrom<ICustomer>()
+                .Where(c => c.ProjectId == _session.Project.Id)
+                .Where(c => c.ErpUid == erpUid)
+                .Execute()
+                .FirstOrDefault();
+        }
     }
 }

@@ -60,5 +60,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         int? OrderFulfillDays { get; set; }
 
         int? ExpirationMonths { get; set; }
+        int? DistributorExpirationLimit { get; set; }
+        int? RetailExpirationLimit { get; set; }
     }
 }

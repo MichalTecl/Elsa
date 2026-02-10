@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Elsa.Commerce.Core.Model
 {
@@ -13,6 +13,7 @@ namespace Elsa.Commerce.Core.Model
         public string BatchNumber { get; set; }
 
         public string WarningMessage { get; set; }
+        public string PinnedWarningMessage { get; set; }
         
         public void Add(OrderItemBatchAssignmentModel assignment)
         {

@@ -240,25 +240,7 @@ namespace Elsa.Apps.Inventory
 
             using (var tx = m_database.OpenTransaction())
             {                
-                var saved = m_materialFacade.ProcessMaterialEditRequest(
-                    request.MaterialId,
-                    request.MaterialName,
-                    request.NominalAmountText,
-                    request.MaterialInventoryId,
-                    request.AutomaticBatches,
-                    request.RequiresPrice,
-                    request.RequiresProductionPrice,
-                    request.RequiresInvoice,
-                    request.RequiresSupplierReference, request.Autofinalization, request.CanBeDigital,
-                    request.Materials.Select(s => s.DisplayText),
-                    thresholdText,
-                    request.DaysBeforeWarnForUnused,
-                    string.IsNullOrWhiteSpace(request.UnusedWarnMaterialType) ? null : request.UnusedWarnMaterialType.Trim(),
-                    request.UsageProlongsLifetime,
-                    request.NotAbandonedUntilNewerBatchUsed,
-                    request.UniqueBatchNumbers,
-                    request.OrderFulfillDays,
-                    request.ExpirationMonths);
+                var saved = m_materialFacade.ProcessMaterialEditRequest(request);
 
                 saved.CommentText = request.Comment;
 
