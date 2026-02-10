@@ -30,5 +30,8 @@ namespace Elsa.App.Crm.Entities
         int? DaysToWarning { get; set; }
 
         bool? RequiresNote { get; set; }
+
+        [NVarchar(500, true)]
+        string OrderPackingMessage { get; set; }
     }
 }

@@ -75,6 +75,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                     }
 
                     tagModel.name = tagRecord.Name;
+                    tagModel.OrderPackingMessage = tagRecord.OrderPackingMessage;
                     tagModel.cssClass = tagRecord.CssClass;
                     tagModel.description = tagRecord.Description;
                     tagModel.isRoot = !tagModel.parentTagInstanceId;
@@ -118,7 +119,8 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                             "CssClass": tagModel.cssClass,
                             "Description": tagModel.description,
                             "DaysToWarning": tagModel.daysToWarning,
-                            "RequiresNote": tagModel.requiresNote
+                            "RequiresNote": tagModel.requiresNote,
+                            "OrderPackingMessage": tagModel.OrderPackingMessage,
                         })
                         .post((tags) => {
                             tagModel.cancelEdit();
