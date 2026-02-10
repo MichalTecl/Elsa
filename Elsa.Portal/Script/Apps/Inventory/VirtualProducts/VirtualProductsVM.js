@@ -1,4 +1,4 @@
-﻿var app = app || {};
+var app = app || {};
 app.virtualProductsEditor = app.virtualProductsEditor || {};
 app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || function() {
 
@@ -360,7 +360,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             UsageProlongsLifetime: model.UsageProlongsLifetime,
             UniqueBatchNumbers: model.UniqueBatchNumbers,
             NotAbandonedUntilNewerBatchUsed: model.NotAbandonedUntilNewerBatchUsed,
-            OrderFulfillDays: model.OrderFulfillDays
+            OrderFulfillDays: model.OrderFulfillDays,
+            ExpirationMonths: model.ExpirationMonths
         };
 
         for (var i = 0; i < model.materials.length; i++) {

@@ -1,4 +1,4 @@
-﻿<div class="panel w4" id="materialsEditorPanel">
+<div class="panel w4" id="materialsEditorPanel">
     <div class="panelContent" id="matsUi">
         <div id="matsSearch" style="display:none">
             <div class="searchPanel" style="width:100%">
@@ -80,17 +80,28 @@
 
                                 <!-- order fulfill days -->
                                 <div class="materialFlagEdit orderFulfillDaysContainer" data-bind="class.hidden:isManufactured">
-                                    <div class="stackLeft">                                        
+                                    <div class="stackLeft">
                                         <label>Limit - max. počet dnů od objednání do naskladnění</label>
                                     </div>
-                                    <input type="number" 
-                                           data-bind="value:OrderFulfillDays;" 
-                                           lt-name="tbFulfill" 
+                                    <input type="number"
+                                           data-bind="value:OrderFulfillDays;"
+                                           lt-name="tbFulfill"
                                            event-bind="change:onNamedPropChanged(VM, 'OrderFulfillDays', this.value)" />
                                 </div>
 
+                                <!-- expiration -->
+                                <div class="materialFlagEdit expirationMonthsContainer">
+                                    <div class="stackLeft">
+                                        <label>Počet měsíců do expirace</label>
+                                    </div>
+                                    <input type="number"
+                                           data-bind="value:ExpirationMonths;"
+                                           lt-name="tbExpiration"
+                                           event-bind="change:onNamedPropChanged(VM, 'ExpirationMonths', this.value)" />
+                                </div>
+
                                 <!-- abadnoned -->
-                                <div class="materialFlagEdit abandonedBatchesSetupContainer">
+                                <div class="materialFlagEdit abandonedBatchesSetupContainer" style="margin-top:6px">
                                     <div class="stackLeft">
                                         <input type="checkbox" lt-name="cbDetectAbandoned" data-bind="checked:detectAbandoned" event-bind="change:onAbandonedPolicyChanged(VM, $cbDetectAbandoned.checked, $tbDaysBeforeWarnForUnused.value, $rbTriggerManufactured.checked, $rbTriggerUsed.checked, $rbAbdActionReport.checked, $tbAbdReportGroup.value, $rbAbdActionAutofinalize.checked)" />
                                         <label>Detekovat opuštěné šarže</label>
@@ -132,7 +143,7 @@
 
                                 </div>
 
-
+                               
                             </div>
 
                         </div>

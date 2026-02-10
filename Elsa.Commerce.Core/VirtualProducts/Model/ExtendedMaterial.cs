@@ -1,4 +1,4 @@
-﻿using Elsa.Commerce.Core.Units;
+using Elsa.Commerce.Core.Units;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Newtonsoft.Json;
@@ -139,6 +139,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
 
         public int? OrderFulfillDays => Adaptee.OrderFulfillDays;
 
+        public int? ExpirationMonths => Adaptee.ExpirationMonths;
 
         #endregion
     }

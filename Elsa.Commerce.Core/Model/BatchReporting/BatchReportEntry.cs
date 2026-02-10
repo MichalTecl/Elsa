@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +25,11 @@ namespace Elsa.Commerce.Core.Model.BatchReporting
         [JsonIgnore]
         public Amount Available { get; set; }
         public string CreateDt { get; set; }
+
+        [JsonIgnore]
+        public DateTime CreatedRaw { get; set; }
+
+        public string Expiration { get; set; }
         public bool IsClosed { get; set; }
         public bool IsLocked { get; set; }
         public bool IsAvailable { get; set; }

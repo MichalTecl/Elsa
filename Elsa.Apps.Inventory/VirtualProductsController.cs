@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -257,7 +257,8 @@ namespace Elsa.Apps.Inventory
                     request.UsageProlongsLifetime,
                     request.NotAbandonedUntilNewerBatchUsed,
                     request.UniqueBatchNumbers,
-                    request.OrderFulfillDays);
+                    request.OrderFulfillDays,
+                    request.ExpirationMonths);
 
                 saved.CommentText = request.Comment;
 

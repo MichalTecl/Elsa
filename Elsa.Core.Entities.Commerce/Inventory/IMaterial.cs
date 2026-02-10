@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Core;
@@ -58,5 +58,7 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         IUser HideUser { get; }
 
         int? OrderFulfillDays { get; set; }
+
+        int? ExpirationMonths { get; set; }
     }
 }

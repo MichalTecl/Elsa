@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -197,6 +197,12 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     if (b.HasStockEvents)
                     {
                         PopulateStockEventCounts(b);
+                    }
+
+                    if (material.ExpirationMonths != null)
+                    {
+                        var expDt = b.CreatedRaw.AddMonths(material.ExpirationMonths.Value);
+                        b.Expiration = StringUtil.FormatDateMonthYear(expDt);
                     }
                 }
             
@@ -552,6 +558,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 MaterialName = row.GetString(materialName),
                 MaterialId = row.GetInt32(materialId),
                 CreateDt = StringUtil.FormatDateTime(row.GetDateTime(batchCreateDt)),
+                CreatedRaw = row.GetDateTime(batchCreateDt),
                 IsClosed = !row.IsDBNull(batchCloseDt),
                 IsLocked = !row.IsDBNull(batchLockDt),
                 IsAvailable = row.GetBoolean(batchAvailable),

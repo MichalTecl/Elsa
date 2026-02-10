@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using Elsa.Commerce.Core.VirtualProducts.Model;
 using Elsa.Core.Entities.Commerce.Commerce;
@@ -25,7 +25,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool usageProlongsLifetime, 
             bool notAbandonedUntilNewerBatchUsed,
             bool uniqueBatchNumbers,
-            int? orderFulfillDays);
+            int? orderFulfillDays,
+            int? expiratinMonths);
         
         MaterialSetupInfo GetMaterialInfo(string materialName);
 

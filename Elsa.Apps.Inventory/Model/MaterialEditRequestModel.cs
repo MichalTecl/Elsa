@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 using Elsa.Commerce.Core.VirtualProducts.Model;
 
@@ -46,5 +46,7 @@ namespace Elsa.Apps.Inventory.Model
         public string Comment { get; set; }
 
         public int? OrderFulfillDays { get; set; }
+
+        public int? ExpirationMonths { get; set; }
     }
 }

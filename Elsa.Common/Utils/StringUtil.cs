@@ -468,5 +468,10 @@ namespace Elsa.Common.Utils
         {
             return startDt.ToString("HH:mm");
         }
+
+        public static string FormatDateMonthYear(DateTime dt)
+        {
+            return dt.ToString("MM/yyyy");
+        }
     }
 }

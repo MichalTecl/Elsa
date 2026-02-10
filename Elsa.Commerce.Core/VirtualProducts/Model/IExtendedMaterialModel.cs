@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 
 using Elsa.Commerce.Core.Units;
@@ -67,5 +67,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         bool IsHidden { get; }
 
         int? OrderFulfillDays { get; }
+
+        int? ExpirationMonths { get; }
     }
 }

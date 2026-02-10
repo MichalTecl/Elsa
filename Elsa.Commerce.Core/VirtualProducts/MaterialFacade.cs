@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -60,7 +60,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
             bool usageProlongsLifetime,
             bool notAbandonedUntilNewerBatchUsed,
             bool uniqueBatchNumbers,
-            int? orderFulfillDays
+            int? orderFulfillDays,            
+            int? expirationMonths
             )
         {
             name = name?.Trim();
@@ -102,6 +103,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                         m.NotAbandonedUntilNewerBatchUsed = notAbandonedUntilNewerBatchUsed;
                         m.UniqueBatchNumbers = uniqueBatchNumbers;
                         m.OrderFulfillDays = orderFulfillDays == 0 ? null : orderFulfillDays;
+                        m.ExpirationMonths = expirationMonths == 0 ? null : expirationMonths;
                     });
                 
                 if (thresholdText == null)
