@@ -10,7 +10,10 @@
             <i class="fas fa-project-diagram ctacTransitionsMarker" data-bind="class!.hidden:HasTransitions" event-bind="click:openTransitionPopup(VM, $targetPicker)"></i>
         </div>    
     </div>
-    <div id="hiddenTagsInfo"></div>
+    <div lt-name="hiddenTagsInfo">
+        <span lt-name="hiddenTagsLabel"></span>
+        <i class="fas fa-bell ctacBell" lt-name="hiddenBellIcon" style="visibility:collapse" ></i>
+    </div>
     <div id="tagPickerPopup" class="popupOverlay">
         <div class="popupBody">
             <div lt-name="digrTagPickerCont" class="stackLeft autocomplete">
@@ -22,7 +25,14 @@
 </div>
 
 <script>
-    lt.element("tagassignments_{%GENERATE%}").attach(function (digrTagPickerCont, digrTagPickerInput, tagPickerPopup, hiddenTagsInfo, tagsContainer) {
+    lt.element("tagassignments_{%GENERATE%}").attach(function (
+        digrTagPickerCont,
+        digrTagPickerInput,
+        tagPickerPopup,
+        hiddenTagsInfo,
+        hiddenTagsLabel,
+        hiddenBellIcon,
+        tagsContainer) {
 
         const self = this;
 
@@ -60,15 +70,7 @@
 
                             saveTransition(transition);
                         });
-
-                    /*
-                    lt.api("/CustomerTagAssignment/assign")
-                        .query({ "customerId": customer.Id, "tagTypeId": transition.TagTypeId, "note": transition.note })
-                        .post((assignments) => {
-                            receiveNewAssignments(transition, assignments);
-                            Popup.close();
-                        });
-                    */
+                                            
                     self.closeTagPicker();
                 }
             );
@@ -78,27 +80,37 @@
 
             const doNotFilter = lt.findParentAttribute(this, "doNotFilterTags");
 
+            let hasHiddenBell = false;
+
             if (!doNotFilter) {
                 collection.forEach(tag => {
                     tag.isFilteredHidden = app.Distributors.vm.filter.TagGroups.indexOf(tag.TagTypeGroupId) === -1;
 
-                    if (tag.isFilteredHidden)
+                    if (tag.isFilteredHidden) {
                         hiddenTags++;
+                        hasHiddenBell = hasHiddenBell || tag.HasTimeoutWarning;
+                    }
                     else
                         shownTags++;
                 });
             }
-                        
+
+            hiddenBellIcon.style.visibility = 'collapse';
+
             if (hiddenTags === 0) {
                 hiddenTagsInfo.style.visibility = 'collapse';
             } else {
                 hiddenTagsInfo.style.visibility = 'visible';
 
                 if (shownTags > 0) {
-                    hiddenTagsInfo.innerHTML = "( + " + hiddenTags + " skrytých štítků)";
+                    hiddenTagsLabel.innerHTML = "( + " + hiddenTags + " skrytých štítků)";
                 } else {
-                    hiddenTagsInfo.innerHTML = "(" + hiddenTags + " skrytých štítků)";
-                }                
+                    hiddenTagsLabel.innerHTML = "(" + hiddenTags + " skrytých štítků)";
+                }    
+
+                if (hasHiddenBell) {
+                    hiddenBellIcon.style.visibility = 'visible';
+                }
             }
         });
 
@@ -244,11 +256,16 @@
         };
 
         let isPeekMode = false;
-        
+
+        let hadHiddenBell = false;
+
         this.addEventListener("mouseenter", () => {
 
             isPeekMode = true;
             hiddenTagsInfo.style.visibility = 'hidden';
+
+            hadHiddenBell = hiddenBellIcon.style.visibility !== "collapse";
+            hiddenBellIcon.style.visibility = 'collapse';
 
             visitTagElements((e) => {
                 e.__hadHidden = e.classList.contains('hidden');
@@ -264,6 +281,9 @@
 
             isPeekMode = false;
             hiddenTagsInfo.style.visibility = 'visible';
+
+            if (hadHiddenBell)
+                hiddenBellIcon.style.visibility = 'visible';
 
             visitTagElements((e) => {
                 if (e.__hadHidden) e.classList.add('hidden');
