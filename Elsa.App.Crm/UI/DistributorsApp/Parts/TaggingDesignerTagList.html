@@ -108,7 +108,7 @@
         };        
 
         this.setPackingMessage = (vm) => {
-            const value = prompt("Zpráva pro baliče", vm.OrderPackingMessage);
+            const value = prompt("Zpráva pro baliče", vm.OrderPackingMessage || "");
 
             if (value === null)
                 return;

@@ -1,7 +1,7 @@
 
 <div id="tagassignments_{%GENERATE%}" class="stackLeft">
     <i class="fas fa-plus-circle faButton digrAddTagButton" event-bind="click:openTagPicker()"></i>
-    <div data-bind="itemsSource:TagAssignments" data-key="TagTypeId" class="ctacTagsContainer">
+    <div data-bind="itemsSource:TagAssignments" data-key="TagTypeId" class="ctacTagsContainer" lt-name="tagsContainer">
         <div class="lt-template ctacTagItem" data-bind="cssClass:TagTypeCssClass;class.hidden:isFilteredHidden">
             <i class="fas fa-times ctacRemoveTag" data-bind="class.hidden:HasTransitions" event-bind="click:removeTag(VM)"></i>
             <div lt-name="targetPicker" class="popupOverlay"></div>            
@@ -22,13 +22,11 @@
 </div>
 
 <script>
-    lt.element("tagassignments_{%GENERATE%}").attach(function (digrTagPickerCont, digrTagPickerInput, tagPickerPopup, hiddenTagsInfo) {
+    lt.element("tagassignments_{%GENERATE%}").attach(function (digrTagPickerCont, digrTagPickerInput, tagPickerPopup, hiddenTagsInfo, tagsContainer) {
 
         const self = this;
 
         let collection = null;
-
-
 
         self.openTagPicker = () => Popup.open(tagPickerPopup);
         self.closeTagPicker = () => {
@@ -238,6 +236,30 @@
                     assignment.Note = nText;
                 });
         };
+
+        const visitTagElements = (callback) => {
+            self.querySelectorAll(".ctacTagsContainer>.ctacTagItem").forEach(e => {
+                callback(e);
+            });
+        };
+                
+        this.addEventListener("mouseenter", () => {
+            hiddenTagsInfo.style.visibility = 'hidden';
+
+            visitTagElements((e) => {
+                e.__hadHidden = e.classList.contains('hidden');
+                e.classList.remove('hidden');
+            });
+        });
+
+        this.addEventListener("mouseleave", () => {
+            hiddenTagsInfo.style.visibility = 'visible';
+
+            visitTagElements((e) => {
+                if (e.__hadHidden) e.classList.add('hidden');
+                e.__hadHidden = undefined;
+            });
+        });
     });
 </script>
 <link href="/UI/DistributorsApp/Css/CustomerTagAssignmentControl.css" rel="stylesheet" />
