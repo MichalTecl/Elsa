@@ -242,24 +242,53 @@
                 callback(e);
             });
         };
-                
+
+        let isPeekMode = false;
+        
         this.addEventListener("mouseenter", () => {
+
+            isPeekMode = true;
             hiddenTagsInfo.style.visibility = 'hidden';
 
             visitTagElements((e) => {
                 e.__hadHidden = e.classList.contains('hidden');
-                e.classList.remove('hidden');
+                
+                if (e.__hadHidden) {
+                    e.classList.remove('hidden');
+                    e.classList.add('tagPeeking');
+                }
             });
         });
 
         this.addEventListener("mouseleave", () => {
+
+            isPeekMode = false;
             hiddenTagsInfo.style.visibility = 'visible';
 
             visitTagElements((e) => {
                 if (e.__hadHidden) e.classList.add('hidden');
                 e.__hadHidden = undefined;
+                e.classList.remove('tagPeeking');
             });
         });
+
+        tagsContainer.addEventListener("click", (ev) => {
+            if (!isPeekMode) return;
+
+            const tag = ev.target.closest(".ctacTagItem");
+            if (!tag) return;
+
+            if (!tag.__hadHidden) return;
+                        
+            ev.preventDefault();
+            ev.stopPropagation();
+            ev.stopImmediatePropagation();
+
+            const vm = lt.getViewModel(tag);
+
+            app.Distributors.vm.updateTagGroupFilter(vm.TagTypeGroupId, true);
+
+        }, true); 
     });
 </script>
 <link href="/UI/DistributorsApp/Css/CustomerTagAssignmentControl.css" rel="stylesheet" />

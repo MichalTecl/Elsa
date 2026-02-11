@@ -231,3 +231,9 @@
 .taipTimeoutWarn {
     color: #d32f2f;
 }
+
+
+.tagPeeking {
+    opacity:0.5;
+    cursor:alias;
+}
