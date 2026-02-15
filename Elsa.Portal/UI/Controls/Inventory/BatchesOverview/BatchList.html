@@ -4,14 +4,13 @@
     <div lt-name="lblCustomField1" style="display:none" class="cell5"></div>
     <div lt-name="lblCustomField2" style="display:none" class="cell5"></div>
     <div lt-name="lblCustomField3" style="display:none" class="cell10"></div>
-    <div class="cell10">Číslo šarže</div>
+    <div class="cell5">Č. šarže</div>
     <div class="cell20">Materiál</div>
     <div class="cell5">Dostupné</div>
     <div class="cell5">Celkem</div>
-    <div class="cell10">Vytvořeno</div>
+    <div class="cell5">Vytvořeno</div>
     <div class="cell5">Expirace</div>
-    <div class="cell10">Faktura</div>
-    <div class="cell1"></div>
+    <div class="cell5">Faktura</div>
     <div class="cell1"></div>
 </div>
 <div lt-name="theList">
@@ -28,19 +27,14 @@
         <div data-bind="text:CustomField1; class!.hidden:showCustomField1" class="cell5"></div>
         <div data-bind="text:CustomField2; class!.hidden:showCustomField2" class="cell5"></div>
         <div data-bind="text:CustomField3; class!.hidden:showCustomField3" class="cell10"></div>
-        <div data-bind="text:BatchNumber" class="bovBatchNumber cell10"></div>
+        <div data-bind="text:BatchNumber" class="bovBatchNumber cell5"></div>
         <div data-bind="text:MaterialName" class="bovBatchMaterial cell20"></div>
         <div data-bind="text:AvailableAmount" class="bovBatchAmount cell5"></div>
         <div data-bind="text:BatchVolume" class="bovBatchAmount cell5"></div>
-        <div data-bind="text:CreateDt" class="bovBatchDt cell10"></div>
+        <div data-bind="text:CreateDt" class="bovBatchDt cell5"></div>
         <div data-bind="text:Expiration" class="bovBatchExp cell5"></div>
-        <div data-bind="text:InvoiceNumber" class="cell10"></div>
-        <div class="cell1">
-            <span class="restricted-MaterialBatchEdits">
-                <i data-bind="class!.hidden:CanDelete" class="far fa-trash-alt faButton" event-bind="click:deleteBatch(VM)"></i>
-                <i class="far fa-trash-alt" style="opacity: 0.2; cursor:no-drop" data-bind="class.hidden:CanDelete;title:NoDelReason"></i>
-            </span>
-        </div>
+        <div data-bind="text:InvoiceNumber" class="cell5"></div>
+        
         <div class="cell1">
             <i class="fas fa-bars faButton" event-bind="click:openPopup($mnuBatchActions,this, VM)"></i>
         </div>
