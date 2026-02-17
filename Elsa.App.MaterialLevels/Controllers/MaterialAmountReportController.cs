@@ -130,7 +130,7 @@ namespace Elsa.App.MaterialLevels.Controllers
         {
             EnsureUserRight(InventoryUserRights.MaterialLevelsChangeOrderDt);
 
-            _orderingRepository.SetOrderDeliveryDeadline(materialId, DateTime.Now.AddDays(days).Date);
+            _orderingRepository.SetOrderDeliveryDeadline(materialId, days == -1 ? null : (DateTime?)DateTime.Now.AddDays(days).Date);
         }
 
         public void DeleteDeadline(int materialId)

@@ -4,6 +4,7 @@
         <button class="matDelPostponeActionButton" event-bind="click:postponeDelivery(7, data.MaterialId, callback)">Za týden</button>
         <button class="matDelPostponeActionButton" event-bind="click:postponeDelivery(14, data.MaterialId, callback)">Za dva týdny</button>
         <button class="matDelPostponeActionButton" event-bind="click:postponeDelivery(30, data.MaterialId, callback)">Za měsíc</button>
+        <button class="matDelPostponeActionButton" event-bind="click:postponeDelivery(-1, data.MaterialId, callback)">Neobjednáno</button>
     </div>
         
     <script>
@@ -13,8 +14,9 @@
                 lt.api("/MaterialAmountReport/setDeadline").query({ "materialId": materialId, "days": days }).post(function () {
                     callback();
                 });
+            };           
 
-            }
+
         });
     </script>
 </div>

@@ -29,6 +29,12 @@ namespace Elsa.App.MaterialLevels.Components
                 .Execute()
                 .FirstOrDefault() ?? throw new ArgumentException("Order event not found");
 
+            if (date == null)
+            {
+                _database.Delete(evt);
+                return;
+            }
+
             evt.DeliveryDeadline = date;
             evt.DeadlineSetDt = DateTime.Now;
             evt.DeadlineSetUserId = _session.User.Id;
