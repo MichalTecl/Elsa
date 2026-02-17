@@ -58,6 +58,7 @@ namespace Elsa.App.Crm.Repositories
                  .Join(m => m.Participants)
                 .Where(m => m.CustomerId == customerId)
                 .Where(m => m.Customer.ProjectId == _session.Project.Id)
+                .OrderByDesc(m => m.StartDt)
                 .Execute()
                 .ToList();
         }

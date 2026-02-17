@@ -255,7 +255,7 @@ namespace Elsa.App.Crm.Controllers
             var categoryIndex = _meetingsRepository.GetAllMeetingCategories();
             var customerIndex = _customerRepository.GetDistributorNameIndex();
 
-            foreach (var record in records)
+            foreach (var record in records.OrderByDescending(r => r.StartDt))
             {
                 var category = categoryIndex.First(c => c.Id == record.MeetingCategoryId);
                 var decider = deciders.FirstOrDefault(d => d.from <= record.StartDt && d.to > record.EndDt);
