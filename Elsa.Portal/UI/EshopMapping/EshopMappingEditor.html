@@ -87,7 +87,7 @@
                             <i class="fas fa-times faButton" event-bind="click:onHideAddItemClick(VM, $emapProductPicker, $butSaveMap)" data-bind="class!.hidden:addItemFormShown"></i>
                             <div class="stackLeft" data-bind="class!.hidden:addItemFormShown">
                                 <div class="autocomplete" lt-name="addItemForm">
-                                    <input lt-name="emapProductPicker" event-bind="change:onProductPickerChange(this, $butSaveMap)" />
+                                    <input lt-name="emapProductPicker" event-bind="input:onProductPickerChange(this, $butSaveMap)" />
                                 </div>
                                 <button class="butSubmit" style="display:none" lt-name="butSaveMap" event-bind="click:setProductMapping(this, VM, $emapProductPicker)"></button>
                             </div>
