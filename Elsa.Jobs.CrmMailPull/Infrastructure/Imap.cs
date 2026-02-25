@@ -142,22 +142,20 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             {
                 if (set == null || list == null) return;
 
+                void addValidAddress(string address)
+                {
+                    if (!string.IsNullOrWhiteSpace(address) && address.Length < 100)
+                        set.Add(address);
+                }
+
                 foreach (var addr in list)
                 {
                     if (addr is MailboxAddress mb)
-                    {
-                        if (!string.IsNullOrWhiteSpace(mb.Address))
-                            set.Add(mb.Address.Trim());
-                    }
-                    else if (addr is GroupAddress grp && grp.Members != null)
-                    {
-                        // group: expand members
+                        addValidAddress(mb.Address);
+                    else if (addr is GroupAddress grp && grp.Members != null)                    
                         foreach (var member in grp.Members.OfType<MailboxAddress>())
-                        {
-                            if (!string.IsNullOrWhiteSpace(member.Address))
-                                set.Add(member.Address.Trim());
-                        }
-                    }
+                            addValidAddress(member.Address);
+                    
                 }
             }
 
