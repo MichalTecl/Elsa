@@ -34,6 +34,8 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             {
                 SyncFolders(source);
             }
+
+            _log.Info("Folders sync completed");
         }
 
         private void SyncFolders(IMailPullSource source)
@@ -87,7 +89,9 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                     if (localFolder.Name != serverFolder.Name)
                     {
                         dirty = true;
-                        serverFolder.Name = localFolder.Name;
+
+                        _log.Info($"Folder Name changed from '{localFolder.Name}' to '{serverFolder.Name}'");
+                        localFolder.Name = serverFolder.Name;
                     }
 
                     if (dirty) 
@@ -95,7 +99,12 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                         _log.Info($"Saving folder {source.Host}/{source.Username}/{serverFolder.FullName}");
                         _db.Save(localFolder);
                     }
-                }
+                    else
+                    {
+                        _log.Info("No changes detected");
+                    }
+                }            
+                
             }
             catch (Exception ex)
             {
