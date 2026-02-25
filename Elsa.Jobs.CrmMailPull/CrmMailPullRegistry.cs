@@ -14,6 +14,7 @@ namespace Elsa.Jobs.CrmMailPull
             setup.For<MailPullRepository>().Use<MailPullRepository>();
             setup.For<ExploreFolders>().Use<ExploreFolders>();
             setup.For<LoadMailReferences>().Use<LoadMailReferences>();
+            setup.For<LoadMessagesContent>().Use<LoadMessagesContent>();
         }
     }
 }

@@ -62,12 +62,14 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
                                 _log.Info($"Received a batch of {batch.Count}");
 
-                                SaveBatch(folder.Id, batch);
-
-                                if (batch.Count < batchSize)
+                                if (batch.Count == 0)
                                 {
                                     _log.Info("Done processing the folder");
                                     break;
+                                }
+                                else
+                                {
+                                    SaveBatch(folder.Id, batch);
                                 }
 
                                 currentLastSeen = batch.Max(b => b.ImapUid);

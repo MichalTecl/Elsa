@@ -15,8 +15,4 @@
     <PackageReference Include="MailKit" Version="2.15.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="SQL\" />
-  </ItemGroup>
-
 </Project>

@@ -13,5 +13,9 @@ namespace Elsa.Jobs.CrmMailPull.Entities
         IMailboxFolder MailboxFolder { get; }
         long ImapUid { get; set; }
         DateTime InternalDt { get; set; }
+        int? ConversationId { get; set; }
+        IMailConversation Conversation { get; }
+        int? FullContentId { get; set; }
+        IMailMessageFullContent FullContent { get; }
     }
 }

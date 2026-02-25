@@ -18,26 +18,11 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             {
                 client.Timeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds;
                 var options = source.UseSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTlsWhenAvailable;
+                
+                client.Connect(source.Host, source.Port, options);
+                client.Authenticate(source.Username, source.Password);
 
-                try
-                {
-                    client.Connect(source.Host, source.Port, options);
-                    client.Authenticate(source.Username, source.Password);
-
-                    return action(client);
-
-                }
-                finally
-                {
-                    try
-                    {
-                        client.Disconnect(false);
-                    }
-                    catch
-                    {
-                        ;
-                    }
-                }
+                return action(client);
             }
         }
 
@@ -115,6 +100,15 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             }
 
             return result;
+        }
+
+        public static MimeMessage GetFullMessageByUid(this IImapClient imap, string folderFullName, uint uid)
+        {            
+            var folder = imap.GetFolder(folderFullName);
+            folder.Open(FolderAccess.ReadOnly);
+
+            var message = folder.GetMessage(new UniqueId(uid));
+            return message;
         }
 
         public static List<RemoteMailMessageReferenceInfo> GetMailMessageReferences(

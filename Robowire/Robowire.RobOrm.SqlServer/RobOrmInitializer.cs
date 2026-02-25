@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data.SqlClient;
 using System.Reflection;
 using System.Web;
@@ -52,15 +52,37 @@ namespace Robowire.RobOrm.SqlServer
 
                         var connectionBuilder = locator.Get<ITransactionManager<SqlConnection>>();
 
-                        using (var connection = connectionBuilder.Open(false))
+                        bool versionMatches = false;
+                        try
                         {
-                            using (var command = new SqlCommand(script, connection.GetConnection()))
+                            using (var connection = connectionBuilder.Open(false))
                             {
-                                command.CommandTimeout = 1000000;
-                                command.ExecuteNonQuery();
-                            }
+                                using (var command = new SqlCommand("SELECT TOP 1 SchemaHash FROM Roborm_Schema_Version ORDER BY ApplyDt DESC", connection.GetConnection()))
+                                {
+                                    var dbHash = command.ExecuteScalar();
+                                    versionMatches = (dbHash?.ToString() == hash);
+                                }
 
-                            connection.Commit();
+                                connection.Commit();
+                            }                            
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.ToString());                            
+                        }
+
+                        if (!versionMatches)
+                        {
+                            using (var connection = connectionBuilder.Open(false))
+                            {
+                                using (var command = new SqlCommand(script, connection.GetConnection()))
+                                {
+                                    command.CommandTimeout = 1000000;
+                                    command.ExecuteNonQuery();
+                                }
+
+                                connection.Commit();
+                            }
                         }
                         
                         if (!string.IsNullOrWhiteSpace(customizer.ScriptsRoot))
