@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.10.35027.167
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11408.92 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{326F0792-00AF-4D82-B170-4CE248D4A975}"
 EndProject
@@ -216,6 +216,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Common.DbUtils", "Elsa.Common.DbUtils\Elsa.Common.DbUtils.csproj", "{814630A6-2D97-4B0B-AAB4-151A3B0DD05D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.CrmRobots", "Elsa.Jobs.CrmRobots\Elsa.Jobs.CrmRobots.csproj", "{B5B6CE83-197A-4282-9CA2-64DAEDA7CBD8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.CrmMailPull", "Elsa.Jobs.CrmMailPull\Elsa.Jobs.CrmMailPull.csproj", "{C356FD1B-B394-5B6D-313D-50D8A08F44BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -539,6 +541,10 @@ Global
 		{B5B6CE83-197A-4282-9CA2-64DAEDA7CBD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5B6CE83-197A-4282-9CA2-64DAEDA7CBD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5B6CE83-197A-4282-9CA2-64DAEDA7CBD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C356FD1B-B394-5B6D-313D-50D8A08F44BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C356FD1B-B394-5B6D-313D-50D8A08F44BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C356FD1B-B394-5B6D-313D-50D8A08F44BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C356FD1B-B394-5B6D-313D-50D8A08F44BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -637,6 +643,7 @@ Global
 		{0914F404-3BD4-4E57-9F5A-3AA79899BE9A} = {456527A3-2BE8-4010-8AC6-187539CE484D}
 		{814630A6-2D97-4B0B-AAB4-151A3B0DD05D} = {FC61D761-EDCC-4BEF-9B3B-06957ACCFAE6}
 		{B5B6CE83-197A-4282-9CA2-64DAEDA7CBD8} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
+		{C356FD1B-B394-5B6D-313D-50D8A08F44BA} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9B0FB86-8E35-4689-8547-81554B0D7A92}

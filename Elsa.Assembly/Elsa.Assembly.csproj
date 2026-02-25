@@ -251,6 +251,10 @@
       <Project>{5ef07762-137b-4bf7-8199-5961768fcaec}</Project>
       <Name>Elsa.Jobs.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.CrmMailPull\Elsa.Jobs.CrmMailPull.csproj">
+      <Project>{C356FD1B-B394-5B6D-313D-50D8A08F44BA}</Project>
+      <Name>Elsa.Jobs.CrmMailPull</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.CrmRobots\Elsa.Jobs.CrmRobots.csproj">
       <Project>{b5b6ce83-197a-4282-9ca2-64daeda7cbd8}</Project>
       <Name>Elsa.Jobs.CrmRobots</Name>

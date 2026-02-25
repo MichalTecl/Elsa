@@ -10,7 +10,7 @@ namespace Elsa.JobLauncher.Scheduler
         public static readonly ElsaJob LoadPayments = new ElsaJob("STAHOVANI_PLATEB", 3, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(0, 10, 0));
         public static readonly ElsaJob PayOnDeliveryProcessing = new ElsaJob("ZPRAC_DOBIRKY", 4, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(0, 10, 0));
 
-        public static readonly ElsaJob BigImport = new ElsaJob("VELKY_IMPORT_FLOX", -10, TimeSpan.FromHours(2), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
+        //public static readonly ElsaJob BigImport = new ElsaJob("VELKY_IMPORT_FLOX", -10, TimeSpan.FromHours(2), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
         public static readonly ElsaJob Currencies = new ElsaJob("MENOVE_KURZY", -9, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
         public static readonly ElsaJob Geocoding = new ElsaJob("GEOCODING", -8, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(6, 0, 0) && eval.NowIsBetween(0, 5));
 
@@ -29,6 +29,9 @@ namespace Elsa.JobLauncher.Scheduler
 
         public static readonly ElsaJob CrmRobots = new ElsaJob("CRM_ROBOTS", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
+        // CRM_MAILPULL
+        public static readonly ElsaJob CrmMailPull = new ElsaJob("CRM_MAILPULL", 1, TimeSpan.FromHours(2), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
+
         //public static readonly ElsaJob OrderDataValidation = new ElsaJob("ORDER_DATA_VALIDATION", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
         public static IEnumerable<ElsaJob> All
@@ -40,7 +43,6 @@ namespace Elsa.JobLauncher.Scheduler
                 yield return LoadPayments;
                 yield return PayOnDeliveryProcessing;
 
-                yield return BigImport;
                 yield return Currencies;
                 
                 yield return DbBackup;
@@ -54,6 +56,7 @@ namespace Elsa.JobLauncher.Scheduler
                 yield return LogReader;
                 yield return StoreMap;
                 yield return CrmRobots;
+                yield return CrmMailPull;
             }
         }
     }
