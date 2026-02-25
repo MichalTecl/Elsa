@@ -13,7 +13,7 @@ namespace Elsa.Jobs.CrmMailPull.Entities
         int MailMessageReferenceId { get; set; }
         IMailMessageReference MailMessageReference { get; }
 
-        [NVarchar(100, false)]
-        string AddressHash { get; set; }
+        int ParticipantAddressId { get; set; }
+        IMessageParticipantAddress ParticipantAddress { get; }
     }
 }

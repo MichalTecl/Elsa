@@ -145,7 +145,11 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 void addValidAddress(string address)
                 {
                     if (!string.IsNullOrWhiteSpace(address) && address.Length < 100)
-                        set.Add(address);
+                    {
+#warning This must be moved to config!!!
+                        if (!address.EndsWith("@biorythme.cz")) // we dont need to store internal emails
+                            set.Add(address);
+                    }
                 }
 
                 foreach (var addr in list)

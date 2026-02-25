@@ -105,16 +105,21 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
                     foreach(var p in message.ParticipantEmails)
                     {
+                        var addr = _db.SelectFrom<IMessageParticipantAddress>().Where(a => a.Email == p).Take(1).Execute().FirstOrDefault();
+                        if (addr == null)
+                        {
+                            addr = _db.New<IMessageParticipantAddress>(a => a.Email = p);
+                            _db.Save(addr);
+                        }
+
                         var pct = _db.New<IMailMessageReferenceParticipant>(i =>
                         {
                             i.MailMessageReferenceId = msg.Id;
-                            i.AddressHash = p;
+                            i.ParticipantAddressId = addr.Id;
                         });
                         
                         _db.Save(pct);
-                    }
-
-                    
+                    }                    
                 }
 
                 tx.Commit();
