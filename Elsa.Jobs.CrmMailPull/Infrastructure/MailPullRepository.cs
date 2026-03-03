@@ -65,7 +65,7 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 entity.Subject = wrap.Subject;
                 entity.ConversationUid = wrap.ConversationUid;
                 entity.Content = wrap.BodyPlainText;
-                entity.Sender = wrap.Message.Sender.GetAddress(false);
+                entity.Sender = wrap.Sender;
 
                 _db.Save(entity);
             }
@@ -95,6 +95,7 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                           FROM MailMessageReference mr  
                           WHERE mr.ConversationId IS NULL    
                             AND mr.FullContentId IS NULL
+                            AND mr.ExclusionRule IS NULL
                             AND mr.Id IN
                             (
                                SELECT mrpa.MailMessageReferenceId
@@ -134,6 +135,18 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
 
                 return new MessageFilter(adrBlsts, contentBlsts); 
             });
+        }
+
+        internal void MarkMessageReferenceExcluded(int mailMessageReferenceId, string blistReason)
+        {
+            var mref = _db.SelectFrom<IMailMessageReference>().Where(m => m.Id == mailMessageReferenceId).Take(1).Execute().FirstOrDefault();
+
+            if (mref == null)
+                return;
+
+            mref.ExclusionRule = blistReason;
+
+            _db.Save(mref);
         }
     }
 

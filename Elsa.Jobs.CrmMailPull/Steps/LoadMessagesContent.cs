@@ -91,9 +91,14 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                                 try
                                 {
                                     var wrap = new MimeMessageWrapper(fullContent);
-                                    if (filter.CheckIsBlacklisted(wrap))
+
+                                    var blistReason = filter.GetBlacklistReason(wrap);
+
+                                    if (blistReason != null)
                                     {
-                                        _log.Info($"Message filtered out by rule");
+                                        _log.Info($"Message filtered out by rule - reason: {blistReason}");
+                                        _repository.MarkMessageReferenceExcluded(message.MailMessageReferenceId, blistReason);
+                                        
                                         continue;
                                     }
 

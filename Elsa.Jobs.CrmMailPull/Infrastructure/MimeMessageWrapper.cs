@@ -23,9 +23,13 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
 
             MessageUid = Truncate(CalcMessageUid(_message, BodyPlainText), 1000);
             ConversationUid = Truncate(CalcConversationUid(_message, MessageUid), 1000);
+
+            Sender = Truncate(GetEffectiveSenderDisplay(_message), 1000);
         }
 
         public MimeMessage Message => _message;
+
+        public string Sender { get; }
 
         /// <summary>
         /// Calculated unique identifier of the message to deduplicate for example the same message in multiple folders/mailbixes etc
@@ -303,6 +307,30 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
         {
             if (string.IsNullOrEmpty(s)) return string.Empty;
             return s.Length <= maxLen ? s : s.Substring(0, maxLen);
+        }
+
+        private static string GetEffectiveSenderDisplay(MimeMessage message)
+        {
+            if (message == null)
+                return null;
+
+            // 1) Prefer explicit Sender header
+            var mailbox = message.Sender as MailboxAddress;
+
+            // 2) Fallback to first From mailbox
+            if (mailbox == null)
+                mailbox = message.From?.OfType<MailboxAddress>()?.FirstOrDefault();
+
+            if (mailbox == null || string.IsNullOrWhiteSpace(mailbox.Address))
+                return null;
+
+            var email = mailbox.Address.Trim();
+            var name = mailbox.Name?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(name))
+                return $"{name} <{email}>";
+
+            return email;
         }
     }
 }

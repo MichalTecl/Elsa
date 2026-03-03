@@ -37,22 +37,25 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 reference.IsFilteredOut = true;
         }
 
-        internal bool CheckIsBlacklisted(MimeMessageWrapper message)
+        internal string GetBlacklistReason(MimeMessageWrapper message)
         {
             // 0) Hard blacklist by "system/non-valuable" type (NO body heuristics)
             var mm = message.Message;
 
-            if (IsDeliveryStatusNotification(mm)) return true;   // bounce/DSN
-            if (IsReadReceiptOrMdn(mm)) return true;             // read receipt
-            if (IsAutoReply(mm)) return true;                    // OOO/auto-reply
-            if (IsListMessage(mm)) return true;                  // mailing lists/newsletters
-            if (IsCalendarMessage(mm)) return true;              // meeting invites
+            if (string.IsNullOrEmpty(message.Sender))
+                return "No sender";
+
+            if (IsDeliveryStatusNotification(mm)) return "bounce/DSN";
+            if (IsReadReceiptOrMdn(mm)) return "read receipt";
+            if (IsAutoReply(mm)) return "OOO/auto-reply";
+            if (IsListMessage(mm)) return "mailing lists/newsletters";
+            if (IsCalendarMessage(mm)) return "meeting invites";
 
             // 1) User-defined content blacklist (subject/body)
             if (IsBlacklisted(message.Subject, message.BodyPlainText))
-                return true;
+                return "By custom rules";
 
-            return false;
+            return null;
         }
 
         private bool IsBlacklisted(string subject, string body)
