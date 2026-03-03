@@ -49,10 +49,8 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 .FirstOrDefault();
         }
 
-        public int SaveMimeMessage(MimeMessage message)
+        public int SaveMimeMessage(MimeMessageWrapper wrap)
         {
-            var wrap = new MimeMessageWrapper(message);
-
             var entity = _db.SelectFrom<IMailMessageFullContent>()
                 .Where(m => m.MessageUid == wrap.MessageUid)
                 .Take(1)
@@ -67,6 +65,7 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 entity.Subject = wrap.Subject;
                 entity.ConversationUid = wrap.ConversationUid;
                 entity.Content = wrap.BodyPlainText;
+                entity.Sender = wrap.Message.Sender.GetAddress(false);
 
                 _db.Save(entity);
             }
@@ -117,6 +116,24 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             mref.FullContentId = fullContentId;
 
             _db.Save(mref);
+        }
+
+        public MessageFilter GetFilter()
+        {
+            return _cache.ReadThrough("mailMessageFilter", TimeSpan.FromHours(1), () => {
+
+                var adrBlsts = _db.SelectFrom<IMailPullAddressBlacklist>()
+                .Execute()
+                .Where(bl => !string.IsNullOrWhiteSpace(bl.Pattern))
+                .ToList();
+
+                var contentBlsts = _db.SelectFrom<IMailContentBlacklist>()
+                .Execute()
+                .Where(bl => !(string.IsNullOrWhiteSpace(bl.SubjectPattern) && string.IsNullOrWhiteSpace(bl.BodyPattern)))
+                .ToList(); 
+
+                return new MessageFilter(adrBlsts, contentBlsts); 
+            });
         }
     }
 

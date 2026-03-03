@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 
 namespace Elsa.Jobs.CrmMailPull.Infrastructure
 {
-    internal class MimeMessageWrapper
+    public class MimeMessageWrapper
     {
         private readonly MimeMessage _message;
 
@@ -24,6 +24,8 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             MessageUid = Truncate(CalcMessageUid(_message, BodyPlainText), 1000);
             ConversationUid = Truncate(CalcConversationUid(_message, MessageUid), 1000);
         }
+
+        public MimeMessage Message => _message;
 
         /// <summary>
         /// Calculated unique identifier of the message to deduplicate for example the same message in multiple folders/mailbixes etc

@@ -139,11 +139,7 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 void addValidAddress(string address)
                 {
                     if (!string.IsNullOrWhiteSpace(address) && address.Length < 100)
-                    {
-#warning This must be moved to config!!!
-                        if (!address.EndsWith("@biorythme.cz")) // we dont need to store internal emails
-                            set.Add(address);
-                    }
+                        set.Add(address);
                 }
 
                 foreach (var addr in list)
@@ -168,7 +164,8 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 {
                     FolderFullName = folderFullName,
                     ImapUid = s.UniqueId.Id,
-                    InternalDt = s.InternalDate?.UtcDateTime ?? default(DateTime)
+                    InternalDt = s.InternalDate?.UtcDateTime ?? default(DateTime),
+                    Subject = s.NormalizedSubject
                 };
                                                         
                 AddEmails(reference.ParticipantEmails, s.Envelope?.From);
@@ -196,8 +193,10 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
         public string FolderFullName { get; set; }
         public uint ImapUid { get; set; }
         public DateTime InternalDt { get; set; }
+        public string Subject { get; set; }
 
         // Raw emails; you can immediately HMAC them before persisting if you want.
         public HashSet<string> ParticipantEmails { get; set; } = new HashSet<string>();
+        public bool IsFilteredOut { get; set; }
     }
 }

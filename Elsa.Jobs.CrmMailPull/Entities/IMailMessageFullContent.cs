@@ -22,5 +22,8 @@ namespace Elsa.Jobs.CrmMailPull.Entities
 
         [NVarchar(1000, false)]
         string MessageUid { get; set; }
+
+        [NVarchar(1000, false)]
+        string Sender { get; set; }
     }
 }

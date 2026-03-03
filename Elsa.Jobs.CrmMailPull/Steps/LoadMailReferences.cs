@@ -29,6 +29,9 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             _log.Info($"Loading folders");
             var allFolders = _repository.GetActiveMailFolders().ToDictionary(f => f.Id, f => f);
 
+            _log.Info($"Loading filter");
+            var filter = _repository.GetFilter();
+
             foreach (var sourceFolderLastSeens in lastSeens)
             {
                 var sourceId = sourceFolderLastSeens.Key;
@@ -69,6 +72,12 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                                 }
                                 else
                                 {
+                                    foreach (var m in batch)
+                                        filter.ClassifyBlacklisted(m);
+
+                                    var blisted = batch.Count(m => m.IsFilteredOut);
+                                    _log.Info($"{blisted} reference(s) filtered out by address/subject rules");
+
                                     SaveBatch(folder.Id, batch);
                                 }
 
@@ -94,7 +103,7 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             _log.Info($"Saving batch of {batch.Count} mails");
             using (var tx = _db.OpenTransaction())
             {
-                foreach (var message in batch)
+                foreach (var message in batch.Where(m => !m.IsFilteredOut))
                 {
                     var msg = _db.New<IMailMessageReference>(r =>
                     {

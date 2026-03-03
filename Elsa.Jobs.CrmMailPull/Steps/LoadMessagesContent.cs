@@ -23,7 +23,9 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
         public void Load()
         {
-            // collecting messages missing full content
+            var filter = _repository.GetFilter();
+
+            _log.Info("collecting messages missing full content...");
             var messages = _repository.GetMessagesMissingFullContent();
 
             if (messages.Count == 0)
@@ -88,7 +90,14 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
                                 try
                                 {
-                                    var fullContentId = _repository.SaveMimeMessage(fullContent);
+                                    var wrap = new MimeMessageWrapper(fullContent);
+                                    if (filter.CheckIsBlacklisted(wrap))
+                                    {
+                                        _log.Info($"Message filtered out by rule");
+                                        continue;
+                                    }
+
+                                    var fullContentId = _repository.SaveMimeMessage(wrap);
                                     _repository.AssignMessageFullContent(message.MailMessageReferenceId, fullContentId);
                                     _log.Info("Saved");
                                 }
