@@ -111,6 +111,7 @@
     <Compile Include="Utils\TextMatchers\ITextMatcher.cs" />
     <Compile Include="Utils\TextMatchers\AllMatchingMatcher.cs" />
     <Compile Include="Utils\TextMatchers\SearchTagMatcher.cs" />
+    <Compile Include="Utils\TimeoutCheck.cs" />
     <Compile Include="Utils\TlsSetter.cs" />
     <Compile Include="WidgetsController.cs" />
   </ItemGroup>

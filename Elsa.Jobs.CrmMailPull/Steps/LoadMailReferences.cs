@@ -1,6 +1,8 @@
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Jobs.CrmMailPull.Entities;
 using Elsa.Jobs.CrmMailPull.Infrastructure;
+using MailKit;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
@@ -8,7 +10,7 @@ using System.Linq;
 
 namespace Elsa.Jobs.CrmMailPull.Steps
 {
-    public class LoadMailReferences
+    public class LoadMailReferences : IStep
     {
         private readonly ILog _log;
         private readonly MailPullRepository _repository;
@@ -21,7 +23,7 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             _db = db;
         }
 
-        public void Load()
+        public void Run(TimeoutCheck timeout)
         {
             _log.Info("Querying last seen ImapUids for all enabled folders... ");
             var lastSeens = _repository.GetLastSeenMailInfo().GroupBy(i => i.SourceId).ToList();
@@ -34,6 +36,8 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
             foreach (var sourceFolderLastSeens in lastSeens)
             {
+                timeout.Check();
+
                 var sourceId = sourceFolderLastSeens.Key;
                 var folderLocalStatuses = sourceFolderLastSeens.ToList();
 
@@ -58,6 +62,8 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                         const int batchSize = 200;
                         while (true)
                         {
+                            timeout.Check();
+
                             try
                             {
                                 _log.Info($"Loading a batch of mails where ImapUid > {currentLastSeen}");
@@ -82,6 +88,14 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                                 }
 
                                 currentLastSeen = batch.Max(b => b.ImapUid);
+                            }
+                            catch (FolderNotFoundException fnfe)
+                            {
+                                _log.Error($"Received FolderNotFound exception - setting the folder {folder.FolderFullName} as disabled", fnfe);
+
+                                _repository.SetFolderDisabled(folder.Id);
+
+                                break;                            
                             }
                             catch (Exception ex)
                             {

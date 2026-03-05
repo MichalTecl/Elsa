@@ -1,5 +1,6 @@
 using Elsa.Common;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Jobs.CrmMailPull.Entities;
 using Elsa.Jobs.CrmMailPull.Infrastructure;
 using MailKit;
@@ -13,7 +14,7 @@ using System.Text;
 
 namespace Elsa.Jobs.CrmMailPull.Steps
 {
-    public class ExploreFolders
+    public class ExploreFolders : IStep
     {
         private static readonly FolderAttributes[] _skippedAttributes = new FolderAttributes[] { FolderAttributes.Junk, FolderAttributes.Drafts, FolderAttributes.Trash };
 
@@ -28,17 +29,19 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             _db = db;
         }
 
-        public void Explore()
+        public void Run(TimeoutCheck timeout)
         {
             foreach(var source in _repository.GetActiveSources())
             {
-                SyncFolders(source);
+                timeout.Check();
+
+                SyncFolders(source, timeout);
             }
 
             _log.Info("Folders sync completed");
         }
 
-        private void SyncFolders(IMailPullSource source)
+        private void SyncFolders(IMailPullSource source, TimeoutCheck timeout)
         {           
             _log.Info($"Starting folders sync. Source={source.Host}/{source.Username}");
             
@@ -52,6 +55,8 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
                 foreach(var serverFolder in serverFolders)
                 {
+                    timeout.Check();
+
                     _log.Info($"Syncing server folder = {serverFolder.FullName}");
 
                     foreach(var skipFlag in _skippedAttributes)

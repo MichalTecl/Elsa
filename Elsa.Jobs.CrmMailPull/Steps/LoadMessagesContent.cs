@@ -1,4 +1,5 @@
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Jobs.CrmMailPull.Infrastructure;
 using MimeKit;
 using Robowire.RobOrm.Core;
@@ -8,7 +9,7 @@ using System.Linq;
 
 namespace Elsa.Jobs.CrmMailPull.Steps
 {
-    public class LoadMessagesContent
+    public class LoadMessagesContent : IStep
     {
         private readonly ILog _log;
         private readonly MailPullRepository _repository;
@@ -21,7 +22,7 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             _db = db;
         }
 
-        public void Load()
+        public void Run(TimeoutCheck timeout)
         {
             var filter = _repository.GetFilter();
 
@@ -43,6 +44,8 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             var groupedPerSource = new Dictionary<int, List<MailMessageRef>>();
             foreach (var message in messages)
             {
+                timeout.Check();
+
                 if (!folderIndex.TryGetValue(message.FolderId, out var folder))
                     continue;
 
@@ -59,6 +62,8 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
             foreach (var sourceId in groupedPerSource.Keys)
             {
+                timeout.Check();
+
                 try
                 {
                     var source = _repository.GetActiveSource(sourceId);
@@ -73,6 +78,8 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                         {
                             foreach(var message in groupedPerSource[sourceId])
                             {
+                                timeout.Check();
+
                                 var folder = folderIndex[message.FolderId];
 
                                 MimeMessage fullContent;

@@ -1,5 +1,6 @@
 using Elsa.Common.Caching;
 using Elsa.Jobs.CrmMailPull.Entities;
+using MailKit;
 using MimeKit;
 using Robowire.RobOrm.Core;
 using System;
@@ -147,6 +148,23 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             mref.ExclusionRule = blistReason;
 
             _db.Save(mref);
+        }
+
+        internal void SetFolderDisabled(int id)
+        {
+            var folder = _db.SelectFrom<IMailboxFolder>()
+                .Where(f => f.Id == id)
+                .Where(f => f.IsEnabled)
+                .Take(1)
+                .Execute()
+                .FirstOrDefault();
+
+            if (folder == null)
+                return;
+
+            folder.IsEnabled = false;
+
+            _db.Save(folder);
         }
     }
 
