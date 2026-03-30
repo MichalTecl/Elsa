@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -95,7 +95,10 @@ namespace Elsa.Jobs.Common.Impl
 
         public void MarkJobStarted(IJobSchedule job)
         {
-            m_log.Info($"MarkJobStarted called {job?.Uid}");
+            m_log.Info($"MarkJobStarted called for job.Uid = {job?.Uid}");
+
+            if (string.IsNullOrEmpty(job?.Uid))
+                return;
 
             job.LastEndDt = null;
             job.LastStartDt = DateTime.Now;
@@ -107,7 +110,10 @@ namespace Elsa.Jobs.Common.Impl
 
         public void MarkJobSucceeded(IJobSchedule job)
         {
-            m_log.Info($"MarkJobSucceeded called {job?.Uid}");
+            m_log.Info($"MarkJobSucceeded called for job.Uid = {job?.Uid}");
+
+            if (string.IsNullOrEmpty(job?.Uid))
+                return;
 
             job.LastEndDt = DateTime.Now;
             job.LastRunFailed = false;
@@ -118,7 +124,10 @@ namespace Elsa.Jobs.Common.Impl
 
         public void MarkJobFailed(IJobSchedule job)
         {
-            m_log.Info($"MarkJobFailed called {job?.Uid}");
+            m_log.Info($"MarkJobFailed called for job.Uid = {job?.Uid}");
+
+            if (string.IsNullOrEmpty(job?.Uid))
+                return;
 
             job.LastEndDt = DateTime.Now;
             job.LastRunFailed = true;
@@ -142,7 +151,7 @@ namespace Elsa.Jobs.Common.Impl
             var schedule = GetCompleteScheduler().FirstOrDefault(j => j.Uid == uid);
             if (schedule == null)
             {
-                m_log.Error($"Schedule for job \"{uid}\" not found");
+                m_log.Info($"Schedule for job \"{uid}\" not found");
             }
 
             return schedule;

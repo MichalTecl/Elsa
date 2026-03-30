@@ -5,7 +5,7 @@ namespace Elsa.JobLauncher.Scheduler
 {
     internal static class JobDefinitions
     {
-        public static readonly ElsaJob CustomersImport = new ElsaJob("ZAKAZNICI_IMPORT", 1, TimeSpan.FromMinutes(20), eval => eval.DidntRunMoreThan(0, 15, 0));
+        public static readonly ElsaJob CustomersImport = new ElsaJob("ZAKAZNICI_IMPORT", 1, TimeSpan.FromMinutes(20), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(1, 5));
         public static readonly ElsaJob QuickImport = new ElsaJob("IMPORT_FLOX", 2, TimeSpan.FromMinutes(30), eval => eval.DidntRunMoreThan(0, 30, 0));
         public static readonly ElsaJob LoadPayments = new ElsaJob("STAHOVANI_PLATEB", 3, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(0, 10, 0));
         public static readonly ElsaJob PayOnDeliveryProcessing = new ElsaJob("ZPRAC_DOBIRKY", 4, TimeSpan.FromMinutes(10), eval => eval.DidntRunMoreThan(0, 10, 0));
