@@ -30,6 +30,73 @@
     margin-left: 5px;
 }
 
+.inspAssignmentsContainer {
+    margin-left: 10px;
+    position: relative;
+}
+
+.inspAssignmentsButton {
+    align-items: center;
+    background: #f3f6fb;
+    border: 1px solid #c8d3e1;
+    border-radius: 999px;
+    color: #36506b;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 0.9em;
+    font-weight: bold;
+    gap: 6px;
+    line-height: 1;
+    padding: 4px 10px;
+}
+
+.inspAssignmentsButton.zeroAssignments {
+    background: #fff1f1;
+    border-color: #d9534f;
+    color: #c9302c;
+}
+
+.inspAssignmentsButton .fa-users {
+    font-size: 0.95em;
+}
+
+.inspAssignmentsPopup {
+    background: #fff;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+    left: 0;
+    min-width: 260px;
+    padding: 10px 12px;
+    position: absolute;
+    top: calc(100% + 6px);
+    z-index: 20;
+}
+
+.inspAssignmentsPopupTitle {
+    border-bottom: 1px solid #e5e9ef;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+}
+
+.assignedUsersListBody {
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.assignedUserListItem + .assignedUserListItem {
+    margin-top: 4px;
+}
+
+.assignedUserListItemLabel {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+    white-space: nowrap;
+}
+
 .inspIssuesList {
     margin-left: 20px;
     margin-bottom: 10px;

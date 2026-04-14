@@ -72,6 +72,7 @@
     <Compile Include="Model\InspectionIssuesCollection.cs" />
     <Compile Include="Model\InspectionIssueViewModel.cs" />
     <Compile Include="Model\IssuesSummaryItemModel.cs" />
+    <Compile Include="Model\UserAssignmentInfo.cs" />
     <Compile Include="Model\UserIssuesCount.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repo\IInspectionsRepository.cs" />

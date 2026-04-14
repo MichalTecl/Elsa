@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Elsa.App.Inspector.Model;
 using Elsa.App.Inspector.Repo;
 using Elsa.Apps.Reporting;
+using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
@@ -13,11 +14,13 @@ namespace Elsa.App.Inspector.Controllers
     [Controller("inspector")]
     public class InspectorController : ElsaControllerBase
     {
-        private readonly IInspectionsRepository m_inspectionsRepository;
+        private readonly IInspectionsRepository _inspectionsRepository;
+        private readonly IUserRepository _userRepository;
 
-        public InspectorController(IWebSession webSession, ILog log, IInspectionsRepository inspectionsRepository) : base(webSession, log)
+        public InspectorController(IWebSession webSession, ILog log, IInspectionsRepository inspectionsRepository, IUserRepository userRepository) : base(webSession, log)
         {
-            m_inspectionsRepository = inspectionsRepository;
+            _inspectionsRepository = inspectionsRepository;
+            _userRepository = userRepository;
         }
 
         [DoNotLog]
@@ -31,23 +34,36 @@ namespace Elsa.App.Inspector.Controllers
                 userId = WebSession.User.Id;
             }
 
-            return m_inspectionsRepository.GetActiveIssuesSummary(userId.Value);
+            var result =  _inspectionsRepository.GetActiveIssuesSummary(userId.Value);
+
+            if (HasUserRight(ReportingUserRights.InspectorIssuesAssignment))
+            {
+                var matrix = _inspectionsRepository.GetResponsibilityMatrix();
+
+                foreach (var sum in result)
+                {
+                    sum.ShowAssignments = true;                    
+                    sum.AssignedUsersCount = matrix.Count(m => m.InspectionTypeId == sum.TypeId);
+                }
+            }
+
+            return result;
         }
 
         public InspectionIssuesCollection GetIssues(int inspectionTypeId, int pageIndex)
         {
             EnsureUserRight(ReportingUserRights.InspectorApp);
 
-            var issues = m_inspectionsRepository.LoadIssues(inspectionTypeId, pageIndex, 10);
+            var issues = _inspectionsRepository.LoadIssues(inspectionTypeId, pageIndex, 10);
 
             var result = new InspectionIssuesCollection()
             {
                 InspectionTypeId = inspectionTypeId,
                 NextPageIndex = (issues.Count < 10) ? -1 : pageIndex+1
             };
-
+                        
             result.Issues.AddRange(issues.Select(i => new InspectionIssueViewModel(i)));
-
+                        
             return result;
         }
 
@@ -55,11 +71,11 @@ namespace Elsa.App.Inspector.Controllers
         {
             EnsureUserRight(ReportingUserRights.InspectorApp);
 
-            var issue = m_inspectionsRepository.LoadIssue(issueId, false);
+            var issue = _inspectionsRepository.LoadIssue(issueId, false);
 
             if (issue == null)
             {
-                var type = m_inspectionsRepository.ResolveIssueTypeByIssueId(issueId);
+                var type = _inspectionsRepository.ResolveIssueTypeByIssueId(issueId);
                 return InspectionIssuesCollection.CreateAsHidden(type, issueId);
             }
 
@@ -77,12 +93,12 @@ namespace Elsa.App.Inspector.Controllers
         {
             EnsureUserRight(ReportingUserRights.InspectorActions);
 
-            using (var session = m_inspectionsRepository.OpenSession())
+            using (var session = _inspectionsRepository.OpenSession())
             {
-                m_inspectionsRepository.RunInspectionAndCloseSession(session, issueId);
+                _inspectionsRepository.RunInspectionAndCloseSession(session, issueId);
             }
 
-            m_inspectionsRepository.LogUserAction(issueId, actionText);
+            _inspectionsRepository.LogUserAction(issueId, actionText);
 
             return LoadIssue(issueId);
         }
@@ -91,7 +107,7 @@ namespace Elsa.App.Inspector.Controllers
         {
             EnsureUserRight(ReportingUserRights.InspectorActions);
 
-            m_inspectionsRepository.PostponeIssue(issueId, days);
+            _inspectionsRepository.PostponeIssue(issueId, days);
         }
 
         public List<UserIssuesCount> GetUsersIssuesCounts()
@@ -99,7 +115,44 @@ namespace Elsa.App.Inspector.Controllers
             if (!WebSession.HasUserRight(ReportingUserRights.InspectorOtherUsers))
                 return new List<UserIssuesCount>(0);            
 
-            return m_inspectionsRepository.GetUserIssuesCounts();
+            return _inspectionsRepository.GetUserIssuesCounts();
+        }       
+
+        public List<UserAssignmentInfo> GetAssignments(int inspectionTypeId)
+        {
+            EnsureUserRight(ReportingUserRights.InspectorIssuesAssignment);
+
+            var assignments = new HashSet<int>(_inspectionsRepository
+                .GetResponsibilityMatrix()
+                .Where(m => m.InspectionTypeId == inspectionTypeId)
+                .Select(m => m.ResponsibleUserId));
+
+            var allUsers = _userRepository.GetAllUsers()
+                .Where(u => u.EMail?.Contains("@") == true);
+
+            var result = new List<UserAssignmentInfo>();
+
+            foreach (var u in allUsers.OrderBy(u => u.EMail))
+                result.Add(new UserAssignmentInfo 
+                {
+                    UserId = u.Id,
+                    Name = u.EMail,
+                    Assigned = assignments.Contains(u.Id)
+                });
+
+            return result;
         }
+
+        public List<UserAssignmentInfo> ChangeAssignment(int inspectionTypeId, int userId, bool assign)
+        {
+            EnsureUserRight(ReportingUserRights.InspectorIssuesAssignment);
+
+            if (assign)
+                _inspectionsRepository.SetResponsibleUser(inspectionTypeId, userId, null, 0);
+            else
+                _inspectionsRepository.RemoveResponsibleUser(inspectionTypeId, userId);
+
+            return GetAssignments(inspectionTypeId);
+        }        
     }
 }

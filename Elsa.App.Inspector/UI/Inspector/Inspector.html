@@ -1,4 +1,4 @@
-﻿<ElsaBody>
+<ElsaBody>
 
     <div class="panel w4">
         <div class="panelHead">
@@ -20,6 +20,25 @@
 
                             <div data-bind="text:TypeName" class="inspTypeRowTitle"></div>
                             <div data-bind="text:IssuesCount" class="inspTypeRowIssuCount"></div>
+
+                            <div class="inspAssignmentsContainer" data-bind="class!.hidden:ShowAssignments">
+                                <button type="button" class="inspAssignmentsButton" data-bind="class.zeroAssignments:isZeroAssignments" event-bind="click:openAssignmentsDialog(VM)">
+                                    <i class="fas fa-users"></i>
+                                    <span data-bind="text:AssignedUsersCount"></span>
+                                </button>
+                                <div class="inspAssignmentsPopup hidden" lt-name="assigPopup" data-bind="class!.hidden:showAssignmentsPopup">
+                                    <div class="inspAssignmentsPopupTitle">Přiřazení</div>
+                                    <div class="assignedUsersListBody" data-bind="itemsSource:assignedUsers" data-key="UserId">
+                                        <div class="lt-template assignedUserListItem">
+                                            <label class="assignedUserListItemLabel">
+                                                <input type="checkbox" data-bind="checked:Assigned" event-bind="change:toggleAssignment(inspectionTypeId, UserId, this.checked)" />
+                                                <span data-bind="text:Name"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="inspTypeRowContent" data-bind="class!.hidden:isExpanded">
                             <div data-bind="itemsSource:issues" data-key="IssueId" class="inspIssuesList">
@@ -74,7 +93,13 @@
                 vm.loadIssues(typeId);
             };
 
+            this.toggleAssignment = function(inspectionTypeId, userId, assign) {
+                vm.toggleAssignment(inspectionTypeId, userId, assign);
+            };
+
             app.Inspector.vm.init(false);
+
+            this.openAssignmentsDialog = (model) => vm.openAssignmentsDialog(model);
         });
     </script>
     

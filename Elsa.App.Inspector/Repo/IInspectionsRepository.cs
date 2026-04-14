@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Elsa.App.Inspector.Database;
 using Elsa.App.Inspector.Model;
@@ -36,6 +36,5 @@ namespace Elsa.App.Inspector.Repo
         int SetResponsibleUser(int issueTypeId, int userId, string emailOverride, int daysAfterDetect);
 
         int RemoveResponsibleUser(int issueTypeId, int? userId);
-
     }
 }

@@ -1,4 +1,4 @@
-﻿var app = app || {};
+var app = app || {};
 app.Inspector = app.Inspector || {};
 app.Inspector.VM = app.Inspector.VM ||
 function() {
@@ -17,6 +17,41 @@ function() {
 
     self.crossUserIssues = [];
     self.selectedUserId = null;
+
+    var ensureSummaryNodeState = function(sum) {
+        sum.isExpanded = !!sum.isExpanded;
+        sum.issues = sum.issues || [];
+        sum.canLoadMore = (sum.canLoadMore === undefined) ? true : sum.canLoadMore;
+        sum.nextPageIndex = (sum.nextPageIndex === undefined) ? 0 : sum.nextPageIndex;
+        sum.assignedUsers = sum.assignedUsers || [];
+        sum.showAssignmentsPopup = !!sum.showAssignmentsPopup;
+        sum.isZeroAssignments = !!sum.ShowAssignments && ((sum.AssignedUsersCount || 0) === 0);
+    };
+
+    var closeAssignmentsPopups = function(exceptTypeId) {
+        self.summary.forEach(function(sum) {
+            if (sum.TypeId !== exceptTypeId) {
+                sum.showAssignmentsPopup = false;
+            }
+        });
+    };
+
+    var applyAssignments = function(typeModel, assignments) {
+        typeModel.assignedUsers = assignments || [];
+
+        typeModel.assignedUsers.forEach(function(user) {
+            user.inspectionTypeId = typeModel.TypeId;
+        });
+
+        typeModel.AssignedUsersCount = typeModel.assignedUsers.filter(function(user) {
+            return user.Assigned;
+        }).length;
+
+        typeModel.isZeroAssignments = typeModel.AssignedUsersCount === 0;
+        typeModel.showAssignmentsPopup = true;
+
+        lt.notify();
+    };
 
     var getType = function(typeId) {
 
@@ -102,6 +137,9 @@ function() {
                 var local = self.summary[i];
                 if (local.TypeId === sum.TypeId) {
                     local.IssuesCount = sum.IssuesCount;
+                    local.ShowAssignments = sum.ShowAssignments;
+                    local.AssignedUsersCount = sum.AssignedUsersCount || 0;
+                    local.isZeroAssignments = !!local.ShowAssignments && (local.AssignedUsersCount === 0);
                     found = true;
                     break;
                 }
@@ -112,10 +150,7 @@ function() {
             }
 
             self.summary.push(sum);
-            sum.isExpanded = false;
-            sum.issues = [];
-            sum.canLoadMore = true;
-            sum.nextPageIndex = 0;
+            ensureSummaryNodeState(sum);
         }
 
         self.isLoading = false;
@@ -145,9 +180,42 @@ function() {
     };
 
     var loadSummary = function () {
+        closeAssignmentsPopups(null);
         lt.api("/inspector/getSummary").query({ "userId": self.selectedUserId }).get(receiveSummary);
 
         lt.api("/inspector/getUsersIssuesCounts").get(receiveCrossUserIssues);
+    };
+
+    self.openAssignmentsDialog = (model) => {
+        if (!model.ShowAssignments) {
+            return;
+        }
+
+        if (model.showAssignmentsPopup) {
+            model.showAssignmentsPopup = false;
+            lt.notify();
+            return;
+        }
+
+        closeAssignmentsPopups(model.TypeId);
+
+        lt.api("/inspector/GetAssignments").query({ "inspectionTypeId": model.TypeId }).get((assignments) => {
+            applyAssignments(model, assignments);
+        });
+    };
+
+    self.toggleAssignment = function(inspectionTypeId, userId, assign) {
+        var typeModel = getType(inspectionTypeId);
+
+        if (!typeModel) {
+            return;
+        }
+
+        lt.api("/inspector/ChangeAssignment")
+            .query({ "inspectionTypeId": inspectionTypeId, "userId": userId, "assign": assign })
+            .get(function(assignments) {
+                applyAssignments(typeModel, assignments);
+            });
     };
     
     self.collapseType = function(typeId) {
@@ -187,12 +255,32 @@ function() {
         if (userId === self.selectedUserId)
             return; 
 
+        closeAssignmentsPopups(null);
         self.selectedUserId = userId;
         receiveCrossUserIssues(self.crossUserIssues);
         self.summary = [];
         lt.notify();
         loadSummary();
     };
+
+    document.addEventListener("click", function(event) {
+        if (event.target.closest(".inspAssignmentsContainer")) {
+            return;
+        }
+
+        var hadOpenPopup = false;
+
+        self.summary.forEach(function(sum) {
+            if (sum.showAssignmentsPopup) {
+                sum.showAssignmentsPopup = false;
+                hadOpenPopup = true;
+            }
+        });
+
+        if (hadOpenPopup) {
+            lt.notify();
+        }
+    });
 };
 
 app.Inspector.vm = app.Inspector.vm || new app.Inspector.VM();

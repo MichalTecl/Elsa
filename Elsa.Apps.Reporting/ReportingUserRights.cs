@@ -1,4 +1,4 @@
-﻿using Elsa.Common.Interfaces;
+using Elsa.Common.Interfaces;
 using Elsa.Users.Infrastructure;
 
 namespace Elsa.Apps.Reporting
@@ -11,6 +11,7 @@ namespace Elsa.Apps.Reporting
         public static readonly UserRight InspectorApp = new UserRight(nameof(InspectorApp), "Inspektor", ViewReportingWidget);
         public static readonly UserRight InspectorActions = new UserRight(nameof(InspectorActions), "Inspektor - Akce", InspectorApp);
         public static readonly UserRight InspectorOtherUsers = new UserRight(nameof(InspectorOtherUsers), "Inspektor - Přehled ostatních uživatelů", InspectorApp);
+        public static readonly UserRight InspectorIssuesAssignment = new UserRight(nameof(InspectorIssuesAssignment), "Inspektor - Přiřazování odpovědných uživatelů", InspectorApp);
 
         public static readonly UserRight DownloadInvoicingFormPackages = new UserRight(nameof(DownloadInvoicingFormPackages), "Stahování balíčků účetních dat");
     }
