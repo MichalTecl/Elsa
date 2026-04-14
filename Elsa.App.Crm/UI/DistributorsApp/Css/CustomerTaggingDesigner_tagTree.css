@@ -47,28 +47,28 @@
 .ctdTagEditPanel {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    transition: box-shadow 0.2s, border 0.2s;
+    gap: 8px;
+    transition: box-shadow 0.2s, border 0.2s, background-color 0.2s;
     margin-top: 6px;
 }
 
 .ctdTagListItemEditing .ctdTagEditPanel {
-    background-color: #f5f9ff;
-    border: 1px solid #3399ff;
-    border-radius: 6px;
-    padding: 6px 8px;
-    box-shadow: 0 0 4px #99cfff;
+    background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+    border: 1px solid #69a9ff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 18px rgba(39, 113, 214, 0.16);
 }
 
 .ctdTagEditPanel:focus-within {
-    box-shadow: 0 0 6px #66aaff;
-    border-radius: 6px;
+    box-shadow: 0 10px 20px rgba(39, 113, 214, 0.2);
+    border-radius: 10px;
 }
 
 /* === NÃƒÂ¡zev Ã…Â¡tÃƒÂ­tku === */
 .ctdTagNameRow {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px;
 }
 
@@ -88,30 +88,65 @@
 /* === Input === */
 .ctdTagNameEditWrapper {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
     gap: 6px;
+    width: 100%;
+}
+
+.ctdTagEditRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.ctdTagEditRowPrimary {
+    align-items: stretch;
+}
+
+.ctdTagEditRowSecondary {
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.ctdTagEditRowTimer,
+.ctdTagEditRowAlias {
+    justify-content: flex-start;
 }
 
 .ctdTagNameEdit input {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 2px 6px;
+    border: 1px solid #bfcef0;
+    border-radius: 8px;
+    padding: 8px 10px;
     font-size: 14px;
     width: 100% !important;
     max-width: none !important;
     min-width: 300px;
     box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.92);
+}
+
+.ctdTagNameEdit {
+    flex: 1 1 auto;
 }
 
 /* === Ikona pro zmÃ„â€ºnu stylu === */
 .tagStyleSwitchIcon {
-    color: #666;
+    color: #355d9a;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color 0.2s, transform 0.2s;
+    background-color: #fff;
+    border: 1px solid #bfcef0;
+    border-radius: 8px;
+    padding: 8px;
+    min-width: 34px;
+    text-align: center;
 }
 
     .tagStyleSwitchIcon:hover {
-        color: #000;
+        color: #173a73;
+        transform: translateY(-1px);
     }
 
 /* === Expand/Collapse Ã…Â¡ipky pÃ…â„¢ÃƒÂ­mo za Ã…Â¡tÃƒÂ­tkem === */
@@ -130,8 +165,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-top: 6px;
-    padding-right: 8px;
+    margin-top: 8px;
     gap: 12px;
 }
 
@@ -141,7 +175,15 @@
     font-size: 16px;
     cursor: pointer;
     margin-right: auto;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
 }
+
+    .ctedTagDeleteButton:hover {
+        background-color: #ffe9e9;
+        color: #a80000;
+    }
 
 /* === TlaÃ„ÂÃƒÂ­tka vpravo === */
 .ctdEditButtonsRight {
@@ -151,23 +193,26 @@
 
 .ctagCancelButton,
 .ctagSaveTagButton {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 4px 8px;
-    border-radius: 6px;
+    background-color: #fff;
+    border: 1px solid #bfcef0;
+    padding: 6px 10px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.2s, border-color 0.2s;
+    min-width: 38px;
+    transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
 }
 
     .ctagCancelButton:hover {
         background-color: #ffe5e5;
-        border-color: #cc0000;
+        border-color: #d77;
+        transform: translateY(-1px);
     }
 
     .ctagSaveTagButton:hover {
-        background-color: #e5ffe5;
-        border-color: #009900;
+        background-color: #e8f8ea;
+        border-color: #66aa77;
+        transform: translateY(-1px);
     }
 
 /* === Sub-container pro dÃ„â€ºti === */
@@ -265,13 +310,121 @@
 .ctdTimerEditPanel {
     display: flex;
     align-items: center;
-    gap: 5px;
-    padding: 5px;
+    gap: 10px;
+    padding: 6px 0 2px;
+    flex-wrap: wrap;
 }
 
     .ctdTimerEditPanel input {
-        max-width: 50px !important;
+        max-width: 64px !important;
+        border: 1px solid #bfcef0;
+        border-radius: 8px;
+        padding: 6px 8px;
+        background-color: #fff;
     }
+
+.ctdTagFlagsEditPanel,
+.ctdTagAdditionalIconsPanel {
+    display: flex;
+    align-items: center;
+}
+
+.ctdTagFlagItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #28415f;
+}
+
+.ctdTagFlagItem input {
+    width: 16px;
+    height: 16px;
+}
+
+.ctdInspectorAliasField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.ctdInspectorAliasField label {
+    font-size: 12px;
+    color: #456;
+    font-weight: 600;
+}
+
+.ctdInspectorAliasField input {
+    border: 1px solid #d7c982;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, #fffde2 0%, #fff9be 100%);
+}
+
+.btnPackingMessage {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 36px;
+    border: 1px solid #bfcef0;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    color: #28415f;
+    transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+    .btnPackingMessage:hover {
+        background-color: #eef5ff;
+        border-color: #8ab3ea;
+        transform: translateY(-1px);
+    }
+
+.ctdDeadlineToggleButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #8ab3ea;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
+    color: #234a78;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+    .ctdDeadlineToggleButton:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(58, 116, 194, 0.16);
+        border-color: #5f96dc;
+    }
+
+.ctdDtwState {
+    color: #65758a;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.ctdDtwActiveGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.75);
+    border: 1px solid #d7e4f8;
+}
+
+.ctdDtwCaption {
+    color: #35506f;
+    font-size: 13px;
+}
 
 .ctdDtwIcon {
     color: #bb3 !important;

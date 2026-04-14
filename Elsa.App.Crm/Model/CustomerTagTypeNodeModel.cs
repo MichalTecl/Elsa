@@ -18,6 +18,7 @@ namespace Elsa.App.Crm.Model
         public int DaysToWarning { get; set; }
         public bool RequiresNote { get; set; }
         public string OrderPackingMessage { get; set; }
+        public string InspectorAlias { get; set; }
     }
 
     public class CustomerTagTypeNodeModel : CustomerTagTypeModel

@@ -18,40 +18,56 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="ctdTagItemHeadColumn ctdTagEditPanel">
                 <div class="ctdTagNameRow">
                     <div class="ctdTagName" data-bind="text:name;cssClass:cssClass;class.hidden:isEditing" event-bind="click:VM.edit()"></div>
-                                        
+
                     <div class="ctdTagExpansionButtons" data-bind="class.hidden:isEditing">
                         <i class="far fa-clock ctdDtwIcon" data-bind="class!.hidden:hasDaysToWarning"></i>
                         <i class="fas fa-chevron-down" data-bind="class!.hidden:isOpen" event-bind="click:VM.close()"></i>
                         <i class="fas fa-chevron-right" data-bind="class.hidden:isOpen" event-bind="click:VM.open()"></i>
                     </div>
                     <div class="ctdTagNameEditWrapper" data-bind="class!.hidden:isEditing">
-                        <i class="fas fa-palette tagStyleSwitchIcon" event-bind="click:VM.changeCssClass()"></i>
-                        <div class="ctdTagNameEdit" data-bind="cssClass:cssClass;">
-                            <input style="background-color:transparent !important; color:inherit !important" type="text" class="ctagNameEditTextbox" data-bind="value:name" event-bind="input:VM.updateName(this.value)" />
+                        <div class="ctdTagEditRow ctdTagEditRowPrimary">
+                            <i class="fas fa-palette tagStyleSwitchIcon" event-bind="click:VM.changeCssClass()"></i>
+                            <div class="ctdTagNameEdit" data-bind="cssClass:cssClass;">
+                                <input style="background-color:transparent !important; color:inherit !important" type="text" class="ctagNameEditTextbox" data-bind="value:name" event-bind="input:VM.updateName(this.value)" />
+                            </div>
                         </div>
-                        <div class="ctdTimerEditPanel">
-                            <i class="far fa-clock" event-bind="click:VM.toggleDaysToWarning()"></i>
-                            <div class="ctdDtwCaption" data-bind="class!.hidden:hasDaysToWarning">Upozornit po</div>
-                            <input type="number" step="1" min="1" data-bind="value:daysToWarning;class!.hidden:hasDaysToWarning" event-bind="input:VM.updateDaysToWarning(this.value)" />
-                            <div class="ctdDtwCaption" data-bind="class!.hidden:hasDaysToWarning">dnů</div>
+                        <div class="ctdTagEditRow ctdTagEditRowSecondary">
+                            <div class="ctdTagFlagsEditPanel">
+                                <div class="ctdTagFlagItem">
+                                    <input type="checkbox" data-bind="checked:requiresNote" event-bind="change:VM.updateRequiresNote(this.checked)" />
+                                    <label>Vyžaduje poznámku</label>
+                                </div>
+                            </div>
+                            <div class="ctdTagAdditionalIconsPanel">
+                                <button class="btnPackingMessage" event-bind="click:setPackingMessage(VM)" title="Nastavit zprávu pro balení">
+                                    <i class="fas fa-envelope-open-text"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="ctdTagFlagsEditPanel">
-                            <div class="ctdTagFlagItem">
-                                <input type="checkbox" data-bind="checked:requiresNote" event-bind="change:VM.updateRequiresNote(this.value)" />
-                                <label>Vyžaduje poznámku</label>
-                            </div>                            
+                        <div class="ctdTagEditRow ctdTagEditRowTimer">
+                            <div class="ctdTimerEditPanel">
+                                <button class="ctdDeadlineToggleButton" event-bind="click:VM.toggleDaysToWarning()">
+                                    <i class="far fa-clock"></i>
+                                    <span>Deadline</span>
+                                </button>
+                                <div class="ctdDtwState" data-bind="class.hidden:hasDaysToWarning">Bez deadline</div>
+                                <div class="ctdDtwActiveGroup" data-bind="class!.hidden:hasDaysToWarning">
+                                    <div class="ctdDtwCaption">Upozornit po</div>
+                                    <input type="number" step="1" min="1" data-bind="value:daysToWarning;class!.hidden:hasDaysToWarning" event-bind="input:VM.updateDaysToWarning(this.value)" />
+                                    <div class="ctdDtwCaption">dnů</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ctdTagAdditionalIconsPanel">
-                            <button class="btnPackingMessage" event-bind="click:setPackingMessage(VM)" title="Nastavit zprávu pro balení">
-                                <i class="fas fa-envelope-open-text"></i>
-                            </button>
+                        <div class="ctdTagEditRow ctdTagEditRowAlias">
+                            <div class="ctdInspectorAliasField">
+                                <label for="tagInspectorAlias_{%GENERATE%}">Alias pro Inspektora</label>
+                                <input id="tagInspectorAlias_{%GENERATE%}" type="text" data-bind="value:InspectorAlias" event-bind="input:VM.updateInspectorAlias(this.value)" />
+                            </div>
                         </div>
-
-
                     </div>
                 </div>
                 <div class="ctdItemEditorRow" data-bind="class!.hidden:isEditing">
@@ -68,22 +84,22 @@
                     </div>
                 </div>
             </div>
-            
+
         </div>
 
-        <div class="ctdSubContainer" data-bind="class!.hidden:isOpen">            
+        <div class="ctdSubContainer" data-bind="class!.hidden:isOpen">
             <div class="ctdChildNodesListContainer" fill-by-lazy="/UI/DistributorsApp/Parts/TaggingDesignerTaglist.html"></div>
 
             <div class="ctdTagItemParentConnector ctdLastSubLevelRow">
                 <div class="ctdSubtagRuleCont ctdLastSubLevelRowRulerCont">
-                    <div class="ctdSubtagRuleContTopHalf"></div>                    
-                </div>                
+                    <div class="ctdSubtagRuleContTopHalf"></div>
+                </div>
                 <div class="ctdSubtagArrowCont">
                     <i class="fas fa-caret-right"></i>
                 </div>
                 <div class="ctdSubActionsCont">
                     <i class="fas fa-plus faButtonNew" event-bind="click:VM.createChildTag()" data-bind="class.hidden:childPickerOpen"></i>
-                    <i class="fas fa-link faButtonNew" event-bind="click:setupTagPicker($tagPickerCont, VM)"  data-bind="class.hidden:childPickerOpen"></i>
+                    <i class="fas fa-link faButtonNew" event-bind="click:setupTagPicker($tagPickerCont, VM)" data-bind="class.hidden:childPickerOpen"></i>
 
                     <div class="ctdLinkTagPickerCont" data-bind="class!.hidden:childPickerOpen">
                         <i class="fas fa-times faButtonNew" event-bind="click:VM.closeChildPicker()"></i>
@@ -105,10 +121,10 @@
         this.setupTagPicker = (container, vm) => {
             app.ui.autosuggest(container, app.CustomerTaggingDesigner.vm.getAllTagNames);
             vm.openChildPicker();
-        };        
+        };
 
         this.setPackingMessage = (vm) => {
-            const value = prompt("Zpráva pro baliče", vm.OrderPackingMessage || "");
+            let value = prompt("Zpráva pro baliče", vm.OrderPackingMessage || "");
 
             if (value === null)
                 return;
@@ -122,6 +138,6 @@
 </script>
 <style>
     .transparent {
-        visibility:hidden;
+        visibility: hidden;
     }
 </style>

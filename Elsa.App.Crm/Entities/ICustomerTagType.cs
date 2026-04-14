@@ -33,5 +33,8 @@ namespace Elsa.App.Crm.Entities
 
         [NVarchar(500, true)]
         string OrderPackingMessage { get; set; }
+
+        [NVarchar(500, true)]
+        string InspectorAlias { get; set; }
     }
 }

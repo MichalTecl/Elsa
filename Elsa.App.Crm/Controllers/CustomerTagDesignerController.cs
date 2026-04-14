@@ -76,6 +76,7 @@ namespace Elsa.App.Crm.Controllers
                         DaysToWarning = tag.DaysToWarning ?? 0,
                         RequiresNote = tag.RequiresNote == true,
                         OrderPackingMessage = tag.OrderPackingMessage,
+                        InspectorAlias = tag.InspectorAlias
                     };
 
                     result.Add(model);
@@ -151,6 +152,7 @@ namespace Elsa.App.Crm.Controllers
                     t.DaysToWarning = model.DaysToWarning == 0 ? null : (int?)model.DaysToWarning;
                     t.RequiresNote = model.RequiresNote;
                     t.OrderPackingMessage = model.OrderPackingMessage;
+                    t.InspectorAlias = model.InspectorAlias;
                 });
 
                 if (parentTagId != null) 

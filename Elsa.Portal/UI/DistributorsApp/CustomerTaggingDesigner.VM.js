@@ -76,6 +76,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
 
                     tagModel.name = tagRecord.Name;
                     tagModel.OrderPackingMessage = tagRecord.OrderPackingMessage;
+                    tagModel.InspectorAlias = tagRecord.InspectorAlias;
                     tagModel.cssClass = tagRecord.CssClass;
                     tagModel.description = tagRecord.Description;
                     tagModel.isRoot = !tagModel.parentTagInstanceId;
@@ -121,6 +122,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                             "DaysToWarning": tagModel.daysToWarning,
                             "RequiresNote": tagModel.requiresNote,
                             "OrderPackingMessage": tagModel.OrderPackingMessage,
+                            "InspectorAlias": tagModel.InspectorAlias,
                         })
                         .post((tags) => {
                             tagModel.cancelEdit();
@@ -139,6 +141,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
                 };
 
                 tagModel.updateRequiresNote = (v) => tagModel.requiresNote = !!v;
+                tagModel.updateInspectorAlias = (v) => tagModel.InspectorAlias = v;
 
                 tagModel.toggleDaysToWarning = () => {
                     if (tagModel.hasDaysToWarning) {
@@ -251,6 +254,7 @@ app.CustomerTaggingDesigner = app.CustomerTaggingDesigner || {
             let model = getTagModel(parentTagUiModel, list, null, !parentTagUiModel);
 
             model.name = "";
+            model.InspectorAlias = "";
             model.cssClass = "crmDistributorTag_default";
             model.isEditing = true;
             model.isOpen = false;
