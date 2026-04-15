@@ -16,6 +16,13 @@
                        data-bind="href:detail.reportUrl">
                         <i class="fas fa-file-excel"></i>
                     </a>
+                    <button class="digrLatestNoteBadge" type="button" title="Upravit poznámku" event-bind="click:editLatestNote" data-bind="class.digrLatestNoteBadgeFilled:detail.LatestNoteText">
+                        <i class="fas fa-sticky-note"></i>
+                        <span class="digrLatestNoteText" data-bind="class!.hidden:detail.LatestNoteText;text:detail.LatestNoteText"></span>
+                        <span lt-name="latestNoteDeleteButton" class="digrLatestNoteDelete" data-bind="class!.hidden:detail.LatestNoteText">
+                            <i class="fas fa-times"></i>
+                        </span>
+                    </button>
                     <div id="digrDetName" data-bind="text:detail.Name"></div>
                 </div>
             </div>
@@ -173,7 +180,7 @@
 
     <script>
         lt.element("digrDetailControlCont")
-            .attach(function (gpsTb) {
+            .attach(function (gpsTb, latestNoteDeleteButton) {
 
                 this.bind(function (detail) {
                     
@@ -223,6 +230,9 @@
 
                 this.save = () => app.Distributors.vm.saveDetail();
 
+                this.editLatestNote = () => app.Distributors.vm.editLatestNote();
+                this.deleteLatestNote = () => app.Distributors.vm.deleteLatestNote();
+
                 this.removeTag = (id) => app.Distributors.vm.removeTag(id);
                 
                 this.activateDetailTab = (text) => app.Distributors.vm.activateTab(text);
@@ -237,6 +247,15 @@
                     const url = "https://www.mapy.cz?q=" + encodeURIComponent(store.Address + ', ' + store.City);
                     window.open(url, '_blank');
                 };
+
+                if (latestNoteDeleteButton) {
+                    latestNoteDeleteButton.addEventListener("click", (ev) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        ev.stopImmediatePropagation();
+                        app.Distributors.vm.deleteLatestNote();
+                    });
+                }
             });
     </script>
 

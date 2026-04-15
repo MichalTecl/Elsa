@@ -55,6 +55,7 @@ namespace Elsa.App.Crm.Controllers
             var usindex = _userRepo.GetUserIndex();
 
             return _customerRepository.GetCustomerRelatedNotes(customerId)
+                .OrderByDescending(n => n.CreateDt)
                 .Select(n => new CustomerNoteViewModel 
                 {
                     Id = n.Id,
@@ -63,6 +64,41 @@ namespace Elsa.App.Crm.Controllers
                     Text = n.Body,
                     IsOwn = n.AuthorId == WebSession.User.Id,
                 });
+        }
+
+        public CustomerNoteViewModel GetLatestNote(int customerId)
+        {
+            return GetNotes(customerId).FirstOrDefault();
+        }
+
+        public CustomerNoteViewModel SetLatestNote(int customerId, string text)
+        {
+            var normalizedText = (text ?? string.Empty).Trim();
+
+            while (normalizedText.Contains("\r\n"))
+                normalizedText = normalizedText.Replace("\r\n", " ");
+
+            while (normalizedText.Contains("\n"))
+                normalizedText = normalizedText.Replace("\n", " ");
+
+            while (normalizedText.Contains("\r"))
+                normalizedText = normalizedText.Replace("\r", " ");
+
+            while (normalizedText.Contains("  "))
+                normalizedText = normalizedText.Replace("  ", " ");
+
+            if (string.IsNullOrWhiteSpace(normalizedText))
+                return GetLatestNote(customerId);
+
+            _customerRepository.AddCustomerNote(customerId, normalizedText);
+
+            return GetLatestNote(customerId);
+        }
+
+        public CustomerNoteViewModel DeleteLatestNote(int customerId)
+        {
+            _customerRepository.AddCustomerNote(customerId, string.Empty);
+            return GetLatestNote(customerId);
         }
 
         public IEnumerable<CustomerNoteViewModel> AddNote(int customerId, string text)

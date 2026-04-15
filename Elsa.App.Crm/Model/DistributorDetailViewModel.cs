@@ -18,7 +18,8 @@ namespace Elsa.App.Crm.Model
         public bool HasStore { get; set; }
         public string VatId { get; set; }
         public string RegistrationId { get; set; }        
-        public int NotesCount { get; set; }        
+        public int NotesCount { get; set; }
+        public string LatestNoteText { get; set; }
     }
 
     public class DistributorAddressViewModel

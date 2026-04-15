@@ -186,6 +186,78 @@ input {
     font-size: 1.2em;
 }
 
+.digrLatestNoteBadge {
+    position: absolute;
+    top: -14px;
+    left: 52px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100vw - 220px);
+    padding: 4px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #5c4b2d;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.digrLatestNoteBadge:hover {
+    background: #fff8dd;
+}
+
+.digrLatestNoteBadgeFilled {
+    min-height: 36px;
+    padding: 6px 30px 6px 10px;
+    border: 1px solid #d8dee8;
+    background: #fffdf5;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.digrLatestNoteBadgeFilled:hover {
+    background: #fff8dd;
+    border-color: #cdbb7d;
+}
+
+.digrLatestNoteBadge i {
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.digrLatestNoteText {
+    white-space: nowrap;
+}
+
+.digrLatestNoteDelete {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid #d8dee8;
+    background: #fff;
+    color: #8f3b2f;
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.digrLatestNoteBadgeFilled:hover .digrLatestNoteDelete {
+    opacity: 1;
+}
+
+.digrLatestNoteDelete:hover {
+    background: #fff1ed;
+}
+
+.digrLatestNoteDelete i {
+    font-size: 10px;
+}
+
 .digrDetName {
     margin-left: 0;
 }

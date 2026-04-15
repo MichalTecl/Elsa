@@ -789,12 +789,40 @@ app.Distributors.VM = app.Distributors.VM || function(){
 
     const loadAddresses = () => lt.api("/CrmDistributors/getAddresses").query({ "customerId": self.detail.Id }).get(receiveAddresses);
 
+    const receiveLatestNote = (note) => {
+        if (!self.detail)
+            return;
+
+        const text = ((note && note.Text) || "").trim();
+        self.detail.LatestNoteText = text.length > 0 ? text : null;
+        self.detail.NotesCount = text.length > 0 ? 1 : 0;
+
+        lt.notify();
+    };
+
+    const loadLatestNote = () => {
+        if (!self.detail)
+            return;
+
+        lt.api("/CrmDistributors/getLatestNote")
+            .query({ "customerId": self.detail.Id })
+            .get(receiveLatestNote);
+    };
+
+    const saveLatestNote = (text) => {
+        lt.api("/Crmdistributors/addNote")
+            .query({ "customerId": self.detail.Id })
+            .rawBody(text || "")
+            .post((notes) => receiveLatestNote((notes || [])[0] || null));
+    };
+
     
     const receiveDetail = (detail) => {
         self.detail = detail;
         self.isDetailOpen = true;
 
         loadAddresses();
+        loadLatestNote();
 
         self.withMetadata((md) => {
 
@@ -825,6 +853,34 @@ app.Distributors.VM = app.Distributors.VM || function(){
             self.detail.reportUrl = "/crmReporting/GetDistributorReport?distributorId=" + self.detail.Id;
 
         });
+    };
+
+    self.editLatestNote = () => {
+        if (!self.detail || !self.detail.Id)
+            return;
+
+        const currentValue = self.detail.LatestNoteText || "";
+        const enteredValue = window.prompt("Upravit poznámku", currentValue);
+
+        if (enteredValue === null)
+            return;
+
+        const normalizedValue = enteredValue.replace(/[\r\n]+/g, " ").trim();
+
+        if (normalizedValue === currentValue)
+            return;
+
+        saveLatestNote(normalizedValue);
+    };
+
+    self.deleteLatestNote = () => {
+        if (!self.detail || !self.detail.Id || !self.detail.LatestNoteText)
+            return;
+
+        if (!window.confirm("Opravdu chcete poznámku smazat?"))
+            return;
+
+        saveLatestNote("");
     };
 
     const loadDetail = (customerId) => {

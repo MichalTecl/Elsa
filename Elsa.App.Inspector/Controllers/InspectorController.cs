@@ -128,7 +128,8 @@ namespace Elsa.App.Inspector.Controllers
                 .Select(m => m.ResponsibleUserId));
 
             var allUsers = _userRepository.GetAllUsers()
-                .Where(u => u.EMail?.Contains("@") == true);
+                .Where(u => u.EMail?.Contains("@") == true)
+                .Where(u => u.LockDt == null);
 
             var result = new List<UserAssignmentInfo>();
 
