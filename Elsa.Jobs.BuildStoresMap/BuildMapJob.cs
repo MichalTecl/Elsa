@@ -49,15 +49,7 @@ namespace Elsa.Jobs.BuildStoresMap
                 .ToList();
 
             _log.Info($"Loaded {dbContacts.Count} contacts");
-
-            _log.Info("Loading Elsa Db stores");
-            var dbStores = _db.SelectFrom<ICustomerStore>()
-                .Join(s => s.Customer)
-                .Where(s => s.Customer.ProjectId == _session.Project.Id)
-                .Execute()
-                .ToList();
-            _log.Info($"Loaded {dbStores.Count} stores");
-                        
+                                                
             foreach(var dbContact in dbContacts)
             {
                 if (string.IsNullOrWhiteSpace(dbContact.CompanyRegistrationId))
@@ -65,8 +57,6 @@ namespace Elsa.Jobs.BuildStoresMap
                     _log.Error($"Valuable distributor {dbContact.Name} has no company registration id");
                     continue;
                 }                
-
-                var savedCustomerStores = dbStores.Where(s => s.CustomerId == dbContact.Id).ToList();                                                                
             }
 
             GenerateCsv();
@@ -80,8 +70,11 @@ namespace Elsa.Jobs.BuildStoresMap
             {
                 var csv = new CsvGenerator(writer, new[] { "title", "address", "city", "url", "preview", "lat", "lng" });
 
+                var cGroupTypes = _db.SelectFrom<ICustomerGroupType>().Execute().ToList();
+
                 var stores = _db.SelectFrom<ICustomerStore>()
                     .Join(s => s.Customer)
+                    .Join(s => s.Customer.CustomerGroups)
                     .Where(s => s.Customer.ProjectId == _session.Project.Id)
                     .Where(s => s.Customer.IsValuableDistributor == true)
                     .Where(s => s.Customer.HasStore == true)
@@ -90,6 +83,24 @@ namespace Elsa.Jobs.BuildStoresMap
 
                 foreach (var store in stores)
                 {
+                    bool skip = false;
+
+                    if (store.Customer.CustomerGroups != null)
+                    {
+                        foreach(var cGroup in store.Customer.CustomerGroups)
+                        {
+                            var gType = cGroupTypes.FirstOrDefault(gt => gt.ErpGroupName.Equals(cGroup.ErpGroupName, StringComparison.InvariantCultureIgnoreCase));
+                            if (gType?.IsDisabled == true)
+                            {
+                                skip = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (skip)
+                        continue;
+
                     try
                     {
                         csv.CellMan(store.Name)

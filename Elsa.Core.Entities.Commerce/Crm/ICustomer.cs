@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -85,5 +85,7 @@ namespace Elsa.Core.Entities.Commerce.Crm
         /// </summary>
         bool? IsValuableDistributor { get; set; }
         DateTime? IsValuableDistributorChangeDt { get; set; }
+
+        IEnumerable<ICustomerGroup> CustomerGroups { get; }        
     }
 }
