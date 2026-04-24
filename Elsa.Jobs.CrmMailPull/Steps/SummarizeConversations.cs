@@ -566,18 +566,20 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             foreach (var message in messages)
             {
                 if (sb.Length > 0)
-                    sb.AppendLine().AppendLine();
+                    sb.AppendLine();
 
-                sb.Append(message.InternalDt.ToString("u"));
+                var sender = string.IsNullOrWhiteSpace(message.Sender) ? "Neznamy odesilatel" : message.Sender.Trim();
+                var text = message.Body;
 
-                if (!string.IsNullOrWhiteSpace(message.Sender))
-                    sb.Append(" | ").Append(message.Sender);
+                if (string.IsNullOrWhiteSpace(text))
+                    text = message.Subject;
 
-                if (!string.IsNullOrWhiteSpace(message.Subject))
-                    sb.Append(" | ").Append(message.Subject);
+                text = TrimTo(text, 500);
 
-                if (!string.IsNullOrWhiteSpace(message.Body))
-                    sb.AppendLine().Append(message.Body);
+                if (string.IsNullOrWhiteSpace(text))
+                    sb.Append(sender).Append(":");
+                else
+                    sb.Append(sender).Append(": ").Append(text);
             }
 
             return sb.ToString().Trim();

@@ -37,7 +37,9 @@ namespace Elsa.App.Crm.Controllers
 
         public List<CustomerMeetingViewModel> GetMeetings(int customerId)
         {
-            return MapMeetings(_meetingsRepository.GetMeetings(customerId)).ToList();
+            return MapMeetings(
+                _meetingsRepository.GetMeetings(customerId),
+                _meetingsRepository.GetMailConversations(customerId)).ToList();
         }
 
         public List<CustomerMeetingViewModel> SetMeetingStatus(int meetingId, int statusTypeId) 
@@ -203,7 +205,7 @@ namespace Elsa.App.Crm.Controllers
         {
             var meetings = _meetingsRepository.GetParticipantMeetings(WebSession.User.Id, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(32));
 
-            return MapMeetings(meetings.Where(m => m.Status.ActionExpected).OrderBy(m => m.StartDt)).ToList();
+            return MapMeetings(meetings.Where(m => m.Status.ActionExpected).OrderBy(m => m.StartDt), null).ToList();
         }
 
         private static IEnumerable<(int order, DateTime from, DateTime to, string text, string grpClass)> GetMeetingTimeDeciders()
@@ -245,7 +247,7 @@ namespace Elsa.App.Crm.Controllers
             return vm;
         }
 
-        private IEnumerable<CustomerMeetingViewModel> MapMeetings(IEnumerable<IMeeting> records)
+        private IEnumerable<CustomerMeetingViewModel> MapMeetings(IEnumerable<IMeeting> records, IEnumerable<CustomerMeetingsRepository.MailConversationDto> conversations)
         {
             var deciders = GetMeetingTimeDeciders().ToList();
 
@@ -254,8 +256,14 @@ namespace Elsa.App.Crm.Controllers
             var actionsIndex = _meetingsRepository.GetMeetingStatusActions(null).OrderBy(a => a.SortOrder).ToList();
             var categoryIndex = _meetingsRepository.GetAllMeetingCategories();
             var customerIndex = _customerRepository.GetDistributorNameIndex();
+            var emailCategory = categoryIndex.FirstOrDefault(c => string.Equals(c.Title, "E-Mail", StringComparison.OrdinalIgnoreCase));
+            var pastStatus = meetingStatusIndex.FirstOrDefault(s => string.Equals(s.Title, "Proběhlo", StringComparison.OrdinalIgnoreCase))
+                ?? meetingStatusIndex.FirstOrDefault(s => !s.ActionExpected && s.MeansCancelled != true)
+                ?? meetingStatusIndex.FirstOrDefault(s => !s.ActionExpected);
 
-            foreach (var record in records.OrderByDescending(r => r.StartDt))
+            var result = new List<(DateTime sortDt, CustomerMeetingViewModel model)>();
+
+            foreach (var record in records)
             {
                 var category = categoryIndex.First(c => c.Id == record.MeetingCategoryId);
                 var decider = deciders.FirstOrDefault(d => d.from <= record.StartDt && d.to > record.EndDt);
@@ -295,13 +303,50 @@ namespace Elsa.App.Crm.Controllers
                         StatusTypeId = action.NextStatusTypeId
                     }));
 
-                yield return model;
-            }            
+                result.Add((record.StartDt, model));
+            }
+
+            if (HasUserRight(CrmUserRights.EmailConversationsPreview))
+                foreach (var conversation in conversations ?? Enumerable.Empty<CustomerMeetingsRepository.MailConversationDto>())
+                {
+                    var conversationDt = conversation.ConversationEndDt ?? DateTime.MinValue;
+                    var decider = deciders.FirstOrDefault(d => d.from <= conversationDt && d.to > conversationDt);
+
+                    var model = new CustomerMeetingViewModel
+                    {
+                        Id = conversation.Id * -1,
+                        MailConversationId = conversation.Id,
+                        Day = StringUtil.FormatDate_DayNameDdMm(conversationDt),
+                        Time = StringUtil.FormatTimeHhMm(conversationDt),
+                        StartDt = StringUtil.FormatDateTimeForUiInput(conversationDt),
+                        EndDt = StringUtil.FormatDateTimeForUiInput(conversationDt),
+                        Title = conversation.Subject,
+                        Text = conversation.Summary ?? "Shrnutí zatím nebylo vytvořeno...",
+                        StatusTypeId = pastStatus?.Id ?? 0,
+                        CategoryId = emailCategory?.Id ?? 0,
+                        CategoryName = emailCategory?.Title ?? "E-Mail",
+                        CategoryIconClass = emailCategory?.IconClass ?? "fas fa-envelope",
+                        ExpectedDurationMinutes = emailCategory?.ExpectedDurationMinutes ?? 1,
+                        TimeGroup = StringUtil.Capitalize(decider.text),
+                        TimeGroupClass = decider.grpClass
+                    };
+
+                if (pastStatus != null)
+                    MapStatus(meetingStatusIndex, model);
+
+                model.StatusTypeColor = "#7A8A99";
+
+                result.Add((conversationDt, model));
+            }
+
+            return result
+                .OrderByDescending(i => i.sortDt)
+                .Select(i => i.model);
         }
 
         private CustomerMeetingViewModel MapMeeting(IMeeting meeting)
         {
-            return MapMeetings(new[] { meeting }).Single();
+            return MapMeetings(new[] { meeting }, null).Single();
         }
 
         

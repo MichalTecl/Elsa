@@ -104,5 +104,21 @@ namespace Elsa.App.Crm.Repositories
                 .Execute()
                 .ToList();
         }
+
+        public List<MailConversationDto> GetMailConversations(int customerId)
+        {
+            return _database.Sql()
+                .Call("GetCustomerMailConversations")
+                .WithParam("@customerId", customerId)
+                .AutoMap<MailConversationDto>();
+        }
+
+        public class MailConversationDto
+        {
+            public int Id { get; set; }
+            public DateTime? ConversationEndDt { get; set; }
+            public string Subject { get; set; }
+            public string Summary { get; set; }
+        }
     }
 }

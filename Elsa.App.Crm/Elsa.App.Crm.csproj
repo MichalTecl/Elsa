@@ -154,6 +154,10 @@
       <Project>{91481B08-E437-474D-9793-A135F1DB465C}</Project>
       <Name>Elsa.Core.Entities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.CrmMailPull\Elsa.Jobs.CrmMailPull.csproj">
+      <Project>{C356FD1B-B394-5B6D-313D-50D8A08F44BA}</Project>
+      <Name>Elsa.Jobs.CrmMailPull</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.SyncErpCustomers\Elsa.Jobs.SyncErpCustomers.csproj">
       <Project>{ee3bf5ce-f5dd-4d3b-b696-12c5a1ef1af4}</Project>
       <Name>Elsa.Jobs.SyncErpCustomers</Name>
@@ -226,6 +230,8 @@
     <Content Include="SQL\20260126_002_insp_customerTagTimeouted.sql" />
     <Content Include="SQL\20260127_003_crmfilter_hasTimeoutedTag_addTagType.sql" />
     <Content Include="SQL\20260414_001_insp_customerTagTimeouted.sql" />
+    <Content Include="SQL\20260424_001_GetCustomerMailConversations.sql" />
+    <Content Include="SQL\20260424_002_mailConversationIndexes.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

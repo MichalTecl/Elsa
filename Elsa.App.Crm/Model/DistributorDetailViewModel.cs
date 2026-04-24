@@ -124,5 +124,7 @@ namespace Elsa.App.Crm.Model
         public List<MeetingParticipantViewModel> Participants { get; set; } = new List<MeetingParticipantViewModel>();
         public string Day { get; set; }
         public string Time { get; set; }
+                
+        public int? MailConversationId { get; set; }
     }
 }

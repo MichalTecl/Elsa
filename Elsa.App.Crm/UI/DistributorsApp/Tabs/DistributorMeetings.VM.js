@@ -44,6 +44,7 @@ app.DistributorMeetings = app.DistributorMeetings || {
                 m.previewDt = fdt(startDate);       
 
                 m.isOpen = false;
+                m.isReadOnly = !!m.MailConversationId;
                 m.Actions.forEach(a => a.meetingId = m.Id);
                 m.textDirty = false;
             });
@@ -156,11 +157,18 @@ app.DistributorMeetings = app.DistributorMeetings || {
         self.meetingTextChange = (meetingId, text) => {
             const meeting = self.meetings.find(m => m.Id === meetingId);
 
+            if (!meeting || meeting.isReadOnly)
+                return;
+
             meeting.textDirty = meeting.Text !== text;
         };
 
         self.saveMeetingText = (meetingId, text) => {
             const meeting = self.meetings.find(m => m.Id === meetingId);
+
+            if (!meeting || meeting.isReadOnly)
+                return;
+
             meeting.Text = text;
 
             lt.api("/CrmMeetings/saveMeeting")
@@ -174,6 +182,9 @@ app.DistributorMeetings = app.DistributorMeetings || {
                 return;
 
             const meeting = self.meetings.find(m => m.Id === id);
+
+            if (!meeting || meeting.isReadOnly)
+                return;
 
             self.currentMeeting = meeting;
             self.editingMeeting = true;
