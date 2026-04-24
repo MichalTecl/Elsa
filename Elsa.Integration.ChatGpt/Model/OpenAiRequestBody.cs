@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +8,7 @@ namespace Elsa.Integration.ChatGpt.Model
     public class OpenAiRequestBody
     {
         [JsonProperty("model")]
-        public string Model { get; set; } = "gpt-3.5-turbo";
+        public string Model { get; set; } = "gpt-4o-mini";
 
         [JsonProperty("messages")]
         public List<Message> Messages { get; set; }

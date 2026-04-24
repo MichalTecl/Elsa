@@ -14,7 +14,8 @@ BEGIN
 
         CREATE TABLE #ConversationsToDelete
         (
-            ConversationId int NOT NULL PRIMARY KEY
+            ConversationId int NOT NULL PRIMARY KEY,
+            SummaryId int NULL
         );
 
         ;WITH OrphanUids AS
@@ -29,30 +30,36 @@ BEGIN
         ),
         ConversationsToDelete AS
         (
-            SELECT DISTINCT r2.ConversationId
+            SELECT DISTINCT r2.ConversationId,
+                            mc.SummaryId
             FROM dbo.MailMessageReference r2
+            JOIN dbo.MailConversation mc
+                ON mc.Id = r2.ConversationId
             JOIN dbo.MailMessageFullContent fc2
                 ON fc2.Id = r2.FullContentId
             JOIN OrphanUids ou
                 ON ou.ConversationUid = fc2.ConversationUid
             WHERE r2.ConversationId IS NOT NULL
         )
-        INSERT INTO #ConversationsToDelete (ConversationId)
-        SELECT ConversationId
+        INSERT INTO #ConversationsToDelete (ConversationId, SummaryId)
+        SELECT ConversationId, SummaryId
         FROM ConversationsToDelete;
 
-        -- 1) Odpoj reference na konverzaci
         UPDATE r
             SET r.ConversationId = NULL
         FROM dbo.MailMessageReference r
         JOIN #ConversationsToDelete d
             ON d.ConversationId = r.ConversationId;
 
-        -- 2) Smaž konverzace
         DELETE mc
         FROM dbo.MailConversation mc
         JOIN #ConversationsToDelete d
             ON d.ConversationId = mc.Id;
+
+        DELETE mcs
+        FROM dbo.MailConversationSummary mcs
+        JOIN #ConversationsToDelete d
+            ON d.SummaryId = mcs.Id;
 
         SET @DeletedCount = @@ROWCOUNT;
 

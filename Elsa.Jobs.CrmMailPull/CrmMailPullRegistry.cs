@@ -16,6 +16,7 @@ namespace Elsa.Jobs.CrmMailPull
             setup.For<LoadMailReferences>().Use<LoadMailReferences>();
             setup.For<LoadMessagesContent>().Use<LoadMessagesContent>();
             setup.For<CompleteConversations>().Use<CompleteConversations>();
+            setup.For<SummarizeConversations>().Use<SummarizeConversations>();
         }
     }
 }

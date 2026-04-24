@@ -1,4 +1,4 @@
-﻿using Elsa.Common.Logging.Helpers;
+using Elsa.Common.Logging.Helpers;
 using Elsa.Common.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,7 @@ namespace Elsa.Common.Logging
     public static class LogExtensions
     {
         private static readonly object s_protoLock = new object();
+        private static readonly Encoding s_logEncoding = new UTF8Encoding(false);
                 
         public static string SaveRequestProtocol(this ILog log, string method, string url, IDictionary<string, object> sent, string received) 
         {
@@ -60,7 +61,7 @@ namespace Elsa.Common.Logging
                     path = StringUtil.AddNumberToFileName(rawPath, i);
                 }
 
-                File.WriteAllText(path, sb.ToString());
+                File.WriteAllText(path, sb.ToString(), s_logEncoding);
 
                 //log.Info($"Communication protocol saved as {path}");
 

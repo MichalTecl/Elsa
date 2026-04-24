@@ -17,7 +17,8 @@ namespace Elsa.Jobs.CrmMailPull
             ExploreFolders exploreFolders,
             LoadMailReferences loadMailReferences,
             LoadMessagesContent loadMessagesContent,
-            CompleteConversations completeConversations)
+            CompleteConversations completeConversations,
+            SummarizeConversations summarizeConversations)
         {
             _log = log;
 
@@ -26,7 +27,8 @@ namespace Elsa.Jobs.CrmMailPull
                 exploreFolders,
                 loadMailReferences, 
                 loadMessagesContent,
-                completeConversations
+                completeConversations,
+                summarizeConversations
             };
         }
 

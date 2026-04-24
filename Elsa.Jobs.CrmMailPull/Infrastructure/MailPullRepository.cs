@@ -166,6 +166,59 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
 
             _db.Save(folder);
         }
+
+        public int? GetNewestConversationIdMissingSummary()
+        {
+            return _db.Sql()
+                .Execute(@"SELECT TOP 1 mc.Id
+                             FROM dbo.MailConversation mc
+                            WHERE mc.SummaryId IS NULL
+                            ORDER BY mc.ConversationEndDt DESC, mc.Id DESC")
+                .Scalar<int?>();
+        }
+
+        
+        public List<IMailMessageReference> GetConversationMessages(int conversationId)
+        {
+            return _db.SelectFrom<IMailMessageReference>()
+                .Join(m => m.FullContent)
+                .Where(m => m.ConversationId == conversationId)
+                .Where(m => m.FullContentId != null)
+                .OrderBy(m => m.InternalDt)
+                .Execute()
+                .ToList();
+        }
+
+        public void SaveConversationSummary(int conversationId, string subjectSummary, string summary)
+        {
+            var conversation = _db.SelectFrom<IMailConversation>()
+                .Join(c => c.Summary)
+                .Where(c => c.Id == conversationId)
+                .Take(1)
+                .Execute()
+                .FirstOrDefault();
+
+            if (conversation == null)
+                throw new ArgumentException($"Invalid {nameof(conversationId)}");
+
+            var entity = conversation.Summary;
+
+            if (entity == null)
+            {
+                entity = _db.New<IMailConversationSummary>();
+            }
+
+            entity.SubjectSummary = subjectSummary;
+            entity.Summary = summary;
+
+            _db.Save(entity);
+
+            if (conversation.SummaryId != entity.Id)
+            {
+                conversation.SummaryId = entity.Id;
+                _db.Save(conversation);
+            }
+        }
     }
 
     public sealed class LastSeenMailInfo
@@ -180,5 +233,5 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
         public int MailMessageReferenceId { get; set; }
         public int FolderId { get; set; }
         public long ImapUid { get; set; }
-    }
+    }   
 }

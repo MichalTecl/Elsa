@@ -1,9 +1,6 @@
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Robowire.RobOrm.Core;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Elsa.Jobs.CrmMailPull.Steps
 {
@@ -22,11 +19,26 @@ namespace Elsa.Jobs.CrmMailPull.Steps
         {
             _log.Info("Deleting incomplete conversations");
             
-            var res = _db.Sql()
+            var deletedCount = _db.Sql()
                .Call("DeleteIncompleteMailConversations")
                .Scalar<int>();
 
-            _log.Info($"Deleted {res} of incomplete conversations ( = where additonal mail was received after the conversation was completed)");
+            _log.Info($"Deleted {deletedCount} of incomplete conversations ( = where additonal mail was received after the conversation was completed)");
+
+            _log.Info("Completing conversations from loaded mail contents");
+
+            var createdCount = 0;
+            var assignedCount = 0;
+
+            _db.Sql()
+                .Call("CompleteMailConversations")
+                .ReadRows<int, int>((created, assigned) =>
+                {
+                    createdCount = created;
+                    assignedCount = assigned;
+                });
+
+            _log.Info($"Created {createdCount} conversation(s) and assigned {assignedCount} message(s)");
 
         }
     }

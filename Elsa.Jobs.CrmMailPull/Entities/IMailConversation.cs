@@ -15,5 +15,10 @@ namespace Elsa.Jobs.CrmMailPull.Entities
 
         [NVarchar(100, true)]
         string Hint { get; set; }
+
+        int? SummaryId { get; set; }
+        IMailConversationSummary Summary { get; }
+
+        DateTime ConversationEndDt { get; set; }
     }
 }
