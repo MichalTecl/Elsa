@@ -52,7 +52,7 @@ namespace Elsa.App.Crm.Controllers
                 .Execute()
                 .ToList();
 
-            var usedPromptIds = GetUsedPromptIds();
+            var usedPromptIds = _meetingsRepository.GetUsedPromptIds();
 
             var activePromptId = all
                 .OrderByDescending(p => p.ConfirmDt)
@@ -107,15 +107,18 @@ namespace Elsa.App.Crm.Controllers
             if (prompt.AuthorId != WebSession.User.Id)
                 throw new InvalidOperationException("Only author can delete this prompt");
 
-            if (GetUsedPromptIds().Contains(promptId))
+            if (_meetingsRepository.GetUsedPromptIds().Contains(promptId))
                 throw new InvalidOperationException("Prompt used by existing summaries cannot be deleted");
 
             _db.Delete(prompt);
             return GetPrompts();
         }
 
-        public List<PromptInfo> EditPrompt(int? id, string promptText)
+        public List<PromptInfo> EditPrompt(PromptEditRequest request)
         {
+            var id = request?.Id;
+            var promptText = request?.PromptText;
+
             if (string.IsNullOrWhiteSpace(promptText))
                 throw new ArgumentException("Prompt text must not be empty", nameof(promptText));
 
@@ -150,62 +153,27 @@ namespace Elsa.App.Crm.Controllers
         public List<int> PrepareConversationTestSet(int size)
         {
             size = Math.Max(1, Math.Min(size, 200));
-            var result = new List<int>();
+            var candidateCount = Math.Min(1000, Math.Max(size * 10, size));
 
-            _db.Sql().Execute(@"
-WITH candidates AS
-(
-    SELECT ade.CustomerId,
-           mc.Id ConversationId,
-           COUNT(DISTINCT mmr.Id) MessageCount,
-           SUM(LEN(ISNULL(mfc.Content, ''))) ContentLength,
-            ROW_NUMBER() OVER (PARTITION BY ade.CustomerId ORDER BY NEWID()) CustomerSpreadOrder
-      FROM dbo.MailConversation mc
-      JOIN dbo.MailConversationSummary mcs ON (mc.SummaryId = mcs.Id)
-      JOIN dbo.MailMessageReference mmr ON (mmr.ConversationId = mc.Id)
-      JOIN dbo.MailMessageFullContent mfc ON (mfc.Id = mmr.FullContentId)
-      JOIN dbo.MailMessageReferenceParticipant mmrp ON (mmrp.MailMessageReferenceId = mmr.Id)
-      JOIN dbo.MessageParticipantAddress mpa ON (mpa.Id = mmrp.ParticipantAddressId)
-      JOIN dbo.vwAllDistributorEmails ade ON (ade.Email = mpa.Email)
-     WHERE mcs.PromptId IS NOT NULL
-     GROUP BY ade.CustomerId, mc.Id
-),
-collapsed AS
-(
-    SELECT c.ConversationId,
-           MIN(c.CustomerSpreadOrder) CustomerSpreadOrder,
-           MAX(c.MessageCount) MessageCount,
-           MAX(c.ContentLength) ContentLength
-      FROM candidates c
-     GROUP BY c.ConversationId
-)
-SELECT TOP (@size) c.ConversationId
-  FROM collapsed c
- ORDER BY c.CustomerSpreadOrder,
-          CASE
-              WHEN c.MessageCount <= 2 THEN 1
-              WHEN c.MessageCount <= 5 THEN 2
-              ELSE 3
-          END,
-          CASE
-              WHEN c.ContentLength <= 1000 THEN 1
-              WHEN c.ContentLength <= 5000 THEN 2
-              ELSE 3
-          END,
-          NEWID()")
-                .WithParam("@size", size)
-                .ReadRows<int>(result.Add);
-
-            return result;
+            return _meetingsRepository.GetConversationTestSet(candidateCount)
+                .Where(c => _summarizer.CanUseAiSummary(c))
+                .Take(size)
+                .ToList();
         }
 
-        public CustomerMeetingViewModel DoTestSummary(int promptId, int conversationId)
+        public CustomerMeetingViewModel DoTestSummary(TestSummaryRequest request)
         {
-            var prompt = GetPrompt(promptId);
-            var conversation = _meetingsRepository.GetMailConversation(conversationId)
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            var conversation = _meetingsRepository.GetMailConversation(request.ConversationId)
                 .Ensure("Invalid conversationId");
 
-            var summary = _summarizer.SummarizeConversation(conversationId, prompt.Prompt, false);
+            var sourcePrompt = string.IsNullOrWhiteSpace(request.PromptText)
+                ? GetPrompt(request.PromptId).Prompt
+                : request.PromptText;
+
+            var summary = _summarizer.SummarizeConversation(request.ConversationId, sourcePrompt, false);
 
             var mapped = _mailConversationMeetingModelFactory.Create(new CustomerMeetingsRepository.MailConversationDto
             {
@@ -221,6 +189,25 @@ SELECT TOP (@size) c.ConversationId
             return mapped;
         }
 
+        public List<MailConversationMessageViewModel> GetMailConversationDetail(int conversationId)
+        {
+            EnsureUserRight(CrmUserRights.EmailConversationsFull);
+
+            _meetingsRepository.GetMailConversation(conversationId)
+                .Ensure("Invalid conversationId");
+
+            return _meetingsRepository.GetMailConversationDetail(conversationId)
+                .Select(m => new MailConversationMessageViewModel
+                {
+                    Id = m.Id,
+                    Dt = StringUtil.FormatDateTime(m.InternalDt),
+                    Sender = string.IsNullOrWhiteSpace(m.Sender) ? "(neznámý odesílatel)" : m.Sender,
+                    Subject = string.IsNullOrWhiteSpace(m.Subject) ? "(bez předmětu)" : m.Subject,
+                    Content = string.IsNullOrWhiteSpace(m.Content) ? "(bez textu)" : m.Content
+                })
+                .ToList();
+        }
+
         public List<PromptInfo> ConfirmPrompt(int promptId, bool rebuildSummaries)
         {
             var prompt = GetPrompt(promptId);
@@ -228,7 +215,7 @@ SELECT TOP (@size) c.ConversationId
             _db.Save(prompt);
 
             if (rebuildSummaries)
-                RebuildRecentSummaries();
+                _meetingsRepository.RebuildRecentMailConversationSummaries(DateTime.Now.AddDays(-365));
 
             return GetPrompts();
         }
@@ -254,47 +241,26 @@ SELECT TOP (@size) c.ConversationId
                 .FirstOrDefault();
         }
 
-        private HashSet<int> GetUsedPromptIds()
+        public class MailConversationMessageViewModel
         {
-            var result = new HashSet<int>();
-
-            _db.Sql()
-                .Execute("SELECT DISTINCT PromptId FROM dbo.MailConversationSummary WHERE PromptId IS NOT NULL")
-                .ReadRows<int>(i => result.Add(i));
-
-            return result;
+            public int Id { get; set; }
+            public string Dt { get; set; }
+            public string Sender { get; set; }
+            public string Subject { get; set; }
+            public string Content { get; set; }
         }
 
-        private void RebuildRecentSummaries()
+        public class PromptEditRequest
         {
-            var cutoffDt = DateTime.Now.AddDays(-365);
+            public int? Id { get; set; }
+            public string PromptText { get; set; }
+        }
 
-            _db.Sql().Execute(@"
-IF OBJECT_ID('tempdb..#SummariesToDrop') IS NOT NULL
-    DROP TABLE #SummariesToDrop;
-
-CREATE TABLE #SummariesToDrop
-(
-    ConversationId INT NOT NULL PRIMARY KEY,
-    SummaryId INT NOT NULL
-);
-
-INSERT INTO #SummariesToDrop (ConversationId, SummaryId)
-SELECT DISTINCT mc.Id, mc.SummaryId
-  FROM dbo.MailConversation mc
-  JOIN dbo.MailMessageReference mmr ON (mmr.ConversationId = mc.Id)
- WHERE mc.SummaryId IS NOT NULL
-   AND mmr.InternalDt >= @cutoffDt;
-
-UPDATE mc
-   SET mc.SummaryId = NULL
-  FROM dbo.MailConversation mc
-  JOIN #SummariesToDrop d ON (d.ConversationId = mc.Id);
-
-DELETE mcs
-  FROM dbo.MailConversationSummary mcs
-  JOIN #SummariesToDrop d ON (d.SummaryId = mcs.Id);")
-                .WithParam("@cutoffDt", cutoffDt);
+        public class TestSummaryRequest
+        {
+            public int PromptId { get; set; }
+            public int ConversationId { get; set; }
+            public string PromptText { get; set; }
         }
     }
 }

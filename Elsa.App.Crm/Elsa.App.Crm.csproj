@@ -240,6 +240,7 @@
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
     <Content Include="UI\DistributorsApp\CrmRobots.VM.js" />
+    <Content Include="UI\DistributorsApp\Css\MailSummariserPromptEditor.css" />
     <Content Include="UI\DistributorsApp\Css\CustomerTagAssignmentControl.css" />
     <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_main.css" />
     <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_tagTree.css" />
@@ -262,6 +263,9 @@
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\GridControlTemplate.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorMailConversationDialog.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorMeetingListItem.html" />
+    <Content Include="UI\DistributorsApp\Parts\PromptEditor\PromptEditorDetail.html" />
+    <Content Include="UI\DistributorsApp\Parts\PromptEditor\PromptEditorRoot.html" />
+    <Content Include="UI\DistributorsApp\Parts\PromptEditor\PromptList.html" />
     <Content Include="UI\DistributorsApp\Parts\RobotsPopup.html" />
     <Content Include="UI\DistributorsApp\Css\CustomerTagsEditor.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Panels.css" />
@@ -299,9 +303,6 @@
     <Content Include="UI\DistributorsApp\Tabs\DistributorOrders.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\OpenCustomerCard.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="UI\DistributorsApp\Parts\PromptEditor\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

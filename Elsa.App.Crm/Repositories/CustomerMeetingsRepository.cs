@@ -131,6 +131,102 @@ namespace Elsa.App.Crm.Repositories
                 .FirstOrDefault();
         }
 
+        public List<int> GetConversationTestSet(int size)
+        {
+            size = Math.Max(1, Math.Min(size, 1000));
+            var result = new List<int>();
+
+            _database.Sql().Execute(@"
+WITH candidates AS
+(
+    SELECT ade.CustomerId,
+           mc.Id ConversationId,
+           COUNT(DISTINCT mmr.Id) MessageCount,
+           SUM(LEN(ISNULL(mfc.Content, ''))) ContentLength,
+           CASE WHEN mc.SummaryId IS NULL THEN 1 ELSE 0 END NeedsSummary,
+           ROW_NUMBER() OVER (
+               PARTITION BY ade.CustomerId, CASE WHEN mc.SummaryId IS NULL THEN 1 ELSE 0 END
+               ORDER BY NEWID()) CustomerSpreadOrder
+      FROM dbo.MailConversation mc
+      JOIN dbo.MailMessageReference mmr ON (mmr.ConversationId = mc.Id)
+      JOIN dbo.MailMessageFullContent mfc ON (mfc.Id = mmr.FullContentId)
+      JOIN dbo.MailMessageReferenceParticipant mmrp ON (mmrp.MailMessageReferenceId = mmr.Id)
+      JOIN dbo.MessageParticipantAddress mpa ON (mpa.Id = mmrp.ParticipantAddressId)
+      JOIN dbo.vwAllDistributorEmails ade ON (ade.Email = mpa.Email)
+     GROUP BY ade.CustomerId, mc.Id, CASE WHEN mc.SummaryId IS NULL THEN 1 ELSE 0 END
+),
+collapsed AS
+(
+    SELECT c.ConversationId,
+           MIN(c.CustomerSpreadOrder) CustomerSpreadOrder,
+           MAX(c.MessageCount) MessageCount,
+           MAX(c.ContentLength) ContentLength,
+           MIN(c.NeedsSummary) NeedsSummary
+      FROM candidates c
+     GROUP BY c.ConversationId
+)
+SELECT TOP (@size) c.ConversationId
+  FROM collapsed c
+ ORDER BY c.NeedsSummary,
+          c.CustomerSpreadOrder,
+          CASE
+              WHEN c.MessageCount <= 2 THEN 1
+              WHEN c.MessageCount <= 5 THEN 2
+              ELSE 3
+          END,
+          CASE
+              WHEN c.ContentLength <= 1000 THEN 1
+              WHEN c.ContentLength <= 5000 THEN 2
+              ELSE 3
+          END,
+          NEWID()")
+                .WithParam("@size", size)
+                .ReadRows<int>(result.Add);
+
+            return result;
+        }
+
+        public HashSet<int> GetUsedPromptIds()
+        {
+            var result = new HashSet<int>();
+
+            _database.Sql()
+                .Execute("SELECT DISTINCT PromptId FROM dbo.MailConversationSummary WHERE PromptId IS NOT NULL")
+                .ReadRows<int>(i => result.Add(i));
+
+            return result;
+        }
+
+        public void RebuildRecentMailConversationSummaries(DateTime cutoffDt)
+        {
+            _database.Sql().Execute(@"
+IF OBJECT_ID('tempdb..#SummariesToDrop') IS NOT NULL
+    DROP TABLE #SummariesToDrop;
+
+CREATE TABLE #SummariesToDrop
+(
+    ConversationId INT NOT NULL PRIMARY KEY,
+    SummaryId INT NOT NULL
+);
+
+INSERT INTO #SummariesToDrop (ConversationId, SummaryId)
+SELECT DISTINCT mc.Id, mc.SummaryId
+  FROM dbo.MailConversation mc
+  JOIN dbo.MailMessageReference mmr ON (mmr.ConversationId = mc.Id)
+ WHERE mc.SummaryId IS NOT NULL
+   AND mmr.InternalDt >= @cutoffDt;
+
+UPDATE mc
+   SET mc.SummaryId = NULL
+  FROM dbo.MailConversation mc
+  JOIN #SummariesToDrop d ON (d.ConversationId = mc.Id);
+
+DELETE mcs
+  FROM dbo.MailConversationSummary mcs
+  JOIN #SummariesToDrop d ON (d.SummaryId = mcs.Id);")
+                .WithParam("@cutoffDt", cutoffDt);
+        }
+
         public List<MailConversationMessageDto> GetMailConversationDetail(int conversationId)
         {
             return _database.SelectFrom<IMailMessageReference>()

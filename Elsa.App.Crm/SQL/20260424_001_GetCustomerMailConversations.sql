@@ -8,7 +8,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT DISTINCT mc.Id,
+    SELECT mc.Id,
            mc.ConversationEndDt,
            ISNULL(mcs.SubjectSummary, mc.Hint) [Subject],
            mcs.Summary
@@ -21,6 +21,8 @@ BEGIN
       JOIN MailMessageReferenceParticipant mmrp ON (mmrp.ParticipantAddressId = mpa.Id)
       JOIN MailMessageReference mmr ON (mmrp.MailMessageReferenceId = mmr.Id)
       JOIN MailConversation mc ON (mmr.ConversationId = mc.Id)
-      JOIN MailConversationSummary mcs ON (mc.SummaryId = mcs.Id);
+      JOIN MailConversationSummary mcs ON (mc.SummaryId = mcs.Id)
+     GROUP BY mc.Id, mc.ConversationEndDt, ISNULL(mcs.SubjectSummary, mc.Hint), mcs.Summary
+    HAVING COUNT(DISTINCT mmr.Id) > 1;
 END;
 GO

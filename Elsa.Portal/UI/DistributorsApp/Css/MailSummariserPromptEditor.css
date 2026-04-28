@@ -1,0 +1,298 @@
+.mailPromptEditorLayout {
+    display: grid;
+    grid-template-columns: 420px minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.mailPromptEditorLayoutDetailOpen {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.mailPromptEditorListPane,
+.mailPromptEditorDetailPane {
+    min-width: 0;
+}
+
+.mailPromptEditorListPaneWide,
+.mailPromptEditorDetailPaneWide {
+    grid-column: 1 / -1;
+}
+
+.mailPromptListWrap {
+    padding: 16px;
+}
+
+.mailPromptListToolbar {
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.mailPromptListToolbarTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #244661;
+}
+
+.mailPromptListToolbarActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mailPromptListHead,
+.mailPromptListRow {
+    align-items: center;
+    gap: 12px;
+}
+
+.mailPromptListHead {
+    font-weight: bold;
+    padding: 8px 12px;
+    border-bottom: 1px solid #d7e0ea;
+    color: #4d657d;
+}
+
+.mailPromptListRow {
+    padding: 12px;
+    border-bottom: 1px solid #eef3f7;
+    cursor: pointer;
+}
+
+.mailPromptListRow:hover {
+    background: #f6fbff;
+}
+
+.mailPromptListRowActive {
+    background: #e8f7ea;
+}
+
+.mailPromptListRowSelected {
+    outline: 2px solid #2ca7df;
+    outline-offset: -2px;
+}
+
+.mailPromptListAuthor {
+    width: 220px;
+    flex: 0 0 220px;
+    word-break: break-word;
+}
+
+.mailPromptListCreateDt {
+    width: 180px;
+    flex: 0 0 180px;
+}
+
+.mailPromptListActive {
+    width: 70px;
+    flex: 0 0 70px;
+    text-align: center;
+    color: #179b3b;
+}
+
+.mailPromptListPrompt {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mailPromptListActions {
+    width: 72px;
+    flex: 0 0 72px;
+    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.mailPromptToolbarButton,
+.mailPromptRowAction {
+    cursor: pointer;
+}
+
+.mailPromptListLoading.hidden {
+    display: none;
+}
+
+.mailPromptListLoading {
+    padding: 12px;
+    color: #6a7d90;
+}
+
+.promptEditorDetailWrap {
+    position: relative;
+}
+
+.promptEditorDetailEmpty,
+.promptEditorDetailBody {
+    background: #fff;
+    border: 1px solid #d9e4ee;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(40, 70, 100, 0.06);
+}
+
+.promptEditorDetailEmpty {
+    padding: 28px;
+    color: #5e7388;
+}
+
+.promptEditorDetailBody {
+    padding: 18px;
+}
+
+.promptEditorDetailHead {
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.promptEditorDetailTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #244661;
+}
+
+.promptEditorDetailTitleWrap {
+    align-items: center;
+    gap: 10px;
+}
+
+.promptEditorBackButton {
+    min-width: 40px;
+}
+
+.promptEditorDetailButtons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.promptEditorTextarea {
+    width: 100%;
+    min-height: 300px;
+    resize: vertical;
+    box-sizing: border-box;
+    padding: 12px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 14px;
+    line-height: 1.45;
+    border: 1px solid #c7d8e8;
+    border-radius: 4px;
+    background: #fcfeff;
+}
+
+.promptEditorTextarea[readonly] {
+    background: #f5f8fb;
+    color: #567;
+}
+
+.promptEditorTestBar {
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border: 1px solid #d9e4ee;
+    border-radius: 4px;
+    background: #f8fbfe;
+    font-weight: 600;
+    color: #284661;
+}
+
+.promptEditorTestSizeSelect {
+    min-width: 70px;
+}
+
+.promptEditorPlayButton,
+.promptEditorStopButton {
+    min-width: 48px;
+}
+
+.promptEditorStopButton {
+    background: #fff4f4;
+    border-color: #e8b4b4;
+    color: #9a2c2c;
+}
+
+.promptEditorTestResultsList {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.promptEditorGhostLoader {
+    margin-top: 14px;
+    border: 2px dashed #c6d7e7;
+    border-radius: 6px;
+    background: #fbfdff;
+}
+
+.promptEditorGhostLoaderInner {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #7aa7c9;
+}
+
+.promptEditorActivateDialog {
+    width: 640px;
+    max-width: calc(100vw - 40px);
+}
+
+.promptEditorActivateHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.promptEditorActivateTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #244661;
+}
+
+.promptEditorActivateText {
+    margin-bottom: 18px;
+    color: #35536d;
+    line-height: 1.45;
+}
+
+.promptEditorActivateCheckboxRow {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #d9e4ee;
+    border-radius: 4px;
+    background: #f8fbfe;
+}
+
+.promptEditorActivateCheckboxTitle {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #244661;
+}
+
+.promptEditorActivateCheckboxHelp {
+    color: #56748d;
+    line-height: 1.4;
+}
+
+.promptEditorActivateButtons {
+    margin-top: 18px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.promptEditorActivateConfirmButton {
+    background: #1ea3da;
+    color: #fff;
+    border-color: #1ea3da;
+}

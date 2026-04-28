@@ -1,9 +1,33 @@
 <div id="mailPromptEditorRoot">
-    <div fill-by="/UI/DistributorsApp/Parts/PromptEditor/PromptList.html"></div>
+    <div class="mailPromptEditorLayout" data-bind="class.mailPromptEditorLayoutDetailOpen:detailOpen">
+        <div class="mailPromptEditorListPane" data-bind="class.mailPromptEditorListPaneWide:listOnly;class.hidden:detailOpen" fill-by="/UI/DistributorsApp/Parts/PromptEditor/PromptList.html"></div>
+        <div class="mailPromptEditorDetailPane hidden" data-bind="class.mailPromptEditorDetailPaneWide:detailOpen;class!.hidden:detailOpen" fill-by="/UI/DistributorsApp/Parts/PromptEditor/PromptEditorDetail.html"></div>
+    </div>
+    <div fill-by="/UI/DistributorsApp/Parts/DistributorMailConversationDialog.html"></div>
 </div>
 <script>
     lt.element("mailPromptEditorRoot")
         .withModel("app.MailSummariserPromptEditor.vm")
         .attach(function () {
+            this.openMeetingDetail = function (id) {
+                app.MailSummariserPromptEditor.vm.openMeetingDetail(id);
+            };
+
+            this.openMailConversation = function (id) {
+                app.MailSummariserPromptEditor.vm.openMailConversation(id);
+            };
+
+            this.closeMailConversation = function () {
+                app.MailSummariserPromptEditor.vm.closeMailConversation();
+            };
+
+            this.stopEvent = function (e) {
+                app.MailSummariserPromptEditor.vm.stopEvent(e);
+            };
+
+            this.meetingTextChange = function () { };
+            this.saveMeetingText = function () { };
+            this.setMeetingStatus = function () { };
+            this.editMeeting = function () { };
         });
 </script>

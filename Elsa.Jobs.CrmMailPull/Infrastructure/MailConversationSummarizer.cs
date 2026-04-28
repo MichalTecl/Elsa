@@ -12,6 +12,8 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
 {
     public class MailConversationSummarizer
     {
+        public const int MinWordsForAiSummary = 50;
+
         private readonly ILog _log;
         private readonly MailPullRepository _repository;
         private readonly IChatGptClient _ai;
@@ -23,7 +25,16 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             _ai = ai;
         }
 
-        public MailConversationSummaryResult SummarizeConversation(int conversationId, string promptTemplate, bool skipAi, int minWordsForAiSummary = 50)
+        public bool CanUseAiSummary(int conversationId, int minWordsForAiSummary = MinWordsForAiSummary)
+        {
+            var messages = _repository.GetConversationMessages(conversationId);
+            var normalizedMessages = BuildNormalizedMessages(messages);
+            var conversationWordCount = CountWords(string.Join("\n\n", normalizedMessages.Select(m => m.Body)));
+
+            return conversationWordCount >= minWordsForAiSummary;
+        }
+
+        public MailConversationSummaryResult SummarizeConversation(int conversationId, string promptTemplate, bool skipAi, int minWordsForAiSummary = MinWordsForAiSummary)
         {
             var messages = _repository.GetConversationMessages(conversationId);
             var normalizedMessages = BuildNormalizedMessages(messages);
@@ -95,7 +106,7 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             if (string.IsNullOrWhiteSpace(content))
                 throw new InvalidOperationException("OpenAI returned empty response");
 
-            var parsed = ParseSummary(content, null, preparedMessages);
+            var parsed = ParseSummary(content);
             return new MailConversationSummaryResult
             {
                 SubjectSummary = conversationSubject,
@@ -207,54 +218,43 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
         private static int EstimateLength(PromptMessage msg)
             => (msg.Sender?.Length ?? 0) + (msg.Subject?.Length ?? 0) + (msg.Body?.Length ?? 0) + 64;
 
-        private static ParsedSummary ParseSummary(string response, string fallbackHint, List<PromptMessage> messages)
+        private static ParsedSummary ParseSummary(string response)
         {
             var normalized = (response ?? string.Empty).Replace("\r\n", "\n").Replace('\r', '\n');
             var lines = normalized.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()).ToList();
-
-            string subject = null;
-            string summary = null;
+            var summaryLines = new List<string>();
 
             foreach (var line in lines)
             {
-                if (subject == null && line.StartsWith("SubjectSummary:", StringComparison.OrdinalIgnoreCase))
+                if (LooksLikePromptLeak(line))
+                    break;
+
+                if (line.StartsWith("SubjectSummary:", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (line.StartsWith("Summary:", StringComparison.OrdinalIgnoreCase))
                 {
-                    subject = line.Substring("SubjectSummary:".Length).Trim();
+                    var stripped = line.Substring("Summary:".Length).Trim();
+                    if (!string.IsNullOrWhiteSpace(stripped))
+                        summaryLines.Add(stripped);
+
                     continue;
                 }
 
-                if (summary == null && line.StartsWith("Summary:", StringComparison.OrdinalIgnoreCase))
-                {
-                    summary = line.Substring("Summary:".Length).Trim();
-                    continue;
-                }
-
-                if (summary != null)
-                {
-                    if (LooksLikePromptLeak(line))
-                        break;
-
-                    summary += " " + line;
-                }
+                summaryLines.Add(line);
             }
 
-            if (string.IsNullOrWhiteSpace(summary))
-                summary = TrimTo(normalized.Trim(), 2000);
+            var summary = summaryLines.Count == 0
+                ? TrimTo(normalized.Trim(), 2000)
+                : string.Join(" ", summaryLines.Where(l => !string.IsNullOrWhiteSpace(l)));
 
             summary = StripPromptLeak(summary);
-
-            if (string.IsNullOrWhiteSpace(subject))
-                subject = MakeFallbackSubject(fallbackHint, messages.Select(m => m.Subject).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s)));
-
-            if (string.IsNullOrWhiteSpace(subject))
-                subject = "E-mailova komunikace";
 
             if (string.IsNullOrWhiteSpace(summary))
                 summary = "Nepodarilo se ziskat pouzitelne shrnuti konverzace.";
 
             return new ParsedSummary
             {
-                SubjectSummary = TrimTo(subject, 200),
                 Summary = TrimTo(summary, 2000)
             };
         }
@@ -567,7 +567,6 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
 
         private sealed class ParsedSummary
         {
-            public string SubjectSummary { get; set; }
             public string Summary { get; set; }
         }
     }

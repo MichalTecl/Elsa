@@ -1,0 +1,151 @@
+<div id="promptEditorDetailUi_{%GENERATE%}" class="promptEditorDetailWrap">
+    <div class="promptEditorDetailEmpty" data-bind="class.hidden:editedPrompt">
+        Vyber prompt ze seznamu vlevo nebo vytvoř nový.
+    </div>
+
+    <div class="promptEditorDetailBody hidden" data-bind="class!.hidden:editedPrompt">
+        <div class="promptEditorDetailHead stackLeft">
+            <div class="promptEditorDetailTitleWrap stackLeft">
+                <button type="button" class="promptEditorBackButton" event-bind="click:closeDetail()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="promptEditorDetailTitle">Detail promptu</div>
+            </div>
+            <div class="promptEditorDetailButtons">
+                <button type="button" class="hidden" data-bind="class!.hidden:canDiscardPrompt" event-bind="click:discardPromptChanges()">Zahodit změny</button>
+                <button type="button" class="hidden" data-bind="class!.hidden:canSavePrompt" event-bind="click:savePrompt()">Uložit</button>
+                <button type="button" class="hidden" data-bind="class!.hidden:canActivatePrompt" event-bind="click:openActivateDialog()">AKTIVOVAT</button>
+                <button type="button" class="promptEditorStopButton hidden" data-bind="class!.hidden:isTesting" event-bind="click:stopTestRun()">Stop</button>
+            </div>
+        </div>
+
+        <textarea class="promptEditorTextarea"
+                  data-bind="value:editedPromptText;readonly:promptReadOnly"
+                  event-bind="input:updatePromptText(this.value)"></textarea>
+
+        <div class="promptEditorTestBar stackLeft">
+            <div class="hidden" data-bind="class!.hidden:isTesting">
+                TESTUJI prompt na <span data-bind="text:testProgressPercent"></span> % z
+            </div>
+            <div data-bind="class.hidden:isTesting">
+                TESTOVAT prompt na
+            </div>
+
+            <select class="promptEditorTestSizeSelect"
+                    data-bind="value:testSetSize;class.hidden:isTesting"
+                    event-bind="change:setTestSetSize(this.value)">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+            </select>
+
+            <select class="promptEditorTestSizeSelect hidden"
+                    data-bind="value:testSetSize;class!.hidden:isTesting"
+                    disabled="disabled">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+            </select>
+
+            <div>konverzacích</div>
+
+            <button type="button" class="promptEditorPlayButton" data-bind="class.hidden:isTesting" event-bind="click:startTestRun()">
+                <i class="fas fa-play"></i>
+            </button>
+        </div>
+
+        <div class="promptEditorTestResults">
+            <div class="promptEditorTestResultsList" data-key="Id" data-bind="itemsSource:testMeetings">
+                <div class="lt-template" fill-by="/UI/DistributorsApp/Parts/DistributorMeetingListItem.html"></div>
+            </div>
+
+            <div class="promptEditorGhostLoader hidden" data-bind="class!.hidden:isTesting">
+                <div class="promptEditorGhostLoaderInner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popupOverlay" data-bind="class.open:activateDialogOpen" event-bind="click:closeActivateDialog()">
+        <div class="popupBody promptEditorActivateDialog" event-bind="click:stopEvent($event)">
+            <div class="promptEditorActivateHead">
+                <div class="promptEditorActivateTitle">Aktivace promptu</div>
+                <i class="fas fa-times faButtonNew" event-bind="click:closeActivateDialog()"></i>
+            </div>
+
+            <div class="promptEditorActivateText">
+                Chystáš se aktivovat nový prompt, čímž změníš chování sumarizeru. Změna se projeví nejpozději do 24 hodin.
+            </div>
+
+            <label class="promptEditorActivateCheckboxRow stackLeft">
+                <input type="checkbox" data-bind="checked:activateRebuildSummaries" event-bind="change:setActivateRebuild(this.checked)" />
+                <div>
+                    <div class="promptEditorActivateCheckboxTitle">Použít na existující konverzace</div>
+                    <div class="promptEditorActivateCheckboxHelp">
+                        Pokud tohle zaškrtneš, přes noc se znovu vytvoří sumarizace pro všechny konverzace za poslední rok. Pozor, bude to stát tokeny.
+                    </div>
+                </div>
+            </label>
+
+            <div class="promptEditorActivateButtons">
+                <button type="button" event-bind="click:closeActivateDialog()">Zrušit</button>
+                <button type="button" class="promptEditorActivateConfirmButton" event-bind="click:confirmActivatePrompt()">Aktivovat</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    lt.element("promptEditorDetailUi_{%GENERATE%}").attach(function () {
+        this.updatePromptText = function (value) {
+            app.MailSummariserPromptEditor.vm.updatePromptText(value);
+        };
+
+        this.closeDetail = function () {
+            app.MailSummariserPromptEditor.vm.closeDetail();
+        };
+
+        this.discardPromptChanges = function () {
+            app.MailSummariserPromptEditor.vm.discardPromptChanges();
+        };
+
+        this.savePrompt = function () {
+            app.MailSummariserPromptEditor.vm.savePrompt();
+        };
+
+        this.openActivateDialog = function () {
+            app.MailSummariserPromptEditor.vm.openActivateDialog();
+        };
+
+        this.closeActivateDialog = function () {
+            app.MailSummariserPromptEditor.vm.closeActivateDialog();
+        };
+
+        this.setActivateRebuild = function (value) {
+            app.MailSummariserPromptEditor.vm.setActivateRebuild(value);
+        };
+
+        this.confirmActivatePrompt = function () {
+            app.MailSummariserPromptEditor.vm.confirmActivatePrompt();
+        };
+
+        this.setTestSetSize = function (value) {
+            app.MailSummariserPromptEditor.vm.testSetSize = parseInt(value, 10) || 5;
+            lt.notify();
+        };
+
+        this.startTestRun = function () {
+            app.MailSummariserPromptEditor.vm.startTestRun();
+        };
+
+        this.stopTestRun = function () {
+            app.MailSummariserPromptEditor.vm.stopTestRun();
+        };
+
+        this.stopEvent = function (e) {
+            app.MailSummariserPromptEditor.vm.stopEvent(e);
+        };
+    });
+</script>
