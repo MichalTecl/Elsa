@@ -2,10 +2,9 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 12px;
+    padding: 0;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
 }
 
 .tagTransitionTargetSelectItem {
@@ -65,10 +64,10 @@
 
 .tagTransitionNoteInputPanel {
     margin-top: 10px;
-    padding: 16px;
-    background: #f9f9f9;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    background: #f6f8fb;
+    border: 1px solid #dfe5ee;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -183,10 +182,10 @@
 .tagAssignmentInfoPanel {
     background-color: #ffffff;
     color: #333333;
-    padding: 16px;
+    padding: 0;
     border-radius: 8px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 14px;
+    box-shadow: none;
 }
 
     .tagAssignmentInfoPanel .taipRow {
@@ -236,4 +235,162 @@
 .tagPeeking {
     opacity:0.5;
     cursor:alias;
+}
+
+.tagTransitionTargetDialog {
+    width: min(520px, calc(100vw - 32px));
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: #1f2933;
+}
+
+.taipHeader {
+    padding: 4px 0 12px;
+    border-bottom: 1px solid #e6ebf2;
+}
+
+.taipTitle {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.taipSubtitle {
+    margin-top: 2px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.taipMetaRow {
+    display: grid;
+    grid-template-columns: minmax(170px, 1fr) minmax(120px, auto);
+    gap: 10px;
+    align-items: end;
+    padding: 12px 0;
+}
+
+.taipMetaRow label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.taipAssignDtInput {
+    height: 34px;
+    box-sizing: border-box;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    padding: 5px 8px;
+    color: #111827;
+    background: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.taipAssignDtInput:focus,
+.taipNoteEditor textarea:focus,
+.tagTransitionNoteInputPanel textarea:focus {
+    border-color: #2563eb;
+    outline: 2px solid rgba(37, 99, 235, 0.16);
+}
+
+.tagAssignmentInfoPanel .taipAssignAuthor {
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    color: #6b7280;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.taipNotePanel,
+.taipNoteEditor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: start;
+    padding: 10px;
+    background: #f6f8fb;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+}
+
+.taipNotePanel.hidden,
+.taipNoteEditor.hidden {
+    display: none !important;
+}
+
+.tagAssignmentInfoPanel .taipNotePanel pre {
+    min-height: 28px;
+    max-height: 120px;
+    padding: 0;
+    color: #1f2933;
+}
+
+.taipIconButton,
+.taipEditorButtons button {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.taipIconButton {
+    color: #475569;
+    background: #e8edf5;
+}
+
+.taipIconButton:hover {
+    color: #111827;
+    background: #dbe3ee;
+}
+
+.taipNoteEditor textarea {
+    width: 100%;
+    min-height: 78px;
+    box-sizing: border-box;
+    resize: vertical;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    padding: 8px;
+    color: #1f2933;
+    background: #fff;
+    font: inherit;
+}
+
+.taipEditorButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.taipTimeoutRow {
+    padding-top: 10px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.tagTransitionTargetSelectItem {
+    border-radius: 6px;
+    box-shadow: none;
+}
+
+@media (max-width: 520px) {
+    .taipMetaRow {
+        grid-template-columns: 1fr;
+    }
+
+    .tagAssignmentInfoPanel .taipAssignAuthor {
+        justify-content: flex-start;
+    }
 }

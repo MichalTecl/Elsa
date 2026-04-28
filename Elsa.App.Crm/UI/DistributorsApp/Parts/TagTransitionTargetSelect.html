@@ -1,20 +1,47 @@
-<div id="tranTarg_{%GENERATE%}">
+<div id="tranTarg_{%GENERATE%}" class="tagTransitionTargetDialog">
     <div class="tagAssignmentInfoPanel" style="cursor:default">
-        <div class="taipRow">
-            <div class="taipAssignDt" data-bind="text:Assigned"></div>
+        <div class="taipHeader">
+            <div class="taipTitle" data-bind="text:TagTypeName"></div>
+            <div class="taipSubtitle">Přiřazený štítek</div>
+        </div>
+
+        <div class="taipMetaRow">
+            <label>
+                <span>Datum přiřazení</span>
+                <input class="taipAssignDtInput"
+                       type="date"
+                       data-bind="value:AssignDtInput"
+                       event-bind="change:changeAssignmentDate(VM,this.value)" />
+            </label>
             <div class="taipAssignAuthor" data-bind="text:AssignedBy"></div>
         </div>
-        <div class="taipRow">           
+
+        <div class="taipNotePanel" data-bind="class.hidden:noteEditOpen">
             <pre data-bind="text:Note"></pre>
-            <i class="fas fa-pencil-alt faButton" event-bind="click:editNote(VM)"></i>
-        </div> 
-        <div class="taipRow" data-bind="class!.hidden:HasTimeoutText">
+            <button class="taipIconButton" title="Upravit poznámku" event-bind="click:editNote(VM)">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+        </div>
+
+        <div class="taipNoteEditor" data-bind="class!.hidden:noteEditOpen">
+            <textarea data-bind="value:noteDraft" event-bind="input:updateAssignmentNoteDraft(VM,this.value)"></textarea>
+            <div class="taipEditorButtons">
+                <button class="ttranCancelButton" title="Zrušit" event-bind="click:cancelAssignmentNoteEdit(VM)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="tranSaveTagButton" title="Uložit poznámku" event-bind="click:saveAssignmentNote(VM)">
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="taipTimeoutRow" data-bind="class!.hidden:HasTimeoutText">
             <div data-bind="text:TimeoutText; class.taipTimeoutWarn:HasTimeoutWarning"></div>
         </div>
     </div>
 
     <div class="tagTransitionTargetSelectCont" data-bind="itemsSource:Transitions;class!.hidden:HasTransitions" data-key="TagTypeId">
-        <div class=" lt-template">
+        <div class="lt-template">
             <div class="tagTransitionTargetSelectName tagTransitionTargetSelectItem"
                  data-bind="text:TagTypeName;cssClass:TagTypeCssClass;class.hidden:isHidden"
                  event-bind="click:transitionSelected(VM)">
@@ -23,11 +50,11 @@
                 <label>Poznámka</label>
                 <textarea data-bind="value:note" event-bind="input:VM.updateNote(this.value)"></textarea>
                 <div class="tagTransitionNoteInputPanelButtons">
-                    <button class="ttranCancelButton" event-bind="click:cancelNoteInput(VM)">
+                    <button class="ttranCancelButton" title="Zrušit" event-bind="click:cancelNoteInput(VM)">
                         <i class="fas fa-times"></i>
                     </button>
 
-                    <button class="tranSaveTagButton" event-bind="click:confirmNote(VM)">
+                    <button class="tranSaveTagButton" title="Uložit" event-bind="click:confirmNote(VM)">
                         <i class="fas fa-check"></i>
                     </button>
                 </div>
@@ -38,6 +65,6 @@
 <script>
     lt.element("tranTarg_{%GENERATE%}").attach(function () {
         this.bi
-        
+
     });
 </script>

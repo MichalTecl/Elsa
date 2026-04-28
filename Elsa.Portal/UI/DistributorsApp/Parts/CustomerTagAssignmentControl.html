@@ -143,6 +143,9 @@
         self.openTransitionPopup = (assignment, targetPicker) => {
 
             assignment.CanEditNote = (assignment.RequiresNote || !!assignment.Note);
+            assignment.noteEditOpen = false;
+            assignment.noteDraft = assignment.Note || "";
+            assignment.AssignDtInput = assignment.AssignDtInput || toDateInputValue(assignment.Assigned);
 
             if (!targetPicker.initialized) {
                 targetPicker.initialized = true;
@@ -237,15 +240,53 @@
             transition.noteInputOpen = false;
         };
 
+        const toDateInputValue = (assignedText) => {
+            const parts = (assignedText || "").split(".");
+            if (parts.length !== 3)
+                return "";
+
+            return parts[2] + "-" + parts[1].padStart(2, "0") + "-" + parts[0].padStart(2, "0");
+        };
+
         self.editNote = (assignment) => {
-            const nText = prompt("Nová poznámka", assignment.Note);
-            if (!nText)
+            assignment.noteDraft = assignment.Note || "";
+            assignment.noteEditOpen = true;
+            lt.notify();
+        };
+
+        self.updateAssignmentNoteDraft = (assignment, value) => {
+            assignment.noteDraft = value;
+        };
+
+        self.cancelAssignmentNoteEdit = (assignment) => {
+            assignment.noteEditOpen = false;
+            assignment.noteDraft = assignment.Note || "";
+            lt.notify();
+        };
+
+        self.saveAssignmentNote = (assignment) => {
+            const nText = assignment.noteDraft;
+            if (!nText && assignment.RequiresNote)
                 return;
 
             lt.api("/CustomerTagAssignment/ChangeAssignmentNote")
                 .query({ "customerId": assignment.CustomerId, "tagTypeId": assignment.TagTypeId, "note": nText })
                 .post(() => {
                     assignment.Note = nText;
+                    assignment.noteEditOpen = false;
+                    lt.notify();
+                });
+        };
+
+        self.changeAssignmentDate = (assignment, assignDate) => {
+            if (!assignDate)
+                return;
+
+            lt.api("/CustomerTagAssignment/ChangeAssignmentDate")
+                .query({ "customerId": assignment.CustomerId, "tagTypeId": assignment.TagTypeId, "assignDate": assignDate })
+                .post((assignments) => {
+                    assignment.AssignDtInput = assignDate;
+                    receiveNewAssignments(assignment, assignments);
                 });
         };
 

@@ -235,6 +235,7 @@
     <Content Include="SQL\20260414_001_insp_customerTagTimeouted.sql" />
     <Content Include="SQL\20260424_001_GetCustomerMailConversations.sql" />
     <Content Include="SQL\20260424_002_mailConversationIndexes.sql" />
+    <Content Include="SQL\20260428_001_insp_customerTagTimeouted.sql" />
     <Content Include="UI\CrmReporting\CrmReporting.css" />
     <Content Include="UI\CrmReporting\CrmReporting.html" />
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />

@@ -524,6 +524,19 @@ namespace Elsa.App.Crm.Repositories
 
             _cache.Remove(AssignmentsCacheKey);
         }
+
+        internal void UpdateAssignmentDate(int customerId, int tagTypeId, DateTime assignDate)
+        {
+            var assignment = _database.SelectFrom<ICustomerTagAssignment>()
+                    .Where(t => t.CustomerId == customerId
+                                && t.TagTypeId == tagTypeId
+                                && t.UnassignDt == null).Take(1).Execute().FirstOrDefault() ?? throw new ArgumentException("Assignment does not exist");
+
+            assignment.AssignDt = assignDate.Date;
+            _database.Save(assignment);
+
+            _cache.Remove(AssignmentsCacheKey);
+        }
                 
         public class TagGroup
         {

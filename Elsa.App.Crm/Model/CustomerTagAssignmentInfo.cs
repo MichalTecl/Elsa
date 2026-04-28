@@ -25,6 +25,7 @@ namespace Elsa.App.Crm.Model
         public string AssignedBy { get; set; }
         public DateTime AssignDt { get; set; }                
         public string Assigned => StringUtil.FormatDate(AssignDt);
+        public string AssignDtInput => AssignDt.ToString("yyyy-MM-dd");
         public int? TimeoutPercent 
         {
             get

@@ -6,6 +6,7 @@ using Elsa.Common.Logging;
 using Robowire.RoboApi;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,6 +74,17 @@ namespace Elsa.App.Crm.Controllers
         public void ChangeAssignmentNote(int customerId, int tagTypeId, string note)
         {
             _customerTagRepository.UpdateAssignmentNote(customerId, tagTypeId, note);
+        }
+
+        public IReadOnlyCollection<CustomerTagAssignmentInfo> ChangeAssignmentDate(int customerId, int tagTypeId, string assignDate)
+        {
+            if (!DateTime.TryParseExact(assignDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+            {
+                throw new ArgumentException("Neplatné datum");
+            }
+
+            _customerTagRepository.UpdateAssignmentDate(customerId, tagTypeId, date);
+            return _customerTagRepository.GetAssignments(new[] { customerId });
         }
     }
 }
