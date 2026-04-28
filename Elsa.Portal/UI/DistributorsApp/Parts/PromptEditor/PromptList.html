@@ -1,0 +1,174 @@
+<div id="promptListUi_{%GENERATE%}" class="mailPromptListWrap">
+    <div class="mailPromptListToolbar stackLeft">
+        <div class="mailPromptListToolbarTitle">Prompty pro sumarizaci</div>
+        <div class="mailPromptListToolbarActions">
+            <i class="fas fa-plus-square faButtonNew mailPromptToolbarButton"
+               title="Vytvořit nový prompt"
+               event-bind="click:createPrompt($event)"></i>
+        </div>
+    </div>
+
+    <div class="mailPromptListHead stackLeft">
+        <div class="mailPromptListAuthor">Autor</div>
+        <div class="mailPromptListCreateDt">Poslední změna</div>
+        <div class="mailPromptListActive">Aktivní</div>
+        <div class="mailPromptListPrompt">Prompt</div>
+        <div class="mailPromptListActions"></div>
+    </div>
+
+    <div class="mailPromptListLoading" data-bind="class!.hidden:loading">Načítám...</div>
+
+    <div class="mailPromptListRows" data-bind="itemsSource:prompts" data-key="PromptId">
+        <div class="lt-template mailPromptListRow stackLeft"
+             data-bind="class.mailPromptListRowActive:IsActive;class.mailPromptListRowSelected:IsSelected"
+             event-bind="click:selectPrompt(PromptId)">
+            <div class="mailPromptListAuthor" data-bind="text:Author"></div>
+            <div class="mailPromptListCreateDt" data-bind="text:CreateDt"></div>
+            <div class="mailPromptListActive">
+                <i class="fas fa-check hidden" data-bind="class!.hidden:IsActive"></i>
+            </div>
+            <div class="mailPromptListPrompt" data-bind="text:Prompt"></div>
+            <div class="mailPromptListActions">
+                <i class="far fa-copy faButtonNew mailPromptRowAction"
+                   title="Duplikovat prompt"
+                   event-bind="click:duplicatePrompt(PromptId, $event)"></i>
+                <i class="far fa-trash-alt faButtonNew mailPromptRowAction hidden"
+                   data-bind="class!.hidden:CanDelete"
+                   title="Smazat prompt"
+                   event-bind="click:deletePrompt(PromptId, $event)"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    lt.element("promptListUi_{%GENERATE%}").attach(function () {
+        this.createPrompt = function (e) {
+            if (!!e && !!e.stopPropagation)
+                e.stopPropagation();
+
+            app.MailSummariserPromptEditor.vm.createPrompt();
+        };
+
+        this.selectPrompt = function (promptId) {
+            app.MailSummariserPromptEditor.vm.selectPrompt(promptId);
+        };
+
+        this.duplicatePrompt = function (promptId, e) {
+            if (!!e && !!e.stopPropagation)
+                e.stopPropagation();
+
+            app.MailSummariserPromptEditor.vm.duplicatePrompt(promptId);
+        };
+
+        this.deletePrompt = function (promptId, e) {
+            if (!!e && !!e.stopPropagation)
+                e.stopPropagation();
+
+            app.MailSummariserPromptEditor.vm.deletePrompt(promptId);
+        };
+    });
+</script>
+<style>
+    .mailPromptListWrap {
+        padding: 16px;
+    }
+
+    .mailPromptListToolbar {
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .mailPromptListToolbarTitle {
+        font-size: 18px;
+        font-weight: 600;
+        color: #244661;
+    }
+
+    .mailPromptListToolbarActions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mailPromptListHead,
+    .mailPromptListRow {
+        align-items: center;
+        gap: 12px;
+    }
+
+    .mailPromptListHead {
+        font-weight: bold;
+        padding: 8px 12px;
+        border-bottom: 1px solid #d7e0ea;
+        color: #4d657d;
+    }
+
+    .mailPromptListRow {
+        padding: 12px;
+        border-bottom: 1px solid #eef3f7;
+        cursor: pointer;
+    }
+
+    .mailPromptListRow:hover {
+        background: #f6fbff;
+    }
+
+    .mailPromptListRowActive {
+        background: #e8f7ea;
+    }
+
+    .mailPromptListRowSelected {
+        outline: 2px solid #2ca7df;
+        outline-offset: -2px;
+    }
+
+    .mailPromptListAuthor {
+        width: 220px;
+        flex: 0 0 220px;
+        word-break: break-word;
+    }
+
+    .mailPromptListCreateDt {
+        width: 180px;
+        flex: 0 0 180px;
+    }
+
+    .mailPromptListActive {
+        width: 70px;
+        flex: 0 0 70px;
+        text-align: center;
+        color: #179b3b;
+    }
+
+    .mailPromptListPrompt {
+        flex: 1 1 auto;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mailPromptListActions {
+        width: 72px;
+        flex: 0 0 72px;
+        text-align: right;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .mailPromptToolbarButton,
+    .mailPromptRowAction {
+        cursor: pointer;
+    }
+
+    .mailPromptListLoading.hidden {
+        display: none;
+    }
+
+    .mailPromptListLoading {
+        padding: 12px;
+        color: #6a7d90;
+    }
+</style>

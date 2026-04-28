@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -58,6 +58,7 @@
     <Compile Include="Controllers\CrmMeetingsController.cs" />
     <Compile Include="Controllers\CrmMetadataController.cs" />
     <Compile Include="Controllers\CrmRobotsController.cs" />
+    <Compile Include="Controllers\MailSumPromptEditorController.cs" />
     <Compile Include="Controllers\CustomerTagAssignmentController.cs" />
     <Compile Include="Controllers\CustomerTagDesignerController.cs" />
     <Compile Include="CrmApp\CrmRobotExecutor.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Model\GroupDeleteInfo.cs" />
     <Compile Include="Model\MeetingInfoModel.cs" />
     <Compile Include="Model\MeetingsOverview.cs" />
+    <Compile Include="Model\PromptInfo.cs" />
     <Compile Include="Model\SalesRepresentativeModel.cs" />
     <Compile Include="Model\SalesTrendTick.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -114,6 +116,7 @@
     <Compile Include="Repositories\CustomerTagRepository.cs" />
     <Compile Include="Repositories\DistributorFiltersRepository.cs" />
     <Compile Include="Repositories\DistributorsRepository.cs" />
+    <Compile Include="Repositories\MailConversationMeetingModelFactory.cs" />
     <Compile Include="Repositories\DynamicColumns\Infrastructure\ColumnHeadControlLoader.cs" />
     <Compile Include="Repositories\DynamicColumns\Infrastructure\ColumnInfo.cs" />
     <Compile Include="Repositories\DynamicColumns\Infrastructure\DynamicColumnWrapper.cs" />
@@ -250,11 +253,15 @@
     <Content Include="UI\DistributorsApp\FilterControls\SalesRepSelect.html" />
     <Content Include="UI\DistributorsApp\FilterControls\CustomerGroupSelect.html" />
     <Content Include="UI\DistributorsApp\FilterControls\NumberInput.html" />
+    <Content Include="UI\DistributorsApp\MailSummariserPromptEditor.VM.js" />
+    <Content Include="UI\DistributorsApp\MailSummariserPromptEditorPage.html" />
     <Content Include="UI\DistributorsApp\Parts\CustomerTagAssignmentControl.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\ColumnHeadSorterTemplate.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\DynamicColumns\TagsColumnTemplate.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\DynamicColumns\TagsColumnTemplate.js" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\GridControlTemplate.html" />
+    <Content Include="UI\DistributorsApp\Parts\DistributorMailConversationDialog.html" />
+    <Content Include="UI\DistributorsApp\Parts\DistributorMeetingListItem.html" />
     <Content Include="UI\DistributorsApp\Parts\RobotsPopup.html" />
     <Content Include="UI\DistributorsApp\Css\CustomerTagsEditor.css" />
     <Content Include="UI\DistributorsApp\Css\DistributorDetailView_Panels.css" />
@@ -293,7 +300,9 @@
     <Content Include="UI\Inspector\ActionControls\CRM\OpenCustomerCard.html" />
     <Content Include="UI\Inspector\ActionControls\CRM\SnoozeDistributor.html" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UI\DistributorsApp\Parts\PromptEditor\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

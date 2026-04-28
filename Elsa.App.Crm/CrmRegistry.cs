@@ -2,6 +2,7 @@ using Elsa.App.Crm.CrmApp;
 using Elsa.App.Crm.DataReporting;
 using Elsa.App.Crm.Repositories;
 using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
+using Elsa.Jobs.CrmMailPull.Infrastructure;
 using Robowire;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,9 @@ namespace Elsa.App.Crm
             setup.For<CustomerTagRepository>().Use<CustomerTagRepository>();
             setup.For<DistributorsRepository>().Use<DistributorsRepository>();
             setup.For<DistributorFiltersRepository>().Use<DistributorFiltersRepository>();
+            setup.For<MailPullRepository>().Use<MailPullRepository>();
+            setup.For<MailConversationSummarizer>().Use<MailConversationSummarizer>();
+            setup.For<MailConversationMeetingModelFactory>().Use<MailConversationMeetingModelFactory>();
             setup.For<CrmRobotExecutor>().Use<CrmRobotExecutor>();
             setup.For<ColumnFactory>().Use<ColumnFactory>();
         }

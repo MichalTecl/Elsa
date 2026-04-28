@@ -12,6 +12,7 @@ namespace Elsa.Jobs.CrmMailPull
         public void Setup(IContainerSetup setup)
         {
             setup.For<MailPullRepository>().Use<MailPullRepository>();
+            setup.For<MailConversationSummarizer>().Use<MailConversationSummarizer>();
             setup.For<ExploreFolders>().Use<ExploreFolders>();
             setup.For<LoadMailReferences>().Use<LoadMailReferences>();
             setup.For<LoadMessagesContent>().Use<LoadMessagesContent>();

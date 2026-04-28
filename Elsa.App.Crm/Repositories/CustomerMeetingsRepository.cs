@@ -114,6 +114,23 @@ namespace Elsa.App.Crm.Repositories
                 .AutoMap<MailConversationDto>();
         }
 
+        public MailConversationDto GetMailConversation(int conversationId)
+        {
+            return _database.SelectFrom<IMailConversation>()
+                .Join(c => c.Summary)
+                .Where(c => c.Id == conversationId)
+                .Take(1)
+                .Execute()
+                .Select(c => new MailConversationDto
+                {
+                    Id = c.Id,
+                    ConversationEndDt = c.ConversationEndDt,
+                    Subject = c.Summary?.SubjectSummary ?? c.Hint,
+                    Summary = c.Summary?.Summary
+                })
+                .FirstOrDefault();
+        }
+
         public List<MailConversationMessageDto> GetMailConversationDetail(int conversationId)
         {
             return _database.SelectFrom<IMailMessageReference>()
