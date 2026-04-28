@@ -59,7 +59,7 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
                     if (preparedMessages.Count == 0)
                     {
-                        _repository.SaveConversactionSummary(
+                        _repository.SaveConversationSummary(
                             conversationIdVal,
                             conversationSubject,
                             "Konverzace neobsahovala pouzitelny text pro automaticke shrnuti.");
