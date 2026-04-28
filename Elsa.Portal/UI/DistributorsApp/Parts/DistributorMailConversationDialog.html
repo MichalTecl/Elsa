@@ -1,0 +1,21 @@
+<div id="mcdg_{%GENERATE%}" class="popupOverlay" data-bind="class.open:mailConversationDialogOpen" event-bind="click:closeMailConversation()">
+    <div class="popupBody mailConversationPopup" event-bind="click:stopEvent($event)">
+        <div class="mailConversationPopupHead">
+            <div class="mailConversationPopupTitle" data-bind="text:mailConversationTitle"></div>
+            <i class="fas fa-times faButtonNew" event-bind="click:closeMailConversation()"></i>
+        </div>
+        <div class="mailConversationMessages" data-bind="itemsSource:mailConversationDetail" data-key="Id">
+            <div class="lt-template mailConversationMessage">
+                <div class="mailConversationMessageMeta">
+                    <div class="mailConversationMessageSender" data-bind="text:Sender"></div>
+                    <div class="mailConversationMessageDt" data-bind="text:Dt"></div>
+                </div>
+                <div class="mailConversationMessageSubject" data-bind="text:Subject"></div>
+                <pre class="mailConversationMessageBody" data-bind="text:Content"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    lt.element("mcdg_{%GENERATE%}").attach(function () { });
+</script>

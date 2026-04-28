@@ -107,6 +107,12 @@
     max-width: 300px;
 }
 
+.distrMeetingConversationId {
+    font-size: 11px;
+    color: #7b8794;
+    white-space: nowrap;
+}
+
 /* Rozbalený detail */
 .distrMeetingListItem .hidden:not(.stackLeft) {
     display: none;
@@ -144,6 +150,25 @@ textarea[lt-name="meetingText"] {
 .distrMeetingTextReadOnly {
     background-color: #f3f5f7;
     color: #55606b;
+}
+
+.distrMeetingConversationLinkWrap {
+    margin-top: 8px;
+}
+
+.distrMeetingConversationLink {
+    padding: 0;
+    border: none;
+    background: none;
+    color: #2c5c85;
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.distrMeetingConversationLabel {
+    color: #6f7d89;
+    font-size: 13px;
 }
 
 /* Uložit ikonka */
@@ -377,6 +402,75 @@ textarea {
 
 #distrCurrentMeetingControls button:last-child:hover {
     background-color: #00a3df;
+}
+
+.mailConversationPopup {
+    width: min(900px, calc(100vw - 40px));
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    padding: 18px;
+    border-radius: 0 !important;
+}
+
+.mailConversationPopupHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.mailConversationPopupTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2b3a55;
+}
+
+.mailConversationMessages {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mailConversationMessage {
+    border: 1px solid #d7e0e7;
+    border-radius: 8px;
+    background-color: #fafcfd;
+    padding: 12px;
+}
+
+.mailConversationMessage:not(:last-child) {
+    border-bottom: 2px solid #d8e1e8;
+}
+
+.mailConversationMessageMeta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #6c7884;
+}
+
+.mailConversationMessageSender {
+    font-weight: 600;
+    color: #33414f;
+}
+
+.mailConversationMessageSubject {
+    font-weight: 600;
+    color: #2b3a55;
+    margin-bottom: 8px;
+}
+
+.mailConversationMessageBody {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #33414f;
 }
 
 .dcmRow input[type="datetime-local"] {

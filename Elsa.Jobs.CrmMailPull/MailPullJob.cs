@@ -9,6 +9,14 @@ namespace Elsa.Jobs.CrmMailPull
 {
     public class MailPullJob : IExecutableJob
     {
+#if DEBUG
+        public const bool SKIP_AI_SUMMARISATION = true;
+#endif
+
+#if !DEBUG
+        public const bool SKIP_AI_SUMMARISATION = false;
+#endif
+
         private readonly IStep[] _steps;
         private readonly ILog _log;
 

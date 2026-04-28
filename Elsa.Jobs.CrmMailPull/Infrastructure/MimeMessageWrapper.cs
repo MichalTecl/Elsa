@@ -90,12 +90,18 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
             // Strongest: References root
             var refs = ParseMessageIdList(m.Headers["References"]);
             if (refs.Count > 0)
-                return "R:" + refs[0]; // root of thread
+                return refs[0]; // root of thread
 
             // Next: In-Reply-To
             var irt = NormalizeMessageId(m.Headers["In-Reply-To"]);
             if (!string.IsNullOrWhiteSpace(irt))
-                return "P:" + irt;
+                return irt;
+
+            // Root message with Message-Id should share the same conversation key
+            // that replies reference via References / In-Reply-To.
+            var msgId = NormalizeMessageId(m.MessageId);
+            if (!string.IsNullOrWhiteSpace(msgId))
+                return msgId;
 
             // Conservative fallback: seed per-message (never merges unrelated conversations)
             // This guarantees we don't accidentally merge independent conversations.

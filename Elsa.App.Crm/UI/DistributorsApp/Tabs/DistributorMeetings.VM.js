@@ -12,6 +12,9 @@ app.DistributorMeetings = app.DistributorMeetings || {
 
         self.currentMeeting = null;
         self.editingMeeting = false;
+        self.mailConversationDialogOpen = false;
+        self.mailConversationDetail = [];
+        self.mailConversationTitle = null;
 
         self.addingParticipant = false;
 
@@ -44,7 +47,9 @@ app.DistributorMeetings = app.DistributorMeetings || {
                 m.previewDt = fdt(startDate);       
 
                 m.isOpen = false;
-                m.isReadOnly = !!m.MailConversationId;
+                m.isMailConversation = !!m.MailConversationId;
+                m.isReadOnly = m.isMailConversation;
+                m.canOpenConversation = m.isMailConversation && !!(window.can && can.EmailConversationsFull);
                 m.Actions.forEach(a => a.meetingId = m.Id);
                 m.textDirty = false;
             });
@@ -190,6 +195,30 @@ app.DistributorMeetings = app.DistributorMeetings || {
             self.editingMeeting = true;
 
             self.openMeetingDetail(-1);
+        };
+
+        self.closeMailConversation = () => {
+            self.mailConversationDialogOpen = false;
+            self.mailConversationDetail = [];
+            self.mailConversationTitle = null;
+        };
+
+        self.openMailConversation = (meetingId) => {
+            const meeting = self.meetings.find(m => m.Id === meetingId);
+
+            if (!meeting || !meeting.MailConversationId || !meeting.canOpenConversation)
+                return;
+
+            lt.api("/CrmMeetings/GetMailConversationDetail")
+                .query({ "customerId": customerId, "conversationId": meeting.MailConversationId })
+                .get(messages => {
+                    self.mailConversationTitle = meeting.Title || "E-mailová konverzace";
+                    self.mailConversationDetail = messages.map(m => ({
+                        ...m,
+                        Content: (m.Content || "").replace(/(\r?\n){3,}/g, "\n\n").trim()
+                    }));
+                    self.mailConversationDialogOpen = true;
+                });
         };
 
         crm.withMetadata((md) => {

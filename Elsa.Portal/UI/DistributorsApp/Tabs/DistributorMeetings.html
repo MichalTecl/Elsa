@@ -1,4 +1,4 @@
-﻿<div id="distrMeetingsPanel">
+<div id="distrMeetingsPanel">
 
     <div id="distrNewMeetingPanel">
         <div id="distrNewMeetingButtonsCont">
@@ -59,32 +59,10 @@
     </div>
 
     <div id="distrMeetingsList" data-key="Id" data-bind="itemsSource:meetings">
-        <div class="lt-template distrMeetingListItem" data-bind="class.open:isOpen;class.distrMeetingListItemReadOnly:isReadOnly">
-            <div class="distrMeetingItemHead stackLeft" event-bind="click:openMeetingDetail(Id)">
-                <i data-bind="class:CategoryIconClass; style.color:StatusTypeColor"></i>
-                <div class="distrMeetingItemDt" data-bind="text:previewDt"></div>
-                <div class="distrMeetingItemTitle" data-bind="text:Title"></div>                
-            </div>
-
-            <div data-bind="class!.hidden:isOpen">
-
-                <div class="preMeetingParticipantsRow stackLeft" data-bind="itemsSource:Participants" data-key="UserId">
-                    <div class="lt-template preMeetingParticipantsRowItem" data-bind="text:UserName"></div>
-                </div>
-
-                <textarea data-bind="text:Text;readonly:isReadOnly;class.distrMeetingTextReadOnly:isReadOnly" lt-name="meetingText" event-bind="input:meetingTextChange(Id, this.value)"></textarea>
-                <i class="fas fa-check-square" data-bind="class!.hidden:textDirty;class.hidden:isReadOnly" event-bind="click:saveMeetingText(Id, $meetingText.value)"></i>
-
-                <div class="preMeetingStatusButtonsRow" data-bind="itemsSource:Actions" data-key="Id">
-                    <button class="lt-template stackLeft" data-bind="style.backgroundColor:StatusTypeColor" event-bind="click:setMeetingStatus(meetingId, StatusTypeId)">
-                        <i data-bind="class:StatusTypeIconClass"></i>
-                        <div data-bind="text:Title"></div>
-                    </button>
-                </div>
-                <i class="fas fa-pencil-alt preMeetingrowEditButton" data-bind="class.hidden:isReadOnly" event-bind="click:editMeeting(Id)"></i>
-            </div>
-        </div>
+        <div class="lt-template" fill-by="/UI/DistributorsApp/Parts/DistributorMeetingListItem.html"></div>
     </div>
+
+    <div fill-by="/UI/DistributorsApp/Parts/DistributorMailConversationDialog.html"></div>
 </div>
 <script src="/UI/DistributorsApp/Tabs/DistributorMeetings.VM.js"></script>
 <script>
@@ -102,6 +80,9 @@
             this.meetingTextChange = (meetingId, text) => app.DistributorMeetings.vm.meetingTextChange(meetingId, text);
             this.saveMeetingText = (meetingId, text) => app.DistributorMeetings.vm.saveMeetingText(meetingId, text);
             this.editMeeting = (id) => app.DistributorMeetings.vm.editMeeting(id);
+            this.openMailConversation = (id) => app.DistributorMeetings.vm.openMailConversation(id);
+            this.closeMailConversation = () => app.DistributorMeetings.vm.closeMailConversation();
+            this.stopEvent = (e) => e.stopPropagation();
 
             this.updateModel = (property, value) => app.DistributorMeetings.vm.updateCurrentMeeting(property, value);
 

@@ -208,6 +208,26 @@ namespace Elsa.App.Crm.Controllers
             return MapMeetings(meetings.Where(m => m.Status.ActionExpected).OrderBy(m => m.StartDt), null).ToList();
         }
 
+        public List<MailConversationMessageViewModel> GetMailConversationDetail(int customerId, int conversationId)
+        {
+            EnsureUserRight(CrmUserRights.EmailConversationsFull);
+
+            _meetingsRepository.GetMailConversations(customerId)
+                .FirstOrDefault(c => c.Id == conversationId)
+                .Ensure("Invalid conversationId");
+
+            return _meetingsRepository.GetMailConversationDetail(conversationId)
+                .Select(m => new MailConversationMessageViewModel
+                {
+                    Id = m.Id,
+                    Dt = StringUtil.FormatDateTime(m.InternalDt),
+                    Sender = string.IsNullOrWhiteSpace(m.Sender) ? "(neznámý odesílatel)" : m.Sender,
+                    Subject = string.IsNullOrWhiteSpace(m.Subject) ? "(bez předmětu)" : m.Subject,
+                    Content = string.IsNullOrWhiteSpace(m.Content) ? "(bez textu)" : m.Content
+                })
+                .ToList();
+        }
+
         private static IEnumerable<(int order, DateTime from, DateTime to, string text, string grpClass)> GetMeetingTimeDeciders()
         {
             var now = DateTime.Now;
@@ -347,6 +367,15 @@ namespace Elsa.App.Crm.Controllers
         private CustomerMeetingViewModel MapMeeting(IMeeting meeting)
         {
             return MapMeetings(new[] { meeting }, null).Single();
+        }
+
+        public class MailConversationMessageViewModel
+        {
+            public int Id { get; set; }
+            public string Dt { get; set; }
+            public string Sender { get; set; }
+            public string Subject { get; set; }
+            public string Content { get; set; }
         }
 
         

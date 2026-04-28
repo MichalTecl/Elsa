@@ -3,6 +3,7 @@ using Elsa.App.Crm.Model;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
+using Elsa.Jobs.CrmMailPull.Entities;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
@@ -113,12 +114,40 @@ namespace Elsa.App.Crm.Repositories
                 .AutoMap<MailConversationDto>();
         }
 
+        public List<MailConversationMessageDto> GetMailConversationDetail(int conversationId)
+        {
+            return _database.SelectFrom<IMailMessageReference>()
+                .Join(m => m.FullContent)
+                .Where(m => m.ConversationId == conversationId)
+                .Where(m => m.FullContentId != null)
+                .OrderBy(m => m.InternalDt)
+                .Execute()
+                .Select(m => new MailConversationMessageDto
+                {
+                    Id = m.Id,
+                    InternalDt = m.InternalDt,
+                    Sender = m.FullContent?.Sender,
+                    Subject = m.FullContent?.Subject,
+                    Content = m.FullContent?.Content
+                })
+                .ToList();
+        }
+
         public class MailConversationDto
         {
             public int Id { get; set; }
             public DateTime? ConversationEndDt { get; set; }
             public string Subject { get; set; }
             public string Summary { get; set; }
+        }
+
+        public class MailConversationMessageDto
+        {
+            public int Id { get; set; }
+            public DateTime InternalDt { get; set; }
+            public string Sender { get; set; }
+            public string Subject { get; set; }
+            public string Content { get; set; }
         }
     }
 }

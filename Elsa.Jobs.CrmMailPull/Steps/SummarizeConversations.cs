@@ -29,6 +29,9 @@ namespace Elsa.Jobs.CrmMailPull.Steps
         {
             const int minWordsForAiSummary = 50;
 
+            if (MailPullJob.SKIP_AI_SUMMARISATION)
+                _log.Info("SKIP_AI_SUMMARISATION is enabled - AI summarisation is disabled and direct summaries will be stored");
+
             while (true)
             {
                 timeout.Check();
@@ -57,6 +60,16 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                             conversationIdVal,
                             conversationSubject,
                             "Konverzace neobsahovala pouzitelny text pro automaticke shrnuti.");
+                        continue;
+                    }
+
+                    if (MailPullJob.SKIP_AI_SUMMARISATION)
+                    {
+                        _log.Info($"SKIP_AI_SUMMARISATION is enabled, saving direct summary for conversation {conversationIdVal} without AI");
+                        _repository.SaveConversationSummary(
+                            conversationIdVal,
+                            conversationSubject,
+                            BuildDirectSummary(normalizedMessages));
                         continue;
                     }
 
