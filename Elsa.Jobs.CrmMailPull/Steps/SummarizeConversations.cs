@@ -28,9 +28,12 @@ namespace Elsa.Jobs.CrmMailPull.Steps
         public void Run(TimeoutCheck timeout)
         {
             const int minWordsForAiSummary = 50;
+            SummaryPromptInfo summaryPrompt = null;
 
-            if (MailPullJob.SKIP_AI_SUMMARISATION)
-                _log.Info("SKIP_AI_SUMMARISATION is enabled - AI summarisation is disabled and direct summaries will be stored");
+            summaryPrompt = _repository.GetLatestConfirmedSummaryPrompt();
+
+            if (string.IsNullOrWhiteSpace(summaryPrompt?.Prompt))
+                throw new InvalidOperationException("No confirmed mail conversation summary prompt found in database");
 
             while (true)
             {
@@ -56,23 +59,13 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
                     if (preparedMessages.Count == 0)
                     {
-                        _repository.SaveConversationSummary(
+                        _repository.SaveConversactionSummary(
                             conversationIdVal,
                             conversationSubject,
                             "Konverzace neobsahovala pouzitelny text pro automaticke shrnuti.");
                         continue;
                     }
-
-                    if (MailPullJob.SKIP_AI_SUMMARISATION)
-                    {
-                        _log.Info($"SKIP_AI_SUMMARISATION is enabled, saving direct summary for conversation {conversationIdVal} without AI");
-                        _repository.SaveConversationSummary(
-                            conversationIdVal,
-                            conversationSubject,
-                            BuildDirectSummary(normalizedMessages));
-                        continue;
-                    }
-
+                                        
                     var conversationWordCount = CountWords(string.Join("\n\n", normalizedMessages.Select(m => m.Body)));
                     if (conversationWordCount < minWordsForAiSummary)
                     {
@@ -84,24 +77,19 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                         continue;
                     }
 
-                    var prompt = BuildPrompt(preparedMessages);
+                    var prompt = BuildPrompt(summaryPrompt.Prompt, preparedMessages);
 
                     _log.Info($"Prepared {preparedMessages.Count} message(s) for summarization, prompt length {prompt.Length} chars");
 
                     var response = _ai.Request(new OpenAiRequestBody
                     {
                         Temperature = 0.1f,
-                        MaxTokens = 250, // Zvyseno z 160 – dava modelu dychaci prostor pro 2 vety
+                        MaxTokens = 250,
                         Messages = new List<OpenAiRequestBody.Message>
                         {
                             new OpenAiRequestBody.Message
                             {
                                 Role = "system",
-                                Content = BuildSystemPrompt()
-                            },
-                            new OpenAiRequestBody.Message
-                            {
-                                Role = "user",
                                 Content = prompt
                             }
                         }
@@ -123,7 +111,7 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                         throw new InvalidOperationException("OpenAI returned empty response");
 
                     var parsed = ParseSummary(content, null, preparedMessages);
-                    _repository.SaveConversationSummary(conversationIdVal, conversationSubject, parsed.Summary);
+                    _repository.SaveConversationSummary(conversationIdVal, conversationSubject, parsed.Summary, summaryPrompt.Id);
 
                     _log.Info($"Conversation {conversationIdVal} summarized");
                 }
@@ -139,42 +127,11 @@ namespace Elsa.Jobs.CrmMailPull.Steps
         // Prompty
         // -------------------------------------------------------------------------
 
-        private static string BuildSystemPrompt()
-        {
-            return
-                "Jsi interni CRM asistent. Tvuj ukol je vytvorit strojovy zaznam e-mailove komunikace pro obchodnika.\n\n" +
-                "IGNORUJ vzdy: pozdravy, podekování, omluvy, zdvorilostni fraze, podpisy, ujisteni o rychle odpovedi " +
-                "a jakekoliv casti textu bez vecneho obsahu.\n\n" +
-                "ZAZNAMENEJ vzdy: co konkretne zakaznik pozadoval nebo resil, co bylo dohodnuto nebo odeslano, " +
-                "relevantni cisla (castky, mnozstvi, terminy, cisla objednavek), " +
-                "otevrene ukoly a dalsi kroky.";
-        }
-
-        private static string BuildPrompt(List<PromptMessage> messages)
+        private static string BuildPrompt(string promptTemplate, List<PromptMessage> messages)
         {
             var sb = new StringBuilder(6000);
 
-            sb.AppendLine("Vrat vystup POUZE v tomto formatu, bez cokoliv dalsiho:");
-            sb.AppendLine("SubjectSummary: [max 100 znaku – tema konverzace, zadna slovesa]");
-            sb.AppendLine("Summary: [1-2 vety – co bylo reseno, co byl vysledek nebo co je otevrene]");
-            sb.AppendLine();
-            sb.AppendLine("Pravidla pro Summary:");
-            sb.AppendLine("- Pis jako interni poznamka, ne jako preklad e-mailu.");
-            sb.AppendLine("- Zacni rovnou vecnou informaci, ne jmenem odesilatele.");
-            sb.AppendLine("- Nikdy nezminuj podekování, omluvy ani zdvorilostni vymeny.");
-            sb.AppendLine("- Pokud neni zrejmy vysledek, napis co je otevreno nebo co se ceka.");
-            sb.AppendLine("- Pokud je to vhodne, preferuj holou informaci pred souvetim.");
-            sb.AppendLine("- Pis cesky.");
-            sb.AppendLine();
-            sb.AppendLine("Priklady spravneho vystupu:");
-            sb.AppendLine("SubjectSummary: Nabidka servisni smlouvy – prodlouzeni");
-            sb.AppendLine("Summary: Zakaznik pozaduje prodlouzeni servisni smlouvy o rok. Ceka na potvrzeni ceny.");
-            sb.AppendLine();
-            sb.AppendLine("SubjectSummary: Reklamace faktury");
-            sb.AppendLine("Summary: Nesoulad v castce – zakaznik tvrdí, ze zaplatil vice nez je fakturovano. Overujeme u uctarny.");
-            sb.AppendLine();
-            sb.AppendLine("SubjectSummary: Dotaz na dostupnost zbozi");
-            sb.AppendLine("Summary: Dotaz na skladovou dostupnost polozky XY. Informovano: naskladneni do 2 tydnu.");
+            sb.AppendLine((promptTemplate ?? string.Empty).Trim());
             sb.AppendLine();
             sb.AppendLine("Zpravy v chronologickem poradi:");
 
@@ -241,10 +198,8 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                 totalChars += len;
             }
 
-            // Vzdy: prvni zprava (zaklad konverzace)
             addIfPossible(normalized[0], true);
 
-            // Novinka: nejdelsi zprava ze stredu (casto obsahuje jadro – nabidku, odpoved s detaily)
             if (normalized.Count > 2)
             {
                 var midCandidate = normalized
@@ -255,7 +210,6 @@ namespace Elsa.Jobs.CrmMailPull.Steps
                 addIfPossible(midCandidate);
             }
 
-            // Nejnovejsi zpravy (aktualni stav)
             for (var i = normalized.Count - 1; i >= 1; i--)
                 addIfPossible(normalized[i]);
 
@@ -386,7 +340,7 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             if (line.StartsWith("Komu:", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("Subject:", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("Predmet:", StringComparison.OrdinalIgnoreCase)) return true;
-            if (line.StartsWith("Předmět:", StringComparison.OrdinalIgnoreCase)) return true;
+            if (line.StartsWith("PÅ™edmÄ›t:", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("-----Original Message-----", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("---------- Forwarded message ----------", StringComparison.OrdinalIgnoreCase)) return true;
             if (Regex.IsMatch(line, @"^On .+wrote:$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)) return true;
@@ -417,14 +371,12 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             sanitized = Regex.Replace(sanitized, @"https?://\S+|www\.\S+", "[odkaz]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             sanitized = Regex.Replace(sanitized, @"\b[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}\b", "[email]", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-            // Bezna telefonni cisla, kratka obchodni cisla nechavame
             sanitized = Regex.Replace(
                 sanitized,
                 @"(?<!\w)(?:\+?\d[\d\-\s\(\)]{7,}\d)(?!\w)",
                 m => CountDigits(m.Value) >= 8 ? "[telefon]" : m.Value,
                 RegexOptions.CultureInvariant);
 
-            // Delsi numericke identifikatory (cisla objednavek, uctu, sledovaci cisla)
             sanitized = Regex.Replace(
                 sanitized,
                 @"(?<!\w)\d{6,}(?!\w)",
@@ -456,7 +408,7 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             addMatch(@"(?:^|\s)To:\s");
             addMatch(@"(?:^|\s)Datum:\s");
             addMatch(@"(?:^|\s)Date:\s");
-            addMatch(@"(?:^|\s)Předmět:\s");
+            addMatch(@"(?:^|\s)PÅ™edmÄ›t:\s");
             addMatch(@"(?:^|\s)Predmet:\s");
             addMatch(@"(?:^|\s)Subject:\s");
 
@@ -508,10 +460,10 @@ namespace Elsa.Jobs.CrmMailPull.Steps
 
             if (line.StartsWith("---")) return true;
             if (line.StartsWith("Zprava ", StringComparison.OrdinalIgnoreCase)) return true;
-            if (line.StartsWith("Zpráva ", StringComparison.OrdinalIgnoreCase)) return true;
+            if (line.StartsWith("ZprÃ¡va ", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("Od:", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("Predmet:", StringComparison.OrdinalIgnoreCase)) return true;
-            if (line.StartsWith("Předmět:", StringComparison.OrdinalIgnoreCase)) return true;
+            if (line.StartsWith("PÅ™edmÄ›t:", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("Text:", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("SubjectSummary:", StringComparison.OrdinalIgnoreCase)) return true;
             if (line.StartsWith("Summary:", StringComparison.OrdinalIgnoreCase)) return true;
@@ -527,12 +479,12 @@ namespace Elsa.Jobs.CrmMailPull.Steps
             var leakMarkers = new[]
             {
                 "--- Zprava",
-                "--- Zpráva",
+                "--- ZprÃ¡va",
                 " Zprava ",
-                " Zpráva ",
+                " ZprÃ¡va ",
                 " Od: ",
                 " Predmet: ",
-                " Předmět: ",
+                " PÅ™edmÄ›t: ",
                 " Text: "
             };
 

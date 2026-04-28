@@ -7,6 +7,8 @@ namespace Elsa.Jobs.CrmMailPull.Entities
     [Entity]
     public interface IMailConversationSummary : IIntIdEntity
     {
+        int? PromptId { get; set; }
+        IMailConversationSummaryPrompt Prompt { get; }
 
         [NVarchar(200, false)]
         string SubjectSummary { get; set; }

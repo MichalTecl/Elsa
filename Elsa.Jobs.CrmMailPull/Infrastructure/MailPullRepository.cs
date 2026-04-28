@@ -177,6 +177,21 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 .Scalar<int?>();
         }
 
+        public SummaryPromptInfo GetLatestConfirmedSummaryPrompt()
+        {
+            return _db.SelectFrom<IMailConversationSummaryPrompt>()
+                .OrderByDesc(p => p.ConfirmDt)
+                .OrderByDesc(p => p.Id)
+                .Take(1)
+                .Execute()
+                .Select(p => new SummaryPromptInfo
+                {
+                    Id = p.Id,
+                    Prompt = p.Prompt
+                })
+                .FirstOrDefault();
+        }
+
         
         public List<IMailMessageReference> GetConversationMessages(int conversationId)
         {
@@ -189,7 +204,7 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
                 .ToList();
         }
 
-        public void SaveConversationSummary(int conversationId, string subjectSummary, string summary)
+        public void SaveConversationSummary(int conversationId, string subjectSummary, string summary, int? promptId = null)
         {
             var conversation = _db.SelectFrom<IMailConversation>()
                 .Join(c => c.Summary)
@@ -210,6 +225,7 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
 
             entity.SubjectSummary = subjectSummary;
             entity.Summary = summary;
+            entity.PromptId = promptId;
 
             _db.Save(entity);
 
@@ -233,5 +249,11 @@ namespace Elsa.Jobs.CrmMailPull.Infrastructure
         public int MailMessageReferenceId { get; set; }
         public int FolderId { get; set; }
         public long ImapUid { get; set; }
-    }   
+    }
+
+    public sealed class SummaryPromptInfo
+    {
+        public int Id { get; set; }
+        public string Prompt { get; set; }
+    }
 }
