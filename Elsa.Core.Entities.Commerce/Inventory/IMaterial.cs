@@ -62,5 +62,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory
         int? ExpirationMonths { get; set; }
         int? DistributorExpirationLimit { get; set; }
         int? RetailExpirationLimit { get; set; }
+
+        [NVarchar(256, true)]
+        string MaterialLevelReportingGroup { get; set; }
     }
 }

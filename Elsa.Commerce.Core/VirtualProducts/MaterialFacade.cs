@@ -86,6 +86,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                         m.ExpirationMonths = request.ExpirationMonths == 0 ? null : request.ExpirationMonths;
                         m.DistributorExpirationLimit = request.DistributorExpirationLimit == 0 ? null : request.DistributorExpirationLimit;
                         m.RetailExpirationLimit = request.RetailExpirationLimit == 0 ? null : request.RetailExpirationLimit;
+                        m.MaterialLevelReportingGroup = string.IsNullOrWhiteSpace(request.MaterialLevelReportingGroup) ? null : request.MaterialLevelReportingGroup.Trim();
                     });
                 
                 if (request.ThresholdText == null)

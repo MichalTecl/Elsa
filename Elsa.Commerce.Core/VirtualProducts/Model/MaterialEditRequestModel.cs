@@ -50,5 +50,7 @@ namespace Elsa.Commerce.Core.VirtualProducts.Model
         public int? ExpirationMonths { get; set; }
         public int? DistributorExpirationLimit { get; set; }
         public int? RetailExpirationLimit { get; set; }
+
+        public string MaterialLevelReportingGroup { get; set; }
     }
 }

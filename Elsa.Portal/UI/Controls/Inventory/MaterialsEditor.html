@@ -118,6 +118,16 @@
                                            event-bind="change:onNamedPropChanged(VM, 'RetailExpirationLimit', this.value)" />
                                 </div>
 
+                                <div class="materialFlagEdit materialLevelReportingGroupContainer">
+                                    <div class="stackLeft">
+                                        <label>Skupina v přehledu zásob</label>
+                                    </div>
+                                    <input type="text"
+                                           data-bind="value:MaterialLevelReportingGroup"
+                                           lt-name="tbMaterialLevelReportingGroup"
+                                           event-bind="change:onNamedPropChanged(VM, 'MaterialLevelReportingGroup', this.value)" />
+                                </div>
+
                                 <!-- abadnoned -->
                                 <div class="materialFlagEdit abandonedBatchesSetupContainer" style="margin-top:6px">
                                     <div class="stackLeft">
