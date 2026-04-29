@@ -11,7 +11,8 @@ BEGIN
     SELECT mc.Id,
            mc.ConversationEndDt,
            ISNULL(mcs.SubjectSummary, mc.Hint) [Subject],
-           mcs.Summary
+           mcs.Summary,
+           COUNT(DISTINCT mmr.Id) MessageCount
       FROM (
             SELECT DISTINCT ade.Email
               FROM vwAllDistributorEmails ade

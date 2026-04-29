@@ -252,6 +252,7 @@ DELETE mcs
             public DateTime? ConversationEndDt { get; set; }
             public string Subject { get; set; }
             public string Summary { get; set; }
+            public int MessageCount { get; set; }
         }
 
         public class MailConversationMessageDto

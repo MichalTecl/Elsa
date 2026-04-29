@@ -126,5 +126,6 @@ namespace Elsa.App.Crm.Model
         public string Time { get; set; }
                 
         public int? MailConversationId { get; set; }
+        public int? MailConversationMessageCount { get; set; }
     }
 }

@@ -336,6 +336,7 @@ namespace Elsa.App.Crm.Controllers
                     {
                         Id = conversation.Id * -1,
                         MailConversationId = conversation.Id,
+                        MailConversationMessageCount = conversation.MessageCount,
                         Day = StringUtil.FormatDate_DayNameDdMm(conversationDt),
                         Time = StringUtil.FormatTimeHhMm(conversationDt),
                         StartDt = StringUtil.FormatDateTimeForUiInput(conversationDt),

@@ -82,7 +82,10 @@
             this.editMeeting = (id) => app.DistributorMeetings.vm.editMeeting(id);
             this.openMailConversation = (id) => app.DistributorMeetings.vm.openMailConversation(id);
             this.closeMailConversation = () => app.DistributorMeetings.vm.closeMailConversation();
-            this.stopEvent = (e) => e.stopPropagation();
+            this.stopEvent = (e) => {
+                if (!!e && !!e.stopPropagation)
+                    e.stopPropagation();
+            };
 
             this.updateModel = (property, value) => app.DistributorMeetings.vm.updateCurrentMeeting(property, value);
 

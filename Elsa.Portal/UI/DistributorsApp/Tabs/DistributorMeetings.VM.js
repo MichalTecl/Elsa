@@ -50,6 +50,9 @@ app.DistributorMeetings = app.DistributorMeetings || {
                 m.isMailConversation = !!m.MailConversationId;
                 m.isReadOnly = m.isMailConversation;
                 m.canOpenConversation = m.isMailConversation && !!(window.can && can.EmailConversationsFull);
+                m.mailConversationLinkText = m.isMailConversation
+                    ? `E-mailová konverzace (${m.MailConversationMessageCount || 0} zpráv)`
+                    : null;
                 m.Actions.forEach(a => a.meetingId = m.Id);
                 m.textDirty = false;
             });

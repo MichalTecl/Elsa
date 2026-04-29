@@ -14,8 +14,8 @@
 
         <textarea data-bind="text:Text;readonly:isReadOnly;class.distrMeetingTextReadOnly:isReadOnly" lt-name="meetingText" event-bind="input:meetingTextChange(Id, this.value)"></textarea>
         <div class="distrMeetingConversationLinkWrap" data-bind="class!.hidden:isMailConversation">
-            <button type="button" class="distrMeetingConversationLink" data-bind="class!.hidden:canOpenConversation" event-bind="click:openMailConversation(Id)">E-mailová konverzace</button>
-            <span class="distrMeetingConversationLabel" data-bind="class.hidden:canOpenConversation">E-mailová konverzace</span>
+            <button type="button" class="distrMeetingConversationLink" data-bind="class!.hidden:canOpenConversation;text:mailConversationLinkText" event-bind="click:openMailConversation(Id)"></button>
+            <span class="distrMeetingConversationLabel" data-bind="class.hidden:canOpenConversation;text:mailConversationLinkText"></span>
         </div>
         <i class="fas fa-check-square" data-bind="class!.hidden:textDirty;class.hidden:isReadOnly" event-bind="click:saveMeetingText(Id, $meetingText.value)"></i>
 
