@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
-using Elsa.Core.Entities.Commerce.Inventory;
+using Elsa.App.MaterialLevels.Components.Model;
 
 namespace Elsa.App.MaterialLevels.Components
 {
     public interface IInventoryWatchRepository
     {
-        List<IMaterialInventory> GetWatchedInventories();
+        List<InventoryModel> GetVisibleTabs();
 
-        void WatchInventory(int inventoryId);
+        void ShowTab(int inventoryId, string materialLevelReportingGroup);
 
-        void UnwatchInventory(int inventoryId);
+        void HideTab(int inventoryId, string materialLevelReportingGroup);
 
-        List<IMaterialInventory> GetUnwatchedInventories();
+        List<InventoryModel> GetHiddenTabs();
     }
 }

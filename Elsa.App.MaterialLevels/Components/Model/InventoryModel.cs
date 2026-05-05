@@ -17,6 +17,12 @@ namespace Elsa.App.MaterialLevels.Components.Model
 
         public int Id { get; set; }
 
+        public string Key { get; set; }
+
+        public int InventoryId { get; set; }
+
+        public string MaterialLevelReportingGroup { get; set; }
+
         public string Name { get; set; }
 
         public int? WarningsCount => m_warnings?.Count;

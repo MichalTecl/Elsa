@@ -54,6 +54,7 @@
     <Compile Include="Components\Model\MaterialLevelEntryModel.cs" />
     <Compile Include="Controllers\MaterialAmountReportController.cs" />
     <Compile Include="Entities\IMaterialOrderEvent.cs" />
+    <Compile Include="Entities\IUserHiddenMaterialLevelTab.cs" />
     <Compile Include="Entities\IUserWatchedInventory.cs" />
     <Compile Include="MaterialLevelsRegistry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -125,6 +126,9 @@
     <Content Include="SQL\20250717_001_alter_insp_missingMaterialOrder.sql" />
     <Content Include="SQL\20250909_001_GetMaterialLevelsReport_AddDeadline.sql" />
     <Content Include="SQL\20250909_002_insp_missingMaterialOrder_addDeadline.sql" />
+    <Content Include="SQL\20260429_001_MaterialLevelsReportingGroups.sql" />
+    <Content Include="SQL\20260505_001_MaterialLevelIndexes.sql" />
+    <Content Include="SQL\20260505_002_GetMaterialLevelsReport.sql" />
     <Content Include="UI\Controls\MaterialLevels\InspectorActions\MaterialDeliveryExpectationPostpone.html" />
     <Content Include="UI\Controls\MaterialLevels\MaterialLevels.css" />
     <Content Include="UI\Controls\MaterialLevels\MaterialLevelsDetail.html" />

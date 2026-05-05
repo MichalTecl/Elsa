@@ -29,10 +29,11 @@ namespace Elsa.App.MaterialLevels.Components
         private readonly IInventoryWatchRepository m_inventoryWatchRepository;
         private readonly IUserRepository m_userRepository;
         private readonly ISupplierRepository m_supplierRepository;
-        private readonly IEntityCommentsFacade m_entityComments;
+        private readonly IEntityCommentsRepository m_entityCommentsRepository;
+        private readonly IUserNickProvider m_userNickProvider;
 
         public MaterialLevelsLoader(ISession session, IDatabase database, AmountProcessor amountProcessor,
-            IUnitRepository unitRepository, IMaterialThresholdRepository thresholdRepository, ICache cache, IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IUserRepository userRepository, ISupplierRepository supplierRepository, IEntityCommentsFacade entityComments)
+            IUnitRepository unitRepository, IMaterialThresholdRepository thresholdRepository, ICache cache, IMaterialRepository materialRepository, IInventoryWatchRepository inventoryWatchRepository, IUserRepository userRepository, ISupplierRepository supplierRepository, IEntityCommentsRepository entityCommentsRepository, IUserNickProvider userNickProvider)
         {
             m_session = session;
             m_database = database;
@@ -44,15 +45,25 @@ namespace Elsa.App.MaterialLevels.Components
             m_inventoryWatchRepository = inventoryWatchRepository;
             m_userRepository = userRepository;
             m_supplierRepository = supplierRepository;
-            m_entityComments = entityComments;
+            m_entityCommentsRepository = entityCommentsRepository;
+            m_userNickProvider = userNickProvider;
         }
 
-        public IEnumerable<MaterialLevelEntryModel> Load(int inventoryId)
+        public IEnumerable<MaterialLevelEntryModel> Load(int inventoryId, string materialLevelReportingGroup)
         {
             var result = new List<MaterialLevelEntryModel>();
+            var resultIndex = new Dictionary<int, MaterialLevelEntryModel>();
+            var normalizedReportingGroup = NormalizeReportingGroup(materialLevelReportingGroup);
 
             // user repo cache fill :(
             m_userRepository.GetAllUsers();
+
+            var materialsById = m_materialRepository.GetAllMaterials(inventoryId, true).ToDictionary(m => m.Id);
+            var unitsById = m_unitRepository.GetAllUnits().ToDictionary(u => u.Id);
+            var thresholdsByMaterialId = m_thresholdRepository.GetAllThresholds().ToDictionary(t => t.MaterialId);
+            var commentsByMaterialId = m_session.HasUserRight(InventoryUserRights.MaterialCommentsView)
+                ? m_entityCommentsRepository.GetComments("Material", materialsById.Keys)
+                : new Dictionary<int, List<EntityComment>>();
 
             var supplierOrderLimits = m_supplierRepository
                 .GetSuppliers()
@@ -60,14 +71,14 @@ namespace Elsa.App.MaterialLevels.Components
                 .GroupBy(s => s.Name)
                 .ToDictionary(s => s.Key, s => new { Lim = s.Min(t => t.OrderFulfillDays ?? 9999), Name = s.Min(x => x.Name) });
 
-            m_database.Sql().Call("GetMaterialLevelsReport").WithParam("@inventoryId", inventoryId).WithParam("@projectId", m_session.Project.Id)
+            m_database.Sql().Call("GetMaterialLevelsReport").WithParam("@inventoryId", inventoryId).WithParam("@projectId", m_session.Project.Id).WithParam("@materialLevelReportingGroup", normalizedReportingGroup)
                 .ReadRows<int, string, string, int, decimal, string, string, string, DateTime?, int?, DateTime?>((materialId, materialName, batchNumber, unitId, available, supName, supMail, supPhone, orderDt, orderUserId, deliveryDeadline)=>
                 {
-                    var entry = result.FirstOrDefault(r => r.MaterialId == materialId);
-                    if (entry == null)
+                    if (!resultIndex.TryGetValue(materialId, out var entry))
                     {
                         entry = new MaterialLevelEntryModel();
                         result.Add(entry);
+                        resultIndex[materialId] = entry;
 
                         entry.MaterialId = materialId;
                         entry.MaterialName = materialName;
@@ -91,11 +102,11 @@ namespace Elsa.App.MaterialLevels.Components
                         return;
                     }
 
-                    var batchModel = entry.Batches.FirstOrDefault(b =>
-                        b.BatchNumber.Equals(batchNumber, StringComparison.InvariantCultureIgnoreCase) && b.UnitId == unitId);
-
                     if (!string.IsNullOrWhiteSpace(batchNumber))
                     {
+                        var batchModel = entry.Batches.FirstOrDefault(b =>
+                            b.BatchNumber.Equals(batchNumber, StringComparison.InvariantCultureIgnoreCase) && b.UnitId == unitId);
+
                         if (batchModel == null)
                         {
                             batchModel = new BatchAmountModel
@@ -112,19 +123,17 @@ namespace Elsa.App.MaterialLevels.Components
 
             foreach (var r in result)
             {
-                var material = m_materialRepository.GetMaterialById(r.MaterialId);
+                var material = materialsById[r.MaterialId];
+                ApplyComment(r, commentsByMaterialId);
 
-                m_entityComments.TryLoadComment(InventoryUserRights.MaterialCommentsView, r);
-
-                var threshold = m_thresholdRepository.GetThreshold(r.MaterialId);
-                if (threshold != null)
+                if (thresholdsByMaterialId.TryGetValue(r.MaterialId, out var threshold))
                 {
-                    r.Threshold = new Amount(threshold.ThresholdQuantity, m_unitRepository.GetUnit(threshold.UnitId));
+                    r.Threshold = new Amount(threshold.ThresholdQuantity, unitsById[threshold.UnitId]);
                 }
 
                 foreach (var batch in r.Batches)
                 {
-                    batch.Amount = new Amount(batch.Value, m_unitRepository.GetUnit(batch.UnitId));
+                    batch.Amount = new Amount(batch.Value, unitsById[batch.UnitId]);
                 }
 
                 r.Total = m_amountProcessor.Sum(r.Batches.Select(b => b.Amount));
@@ -195,7 +204,7 @@ namespace Elsa.App.MaterialLevels.Components
 
         public IEnumerable<InventoryModel> GetInventories()
         {
-            var cacheKey = $"matLevelInventories_{m_session.Project.Id}";
+            var cacheKey = $"matLevelInventories_{m_session.Project.Id}:{m_session.User.Id}";
             
             return m_cache.ReadThrough(cacheKey, TimeSpan.FromMinutes(5), () =>
             {
@@ -211,8 +220,8 @@ namespace Elsa.App.MaterialLevels.Components
         {
             var result = new List<InventoryModel>();
 
-            var watched = m_inventoryWatchRepository.GetWatchedInventories();
-            if (watched.Count == 0)
+            var visibleTabs = m_inventoryWatchRepository.GetVisibleTabs();
+            if (visibleTabs.Count == 0)
             {
                 return result;
             }
@@ -220,14 +229,19 @@ namespace Elsa.App.MaterialLevels.Components
             var aggreagate = new InventoryModel(null)
             {
                 Id = -1,
+                Key = "-1|",
+                InventoryId = -1,
                 Name = "Varování"
             };
 
             result.Add(aggreagate);
 
-            result.AddRange(watched.OrderBy(i => i.CanBeConnectedToTag ? 0 : 1).ThenBy(i => i.Name).Select(i => new InventoryModel(aggreagate)
+            result.AddRange(visibleTabs.Select(i => new InventoryModel(aggreagate)
             {
                 Id = i.Id,
+                Key = i.Key,
+                InventoryId = i.InventoryId,
+                MaterialLevelReportingGroup = i.MaterialLevelReportingGroup,
                 Name = i.Name
             }));
 
@@ -236,21 +250,23 @@ namespace Elsa.App.MaterialLevels.Components
 
         private void LoadWarnings(List<InventoryModel> models)
         {
-            var allUnits = m_unitRepository.GetAllUnits();
+            var allUnits = m_unitRepository.GetAllUnits().ToDictionary(u => u.Id);
 
             m_database.Sql().Call("GetThresholdsState")
                 .WithParam("@projectId", m_session.Project.Id)
                 .WithParam("@userId", m_session.User.Id)
-                .ReadRows<int, int, string, decimal, int, decimal>(
-                    (inventoryId, materialId, materialName, threshodlQty, unitId, available) =>
+                .ReadRows<int, string, int, string, decimal, int, decimal>(
+                    (inventoryId, materialLevelReportingGroup, materialId, materialName, threshodlQty, unitId, available) =>
                     {
-                        var inv = models.FirstOrDefault(m => m.Id == inventoryId);
+                        var normalizedGroup = NormalizeReportingGroup(materialLevelReportingGroup);
+                        var inv = models.FirstOrDefault(m => m.InventoryId == inventoryId
+                                                             && string.Equals(NormalizeReportingGroup(m.MaterialLevelReportingGroup), normalizedGroup, StringComparison.InvariantCultureIgnoreCase));
                         if (inv == null)
                         {
                             return;
                         }
 
-                        var unit = allUnits.FirstOrDefault(u => u.Id == unitId).Ensure();
+                        var unit = allUnits[unitId];
                         inv.AddWarning(materialName, new Amount(available, unit));
                     });
 
@@ -258,6 +274,29 @@ namespace Elsa.App.MaterialLevels.Components
             {
                 m.Close();
             }
+        }
+
+        private static string NormalizeReportingGroup(string materialLevelReportingGroup)
+        {
+            return string.IsNullOrWhiteSpace(materialLevelReportingGroup) ? null : materialLevelReportingGroup.Trim();
+        }
+
+        private void ApplyComment(MaterialLevelEntryModel entry, Dictionary<int, List<EntityComment>> commentsByMaterialId)
+        {
+            if (!commentsByMaterialId.TryGetValue(entry.MaterialId, out var comments))
+            {
+                return;
+            }
+
+            var comment = comments.OrderByDescending(c => c.Id).FirstOrDefault();
+            if (comment == null)
+            {
+                return;
+            }
+
+            entry.CommentDt = comment.PostDt;
+            entry.CommentText = comment.Text;
+            entry.CommentAuthorNick = m_userNickProvider.GetUserNick(comment.Author.Id);
         }
     }
 }

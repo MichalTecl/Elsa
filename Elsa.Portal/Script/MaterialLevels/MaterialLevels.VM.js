@@ -4,7 +4,7 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
 
     var self = this;
 
-    var selectedInventoryId = 0;
+    var selectedTabKey = null;
     var filter = null;
 
     self.isDisabled = false;
@@ -38,6 +38,15 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
     var getBatchSearchLink = function(materialName, batchNumber) {
         return "/UI/Pages/Inventory/WhEvents.html?#findBatches=" +
             encodeURIComponent(JSON.stringify({ "materialName": materialName, "batchNumber": batchNumber }));
+    };
+
+    var getTabQuery = function(tab) {
+        var query = { "inventoryId": tab.InventoryId };
+        if (tab.MaterialLevelReportingGroup) {
+            query.materialLevelReportingGroup = tab.MaterialLevelReportingGroup;
+        }
+
+        return query;
     };
 
     var receiveReport = function (data) {
@@ -95,51 +104,69 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
         lt.notify();
     };
     
-    self.onInventorySelected = function (inventoryId) {
+    var findInventoryTab = function(key) {
+        for (var i = 0; i < self.inventories.length; i++) {
+            if (self.inventories[i].Key === key) {
+                return self.inventories[i];
+            }
+        }
+
+        return null;
+    };
+
+    self.onInventorySelected = function (tabKey) {
 
         self.displaySupplier(null, null);
 
         if (self.inventories.length === 0) {
-            setTimeout(function () { self.onInventorySelected(inventoryId); }, 100);
+            setTimeout(function () { self.onInventorySelected(tabKey); }, 100);
             return;
         }
 
-        if (inventoryId === null || inventoryId === undefined) {
+        if (tabKey === null || tabKey === undefined) {
             for (let i = 0; i < self.inventories.length; i++) {
                 if (self.inventories[i].hasWarning) {
-                    self.onInventorySelected(self.inventories[i].Id);
+                    self.onInventorySelected(self.inventories[i].Key);
                     return;
                 }
             }
 
             for (let i = 0; i < self.inventories.length; i++) {
                 if (self.inventories[i].Id > -1) {
-                    self.onInventorySelected(self.inventories[i].Id);
+                    self.onInventorySelected(self.inventories[i].Key);
                     return;
                 }
             }
 
-            self.onInventorySelected(-1);
+            self.onInventorySelected("-1|");
             return;
         }
         
-        if (selectedInventoryId === inventoryId) {
+        if (selectedTabKey === tabKey) {
+            return;
+        }
+
+        var selectedTab = findInventoryTab(tabKey);
+        if (!selectedTab) {
+            self.onInventorySelected(null);
             return;
         }
 
         self.report = [];
         lt.notify();
 
-        selectedInventoryId = inventoryId;
+        selectedTabKey = tabKey;
     
         for (let i = 0; i < self.inventories.length; i++) {
-            self.inventories[i].isSelected = (self.inventories[i].Id === inventoryId);
+            self.inventories[i].isSelected = (self.inventories[i].Key === tabKey);
             self.inventories[i].isSelectedNu = self.inventories[i].isSelected ? 1 : 0;
         }
 
         lt.notify();
 
-        lt.api("/MaterialAmountReport/getLevels").query({ "inventoryId": inventoryId }).get(function(report) {
+        lt.api("/MaterialAmountReport/getLevels")
+            .query(getTabQuery(selectedTab))
+            .get(function(report) {
             receiveReport(report);
         });
     };
@@ -149,7 +176,7 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
         var theModel = null;
 
         for (var i = 0; i < self.inventories.length; i++) {
-            if (self.inventories[i].Id === inventoryModel.Id) {
+            if (self.inventories[i].Key === inventoryModel.Key) {
                 theModel = self.inventories[i];
                 break;
             }
@@ -222,46 +249,56 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
     setTimeout(loadInventories, 100);
     setTimeout(loadUnwatchedInventories, 500);
 
-    var changeWatchedInventories = function(url, inventoryId) {
+    var changeWatchedInventories = function(url, tab, selectAfterChange) {
         self.report = [];
         self.inventories = [];
         self.unwatchedInventories = [];
-        selectedInventoryId = 0;
+        selectedTabKey = null;
         lt.notify();
 
-        lt.api(url).query({"inventoryId":inventoryId}).get(function (inventories) {
+        lt.api(url)
+            .query(getTabQuery(tab))
+            .get(function (inventories) {
             receiveInventories(inventories);
-            self.onInventorySelected(inventoryId);
+            self.onInventorySelected(selectAfterChange ? tab.Key : null);
             loadUnwatchedInventories();
         });
     };
 
-    self.watchInventory = function (inventoryId) {
-        changeWatchedInventories("/MaterialAmountReport/watchInventory", inventoryId);
+    self.watchInventory = function (tab) {
+        changeWatchedInventories("/MaterialAmountReport/watchInventory", tab, true);
     };
 
-    self.unwatchInventory = function (inventoryId) {
-        changeWatchedInventories("/MaterialAmountReport/unwatchInventory", inventoryId);
+    self.unwatchInventory = function (tab) {
+        changeWatchedInventories("/MaterialAmountReport/unwatchInventory", tab, false);
     };
 
     self.refresh = function() {
         self.report = [];
         lt.notify();
 
-        if (selectedInventoryId === 0) {
+        if (!selectedTabKey) {
             self.onInventorySelected(null);
         }
 
+        var selectedTab = findInventoryTab(selectedTabKey);
+        if (!selectedTab) {
+            self.onInventorySelected(null);
+            return;
+        }
+
         for (let i = 0; i < self.inventories.length; i++) {
-            self.inventories[i].isSelected = (self.inventories[i].Id === selectedInventoryId);
+            self.inventories[i].isSelected = (self.inventories[i].Key === selectedTabKey);
             self.inventories[i].isSelectedNu = self.inventories[i].isSelected ? 1 : 0;
         }
 
         lt.notify();
 
-        lt.api("/MaterialAmountReport/getLevels").query({ "inventoryId": selectedInventoryId }).get(function (report) {
-            receiveReport(report);
-        });
+        lt.api("/MaterialAmountReport/getLevels")
+            .query(getTabQuery(selectedTab))
+            .get(function (report) {
+                receiveReport(report);
+            });
     };
 
     self.setThreshold = function(materialId, thresholdText) {

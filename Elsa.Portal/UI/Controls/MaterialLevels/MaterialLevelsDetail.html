@@ -1,17 +1,17 @@
 <div id="mlUi">
     <div>
         <div class="tabPanelHeadersContainer">
-            <div class="stackLeft" data-bind="itemsSource:inventories" data-key="Id">
-                <div class="lt-template tabControlTabHead matlvlInventoryTabHead" event-bind="click:onTabClick(Id)" data-bind="active-tab:isSelectedNu">
+            <div class="stackLeft" data-bind="itemsSource:inventories" data-key="Key">
+                <div class="lt-template tabControlTabHead matlvlInventoryTabHead" event-bind="click:onTabClick(Key)" data-bind="active-tab:isSelectedNu">
                     <div data-bind="text:Name" class="matlvlInventoryTabHeadName"></div>
                     <div class="matlvlInventoryTabHeadIcons">
                         <div data-bind="text:WarningsCount;class!.hidden:hasWarning" class="matlvlInventoryTabHeadWarning"></div>
-                        <i class="far fa-bell-slash faButton matlvlInventoryTabHeadUnwatch" title="Přestat sledovat" event-bind="click:onUnwatchClick(Id)" data-bind="class.hidden:isAggregation"></i>
+                        <i class="far fa-bell-slash faButton matlvlInventoryTabHeadUnwatch" title="Přestat sledovat" event-bind="click:onUnwatchClick(VM)" data-bind="class.hidden:isAggregation"></i>
                     </div>
                 </div>
             </div>
-            <div class="stackLeft" data-bind="itemsSource:unwatchedInventories" data-key="Id">
-                <div class="lt-template stackLeft matlvlUnwatchedInventoryItem" event-bind="click:onWatchClick(Id)">
+            <div class="stackLeft" data-bind="itemsSource:unwatchedInventories" data-key="Key">
+                <div class="lt-template stackLeft matlvlUnwatchedInventoryItem" event-bind="click:onWatchClick(VM)">
                     <i class="fas fa-plus faButton"></i>
                     <div data-bind="text:Name"></div>
                 </div>
@@ -120,16 +120,16 @@
 
         var self = this;
 
-        this.onTabClick = function(id) {
-            app.MaterialLevels.vm.onInventorySelected(id);
+        this.onTabClick = function(key) {
+            app.MaterialLevels.vm.onInventorySelected(key);
         };
 
-        this.onWatchClick = function(id) {
-            app.MaterialLevels.vm.watchInventory(id);
+        this.onWatchClick = function(tab) {
+            app.MaterialLevels.vm.watchInventory(tab);
         };
 
-        this.onUnwatchClick = function (id) {
-            app.MaterialLevels.vm.unwatchInventory(id);
+        this.onUnwatchClick = function (tab) {
+            app.MaterialLevels.vm.unwatchInventory(tab);
         };
 
         this.onThresholdDeleteClick = function(materialId, materialName) {

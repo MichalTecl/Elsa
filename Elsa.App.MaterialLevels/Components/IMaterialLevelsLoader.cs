@@ -5,7 +5,7 @@ namespace Elsa.App.MaterialLevels.Components
 {
     public interface IMaterialLevelsLoader
     {
-        IEnumerable<MaterialLevelEntryModel> Load(int inventoryId);
+        IEnumerable<MaterialLevelEntryModel> Load(int inventoryId, string materialLevelReportingGroup);
 
         IEnumerable<InventoryModel> GetInventories();
     }

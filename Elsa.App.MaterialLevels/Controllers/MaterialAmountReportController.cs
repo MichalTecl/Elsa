@@ -37,12 +37,12 @@ namespace Elsa.App.MaterialLevels.Controllers
             _orderingRepository = orderingRepository;
         }
 
-        public IEnumerable<MaterialLevelEntryModel> GetLevels(int inventoryId)
+        public IEnumerable<MaterialLevelEntryModel> GetLevels(int inventoryId, string materialLevelReportingGroup)
         {
             if (!HasUserRight(InventoryUserRights.MaterialLevels))
                 return new List<MaterialLevelEntryModel>(0);
 
-            return _levelsLoader.Load(inventoryId);
+            return _levelsLoader.Load(inventoryId, materialLevelReportingGroup);
         }
 
         public IEnumerable<InventoryModel> GetInventories(bool quick)
@@ -58,27 +58,23 @@ namespace Elsa.App.MaterialLevels.Controllers
             if (!HasUserRight(InventoryUserRights.MaterialLevels))
                 return new List<InventoryModel>(0);
 
-            return _inventoryWatchRepository.GetUnwatchedInventories().Select(i => new InventoryModel(null)
-            {
-                Id = i.Id,
-                Name = i.Name
-            });
+            return _inventoryWatchRepository.GetHiddenTabs();
         }
 
-        public IEnumerable<InventoryModel> WatchInventory(int inventoryId)
+        public IEnumerable<InventoryModel> WatchInventory(int inventoryId, string materialLevelReportingGroup)
         {
             EnsureUserRight(InventoryUserRights.MaterialLevels);
 
-            _inventoryWatchRepository.WatchInventory(inventoryId);
+            _inventoryWatchRepository.ShowTab(inventoryId, materialLevelReportingGroup);
 
             return GetInventories(false);
         }
 
-        public IEnumerable<InventoryModel> UnwatchInventory(int inventoryId)
+        public IEnumerable<InventoryModel> UnwatchInventory(int inventoryId, string materialLevelReportingGroup)
         {
             EnsureUserRight(InventoryUserRights.MaterialLevels);
 
-            _inventoryWatchRepository.UnwatchInventory(inventoryId);
+            _inventoryWatchRepository.HideTab(inventoryId, materialLevelReportingGroup);
             return GetInventories(false);
         }
 
