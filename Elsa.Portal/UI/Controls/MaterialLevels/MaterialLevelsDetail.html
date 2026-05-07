@@ -49,11 +49,13 @@
                                 <span class="restricted-MaterialCommentsEdit">
                                     <i class="fas fa-sticky-note matNoteIco matNoteEditButton faButton hidden" event-bind="click:editMaterialNote(VM)"></i>
                                 </span>
-                                <div class="materialNote" data-bind="text:CommentText"></div>
+                                <div class="materialNote" data-bind="text:CommentText;title:CommentText"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="cell5" data-bind="text:TotalFormatted"></div>
+                    <div class="cell5">
+                        <span data-bind="text:TotalFormatted;class.matlvlZeroAmount:IsZeroTotal"></span>
+                    </div>
                     <div class="cell5">
                         <div class="matlvlThresholdCont">
                             <div class="matlvlThresholdView" data-bind="text:ThresholdFormatted"></div>

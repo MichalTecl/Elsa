@@ -161,6 +161,18 @@ div.orderDtView {
     margin-right: 5px;
 }
 
+.materialNoteCont {
+    min-width: 0;
+    max-width: 220px;
+}
+
+.materialNote {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .matLevelsMaterialCell .matNoteIcon {
     opacity: 0.5;
 }
@@ -181,4 +193,8 @@ div.orderDtView {
 
 div.orderDtCell:hover .butSetDeadline {
     display:block;
+}
+
+.matlvlZeroAmount {
+    opacity: 0.6;
 }

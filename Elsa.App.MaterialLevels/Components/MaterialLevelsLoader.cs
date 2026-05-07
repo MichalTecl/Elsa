@@ -136,7 +136,11 @@ namespace Elsa.App.MaterialLevels.Components
                     batch.Amount = new Amount(batch.Value, unitsById[batch.UnitId]);
                 }
 
-                r.Total = m_amountProcessor.Sum(r.Batches.Select(b => b.Amount));
+                r.Total = m_amountProcessor.Sum(r.Batches.Select(b => b.Amount)) ?? new Amount(0, material.NominalUnit);
+                if (r.Threshold != null)
+                {
+                    r.Total = m_amountProcessor.Convert(r.Total, r.Threshold.Unit);
+                }
 
                 if (string.IsNullOrWhiteSpace(r.UnitSymbol))
                 {                    

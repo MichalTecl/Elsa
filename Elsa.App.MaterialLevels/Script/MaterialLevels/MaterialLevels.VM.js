@@ -241,7 +241,7 @@ app.MaterialLevels.VM = app.MaterialLevels.VM || function() {
     };
 
     var loadUnwatchedInventories = function() {
-        lt.api("/MaterialAmountReport/getUnwatchedInventories").get(function(unwa) {
+        lt.api("/MaterialAmountReport/getUnwatchedInventories").silent().get(function(unwa) {
             self.unwatchedInventories = unwa;
         });
     };

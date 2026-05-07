@@ -24,6 +24,8 @@ namespace Elsa.App.MaterialLevels.Components.Model
 
         public string TotalFormatted => Total?.ToString();
 
+        public bool IsZeroTotal => Total?.IsZero == true;
+
         [JsonIgnore]
         public Amount Threshold { get; set; }
 

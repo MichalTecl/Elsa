@@ -110,6 +110,7 @@
   <ItemGroup>
     <Content Include="Script\MaterialLevels\MaterialLevels.VM.js" />
     <Content Include="SQL\20200412-002 CalculateBatchUsages.sql" />
+    <Content Include="SQL\20260506_001_GetMaterialLevelsReport.sql" />
     <Content Include="SQL\20250211_004_GetMaterialLevelsReport.sql" />
     <Content Include="SQL\20241203-001 GetMaterialLevelsReport.sql" />
     <Content Include="SQL\20200501-001 GetMaterialLevelsReport.sql" />
