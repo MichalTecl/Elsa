@@ -1,0 +1,30 @@
+<ElsaBody>
+    <script src="/UI/Controls/Common/TabControl.js"></script>
+
+    <div class="panel w4" id="crmAdministrationTabPanel"></div>
+    <div class="panel w4 hidden" id="crmAdministrationNoAccess">
+        Nemáte oprávnění k žádné části administrace CRM.
+    </div>
+
+    <script>
+        (function () {
+            var tabPanel = document.getElementById("crmAdministrationTabPanel");
+            var noAccessPanel = document.getElementById("crmAdministrationNoAccess");
+            var tabControl = new app.ui.TabControl(tabPanel);
+            var hasVisibleTab = false;
+
+            if (!!window.can && can.EmailSummaryPromptEdit) {
+                tabControl.addTab("Ladění AI sumarizace", "/UI/DistributorsApp/Parts/CrmAdministration/MailSummariserPromptEditorTab.html", null, null, "mailSummaryPromptEdit");
+                hasVisibleTab = true;
+            }
+
+            if (!!window.can && can.EmailSummarySettingsAdmin) {
+                tabControl.addTab("Propojení se schránkami", "/UI/DistributorsApp/Parts/CrmAdministration/MailboxConnectionsTab.html", null, null, "mailboxConnections");
+                hasVisibleTab = true;
+            }
+
+            tabPanel.classList.toggle("hidden", !hasVisibleTab);
+            noAccessPanel.classList.toggle("hidden", hasVisibleTab);
+        })();
+    </script>
+</ElsaBody>

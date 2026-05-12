@@ -11,7 +11,9 @@ namespace Elsa.App.Crm
         public static readonly UserRight DistributorsAppEdits = new UserRight(nameof(DistributorsAppEdits), "Velkoodběratelé - úpravy", DistributorsApp);
         public static readonly UserRight EmailConversationsPreview = new UserRight(nameof(EmailConversationsPreview), "E-mailové konverzace - vidí AI sumarizace", DistributorsApp);
         public static readonly UserRight EmailConversationsFull = new UserRight(nameof(EmailConversationsFull), "E-mailové konverzace - vidí plný text", EmailConversationsPreview);
-        public static readonly UserRight EmailSummaryPromptEdit = new UserRight(nameof(EmailSummaryPromptEdit), "E-mailové konverzace - ladění promptu AI sumarizace", EmailConversationsFull);
-        public static readonly UserRight EmailSummarySettingsAdmin = new UserRight(nameof(EmailSummarySettingsAdmin), "Administrace přístupu do mailu", EmailConversationsFull);
+
+        public static readonly UserRight CrmAdministrator = new UserRight(nameof(CrmAdministrator), "Administrace CRM", DistributorsAppEdits);
+        public static readonly UserRight EmailSummaryPromptEdit = new UserRight(nameof(EmailSummaryPromptEdit), "E-mailové konverzace - ladění promptu AI sumarizace", CrmAdministrator);
+        public static readonly UserRight EmailSummarySettingsAdmin = new UserRight(nameof(EmailSummarySettingsAdmin), "Administrace přístupu do mailu", CrmAdministrator);
     }
 }

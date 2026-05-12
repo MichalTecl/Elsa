@@ -257,7 +257,10 @@
     <Content Include="UI\DistributorsApp\FilterControls\CustomerGroupSelect.html" />
     <Content Include="UI\DistributorsApp\FilterControls\NumberInput.html" />
     <Content Include="UI\DistributorsApp\MailSummariserPromptEditor.VM.js" />
+    <Content Include="UI\DistributorsApp\CrmAdministration.html" />
     <Content Include="UI\DistributorsApp\MailSummariserPromptEditorPage.html" />
+    <Content Include="UI\DistributorsApp\Parts\CrmAdministration\MailSummariserPromptEditorTab.html" />
+    <Content Include="UI\DistributorsApp\Parts\CrmAdministration\MailboxConnectionsTab.html" />
     <Content Include="UI\DistributorsApp\Parts\CustomerTagAssignmentControl.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\ColumnHeadSorterTemplate.html" />
     <Content Include="UI\DistributorsApp\Parts\DistributorGridParts\DynamicColumns\TagsColumnTemplate.html" />
