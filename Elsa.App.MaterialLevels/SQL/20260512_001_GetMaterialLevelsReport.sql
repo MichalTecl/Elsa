@@ -26,6 +26,7 @@ BEGIN
     FROM dbo.Material m
     WHERE m.InventoryId = @inventoryId
       AND m.ProjectId = @projectId
+      AND m.HideDt IS NULL
       AND
       (
             (

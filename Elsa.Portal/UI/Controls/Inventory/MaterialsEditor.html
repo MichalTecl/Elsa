@@ -1,28 +1,57 @@
 <div class="panel w4" id="materialsEditorPanel">
     <div class="panelContent" id="matsUi">
-        <div id="matsSearch" style="display:none">
-            <div class="searchPanel" style="width:100%">
-                <input type="text" id="tbMatsQuery" />
-                <button event-bind="click:search($tbMatsQuery.value)" class="fa fa-search"></button>
+        <div class="materialsListContainer">
+            <div class="materialsToolbar">
+                <button event-bind="click:createNewMaterial" class="addMaterialProductBut restricted-MaterialEdits"><i class="fas fa-plus"></i></button>
+                <input type="text"
+                       lt-name="tbMatsQuery"
+                       class="materialsFilterInput"
+                       placeholder="Hledat materiál nebo skupinu"
+                       event-bind="focus:onFilterFocus(this);keyup:onFilterQueryChanged(this.value);change:onFilterQueryChanged(this.value)" />
             </div>
-        </div>
-        <div class="materialsListContainer">            
-            <button event-bind="click:createNewMaterial" class="addMaterialProductBut restricted-MaterialEdits"><i class="fas fa-plus"></i></button>              
             
+            <div class="materialsOverviewTableHeader">
+                <div>Název</div>
+                <div>Minimální množství</div>
+                <div>Skupina v přehledu zásob</div>
+            </div>
+
             <div id="materialsList" class="listContainer">
 
                 <div lt-name="materialItemTemplate" class="materialItemContainer lt-template">
-                    <div data-bind="class.hidden:editMode;class.hiddenMaterialItem:IsHidden" class="materialItemView showButtonsOnHover simpleListItem">                        
-                        <div data-bind="text:Name" class="materialTitle"></div>
-                        <i class="fas fa-edit faButton" event-bind="click:editMaterial(Id)"></i>
+                    <div data-bind="class.hiddenMaterialItem:IsHidden;class.hidden:filteredOut" class="materialItemView materialsOverviewRow simpleListItem">
+                        <div class="materialOverviewNameCell" event-bind="click:editMaterial(Id)">
+                            <div data-bind="text:Name" class="materialTitle"></div>
+                        </div>
+                        <div class="materialOverviewFieldCell restricted-MaterialEdits">
+                            <input type="text"
+                                   data-bind="value:ThresholdText"
+                                   placeholder="není nastaveno"
+                                   event-bind="change:onThresholdTextChanged(VM, this.value)" />
+                        </div>
+                        <div class="materialOverviewFieldCell restricted-MaterialEdits">
+                            <input type="text"
+                                   data-bind="value:MaterialLevelReportingGroup"
+                                   placeholder="bez skupiny"
+                                   event-bind="change:onReportingGroupChanged(VM, this.value)" />
+                        </div>
+                        <div class="materialOverviewActionCell restricted-MaterialEdits">
+                            <i class="far fa-eye-slash faButton"
+                               data-bind="class.hidden:IsHidden"
+                               event-bind="click:hideMaterial(VM, $event)"></i>
+                            <i class="far fa-eye faButton"
+                               data-bind="class!.hidden:IsHidden"
+                               event-bind="click:unhideMaterial(VM, $event)"></i>
+                        </div>
                     </div>
-                    <div data-bind="class!.hidden:editMode" class="materialEditItem">
+                    <div data-bind="class!.hidden:editMode" class="materialEditOverlay">
+                        <div class="materialEditDialog" event-bind="click:stopEvent($event)">
+                        <div class="materialEditItem">
                         <div class="wikilink">
                             <a href="https://github.com/MichalTecl/Elsa/wiki/Materi%C3%A1l#nastaven%C3%AD-materi%C3%A1l%C5%AF-editor" target="_blank"></a>
                         </div>
 
-                        <i class="fas fa-cube"></i>
-                        <input data-bind="value:Name" event-bind="change:updateModelName(this.value, VM)" />
+                        <input class="materialNameInput" data-bind="value:Name" event-bind="change:updateModelName(this.value, VM)" />
                         
                         <div class="materialEditContainer">
                             <div class="containsTitleContainer containsTitle">
@@ -191,6 +220,8 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
+                        </div>
                     </div>
 
                 </div>
@@ -202,7 +233,7 @@
 </div>
 
 <script>
-    lt.element("materialsEditorPanel").withModel("app.virtualProductsEditor.vm").attach(function (materialsList, materialItemTemplate) {
+    lt.element("materialsEditorPanel").withModel("app.virtualProductsEditor.vm").attach(function (materialsList, materialItemTemplate, tbMatsQuery) {
         
         var materialItemController = function (materialEditPlaceholder, tbNominalAmount, lblNominalLeft, lblNominalRight) {
             app.ui.MaterialList.renderTo(materialEditPlaceholder);
@@ -223,21 +254,81 @@
                 .currentMaterialInventoryCanBeNull();
         };
 
-        this.bind(function (selectedMaterials) {
+        var materialsQuery = "";
+        var currentMaterials = [];
+        var filterTimeout = null;
 
+        var normalizeSearchText = function(inp) {
+            if (!inp) {
+                return "";
+            }
+
+            return inp.toLowerCase()
+                .replace(/á/g, "a")
+                .replace(/[čć]/g, "c")
+                .replace(/ď/g, "d")
+                .replace(/[ěéèêë]/g, "e")
+                .replace(/[íìîï]/g, "i")
+                .replace(/ň/g, "n")
+                .replace(/[óòôö]/g, "o")
+                .replace(/ř/g, "r")
+                .replace(/š/g, "s")
+                .replace(/ť/g, "t")
+                .replace(/[ůúùûü]/g, "u")
+                .replace(/[ýÿ]/g, "y")
+                .replace(/ž/g, "z")
+                .replace(/[^a-z0-9]/g, "");
+        };
+
+        var applyFilter = function() {
+            var normalizedQuery = normalizeSearchText((materialsQuery || "").trim());
+            for (var i = 0; i < currentMaterials.length; i++) {
+                var vm = currentMaterials[i];
+                vm.filteredOut = !!normalizedQuery && ((vm.searchTag || "").indexOf(normalizedQuery) === -1);
+            }
+
+            lt.notify(this);
+        };
+
+        this.bind(function (selectedMaterials) {
+            currentMaterials = selectedMaterials || [];
             lt.generate(materialsList,
                 materialItemTemplate,
-                selectedMaterials,
-                function (m) { return m.Id; },
+                currentMaterials,
+                function (m) { return m.Id || ("new_" + (m.rbGroupAction || "")); },
                 materialItemController);
+            applyFilter();
         });
 
         this.search = function (query) {
-            ;
+            materialsQuery = query || "";
+            applyFilter();
+        };
+
+        this.onFilterQueryChanged = function(query) {
+            materialsQuery = query || "";
+            if (!!filterTimeout) {
+                clearTimeout(filterTimeout);
+            }
+
+            filterTimeout = setTimeout(function() {
+                filterTimeout = null;
+                applyFilter();
+            }, 150);
+        };
+
+        this.onFilterFocus = function(input) {
+            setTimeout(function() { input.select(); }, 0);
         };
 
         this.editMaterial = function (id) {
             app.virtualProductsEditor.vm.setMaterialEdit(id);
+        };
+
+        this.stopEvent = function(e) {
+            if (!!e && !!e.stopPropagation) {
+                e.stopPropagation();
+            }
         };
 
         this.createNewMaterial = function () {
@@ -255,6 +346,8 @@
 
         this.updateModelName = function (newName, model) {
             model.Name = newName;
+            app.virtualProductsEditor.vm.updateMaterialSearchTag(model);
+            applyFilter();
             lt.notify(this);
         };
 
@@ -296,6 +389,21 @@
             lt.notify();
         };
 
+        this.onThresholdTextChanged = function(model, thresholdText) {
+            model.ThresholdText = thresholdText;
+            model.HasThreshold = !!(thresholdText && thresholdText.toString().trim());
+            lt.notify(this);
+            app.virtualProductsEditor.vm.saveMaterial(model);
+        };
+
+        this.onReportingGroupChanged = function(model, groupName) {
+            model.MaterialLevelReportingGroup = groupName;
+            app.virtualProductsEditor.vm.updateMaterialSearchTag(model);
+            applyFilter();
+            lt.notify(this);
+            app.virtualProductsEditor.vm.saveMaterial(model);
+        };
+
         this.onAbandonedPolicyChanged = function (
             model,
             detectAbandoned,
@@ -322,7 +430,13 @@
             lt.notify();
         };
 
-        this.hideMaterial = function (model) { app.virtualProductsEditor.vm.hideMaterial(model.Id); };
-        this.unhideMaterial = function (model) { app.virtualProductsEditor.vm.unhideMaterial(model.Id); };
+        this.hideMaterial = function (model, e) {
+            this.stopEvent(e);
+            app.virtualProductsEditor.vm.hideMaterial(model.Id);
+        };
+        this.unhideMaterial = function (model, e) {
+            this.stopEvent(e);
+            app.virtualProductsEditor.vm.unhideMaterial(model.Id);
+        };
     });
 </script>

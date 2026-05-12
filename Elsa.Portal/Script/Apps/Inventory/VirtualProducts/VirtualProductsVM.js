@@ -14,6 +14,56 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
 
     var materialInventories = null;
     var matInventoriesCallbacks = [];
+    var editedMaterialIndex = -1;
+    var editedMaterialBackup = null;
+
+    var cloneMaterial = function(material) {
+        return JSON.parse(JSON.stringify(material));
+    };
+
+    var replacements = {
+        "á": "a",
+        "č": "c",
+        "ď": "d",
+        "ě": "e",
+        "é": "e",
+        "í": "i",
+        "ň": "n",
+        "ó": "o",
+        "ř": "r",
+        "š": "s",
+        "ť": "t",
+        "ů": "u",
+        "ú": "u",
+        "ý": "y",
+        "ž": "z"
+    };
+
+    var normalizeSearchText = function(inp) {
+        if (!inp) {
+            return "";
+        }
+
+        inp = inp.toLowerCase();
+
+        var result = [];
+        for (var i = 0; i < inp.length; i++) {
+            var ch = replacements[inp.charAt(i)] || inp.charAt(i);
+            if ((ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9")) {
+                result.push(ch);
+            }
+        }
+
+        return result.join("");
+    };
+
+    var updateMaterialSearchTag = function(mat) {
+        if (!mat) {
+            return;
+        }
+
+        mat.searchTag = normalizeSearchText((mat.Name || "") + " " + (mat.MaterialLevelReportingGroup || ""));
+    };
 
     var setupAbandonedBatchesStuff = function (mat) {
 
@@ -42,6 +92,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
     var adjustServerMaterial = function(mat) {
 
         mat.editMode = false;
+        mat.filteredOut = false;
 
         var materials = [];
         
@@ -50,6 +101,7 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         mat.nominalAmountText = mat.NominalAmount + mat.NominalUnit.Symbol;
 
         setupAbandonedBatchesStuff(mat);
+        updateMaterialSearchTag(mat);
 
         var inventory = materialInventories.find(i => i.Id == mat.InventoryId);
         if (!!inventory) {
@@ -59,6 +111,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
             console.error("Missing inventories info");
         }
     };
+
+    self.updateMaterialSearchTag = updateMaterialSearchTag;
 
     var receiveMaterials = function (mats) {
 
@@ -267,15 +321,15 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
 
         for (var i = 0; i < self.selectedMaterials.length; i++) {
-
-            if (!!self.selectedMaterials[i].editMode) {
-                lt.api("/virtualProducts/getMaterialById")
-                    .query({ "id": self.selectedMaterials[i].Id })
-                    .get(receiveSingleMaterial);
+            if (!!self.selectedMaterials[i].editMode && editedMaterialBackup && i === editedMaterialIndex) {
+                self.selectedMaterials[i] = editedMaterialBackup;
             }
 
             self.selectedMaterials[i].editMode = false;
         }
+
+        editedMaterialIndex = -1;
+        editedMaterialBackup = null;
 
         if (!doNotNotify) {
             lt.notify();
@@ -289,6 +343,8 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         var found = false;
         for (var i = 0; i < self.selectedMaterials.length; i++) {
             if (self.selectedMaterials[i].Id === id) {
+                editedMaterialIndex = i;
+                editedMaterialBackup = cloneMaterial(self.selectedMaterials[i]);
                 self.selectedMaterials[i].editMode = true;
                 found = true;
                 break;
@@ -296,8 +352,10 @@ app.virtualProductsEditor.ViewModel = app.virtualProductsEditor.ViewModel || fun
         }
 
         if (!found) {
+            editedMaterialIndex = 0;
+            editedMaterialBackup = null;
 
-            var newMat = { editMode: true, materials: [], RequiresPrice: self.currentMaterialInventory.RequirePriceDefault || false, RequiresInvoice: self.currentMaterialInventory.RequireInvoicesDefault };
+            var newMat = { editMode: true, filteredOut: false, materials: [], RequiresPrice: self.currentMaterialInventory.RequirePriceDefault || false, RequiresInvoice: self.currentMaterialInventory.RequireInvoicesDefault };
             if (self.currentMaterialInventory.AllowedUnit) {
                 newMat.nominalAmountText = "1" + self.currentMaterialInventory.AllowedUnit.Symbol;
             }

@@ -176,9 +176,86 @@ div.containsTitleContainer > input {
     width: 620px;
 }
 
-    .materialEditItem > input {
-        min-width: 595px !important;
+.materialEditOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 45, 0.45);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 2000;
+    padding: 24px;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+.materialEditDialog {
+    background: #fff;
+    border: 1px solid #d7dfeb;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+    width: min(760px, calc(100vw - 48px));
+    max-width: calc(100vw - 48px);
+    margin: 0 auto;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+.materialEditDialog .materialEditItem {
+    margin-top: 0;
+    margin-bottom: 0;
+    border: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.materialEditDialog .materialEditItem > input {
+    min-width: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
+
+.materialEditDialog .materialEditItem > input.materialNameInput,
+.materialEditDialog .materialNameInput {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    display: block !important;
+    box-sizing: border-box !important;
+}
+
+.materialEditDialog .materialEditContainer,
+.materialEditDialog .materialEditFlags,
+.materialEditDialog .itemEditFooter {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.materialEditDialog .thresholdContainer > input,
+.materialEditDialog .materialLevelReportingGroupContainer input,
+.materialEditDialog .orderFulfillDaysContainer input {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.materialEditDialog .itemEditFooter {
+    padding-bottom: 4px;
+}
+
+@media (max-width: 820px) {
+    .materialEditOverlay {
+        padding: 12px;
     }
+
+    .materialEditDialog {
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+    }
+
+    .materialEditDialog .materialEditItem {
+        padding: 12px;
+    }
+}
 
     .materialEditItem > div.itemEditFoot > i {
         position: absolute;
@@ -194,31 +271,86 @@ div.containsTitleContainer > input {
     margin-bottom: 10px;
 }
 
-.showButtonsOnHover {
+.materialsToolbar {
     display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
 }
 
-    .showButtonsOnHover > .faButton {
-        display: none;
-    }
+.materialsFilterInput {
+    width: 320px;
+    max-width: 100%;
+    margin-bottom: 0 !important;
+}
 
-    .showButtonsOnHover:hover > .faButton {
-        display: block;
-        margin-left: 5px;
-    }
+.materialsOverviewTableHeader,
+.materialsOverviewRow {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) minmax(180px, 1fr) minmax(220px, 1.4fr) 32px;
+    column-gap: 12px;
+    align-items: center;
+}
+
+.materialsOverviewTableHeader {
+    padding: 8px 10px;
+    font-size: 0.85em;
+    font-weight: bold;
+    color: #5d6b83;
+    background: linear-gradient(180deg, #f7f9fc 0%, #eef3f8 100%);
+    border: 1px solid #dde6f0;
+    border-bottom: none;
+}
 
 .simpleListItem {
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding: 10px;
 }
 
     .simpleListItem:hover {
-        background-color: #efefff;
+        background-color: #f5f8fc;
     }
 
 .listContainer {
-    margin-top: 8px;
-    border-top: 1px solid #eeeeef;
+    border: 1px solid #dde6f0;
+    overflow: hidden;
+}
+
+.materialItemContainer + .materialItemContainer .materialsOverviewRow {
+    border-top: 1px solid #edf1f6;
+}
+
+.materialOverviewNameCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.materialOverviewNameCell .materialTitle {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.materialOverviewFieldCell input {
+    width: 100%;
+    margin-bottom: 0 !important;
+}
+
+.materialOverviewActionCell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.materialOverviewActionCell .faButton {
+    cursor: pointer;
+}
+
+.materialsOverviewRow input {
+    cursor: text;
 }
 
 body, html {
