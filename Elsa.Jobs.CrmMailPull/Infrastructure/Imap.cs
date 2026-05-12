@@ -10,8 +10,13 @@ using System.Linq;
 
 namespace Elsa.Jobs.CrmMailPull.Infrastructure
 {
-    internal static class Imap
+    public static class Imap
     {
+        public static List<RemoteFolderInfo> TestConnectionAndGetFolders(IMailPullSource source)
+        {
+            return PerformConnected(source, client => client.GetAllFolders());
+        }
+
         public static T PerformConnected<T>(IMailPullSource source, Func<IImapClient, T> action)
         {
             using (var client = new ImapClient())

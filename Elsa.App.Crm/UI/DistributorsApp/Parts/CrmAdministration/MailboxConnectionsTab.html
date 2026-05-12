@@ -1,3 +1,112 @@
-<div class="panelContent">
-    TODO
+<script src="/UI/DistributorsApp/MailboxAdministration.VM.js"></script>
+<div id="crmMailboxAdminRoot" class="crmMailboxAdminRoot">
+    <div class="crmMailboxAdminToolbar">
+        <button type="button" event-bind="click:addSource()">Nové propojení</button>
+    </div>
+
+    <div class="crmMailboxAdminLoading hidden" data-bind="class!.hidden:isLoading">Načítám...</div>
+
+    <div class="crmMailboxAdminTable">
+        <div class="crmMailboxAdminHeadRow">
+            <div></div>
+            <div>Host</div>
+            <div>Port</div>
+            <div>SSL</div>
+            <div>Uživatel</div>
+            <div>Heslo</div>
+            <div>Povoleno</div>
+            <div>Stav</div>
+            <div></div>
+        </div>
+
+        <div data-bind="itemsSource:sources" data-key="RowKey">
+            <div class="lt-template crmMailboxAdminSourceBlock">
+                <div class="crmMailboxAdminDataRow">
+                    <div class="crmMailboxAdminExpander">
+                        <i data-bind="class.hidden:isExpanded" class="far fa-plus-square faButton" event-bind="click:toggleExpanded(VM)"></i>
+                        <i data-bind="class!.hidden:isExpanded" class="far fa-minus-square faButton hidden" event-bind="click:toggleExpanded(VM)"></i>
+                    </div>
+                    <div>
+                        <input type="text" data-bind="value:Host" event-bind="input:updateSourceText(VM, 'Host', this.value)" />
+                    </div>
+                    <div>
+                        <input type="number" data-bind="value:Port" event-bind="input:updateSourceText(VM, 'Port', this.value)" />
+                    </div>
+                    <div class="crmMailboxAdminCentered">
+                        <input type="checkbox" data-bind="checked:UseSsl" event-bind="change:updateSourceBool(VM, 'UseSsl', this.checked)" />
+                    </div>
+                    <div>
+                        <input type="text" data-bind="value:Username" event-bind="input:updateSourceText(VM, 'Username', this.value)" />
+                    </div>
+                    <div>
+                        <input type="password" placeholder="Zadat nové heslo" event-bind="input:updateSourceText(VM, 'password', this.value)" />
+                    </div>
+                    <div class="crmMailboxAdminCentered">
+                        <input type="checkbox" data-bind="checked:IsEnabled" event-bind="change:updateSourceBool(VM, 'IsEnabled', this.checked)" />
+                    </div>
+                    <div>
+                        <div data-bind="class.hidden:hasPassword" class="crmMailboxAdminSourceState">Bez hesla</div>
+                        <div data-bind="class!.hidden:hasPassword" class="crmMailboxAdminSourceState hidden">Heslo uloženo</div>
+                    </div>
+                    <div class="crmMailboxAdminActions">
+                        <button type="button" class="crmMailboxAdminSaveButton hidden" data-bind="class!.hidden:isDirty" event-bind="click:saveSource(VM)" title="Uložit">
+                            <i class="fas fa-save"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="crmMailboxAdminFoldersWrap hidden" data-bind="class!.hidden:isExpanded">
+                    <div class="crmMailboxAdminFoldersEmpty" data-bind="class.hidden:hasFolders">Zatím nejsou načtené žádné složky. Doplní se po prvním nočním jobu.</div>
+
+                    <div class="crmMailboxAdminFoldersTable hidden" data-bind="class!.hidden:hasFolders">
+                        <div class="crmMailboxAdminFolderHeadRow">
+                            <div>Název</div>
+                            <div>Plný název složky</div>
+                            <div>UID validity</div>
+                            <div>Povoleno</div>
+                        </div>
+
+                        <div data-bind="itemsSource:folders" data-key="Id">
+                            <div class="lt-template crmMailboxAdminFolderRow">
+                                <div data-bind="text:Name"></div>
+                                <div data-bind="text:FolderFullName"></div>
+                                <div data-bind="text:UidValidity"></div>
+                                <div class="crmMailboxAdminCentered">
+                                    <input type="checkbox" data-bind="checked:IsEnabled" event-bind="change:saveFolderEnabled(VM, this.checked)" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script>
+    lt.element("crmMailboxAdminRoot").withModel("app.CrmMailboxAdministration.vm").attach(function () {
+        this.addSource = function () {
+            app.CrmMailboxAdministration.vm.addSource();
+        };
+
+        this.toggleExpanded = function (source) {
+            app.CrmMailboxAdministration.vm.toggleExpanded(source);
+        };
+
+        this.updateSourceText = function (source, field, value) {
+            app.CrmMailboxAdministration.vm.updateSourceText(source, field, value);
+        };
+
+        this.updateSourceBool = function (source, field, value) {
+            app.CrmMailboxAdministration.vm.updateSourceBool(source, field, value);
+        };
+
+        this.saveSource = function (source) {
+            app.CrmMailboxAdministration.vm.saveSource(source);
+        };
+
+        this.saveFolderEnabled = function (folder, isEnabled) {
+            app.CrmMailboxAdministration.vm.saveFolderEnabled(folder, isEnabled);
+        };
+    });
+</script>
+<link href="/UI/DistributorsApp/Css/MailboxAdministration.css" rel="stylesheet" />

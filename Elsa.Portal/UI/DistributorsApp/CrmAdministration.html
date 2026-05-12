@@ -14,12 +14,12 @@
             var hasVisibleTab = false;
 
             if (!!window.can && can.EmailSummaryPromptEdit) {
-                tabControl.addTab("Ladění AI sumarizace", "/UI/DistributorsApp/Parts/CrmAdministration/MailSummariserPromptEditorTab.html", null, null, "mailSummaryPromptEdit");
+                tabControl.addTab("<i class='fas fa-flask'></i> Ladění AI sumarizace", "/UI/DistributorsApp/Parts/CrmAdministration/MailSummariserPromptEditorTab.html", null, null, "mailSummaryPromptEdit");
                 hasVisibleTab = true;
             }
 
             if (!!window.can && can.EmailSummarySettingsAdmin) {
-                tabControl.addTab("Propojení se schránkami", "/UI/DistributorsApp/Parts/CrmAdministration/MailboxConnectionsTab.html", null, null, "mailboxConnections");
+                tabControl.addTab("<i class='fas fa-envelope-open-text'></i> Propojení se schránkami", "/UI/DistributorsApp/Parts/CrmAdministration/MailboxConnectionsTab.html", null, null, "mailboxConnections");
                 hasVisibleTab = true;
             }
 

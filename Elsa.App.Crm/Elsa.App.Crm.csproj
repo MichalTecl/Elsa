@@ -57,6 +57,7 @@
     <Compile Include="Controllers\CrmDynamicColumnsController.cs" />
     <Compile Include="Controllers\CrmMeetingsController.cs" />
     <Compile Include="Controllers\CrmMetadataController.cs" />
+    <Compile Include="Controllers\CrmMailboxAdministrationController.cs" />
     <Compile Include="Controllers\CrmRobotsController.cs" />
     <Compile Include="Controllers\MailSumPromptEditorController.cs" />
     <Compile Include="Controllers\CustomerTagAssignmentController.cs" />
@@ -242,6 +243,8 @@
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
     <Content Include="UI\DistributorsApp\CrmRobots.VM.js" />
+    <Content Include="UI\DistributorsApp\MailboxAdministration.VM.js" />
+    <Content Include="UI\DistributorsApp\Css\MailboxAdministration.css" />
     <Content Include="UI\DistributorsApp\Css\MailSummariserPromptEditor.css" />
     <Content Include="UI\DistributorsApp\Css\CustomerTagAssignmentControl.css" />
     <Content Include="UI\DistributorsApp\Css\CustomerTaggingDesigner_main.css" />
