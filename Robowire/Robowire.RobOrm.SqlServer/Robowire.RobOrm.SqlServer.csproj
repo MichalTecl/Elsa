@@ -49,7 +49,12 @@
     <Compile Include="HierarchicSqlDataReader.cs" />
     <Compile Include="ISqlConnectionStringProvider.cs" />
     <Compile Include="Migration\MigrationCustomizer.cs" />
+    <Compile Include="Migration\ProceduralMigrationFeatures.cs" />
     <Compile Include="Migration\ScriptsMigrator.cs" />
+    <Compile Include="Migration\SchemaMigrationProceduresInstaller.cs" />
+    <Compile Include="Migration\SqlConsoleLogging.cs" />
+    <Compile Include="Migration\SqlBatchReader.cs" />
+    <Compile Include="Migration\StoredProcedureMigrationScriptBuilder.cs" />
     <Compile Include="Migration\SqlMigrationScriptBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pure\SqlCommandBuilder.cs" />
@@ -59,6 +64,9 @@
     <Compile Include="Transaction\ISqlTransaction.cs" />
     <Compile Include="Transaction\SqlTransaction.cs" />
     <Compile Include="Transaction\SqlTransactionManagerBase.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migration\RobOrmSchemaMigrationProcedures.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CodeGeneration\CodeGeneration.csproj">

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
@@ -11,7 +11,7 @@ namespace Robowire.RobOrm.SqlServer.Migration
 {
     internal class ScriptsMigrator
     {
-        private const string c_historyQuery = @"SELECT rsl.ScriptName, rsl.FileHash
+        private const string HISTORY_QUERY = @"SELECT rsl.ScriptName, rsl.FileHash
   FROM Roborm_Scripts_Log rsl
   JOIN (SELECT s.ScriptName, MAX(s.RunDt) LastRun
            FROM Roborm_Scripts_Log s
@@ -21,12 +21,16 @@ namespace Robowire.RobOrm.SqlServer.Migration
         {
             if (!Directory.Exists(scriptsFolder))
             {
+                Console.WriteLine($"[RobOrm] SQL scripts folder '{scriptsFolder}' does not exist");
                 return;
             }
+
+            Console.WriteLine($"[RobOrm] Checking SQL scripts in '{scriptsFolder}'");
 
             using (var conn = sql.OpenUnmanagedConnection())
             {
                 conn.Open();
+                SqlConsoleLogging.Attach(conn, "extra-scripts-bootstrap");
 
                 EnsureScriptTable(conn);
             }
@@ -37,7 +41,12 @@ namespace Robowire.RobOrm.SqlServer.Migration
             {
                 if (RunScript(Path.Combine(scriptsFolder, file), lastHashes, sql))
                 {
+                    Console.WriteLine($"[RobOrm] Script '{file}' changed and was executed");
                     lastHashes.Clear();
+                }
+                else
+                {
+                    Console.WriteLine($"[RobOrm] Script '{file}' unchanged");
                 }
             }
         }
@@ -65,6 +74,8 @@ namespace Robowire.RobOrm.SqlServer.Migration
                         using (var conn = sql.OpenUnmanagedConnection())
                         {
                             conn.Open();
+                            SqlConsoleLogging.Attach(conn, $"extra-script:{scriptFileName}");
+                            Console.WriteLine($"[RobOrm] Executing SQL script '{scriptFileName}'");
 
                             foreach (var partialScript in GetScripts(reader))
                             {
@@ -107,7 +118,7 @@ namespace Robowire.RobOrm.SqlServer.Migration
             using (var connection = tm.OpenUnmanagedConnection())
             {
                 connection.Open();
-                using (var cmd = new SqlCommand(c_historyQuery, connection))
+                using (var cmd = new SqlCommand(HISTORY_QUERY, connection))
                 {
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -124,41 +135,7 @@ namespace Robowire.RobOrm.SqlServer.Migration
 
         private static IEnumerable<string> GetScripts(StreamReader scriptFile)
         {
-            var sb = new StringBuilder();
-            while (!scriptFile.EndOfStream)
-            {
-                var line = scriptFile.ReadLine();
-
-                if (line?.Trim().TrimEnd(';').Equals("go", StringComparison.InvariantCultureIgnoreCase) == true)
-                {
-                    if (PopSegment(out var segment))
-                    {
-                        yield return segment;
-                    }
-                    
-                    continue;
-                }
-
-                sb.AppendLine(line);
-            }
-
-            if (PopSegment(out var final))
-            {
-                yield return final;
-            }
-
-            bool PopSegment(out string segment)
-            {
-                segment = sb.ToString().Trim();
-                sb.Clear();
-
-                if (string.IsNullOrWhiteSpace(segment))
-                {
-                    return false;
-                }
-
-                return true;
-            }
+            return SqlBatchReader.GetBatches(scriptFile);
         }
     }
 }
