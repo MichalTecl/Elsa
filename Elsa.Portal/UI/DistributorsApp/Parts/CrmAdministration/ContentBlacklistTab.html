@@ -1,0 +1,56 @@
+<div id="crmContentRulesRoot" class="crmMailRulesRoot">
+    <div class="crmMailRulesLegend">Filtr na klíčová slova těla nebo předmětu e-mailu. Pokud e-mail obsahuje obě (nebo jen jednu, pokud druhá není nastavena) části pravidla, pro sumarizaci konverzací se nepoužívá.</div>
+    <div class="crmMailRulesToolbar">
+        <button type="button" event-bind="click:addRow()">Nové pravidlo</button>
+    </div>
+    <div class="crmMailRulesLoading hidden" data-bind="class!.hidden:isLoading">Načítám...</div>
+    <div class="crmMailRulesTable">
+        <div class="crmMailRulesHeadRow crmMailRulesContentCols">
+            <div>Filtr předmětu</div>
+            <div>Filtr těla</div>
+            <div></div>
+            <div></div>
+        </div>
+        <div data-bind="itemsSource:rows" data-key="RowKey">
+            <div class="lt-template crmMailRulesDataRow crmMailRulesContentCols">
+                <div>
+                    <input type="text" data-bind="value:SubjectPattern" event-bind="input:updateField(VM, 'SubjectPattern', this.value)" />
+                </div>
+                <div>
+                    <input type="text" data-bind="value:BodyPattern" event-bind="input:updateField(VM, 'BodyPattern', this.value)" />
+                </div>
+                <div class="crmMailRulesActions">
+                    <button type="button" class="crmMailRulesSaveButton hidden" data-bind="class!.hidden:isDirty" event-bind="click:saveRow(VM)" title="Uložit">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+                <div class="crmMailRulesActions">
+                    <button type="button" event-bind="click:deleteRow(VM)" title="Smazat">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    app = app || {};
+    app.CrmMailFilterRules = app.CrmMailFilterRules || {};
+
+    app.CrmMailFilterRules.contentVm = app.CrmMailFilterRules.contentVm || app.CrmMailFilterRules.createListVm({
+        loadUrl: "/CrmMailFilterRules/GetContentRules",
+        saveUrl: "/CrmMailFilterRules/SaveContentRule",
+        deleteUrl: "/CrmMailFilterRules/DeleteContentRule",
+        emptyRowFactory: function () { return { Id: null, SubjectPattern: "", BodyPattern: "" }; },
+        snapshot: function (row) { return { SubjectPattern: row.SubjectPattern || "", BodyPattern: row.BodyPattern || "" }; },
+        toPayload: function (row) { return { Id: row.Id || 0, SubjectPattern: row.SubjectPattern || "", BodyPattern: row.BodyPattern || "" }; }
+    });
+
+    lt.element("crmContentRulesRoot").withModel("app.CrmMailFilterRules.contentVm").attach(function () {
+        this.addRow = function () { app.CrmMailFilterRules.contentVm.addRow(); };
+        this.updateField = function (row, field, value) { app.CrmMailFilterRules.contentVm.updateField(row, field, value); };
+        this.saveRow = function (row) { app.CrmMailFilterRules.contentVm.saveRow(row); };
+        this.deleteRow = function (row) { app.CrmMailFilterRules.contentVm.deleteRow(row); };
+    });
+</script>
+<link href="/UI/DistributorsApp/Css/MailFilterRules.css" rel="stylesheet" />

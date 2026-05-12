@@ -1,0 +1,52 @@
+<div id="crmAddressRulesRoot" class="crmMailRulesRoot">
+    <div class="crmMailRulesLegend">Filtr adres, které jsou považovány v konverzacích jako nerelevantní. Možno použít hvězdičku jako wildcard</div>
+    <div class="crmMailRulesToolbar">
+        <button type="button" event-bind="click:addRow()">Nové pravidlo</button>
+    </div>
+    <div class="crmMailRulesLoading hidden" data-bind="class!.hidden:isLoading">Načítám...</div>
+    <div class="crmMailRulesTable">
+        <div class="crmMailRulesHeadRow crmMailRulesAddressCols">
+            <div>Filtr adresy</div>
+            <div></div>
+            <div></div>
+        </div>
+        <div data-bind="itemsSource:rows" data-key="RowKey">
+            <div class="lt-template crmMailRulesDataRow crmMailRulesAddressCols">
+                <div>
+                    <input type="text" data-bind="value:Pattern" event-bind="input:updateField(VM, 'Pattern', this.value)" />
+                </div>
+                <div class="crmMailRulesActions">
+                    <button type="button" class="crmMailRulesSaveButton hidden" data-bind="class!.hidden:isDirty" event-bind="click:saveRow(VM)" title="Uložit">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+                <div class="crmMailRulesActions">
+                    <button type="button" event-bind="click:deleteRow(VM)" title="Smazat">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    app = app || {};
+    app.CrmMailFilterRules = app.CrmMailFilterRules || {};
+
+    app.CrmMailFilterRules.addressVm = app.CrmMailFilterRules.addressVm || app.CrmMailFilterRules.createListVm({
+        loadUrl: "/CrmMailFilterRules/GetAddressRules",
+        saveUrl: "/CrmMailFilterRules/SaveAddressRule",
+        deleteUrl: "/CrmMailFilterRules/DeleteAddressRule",
+        emptyRowFactory: function () { return { Id: null, Pattern: "" }; },
+        snapshot: function (row) { return { Pattern: row.Pattern || "" }; },
+        toPayload: function (row) { return { Id: row.Id || 0, Pattern: row.Pattern || "" }; }
+    });
+
+    lt.element("crmAddressRulesRoot").withModel("app.CrmMailFilterRules.addressVm").attach(function () {
+        this.addRow = function () { app.CrmMailFilterRules.addressVm.addRow(); };
+        this.updateField = function (row, field, value) { app.CrmMailFilterRules.addressVm.updateField(row, field, value); };
+        this.saveRow = function (row) { app.CrmMailFilterRules.addressVm.saveRow(row); };
+        this.deleteRow = function (row) { app.CrmMailFilterRules.addressVm.deleteRow(row); };
+    });
+</script>
+<link href="/UI/DistributorsApp/Css/MailFilterRules.css" rel="stylesheet" />

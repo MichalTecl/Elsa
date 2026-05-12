@@ -1,5 +1,6 @@
 <ElsaBody>
     <script src="/UI/Controls/Common/TabControl.js"></script>
+    <script src="/UI/DistributorsApp/MailFilterRules.VM.js"></script>
 
     <div class="panel w4" id="crmAdministrationTabPanel"></div>
     <div class="panel w4 hidden" id="crmAdministrationNoAccess">
@@ -20,6 +21,12 @@
 
             if (!!window.can && can.EmailSummarySettingsAdmin) {
                 tabControl.addTab("<i class='fas fa-envelope-open-text'></i> Propojení se schránkami", "/UI/DistributorsApp/Parts/CrmAdministration/MailboxConnectionsTab.html", null, null, "mailboxConnections");
+                hasVisibleTab = true;
+            }
+
+            if (!!window.can && can.MailPullRulesAdmin) {
+                tabControl.addTab("<i class='fas fa-at'></i> Blacklist adres", "/UI/DistributorsApp/Parts/CrmAdministration/AddressBlacklistTab.html", null, null, "addressBlacklist");
+                tabControl.addTab("<i class='fas fa-filter'></i> Blacklist obsahu", "/UI/DistributorsApp/Parts/CrmAdministration/ContentBlacklistTab.html", null, null, "contentBlacklist");
                 hasVisibleTab = true;
             }
 

@@ -15,5 +15,6 @@ namespace Elsa.App.Crm
         public static readonly UserRight CrmAdministrator = new UserRight(nameof(CrmAdministrator), "Administrace CRM", DistributorsAppEdits);
         public static readonly UserRight EmailSummaryPromptEdit = new UserRight(nameof(EmailSummaryPromptEdit), "E-mailové konverzace - ladění promptu AI sumarizace", CrmAdministrator);
         public static readonly UserRight EmailSummarySettingsAdmin = new UserRight(nameof(EmailSummarySettingsAdmin), "Administrace přístupu do mailu", CrmAdministrator);
+        public static readonly UserRight MailPullRulesAdmin = new UserRight(nameof(MailPullRulesAdmin), "Správa blacklistů a pravidel", CrmAdministrator);
     }
 }

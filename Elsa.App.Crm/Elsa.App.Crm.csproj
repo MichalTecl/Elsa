@@ -55,6 +55,7 @@
     <Compile Include="Controllers\CrmCustomFiltersController.cs" />
     <Compile Include="Controllers\CrmDistributorsController.cs" />
     <Compile Include="Controllers\CrmDynamicColumnsController.cs" />
+    <Compile Include="Controllers\CrmMailFilterRulesController.cs" />
     <Compile Include="Controllers\CrmMeetingsController.cs" />
     <Compile Include="Controllers\CrmMetadataController.cs" />
     <Compile Include="Controllers\CrmMailboxAdministrationController.cs" />
@@ -243,7 +244,9 @@
     <Content Include="UI\CrmReporting\CrmReporting.vm.js" />
     <Content Include="UI\CrmReporting\CrmWidget.html" />
     <Content Include="UI\DistributorsApp\CrmRobots.VM.js" />
+    <Content Include="UI\DistributorsApp\MailFilterRules.VM.js" />
     <Content Include="UI\DistributorsApp\MailboxAdministration.VM.js" />
+    <Content Include="UI\DistributorsApp\Css\MailFilterRules.css" />
     <Content Include="UI\DistributorsApp\Css\MailboxAdministration.css" />
     <Content Include="UI\DistributorsApp\Css\MailSummariserPromptEditor.css" />
     <Content Include="UI\DistributorsApp\Css\CustomerTagAssignmentControl.css" />
@@ -262,6 +265,8 @@
     <Content Include="UI\DistributorsApp\MailSummariserPromptEditor.VM.js" />
     <Content Include="UI\DistributorsApp\CrmAdministration.html" />
     <Content Include="UI\DistributorsApp\MailSummariserPromptEditorPage.html" />
+    <Content Include="UI\DistributorsApp\Parts\CrmAdministration\AddressBlacklistTab.html" />
+    <Content Include="UI\DistributorsApp\Parts\CrmAdministration\ContentBlacklistTab.html" />
     <Content Include="UI\DistributorsApp\Parts\CrmAdministration\MailSummariserPromptEditorTab.html" />
     <Content Include="UI\DistributorsApp\Parts\CrmAdministration\MailboxConnectionsTab.html" />
     <Content Include="UI\DistributorsApp\Parts\CustomerTagAssignmentControl.html" />
