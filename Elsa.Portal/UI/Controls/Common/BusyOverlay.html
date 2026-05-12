@@ -13,11 +13,20 @@
             lt.api.usageManager.subscribeBusyHandler(function(isBusy) {
 
                 var ovrly = document.getElementById("busyOverlay");
+                var root = document.documentElement;
+                var body = document.body;
+
+                if (root) {
+                    root.style.cursor = isBusy ? "wait" : "";
+                }
+
+                if (body) {
+                    body.style.cursor = isBusy ? "wait" : "";
+                }
 
                 if (isBusy) {
-                    if (document.body) {
-                        var body = document.body,
-                            html = document.documentElement;
+                    if (body) {
+                        var html = document.documentElement;
 
                         var height = Math.max( body.scrollHeight, body.offsetHeight, 
                             html.clientHeight, html.scrollHeight, html.offsetHeight);
