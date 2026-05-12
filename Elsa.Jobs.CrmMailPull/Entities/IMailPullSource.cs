@@ -15,7 +15,7 @@ namespace Elsa.Jobs.CrmMailPull.Entities
         bool UseSsl { get; set; }
         [NVarchar(255, false)]
         string Username { get; set; }
-        [NVarchar(255, false)]
+        [NVarchar(255, true)]
         string Password { get; set; }
         bool IsEnabled { get; set; }
         IEnumerable<IMailboxFolder> Folders { get; }
