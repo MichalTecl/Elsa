@@ -70,14 +70,47 @@ lanta.ControlBuilder = function() {
             function(owner, expression) {
                 return window;
             });
+
+        var resolveModel = function(expression) {
+            return lanta.BindingCore.defaultExpressionEvaluator(window, expression, function() { return window; });
+        };
         
         for (var i = 0; i < elements.length; i++) {
         	var element = elements[i];
 
             lanta.BindingCore.bind(element, function(value) {
             	this["lt_view_model"] = value;
+
+                if (value !== null && value !== undefined && !!this["lt_model_wait_handle"]) {
+                    window.clearInterval(this["lt_model_wait_handle"]);
+                    this["lt_model_wait_handle"] = null;
+                }
+
                 lt.updateBindings(this);
             }, [modelParam]);
+
+            if (!element["lt_model_wait_handle"]) {
+                (function(boundElement, expression) {
+                    var attempts = 0;
+                    boundElement["lt_model_wait_handle"] = window.setInterval(function() {
+                        attempts++;
+
+                        var resolvedModel = resolveModel(expression);
+                        if (resolvedModel !== null && resolvedModel !== undefined) {
+                            boundElement["lt_view_model"] = resolvedModel;
+                            window.clearInterval(boundElement["lt_model_wait_handle"]);
+                            boundElement["lt_model_wait_handle"] = null;
+                            lt.updateBindings(boundElement);
+                            return;
+                        }
+
+                        if (attempts > 200) {
+                            window.clearInterval(boundElement["lt_model_wait_handle"]);
+                            boundElement["lt_model_wait_handle"] = null;
+                        }
+                    }, 25);
+                })(element, m);
+            }
         }
 
         return this;

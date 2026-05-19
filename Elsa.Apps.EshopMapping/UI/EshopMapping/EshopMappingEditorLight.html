@@ -1,0 +1,246 @@
+<div id="eshopMappingEditorLightUi">
+    <div class="emapLightTable">
+        <div class="emapLightRow emapLightHeader">
+            <div class="emapLightCell emapLightMainCell">
+                <div class="emapLightHeaderTitle">
+                    <span>ELSA</span>
+                    <i class="fas fa-sort faButton emapLightSortButton" event-bind="click:onSortClick('material')"></i>
+                </div>
+                <div class="emapLightFilterWrap emapLightFilterBox">
+                    <i class="fas fa-search emapLightFilterIcon"></i>
+                    <input lt-name="materialFilterInput" type="text" event-bind="input:onMaterialFilterChanged(this.value)" />
+                </div>
+            </div>
+            <div class="emapLightCell emapLightMainCell">
+                <div class="emapLightHeaderTitle">
+                    <span>E-shop</span>
+                    <i class="fas fa-sort faButton emapLightSortButton" event-bind="click:onSortClick('product')"></i>
+                    <a href="javascript:void(0)" class="emapLightRefreshLink" event-bind="click:onRefreshProductsClick()">Stáhnout produkty z e-shopu</a>
+                    <label class="emapLightCheckboxWrap">
+                        <input lt-name="includeHistoricalProductsCheckbox" type="checkbox" event-bind="change:onIncludeHistoricalProductsChanged(this.checked)" />
+                        <span>Zahrnout historické produkty</span>
+                    </label>
+                </div>
+                <div class="emapLightFilterWrap emapLightFilterBox">
+                    <i class="fas fa-search emapLightFilterIcon"></i>
+                    <input lt-name="productFilterInput" type="text" event-bind="input:onProductFilterChanged(this.value)" />
+                </div>
+            </div>
+            <div class="emapLightIconCell"></div>
+            <div class="emapLightIconCell"></div>
+            <div class="emapLightIconCell"></div>
+        </div>
+
+        <div id="emapLightRows" data-bind="itemsSource:rows" data-key="rowKey">
+            <div class="lt-template emapLightRow" data-bind="class!.hidden:isVisible; class.emapLightPuzzleSource:selectedAsPuzzleSource; class.emapLightPuzzleTarget:puzzleTargetCandidate; class.emapLightRowsOdd:isOddRow; class!.emapLightRowsEven:isOddRow">
+                <div class="emapLightCell emapLightMainCell">
+                    <div data-bind="text:MaterialName; class!.hidden:hasMaterial" class="emapLightValue"></div>
+                    <div class="autocomplete emapLightEditorWrap" data-bind="class.hidden:hasMaterial" lt-name="materialEditorCont">
+                        <input type="text"
+                               data-bind="value:materialDraft"
+                               event-bind="focus:ensureMaterialAutosuggest(VM, $materialEditorCont); input:onMaterialDraftChanged(VM, this.value)" />
+                        <div class="emapLightInlineActions" data-bind="class!.hidden:showMaterialActions">
+                            <i class="fas fa-check faButton emapLightSaveButton"
+                               title="Uložit mapování"
+                               data-bind="class!.emapLightActionDisabled:canSaveMaterial"
+                               event-bind="click:saveMaterialMapping(VM)"></i>
+                            <i class="fas fa-times faButton emapLightCancelButton" title="Zrušit změnu" event-bind="click:cancelMaterialEdit(VM, $materialEditorCont)"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="emapLightCell emapLightMainCell">
+                    <div data-bind="text:ProductName; class!.hidden:hasProduct" class="emapLightValue"></div>
+                    <div class="autocomplete emapLightEditorWrap" data-bind="class.hidden:hasProduct" lt-name="productEditorCont">
+                        <input type="text"
+                               data-bind="value:productDraft"
+                               event-bind="focus:ensureProductAutosuggest(VM, $productEditorCont); input:onProductDraftChanged(VM, this.value)" />
+                        <div class="emapLightInlineActions" data-bind="class!.hidden:showProductActions">
+                            <i class="fas fa-check faButton emapLightSaveButton"
+                               title="Uložit mapování"
+                               data-bind="class!.emapLightActionDisabled:canSaveProduct"
+                               event-bind="click:saveProductMapping(VM)"></i>
+                            <i class="fas fa-times faButton emapLightCancelButton" title="Zrušit změnu" event-bind="click:cancelProductEdit(VM, $productEditorCont)"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="emapLightIconCell">
+                    <i class="fas fa-puzzle-piece faButton emapLightPuzzleButton"
+                       title="Propojit nekompletní mapování"
+                       data-bind="class!.hidden:showPuzzle"
+                       event-bind="click:onPuzzleClick(VM, event)"></i>
+                </div>
+
+                <div class="emapLightIconCell">
+                    <i class="far fa-copy faButton"
+                       title="Přidat další produkt ke stejnému materiálu"
+                       data-bind="class!.hidden:canDuplicate"
+                       event-bind="click:onDuplicateClick(VM)"></i>
+                </div>
+
+                <div class="emapLightIconCell">
+                    <i class="fas fa-trash-alt faButton"
+                       title="Smazat mapování"
+                       data-bind="class!.hidden:canDelete"
+                       event-bind="click:deleteMapping(VM)"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/UI/EshopMapping/EshopMappingEditorLight.VM.js"></script>
+<script>
+    lt.element("eshopMappingEditorLightUi").withModel("app.EshopMapping.lightVm").attach(function(materialFilterInput, productFilterInput, includeHistoricalProductsCheckbox) {
+        const self = this;
+        const getVm = () => lt.getViewModel(self);
+
+        const assignAutosuggestInputId = function(container, row, prefix) {
+            const input = container.getElementsByTagName("input")[0];
+            if (!input.id) {
+                input.id = prefix + "_" + row.rowKey;
+            }
+        };
+
+        const resetInput = function(container) {
+            const input = container.getElementsByTagName("input")[0];
+            input.value = "";
+            input.dispatchEvent(new Event("input"));
+        };
+
+        this.onMaterialFilterChanged = function(value) {
+            const vm = getVm();
+            if (!!vm) vm.setMaterialFilter(value);
+        };
+
+        this.onProductFilterChanged = function(value) {
+            const vm = getVm();
+            if (!!vm) vm.setProductFilter(value);
+        };
+
+        this.onSortClick = function(column) {
+            const vm = getVm();
+            if (!!vm) vm.toggleSort(column);
+        };
+
+        this.onRefreshProductsClick = function() {
+            const vm = getVm();
+            if (!!vm) vm.refreshProducts();
+        };
+
+        this.onIncludeHistoricalProductsChanged = function(checked) {
+            const vm = getVm();
+            if (!!vm) vm.setIncludeHistoricalProducts(checked);
+        };
+
+        this.ensureMaterialAutosuggest = function(row, container) {
+            assignAutosuggestInputId(container, row, "emapLightMaterial");
+
+            if (!container.autosuggestSetup) {
+                app.ui.autosuggest(container, function(query, callback) {
+                    const vm = getVm();
+                    if (!vm) {
+                        callback([]);
+                        return;
+                    }
+
+                    vm.getMaterialNames(query, callback);
+                });
+                container.autosuggestSetup = true;
+            }
+        };
+
+        this.ensureProductAutosuggest = function(row, container) {
+            assignAutosuggestInputId(container, row, "emapLightProduct");
+
+            if (!container.autosuggestSetup) {
+                app.ui.autosuggest(container, function(query, callback) {
+                    const vm = getVm();
+                    if (!vm) {
+                        callback([]);
+                        return;
+                    }
+
+                    vm.getProductNames(query, callback);
+                });
+                container.autosuggestSetup = true;
+            }
+        };
+
+        this.onMaterialDraftChanged = function(row, value) {
+            const vm = getVm();
+            if (!!vm) vm.setMaterialDraft(row, value);
+        };
+
+        this.onProductDraftChanged = function(row, value) {
+            const vm = getVm();
+            if (!!vm) vm.setProductDraft(row, value);
+        };
+
+        this.cancelMaterialEdit = function(row, container) {
+            const vm = getVm();
+            if (!!vm) vm.cancelMaterialDraft(row);
+            resetInput(container);
+        };
+
+        this.cancelProductEdit = function(row, container) {
+            const vm = getVm();
+            if (!!vm) vm.cancelProductDraft(row);
+            resetInput(container);
+        };
+
+        this.saveMaterialMapping = function(row) {
+            const vm = getVm();
+            if (!!vm) vm.saveRow(row);
+        };
+
+        this.saveProductMapping = function(row) {
+            const vm = getVm();
+            if (!!vm) vm.saveRow(row);
+        };
+
+        this.onPuzzleClick = function(row, event) {
+            if (!!event && !!event.stopPropagation) {
+                event.stopPropagation();
+            }
+
+            const vm = getVm();
+            if (!!vm) vm.togglePuzzleRow(row);
+        };
+
+        this.onDuplicateClick = function(row) {
+            const vm = getVm();
+            if (!!vm) vm.duplicateRow(row);
+        };
+
+        this.deleteMapping = function(row) {
+            const vm = getVm();
+            if (!!vm) vm.deleteMapping(row);
+        };
+
+        materialFilterInput.addEventListener("focus", function() {
+            this.select();
+        });
+
+        productFilterInput.addEventListener("focus", function() {
+            this.select();
+        });
+
+        this.bind(function(vm) {
+            if (!!vm) {
+                includeHistoricalProductsCheckbox.checked = !!vm.includeHistoricalProducts;
+            }
+        });
+
+        document.addEventListener("click", function(event) {
+            if (!!event.target.closest(".emapLightPuzzleButton")) {
+                return;
+            }
+
+            const vm = getVm();
+            if (!!vm) vm.cancelPuzzleSelection();
+        });
+    });
+</script>
+<link href="/UI/EshopMapping/EshopMappingEditorLight.css" rel="stylesheet" />

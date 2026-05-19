@@ -43,16 +43,38 @@ namespace Elsa.Apps.EshopMapping.Controllers
             return _facade.GetMappings(GetErpId(), reloadErpProducts);
         }
 
+        public List<EshopMappingLightRecord> GetLightMappings(bool includeHistoricalProducts)
+        {
+            return _facade.GetLightMappings(GetErpId(), false, includeHistoricalProducts);
+        }
+
+        public List<EshopMappingLightRecord> ReloadErpProducts(bool includeHistoricalProducts)
+        {
+            return _facade.GetLightMappings(GetErpId(), true, includeHistoricalProducts);
+        }
+
         public List<EshopItemMappingRecord> Map(string elsaMaterialName, string eshopProductName)
         {            
             _facade.Map(GetErpId(), elsaMaterialName, eshopProductName, false);
             return GetMappings(false);
         }
 
+        public List<EshopMappingLightRecord> MapLight(string elsaMaterialName, string eshopProductName, bool includeHistoricalProducts)
+        {
+            _facade.Map(GetErpId(), elsaMaterialName, eshopProductName, false);
+            return GetLightMappings(includeHistoricalProducts);
+        }
+
         public List<EshopItemMappingRecord> Unmap(string elsaMaterialName, string eshopProductName)
         {
             _facade.Unmap(GetErpId(), elsaMaterialName, eshopProductName);
             return GetMappings(false);
+        }
+
+        public List<EshopMappingLightRecord> UnmapLight(string elsaMaterialName, string eshopProductName, bool includeHistoricalProducts)
+        {
+            _facade.Unmap(GetErpId(), elsaMaterialName, eshopProductName);
+            return GetLightMappings(includeHistoricalProducts);
         }
 
         public List<EshopItemMappingRecord> UpdateKitItem(int kitItemId, string newItemName)

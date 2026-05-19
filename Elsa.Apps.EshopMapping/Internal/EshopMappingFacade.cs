@@ -121,20 +121,56 @@ namespace Elsa.Apps.EshopMapping.Internal
             return result;
         }
 
+        public List<EshopMappingLightRecord> GetLightMappings(int erpId, bool reloadErpProducts, bool includeHistoricalProducts)
+        {
+            if (reloadErpProducts)
+            {
+                GetMappings(erpId, true);
+            }
+
+            return _db.Sql()
+                .Call("GetProductMaterialMappingCandidates")
+                .WithParam("@erpId", erpId)
+                .WithParam("@includeHistoricalProducts", includeHistoricalProducts)
+                .AutoMap<EshopMappingLightRecord>()
+                .Select(r => new EshopMappingLightRecord
+                {
+                    MaterialId = r.MaterialId,
+                    MaterialName = string.IsNullOrWhiteSpace(r.MaterialName) ? null : r.MaterialName.Trim(),
+                    ProductName = string.IsNullOrWhiteSpace(r.ProductName) ? null : r.ProductName.Trim()
+                })
+                .OrderBy(r => string.IsNullOrWhiteSpace(r.MaterialName) ? 1 : 0)
+                .ThenBy(r => r.MaterialName)
+                .ThenBy(r => string.IsNullOrWhiteSpace(r.ProductName) ? 1 : 0)
+                .ThenBy(r => r.ProductName)
+                .ToList();
+        }
+
         public void Map(int erpId, string elsaMaterialName, string eshopProductName, bool deleteExistingMapping)
         {
             var currentMappings = GetMappings(erpId, false);
-            var existingMapping = currentMappings.FirstOrDefault(m => !string.IsNullOrEmpty(m.ElsaMaterialName) && m.Products.Any(p => p.ProductName == eshopProductName));
+            var existingMapping = currentMappings.FirstOrDefault(m =>
+                !string.IsNullOrEmpty(m.ElsaMaterialName) &&
+                m.Products.Any(p => string.Equals(p.ProductName, eshopProductName, StringComparison.InvariantCultureIgnoreCase)));
+
             if (existingMapping != null)
             {
+                if (string.Equals(existingMapping.ElsaMaterialName, elsaMaterialName, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return;
+                }
+
                 if (deleteExistingMapping)
                 {
-                    Unmap(erpId, elsaMaterialName, eshopProductName);
+                    Unmap(erpId, existingMapping.ElsaMaterialName, eshopProductName);
                     Map(erpId, elsaMaterialName, eshopProductName, false);
                     return;
                 }
 
-                throw new InvalidOperationException($"Produkt \"{eshopProductName}\" již je propojen s materiálem \"{existingMapping.ElsaMaterialName}\"");
+                throw new InvalidOperationException(
+                    $"Produkt \"{eshopProductName}\" už je namapovaný na materiál \"{existingMapping.ElsaMaterialName}\". " +
+                    $"Dokud nezrušíte mapování \"{eshopProductName}\" -> \"{existingMapping.ElsaMaterialName}\", " +
+                    $"nelze vytvořit mapování \"{eshopProductName}\" -> \"{elsaMaterialName}\".");
             }
 
             _vpRepo.ImportErpProductMappings(new List<Commerce.Core.VirtualProducts.Model.ErpProductMapping>

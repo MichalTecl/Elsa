@@ -1,0 +1,164 @@
+#eshopMappingEditorLightUi {
+    padding: 16px;
+    overflow-x: auto;
+}
+
+:root {
+    --emap-light-icon-col-width: 42px;
+}
+
+.emapLightTable {
+    width: 100%;
+    min-width: 960px;
+}
+
+.emapLightRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) var(--emap-light-icon-col-width) var(--emap-light-icon-col-width) var(--emap-light-icon-col-width);
+    width: 100%;
+}
+
+.emapLightCell,
+.emapLightIconCell {
+    padding: 8px 10px;
+    vertical-align: middle;
+    background-color: #fff;
+    min-width: 0;
+}
+
+.emapLightRowsOdd .emapLightCell,
+.emapLightRowsOdd .emapLightIconCell {
+    background-color: #fcfcfc;
+}
+
+.emapLightRowsEven .emapLightCell,
+.emapLightRowsEven .emapLightIconCell {
+    background-color: #f5f7fa;
+}
+
+.emapLightHeader .emapLightCell,
+.emapLightHeader .emapLightIconCell {
+    background-color: #f5f5f5;
+}
+
+.emapLightHeaderTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.emapLightSortButton {
+    color: #6f6f6f !important;
+}
+
+.emapLightRefreshLink {
+    margin-left: 4px;
+    color: #12719a;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: underline;
+}
+
+.emapLightCheckboxWrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #404040;
+}
+
+.emapLightFilterBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    background: #eef6ff;
+    border: 1px solid #c6d8ee;
+    border-radius: 4px;
+}
+
+.emapLightFilterIcon {
+    color: #4f6f8f;
+    flex: 0 0 auto;
+}
+
+.emapLightFilterWrap input,
+.emapLightEditorWrap input {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.emapLightFilterWrap input {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.emapLightValue {
+    min-height: 20px;
+    line-height: 20px;
+    word-break: break-word;
+}
+
+.emapLightEditorWrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100%;
+    min-width: 0;
+}
+
+.emapLightEditorWrap.autocomplete {
+    position: relative;
+}
+
+.emapLightInlineActions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+.emapLightActionDisabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.emapLightSaveButton {
+    color: #2e9b45 !important;
+}
+
+.emapLightCancelButton {
+    color: #d67b1f !important;
+}
+
+.emapLightPuzzleButton {
+    color: #7d7d7d !important;
+}
+
+.emapLightPuzzleSource .emapLightCell,
+.emapLightPuzzleSource .emapLightIconCell {
+    background-color: #fff6d8;
+}
+
+.emapLightPuzzleTarget .emapLightCell,
+.emapLightPuzzleTarget .emapLightIconCell {
+    background-color: #eef9ef;
+}
+
+.emapLightIconCell {
+    width: var(--emap-light-icon-col-width);
+    min-width: var(--emap-light-icon-col-width);
+    text-align: center;
+}
+
+.hidden {
+    display: none !important;
+}
