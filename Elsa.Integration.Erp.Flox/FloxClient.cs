@@ -120,6 +120,8 @@ namespace Elsa.Integration.Erp.Flox
 
         private IErpOrderModel LoadOrderWithoutApi(string orderNumber)
         {
+            LogLegacyXmlUsage($"load single order {orderNumber}");
+
             EnsureSession();
 
             var dlToken = ((long)((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)).ToString();
@@ -384,7 +386,9 @@ namespace Elsa.Integration.Erp.Flox
                 var received = _apiConnector.LoadOrders(changedAfter ?? from, statusId);
                 return PostMap(received);
             }
-            
+
+            LogLegacyXmlUsage($"load order list from={from:yyyy-MM-dd HH:mm:ss}, to={to:yyyy-MM-dd HH:mm:ss}, changedAfter={changedAfter:yyyy-MM-dd HH:mm:ss}, status={status ?? "<null>"}");
+
             _log.Info($"Zacinam stahovani objednavek od={from}, do={to}, status={status}");
             EnsureSession();
 
@@ -433,6 +437,11 @@ namespace Elsa.Integration.Erp.Flox
 
                 yield return om;
             }
+        }
+
+        private void LogLegacyXmlUsage(string operation)
+        {
+            _log.Error($"Flox legacy XML path is in use for operation '{operation}'. This path may behave differently from the API integration, including discount mapping.");
         }
 
         private void ValidateOrderData(IErpOrderModel om)

@@ -159,11 +159,18 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection.Model
         public IEnumerable<IErpOrderItemModel> LineItems =>
                        _source.items == null ? throw new ArgumentException($"Order {OrderNumber} has no lineitems") :  _source.items.Select(i => new ApiLineItemModel(i)) ;
 
+        private static readonly string[] _discountMarkers = { "custom", "discount", "gift", "percent_discount" };
         public string DiscountsText
         {
             get
             {
-                var elements = OrderPriceElements.Where(p => p.TypeErpName.Equals("discount")).Select(p => p.Title).ToList();
+                var elements = OrderPriceElements
+                    .Where(p => _discountMarkers.Contains(p.TypeErpName?.Trim() ?? string.Empty, StringComparer.InvariantCultureIgnoreCase))
+                    .Select(p => p.Title?.Trim())
+                    .Where(t => !string.IsNullOrWhiteSpace(t))
+                    .Distinct(StringComparer.InvariantCultureIgnoreCase)
+                    .ToList();
+
                 if (!elements.Any())
                 {
                     return null;

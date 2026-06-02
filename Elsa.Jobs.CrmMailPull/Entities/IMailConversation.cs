@@ -10,10 +10,10 @@ namespace Elsa.Jobs.CrmMailPull.Entities
     [Entity]
     public interface IMailConversation : IIntIdEntity
     {
-        [NVarchar(100, false)]
+        [NVarchar(1000, false)]
         string ConversationUid { get; set; }
 
-        [NVarchar(100, true)]
+        [NVarchar(1000, true)]
         string Hint { get; set; }
 
         int? SummaryId { get; set; }
