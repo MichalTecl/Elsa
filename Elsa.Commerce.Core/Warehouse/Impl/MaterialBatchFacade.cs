@@ -965,7 +965,8 @@ namespace Elsa.Commerce.Core.Warehouse.Impl
 
                     if (monthsToExpiration <= expLimit)
                     {
-                        assignment.PinnedWarningMessage = $"Zbývá {monthsToExpiration} měsíců do expirace. Limit pro {(isDistributor ? "velkoodběratele" : "maloodběratele")} je {expLimit} měs.";
+                        assignment.PinnedWarningMessage =
+                            $"POZOR: Spotřeba už jen {monthsToExpiration} měsíců. Pro {(isDistributor ? "VO" : "MO")} je minimum {expLimit} měs. Vyber čerstvější šarži.";
                     }
                 }
             }
