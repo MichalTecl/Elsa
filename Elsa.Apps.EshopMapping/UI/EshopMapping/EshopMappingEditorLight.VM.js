@@ -71,16 +71,16 @@ app.EshopMapping.Light.VM = app.EshopMapping.Light.VM || function() {
     };
 
     const applyFilters = () => {
-        const materialNeedle = normalize(materialFilter);
-        const productNeedle = normalize(productFilter);
+        const materialMatcher = hasText(materialFilter) ? new TextMatcher(materialFilter) : null;
+        const productMatcher = hasText(productFilter) ? new TextMatcher(productFilter) : null;
         const puzzleSelection = getPuzzleSelection();
 
         allRows.forEach(row => {
-            const materialText = normalize(row.MaterialName || row.materialDraft);
-            const productText = normalize(row.ProductName || row.productDraft);
+            const materialText = row.MaterialName || row.materialDraft;
+            const productText = row.ProductName || row.productDraft;
 
-            row.isVisible = (!materialNeedle || materialText.indexOf(materialNeedle) > -1) &&
-                (!productNeedle || productText.indexOf(productNeedle) > -1);
+            row.isVisible = (!materialMatcher || materialMatcher.match(materialText, true)) &&
+                (!productMatcher || productMatcher.match(productText, true));
 
             row.selectedAsPuzzleSource = !!puzzleSelection && puzzleSelection.rowKey === row.rowKey;
             row.puzzleTargetCandidate = !!puzzleSelection && canPuzzlePair(puzzleSelection, row);
