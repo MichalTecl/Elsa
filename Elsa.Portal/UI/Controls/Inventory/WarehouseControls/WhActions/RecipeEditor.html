@@ -41,7 +41,7 @@
                         </div>
                         <div>
                             <div class="autocomplete" lt-name="materialAutocompleteContainer">
-                                <input data-bind="value:Text" event-bind="userinput:onMaterialTextChange(VM, this, $materialAutocompleteContainer, $errorBox); focus:onMaterialInputFocus;blur:onMaterialInputBlur;">
+                                <input data-bind="value:Text" event-bind="userinput:onMaterialTextChange(VM, this, $materialAutocompleteContainer, $errorBox); focus:onMaterialInputFocus(VM, this, $errorBox);blur:onMaterialInputBlur(VM, this, $errorBox);">
                             </div>
                             <div lt-name="errorBox"></div>
                         </div>
@@ -96,6 +96,12 @@
             }
         };
 
+        var syncComponentText = function(vm, componentMaterialInput, errorBox) {
+            var parsed = matlistvm.parseMaterialEntry(componentMaterialInput.value);
+            errorBox.innerHTML = parsed.error || "";
+            vm.Text = componentMaterialInput.value;
+        };
+
         this.onMaterialTextChange = function (vm, componentMaterialInput, autosuggest, errorBox) {
 
             if (!autosuggest.wasSetup) {
@@ -103,14 +109,17 @@
                 app.ui.autosuggest(autosuggest, app.warehouseActions.vm.searchMaterialNames, null, componentAutosuggestCustomizer);
             }
 
-            var parsed = matlistvm.parseMaterialEntry(componentMaterialInput.value);
-            errorBox.innerHTML = parsed.error;
-
-            vm.Text = componentMaterialInput.value;
+            syncComponentText(vm, componentMaterialInput, errorBox);
         };
 
-        this.onMaterialInputFocus = function () { };
-        this.onMaterialInputBlur = function () { };
+        this.onMaterialInputFocus = function (vm, componentMaterialInput, errorBox) {
+            syncComponentText(vm, componentMaterialInput, errorBox);
+        };
+        this.onMaterialInputBlur = function (vm, componentMaterialInput, errorBox) {
+            setTimeout(function() {
+                syncComponentText(vm, componentMaterialInput, errorBox);
+            }, 0);
+        };
 
         this.toggleTransformationSource = function(itemIndex) {
             app.recipesEditor.vm.toggleTransformationSource(itemIndex);
