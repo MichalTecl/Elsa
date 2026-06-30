@@ -99,6 +99,10 @@
       <Project>{00851e14-33be-4f64-91d1-e27fa48422bd}</Project>
       <Name>Elsa.App.Crm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.EshopExtensions\Elsa.App.EshopExtensions.csproj">
+      <Project>{5726C7FD-20F1-4B6A-B2D5-31771548D3A1}</Project>
+      <Name>Elsa.App.EshopExtensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.ImportExport\Elsa.App.ImportExport.csproj">
       <Project>{2f701563-935d-43bd-8cf3-bbf47df17397}</Project>
       <Name>Elsa.App.ImportExport</Name>

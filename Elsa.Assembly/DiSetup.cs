@@ -4,6 +4,7 @@ using Elsa.App.Commerce.Payments;
 using Elsa.App.Commerce.Preview;
 using Elsa.App.CommonReports;
 using Elsa.App.Crm;
+using Elsa.App.EshopExtensions;
 using Elsa.App.ImportExport;
 using Elsa.App.Inspector;
 using Elsa.App.MaterialLevels;
@@ -129,6 +130,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(DbUtilsRegistry).Assembly);
                     s.ScanAssembly(typeof(CrmRobotsRegistry).Assembly);
                     s.ScanAssembly(typeof(CrmMailPullRegistry).Assembly);
+                    s.ScanAssembly(typeof(EshopExtensionsRegistry).Assembly);
 
                     s.For<ILogWriter>().ImportObject.Existing(logWriter);
 
