@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Newtonsoft.Json;
+
 namespace Elsa.App.EshopExtensions.Model
 {
     public class CouponValidationRule
@@ -27,7 +29,7 @@ namespace Elsa.App.EshopExtensions.Model
 
             return new Rule
             {
-                MustHaveProductInCart = source.MustHaveProductInCart,
+                MustHaveProductsInCart = source.MustHaveProductsInCart?.ToList(),
                 MinQuantity = source.MinQuantity,
                 MaxQuantity = source.MaxQuantity,
                 ViolationMessage = source.ViolationMessage,
@@ -51,7 +53,8 @@ namespace Elsa.App.EshopExtensions.Model
 
     public class Rule
     {
-        public string MustHaveProductInCart { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> MustHaveProductsInCart { get; set; }
 
         public int MinQuantity { get; set; }
 

@@ -41,8 +41,32 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
 
     const encodeProductPathForTransport = (value) => encodeURIComponent(normalizeProductPath(value));
 
+    const extractProductLinksFromText = (value) => {
+        if (!value) {
+            return [];
+        }
+
+        return value
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .map(line => {
+                const markdownMatch = /^\[[^\]]*\]\(([^)]+)\)$/.exec(line);
+                return markdownMatch ? markdownMatch[1] : line;
+            })
+            .map(normalizeProductPath)
+            .filter(line => line.length > 0);
+    };
+
     const createCouponCodeUi = (value) => ({
         Key: newKey(),
+        Value: value || ""
+    });
+
+    const createProductLinkUi = (value, groupKey, ruleItemKey) => ({
+        Key: newKey(),
+        GroupKey: groupKey,
+        RuleItemKey: ruleItemKey,
         Value: value || ""
     });
 
@@ -62,15 +86,49 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         self.activeRule.CouponCodesUi = nonEmptyCodes;
     };
 
-    const createRuleItemUi = (ruleData, groupKey, showAndAlsoLabel) => ({
-        Key: newKey(),
-        GroupKey: groupKey,
-        ShowAndAlsoLabel: !!showAndAlsoLabel,
-        MustHaveProductInCart: normalizeProductPath(ruleData && ruleData.MustHaveProductInCart),
-        MinQuantity: ruleData && ruleData.MinQuantity > 0 ? ruleData.MinQuantity : 1,
-        MaxQuantity: ruleData && ruleData.MaxQuantity > 0 ? ruleData.MaxQuantity : 9999,
-        ViolationMessage: ruleData && ruleData.ViolationMessage ? ruleData.ViolationMessage : ""
-    });
+    const getRuleProductLinks = (ruleData) => {
+        if (ruleData && Array.isArray(ruleData.MustHaveProductsInCart) && ruleData.MustHaveProductsInCart.length > 0) {
+            return ruleData.MustHaveProductsInCart;
+        }
+
+        return [];
+    };
+
+    const normalizeProductLinksUi = (item) => {
+        if (!item) {
+            return;
+        }
+
+        const nonEmptyLinks = (item.ProductLinksUi || [])
+            .map(link => ({
+                Key: link.Key || newKey(),
+                GroupKey: item.GroupKey,
+                RuleItemKey: item.Key,
+                Value: normalizeProductPath(link.Value)
+            }))
+            .filter(link => link.Value.length > 0);
+
+        nonEmptyLinks.push(createProductLinkUi("", item.GroupKey, item.Key));
+        item.ProductLinksUi = nonEmptyLinks;
+    };
+
+    const createRuleItemUi = (ruleData, groupKey, showAndAlsoLabel) => {
+        const item = {
+            Key: newKey(),
+            GroupKey: groupKey,
+            ShowAndAlsoLabel: !!showAndAlsoLabel,
+            ProductLinksUi: [],
+            MinQuantity: ruleData && ruleData.MinQuantity > 0 ? ruleData.MinQuantity : 1,
+            MaxQuantity: ruleData && ruleData.MaxQuantity > 0 ? ruleData.MaxQuantity : 9999,
+            ViolationMessage: ruleData && ruleData.ViolationMessage ? ruleData.ViolationMessage : ""
+        };
+
+        item.ProductLinksUi = getRuleProductLinks(ruleData)
+            .map(value => createProductLinkUi(normalizeProductPath(value), groupKey, item.Key));
+
+        normalizeProductLinksUi(item);
+        return item;
+    };
 
     const createRuleGroupUi = (ruleData) => {
         const groupKey = newKey();
@@ -121,6 +179,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
             group.ChainItems.forEach((item, chainIndex) => {
                 item.ShowAndAlsoLabel = chainIndex > 0;
                 item.GroupKey = group.Key;
+                normalizeProductLinksUi(item);
             });
         });
     };
@@ -157,7 +216,9 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         }
 
         return {
-            MustHaveProductInCart: normalizeProductPath(items[index].MustHaveProductInCart),
+            MustHaveProductsInCart: items[index].ProductLinksUi
+                .map(link => normalizeProductPath(link.Value))
+                .filter(link => !!link),
             MinQuantity: parseInt(items[index].MinQuantity, 10) || 1,
             MaxQuantity: parseInt(items[index].MaxQuantity, 10) || 9999,
             ViolationMessage: (items[index].ViolationMessage || "").trim(),
@@ -181,7 +242,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         }
 
         return {
-            MustHaveProductInCart: encodeProductPathForTransport(rule.MustHaveProductInCart),
+            MustHaveProductsInCart: (rule.MustHaveProductsInCart || []).map(encodeProductPathForTransport),
             MinQuantity: rule.MinQuantity,
             MaxQuantity: rule.MaxQuantity,
             ViolationMessage: rule.ViolationMessage,
@@ -202,11 +263,11 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
             return true;
         }
 
-        if (!rule.MustHaveProductInCart || !rule.MustHaveProductInCart.trim()) {
+        if (!Array.isArray(rule.MustHaveProductsInCart) || rule.MustHaveProductsInCart.length === 0) {
             return true;
         }
 
-        if (!isValidProductPath(rule.MustHaveProductInCart)) {
+        if (rule.MustHaveProductsInCart.some(link => !isValidProductPath(link))) {
             return true;
         }
 
@@ -239,7 +300,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         }
 
         if (payload.Rules.some(hasInvalidRule)) {
-            return "Každá podmínka musí mít platnou URL produktu a hlášku při nesplnění.";
+            return "Každá podmínka musí mít alespoň jednu platnou URL produktu a hlášku při nesplnění.";
         }
 
         return null;
@@ -444,11 +505,62 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         return group.ChainItems.find(i => i.Key === itemKey) || null;
     };
 
-    self.updateRuleProduct = (groupKey, itemKey, value) => {
+    self.updateRuleProductLink = (groupKey, itemKey, productLinkKey, value) => {
         const item = getRuleItem(groupKey, itemKey);
-        if (item) {
-            item.MustHaveProductInCart = normalizeProductPath(value);
+        if (!item) {
+            return;
         }
+
+        const productLink = (item.ProductLinksUi || []).find(link => link.Key === productLinkKey);
+        if (!productLink) {
+            return;
+        }
+
+        productLink.Value = normalizeProductPath(value);
+        normalizeProductLinksUi(item);
+        lt.notify();
+    };
+
+    self.handleRuleProductLinksPaste = (groupKey, itemKey, productLinkKey, event) => {
+        const clipboardText = event && event.clipboardData
+            ? event.clipboardData.getData("text")
+            : "";
+
+        const pastedLinks = extractProductLinksFromText(clipboardText);
+        if (pastedLinks.length <= 1) {
+            return;
+        }
+
+        const item = getRuleItem(groupKey, itemKey);
+        if (!item) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const targetIndex = (item.ProductLinksUi || []).findIndex(link => link.Key === productLinkKey);
+        if (targetIndex < 0) {
+            return;
+        }
+
+        const existingLinks = (item.ProductLinksUi || [])
+            .map(link => ({
+                Key: link.Key,
+                GroupKey: link.GroupKey,
+                RuleItemKey: link.RuleItemKey,
+                Value: normalizeProductPath(link.Value)
+            }))
+            .filter(link => link.Value.length > 0);
+
+        const before = existingLinks.slice(0, targetIndex);
+        const after = existingLinks.slice(targetIndex + 1);
+
+        item.ProductLinksUi = before
+            .concat(pastedLinks.map(link => createProductLinkUi(link, item.GroupKey, item.Key)))
+            .concat(after);
+
+        normalizeProductLinksUi(item);
+        lt.notify();
     };
 
     self.updateRuleMin = (groupKey, itemKey, value) => {

@@ -253,7 +253,7 @@ namespace Elsa.App.EshopExtensions.Internal
 
             if (model.Rules.Any(HasInvalidRule))
             {
-                return "Každá podmínka musí mít platnou URL produktu a hlášku při nesplnění.";
+                return "Každá podmínka musí mít alespoň jednu platnou URL produktu a hlášku při nesplnění.";
             }
 
             return null;
@@ -266,8 +266,10 @@ namespace Elsa.App.EshopExtensions.Internal
                 return true;
             }
 
-            if (string.IsNullOrWhiteSpace(rule.MustHaveProductInCart) ||
-                !IsValidProductUrl(rule.MustHaveProductInCart) ||
+            var productLinks = NormalizeProductLinks(rule.MustHaveProductsInCart);
+
+            if (productLinks.Count == 0 ||
+                productLinks.Any(link => !IsValidProductUrl(link)) ||
                 string.IsNullOrWhiteSpace(rule.ViolationMessage))
             {
                 return true;
@@ -285,7 +287,7 @@ namespace Elsa.App.EshopExtensions.Internal
 
             return new Rule
             {
-                MustHaveProductInCart = NormalizeProductLink(source.MustHaveProductInCart),
+                MustHaveProductsInCart = NormalizeProductLinks(source.MustHaveProductsInCart),
                 MinQuantity = source.MinQuantity <= 0 ? 1 : source.MinQuantity,
                 MaxQuantity = source.MaxQuantity <= 0 ? 9999 : source.MaxQuantity,
                 ViolationMessage = source.ViolationMessage?.Trim(),
@@ -302,7 +304,7 @@ namespace Elsa.App.EshopExtensions.Internal
 
             return new Rule
             {
-                MustHaveProductInCart = NormalizeProductLink(source.MustHaveProductInCart),
+                MustHaveProductsInCart = NormalizeProductLinks(source.MustHaveProductsInCart),
                 MinQuantity = source.MinQuantity <= 0 ? 1 : source.MinQuantity,
                 MaxQuantity = source.MaxQuantity <= 0 ? 9999 : source.MaxQuantity,
                 ViolationMessage = source.ViolationMessage?.Trim(),
@@ -319,12 +321,21 @@ namespace Elsa.App.EshopExtensions.Internal
 
             return new Rule
             {
-                MustHaveProductInCart = NormalizeProductLink(source.MustHaveProductInCart),
+                MustHaveProductsInCart = NormalizeProductLinks(source.MustHaveProductsInCart),
                 MinQuantity = source.MinQuantity,
                 MaxQuantity = source.MaxQuantity,
                 ViolationMessage = source.ViolationMessage,
                 AndAlso = CloneRule(source.AndAlso)
             };
+        }
+
+        private List<string> NormalizeProductLinks(IEnumerable<string> source)
+        {
+            return (source ?? Enumerable.Empty<string>())
+                .Select(NormalizeProductLink)
+                .Where(link => !string.IsNullOrWhiteSpace(link))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         private Rule CreateDefaultRule()

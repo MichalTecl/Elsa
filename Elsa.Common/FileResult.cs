@@ -29,6 +29,7 @@ namespace Elsa.Common
         public bool AllowCrossOriginAccess { get; set; }
         public bool PubliclyCacheable { get; set; }
         public bool DisableBrowserCache { get; set; }
+        public TimeSpan? CacheMaxAge { get; set; }
 
         public void WriteResponse(HttpContextBase context)
         {
@@ -41,6 +42,20 @@ namespace Elsa.Common
             if (PubliclyCacheable)
             {
                 context.Response.Cache.SetCacheability(HttpCacheability.Public);
+            }
+
+            if (PubliclyCacheable && CacheMaxAge.HasValue && !DisableBrowserCache)
+            {
+                var maxAgeSeconds = Math.Max(0, (int)CacheMaxAge.Value.TotalSeconds);
+                var cacheControlValue = $"public, max-age={maxAgeSeconds}, s-maxage={maxAgeSeconds}";
+
+                context.Response.Cache.SetMaxAge(CacheMaxAge.Value);
+                context.Response.Cache.SetExpires(DateTime.UtcNow.Add(CacheMaxAge.Value));
+                context.Response.Headers["Cache-Control"] = cacheControlValue;
+                context.Response.Headers["CDN-Cache-Control"] = cacheControlValue;
+                context.Response.Headers["Cloudflare-CDN-Cache-Control"] = cacheControlValue;
+                context.Response.Headers.Remove("Pragma");
+                context.Response.Headers.Remove("Expires");
             }
 
             if (DisableBrowserCache)

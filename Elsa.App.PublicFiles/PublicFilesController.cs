@@ -39,7 +39,7 @@ namespace Elsa.App.PublicFiles
                     var file = _publicFilesHelper.GetFile(cid, ftype);
                     file.AllowCrossOriginAccess = true;
                     file.PubliclyCacheable = true;
-                    file.DisableBrowserCache = true;
+                    file.CacheMaxAge = TimeSpan.FromMinutes(10);
                     return file;
 
                 });

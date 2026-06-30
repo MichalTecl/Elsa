@@ -161,6 +161,12 @@
     gap: 8px;
 }
 
+.couponEditorProductsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .couponEditorCodeRow {
     display: flex;
     gap: 8px;

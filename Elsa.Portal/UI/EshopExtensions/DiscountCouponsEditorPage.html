@@ -103,12 +103,16 @@
 
                                             <label class="couponEditorField">
                                                 <span class="couponEditorFieldLabelRow">
-                                                    <span>V košíku musí být produkt</span>
+                                                    <span>V košíku musí být jeden z produktů</span>
                                                     <button type="button" class="couponEditorHelpButton" title="Nápověda k odkazu produktu" event-bind="click:toggleProductHelp()">
                                                         <i class="fas fa-question-circle"></i>
                                                     </button>
                                                 </span>
-                                                <input type="text" data-bind="value:MustHaveProductInCart" event-bind="input:updateRuleProduct(GroupKey, Key, this.value)" />
+                                                <div class="couponEditorProductsList" data-bind="itemsSource:ProductLinksUi" data-key="Key">
+                                                    <div class="lt-template couponEditorCodeRow">
+                                                        <input type="text" data-bind="value:Value" event-bind="input:updateRuleProductLink(GroupKey, RuleItemKey, Key, this.value);paste:handleRuleProductLinksPaste(GroupKey, RuleItemKey, Key, event)" />
+                                                    </div>
+                                                </div>
                                             </label>
 
                                             <div class="couponEditorRuleCounts">
@@ -185,7 +189,8 @@
             this.addAndAlsoToLastGroup = () => vm.addAndAlsoToLastGroup();
             this.removeChainItem = (groupKey, itemKey) => vm.removeChainItem(groupKey, itemKey);
 
-            this.updateRuleProduct = (groupKey, itemKey, value) => vm.updateRuleProduct(groupKey, itemKey, value);
+            this.updateRuleProductLink = (groupKey, itemKey, productLinkKey, value) => vm.updateRuleProductLink(groupKey, itemKey, productLinkKey, value);
+            this.handleRuleProductLinksPaste = (groupKey, itemKey, productLinkKey, event) => vm.handleRuleProductLinksPaste(groupKey, itemKey, productLinkKey, event);
             this.updateRuleMin = (groupKey, itemKey, value) => vm.updateRuleMin(groupKey, itemKey, value);
             this.updateRuleMax = (groupKey, itemKey, value) => vm.updateRuleMax(groupKey, itemKey, value);
             this.updateRuleMessage = (groupKey, itemKey, value) => vm.updateRuleMessage(groupKey, itemKey, value);
