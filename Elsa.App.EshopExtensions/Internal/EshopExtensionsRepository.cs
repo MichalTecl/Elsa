@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using Elsa.App.EshopExtensions.Entities;
 using Elsa.App.EshopExtensions.Model;
+using Elsa.App.PublicFiles;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
@@ -16,15 +18,18 @@ namespace Elsa.App.EshopExtensions.Internal
 {
     public class EshopExtensionsRepository : IEshopExtensionsRepository
     {
+        private static readonly Regex ProductUrlRegex = new Regex(@"^/p/\d+(/[^?#]+)?(\?variant\[\d+\]=[^&#]+(&variant\[\d+\]=[^&#]+)*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly AutoRepo<ICouponValidationRule> _couponRules;
         private readonly IWebSession _session;
         private readonly IDatabase _database;
+        private readonly IPublicFilesHelper _publicFilesHelper;
 
-        public EshopExtensionsRepository(IWebSession session, IDatabase database, ICache cache)
+        public EshopExtensionsRepository(IWebSession session, IDatabase database, ICache cache, IPublicFilesHelper publicFilesHelper)
         {
             _session = session;
             _database = database;
             _couponRules = new AutoRepo<ICouponValidationRule>(session, database, cache);
+            _publicFilesHelper = publicFilesHelper;
         }
 
         public EshopExtensionsStatus GetStatus()
@@ -86,6 +91,8 @@ namespace Elsa.App.EshopExtensions.Internal
                 });
             });
 
+            PublishActiveRules();
+
             var result = ToEditorModel(saved);
             result.ValidationMessage = validationError;
             return result;
@@ -96,6 +103,23 @@ namespace Elsa.App.EshopExtensions.Internal
             var entity = FindRule(ruleId);
             _database.Delete(entity);
             _couponRules.ClearCache();
+            PublishActiveRules();
+        }
+
+        private void PublishActiveRules()
+        {
+            var publish = _couponRules.GetAll()
+                .Where(IsRuleActive)
+                .Select(rule => DeserializeRuleDefinition(rule.RuleJson).ToHashedForm())
+                .ToList();
+
+            _publicFilesHelper.Write(_session.Project.Name, "couponrules", "cprules.json", writer =>
+            {
+                writer.Write(JsonConvert.SerializeObject(new
+                {
+                    rules = publish
+                }));
+            });
         }
 
         private ICouponValidationRule FindRule(int id)
@@ -229,7 +253,7 @@ namespace Elsa.App.EshopExtensions.Internal
 
             if (model.Rules.Any(HasInvalidRule))
             {
-                return "Každá podmínka musí mít produkt a hlášku při nesplnění.";
+                return "Každá podmínka musí mít platnou URL produktu a hlášku při nesplnění.";
             }
 
             return null;
@@ -243,6 +267,7 @@ namespace Elsa.App.EshopExtensions.Internal
             }
 
             if (string.IsNullOrWhiteSpace(rule.MustHaveProductInCart) ||
+                !IsValidProductUrl(rule.MustHaveProductInCart) ||
                 string.IsNullOrWhiteSpace(rule.ViolationMessage))
             {
                 return true;
@@ -294,7 +319,7 @@ namespace Elsa.App.EshopExtensions.Internal
 
             return new Rule
             {
-                MustHaveProductInCart = source.MustHaveProductInCart,
+                MustHaveProductInCart = NormalizeProductLink(source.MustHaveProductInCart),
                 MinQuantity = source.MinQuantity,
                 MaxQuantity = source.MaxQuantity,
                 ViolationMessage = source.ViolationMessage,
@@ -318,7 +343,7 @@ namespace Elsa.App.EshopExtensions.Internal
                 return value?.Trim();
             }
 
-            var trimmed = value.Trim();
+            var trimmed = DecodeProductLink(value.Trim()).Trim().Trim('"');
             var productPathStart = trimmed.IndexOf("/p/", StringComparison.OrdinalIgnoreCase);
 
             if (productPathStart >= 0)
@@ -326,13 +351,36 @@ namespace Elsa.App.EshopExtensions.Internal
                 trimmed = trimmed.Substring(productPathStart);
             }
 
-            var queryIndex = trimmed.IndexOfAny(new[] { '?', '#' });
-            if (queryIndex >= 0)
+            var hashIndex = trimmed.IndexOf('#');
+            if (hashIndex >= 0)
             {
-                trimmed = trimmed.Substring(0, queryIndex);
+                trimmed = trimmed.Substring(0, hashIndex);
             }
 
             return trimmed;
+        }
+
+        private string DecodeProductLink(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+
+            try
+            {
+                return Uri.UnescapeDataString(value);
+            }
+            catch
+            {
+                return value;
+            }
+        }
+
+        private bool IsValidProductUrl(string value)
+        {
+            var normalized = NormalizeProductLink(value);
+            return !string.IsNullOrWhiteSpace(normalized) && ProductUrlRegex.IsMatch(normalized);
         }
     }
 }

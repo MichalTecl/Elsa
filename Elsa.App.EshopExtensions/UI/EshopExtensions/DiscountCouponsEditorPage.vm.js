@@ -8,6 +8,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
     self.ruleList = [];
     self.activeRule = null;
     self.hasActiveRule = false;
+    self.productHelpVisible = false;
 
     const newKey = () => crypto.randomUUID();
 
@@ -17,15 +18,28 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         }
 
         let normalized = value.trim();
+
+        try {
+            normalized = decodeURIComponent(normalized);
+        } catch (e) {
+        }
+
         const productPathIndex = normalized.toLowerCase().indexOf("/p/");
         if (productPathIndex >= 0) {
             normalized = normalized.substring(productPathIndex);
         }
 
-        normalized = normalized.split("?")[0].split("#")[0];
+        normalized = normalized.split("#")[0];
 
         return normalized.trim();
     };
+
+    const isValidProductPath = (value) => {
+        const normalized = normalizeProductPath(value);
+        return /^\/p\/\d+(\/[^?#]+)?(\?variant\[\d+\]=[^&#]+(&variant\[\d+\]=[^&#]+)*)?$/i.test(normalized);
+    };
+
+    const encodeProductPathForTransport = (value) => encodeURIComponent(normalizeProductPath(value));
 
     const createCouponCodeUi = (value) => ({
         Key: newKey(),
@@ -161,12 +175,38 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         Rules: self.activeRule.RuleGroups.map(g => buildRuleChain(g.ChainItems, 0))
     });
 
+    const mapRuleForTransport = (rule) => {
+        if (!rule) {
+            return null;
+        }
+
+        return {
+            MustHaveProductInCart: encodeProductPathForTransport(rule.MustHaveProductInCart),
+            MinQuantity: rule.MinQuantity,
+            MaxQuantity: rule.MaxQuantity,
+            ViolationMessage: rule.ViolationMessage,
+            AndAlso: mapRuleForTransport(rule.AndAlso)
+        };
+    };
+
+    const createTransportPayload = (payload) => ({
+        Id: payload.Id,
+        RuleName: payload.RuleName,
+        IsActive: payload.IsActive,
+        CouponCodes: payload.CouponCodes.slice(),
+        Rules: payload.Rules.map(mapRuleForTransport)
+    });
+
     const hasInvalidRule = (rule) => {
         if (!rule) {
             return true;
         }
 
         if (!rule.MustHaveProductInCart || !rule.MustHaveProductInCart.trim()) {
+            return true;
+        }
+
+        if (!isValidProductPath(rule.MustHaveProductInCart)) {
             return true;
         }
 
@@ -199,7 +239,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         }
 
         if (payload.Rules.some(hasInvalidRule)) {
-            return "Každá podmínka musí mít produkt a hlášku při nesplnění.";
+            return "Každá podmínka musí mít platnou URL produktu a hlášku při nesplnění.";
         }
 
         return null;
@@ -228,6 +268,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
     const closeDetail = (selectedId) => {
         self.activeRule = null;
         self.hasActiveRule = false;
+        self.productHelpVisible = false;
         syncActiveCheckbox();
         refreshList(selectedId || null);
         lt.notify();
@@ -256,11 +297,13 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         }
 
         const payload = buildPayload();
+        const transportPayload = createTransportPayload(payload);
         const requestedActive = !!payload.IsActive;
         const clientValidationMessage = validateForActivation(payload);
 
         if (requestedActive && clientValidationMessage) {
             payload.IsActive = false;
+            transportPayload.IsActive = false;
             self.activeRule.IsActive = false;
             self.activeRule.ValidationMessage = clientValidationMessage;
             syncActiveCheckbox();
@@ -268,7 +311,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         }
 
         lt.api("/discountCoupons/saveCouponRule")
-            .body(payload)
+            .body(transportPayload)
             .post((saved) => {
                 if (requestedActive && saved && saved.ValidationMessage && !clientValidationMessage) {
                     alert("Pravidlo bylo uloženo jako neaktivní: " + saved.ValidationMessage);
@@ -298,6 +341,14 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
     };
 
     self.closeDetail = () => closeDetail(null);
+    self.toggleProductHelp = () => {
+        self.productHelpVisible = !self.productHelpVisible;
+        lt.notify();
+    };
+    self.closeProductHelp = () => {
+        self.productHelpVisible = false;
+        lt.notify();
+    };
 
     self.updateRuleName = (value) => {
         self.activeRule.RuleName = value;

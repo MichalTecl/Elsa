@@ -102,7 +102,12 @@
                                             </div>
 
                                             <label class="couponEditorField">
-                                                <span>V košíku musí být produkt</span>
+                                                <span class="couponEditorFieldLabelRow">
+                                                    <span>V košíku musí být produkt</span>
+                                                    <button type="button" class="couponEditorHelpButton" title="Nápověda k odkazu produktu" event-bind="click:toggleProductHelp()">
+                                                        <i class="fas fa-question-circle"></i>
+                                                    </button>
+                                                </span>
                                                 <input type="text" data-bind="value:MustHaveProductInCart" event-bind="input:updateRuleProduct(GroupKey, Key, this.value)" />
                                             </label>
 
@@ -142,6 +147,13 @@
                 </div>
             </div>
         </div>
+
+        <div class="couponEditorHelpOverlay hidden" data-bind="class!.hidden:productHelpVisible" event-bind="click:closeProductHelp()">
+            <div class="couponEditorHelpDialog" event-bind="click:stopEvent(event)">
+                <div class="couponEditorHelpTitle">Zkopíruj link produktu z košíku</div>
+                <img src="/UI/EshopExtensions/DiscountCouponsHelp.png" alt="Nápověda k odkazu produktu" class="couponEditorHelpImage" />
+            </div>
+        </div>
     </div>
 
     <script>
@@ -153,6 +165,13 @@
             this.saveRule = () => vm.saveRule();
             this.deleteRule = () => vm.deleteRule();
             this.closeDetail = () => vm.closeDetail();
+            this.toggleProductHelp = () => vm.toggleProductHelp();
+            this.closeProductHelp = () => vm.closeProductHelp();
+            this.stopEvent = (event) => {
+                if (event) {
+                    event.stopPropagation();
+                }
+            };
 
             this.updateRuleName = (value) => vm.updateRuleName(value);
             this.updateIsActive = (value) => vm.updateIsActive(value);

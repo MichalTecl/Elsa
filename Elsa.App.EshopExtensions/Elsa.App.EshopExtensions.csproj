@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Elsa.App.PublicFiles\Elsa.App.PublicFiles.csproj" />
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj" />
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj" />
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj" />
