@@ -1,8 +1,11 @@
-﻿using Elsa.Common;
+using Elsa.Common;
+using Elsa.Common.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -11,6 +14,15 @@ namespace Elsa.App.PublicFiles.Impl
 {
     public class PublicFiles : IPublicFilesHelper
     {
+        private readonly ILog _log;
+        private readonly PublicFilesConfig _config;
+
+        public PublicFiles(ILog log, PublicFilesConfig config)
+        {
+            _log = log;
+            _config = config;
+        }
+
         public FileResult GetFile(string cid, string ftype)
         {
             if (!ValidateDirectory(cid) || !ValidateDirectory(ftype))
@@ -66,6 +78,8 @@ namespace Elsa.App.PublicFiles.Impl
             {
                 File.Move(tempFile, Path.Combine(directory, $"{fileName}.public"));
             });
+
+            PurgeCloudflareCache();
         }
 
         private bool ValidateDirectory(string inp)
@@ -94,6 +108,47 @@ namespace Elsa.App.PublicFiles.Impl
 
                     Thread.Sleep(100 * i);
                 }
+            }
+        }
+
+        private void PurgeCloudflareCache()
+        {
+            if (_config == null)
+            {
+                const string message = "PublicFilesConfig is not configured";
+                _log.Error(message);
+                throw new InvalidOperationException(message);
+            }
+
+            if (string.IsNullOrWhiteSpace(_config.CfZoneId) || string.IsNullOrWhiteSpace(_config.CfToken))
+            {
+                const string message = "Cloudflare purge is not configured. Missing CloudFlare.ZoneId or CloudFlare.ApiToken";
+                _log.Error(message);
+                throw new InvalidOperationException(message);
+            }
+
+            _log.Info($"Purging Cloudflare cache for zone '{_config.CfZoneId}'");
+
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", _config.CfToken);
+
+                var response = httpClient.PostAsync(
+                    $"https://api.cloudflare.com/client/v4/zones/{_config.CfZoneId}/purge_cache",
+                    new StringContent("{\"purge_everything\":true}", Encoding.UTF8, "application/json"))
+                    .GetAwaiter()
+                    .GetResult();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseText = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    _log.Error($"Cloudflare cache purge failed with status {(int)response.StatusCode}: {responseText}");
+                    throw new InvalidOperationException(
+                        $"Cloudflare cache purge failed with status {(int)response.StatusCode}: {responseText}");
+                }
+
+                _log.Info($"Cloudflare cache purge finished for zone '{_config.CfZoneId}'");
             }
         }
     }
