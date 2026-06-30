@@ -1,0 +1,177 @@
+<ElsaBody>
+    <script src="/UI/EshopExtensions/DiscountCouponsEditorPage.vm.js"></script>
+
+    <div id="discountCouponsEditorPage" class="couponEditorLayout">
+        <div class="panel w1 couponEditorSidebar">
+            <div class="panelHead">
+                <div class="panelTitle">Pravidla kuponů</div>
+            </div>
+            <div class="panelContent couponEditorSidebarContent">
+                <div class="couponEditorSidebarActions">
+                    <button type="button" event-bind="click:createRule()">
+                        <i class="fas fa-plus"></i>
+                        Přidat pravidlo
+                    </button>
+                </div>
+
+                <div class="couponEditorRuleList" data-bind="itemsSource:ruleList" data-key="Id">
+                    <div class="lt-template couponEditorRuleListItem" data-bind="class.active:IsSelected;class.inactive:!IsActive" event-bind="click:openRule(Id)">
+                        <div class="couponEditorRuleListTitle" data-bind="text:RuleName"></div>
+                        <div class="couponEditorRuleListDates" data-bind="text:StatusText"></div>
+                        <div class="couponEditorRuleListCodes" data-bind="text:CouponCodesText"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel w3 couponEditorDetailPanel">
+            <div class="panelHead">
+                <div class="panelTitle">Detail pravidla</div>
+            </div>
+
+            <div class="panelContent couponEditorDetailEmpty" data-bind="class.hidden:hasActiveRule">
+                Vyber pravidlo vlevo nebo vytvoř nové.
+            </div>
+
+            <div class="panelContent couponEditorDetailBody hidden" data-bind="class!.hidden:hasActiveRule">
+                <div class="couponEditorTopBar">
+                    <button type="button" class="couponEditorDeleteButton" data-bind="class.hidden:!activeRule.CanDelete" event-bind="click:deleteRule()">Smazat</button>
+
+                    <div class="couponEditorTopBarActions">
+                        <button type="button" class="couponEditorCloseButton" event-bind="click:closeDetail()" title="Zavřít bez uložení">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button type="button" event-bind="click:saveRule()">Uložit</button>
+                    </div>
+                </div>
+
+                <div class="couponEditorFormGrid">
+                    <label class="couponEditorField">
+                        <span>Název pravidla</span>
+                        <input type="text" data-bind="value:activeRule.RuleName" event-bind="input:updateRuleName(this.value)" />
+                    </label>
+
+                    <div class="couponEditorField couponEditorActiveField">
+                        <span>Stav pravidla</span>
+                        <label class="couponEditorCheckboxRow">
+                            <input id="couponEditorActiveCheckbox" type="checkbox" data-bind="checked:activeRule.IsActive" event-bind="change:updateIsActive(this.checked)" />
+                            <span>Pravidlo je aktivní</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="couponEditorValidationMessage hidden" data-bind="class!.hidden:activeRule.ValidationMessage; text:activeRule.ValidationMessage"></div>
+
+                <div class="couponEditorSection">
+                    <div class="couponEditorSectionHead">
+                        <div class="couponEditorSectionTitle">Kódy kuponů</div>
+                    </div>
+
+                    <div class="couponEditorCodesList" data-bind="itemsSource:activeRule.CouponCodesUi" data-key="Key">
+                        <div class="lt-template couponEditorCodeRow">
+                            <input type="text" data-bind="value:Value" event-bind="input:updateCouponCode(Key, this.value)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="couponEditorSection">
+                    <div class="couponEditorSectionHead">
+                        <div class="couponEditorSectionTitle">Podmínky</div>
+                    </div>
+
+                    <div class="couponEditorGroups" data-bind="itemsSource:activeRule.RuleGroups" data-key="Key">
+                        <div class="lt-template couponEditorGroup">
+                            <div class="couponEditorOrLabel hidden" data-bind="class!.hidden:ShowOrLabel">NEBO</div>
+
+                            <div class="couponEditorRuleChain" data-bind="itemsSource:ChainItems" data-key="Key">
+                                <div class="lt-template couponEditorRuleChainItem">
+                                    <div class="couponEditorRuleChainRow">
+                                        <div class="couponEditorAndAlso hidden" data-bind="class!.hidden:ShowAndAlsoLabel">A TAKÉ</div>
+
+                                        <div class="couponEditorRuleCard">
+                                            <div class="couponEditorRuleCardActions">
+                                                <button type="button" class="couponEditorIconButton" data-bind="class.hidden:CanMoveUp" event-bind="click:moveRuleGroup(GroupKey, -1)">
+                                                    <i class="fas fa-arrow-up"></i>
+                                                </button>
+                                                <button type="button" class="couponEditorIconButton" data-bind="class.hidden:CanMoveDown" event-bind="click:moveRuleGroup(GroupKey, 1)">
+                                                    <i class="fas fa-arrow-down"></i>
+                                                </button>
+                                                <button type="button" class="couponEditorIconButton" event-bind="click:removeChainItem(GroupKey, Key)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+
+                                            <label class="couponEditorField">
+                                                <span>V košíku musí být produkt</span>
+                                                <input type="text" data-bind="value:MustHaveProductInCart" event-bind="input:updateRuleProduct(GroupKey, Key, this.value)" />
+                                            </label>
+
+                                            <div class="couponEditorRuleCounts">
+                                                <label class="couponEditorField">
+                                                    <span>Nejméně</span>
+                                                    <input type="number" min="1" data-bind="value:MinQuantity" event-bind="input:updateRuleMin(GroupKey, Key, this.value)" />
+                                                </label>
+
+                                                <label class="couponEditorField">
+                                                    <span>A maximálně</span>
+                                                    <input type="number" min="1" data-bind="value:MaxQuantity" event-bind="input:updateRuleMax(GroupKey, Key, this.value)" />
+                                                </label>
+                                            </div>
+
+                                            <label class="couponEditorField">
+                                                <span>Hláška při nesplnění</span>
+                                                <input type="text" data-bind="value:ViolationMessage" event-bind="input:updateRuleMessage(GroupKey, Key, this.value)" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="couponEditorBottomActions">
+                        <button type="button" event-bind="click:addRuleGroup()">
+                            <i class="fas fa-plus"></i>
+                            NEBO
+                        </button>
+                        <button type="button" data-bind="class.hidden:!hasActiveRule" event-bind="click:addAndAlsoToLastGroup()">
+                            <i class="fas fa-link"></i>
+                            A TAKÉ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lt.element("discountCouponsEditorPage").withModel("app.DiscountCouponsEditor.vm").attach(function () {
+            const vm = app.DiscountCouponsEditor.vm;
+
+            this.createRule = () => vm.createRule();
+            this.openRule = (id) => vm.openRule(id);
+            this.saveRule = () => vm.saveRule();
+            this.deleteRule = () => vm.deleteRule();
+            this.closeDetail = () => vm.closeDetail();
+
+            this.updateRuleName = (value) => vm.updateRuleName(value);
+            this.updateIsActive = (value) => vm.updateIsActive(value);
+
+            this.updateCouponCode = (key, value) => vm.updateCouponCode(key, value);
+
+            this.addRuleGroup = () => vm.addRuleGroup();
+            this.moveRuleGroup = (groupKey, direction) => vm.moveRuleGroup(groupKey, direction);
+            this.removeRuleGroup = (groupKey) => vm.removeRuleGroup(groupKey);
+            this.addAndAlso = (groupKey) => vm.addAndAlso(groupKey);
+            this.addAndAlsoToLastGroup = () => vm.addAndAlsoToLastGroup();
+            this.removeChainItem = (groupKey, itemKey) => vm.removeChainItem(groupKey, itemKey);
+
+            this.updateRuleProduct = (groupKey, itemKey, value) => vm.updateRuleProduct(groupKey, itemKey, value);
+            this.updateRuleMin = (groupKey, itemKey, value) => vm.updateRuleMin(groupKey, itemKey, value);
+            this.updateRuleMax = (groupKey, itemKey, value) => vm.updateRuleMax(groupKey, itemKey, value);
+            this.updateRuleMessage = (groupKey, itemKey, value) => vm.updateRuleMessage(groupKey, itemKey, value);
+        });
+    </script>
+
+    <link href="/UI/EshopExtensions/DiscountCouponsEditorPage.css" rel="stylesheet" />
+</ElsaBody>

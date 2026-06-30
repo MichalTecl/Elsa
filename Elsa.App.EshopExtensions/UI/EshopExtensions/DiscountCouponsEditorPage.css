@@ -1,0 +1,258 @@
+.couponEditorLayout {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.couponEditorSidebar {
+    min-width: 320px;
+}
+
+.couponEditorSidebarContent,
+.couponEditorDetailBody {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.couponEditorSidebarActions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.couponEditorRuleList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.couponEditorRuleListItem {
+    border: 1px solid #c8d2df;
+    border-radius: 4px;
+    padding: 10px 12px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.couponEditorRuleListItem.active {
+    border-color: #3f5e9d;
+    background: #eef3ff;
+}
+
+.couponEditorRuleListItem.inactive {
+    opacity: 0.75;
+    border-left: 4px solid #b43838;
+}
+
+.couponEditorRuleListTitle {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.couponEditorRuleListDates,
+.couponEditorRuleListCodes {
+    font-size: 12px;
+    color: #4e5b6f;
+}
+
+.couponEditorDetailEmpty {
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+}
+
+.couponEditorTopBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.couponEditorTopBarActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.couponEditorDeleteButton {
+    background: #b43838;
+    color: #fff;
+}
+
+.couponEditorCloseButton {
+    min-width: 34px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.couponEditorFormGrid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) 260px;
+    gap: 12px;
+    align-items: end;
+}
+
+.couponEditorActiveField {
+    justify-self: start;
+}
+
+.couponEditorCheckboxRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    margin-top: 6px;
+}
+
+.couponEditorCheckboxRow span {
+    font-size: 14px;
+}
+
+.couponEditorValidationMessage {
+    padding: 10px 12px;
+    border: 1px solid #d3b36b;
+    background: #fff6cf;
+    color: #6d5200;
+    border-radius: 4px;
+}
+
+.couponEditorField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.couponEditorField span {
+    font-size: 13px;
+}
+
+.couponEditorField input {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+}
+
+.couponEditorSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.couponEditorSectionHead {
+    display: flex;
+    align-items: center;
+}
+
+.couponEditorSectionTitle {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.couponEditorCodesList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.couponEditorCodeRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.couponEditorCodeRow input {
+    flex: 1;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.couponEditorRuleCard input,
+.couponEditorFormGrid input,
+.couponEditorCodesList input {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.couponEditorActiveField input[type="checkbox"] {
+    width: auto !important;
+    max-width: none !important;
+    flex: 0 0 auto !important;
+}
+
+.couponEditorGroups {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.couponEditorGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.couponEditorOrLabel,
+.couponEditorAndAlso {
+    font-weight: 700;
+    color: #4a628f;
+}
+
+.couponEditorBottomActions {
+    display: flex;
+    gap: 6px;
+}
+
+.couponEditorRuleChain {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.couponEditorRuleChainItem + .couponEditorRuleChainItem {
+    margin-top: -1px;
+}
+
+.couponEditorRuleChainRow {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.couponEditorAndAlso {
+    flex: 0 0 78px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 14px;
+    line-height: 1.1;
+}
+
+.couponEditorRuleCard {
+    flex: 1 1 auto;
+    border: 1px solid #c8d2df;
+    border-left: 6px solid #28d3df;
+    border-radius: 4px;
+    background: #fdfefe;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.couponEditorRuleCardActions {
+    display: flex;
+    justify-content: flex-start;
+    align-self: flex-start;
+    gap: 6px;
+}
+
+.couponEditorRuleCounts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.couponEditorIconButton {
+    min-width: 34px;
+}

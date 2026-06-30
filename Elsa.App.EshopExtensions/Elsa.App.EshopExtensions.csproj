@@ -5,8 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj" />
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj" />
+    <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj" />
     <ProjectReference Include="..\Robowire\Robowire.RoboApi\Robowire.RoboApi.csproj" />
     <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj" />
     <ProjectReference Include="..\Robowire\Robowire.RobOrm.SqlServer\Robowire.RobOrm.SqlServer.csproj" />
@@ -14,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Internal\" />
     <Folder Include="SQL\" />
     <Folder Include="UI\" />
   </ItemGroup>
