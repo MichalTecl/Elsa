@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Robowire.Core;
 
@@ -11,6 +11,8 @@ namespace Robowire.RoboApi.Internal
         public Type ProxyBuilderType { get; set; }
 
         public Type CallBuilderType { get; set; }
+
+        public bool SuppressSessionCookieWrite { get; set; }
 
         public void BindTo(IServiceSetupRecord setup)
         {

@@ -9,6 +9,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
+using Robowire.RoboApi;
 using Robowire.RobOrm.Core;
 
 namespace Elsa.Users
@@ -159,15 +160,15 @@ namespace Elsa.Users
 
         public void Initialize(HttpContext rq) 
         {
-            Initialize(ck => rq.Request.Cookies[ck], c => rq.Response.Cookies.Add(c));
+            Initialize(ck => rq.Request.Cookies[ck], c => rq.Response.Cookies.Add(c), ShouldSuppressCookieWrite(rq.Items));
         }
 
         public void Initialize(HttpContextBase rq) 
         {
-            Initialize(ck => rq.Request.Cookies[ck], c => rq.Response.Cookies.Add(c));
+            Initialize(ck => rq.Request.Cookies[ck], c => rq.Response.Cookies.Add(c), ShouldSuppressCookieWrite(rq.Items));
         }
 
-        private void Initialize(Func<string, HttpCookie> getCookie, Action<HttpCookie> setCookie)
+        private void Initialize(Func<string, HttpCookie> getCookie, Action<HttpCookie> setCookie, bool suppressCookieWrite)
         {
             var sessionCookie = getCookie(c_sessionCookieIdentifier);
             if (sessionCookie != null)
@@ -201,6 +202,12 @@ namespace Elsa.Users
             {
                 m_session = null;
 
+                if (suppressCookieWrite)
+                {
+                    m_initialized = true;
+                    return;
+                }
+
                 m_sessionPublicId = Guid.NewGuid();
                 m_cache.Remove(GetCacheKey(m_sessionPublicId.Value));
 
@@ -210,10 +217,18 @@ namespace Elsa.Users
                                     };
             }
 
-            sessionCookie.Expires = DateTime.Now.AddDays(30);
-            setCookie(sessionCookie);
+            if (!suppressCookieWrite)
+            {
+                sessionCookie.Expires = DateTime.Now.AddDays(30);
+                setCookie(sessionCookie);
+            }
             
             m_initialized = true;
+        }
+
+        private static bool ShouldSuppressCookieWrite(System.Collections.IDictionary items)
+        {
+            return RequestContextFlags.GetSuppressSessionCookieWrite(items);
         }
 
         private void EnsureInitialized()

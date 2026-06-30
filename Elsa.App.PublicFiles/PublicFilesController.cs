@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Elsa.App.PublicFiles
 {
-    [Controller("PublicFile")]
+    [Controller("PublicFile", suppressSessionCookieWrite: true)]
     public class PublicFilesController : ElsaControllerBase
     {
         private readonly ILog _log;
@@ -38,6 +38,8 @@ namespace Elsa.App.PublicFiles
 
                     var file = _publicFilesHelper.GetFile(cid, ftype);
                     file.AllowCrossOriginAccess = true;
+                    file.PubliclyCacheable = true;
+                    file.DisableBrowserCache = true;
                     return file;
 
                 });

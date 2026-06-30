@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Robowire.RoboApi.Convention.Default;
@@ -11,15 +11,22 @@ namespace Robowire.RoboApi
         private readonly string m_controllerName;
         private readonly Type m_proxyBuilderType;
         private readonly Type m_callBuilderType;
-        
-        public ControllerAttribute(string controllerName, Type proxyBuilderType = null, Type callBuilderType = null)
+        private readonly bool m_suppressSessionCookieWrite;
+
+        public ControllerAttribute(
+            string controllerName,
+            Type proxyBuilderType = null,
+            Type callBuilderType = null,
+            bool suppressSessionCookieWrite = false)
         {
             m_controllerName = controllerName;
             m_proxyBuilderType = proxyBuilderType ?? typeof(ControllerProxyBuilder);
             m_callBuilderType = callBuilderType ?? typeof(DefaultCallBuilder);
+            m_suppressSessionCookieWrite = suppressSessionCookieWrite;
         }
 
         public string Name => m_controllerName;
+        public bool SuppressSessionCookieWrite => m_suppressSessionCookieWrite;
 
         public void Setup(Type markedType, IContainerSetup setup)
         {
@@ -38,6 +45,7 @@ namespace Robowire.RoboApi
             behavior.ControllerName = m_controllerName;
             behavior.ProxyBuilderType = m_proxyBuilderType;
             behavior.CallBuilderType = m_callBuilderType;
+            behavior.SuppressSessionCookieWrite = m_suppressSessionCookieWrite;
         }
     }
 }

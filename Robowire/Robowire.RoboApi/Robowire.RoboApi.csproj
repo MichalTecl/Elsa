@@ -67,6 +67,7 @@
     <Compile Include="Internal\RaControllerFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawStringAttribute.cs" />
+    <Compile Include="RequestContextFlags.cs" />
     <Compile Include="RoboApiInstaller.cs" />
   </ItemGroup>
   <ItemGroup>

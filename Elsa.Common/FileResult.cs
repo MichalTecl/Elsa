@@ -27,6 +27,8 @@ namespace Elsa.Common
         }
       
         public bool AllowCrossOriginAccess { get; set; }
+        public bool PubliclyCacheable { get; set; }
+        public bool DisableBrowserCache { get; set; }
 
         public void WriteResponse(HttpContextBase context)
         {
@@ -35,6 +37,20 @@ namespace Elsa.Common
             context.Response.Clear();
             context.Response.ContentType = m_contentType ?? $"application/{fileType}";
             context.Response.AddHeader("Content-Disposition", $"{m_contentDisposition}; filename={m_fileName}");
+
+            if (PubliclyCacheable)
+            {
+                context.Response.Cache.SetCacheability(HttpCacheability.Public);
+            }
+
+            if (DisableBrowserCache)
+            {
+                context.Response.Headers["Cache-Control"] = PubliclyCacheable
+                    ? "public, max-age=0, must-revalidate"
+                    : "no-cache, no-store, must-revalidate";
+                context.Response.Headers["Pragma"] = "no-cache";
+                context.Response.Headers["Expires"] = "0";
+            }
 
             if(AllowCrossOriginAccess)
             {

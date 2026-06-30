@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Linq;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.SessionState;
@@ -9,25 +10,37 @@ namespace Robowire.RoboApi.Internal
     {
         private readonly IContainer m_container;
         private readonly Action<RequestContext, IServiceLocator> m_requestScopeInitializer;
+        private readonly IControllerNameExtractor m_nameExtractor;
+        private readonly ControllerIndex m_controllerIndex;
 
         public RaControllerFactory(IContainer container, Action<RequestContext, IServiceLocator> requestScopeInitializer)
         {
             m_container = container;
             m_requestScopeInitializer = requestScopeInitializer;
+
+            using (var locator = m_container.GetLocator())
+            {
+                m_nameExtractor = locator.Get<IControllerNameExtractor>();
+                m_controllerIndex = locator.Get<ControllerIndex>();
+            }
         }
 
         public IController CreateController(RequestContext requestContext, string controllerName)
         {
             var locator = m_container.GetLocator();
 
+            var ctlrName = m_nameExtractor.GetControllerName(requestContext, controllerName);
+            var controllerType = m_controllerIndex.GetControllerType(ctlrName);
+            var controllerAttribute = controllerType.GetCustomAttributes(typeof(ControllerAttribute), true)
+                .OfType<ControllerAttribute>()
+                .FirstOrDefault();
+
+            if (controllerAttribute?.SuppressSessionCookieWrite == true)
+            {
+                RequestContextFlags.SetSuppressSessionCookieWrite(requestContext.HttpContext.Items, true);
+            }
+
             m_requestScopeInitializer?.Invoke(requestContext, locator);
-
-            var nameExtractor = locator.Get<IControllerNameExtractor>();
-
-            var ctlrName = nameExtractor.GetControllerName(requestContext, controllerName);
-
-            var index = locator.Get<ControllerIndex>();
-            var controllerType = index.GetControllerType(ctlrName);
 
             var controller = locator.Get(controllerType) as IController;
 
@@ -41,6 +54,17 @@ namespace Robowire.RoboApi.Internal
 
         public SessionStateBehavior GetControllerSessionBehavior(RequestContext requestContext, string controllerName)
         {
+            var ctlrName = m_nameExtractor.GetControllerName(requestContext, controllerName);
+            var controllerType = m_controllerIndex.GetControllerType(ctlrName);
+            var controllerAttribute = controllerType.GetCustomAttributes(typeof(ControllerAttribute), true)
+                .OfType<ControllerAttribute>()
+                .FirstOrDefault();
+
+            if (controllerAttribute?.SuppressSessionCookieWrite == true)
+            {
+                return SessionStateBehavior.Disabled;
+            }
+
             return SessionStateBehavior.Default;
         }
 
