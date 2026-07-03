@@ -17,6 +17,6 @@ namespace Elsa.App.EshopExtensions.Entities
         string RuleJson { get; set; }
 
         DateTime? ValidFrom { get; set; }
-        DateTime? ValidTo { get; set; }
+        DateTime? ValidTo { get; set; }        
     }
 }

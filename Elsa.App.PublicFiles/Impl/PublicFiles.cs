@@ -1,5 +1,6 @@
 using Elsa.Common;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -113,6 +114,12 @@ namespace Elsa.App.PublicFiles.Impl
 
         private void PurgeCloudflareCache()
         {
+            if (AppEnvironment.IsDev)
+            {
+                _log.Info("Skipping Cloudflare cache purge because application is running in DEV environment");
+                return;
+            }
+
             if (_config == null)
             {
                 const string message = "PublicFilesConfig is not configured";

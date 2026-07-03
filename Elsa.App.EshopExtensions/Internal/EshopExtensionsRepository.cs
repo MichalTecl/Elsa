@@ -253,7 +253,7 @@ namespace Elsa.App.EshopExtensions.Internal
 
             if (model.Rules.Any(HasInvalidRule))
             {
-                return "Každá podmínka musí mít alespoň jednu platnou URL produktu a hlášku při nesplnění.";
+                return "Každá podmínka musí mít vyplněný jeden typ podmínky a hlášku při nesplnění.";
             }
 
             return null;
@@ -266,11 +266,24 @@ namespace Elsa.App.EshopExtensions.Internal
                 return true;
             }
 
-            var productLinks = NormalizeProductLinks(rule.MustHaveProductsInCart);
+            var conditionType = NormalizeConditionType(rule.ConditionType);
+            var hasInvalidCondition = false;
 
-            if (productLinks.Count == 0 ||
-                productLinks.Any(link => !IsValidProductUrl(link)) ||
-                string.IsNullOrWhiteSpace(rule.ViolationMessage))
+            if (conditionType == CouponRuleConditionTypes.ProductsInCart)
+            {
+                var productLinks = NormalizeProductLinks(rule.MustHaveProductsInCart);
+                hasInvalidCondition = productLinks.Count == 0 || productLinks.Any(link => !IsValidProductUrl(link));
+            }
+            else if (conditionType == CouponRuleConditionTypes.MinimumOrderPrice)
+            {
+                hasInvalidCondition = !rule.MinOrderPrice.HasValue || rule.MinOrderPrice.Value <= 0;
+            }
+            else
+            {
+                hasInvalidCondition = true;
+            }
+
+            if (hasInvalidCondition || string.IsNullOrWhiteSpace(rule.ViolationMessage))
             {
                 return true;
             }
@@ -285,11 +298,19 @@ namespace Elsa.App.EshopExtensions.Internal
                 return CreateDefaultRule();
             }
 
+            var conditionType = NormalizeConditionType(source.ConditionType);
+
             return new Rule
             {
-                MustHaveProductsInCart = NormalizeProductLinks(source.MustHaveProductsInCart),
+                ConditionType = conditionType,
+                MustHaveProductsInCart = conditionType == CouponRuleConditionTypes.ProductsInCart
+                    ? NormalizeProductLinks(source.MustHaveProductsInCart)
+                    : new List<string>(),
                 MinQuantity = source.MinQuantity <= 0 ? 1 : source.MinQuantity,
                 MaxQuantity = source.MaxQuantity <= 0 ? 9999 : source.MaxQuantity,
+                MinOrderPrice = conditionType == CouponRuleConditionTypes.MinimumOrderPrice && source.MinOrderPrice > 0
+                    ? source.MinOrderPrice
+                    : null,
                 ViolationMessage = source.ViolationMessage?.Trim(),
                 AndAlso = NormalizeNestedRule(source.AndAlso)
             };
@@ -302,11 +323,19 @@ namespace Elsa.App.EshopExtensions.Internal
                 return null;
             }
 
+            var conditionType = NormalizeConditionType(source.ConditionType);
+
             return new Rule
             {
-                MustHaveProductsInCart = NormalizeProductLinks(source.MustHaveProductsInCart),
+                ConditionType = conditionType,
+                MustHaveProductsInCart = conditionType == CouponRuleConditionTypes.ProductsInCart
+                    ? NormalizeProductLinks(source.MustHaveProductsInCart)
+                    : new List<string>(),
                 MinQuantity = source.MinQuantity <= 0 ? 1 : source.MinQuantity,
                 MaxQuantity = source.MaxQuantity <= 0 ? 9999 : source.MaxQuantity,
+                MinOrderPrice = conditionType == CouponRuleConditionTypes.MinimumOrderPrice && source.MinOrderPrice > 0
+                    ? source.MinOrderPrice
+                    : null,
                 ViolationMessage = source.ViolationMessage?.Trim(),
                 AndAlso = NormalizeNestedRule(source.AndAlso)
             };
@@ -321,9 +350,11 @@ namespace Elsa.App.EshopExtensions.Internal
 
             return new Rule
             {
+                ConditionType = NormalizeConditionType(source.ConditionType),
                 MustHaveProductsInCart = NormalizeProductLinks(source.MustHaveProductsInCart),
                 MinQuantity = source.MinQuantity,
                 MaxQuantity = source.MaxQuantity,
+                MinOrderPrice = source.MinOrderPrice,
                 ViolationMessage = source.ViolationMessage,
                 AndAlso = CloneRule(source.AndAlso)
             };
@@ -342,9 +373,20 @@ namespace Elsa.App.EshopExtensions.Internal
         {
             return new Rule
             {
+                ConditionType = CouponRuleConditionTypes.ProductsInCart,
                 MinQuantity = 1,
                 MaxQuantity = 9999
             };
+        }
+
+        private string NormalizeConditionType(string value)
+        {
+            if (string.Equals(value, CouponRuleConditionTypes.MinimumOrderPrice, StringComparison.OrdinalIgnoreCase))
+            {
+                return CouponRuleConditionTypes.MinimumOrderPrice;
+            }
+
+            return CouponRuleConditionTypes.ProductsInCart;
         }
 
         private string NormalizeProductLink(string value)

@@ -252,6 +252,36 @@
     gap: 12px;
 }
 
+.couponEditorConditionTabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.couponEditorConditionTab {
+    background: #eef3ff;
+    border: 1px solid #c8d2df;
+    color: #314a7c;
+}
+
+.couponEditorConditionTab.active {
+    background: #3f5e9d;
+    border-color: #3f5e9d;
+    color: #fff;
+}
+
+.couponEditorConditionPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.couponEditorConditionHint {
+    font-size: 12px;
+    color: #5f6f86;
+    line-height: 1.4;
+}
+
 .couponEditorRuleCardActions {
     display: flex;
     justify-content: flex-start;

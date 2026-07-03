@@ -29,9 +29,11 @@ namespace Elsa.App.EshopExtensions.Model
 
             return new Rule
             {
+                ConditionType = source.ConditionType,
                 MustHaveProductsInCart = source.MustHaveProductsInCart?.ToList(),
                 MinQuantity = source.MinQuantity,
                 MaxQuantity = source.MaxQuantity,
+                MinOrderPrice = source.MinOrderPrice,
                 ViolationMessage = source.ViolationMessage,
                 AndAlso = CloneRule(source.AndAlso)
             };
@@ -53,6 +55,8 @@ namespace Elsa.App.EshopExtensions.Model
 
     public class Rule
     {
+        public string ConditionType { get; set; }
+
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public List<string> MustHaveProductsInCart { get; set; }
 
@@ -60,8 +64,16 @@ namespace Elsa.App.EshopExtensions.Model
 
         public int MaxQuantity { get; set; }
 
+        public decimal? MinOrderPrice { get; set; }
+
         public string ViolationMessage { get; set; }
 
         public Rule AndAlso { get; set; }
+    }
+
+    public static class CouponRuleConditionTypes
+    {
+        public const string ProductsInCart = "productsInCart";
+        public const string MinimumOrderPrice = "minimumOrderPrice";
     }
 }
