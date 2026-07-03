@@ -31,7 +31,7 @@ namespace Elsa.App.PublicFiles
 
             try
             {
-                return _cache.ReadThrough<FileResult>($"PublicFiles/{cid.GetHashCode()}/{ftype.GetHashCode()}",
+                return _cache.ReadThrough<FileResult>(PublicFilesCacheKeyHelper.GetCacheKey(cid, ftype),
                 TimeSpan.FromMinutes(60),
                 () =>
                 {

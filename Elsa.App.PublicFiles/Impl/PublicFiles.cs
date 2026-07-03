@@ -1,4 +1,5 @@
 using Elsa.Common;
+using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using System;
@@ -16,11 +17,13 @@ namespace Elsa.App.PublicFiles.Impl
     public class PublicFiles : IPublicFilesHelper
     {
         private readonly ILog _log;
+        private readonly ICache _cache;
         private readonly PublicFilesConfig _config;
 
-        public PublicFiles(ILog log, PublicFilesConfig config)
+        public PublicFiles(ILog log, ICache cache, PublicFilesConfig config)
         {
             _log = log;
+            _cache = cache;
             _config = config;
         }
 
@@ -80,6 +83,7 @@ namespace Elsa.App.PublicFiles.Impl
                 File.Move(tempFile, Path.Combine(directory, $"{fileName}.public"));
             });
 
+            _cache.Remove(PublicFilesCacheKeyHelper.GetCacheKey(customerName, fileType));
             PurgeCloudflareCache();
         }
 
