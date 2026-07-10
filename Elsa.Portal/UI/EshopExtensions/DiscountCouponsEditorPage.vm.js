@@ -6,6 +6,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
     const activeCheckboxId = "couponEditorActiveCheckbox";
     const conditionTypes = {
         productsInCart: "productsInCart",
+        forbiddenProductsInCart: "forbiddenProductsInCart",
         minimumOrderPrice: "minimumOrderPrice"
     };
 
@@ -91,6 +92,10 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
     };
 
     const getRuleProductLinks = (ruleData) => {
+        if (ruleData && Array.isArray(ruleData.RuleProducts) && ruleData.RuleProducts.length > 0) {
+            return ruleData.RuleProducts;
+        }
+
         if (ruleData && Array.isArray(ruleData.MustHaveProductsInCart) && ruleData.MustHaveProductsInCart.length > 0) {
             return ruleData.MustHaveProductsInCart;
         }
@@ -117,9 +122,13 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
     };
 
     const createRuleItemUi = (ruleData, groupKey, showAndAlsoLabel) => {
-        const conditionType = ruleData && ruleData.ConditionType === conditionTypes.minimumOrderPrice
-            ? conditionTypes.minimumOrderPrice
-            : conditionTypes.productsInCart;
+        let conditionType = conditionTypes.productsInCart;
+
+        if (ruleData && ruleData.ConditionType === conditionTypes.minimumOrderPrice) {
+            conditionType = conditionTypes.minimumOrderPrice;
+        } else if (ruleData && ruleData.ConditionType === conditionTypes.forbiddenProductsInCart) {
+            conditionType = conditionTypes.forbiddenProductsInCart;
+        }
 
         const item = {
             Key: newKey(),
@@ -127,6 +136,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
             ShowAndAlsoLabel: !!showAndAlsoLabel,
             ConditionType: conditionType,
             IsProductsInCartCondition: conditionType === conditionTypes.productsInCart,
+            IsForbiddenProductsInCartCondition: conditionType === conditionTypes.forbiddenProductsInCart,
             IsMinimumOrderPriceCondition: conditionType === conditionTypes.minimumOrderPrice,
             ProductLinksUi: [],
             MinQuantity: ruleData && ruleData.MinQuantity > 0 ? ruleData.MinQuantity : 1,
@@ -148,6 +158,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
         }
 
         item.IsProductsInCartCondition = item.ConditionType === conditionTypes.productsInCart;
+        item.IsForbiddenProductsInCartCondition = item.ConditionType === conditionTypes.forbiddenProductsInCart;
         item.IsMinimumOrderPriceCondition = item.ConditionType === conditionTypes.minimumOrderPrice;
     };
 
@@ -239,7 +250,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
 
         return {
             ConditionType: items[index].ConditionType || conditionTypes.productsInCart,
-            MustHaveProductsInCart: items[index].ProductLinksUi
+            RuleProducts: items[index].ProductLinksUi
                 .map(link => normalizeProductPath(link.Value))
                 .filter(link => !!link),
             MinQuantity: parseInt(items[index].MinQuantity, 10) || 1,
@@ -267,7 +278,7 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
 
         return {
             ConditionType: rule.ConditionType || conditionTypes.productsInCart,
-            MustHaveProductsInCart: (rule.MustHaveProductsInCart || []).map(encodeProductPathForTransport),
+            RuleProducts: ((rule.RuleProducts || rule.MustHaveProductsInCart || [])).map(encodeProductPathForTransport),
             MinQuantity: rule.MinQuantity,
             MaxQuantity: rule.MaxQuantity,
             MinOrderPrice: rule.MinOrderPrice,
@@ -291,12 +302,12 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
 
         const conditionType = rule.ConditionType || conditionTypes.productsInCart;
 
-        if (conditionType === conditionTypes.productsInCart) {
-            if (!Array.isArray(rule.MustHaveProductsInCart) || rule.MustHaveProductsInCart.length === 0) {
+        if (conditionType === conditionTypes.productsInCart || conditionType === conditionTypes.forbiddenProductsInCart) {
+            if (!Array.isArray(rule.RuleProducts) || rule.RuleProducts.length === 0) {
                 return true;
             }
 
-            if (rule.MustHaveProductsInCart.some(link => !isValidProductPath(link))) {
+            if (rule.RuleProducts.some(link => !isValidProductPath(link))) {
                 return true;
             }
         } else if (conditionType === conditionTypes.minimumOrderPrice) {
@@ -563,9 +574,13 @@ app.DiscountCouponsEditor.VM = app.DiscountCouponsEditor.VM || function () {
             return;
         }
 
-        item.ConditionType = conditionType === conditionTypes.minimumOrderPrice
-            ? conditionTypes.minimumOrderPrice
-            : conditionTypes.productsInCart;
+        if (conditionType === conditionTypes.minimumOrderPrice) {
+            item.ConditionType = conditionTypes.minimumOrderPrice;
+        } else if (conditionType === conditionTypes.forbiddenProductsInCart) {
+            item.ConditionType = conditionTypes.forbiddenProductsInCart;
+        } else {
+            item.ConditionType = conditionTypes.productsInCart;
+        }
         refreshRuleItemState(item);
         lt.notify();
     };

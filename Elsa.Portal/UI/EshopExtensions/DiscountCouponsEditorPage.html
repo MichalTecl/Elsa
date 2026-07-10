@@ -103,6 +103,7 @@
 
                                             <div class="couponEditorConditionTabs">
                                                 <button type="button" class="couponEditorConditionTab" data-bind="class.active:IsProductsInCartCondition" event-bind="click:setRuleConditionType(GroupKey, Key, 'productsInCart')">Produkty v košíku</button>
+                                                <button type="button" class="couponEditorConditionTab" data-bind="class.active:IsForbiddenProductsInCartCondition" event-bind="click:setRuleConditionType(GroupKey, Key, 'forbiddenProductsInCart')">Zakázané produkty</button>
                                                 <button type="button" class="couponEditorConditionTab" data-bind="class.active:IsMinimumOrderPriceCondition" event-bind="click:setRuleConditionType(GroupKey, Key, 'minimumOrderPrice')">Minimální cena nákupu</button>
                                             </div>
 
@@ -132,6 +133,22 @@
                                                         <input type="number" min="1" data-bind="value:MaxQuantity" event-bind="input:updateRuleMax(GroupKey, Key, this.value)" />
                                                     </label>
                                                 </div>
+                                            </div>
+
+                                            <div class="couponEditorConditionPanel hidden" data-bind="class!.hidden:IsForbiddenProductsInCartCondition">
+                                                <label class="couponEditorField">
+                                                    <span class="couponEditorFieldLabelRow">
+                                                        <span>Objednávka nesmí obsahovat žádný z produktů</span>
+                                                        <button type="button" class="couponEditorHelpButton" title="Nápověda k odkazu produktu" event-bind="click:toggleProductHelp()">
+                                                            <i class="fas fa-question-circle"></i>
+                                                        </button>
+                                                    </span>
+                                                    <div class="couponEditorProductsList" data-bind="itemsSource:ProductLinksUi" data-key="Key">
+                                                        <div class="lt-template couponEditorCodeRow">
+                                                            <input type="text" data-bind="value:Value" event-bind="input:updateRuleProductLink(GroupKey, RuleItemKey, Key, this.value);paste:handleRuleProductLinksPaste(GroupKey, RuleItemKey, Key, event)" />
+                                                        </div>
+                                                    </div>
+                                                </label>
                                             </div>
 
                                             <div class="couponEditorConditionPanel hidden" data-bind="class!.hidden:IsMinimumOrderPriceCondition">

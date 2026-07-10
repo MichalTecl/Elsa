@@ -269,9 +269,10 @@ namespace Elsa.App.EshopExtensions.Internal
             var conditionType = NormalizeConditionType(rule.ConditionType);
             var hasInvalidCondition = false;
 
-            if (conditionType == CouponRuleConditionTypes.ProductsInCart)
+            if (conditionType == CouponRuleConditionTypes.ProductsInCart ||
+                conditionType == CouponRuleConditionTypes.ForbiddenProductsInCart)
             {
-                var productLinks = NormalizeProductLinks(rule.MustHaveProductsInCart);
+                var productLinks = NormalizeProductLinks(rule.RuleProducts);
                 hasInvalidCondition = productLinks.Count == 0 || productLinks.Any(link => !IsValidProductUrl(link));
             }
             else if (conditionType == CouponRuleConditionTypes.MinimumOrderPrice)
@@ -303,8 +304,8 @@ namespace Elsa.App.EshopExtensions.Internal
             return new Rule
             {
                 ConditionType = conditionType,
-                MustHaveProductsInCart = conditionType == CouponRuleConditionTypes.ProductsInCart
-                    ? NormalizeProductLinks(source.MustHaveProductsInCart)
+                RuleProducts = UsesProductListCondition(conditionType)
+                    ? NormalizeProductLinks(source.RuleProducts)
                     : new List<string>(),
                 MinQuantity = source.MinQuantity <= 0 ? 1 : source.MinQuantity,
                 MaxQuantity = source.MaxQuantity <= 0 ? 9999 : source.MaxQuantity,
@@ -328,8 +329,8 @@ namespace Elsa.App.EshopExtensions.Internal
             return new Rule
             {
                 ConditionType = conditionType,
-                MustHaveProductsInCart = conditionType == CouponRuleConditionTypes.ProductsInCart
-                    ? NormalizeProductLinks(source.MustHaveProductsInCart)
+                RuleProducts = UsesProductListCondition(conditionType)
+                    ? NormalizeProductLinks(source.RuleProducts)
                     : new List<string>(),
                 MinQuantity = source.MinQuantity <= 0 ? 1 : source.MinQuantity,
                 MaxQuantity = source.MaxQuantity <= 0 ? 9999 : source.MaxQuantity,
@@ -351,7 +352,7 @@ namespace Elsa.App.EshopExtensions.Internal
             return new Rule
             {
                 ConditionType = NormalizeConditionType(source.ConditionType),
-                MustHaveProductsInCart = NormalizeProductLinks(source.MustHaveProductsInCart),
+                RuleProducts = NormalizeProductLinks(source.RuleProducts),
                 MinQuantity = source.MinQuantity,
                 MaxQuantity = source.MaxQuantity,
                 MinOrderPrice = source.MinOrderPrice,
@@ -386,7 +387,18 @@ namespace Elsa.App.EshopExtensions.Internal
                 return CouponRuleConditionTypes.MinimumOrderPrice;
             }
 
+            if (string.Equals(value, CouponRuleConditionTypes.ForbiddenProductsInCart, StringComparison.OrdinalIgnoreCase))
+            {
+                return CouponRuleConditionTypes.ForbiddenProductsInCart;
+            }
+
             return CouponRuleConditionTypes.ProductsInCart;
+        }
+
+        private bool UsesProductListCondition(string conditionType)
+        {
+            return conditionType == CouponRuleConditionTypes.ProductsInCart ||
+                   conditionType == CouponRuleConditionTypes.ForbiddenProductsInCart;
         }
 
         private string NormalizeProductLink(string value)
