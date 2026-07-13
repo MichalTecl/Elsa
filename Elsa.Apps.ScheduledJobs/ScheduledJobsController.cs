@@ -41,15 +41,22 @@ namespace Elsa.Apps.ScheduledJobs
         public IEnumerable<ScheduledJobStatus> GetStatus()
         {
             var cacheKey = GetStatusCacheKey();
-            var scheduler = m_jobsRepository.GetCompleteScheduler().OrderBy(s => s.LoopLaunchPriority).ToList();
+            var currentVersion = GetStatusVersion();
+            var cachedStatus = m_cache.ReadThrough(
+                cacheKey,
+                TimeSpan.FromHours(1),
+                () => CreateCachedStatus(currentVersion));
 
-            if (scheduler.Any(IsRunning))
+            if (cachedStatus.Version != currentVersion)
             {
                 m_cache.Remove(cacheKey);
-                return CreateStatuses(scheduler);
+                cachedStatus = m_cache.ReadThrough(
+                    cacheKey,
+                    TimeSpan.FromHours(1),
+                    () => CreateCachedStatus(currentVersion));
             }
 
-            return m_cache.ReadThrough(cacheKey, TimeSpan.FromSeconds(20), () => CreateStatuses(scheduler));
+            return cachedStatus.Statuses;
         }
 
         [DoNotLog]
@@ -77,22 +84,15 @@ namespace Elsa.Apps.ScheduledJobs
                 throw new InvalidOperationException("Invalid schedule");
             }
 
-            var cacheKey = GetStatusCacheKey();
-            m_cache.Remove(cacheKey);
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    m_executor.LaunchJob(schedule);
-                }
-                finally
-                {
-                    m_cache.Remove(cacheKey);
-                }
-            });
+            Task.Run(() => m_executor.LaunchJob(schedule));
 
             return GetStatus();
+        }
+
+        private CachedStatus CreateCachedStatus(string version)
+        {
+            var scheduler = m_jobsRepository.GetCompleteScheduler().OrderBy(s => s.LoopLaunchPriority).ToList();
+            return new CachedStatus(version, CreateStatuses(scheduler).ToList());
         }
 
         private IEnumerable<ScheduledJobStatus> CreateStatuses(IList<IJobSchedule> scheduler)
@@ -119,6 +119,19 @@ namespace Elsa.Apps.ScheduledJobs
         private string GetStatusCacheKey()
         {
             return $"jobsStat_{m_session.Project.Id}";
+        }
+
+        private string GetStatusVersion()
+        {
+            try
+            {
+                return ScheduledJobsStatusVersion.Get(m_session.Project.Id);
+            }
+            catch (Exception ex)
+            {
+                m_log.Error("Cannot read scheduled jobs status version", ex);
+                return string.Empty;
+            }
         }
 
         private IEnumerable<JobExecutionStatus> GetExecutionStatuses(IJobSchedule schedule)
@@ -187,6 +200,19 @@ namespace Elsa.Apps.ScheduledJobs
             }
 
             return (sche.LastStartDt.Value < DateTime.Now) && (sche.LastEndDt == null);
+        }
+
+        private sealed class CachedStatus
+        {
+            public CachedStatus(string version, IEnumerable<ScheduledJobStatus> statuses)
+            {
+                Version = version;
+                Statuses = statuses;
+            }
+
+            public string Version { get; }
+
+            public IEnumerable<ScheduledJobStatus> Statuses { get; }
         }
 
     }

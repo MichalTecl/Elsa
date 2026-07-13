@@ -10,7 +10,7 @@ app.scheduledJobs.ViewModel = app.scheduledJobs.ViewModel || function() {
     var receive = function(jobs) {
         self.jobs = jobs;
 
-        setTimeout(update, 5000);
+        setTimeout(update, 3000);
     };
 
     var update = function() {

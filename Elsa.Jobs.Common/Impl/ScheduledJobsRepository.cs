@@ -41,13 +41,19 @@ namespace Elsa.Jobs.Common.Impl
             var interruptedExecutions = m_database.SelectFrom<IJobExecutionLog>()
                 .Join(e => e.ScheduledJob)
                 .Where(e => e.ScheduledJob.ProjectId == projectId && e.EndDt == null)
-                .Execute();
+                .Execute()
+                .ToList();
 
             foreach (var execution in interruptedExecutions)
             {
                 execution.EndDt = execution.StartDt;
                 execution.ErrorMessage = "Běh úlohy nebyl korektně ukončen.";
                 m_database.Save(execution);
+            }
+
+            if (interruptedExecutions.Any())
+            {
+                TouchStatusVersion(projectId);
             }
             
             var schedule =
@@ -131,6 +137,7 @@ namespace Elsa.Jobs.Common.Impl
             executionLog.StartUserId = m_session.User.Id;
             executionLog.StartDt = startDt;
             m_database.Save(executionLog);
+            TouchStatusVersion(job.ProjectId);
 
             m_log.Info($"MarkJobStarted OK {job?.Uid}");
             return executionLog;
@@ -138,11 +145,17 @@ namespace Elsa.Jobs.Common.Impl
 
         public void MarkJobSucceeded(IJobSchedule job)
         {
+            if (string.IsNullOrEmpty(job?.Uid))
+                return;
+
             var executionLog = FindRunningExecution(job?.ScheduledJobId);
             if (executionLog != null)
             {
                 MarkJobSucceeded(job, executionLog);
+                return;
             }
+
+            TouchStatusVersion(job.ProjectId);
         }
 
         public void MarkJobSucceeded(IJobSchedule job, IJobExecutionLog executionLog)
@@ -162,16 +175,24 @@ namespace Elsa.Jobs.Common.Impl
                 m_database.Save(executionLog);
             }
 
+            TouchStatusVersion(job.ProjectId);
+
             m_log.Info($"MarkJobSucceeded OK {job?.Uid}");
         }
 
         public void MarkJobFailed(IJobSchedule job)
         {
+            if (string.IsNullOrEmpty(job?.Uid))
+                return;
+
             var executionLog = FindRunningExecution(job?.ScheduledJobId);
             if (executionLog != null)
             {
                 MarkJobFailed(job, executionLog, "Běh úlohy selhal.");
+                return;
             }
+
+            TouchStatusVersion(job.ProjectId);
         }
 
         public void MarkJobFailed(IJobSchedule job, IJobExecutionLog executionLog, string errorMessage)
@@ -191,6 +212,8 @@ namespace Elsa.Jobs.Common.Impl
                 executionLog.ErrorMessage = errorMessage;
                 m_database.Save(executionLog);
             }
+
+            TouchStatusVersion(job.ProjectId);
 
             m_log.Info($"MarkJobFailed OK {job?.Uid}");
         }
@@ -218,6 +241,18 @@ namespace Elsa.Jobs.Common.Impl
                 .Take(1)
                 .Execute()
                 .FirstOrDefault();
+        }
+
+        private void TouchStatusVersion(int projectId)
+        {
+            try
+            {
+                ScheduledJobsStatusVersion.Touch(projectId);
+            }
+            catch (Exception ex)
+            {
+                m_log.Error($"Cannot update scheduled jobs status version for project {projectId}", ex);
+            }
         }
 
         public IEnumerable<IJobSchedule> GetCompleteScheduler()
