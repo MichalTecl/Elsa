@@ -63,6 +63,7 @@
     <Compile Include="Accounting\IInvoiceFormType.cs" />
     <Compile Include="Accounting\IReleasingFormsGenerationTask.cs" />
     <Compile Include="Accounting\IReleasingFormsGenerationTaskInventory.cs" />
+    <Compile Include="Automation\IJobExecutionLog.cs" />
     <Compile Include="Automation\IJobSchedule.cs" />
     <Compile Include="Automation\IScheduledJob.cs" />
     <Compile Include="Commerce\IOrderItem.cs" />

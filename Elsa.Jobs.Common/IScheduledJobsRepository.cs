@@ -8,11 +8,17 @@ namespace Elsa.Jobs.Common
     {
         IJobSchedule GetCurrentJob(int projectId);
 
-        void MarkJobStarted(IJobSchedule job);
+        IJobExecutionLog MarkJobStarted(IJobSchedule job);
 
         void MarkJobSucceeded(IJobSchedule job);
 
+        void MarkJobSucceeded(IJobSchedule job, IJobExecutionLog executionLog);
+
         void MarkJobFailed(IJobSchedule job);
+
+        void MarkJobFailed(IJobSchedule job, IJobExecutionLog executionLog, string errorMessage);
+
+        IEnumerable<IJobExecutionLog> GetExecutionLogs(int scheduledJobId, int maxCount);
 
         IEnumerable<IJobSchedule> GetCompleteScheduler();
 

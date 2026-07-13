@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +19,8 @@ namespace Elsa.Apps.ScheduledJobs
     [Controller("scheduledJobs")]
     public class ScheduledJobsController : ElsaControllerBase
     {
+        private const int MAX_EXECUTION_LOGS = 100;
+
         private readonly IScheduledJobsRepository m_jobsRepository;
         private readonly IJobExecutor m_executor;
         private readonly ICache m_cache;
@@ -38,32 +40,16 @@ namespace Elsa.Apps.ScheduledJobs
         [DoNotLog]
         public IEnumerable<ScheduledJobStatus> GetStatus()
         {
-            return m_cache.ReadThrough($"jobsStat_{m_session.Project.Id}",
-                TimeSpan.FromSeconds(20),
-                () =>
-                {
-                    var scheduler = m_jobsRepository.GetCompleteScheduler().OrderBy(s => s.LoopLaunchPriority).ToList();
+            var cacheKey = GetStatusCacheKey();
+            var scheduler = m_jobsRepository.GetCompleteScheduler().OrderBy(s => s.LoopLaunchPriority).ToList();
 
-                    var result = new List<ScheduledJobStatus>(scheduler.Count);
+            if (scheduler.Any(IsRunning))
+            {
+                m_cache.Remove(cacheKey);
+                return CreateStatuses(scheduler);
+            }
 
-                    foreach (var sch in scheduler)
-                    {
-                        result.Add(new ScheduledJobStatus()
-                        {
-                            ScheduleId = sch.Id,
-                            Name = sch.ScheduledJob.Name,
-                            LastRun =
-                                sch.LastStartDt == null
-                                    ? "Nikdy"
-                                    : DateUtil.FormatDateWithAgo(sch.LastStartDt ?? sch.LastEndDt.Value, true),
-                            CanBeStarted = sch.CanBeStartedManually && !IsRunning(sch),
-                            CurrentStatus = GetJobStatus(sch),
-                            StartMode = GetStartMode(sch)
-                        });
-                    }
-
-                    return result;
-                });
+            return m_cache.ReadThrough(cacheKey, TimeSpan.FromSeconds(20), () => CreateStatuses(scheduler));
         }
 
         [DoNotLog]
@@ -91,38 +77,106 @@ namespace Elsa.Apps.ScheduledJobs
                 throw new InvalidOperationException("Invalid schedule");
             }
 
-            Task.Run(() => m_executor.LaunchJob(schedule));
+            var cacheKey = GetStatusCacheKey();
+            m_cache.Remove(cacheKey);
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    m_executor.LaunchJob(schedule);
+                }
+                finally
+                {
+                    m_cache.Remove(cacheKey);
+                }
+            });
 
             return GetStatus();
         }
 
-        private string GetStartMode(IJobSchedule sch)
+        private IEnumerable<ScheduledJobStatus> CreateStatuses(IList<IJobSchedule> scheduler)
         {
-            if (sch.Active)
+            var result = new List<ScheduledJobStatus>(scheduler.Count);
+
+            foreach (var schedule in scheduler)
             {
-                if (sch.CanBeStartedManually)
+                result.Add(new ScheduledJobStatus
                 {
-                    return "Automaticky nebo ručně";
-                }
-                else
-                {
-                    return "Pouze automaticky";
-                }
+                    ScheduleId = schedule.Id,
+                    Name = schedule.ScheduledJob.Name,
+                    LastRun = schedule.LastStartDt == null
+                        ? "Nikdy"
+                        : DateUtil.FormatDateWithAgo(schedule.LastStartDt ?? schedule.LastEndDt.Value, true),
+                    CanBeStarted = schedule.CanBeStartedManually && !IsRunning(schedule),
+                    Executions = GetExecutionStatuses(schedule)
+                });
             }
-            else
-            {
-                return "Pouze ručně";
-            }
+
+            return result;
         }
 
-        private string GetJobStatus(IJobSchedule sch)
+        private string GetStatusCacheKey()
         {
-            if (IsRunning(sch))
+            return $"jobsStat_{m_session.Project.Id}";
+        }
+
+        private IEnumerable<JobExecutionStatus> GetExecutionStatuses(IJobSchedule schedule)
+        {
+            return m_jobsRepository.GetExecutionLogs(schedule.ScheduledJobId, MAX_EXECUTION_LOGS)
+                .Reverse()
+                .Select(ToExecutionStatus)
+                .ToList();
+        }
+
+        private static JobExecutionStatus ToExecutionStatus(IJobExecutionLog execution)
+        {
+            var statusClass = execution.EndDt == null
+                ? "jobRunRunning"
+                : string.IsNullOrWhiteSpace(execution.ErrorMessage)
+                    ? "jobRunSucceeded"
+                    : "jobRunFailed";
+
+            var tooltip = $"Spuštěno: {execution.StartDt:dd.MM.yyyy HH:mm:ss}\n" +
+                          $"Spustil: {execution.StartUser.EMail}\n" +
+                          $"Doba běhu: {GetDurationText(execution)}";
+
+            if (!string.IsNullOrWhiteSpace(execution.ErrorMessage))
+            {
+                tooltip += $"\nChyba: {execution.ErrorMessage}";
+            }
+
+            return new JobExecutionStatus
+            {
+                Id = execution.Id,
+                StatusClass = statusClass,
+                Tooltip = tooltip
+            };
+        }
+
+        private static string GetDurationText(IJobExecutionLog execution)
+        {
+            if (execution.EndDt == null)
             {
                 return "Probíhá";
             }
 
-            return (sch.LastRunFailed ?? false) ? "Selhal" : "OK";
+            return FormatDuration(execution.EndDt.Value - execution.StartDt);
+        }
+
+        private static string FormatDuration(TimeSpan duration)
+        {
+            if (duration.TotalHours >= 1)
+            {
+                return $"{(int)duration.TotalHours} h {duration.Minutes} min {duration.Seconds} s";
+            }
+
+            if (duration.TotalMinutes >= 1)
+            {
+                return $"{duration.Minutes} min {duration.Seconds} s";
+            }
+
+            return $"{Math.Max(0, (int)duration.TotalSeconds)} s";
         }
 
         private bool IsRunning(IJobSchedule sche)

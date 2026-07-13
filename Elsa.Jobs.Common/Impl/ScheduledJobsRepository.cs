@@ -37,6 +37,18 @@ namespace Elsa.Jobs.Common.Impl
                 misaljob.LastRunFailed = true;
                 m_database.Save(misaljob);
             }
+
+            var interruptedExecutions = m_database.SelectFrom<IJobExecutionLog>()
+                .Join(e => e.ScheduledJob)
+                .Where(e => e.ScheduledJob.ProjectId == projectId && e.EndDt == null)
+                .Execute();
+
+            foreach (var execution in interruptedExecutions)
+            {
+                execution.EndDt = execution.StartDt;
+                execution.ErrorMessage = "Běh úlohy nebyl korektně ukončen.";
+                m_database.Save(execution);
+            }
             
             var schedule =
                 m_database.SelectFrom<IJobSchedule>()
@@ -93,22 +105,47 @@ namespace Elsa.Jobs.Common.Impl
             return justRunJob;
         }
 
-        public void MarkJobStarted(IJobSchedule job)
+        public IJobExecutionLog MarkJobStarted(IJobSchedule job)
         {
             m_log.Info($"MarkJobStarted called for job.Uid = {job?.Uid}");
 
             if (string.IsNullOrEmpty(job?.Uid))
-                return;
+                return null;
 
+            if (job.LastStartDt != null && job.LastEndDt == null)
+            {
+                var runningExecution = FindRunningExecution(job.ScheduledJobId);
+                if (runningExecution != null)
+                {
+                    return runningExecution;
+                }
+            }
+
+            var startDt = DateTime.Now;
             job.LastEndDt = null;
-            job.LastStartDt = DateTime.Now;
-         
+            job.LastStartDt = startDt;
             m_database.Save(job);
 
+            var executionLog = m_database.New<IJobExecutionLog>();
+            executionLog.ScheduledJobId = job.ScheduledJobId;
+            executionLog.StartUserId = m_session.User.Id;
+            executionLog.StartDt = startDt;
+            m_database.Save(executionLog);
+
             m_log.Info($"MarkJobStarted OK {job?.Uid}");
+            return executionLog;
         }
 
         public void MarkJobSucceeded(IJobSchedule job)
+        {
+            var executionLog = FindRunningExecution(job?.ScheduledJobId);
+            if (executionLog != null)
+            {
+                MarkJobSucceeded(job, executionLog);
+            }
+        }
+
+        public void MarkJobSucceeded(IJobSchedule job, IJobExecutionLog executionLog)
         {
             m_log.Info($"MarkJobSucceeded called for job.Uid = {job?.Uid}");
 
@@ -119,10 +156,25 @@ namespace Elsa.Jobs.Common.Impl
             job.LastRunFailed = false;
             m_database.Save(job);
 
+            if (executionLog != null)
+            {
+                executionLog.EndDt = job.LastEndDt;
+                m_database.Save(executionLog);
+            }
+
             m_log.Info($"MarkJobSucceeded OK {job?.Uid}");
         }
 
         public void MarkJobFailed(IJobSchedule job)
+        {
+            var executionLog = FindRunningExecution(job?.ScheduledJobId);
+            if (executionLog != null)
+            {
+                MarkJobFailed(job, executionLog, "Běh úlohy selhal.");
+            }
+        }
+
+        public void MarkJobFailed(IJobSchedule job, IJobExecutionLog executionLog, string errorMessage)
         {
             m_log.Info($"MarkJobFailed called for job.Uid = {job?.Uid}");
 
@@ -133,7 +185,39 @@ namespace Elsa.Jobs.Common.Impl
             job.LastRunFailed = true;
             m_database.Save(job);
 
-            m_log.Info($"MarkJobSucceeded OK {job?.Uid}");
+            if (executionLog != null)
+            {
+                executionLog.EndDt = job.LastEndDt;
+                executionLog.ErrorMessage = errorMessage;
+                m_database.Save(executionLog);
+            }
+
+            m_log.Info($"MarkJobFailed OK {job?.Uid}");
+        }
+
+        public IEnumerable<IJobExecutionLog> GetExecutionLogs(int scheduledJobId, int maxCount)
+        {
+            return m_database.SelectFrom<IJobExecutionLog>()
+                .Join(e => e.StartUser)
+                .Where(e => e.ScheduledJobId == scheduledJobId)
+                .OrderByDesc(e => e.StartDt)
+                .Take(maxCount)
+                .Execute();
+        }
+
+        private IJobExecutionLog FindRunningExecution(int? scheduledJobId)
+        {
+            if (scheduledJobId == null)
+            {
+                return null;
+            }
+
+            return m_database.SelectFrom<IJobExecutionLog>()
+                .Where(e => e.ScheduledJobId == scheduledJobId.Value && e.EndDt == null)
+                .OrderByDesc(e => e.StartDt)
+                .Take(1)
+                .Execute()
+                .FirstOrDefault();
         }
 
         public IEnumerable<IJobSchedule> GetCompleteScheduler()

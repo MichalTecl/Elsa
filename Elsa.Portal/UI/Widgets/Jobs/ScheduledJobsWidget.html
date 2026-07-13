@@ -16,7 +16,6 @@
                         <th>Název</th>
                         <th>Naposledy</th>
                         <th>Stav</th>
-                        <th>Start</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -24,8 +23,11 @@
                     <tr>
                         <td data-bind="text:Name" style="font-weight: bold"></td>
                         <td data-bind="text:LastRun"></td>
-                        <td data-bind="text:CurrentStatus"></td>
-                        <td data-bind="text:StartMode"></td>
+                        <td>
+                            <div class="jobRuns" data-bind="itemsSource:Executions" data-key="Id">
+                                <span class="lt-template jobRunIndicator" data-bind="class:StatusClass;title:Tooltip"></span>
+                            </div>
+                        </td>
                         <td><button event-bind="click:launchJob(ScheduleId)">Spustit</button></td>
                     </tr>
                 </tbody>
@@ -56,6 +58,7 @@
   width: 100%;
   text-align: left;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 table.jobsTable td, table.jobsTable th {
   border: 1px solid #AAAAAA;
@@ -63,6 +66,37 @@ table.jobsTable td, table.jobsTable th {
 }
 table.jobsTable tbody td {
   font-size: 13px;
+}
+table.jobsTable th:nth-child(1) { width: 28%; }
+table.jobsTable th:nth-child(2) { width: 18%; }
+table.jobsTable th:nth-child(3) { width: 44%; }
+table.jobsTable th:nth-child(4) { width: 10%; }
+.jobRuns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 3px;
+  overflow: hidden;
+  width: 100%;
+}
+.jobRuns > span:not(.lt-template) {
+  display: block;
+  flex: 0 0 10px;
+  height: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.jobRuns > span.jobRunSucceeded {
+  background-color: #259b45;
+  border-color: #126b2a;
+}
+.jobRuns > span.jobRunFailed {
+  background-color: #ff0000;
+  border-color: #a80000;
+}
+.jobRuns > span.jobRunRunning {
+  background-color: #006cff;
+  border-color: #003f99;
 }
 table.jobsTable tr:nth-child(even) {
   background: #D0E4F5;

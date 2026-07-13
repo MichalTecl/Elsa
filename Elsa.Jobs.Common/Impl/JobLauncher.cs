@@ -22,6 +22,7 @@ namespace Elsa.Jobs.Common.Impl
 
         public void LaunchJob(IJobSchedule jobEntry)
         {
+            var executionLog = m_scheduledJobs.MarkJobStarted(jobEntry);
             IExecutableJob jobExecutable = null;
             try
             {
@@ -38,10 +39,9 @@ namespace Elsa.Jobs.Common.Impl
             catch (Exception ex)
             {
                 m_log.Error("Job instantiation failed", ex);
+                m_scheduledJobs.MarkJobFailed(jobEntry, executionLog, ex.ToString());
                 return;
             }
-            
-            m_scheduledJobs.MarkJobStarted(jobEntry);
 
             try
             {
@@ -49,12 +49,12 @@ namespace Elsa.Jobs.Common.Impl
                 jobExecutable.Run(jobEntry.ScheduledJob.CustomData);
 
                 m_log.Info("Job uspesne dokoncen");
-                m_scheduledJobs.MarkJobSucceeded(jobEntry);
+                m_scheduledJobs.MarkJobSucceeded(jobEntry, executionLog);
             }
             catch (Exception ex)
             {
                 m_log.Error("Job selhal", ex);
-                m_scheduledJobs.MarkJobFailed(jobEntry);
+                m_scheduledJobs.MarkJobFailed(jobEntry, executionLog, ex.ToString());
             }
         }
     }
