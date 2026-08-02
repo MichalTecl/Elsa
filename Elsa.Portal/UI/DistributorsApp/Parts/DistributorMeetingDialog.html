@@ -1,0 +1,36 @@
+<div id="dmd_{%GENERATE%}" class="popupBody distributorMeetingDialog">
+    <div class="distributorMeetingDialogHead">
+        <div>Detail schůzky</div>
+        <i class="fas fa-times faButtonNew" event-bind="click:closeMeetingDialog()"></i>
+    </div>
+
+    <div fill-by="/UI/DistributorsApp/Parts/DistributorMeetingEditor.html"></div>
+</div>
+<script>
+    lt.element("dmd_{%GENERATE%}")
+        .withModel("app.DistributorMeetings.vm")
+        .attach(function () {
+            this.closeMeetingDialog = () => app.meetingCalendarVm.closeMeetingDialog();
+        });
+</script>
+<link href="/UI/DistributorsApp/Tabs/DistributorMeetings.css" rel="stylesheet" />
+<style>
+    .popupOverlay .distributorMeetingDialog {
+        width: min(900px, calc(100vw - 40px));
+        max-height: calc(100vh - 40px);
+        overflow: auto;
+        padding: 18px;
+        border-radius: 0 !important;
+    }
+
+    .distributorMeetingDialogHead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        color: #2b3a55;
+        font-size: 18px;
+        font-weight: 600;
+    }
+</style>

@@ -52,7 +52,7 @@
 <script>
     lt.element("meetingsTile").attach(function (meetingsLink, meetingsWarning) {
 
-        const loadOverview = () => lt.api("/crmMeetings/getMyMeetingsOverview").get((t) => {
+        const loadOverview = () => lt.api("/crmMeetings/getMyMeetingsOverview").silent().get((t) => {
             meetingsLink.textContent = "Schůzky: " + t.Text;
             meetingsWarning.classList.toggle("hidden", !t.IsWarning);
         });

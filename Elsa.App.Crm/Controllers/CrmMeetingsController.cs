@@ -131,14 +131,12 @@ namespace Elsa.App.Crm.Controllers
 
         public MeetingsOverview GetMyMeetingsOverview()
         {
-            var meetings = _meetingsRepository
-                .GetParticipantMeetings(WebSession.User.Id)
-                .Where(m => m.Status.ActionExpected).ToList();
+            var overview = _meetingsRepository.GetParticipantMeetingsOverview(WebSession.User.Id);
 
             return new MeetingsOverview
             {
-                Text = meetings.Count.ToString(),
-                IsWarning = meetings.Any(m => m.StartDt < DateTime.Now)
+                Text = overview.MeetingCount.ToString(),
+                IsWarning = overview.IsWarning
             };
         }
         
@@ -178,9 +176,9 @@ namespace Elsa.App.Crm.Controllers
 
         public List<CustomerMeetingViewModel> GetMyMeetings()
         {
-            var meetings = _meetingsRepository.GetParticipantMeetings(WebSession.User.Id);
+            var meetings = _meetingsRepository.GetActionExpectedParticipantMeetings(WebSession.User.Id);
 
-            return MapMeetings(meetings.Where(m => m.Status.ActionExpected).OrderBy(m => m.StartDt), null).ToList();
+            return MapMeetings(meetings.OrderBy(m => m.StartDt), null).ToList();
         }
 
         public List<MailConversationMessageViewModel> GetMailConversationDetail(int customerId, int conversationId)
@@ -225,7 +223,7 @@ namespace Elsa.App.Crm.Controllers
             yield return Def(tomorrowStart, tomorrowEnd, "zítra", "mtGrpTomorrow");
             yield return Def(tomorrowEnd, startOfNextWeek, "tento týden", "mtGrpThisWeek");
             yield return Def(startOfNextWeek, endOfNextWeek, "příští týden", "mtGrpNextWeek");
-            yield return Def(DateTime.MinValue, todayStart, "neuzavřených", "mtGrpPassed");
+            yield return Def(DateTime.MinValue, todayStart, "neuzavřené", "mtGrpPassed");
         }
 
         private T MapStatus<T>(IEnumerable<IMeetingStatus> index, T vm) where T : StatusVmBase

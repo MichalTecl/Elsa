@@ -231,7 +231,7 @@ textarea[lt-name="meetingText"] {
 }
 
 /* ===== OBAL CELÉHO EDIT PANELU ===== */
-#distrCurrentMeeting {
+.distrCurrentMeeting {
     background-color: #f8fbfd;
     border: 1px solid #d0e3f0;
     border-radius: 10px;
@@ -241,7 +241,7 @@ textarea[lt-name="meetingText"] {
 }
 
 /* ===== FORMULÁŘOVÝ BLOK ===== */
-#distrCurrentMeetingForm {
+.distrCurrentMeetingForm {
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -271,7 +271,7 @@ textarea[lt-name="meetingText"] {
     }
 
 /* Název schůzky – input */
-#currMeetingTitle {
+.currMeetingTitle {
     flex-grow: 1;
     padding: 6px 10px;
     font-size: 14px;
@@ -304,7 +304,7 @@ textarea {
 }
 
 /* ===== ÚČASTNÍCI ===== */
-#distrCurrMeetingParticipants {
+.distrCurrMeetingParticipants {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
@@ -334,28 +334,28 @@ textarea {
     }
 
 /* Přidání účastníka */
-#newParticipantSelector {
+.newParticipantSelector {
     display: flex;
     align-items: center;
     gap: 6px;
     margin-top: 6px;
 }
 
-#newParticipantName {
+.newParticipantSelector input {
     padding: 6px 10px;
     border-radius: 6px;
     border: 1px solid #ccd8e4;
     font-size: 14px;
 }
 
-#newParticipantSelector i {
+.newParticipantSelector i {
     color: #2ecc71;
     font-size: 18px;
     cursor: pointer;
 }
 
 /* ===== STAV SELECT ===== */
-#dcmStatusSelect {
+.dcmStatusSelect {
     padding: 6px 10px;
     font-size: 14px;
     border-radius: 6px;
@@ -365,14 +365,14 @@ textarea {
 }
 
 /* ===== BUTTONY SAVE / CANCEL ===== */
-#distrCurrentMeetingControls {
+.distrCurrentMeetingControls {
     margin-top: 12px;
     display: flex;
     gap: 10px;
     justify-content: flex-end;
 }
 
-#distrCurrentMeetingControls button {
+.distrCurrentMeetingControls button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -386,21 +386,21 @@ textarea {
     transition: background-color 0.2s;
 }
 
-#distrCurrentMeetingControls button i {
+.distrCurrentMeetingControls button i {
     font-size: 16px;
 }
 
-#distrCurrentMeetingControls button:first-child {
+.distrCurrentMeetingControls button:first-child {
     background-color: #e0e6ed;
     color: #333;
 }
 
-#distrCurrentMeetingControls button:last-child {
+.distrCurrentMeetingControls button:last-child {
     background-color: #00bfff;
     color: #fff;
 }
 
-#distrCurrentMeetingControls button:last-child:hover {
+.distrCurrentMeetingControls button:last-child:hover {
     background-color: #00a3df;
 }
 

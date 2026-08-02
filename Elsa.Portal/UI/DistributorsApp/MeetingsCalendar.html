@@ -17,6 +17,10 @@
 
                                     <div class="lt-template meetingItem">
                                         <div class="mgiMeetingItemHead">
+                                            <button type="button" class="mgiMeetingEditButton" title="Upravit schůzku" aria-label="Upravit schůzku" event-bind="click:openMeetingDialog(Id)">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </button>
+                                            <i class="fas fa-exclamation-triangle mgiPastWarning hidden" data-bind="class!.hidden:isPast" title="Schůzka je v minulosti"></i>
                                             <div class="mgiDayWrap">
                                                 <div class="mgiMeetingDay" data-bind="text:Day"></div>
                                             </div>
@@ -35,14 +39,6 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="mgiMeetingActions">
-                                            <div class="mgiMeetingStatusButtonsRow stackLeft" data-bind="itemsSource:Actions" data-key="Id">
-                                                <button class="lt-template stackLeft" data-bind="style.backgroundColor:StatusTypeColor" event-bind="click:setMeetingStatus(meetingId, StatusTypeId)">
-                                                    <i data-bind="class:StatusTypeIconClass"></i>
-                                                    <div data-bind="text:Title"></div>
-                                                </button>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -51,6 +47,8 @@
                 </div>
             </div>
         </div>
+
+        <div id="meetingDetailPopup" class="popupOverlay" fill-by-lazy="/UI/DistributorsApp/Parts/DistributorMeetingDialog.html"></div>
     </div>
 
     <style>
@@ -77,17 +75,38 @@
         .mtGrpNextWeek {
         }
 
-        /* only for passed meetings show buttons */
-        .mgiMeetingActions {
-            display: none;
+        .mgiMeetingEditButton {
+            align-items: center;
+            background-color: #eaf4ff;
+            border: 1px solid #9fc8e8;
+            border-radius: 6px;
+            color: #2878b5;
+            cursor: pointer;
+            display: inline-flex;
+            flex-shrink: 0;
+            justify-content: center;
+            padding: 7px 9px;
+            transition: background-color 0.15s, border-color 0.15s, color 0.15s;
         }
 
-        .mtGrpPassed .mgiMeetingActions {
-            display: block;
+        .mgiMeetingEditButton:hover {
+            background-color: #d8ebff;
+            border-color: #6ba9d6;
+            color: #005f9e;
         }
 
-        .mtGrpPassed .mgiNameWrap {
-            display: none;
+        .mgiPastWarning {
+            color: #f7941e;
+            flex-shrink: 0;
+        }
+
+        .meetingGroupItem.mtGrpPassed {
+            background-color: #fffdf9;
+            border-color: #f0d2aa;
+        }
+
+        .mtGrpPassed .mgiNameLabel {
+            color: #a95c00;
         }
 
         .mtGrpPassed .mgiMeetingTime {
@@ -98,20 +117,6 @@
             display: block !important;
         }
 
-        .mtGrpPassed .mgiMeetingsList {
-            gap: 0 !important;
-        }
-
-        .mtGrpPassed .mgiDaysList {
-            display: flex;
-            flex-direction: column;
-            gap: 0 !important;
-        }
-
-        .mtGrpPassed .meetingItem {
-            margin-bottom: 30px;
-            margin-top: 0px;
-        }
     </style>
 
     <script>
@@ -122,12 +127,17 @@
             const self = this;
 
             self.groups = [];
+            self.meetings = [];
 
             const receiveMeetings = (meetings) => {
 
                 self.groups = [];
+                self.meetings = meetings;
+                const now = new Date();
 
                 meetings.forEach(meeting => {
+                    meeting.isPast = new Date(meeting.StartDt) < now;
+
                     let group = self.groups.find(g => g.timeClass === meeting.TimeGroupClass);
                     if (!group) {
                         group = {
@@ -152,7 +162,6 @@
                     day.meetings.push(meeting);
 
                     meeting.customerUrl = "/UI/DistributorsApp/DistributorsAppPage.html?customerId=" + meeting.CustomerId;
-                    meeting.Actions.forEach(a => a.meetingId = meeting.Id);
                 });
             };
 
@@ -161,15 +170,38 @@
                     .get(receiveMeetings);
             };
 
+            let meetingDetailPopup = null;
+
+            self.openMeetingDialog = (meetingId, popup) => {
+                const meeting = self.meetings.find(item => item.Id === meetingId);
+
+                if (!meeting)
+                    return;
+
+                meetingDetailPopup = popup;
+                app.DistributorMeetings.vm.openExternalMeeting(meeting, self.loadMeetings, self.closeMeetingDialog);
+                Popup.open(meetingDetailPopup, () => {
+                    app.DistributorMeetings.vm.closeExternalMeeting();
+                    meetingDetailPopup = null;
+                });
+            };
+
+            self.closeMeetingDialog = () => {
+                if (!!meetingDetailPopup) {
+                    Popup.close(meetingDetailPopup);
+                } else {
+                    app.DistributorMeetings.vm.closeExternalMeeting();
+                }
+            };
+
             self.loadMeetings();
         };
 
         lt.element("meetingsCalendarUi")
             .withModel("app.meetingCalendarVm")
-            .attach(function () {
-                this.setMeetingStatus = (meetingId, statusTypeId) => app.DistributorMeetings.vm.setMeetingStatus(meetingId, statusTypeId, () => {
-                    app.meetingCalendarVm.loadMeetings();
-                });
+            .attach(function (meetingDetailPopup) {
+                this.openMeetingDialog = (meetingId) => app.meetingCalendarVm.openMeetingDialog(meetingId, meetingDetailPopup);
+                this.closeMeetingDialog = () => app.meetingCalendarVm.closeMeetingDialog();
             });
 
 

@@ -2,27 +2,27 @@
 #meetingGroupsList {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 18px;
     padding: 16px;
     font-family: sans-serif;
 }
 
 /* === SKUPINA === */
 .meetingGroupItem {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 12px 16px;
+    border: 1px solid #dce3e9;
+    border-radius: 10px;
+    padding: 16px 18px;
     background: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 7px rgba(36, 50, 64, 0.05);
 }
 
 .mgiNameWrap {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .mgiNameLabel {
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
     color: #222;
 }
 
@@ -43,15 +43,23 @@
     display: flex;
     flex-direction: column;
     gap: 10px; /* vertikÃ¡lnÃ­ mezera mezi meetingy */
-    padding-left: 8px;
 }
 
 /* === MEETING === */
 .meetingItem {
     display: flex;
     flex-direction: column;
-    border-left: 3px solid #007bff20;
-    padding-left: 6px;
+    padding: 10px 12px;
+    border: 1px solid #edf1f4;
+    border-radius: 8px;
+    background-color: #fbfcfd;
+    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+
+.meetingItem:hover {
+    border-color: #d5e1ea;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(36, 50, 64, 0.06);
 }
 
 .mgiMeetingItemHead {
@@ -138,31 +146,10 @@
 }
 
 /* === TLAÄŒÃTKA === */
-.mgiMeetingActions {
-    margin-top: 6px;
-}
-
-.mgiMeetingStatusButtonsRow button {
-    border: none;
-    padding: 4px 8px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: white;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-    .mgiMeetingStatusButtonsRow button i {
-        font-size: 14px;
-    }
-
 .mgiDaysList {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
 }
 
 .icsLinkWrap {

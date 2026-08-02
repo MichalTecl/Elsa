@@ -4,6 +4,9 @@ app.DistributorMeetings = app.DistributorMeetings || {
         const crm = app.Distributors.vm;
 
         let customerId = null;
+        let externalMeetingId = null;
+        let externalChangeCallback = null;
+        let externalCloseCallback = null;
 
         self.meetings = [];
 
@@ -61,6 +64,44 @@ app.DistributorMeetings = app.DistributorMeetings || {
 
         }
 
+        const receiveMeetingUpdate = (meetings) => {
+            if (externalMeetingId === null) {
+                receiveMeetings(meetings);
+                return;
+            }
+
+            const meeting = meetings.find(m => m.Id === externalMeetingId);
+            receiveMeetings(!!meeting ? [meeting] : []);
+
+            if (!!meeting)
+                self.openMeetingDetail(meeting.Id);
+
+            if (!!externalChangeCallback)
+                externalChangeCallback();
+        };
+
+        self.openExternalMeeting = (meeting, changeCallback, closeCallback) => {
+            externalMeetingId = meeting.Id;
+            externalChangeCallback = changeCallback;
+            externalCloseCallback = closeCallback;
+            customerId = meeting.CustomerId;
+
+            receiveMeetings([JSON.parse(JSON.stringify(meeting))]);
+            self.currentMeeting = self.meetings[0];
+            self.editingMeeting = true;
+        };
+
+        self.closeExternalMeeting = () => {
+            self.currentMeeting = null;
+            self.editingMeeting = false;
+            self.addingParticipant = false;
+            self.meetings = [];
+            externalMeetingId = null;
+            externalChangeCallback = null;
+            externalCloseCallback = null;
+            customerId = null;
+        };
+
         self.newMeeting = (categoryId) => {
 
             lt.api("/CrmMeetings/GetMeetingTemplate")
@@ -77,16 +118,42 @@ app.DistributorMeetings = app.DistributorMeetings || {
         }
 
         self.cancelMeetingEdit = () => {
+            if (externalMeetingId !== null) {
+                if (!!externalCloseCallback)
+                    externalCloseCallback();
+
+                return;
+            }
+
             self.currentMeeting = null;
             self.editingMeeting = false;
+            self.addingParticipant = false;
         };
 
         self.saveMeeting = () => {
+            const meetingToSave = {
+                ...self.currentMeeting,
+                Participants: self.currentMeeting.Participants.map(participant => ({
+                    UserId: participant.UserId,
+                    UserName: participant.UserName
+                }))
+            };
+
             lt.api("/CrmMeetings/SaveMeeting")
-                .body(self.currentMeeting)
+                .body(meetingToSave)
                 .post((meetings) => {
+                    if (externalMeetingId !== null) {
+                        if (!!externalChangeCallback)
+                            externalChangeCallback();
+
+                        if (!!externalCloseCallback)
+                            externalCloseCallback();
+
+                        return;
+                    }
+
                     self.cancelMeetingEdit();
-                    receiveMeetings(meetings);
+                    receiveMeetingUpdate(meetings);
                 });
         };
 
@@ -110,12 +177,21 @@ app.DistributorMeetings = app.DistributorMeetings || {
             lt.api("/crmMeetings/getAllParticipants")
                 .get(all => {
 
-                    const toAdd = all.find(p => p.UserName === userName);
+                    const normalizedUserName = (userName || "").trim().toLocaleLowerCase();
+                    const toAdd = all.find(p => p.UserName.toLocaleLowerCase() === normalizedUserName);
 
-                    if(!!toAdd)
-                        self.currentMeeting.Participants.push(toAdd);
+                    if (!!toAdd && !self.currentMeeting.Participants.some(p => p.UserId === toAdd.UserId)) {
+                        self.currentMeeting.Participants = [
+                            ...self.currentMeeting.Participants,
+                            {
+                                UserId: toAdd.UserId,
+                                UserName: toAdd.UserName
+                            }
+                        ];
+                    }
 
                     self.addingParticipant = false;
+                    lt.notify();
 
                 });
         };
@@ -156,7 +232,7 @@ app.DistributorMeetings = app.DistributorMeetings || {
             .api("/CrmMeetings/setMeetingStatus")
             .query({ "meetingId": meetingId, "statusTypeId": statusTypeId })
             .post(m => {
-                receiveMeetings(m);
+                receiveMeetingUpdate(m);
 
                 if (!!callback)
                     callback();
@@ -181,7 +257,7 @@ app.DistributorMeetings = app.DistributorMeetings || {
 
             lt.api("/CrmMeetings/saveMeeting")
                 .body(meeting)
-                .post(receiveMeetings);
+                .post(receiveMeetingUpdate);
         };
 
         self.editMeeting = (id) => {

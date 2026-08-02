@@ -11,50 +11,7 @@
             </div>
         </div>
 
-        <div id="distrCurrentMeeting" data-bind="class!.hidden:editingMeeting">
-
-            <div id="distrCurrentMeetingForm">
-                <div class="dcmRow">
-                    <div class="distrFormCategory">
-                        <i data-bind="class:currentMeeting.CategoryIconClass"></i>
-                        <div class="distrNewMeetingButtonTitle" data-bind="text:currentMeeting.CategoryName"></div>
-                    </div>
-                    <input id="currMeetingTitle" data-bind="value:currentMeeting.Title" event-bind="change:updateModel('Title', this.value)" />
-                </div>
-                <div class="dcmRow">
-                    <label>Od</label>
-                    <input type="datetime-local" data-bind="value:currentMeeting.StartDt" event-bind="change:updateModel('StartDt', this.value)" />
-                    <label>Do</label>
-                    <input type="datetime-local" data-bind="value:currentMeeting.EndDt" event-bind="change:updateModel('EndDt', this.value)" />
-                    <label>Stav</label>
-                    <select id="dcmStatusSelect" data-bind="itemsSource:meetingStatusTypes;value:currentMeeting.StatusTypeId" data-key="Id" event-bind="change:updateModel('StatusTypeId', this.value)">
-                        <option class="lt-template" data-bind="value:Id; text:Title; style.color:ColorHex"></option>
-                    </select>
-                </div>
-                <div class="dcmRow">
-                    <textarea data-bind="value:currentMeeting.Text" event-bind="change:updateModel('Text', this.value)"></textarea>
-                </div>
-                <div class="dcmRow" id="distrCurrMeetingParticipants">
-                    <label>Účastníci</label>
-                    <div id="dcmParticipantList" data-bind="itemsSource:currentMeeting.Participants" data-key="UserId">
-                        <div class="lt-template dcmParticipantItem stackLeft">
-                            <div data-bind="text:UserName"></div>
-                            <i class="fas fa-times participantRemoveButton" event-bind="click:removeParticipant(UserId)"></i>
-                        </div>
-                    </div>
-                    <i class="fas fa-plus-circle" data-bind="class.hidden:addingParticipant" event-bind="click:openParticipantAdd"></i>
-                    <div id="newParticipantSelector" class="autocomplete" data-bind="class!.hidden:addingParticipant">
-                        <input id="newParticipantName" />
-                        <i class="fas fa-check-square" event-bind="click:addParticipant($newParticipantName.value)"></i>
-                    </div>                    
-                </div>
-            </div>
-
-            <div id="distrCurrentMeetingControls">
-                <button event-bind="click:cancelEdit()"><i class="fas fa-times"></i></button>
-                <button event-bind="click:saveMeeting()"><i class="fas fa-check"></i></button>
-            </div>
-        </div>
+        <div fill-by="/UI/DistributorsApp/Parts/DistributorMeetingEditor.html"></div>
 
     </div>
 
@@ -68,13 +25,9 @@
 <script>
     lt.element("distrMeetingsPanel")
         .withModel("app.DistributorMeetings.vm")
-        .attach(function (newParticipantSelector) {
+        .attach(function () {
 
             this.newMeetingClick = (categoryId) => app.DistributorMeetings.vm.newMeeting(categoryId);
-            this.removeParticipant = (userId) => app.DistributorMeetings.vm.removeParticipant(userId);
-            this.cancelEdit = () => app.DistributorMeetings.vm.cancelMeetingEdit();
-            this.saveMeeting = () => app.DistributorMeetings.vm.saveMeeting();
-            this.addParticipant = (userName) => app.DistributorMeetings.vm.addParticipant(userName);
             this.openMeetingDetail = (meetingId) => app.DistributorMeetings.vm.openMeetingDetail(meetingId);
             this.setMeetingStatus = (meetingId, statusId) => app.DistributorMeetings.vm.setMeetingStatus(meetingId, statusId);
             this.meetingTextChange = (meetingId, text) => app.DistributorMeetings.vm.meetingTextChange(meetingId, text);
@@ -85,13 +38,6 @@
             this.stopEvent = (e) => {
                 if (!!e && !!e.stopPropagation)
                     e.stopPropagation();
-            };
-
-            this.updateModel = (property, value) => app.DistributorMeetings.vm.updateCurrentMeeting(property, value);
-
-            this.openParticipantAdd = () => {
-                app.ui.autosuggest(newParticipantSelector, app.DistributorMeetings.vm.getParticipantSelection);
-                app.DistributorMeetings.vm.setParticipantAdd();
             };
 
         });

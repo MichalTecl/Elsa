@@ -67,11 +67,11 @@ namespace Elsa.App.Crm.Repositories
         public IMeeting GetMeeting(int meetingId)
         {
             return _database.SelectFrom<IMeeting>()
-                    .Join(m => m.Customer)
-                 .Join(m => m.Participants)
+                .Join(m => m.Customer)
+                .Join(m => m.Participants)
+                .Join(m => m.Status)
                 .Where(m => m.Id == meetingId)
                 .Where(m => m.Customer.ProjectId == _session.Project.Id)
-                .Take(1)
                 .Execute()
                 .FirstOrDefault();
         }
@@ -97,15 +97,75 @@ namespace Elsa.App.Crm.Repositories
             var effectiveFromDt = fromDt ?? now.AddYears(-10);
             var effectiveToDt = toDt ?? now.AddYears(10);
 
-            return _database.SelectFrom<IMeeting>()
+            // Filtering by a joined participant also limits the hydrated Participants collection.
+            // Resolve matching IDs first, then reload each meeting with its complete collection.
+            var meetingIds = _database.SelectFrom<IMeeting>()
+                .Join(m => m.Customer)
+                .Join(m => m.Participants)
+                .Where(m => m.Participants.Each().ParticipantId == participantId)
+                .Where(m => m.Customer.ProjectId == _session.Project.Id)
+                .Where(m => m.StartDt >= effectiveFromDt && m.StartDt <= effectiveToDt)
+                .Execute()
+                .Select(m => m.Id)
+                .Distinct()
+                .ToList();
+
+            return meetingIds
+                .Select(GetMeeting)
+                .Where(m => m != null)
+                .OrderByDescending(m => m.StartDt)
+                .ToList();
+        }
+
+        public List<IMeeting> GetActionExpectedParticipantMeetings(int participantId)
+        {
+            var now = DateTime.Now;
+            var fromDt = now.AddYears(-10);
+            var toDt = now.AddYears(10);
+
+            // Keep the participant join unfiltered so the ORM hydrates the complete collection.
+            // The project has few users, so filtering the materialized meetings in .NET is cheaper
+            // than issuing a separate query for every matching meeting.
+            var meetings = _database.SelectFrom<IMeeting>()
                 .Join(m => m.Customer)
                 .Join(m => m.Participants)
                 .Join(m => m.Status)
-                .Where(m => m.Participants.Each().ParticipantId == participantId)
-                .Where(m => m.StartDt >= effectiveFromDt && m.StartDt <= effectiveToDt)
+                .Where(m => m.Customer.ProjectId == _session.Project.Id)
+                .Where(m => m.Status.ActionExpected == true)
+                .Where(m => m.StartDt >= fromDt && m.StartDt <= toDt)
                 .OrderByDesc(m => m.StartDt)
                 .Execute()
                 .ToList();
+
+            return meetings
+                .Where(m => m.Participants.Any(p => p.ParticipantId == participantId))
+                .ToList();
+        }
+
+        public ParticipantMeetingsOverview GetParticipantMeetingsOverview(int participantId)
+        {
+            var now = DateTime.Now;
+
+            return _database.Sql()
+                .Execute(@"
+SELECT COUNT(DISTINCT m.Id) MeetingCount,
+       CAST(ISNULL(MAX(CASE WHEN m.StartDt < @now THEN 1 ELSE 0 END), 0) AS bit) IsWarning
+  FROM dbo.Meeting m
+  JOIN dbo.MeetingParticipant mp ON (mp.MeetingId = m.Id)
+  JOIN dbo.MeetingStatus ms ON (ms.Id = m.StatusId)
+  JOIN dbo.Customer c ON (c.Id = m.CustomerId)
+ WHERE mp.ParticipantId = @participantId
+   AND c.ProjectId = @projectId
+   AND ms.ActionExpected = 1
+   AND m.StartDt >= @fromDt
+   AND m.StartDt <= @toDt")
+                .WithParam("@participantId", participantId)
+                .WithParam("@projectId", _session.Project.Id)
+                .WithParam("@fromDt", now.AddYears(-10))
+                .WithParam("@toDt", now.AddYears(10))
+                .WithParam("@now", now)
+                .AutoMap<ParticipantMeetingsOverview>()
+                .Single();
         }
 
         public List<MailConversationDto> GetMailConversations(int customerId)
@@ -255,6 +315,12 @@ DELETE mcs
             public string Subject { get; set; }
             public string Summary { get; set; }
             public int MessageCount { get; set; }
+        }
+
+        public class ParticipantMeetingsOverview
+        {
+            public int MeetingCount { get; set; }
+            public bool IsWarning { get; set; }
         }
 
         public class MailConversationMessageDto
