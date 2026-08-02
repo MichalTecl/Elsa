@@ -131,39 +131,14 @@ namespace Elsa.App.Crm.Controllers
 
         public MeetingsOverview GetMyMeetingsOverview()
         {
-            var types = GetMeetingTimeDeciders().ToDictionary(d => d, d => 0);
-
             var meetings = _meetingsRepository
-                .GetParticipantMeetings(WebSession.User.Id, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(16))
+                .GetParticipantMeetings(WebSession.User.Id)
                 .Where(m => m.Status.ActionExpected).ToList();
-
-            var allKeys = types.Keys.ToList();
-
-            foreach (var m in meetings)
-            {
-                if (!m.Status.ActionExpected)
-                    continue;
-
-                var meetDt = m.StartDt;
-
-                foreach (var k in allKeys)
-                {
-                    if (k.from <= meetDt && k.to >= meetDt)
-                    {
-                        types[k] = types[k] + 1;
-                    }
-                }
-            }
-
-            var text = string.Join(", ", types
-                .Where(kv => kv.Value > 0)
-                .OrderBy(kv => kv.Key.order)
-                .Select(kv => $"{kv.Value} {kv.Key.text}"));
 
             return new MeetingsOverview
             {
-                Text = text,
-                IsWarning = false
+                Text = meetings.Count.ToString(),
+                IsWarning = meetings.Any(m => m.StartDt < DateTime.Now)
             };
         }
         
@@ -203,7 +178,7 @@ namespace Elsa.App.Crm.Controllers
 
         public List<CustomerMeetingViewModel> GetMyMeetings()
         {
-            var meetings = _meetingsRepository.GetParticipantMeetings(WebSession.User.Id, DateTime.Now.AddDays(-30), DateTime.Now.AddDays(32));
+            var meetings = _meetingsRepository.GetParticipantMeetings(WebSession.User.Id);
 
             return MapMeetings(meetings.Where(m => m.Status.ActionExpected).OrderBy(m => m.StartDt), null).ToList();
         }

@@ -13,6 +13,7 @@
 
         <div class="actionTile restricted-DistributorsApp" id="meetingsTile">
             <i class="far fa-calendar-alt actionTileIcon"></i>
+            <i id="meetingsWarning" class="fas fa-exclamation-triangle meetingsWarning hidden"></i>
             <a id="meetingsLink" href="/UI/DistributorsApp/MeetingsCalendar.html">...</a>
         </div>
 
@@ -43,10 +44,18 @@
 </script>
 </div>
 <link href="/UI/Inspector/Inspector.css" rel="stylesheet" />
+<style>
+    .meetingsWarning {
+        color: #f7941e;
+    }
+</style>
 <script>
-    lt.element("meetingsTile").attach(function (meetingsLink) {
+    lt.element("meetingsTile").attach(function (meetingsLink, meetingsWarning) {
 
-        const loadOverview = () => lt.api("/crmMeetings/getMyMeetingsOverview").get((t) => meetingsLink.innerHTML = ("Schůzky: " + t.Text).trim());
+        const loadOverview = () => lt.api("/crmMeetings/getMyMeetingsOverview").get((t) => {
+            meetingsLink.textContent = "Schůzky: " + t.Text;
+            meetingsWarning.classList.toggle("hidden", !t.IsWarning);
+        });
 
         setTimeout(loadOverview, 100);
 

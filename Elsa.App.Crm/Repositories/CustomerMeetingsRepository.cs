@@ -91,16 +91,18 @@ namespace Elsa.App.Crm.Repositories
             return result;
         }
 
-        public List<IMeeting> GetParticipantMeetings(int participantId, DateTime fromDt, DateTime toDt)
+        public List<IMeeting> GetParticipantMeetings(int participantId, DateTime? fromDt = null, DateTime? toDt = null)
         {
             var now = DateTime.Now;
+            var effectiveFromDt = fromDt ?? now.AddYears(-10);
+            var effectiveToDt = toDt ?? now.AddYears(10);
 
             return _database.SelectFrom<IMeeting>()
                 .Join(m => m.Customer)
                 .Join(m => m.Participants)
                 .Join(m => m.Status)
                 .Where(m => m.Participants.Each().ParticipantId == participantId)
-                .Where(m => m.StartDt >= fromDt && m.StartDt <= toDt)
+                .Where(m => m.StartDt >= effectiveFromDt && m.StartDt <= effectiveToDt)
                 .OrderByDesc(m => m.StartDt)
                 .Execute()
                 .ToList();
