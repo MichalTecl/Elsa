@@ -163,6 +163,10 @@
 
                     meeting.customerUrl = "/UI/DistributorsApp/DistributorsAppPage.html?customerId=" + meeting.CustomerId;
                 });
+
+                const todayGroupIndex = self.groups.findIndex(group => group.timeClass === "mtGrpToday");
+                if (todayGroupIndex > 0)
+                    self.groups.unshift(self.groups.splice(todayGroupIndex, 1)[0]);
             };
 
             self.loadMeetings = () => {
