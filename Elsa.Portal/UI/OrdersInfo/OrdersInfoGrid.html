@@ -1,0 +1,71 @@
+<div id="ordersInfoGrid" class="ordersInfoGrid">
+    <div class="ordersInfoLoading hidden" data-bind="class!.hidden:isLoading">Načítám objednávky…</div>
+    <div class="ordersInfoEmpty hidden" data-bind="class!.hidden:isEmpty">Žádné objednávky neodpovídají zadaným filtrům.</div>
+
+    <div class="ordersInfoGridContent hidden" data-bind="class!.hidden:hasOrders">
+        <div class="ordersInfoGridHeader">
+            <span></span>
+            <span>Číslo objednávky</span>
+            <span>Datum nákupu</span>
+            <span>Zákazník</span>
+            <span>Stav</span>
+            <span>Způsob dopravy</span>
+            <span class="ordersInfoPrice">Cena s DPH</span>
+        </div>
+
+        <div class="ordersInfoGridBody" data-bind="itemsSource:orders" data-key="OrderId">
+            <div class="lt-template ordersInfoGridItem">
+                <div class="ordersInfoGridSummary" event-bind="click:toggleOrderDetail(VM)">
+                    <span class="ordersInfoExpander">
+                        <i class="fas fa-chevron-right" data-bind="class.hidden:IsExpanded"></i>
+                        <i class="fas fa-chevron-down hidden" data-bind="class!.hidden:IsExpanded"></i>
+                    </span>
+                    <span data-bind="text:OrderNumber"></span>
+                    <span data-bind="text:PurchaseDateText"></span>
+                    <span data-bind="text:CustomerName"></span>
+                    <span data-bind="text:ErpStatusName"></span>
+                    <span data-bind="text:ShippingMethodName"></span>
+                    <span class="ordersInfoPrice" data-bind="text:PriceWithVatText"></span>
+                </div>
+
+                <div class="ordersInfoGridDetail hidden" data-bind="class!.hidden:IsExpanded">
+                    <div>
+                        <span class="ordersInfoDetailLabel">ID objednávky</span>
+                        <span data-bind="text:OrderId"></span>
+                    </div>
+                    <div>
+                        <span class="ordersInfoDetailLabel">Způsob platby</span>
+                        <span data-bind="text:PaymentMethodName"></span>
+                    </div>
+                    <div class="ordersInfoDetailExtension"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ordersInfoPager">
+        <button type="button" data-bind="disabled:previousDisabled" event-bind="click:previousPage()">Předchozí</button>
+        <span data-bind="text:pageLabel"></span>
+        <button type="button" data-bind="disabled:nextDisabled" event-bind="click:nextPage()">Další</button>
+    </div>
+</div>
+
+<script>
+    lt.element("ordersInfoGrid").withModel("app.OrdersInfo.vm").attach(function () {
+        var vm = app.OrdersInfo.vm;
+
+        this.toggleOrderDetail = function (order) {
+            vm.toggleOrderDetail(order.OrderId);
+        };
+
+        this.previousPage = function () {
+            vm.previousPage();
+        };
+
+        this.nextPage = function () {
+            vm.nextPage();
+        };
+
+        vm.init();
+    });
+</script>

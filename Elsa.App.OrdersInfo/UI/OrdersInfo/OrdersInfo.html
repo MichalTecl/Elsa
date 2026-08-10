@@ -1,0 +1,15 @@
+<ElsaBody>
+    <script src="/UI/OrdersInfo/OrdersInfo.vm.js"></script>
+    <link href="/UI/OrdersInfo/OrdersInfo.css" rel="stylesheet" />
+
+    <div class="panel w4">
+        <div class="panelHead">
+            <div class="panelTitle">Přehled objednávek</div>
+        </div>
+
+        <div class="panelContent ordersInfo">
+            <div replace-by="/UI/OrdersInfo/OrdersInfoFilter.html"></div>
+            <div replace-by="/UI/OrdersInfo/OrdersInfoGrid.html"></div>
+        </div>
+    </div>
+</ElsaBody>

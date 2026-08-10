@@ -1,0 +1,207 @@
+<div id="ordersInfoFilter" class="ordersInfoFilter">
+    <div class="ordersInfoFilters">
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">
+                <span>Číslo objednávky</span>
+                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu.">?</span>
+            </span>
+            <input id="orderNumberFilter" type="text" placeholder="např. 2026*" />
+        </label>
+
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">
+                <span>Zákazník</span>
+                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu.">?</span>
+            </span>
+            <input id="customerFilter" type="text" placeholder="*část názvu*" />
+        </label>
+
+        <div id="placedItemAutocomplete" class="ordersInfoFilterField autocomplete">
+            <label class="ordersInfoFilterLabel" for="placedItemFilter">
+                <span>Obsahuje produkt</span>
+                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu. Můžete vybrat našeptaný produkt nebo zadat jakýkoliv text.">?</span>
+            </label>
+            <input id="placedItemFilter" type="text" placeholder="Začněte psát nebo zadejte libovolný text" />
+        </div>
+
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">
+                <span>Způsob dopravy</span>
+                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu.">?</span>
+            </span>
+            <input id="shipmentFilter" type="text" placeholder="*část názvu*" />
+        </label>
+
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">
+                <span>Způsob platby</span>
+                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu.">?</span>
+            </span>
+            <input id="paymentFilter" type="text" placeholder="*část názvu*" />
+        </label>
+
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">Datum nákupu od</span>
+            <input id="minPurchaseDateFilter" type="date" />
+        </label>
+
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">Datum nákupu do</span>
+            <input id="maxPurchaseDateFilter" type="date" />
+        </label>
+
+        <div class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">Stavy objednávky</span>
+            <div id="erpStatusesDropdown" class="ordersInfoStatusDropdown">
+                <button id="erpStatusesButton" type="button" class="ordersInfoStatusButton" event-bind="click:toggleStatuses(event)">
+                    <span id="erpStatusesText">Všechny stavy</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div id="erpStatusesMenu" class="ordersInfoStatusMenu hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ordersInfoFilterActions">
+        <button type="button" class="ordersInfoClearButton" title="Vymazat filtry" aria-label="Vymazat filtry" event-bind="click:clearFilters()">
+            <i class="fas fa-times"></i>
+        </button>
+        <button type="button" event-bind="click:load()">
+            <i class="fas fa-sync-alt"></i>
+            Načíst
+        </button>
+    </div>
+</div>
+
+<script>
+    lt.element("ordersInfoFilter").withModel("app.OrdersInfo.vm").attach(function (
+        orderNumberFilter,
+        customerFilter,
+        placedItemAutocomplete,
+        placedItemFilter,
+        shipmentFilter,
+        paymentFilter,
+        minPurchaseDateFilter,
+        maxPurchaseDateFilter,
+        erpStatusesDropdown,
+        erpStatusesText,
+        erpStatusesMenu) {
+
+        var vm = app.OrdersInfo.vm;
+        var currentParams = new URLSearchParams(window.location.search);
+        var selectedStatusValues = currentParams.getAll("ErpStatuses");
+
+        var setValueFromQuery = function (input, parameterName) {
+            input.value = currentParams.get(parameterName) || "";
+        };
+
+        var getStatusCheckboxes = function () {
+            return erpStatusesMenu.querySelectorAll("input[type='checkbox']");
+        };
+
+        var updateStatusesText = function () {
+            var selected = Array.prototype.filter.call(getStatusCheckboxes(), function (checkbox) {
+                return checkbox.checked;
+            }).map(function (checkbox) {
+                return checkbox.value;
+            });
+
+            if (selected.length === 0) {
+                erpStatusesText.textContent = "Všechny stavy";
+            } else if (selected.length === 1) {
+                erpStatusesText.textContent = selected[0];
+            } else {
+                erpStatusesText.textContent = "Vybráno: " + selected.length;
+            }
+        };
+
+        var addStatusOptions = function (statuses) {
+            (statuses || []).forEach(function (status) {
+                var label = document.createElement("label");
+                var checkbox = document.createElement("input");
+                var text = document.createElement("span");
+
+                label.className = "ordersInfoStatusOption";
+                checkbox.type = "checkbox";
+                checkbox.value = status;
+                checkbox.checked = selectedStatusValues.indexOf(status) !== -1;
+                checkbox.addEventListener("change", updateStatusesText);
+                text.textContent = status;
+
+                label.appendChild(checkbox);
+                label.appendChild(text);
+                erpStatusesMenu.appendChild(label);
+            });
+
+            updateStatusesText();
+        };
+
+        var appendValue = function (params, name, value) {
+            var normalizedValue = (value || "").trim();
+            if (normalizedValue) {
+                params.append(name, normalizedValue);
+            }
+        };
+
+        setValueFromQuery(orderNumberFilter, "OrderNumber");
+        setValueFromQuery(customerFilter, "CustomerNameWildcard");
+        setValueFromQuery(placedItemFilter, "ContainsPlacedItemWildcard");
+        setValueFromQuery(shipmentFilter, "ShipmentMethodNameWildcard");
+        setValueFromQuery(paymentFilter, "PaymentMethodNameWildcard");
+        setValueFromQuery(minPurchaseDateFilter, "MinPurchaseDt");
+        setValueFromQuery(maxPurchaseDateFilter, "MaxPurchaseDt");
+
+        app.ui.autosuggest(placedItemAutocomplete, vm.getPlacedItemNames);
+        vm.getErpStatuses(addStatusOptions);
+
+        this.toggleStatuses = function (event) {
+            event.stopPropagation();
+            erpStatusesMenu.classList.toggle("hidden");
+        };
+
+        this.clearFilters = function () {
+            orderNumberFilter.value = "";
+            customerFilter.value = "";
+            placedItemFilter.value = "";
+            shipmentFilter.value = "";
+            paymentFilter.value = "";
+            minPurchaseDateFilter.value = "";
+            maxPurchaseDateFilter.value = "";
+
+            Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
+                checkbox.checked = false;
+            });
+
+            erpStatusesMenu.classList.add("hidden");
+            updateStatusesText();
+        };
+
+        this.load = function () {
+            var params = new URLSearchParams();
+
+            appendValue(params, "OrderNumber", orderNumberFilter.value);
+            appendValue(params, "CustomerNameWildcard", customerFilter.value);
+            appendValue(params, "ContainsPlacedItemWildcard", placedItemFilter.value);
+            appendValue(params, "ShipmentMethodNameWildcard", shipmentFilter.value);
+            appendValue(params, "PaymentMethodNameWildcard", paymentFilter.value);
+            appendValue(params, "MinPurchaseDt", minPurchaseDateFilter.value);
+            appendValue(params, "MaxPurchaseDt", maxPurchaseDateFilter.value);
+
+            Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
+                if (checkbox.checked) {
+                    params.append("ErpStatuses", checkbox.value);
+                }
+            });
+
+            var queryString = params.toString();
+            var targetUrl = window.location.pathname + (queryString ? "?" + queryString : "") + window.location.hash;
+            window.location.assign(targetUrl);
+        };
+
+        document.addEventListener("click", function (event) {
+            if (!erpStatusesDropdown.contains(event.target)) {
+                erpStatusesMenu.classList.add("hidden");
+            }
+        });
+    });
+</script>

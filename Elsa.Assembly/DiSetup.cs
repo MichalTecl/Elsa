@@ -8,6 +8,7 @@ using Elsa.App.EshopExtensions;
 using Elsa.App.ImportExport;
 using Elsa.App.Inspector;
 using Elsa.App.MaterialLevels;
+using Elsa.App.OrdersInfo;
 using Elsa.App.OrdersPacking;
 using Elsa.App.Profile;
 using Elsa.App.PublicFiles;
@@ -97,6 +98,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(PaymentsPairingController).Assembly);
                     s.ScanAssembly(typeof(ZasilkovnaClient).Assembly);
                     s.ScanAssembly(typeof(ShipmentController).Assembly);
+                    s.ScanAssembly(typeof(OrdersInfoRegistry).Assembly);
                     s.ScanAssembly(typeof(OrdersPackingRegistry).Assembly);
                     s.ScanAssembly(typeof(CustomersSyncJob).Assembly);
                     s.ScanAssembly(typeof(CustomersController).Assembly);

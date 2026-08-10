@@ -1,0 +1,197 @@
+.ordersInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ordersInfoFilters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+}
+
+.ordersInfoFilterField {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.ordersInfoFilterLabel {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+    min-height: 20px;
+}
+
+.ordersInfoWildcardHelp {
+    align-items: center;
+    border: 1px solid #888;
+    border-radius: 50%;
+    color: #666;
+    cursor: help;
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: bold;
+    height: 15px;
+    justify-content: center;
+    line-height: 15px;
+    width: 15px;
+}
+
+.ordersInfoFilterField input,
+.ordersInfoStatusButton {
+    box-sizing: border-box;
+    min-height: 34px;
+    width: 100%;
+}
+
+.ordersInfoStatusDropdown {
+    position: relative;
+}
+
+.ordersInfoStatusButton {
+    align-items: center;
+    background: white;
+    border: 1px solid #aaa;
+    color: inherit;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 9px;
+    text-align: left;
+}
+
+.ordersInfoStatusMenu {
+    background: white;
+    border: 1px solid #aaa;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    left: 0;
+    max-height: 260px;
+    min-width: 100%;
+    overflow-y: auto;
+    padding: 6px 0;
+    position: absolute;
+    top: calc(100% + 2px);
+    z-index: 20;
+}
+
+.ordersInfoStatusOption {
+    align-items: center;
+    display: flex;
+    gap: 7px;
+    padding: 5px 9px;
+    white-space: nowrap;
+}
+
+.ordersInfoStatusOption:hover {
+    background: #eee;
+}
+
+.ordersInfoStatusOption input {
+    margin: 0;
+    min-height: auto;
+    width: auto;
+}
+
+.ordersInfoFilterActions {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.ordersInfoClearButton {
+    min-width: 36px;
+}
+
+.ordersInfoGrid {
+    min-width: 0;
+}
+
+.ordersInfoLoading,
+.ordersInfoEmpty {
+    padding: 24px;
+    text-align: center;
+}
+
+.ordersInfoGridContent {
+    border: 1px solid #d5d5d5;
+    overflow-x: auto;
+}
+
+.ordersInfoGridHeader,
+.ordersInfoGridSummary {
+    align-items: center;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 24px minmax(130px, 0.9fr) minmax(145px, 0.9fr) minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(180px, 1.25fr) minmax(110px, 0.7fr);
+    min-width: 1040px;
+    padding: 9px 11px;
+}
+
+.ordersInfoGridHeader {
+    background: #eee;
+    border-bottom: 1px solid #ccc;
+    font-weight: bold;
+}
+
+.ordersInfoGridItem + .ordersInfoGridItem {
+    border-top: 1px solid #ddd;
+}
+
+.ordersInfoGridSummary {
+    cursor: pointer;
+}
+
+.ordersInfoGridSummary:hover {
+    background: #f5f5f5;
+}
+
+.ordersInfoGridSummary > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ordersInfoExpander {
+    color: #666;
+    text-align: center;
+}
+
+.ordersInfoPrice {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.ordersInfoGridDetail {
+    background: #fafafa;
+    border-top: 1px dashed #ddd;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 36px;
+    padding: 14px 45px;
+}
+
+.ordersInfoGridDetail > div {
+    display: flex;
+    gap: 8px;
+}
+
+.ordersInfoDetailLabel {
+    color: #666;
+    font-weight: bold;
+}
+
+.ordersInfoDetailExtension {
+    flex-basis: 100%;
+}
+
+.ordersInfoPager {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 14px;
+}

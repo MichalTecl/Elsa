@@ -119,6 +119,10 @@
       <Project>{87d88b8d-17b5-4fb4-b7bd-aaa2d2ffb4a1}</Project>
       <Name>Elsa.App.OrdersPacking</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.OrdersInfo\Elsa.App.OrdersInfo.csproj">
+      <Project>{44DC0977-317B-4669-BB27-FA117D19C9A3}</Project>
+      <Name>Elsa.App.OrdersInfo</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.Profile\Elsa.App.Profile.csproj">
       <Project>{09e35860-d69e-42a0-aabd-a7431f283c97}</Project>
       <Name>Elsa.App.Profile</Name>

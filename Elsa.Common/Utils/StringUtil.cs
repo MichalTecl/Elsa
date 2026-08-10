@@ -473,5 +473,37 @@ namespace Elsa.Common.Utils
         {
             return dt.ToString("MM/yyyy");
         }
+
+        public static string ToSqlLike(this string starPattern)
+        {
+            if (starPattern == null)
+                return null;
+
+            var result = new StringBuilder(starPattern.Length);
+
+            foreach (var character in starPattern)
+            {
+                switch (character)
+                {
+                    case '*':
+                        result.Append('%');
+                        break;
+                    case '%':
+                        result.Append("[%]");
+                        break;
+                    case '_':
+                        result.Append("[_]");
+                        break;
+                    case '[':
+                        result.Append("[[]");
+                        break;
+                    default:
+                        result.Append(character);
+                        break;
+                }
+            }
+
+            return result.ToString();
+        }
     }
 }
