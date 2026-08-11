@@ -47,7 +47,7 @@ namespace Elsa.App.OrdersInfo.App
                 yield return source.DiscountsText;
                 yield return source.PercentDiscountText;
 
-                foreach (var pe in source.PriceElements.Where(pe => pe.TypeName != "shipping" && pe.TypeName != "payment"))
+                foreach (var pe in source.PriceElements)
                     yield return pe.Title;
             }
 
@@ -62,7 +62,9 @@ namespace Elsa.App.OrdersInfo.App
                 PaymentMethodName = source.PaymentMethodName,
                 CustomerName = source.CustomerName,
                 CustomerErpUid = source.CustomerErpUid,
-                Discounts = string.Join(", ", GetDiscounts().Where(d => !string.IsNullOrWhiteSpace(d)).Distinct())
+                Discounts = string.Join(", ", GetDiscounts()
+                    .Where(discount => !string.IsNullOrWhiteSpace(discount))
+                    .Distinct(StringComparer.OrdinalIgnoreCase))
             };
         }
 
@@ -77,6 +79,20 @@ namespace Elsa.App.OrdersInfo.App
                                         AND ErpStatusName IS NOT NULL
                                       ORDER BY ErpStatusName", _session.Project.Id)
                 .MapRows(r => r.GetString(0)));
+        }
+
+        public IList<string> GetPaymentMethods()
+        {
+            return _cache.ReadThrough($"ordinf_allPaymentMethods_{_session.Project.Id}",
+                TimeSpan.FromHours(1),
+                () => _db.Sql()
+                    .ExecuteWithParams(@"SELECT DISTINCT PaymentMethodName
+                                           FROM PurchaseOrder
+                                          WHERE ProjectId = {0}
+                                            AND PaymentMethodName IS NOT NULL
+                                            AND LTRIM(RTRIM(PaymentMethodName)) <> ''
+                                          ORDER BY PaymentMethodName", _session.Project.Id)
+                    .MapRows(row => row.GetString(0)));
         }
 
         public IList<string> GetPlacedItemNames()

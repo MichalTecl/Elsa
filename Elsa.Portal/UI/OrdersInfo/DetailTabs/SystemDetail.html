@@ -1,0 +1,22 @@
+<div id="systemDetail{%GENERATE%}" class="ordersInfoSystemDetail">
+    <div class="ordersInfoSystemOrderId">
+        <span class="ordersInfoDetailLabel">ID objednávky</span>
+        <span data-bind="text:data.OrderId"></span>
+    </div>
+
+    <div class="ordersInfoDetailEmpty" data-bind="class.hidden:data.HasEvents">
+        K objednávce nejsou zaznamenané žádné systémové události.
+    </div>
+
+    <div class="ordersInfoSystemEvents hidden" data-bind="class!.hidden:data.HasEvents; itemsSource:data.Events" data-key="Id">
+        <div class="lt-template ordersInfoSystemEvent">
+            <span class="ordersInfoSystemEventDate" data-bind="text:DtText"></span>
+            <span data-bind="text:Text"></span>
+            <span class="ordersInfoSystemEventUser hidden" data-bind="class!.hidden:HasUser; text:User"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("systemDetail{%GENERATE%}").attach(function () { });
+</script>

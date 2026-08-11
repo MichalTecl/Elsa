@@ -5,16 +5,76 @@
 }
 
 .ordersInfoFilters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
     gap: 14px;
 }
 
 .ordersInfoFilterField {
     display: flex;
+    flex: 0 1 210px;
     flex-direction: column;
     gap: 5px;
     min-width: 0;
+}
+
+.ordersInfoProductBatchGroup {
+    flex: 0 1 940px;
+    min-width: 0;
+}
+
+.ordersInfoProductBatchFields {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) 125px;
+    width: 100%;
+}
+
+.ordersInfoProductBatchLegend {
+    color: #666;
+    font-size: 12px;
+    line-height: 1.35;
+    margin-top: 5px;
+}
+
+.ordersInfoFilterField.autocomplete {
+    display: flex;
+}
+
+.ordersInfoFilterField.autocomplete input[type="text"] {
+    background-color: rgb(250, 255, 189);
+    max-width: none;
+}
+
+.ordersInfoOrderNumberFilter {
+    flex: 0 0 auto;
+}
+
+.ordersInfoOrderNumberFilter input[type="text"] {
+    max-width: 12ch;
+}
+
+.ordersInfoCustomerFilter,
+.ordersInfoDiscountFilter {
+    flex-basis: 400px;
+}
+
+.ordersInfoCustomerFilter input[type="text"],
+.ordersInfoDiscountFilter input[type="text"] {
+    max-width: 400px;
+}
+
+.ordersInfoDateFilter {
+    flex-basis: 160px;
+}
+
+.ordersInfoDateFilter input[type="date"] {
+    max-width: 160px;
+}
+
+.ordersInfoBatchNumberFilter input[type="text"] {
+    max-width: 125px;
 }
 
 .ordersInfoFilterLabel {
@@ -40,6 +100,7 @@
 }
 
 .ordersInfoFilterField input,
+.ordersInfoFilterField select,
 .ordersInfoStatusButton {
     box-sizing: border-box;
     min-height: 34px;
@@ -103,7 +164,25 @@
 }
 
 .ordersInfoClearButton {
+    background: #e3e3e3;
+    border-color: #bdbdbd;
+    color: #555;
     min-width: 36px;
+}
+
+.ordersInfoClearButton:hover {
+    background: #d8d8d8;
+}
+
+.ordersInfoLoadButton {
+    background: #2e8b57;
+    border-color: #237047;
+    color: white;
+    min-width: 36px;
+}
+
+.ordersInfoLoadButton:hover {
+    background: #267849;
 }
 
 .ordersInfoGrid {
@@ -180,18 +259,6 @@
 
 .ordersInfoGridDetail > div {
     width: 100%;
-}
-
-.ordersInfoDetailSummary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 36px;
-    padding: 0 6px 12px;
-}
-
-.ordersInfoDetailSummary > div {
-    display: flex;
-    gap: 8px;
 }
 
 .ordersInfoDetailLabel {
@@ -298,7 +365,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px 28px;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 
 .ordersInfoPaymentMethodHeader h3 {
@@ -331,19 +398,111 @@
 }
 
 .ordersInfoPaymentProperties {
-    display: grid;
-    gap: 9px 24px;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
 }
 
 .ordersInfoPaymentMessage {
-    grid-column: 1 / -1;
+    width: 100%;
 }
 
 .ordersInfoPaymentMessage pre {
     font-family: inherit;
     margin: 0;
     white-space: pre-wrap;
+}
+
+.ordersInfoShippingMethodHeader,
+.ordersInfoShippingOverview {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    justify-content: flex-start;
+}
+
+.ordersInfoShippingMethodHeader h3 {
+    margin: 0;
+}
+
+.ordersInfoShippingOverview {
+    border-bottom: 1px solid #ddd;
+    justify-content: flex-start;
+    padding: 12px 0;
+}
+
+.ordersInfoShippingOverview > div,
+.ordersInfoShippingProperties > div {
+    display: flex;
+    gap: 8px;
+}
+
+.ordersInfoShippingSection {
+    margin-top: 18px;
+}
+
+.ordersInfoShippingSection h4 {
+    margin: 0 0 9px;
+}
+
+.ordersInfoShippingProperties {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.ordersInfoShippingMessage {
+    width: 100%;
+}
+
+.ordersInfoShippingMessage pre {
+    font-family: inherit;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.ordersInfoSystemOrderId {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.ordersInfoSystemEvents {
+    display: flex;
+    flex-direction: column;
+}
+
+.ordersInfoSystemEvent {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    padding: 7px 0;
+}
+
+.ordersInfoSystemEvent + .ordersInfoSystemEvent {
+    border-top: 1px solid #ddd;
+}
+
+.ordersInfoSystemEventDate {
+    color: #555;
+    min-width: 145px;
+    white-space: nowrap;
+}
+
+.ordersInfoSystemEventUser {
+    color: #666;
+}
+
+.ordersInfoSystemEventUser::before {
+    content: "(";
+}
+
+.ordersInfoSystemEventUser::after {
+    content: ")";
 }
 
 .ordersInfoPager {

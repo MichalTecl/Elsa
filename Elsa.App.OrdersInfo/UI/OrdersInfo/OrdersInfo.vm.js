@@ -54,10 +54,13 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
             MinPurchaseDt: readDate(params, "MinPurchaseDt", false),
             MaxPurchaseDt: readDate(params, "MaxPurchaseDt", true),
             ErpStatuses: params.getAll("ErpStatuses"),
+            OrderStatusId: readInt(params, "OrderStatusId", null),
             ContainsPlacedItemWildcard: params.get("ContainsPlacedItemWildcard") || null,
+            MaterialBatchNumberWildcard: params.get("MaterialBatchNumberWildcard") || null,
             CustomerNameWildcard: params.get("CustomerNameWildcard") || null,
             ShipmentMethodNameWildcard: params.get("ShipmentMethodNameWildcard") || null,
-            PaymentMethodNameWildcard: params.get("PaymentMethodNameWildcard") || null
+            PaymentMethodName: params.get("PaymentMethodName") || null,
+            DiscountTextWildcard: params.get("DiscountTextWildcard") || null
         };
     };
 
@@ -237,6 +240,10 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         lt.api("/ordersInfo/getErpStatuses").get(callback);
     };
 
+    self.getPaymentMethods = function (callback) {
+        lt.api("/ordersInfo/getPaymentMethods").get(callback);
+    };
+
     self.registerDetailTab = function (definition) {
         if (!definition || !definition.id || !definition.tabTitle || !definition.control) {
             throw new Error("Neplatná definice záložky detailu objednávky");
@@ -378,6 +385,52 @@ app.OrdersInfo.vm.registerDetailTab({
 });
 
 app.OrdersInfo.vm.registerDetailTab({
+    id: "shippingDetail",
+    tabTitle: "Doprava",
+    action: "getShippingDetail",
+    control: "/UI/OrdersInfo/DetailTabs/ShippingDetail.html",
+    prepareData: function (detail) {
+        detail = detail || {};
+        detail.ShippingMethodName = detail.ShippingMethodName || "Neuvedený způsob dopravy";
+        detail.HasDpdUrl = !!detail.DpdUrl;
+        detail.HasPacketaUrl = !!detail.PacketaUrl;
+        detail.HasDeliveryAddress = !!detail.DeliveryAddress;
+        detail.ShippingCostText = Number(detail.TaxedShippingCost || 0).toLocaleString("cs-CZ", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + (detail.OrderCurrencySymbol ? " " + detail.OrderCurrencySymbol : "");
+
+        var packingDate = new Date(detail.PackingDt);
+        detail.PackingDtText = detail.PackingDt && !isNaN(packingDate.getTime())
+            ? packingDate.toLocaleString("cs-CZ")
+            : "";
+
+        if (detail.DeliveryAddress) {
+            var address = detail.DeliveryAddress;
+            var streetNumbers = [address.DescriptiveNumber, address.OrientationNumber]
+                .filter(function (value) { return !!value; })
+                .join("/");
+
+            address.RecipientName = [address.FirstName, address.LastName]
+                .filter(function (value) { return !!value; })
+                .join(" ");
+            address.StreetText = [address.Street, streetNumbers]
+                .filter(function (value) { return !!value; })
+                .join(" ");
+            address.CityText = [address.Zip, address.City]
+                .filter(function (value) { return !!value; })
+                .join(" ");
+            address.HasCompanyName = !!address.CompanyName;
+            address.HasPhone = !!address.Phone;
+            address.HasNote = !!address.Note;
+            address.PhoneUrl = address.Phone ? "tel:" + address.Phone : "";
+        }
+
+        return detail;
+    }
+});
+
+app.OrdersInfo.vm.registerDetailTab({
     id: "paymentDetail",
     tabTitle: "Platba",
     action: "getPaymentDetail",
@@ -406,6 +459,28 @@ app.OrdersInfo.vm.registerDetailTab({
                 maximumFractionDigits: 2
             }) + (detail.Payment.CurrencySymbol ? " " + detail.Payment.CurrencySymbol : "");
         }
+
+        return detail;
+    }
+});
+
+app.OrdersInfo.vm.registerDetailTab({
+    id: "systemDetail",
+    tabTitle: "System",
+    action: "getOrderSysInfo",
+    control: "/UI/OrdersInfo/DetailTabs/SystemDetail.html",
+    prepareData: function (detail) {
+        detail = detail || {};
+        detail.Events = detail.Events || [];
+        detail.HasEvents = detail.Events.length > 0;
+
+        detail.Events.forEach(function (orderEvent) {
+            var eventDate = new Date(orderEvent.Dt);
+            orderEvent.DtText = isNaN(eventDate.getTime())
+                ? ""
+                : eventDate.toLocaleString("cs-CZ");
+            orderEvent.HasUser = !!orderEvent.User;
+        });
 
         return detail;
     }

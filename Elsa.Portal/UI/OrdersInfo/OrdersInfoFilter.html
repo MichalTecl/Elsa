@@ -1,51 +1,35 @@
 <div id="ordersInfoFilter" class="ordersInfoFilter">
     <div class="ordersInfoFilters">
-        <label class="ordersInfoFilterField">
+        <label class="ordersInfoFilterField ordersInfoOrderNumberFilter">
             <span class="ordersInfoFilterLabel">
-                <span>Číslo objednávky</span>
-                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu.">?</span>
+                <span>Č. Obj.</span>
+                <span class="ordersInfoWildcardHelp" title="Bez hvězdičky se hledá zadaný text kdekoliv v hodnotě. Text v uvozovkách se hledá bez automatického doplnění hvězdiček. Znak * můžete použít pro vlastní umístění zástupného textu.">?</span>
             </span>
-            <input id="orderNumberFilter" type="text" placeholder="např. 2026*" />
+            <input id="orderNumberFilter" type="text" />
         </label>
 
-        <label class="ordersInfoFilterField">
+        <label class="ordersInfoFilterField ordersInfoCustomerFilter">
             <span class="ordersInfoFilterLabel">
                 <span>Zákazník</span>
-                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu.">?</span>
+                <span class="ordersInfoWildcardHelp" title="Bez hvězdičky se hledá zadaný text kdekoliv v hodnotě. Text v uvozovkách se hledá bez automatického doplnění hvězdiček. Znak * můžete použít pro vlastní umístění zástupného textu.">?</span>
             </span>
-            <input id="customerFilter" type="text" placeholder="*část názvu*" />
+            <input id="customerFilter" type="text" />
         </label>
 
-        <div id="placedItemAutocomplete" class="ordersInfoFilterField autocomplete">
-            <label class="ordersInfoFilterLabel" for="placedItemFilter">
-                <span>Obsahuje produkt</span>
-                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu. Můžete vybrat našeptaný produkt nebo zadat jakýkoliv text.">?</span>
-            </label>
-            <input id="placedItemFilter" type="text" placeholder="Začněte psát nebo zadejte libovolný text" />
-        </div>
-
-        <label class="ordersInfoFilterField">
+        <label class="ordersInfoFilterField ordersInfoDiscountFilter">
             <span class="ordersInfoFilterLabel">
-                <span>Způsob dopravy</span>
-                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu.">?</span>
+                <span>Sleva/kupón</span>
+                <span class="ordersInfoWildcardHelp" title="Bez hvězdičky se hledá zadaný text kdekoliv v hodnotě. Text v uvozovkách se hledá bez automatického doplnění hvězdiček. Znak * můžete použít pro vlastní umístění zástupného textu.">?</span>
             </span>
-            <input id="shipmentFilter" type="text" placeholder="*část názvu*" />
+            <input id="discountFilter" type="text" />
         </label>
 
-        <label class="ordersInfoFilterField">
-            <span class="ordersInfoFilterLabel">
-                <span>Způsob platby</span>
-                <span class="ordersInfoWildcardHelp" title="Ve filtru lze použít znak * jako zástupný znak pro libovolnou část textu.">?</span>
-            </span>
-            <input id="paymentFilter" type="text" placeholder="*část názvu*" />
-        </label>
-
-        <label class="ordersInfoFilterField">
+        <label class="ordersInfoFilterField ordersInfoDateFilter">
             <span class="ordersInfoFilterLabel">Datum nákupu od</span>
             <input id="minPurchaseDateFilter" type="date" />
         </label>
 
-        <label class="ordersInfoFilterField">
+        <label class="ordersInfoFilterField ordersInfoDateFilter">
             <span class="ordersInfoFilterLabel">Datum nákupu do</span>
             <input id="maxPurchaseDateFilter" type="date" />
         </label>
@@ -60,15 +44,52 @@
                 <div id="erpStatusesMenu" class="ordersInfoStatusMenu hidden"></div>
             </div>
         </div>
+
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">
+                <span>Způsob dopravy</span>
+                <span class="ordersInfoWildcardHelp" title="Bez hvězdičky se hledá zadaný text kdekoliv v hodnotě. Text v uvozovkách se hledá bez automatického doplnění hvězdiček. Znak * můžete použít pro vlastní umístění zástupného textu.">?</span>
+            </span>
+            <input id="shipmentFilter" type="text" />
+        </label>
+
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">Způsob platby</span>
+            <select id="paymentFilter">
+                <option value="">Všechny způsoby platby</option>
+            </select>
+        </label>
+
+        <div class="ordersInfoProductBatchGroup">
+            <div class="ordersInfoProductBatchFields">
+                <div id="placedItemAutocomplete" class="ordersInfoFilterField autocomplete">
+                    <label class="ordersInfoFilterLabel" for="placedItemFilter">
+                        <span>Obsahuje produkt</span>
+                        <span class="ordersInfoWildcardHelp" title="Bez hvězdičky se hledá zadaný text kdekoliv v názvu. Text v uvozovkách se hledá bez automatického doplnění hvězdiček. Znak * můžete použít pro vlastní umístění zástupného textu. Můžete vybrat našeptaný produkt nebo zadat jakýkoliv text.">?</span>
+                    </label>
+                    <input id="placedItemFilter" type="text" />
+                </div>
+
+                <label class="ordersInfoFilterField ordersInfoBatchNumberFilter">
+                    <span class="ordersInfoFilterLabel">
+                        <span>Číslo šarže</span>
+                        <span class="ordersInfoWildcardHelp" title="Bez hvězdičky se hledá zadaný text kdekoliv v čísle šarže. Text v uvozovkách se hledá bez automatického doplnění hvězdiček. Znak * můžete použít pro vlastní umístění zástupného textu.">?</span>
+                    </span>
+                    <input id="materialBatchNumberFilter" type="text" />
+                </label>
+            </div>
+            <div class="ordersInfoProductBatchLegend">
+                Pokud zadáte produkt i číslo šarže, vyhledají se objednávky, ve kterých byl zadaný produkt vypořádán z této šarže. Samotné číslo šarže hledá bez ohledu na produkt.
+            </div>
+        </div>
     </div>
 
     <div class="ordersInfoFilterActions">
         <button type="button" class="ordersInfoClearButton" title="Vymazat filtry" aria-label="Vymazat filtry" event-bind="click:clearFilters()">
-            <i class="fas fa-times"></i>
+            <i class="fas fa-eraser"></i>
         </button>
-        <button type="button" event-bind="click:load()">
-            <i class="fas fa-sync-alt"></i>
-            Načíst
+        <button type="button" class="ordersInfoLoadButton" title="Načíst objednávky" aria-label="Načíst objednávky" event-bind="click:load()">
+            <i class="fas fa-search"></i>
         </button>
     </div>
 </div>
@@ -79,8 +100,10 @@
         customerFilter,
         placedItemAutocomplete,
         placedItemFilter,
+        materialBatchNumberFilter,
         shipmentFilter,
         paymentFilter,
+        discountFilter,
         minPurchaseDateFilter,
         maxPurchaseDateFilter,
         erpStatusesDropdown,
@@ -91,6 +114,10 @@
         var vm = app.OrdersInfo.vm;
         var currentParams = new URLSearchParams(window.location.search);
         var selectedStatusValues = currentParams.getAll("ErpStatuses");
+        var selectedPaymentMethod = currentParams.get("PaymentMethodName") || "";
+        var selectedOrderStatusId = /^\d+$/.test(currentParams.get("OrderStatusId") || "")
+            ? currentParams.get("OrderStatusId")
+            : null;
 
         var setValueFromQuery = function (input, parameterName) {
             input.value = currentParams.get(parameterName) || "";
@@ -137,6 +164,17 @@
             updateStatusesText();
         };
 
+        var addPaymentOptions = function (paymentMethods) {
+            (paymentMethods || []).forEach(function (paymentMethod) {
+                var option = document.createElement("option");
+                option.value = paymentMethod;
+                option.textContent = paymentMethod;
+                paymentFilter.appendChild(option);
+            });
+
+            paymentFilter.value = selectedPaymentMethod;
+        };
+
         var appendValue = function (params, name, value) {
             var normalizedValue = (value || "").trim();
             if (normalizedValue) {
@@ -147,13 +185,15 @@
         setValueFromQuery(orderNumberFilter, "OrderNumber");
         setValueFromQuery(customerFilter, "CustomerNameWildcard");
         setValueFromQuery(placedItemFilter, "ContainsPlacedItemWildcard");
+        setValueFromQuery(materialBatchNumberFilter, "MaterialBatchNumberWildcard");
         setValueFromQuery(shipmentFilter, "ShipmentMethodNameWildcard");
-        setValueFromQuery(paymentFilter, "PaymentMethodNameWildcard");
+        setValueFromQuery(discountFilter, "DiscountTextWildcard");
         setValueFromQuery(minPurchaseDateFilter, "MinPurchaseDt");
         setValueFromQuery(maxPurchaseDateFilter, "MaxPurchaseDt");
 
         app.ui.autosuggest(placedItemAutocomplete, vm.getPlacedItemNames);
         vm.getErpStatuses(addStatusOptions);
+        vm.getPaymentMethods(addPaymentOptions);
 
         this.toggleStatuses = function (event) {
             event.stopPropagation();
@@ -164,10 +204,13 @@
             orderNumberFilter.value = "";
             customerFilter.value = "";
             placedItemFilter.value = "";
+            materialBatchNumberFilter.value = "";
             shipmentFilter.value = "";
             paymentFilter.value = "";
+            discountFilter.value = "";
             minPurchaseDateFilter.value = "";
             maxPurchaseDateFilter.value = "";
+            selectedOrderStatusId = null;
 
             Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
                 checkbox.checked = false;
@@ -183,10 +226,13 @@
             appendValue(params, "OrderNumber", orderNumberFilter.value);
             appendValue(params, "CustomerNameWildcard", customerFilter.value);
             appendValue(params, "ContainsPlacedItemWildcard", placedItemFilter.value);
+            appendValue(params, "MaterialBatchNumberWildcard", materialBatchNumberFilter.value);
             appendValue(params, "ShipmentMethodNameWildcard", shipmentFilter.value);
-            appendValue(params, "PaymentMethodNameWildcard", paymentFilter.value);
+            appendValue(params, "PaymentMethodName", paymentFilter.value);
+            appendValue(params, "DiscountTextWildcard", discountFilter.value);
             appendValue(params, "MinPurchaseDt", minPurchaseDateFilter.value);
             appendValue(params, "MaxPurchaseDt", maxPurchaseDateFilter.value);
+            appendValue(params, "OrderStatusId", selectedOrderStatusId);
 
             Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
                 if (checkbox.checked) {

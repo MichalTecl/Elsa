@@ -42,7 +42,8 @@ namespace Elsa.App.Commerce.Preview
                     DateTime.Now))
                 {
                     report[row.ErpName, "ERP"] = row.ErpName;
-                    report[row.ErpName, m_statusTranslator.Translate(row.StatusId)] = row.Count.ToString();
+                    report[row.ErpName, m_statusTranslator.Translate(row.StatusId)] =
+                        $"<a href=\"/UI/OrdersInfo/OrdersInfo.html?OrderStatusId={row.StatusId}\">{row.Count}</a>";
                 }
 
                 return report;

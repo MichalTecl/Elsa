@@ -14,6 +14,8 @@ using Elsa.Commerce.Core.Crm;
 using System.Linq;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using System.Net;
+using Elsa.Core.Entities.Commerce.Integration;
+using Elsa.App.OrdersPacking.Entities;
 
 namespace Elsa.App.OrdersInfo
 {
@@ -22,11 +24,14 @@ namespace Elsa.App.OrdersInfo
     {
         private const string CRM_APP_RIGHT = "DistributorsApp";
         private const string COMGATE_TRANSACTIONS_URL = "https://portal.comgate.cz/cs/transakce";
+        private const string DPD_SHIPMENTS_URL = "https://shipping.dpdgroup.com/shipments";
+        private const string PACKETA_PACKETS_URL = "https://client.packeta.com/cs/packets/list";
 
         private readonly OrdersInfoRepository _orderInfoRepository;
         private readonly IDatabase _db;
         private readonly IPurchaseOrderRepository _purchaseOrderRepository;
         private readonly ICustomerRepository _customerRepository;
+        private readonly IUserRepository _userRepository;
 
         public OrdersInfoController(
             IWebSession webSession,
@@ -34,12 +39,14 @@ namespace Elsa.App.OrdersInfo
             OrdersInfoRepository orderInfoRepository,
             IDatabase db,
             IPurchaseOrderRepository purchaseOrderRepository,
-            ICustomerRepository customerRepository) : base(webSession, log)
+            ICustomerRepository customerRepository,
+            IUserRepository userRepository) : base(webSession, log)
         {
             _orderInfoRepository = orderInfoRepository;
             _db = db;
             _purchaseOrderRepository = purchaseOrderRepository;
             _customerRepository = customerRepository;
+            _userRepository = userRepository;
         }
 
         protected override void OnBeforeCall()
@@ -50,6 +57,12 @@ namespace Elsa.App.OrdersInfo
         public List<OrderInfoModel> Query(OrderQueryModel query)
         {
             query = query ?? new OrderQueryModel();
+            query.OrderNumber = NormalizeWildcard(query.OrderNumber);
+            query.ContainsPlacedItemWildcard = NormalizeWildcard(query.ContainsPlacedItemWildcard);
+            query.MaterialBatchNumberWildcard = NormalizeWildcard(query.MaterialBatchNumberWildcard);
+            query.CustomerNameWildcard = NormalizeWildcard(query.CustomerNameWildcard);
+            query.ShipmentMethodNameWildcard = NormalizeWildcard(query.ShipmentMethodNameWildcard);
+            query.DiscountTextWildcard = NormalizeWildcard(query.DiscountTextWildcard);
 
             var take = Math.Min(Math.Max(query.PageSize, 1), 200);
             var page = Math.Max(query.Page, 0);
@@ -70,8 +83,34 @@ namespace Elsa.App.OrdersInfo
 
                     if (query.ErpStatuses?.Count > 0)
                         q.Where(o => o.ErpStatusName.InCsv(query.ErpStatuses));
+
+                    if (query.OrderStatusId != null)
+                    {
+                        var filteredOrderStatusId = query.OrderStatusId.Value;
+                        q.Where(o => o.OrderStatusId == filteredOrderStatusId);
+                    }
                     
-                    if (!string.IsNullOrWhiteSpace(query.ContainsPlacedItemWildcard))
+                    if (!string.IsNullOrWhiteSpace(query.MaterialBatchNumberWildcard))
+                    {
+                        var batchQuery = _db.SelectFrom<IOrderItemMaterialBatch>()
+                            .Join(assignment => assignment.MaterialBatch)
+                            .Join(assignment => assignment.OrderItem)
+                            .Join(assignment => assignment.OrderItem.KitParent)
+                            .Join(assignment => assignment.OrderItem.PurchaseOrder)
+                            .Where(assignment => assignment.MaterialBatch.BatchNumber.Like(
+                                query.MaterialBatchNumberWildcard.ToSqlLike()));
+
+                        if (!string.IsNullOrWhiteSpace(query.ContainsPlacedItemWildcard))
+                        {
+                            batchQuery.Where(assignment =>
+                                assignment.OrderItem.PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike())
+                                || assignment.OrderItem.KitParent.PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike()));
+                        }
+
+                        q.Where(order => order.Id.InSubquery(batchQuery
+                            .Transform(assignment => assignment.OrderItem.PurchaseOrder.Id)));
+                    }
+                    else if (!string.IsNullOrWhiteSpace(query.ContainsPlacedItemWildcard))
                     {
                         q.Where(o => o.Id.InSubquery(_db.SelectFrom<IOrderItem>()
                                                         .Join(i => i.KitChildren)
@@ -87,12 +126,38 @@ namespace Elsa.App.OrdersInfo
                     if (!string.IsNullOrWhiteSpace(query.ShipmentMethodNameWildcard))
                         q.Where(o => o.ShippingMethodName.Like(query.ShipmentMethodNameWildcard.ToSqlLike()));
 
-                    if (!string.IsNullOrWhiteSpace(query.PaymentMethodNameWildcard))
-                        q.Where(o => o.PaymentMethodName.Like(query.PaymentMethodNameWildcard.ToSqlLike()));
+                    if (!string.IsNullOrWhiteSpace(query.PaymentMethodName))
+                        q.Where(o => o.PaymentMethodName == query.PaymentMethodName);
+
+                    if (!string.IsNullOrWhiteSpace(query.DiscountTextWildcard))
+                    {
+                        q.Where(o => o.Id.InSubquery(_db.SelectFrom<IOrderPriceElement>()
+                            .Where(element => element.Title.Like(query.DiscountTextWildcard.ToSqlLike()))
+                            .Transform(element => element.PurchaseOrderId)));
+                    }
 
                 });
 
             return result;
+        }
+
+        private static string NormalizeWildcard(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return null;
+
+            var normalizedValue = value.Trim();
+            if (normalizedValue.Length >= 2
+                && normalizedValue[0] == '"'
+                && normalizedValue[normalizedValue.Length - 1] == '"')
+            {
+                var unquotedValue = normalizedValue.Substring(1, normalizedValue.Length - 2);
+                return string.IsNullOrWhiteSpace(unquotedValue) ? null : unquotedValue;
+            }
+
+            return normalizedValue.IndexOf('*') >= 0
+                ? normalizedValue
+                : $"*{normalizedValue}*";
         }
 
         public IList<string> GetPlacedItemNames()
@@ -103,6 +168,11 @@ namespace Elsa.App.OrdersInfo
         public IList<string> GetErpStatuses()
         {
             return _orderInfoRepository.GetErpStatuses();
+        }
+
+        public IList<string> GetPaymentMethods()
+        {
+            return _orderInfoRepository.GetPaymentMethods();
         }
 
         public List<OrderNoteModel> GetOrderNotes(long orderId)
@@ -214,6 +284,132 @@ namespace Elsa.App.OrdersInfo
             }
 
             return result;
+        }
+
+        public ShippingDetailModel GetShippingDetail(long orderId)
+        {
+            var order = _db.SelectFrom<IPurchaseOrder>()
+                .Join(item => item.Currency)
+                .Join(item => item.DeliveryAddress)
+                .Join(item => item.PackingUser)
+                .Where(item => item.Id == orderId)
+                .Where(item => item.ProjectId == WebSession.Project.Id)
+                .Execute()
+                .FirstOrDefault() ?? throw new ArgumentException("Objednávka nenalezena");
+
+            var result = new ShippingDetailModel
+            {
+                ShippingMethodName = order.ShippingMethodName,
+                TaxedShippingCost = order.TaxedShippingCost,
+                OrderCurrencySymbol = order.Currency?.Symbol,
+                HasPackingInfo = order.PackingUserId != null || order.PackingDt != null,
+                PackingUser = order.PackingUser?.EMail,
+                PackingDt = order.PackingDt
+            };
+
+            if (order.DeliveryAddress != null)
+            {
+                result.DeliveryAddress = new ShippingAddressInfoModel
+                {
+                    CompanyName = order.DeliveryAddress.CompanyName,
+                    FirstName = order.DeliveryAddress.FirstName,
+                    LastName = order.DeliveryAddress.LastName,
+                    Street = order.DeliveryAddress.Street,
+                    DescriptiveNumber = order.DeliveryAddress.DescriptiveNumber,
+                    OrientationNumber = order.DeliveryAddress.OrientationNumber,
+                    City = order.DeliveryAddress.City,
+                    Zip = order.DeliveryAddress.Zip,
+                    Country = order.DeliveryAddress.Country,
+                    Phone = order.DeliveryAddress.Phone,
+                    Note = order.DeliveryAddress.Note
+                };
+            }
+
+            if (result.HasPackingInfo && string.IsNullOrWhiteSpace(result.PackingUser))
+                result.PackingUser = "Neznámý uživatel";
+
+            var isDpd = !string.IsNullOrWhiteSpace(order.ShippingMethodName)
+                        && order.ShippingMethodName.IndexOf("DPD", StringComparison.OrdinalIgnoreCase) >= 0;
+
+            if (isDpd)
+                result.DpdUrl = BuildDpdUrl(order.OrderNumber);
+            else
+                result.PacketaUrl = BuildPacketaUrl(order);
+
+            return result;
+        }
+
+        public SysInfoModel GetOrderSysInfo(long orderId)
+        {
+            var order = GetOrder(orderId);
+
+            var events = new List<OrderEventModel>();
+
+            void AddEvent(DateTime? dateTime, string text, int? userId = null)
+            {
+                if (dateTime == null || string.IsNullOrWhiteSpace(text))
+                    return;
+
+                var user = userId == null
+                    ? null
+                    : _userRepository.GetUser(userId.Value)?.EMail;
+
+                events.Add(new OrderEventModel
+                {
+                    Dt = dateTime.Value,
+                    Text = text.Trim(),
+                    User = user
+                });
+            }
+
+            AddEvent(order.BuyDate, nameof(order.BuyDate));
+            AddEvent(order.PurchaseDate, nameof(order.PurchaseDate));
+            AddEvent(order.DueDate, nameof(order.DueDate));
+            AddEvent(order.ErpLastChange, nameof(order.ErpLastChange));
+            AddEvent(order.InsertDt, "Záznam vytvořen", order.InsertUserId);
+            AddEvent(order.PaymentPairingDt, "Platba spárována", order.PaymentPairingUserId);
+            AddEvent(order.PackingDt, "Zabaleno", order.PackingUserId);
+            AddEvent(order.ReturnDt, "Vráceno");
+
+            foreach (var blocker in _db.SelectFrom<IOrderProcessingBlocker>().Where(o => o.PurchaseOrderId == orderId).Execute())
+                AddEvent(blocker.CreateDt, blocker.Message, blocker.AuthorId);
+
+            foreach (var e in _db.SelectFrom<IOrderProcessingLog>().Where(l => l.PurchaseOrderId == orderId).Execute())
+                AddEvent(e.ProcessDt, e.ProcessCode);
+
+            foreach (var rev in _db.SelectFrom<IOrderReviewResult>().Where(r => r.OrderId == orderId).Execute())
+                AddEvent(rev.ReviewDt, "Potvrzeno v 'Objednávky ke kontrole'", rev.AuthorId);
+
+            var sortedEvents = events
+                .OrderBy(orderEvent => orderEvent.Dt)
+                .ThenBy(orderEvent => orderEvent.Text)
+                .ToList();
+
+            for (var index = 0; index < sortedEvents.Count; index++)
+                sortedEvents[index].Id = index + 1;
+
+            return new SysInfoModel
+            {
+                OrderId = orderId,
+                Events = sortedEvents
+            };
+        }
+
+        private static string BuildDpdUrl(string orderNumber)
+        {
+            return $"{DPD_SHIPMENTS_URL}?page=0&limit=10&parcelRef={WebUtility.UrlEncode(orderNumber)}";
+        }
+
+        private static string BuildPacketaUrl(IPurchaseOrder order)
+        {
+            var dateFrom = order.PurchaseDate.AddYears(-1).Date;
+            var dateTo = order.PurchaseDate.AddYears(1).Date;
+            var period = WebUtility.UrlEncode($"{dateFrom:dd.MM.yy}-{dateTo:dd.MM.yy}");
+
+            return $"{PACKETA_PACKETS_URL}?locale=cs"
+                   + "&list-perPage=50"
+                   + $"&list-filter%5BdateStored%5D%5Bfrom%5D={period}"
+                   + $"&list-filter%5Bnumber%5D={WebUtility.UrlEncode(order.OrderNumber)}";
         }
 
         private static string BuildComgateUrl(IPurchaseOrder order)

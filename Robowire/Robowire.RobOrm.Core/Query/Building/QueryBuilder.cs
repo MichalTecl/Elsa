@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Robowire.Common.Expressions;
 using Robowire.RobOrm.Core.Internal;
@@ -131,9 +132,40 @@ namespace Robowire.RobOrm.Core.Query.Building
             var model = Build();
             var queryText = m_owner.GetQueryText(model, this);
 
-            foreach (var p in m_parameters)
+            if (m_parameters.Count > 0)
             {
-                paramsTarget.AddParameter(p.Key, p.Value);
+                var targetParameterNames = new HashSet<string>(
+                    paramsTarget.GetParameters().Select(parameter => parameter.Key),
+                    StringComparer.Ordinal);
+
+                var scopeNumber = 1;
+                string parameterPrefix;
+                do
+                {
+                    parameterPrefix = $"@sq{scopeNumber++}_";
+                }
+                while (targetParameterNames.Any(name => name.StartsWith(parameterPrefix, StringComparison.Ordinal)));
+
+                var parameterMappings = new Dictionary<string, string>(StringComparer.Ordinal);
+                var parameterNumber = 1;
+
+                foreach (var parameter in m_parameters.OrderBy(item => item.Key, StringComparer.Ordinal))
+                {
+                    var scopedName = $"{parameterPrefix}p{parameterNumber++}";
+                    parameterMappings.Add(parameter.Key, scopedName);
+                    paramsTarget.AddParameter(scopedName, parameter.Value);
+                }
+
+                var parameterPattern = string.Join(
+                    "|",
+                    parameterMappings.Keys
+                        .OrderByDescending(name => name.Length)
+                        .Select(Regex.Escape));
+
+                queryText = Regex.Replace(
+                    queryText,
+                    $"(?:{parameterPattern})(?![A-Za-z0-9_])",
+                    match => parameterMappings[match.Value]);
             }
 
             return new SubquerySegment(queryText);

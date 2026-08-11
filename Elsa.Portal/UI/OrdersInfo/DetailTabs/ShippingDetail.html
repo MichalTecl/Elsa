@@ -1,0 +1,72 @@
+<div id="shippingDetail{%GENERATE%}" class="ordersInfoShippingDetail">
+    <div class="ordersInfoShippingMethodHeader">
+        <h3 data-bind="text:data.ShippingMethodName"></h3>
+        <a class="hidden" target="_blank" rel="noopener noreferrer" data-bind="class!.hidden:data.HasDpdUrl; href:data.DpdUrl">
+            <i class="fas fa-external-link-alt"></i>
+            Vyhledat zásilku v DPD
+        </a>
+        <a class="hidden" target="_blank" rel="noopener noreferrer" data-bind="class!.hidden:data.HasPacketaUrl; href:data.PacketaUrl">
+            <i class="fas fa-external-link-alt"></i>
+            Vyhledat zásilku v Packetě
+        </a>
+    </div>
+
+    <div class="ordersInfoShippingOverview">
+        <div>
+            <span class="ordersInfoDetailLabel">Cena dopravy s DPH</span>
+            <span data-bind="text:data.ShippingCostText"></span>
+        </div>
+    </div>
+
+    <div class="ordersInfoShippingSection hidden" data-bind="class!.hidden:data.HasDeliveryAddress">
+        <h4>Doručovací adresa</h4>
+        <div class="ordersInfoShippingProperties">
+            <div>
+                <span class="ordersInfoDetailLabel">Příjemce</span>
+                <span data-bind="text:data.DeliveryAddress.RecipientName"></span>
+            </div>
+            <div class="hidden" data-bind="class!.hidden:data.DeliveryAddress.HasCompanyName">
+                <span class="ordersInfoDetailLabel">Firma</span>
+                <span data-bind="text:data.DeliveryAddress.CompanyName"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Ulice</span>
+                <span data-bind="text:data.DeliveryAddress.StreetText"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Město</span>
+                <span data-bind="text:data.DeliveryAddress.CityText"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Země</span>
+                <span data-bind="text:data.DeliveryAddress.Country"></span>
+            </div>
+            <div class="hidden" data-bind="class!.hidden:data.DeliveryAddress.HasPhone">
+                <span class="ordersInfoDetailLabel">Telefon</span>
+                <a data-bind="text:data.DeliveryAddress.Phone; href:data.DeliveryAddress.PhoneUrl"></a>
+            </div>
+            <div class="ordersInfoShippingMessage hidden" data-bind="class!.hidden:data.DeliveryAddress.HasNote">
+                <span class="ordersInfoDetailLabel">Poznámka k adrese</span>
+                <pre data-bind="text:data.DeliveryAddress.Note"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="ordersInfoShippingSection hidden" data-bind="class!.hidden:data.HasPackingInfo">
+        <h4>Zabalení</h4>
+        <div class="ordersInfoShippingProperties">
+            <div>
+                <span class="ordersInfoDetailLabel">Zabalil</span>
+                <span data-bind="text:data.PackingUser"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Datum zabalení</span>
+                <span data-bind="text:data.PackingDtText"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("shippingDetail{%GENERATE%}").attach(function () { });
+</script>

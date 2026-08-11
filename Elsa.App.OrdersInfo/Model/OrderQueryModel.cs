@@ -18,14 +18,18 @@ namespace Elsa.App.OrdersInfo.Model
 
         public List<string> ErpStatuses { get; set; }
 
+        public int? OrderStatusId { get; set; }
+
         public string ContainsPlacedItemWildcard { get; set; }
+
+        public string MaterialBatchNumberWildcard { get; set; }
 
         public string CustomerNameWildcard { get; set; }
 
         public string ShipmentMethodNameWildcard { get; set; }
 
-        public string PaymentMethodNameWildcard { get; set; }
+        public string PaymentMethodName { get; set; }
 
-        public string DiscountTextWidlcard { get; set; }
+        public string DiscountTextWildcard { get; set; }
     }
 }

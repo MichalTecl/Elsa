@@ -1,15 +1,4 @@
 <div id="ordersInfoDetail{%GENERATE%}" class="ordersInfoDetail">
-    <div class="ordersInfoDetailSummary">
-        <div>
-            <span class="ordersInfoDetailLabel">ID objednávky</span>
-            <span data-bind="text:OrderId"></span>
-        </div>
-        <div>
-            <span class="ordersInfoDetailLabel">Způsob platby</span>
-            <span data-bind="text:PaymentMethodName"></span>
-        </div>
-    </div>
-
     <div class="ordersInfoDetailTabs">
         <div class="tabPanelHeadersContainer" data-bind="itemsSource:details" data-key="id">
             <div class="lt-template tabControlTabHead" data-bind="active-tab:active" event-bind="click:activateTab(VM)">
