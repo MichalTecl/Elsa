@@ -21,5 +21,9 @@ namespace Elsa.App.OrdersInfo.Model
         public string PaymentMethodName { get; set; }
 
         public string CustomerName { get; set; }
+
+        public string CustomerErpUid { get; set; }
+
+        public string Discounts { get; set; }
     }
 }

@@ -126,8 +126,8 @@
     align-items: center;
     display: grid;
     gap: 10px;
-    grid-template-columns: 24px minmax(130px, 0.9fr) minmax(145px, 0.9fr) minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(180px, 1.25fr) minmax(110px, 0.7fr);
-    min-width: 1040px;
+    grid-template-columns: 24px minmax(130px, 0.9fr) minmax(145px, 0.9fr) minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(180px, 1.25fr) minmax(160px, 1.1fr) minmax(160px, 1.1fr) minmax(110px, 0.7fr);
+    min-width: 1380px;
     padding: 9px 11px;
 }
 
@@ -165,16 +165,31 @@
     white-space: nowrap;
 }
 
+.ordersInfoShipping {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .ordersInfoGridDetail {
     background: #fafafa;
     border-top: 1px dashed #ddd;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px 36px;
-    padding: 14px 45px;
+    padding: 14px 24px 20px 45px;
 }
 
 .ordersInfoGridDetail > div {
+    width: 100%;
+}
+
+.ordersInfoDetailSummary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 36px;
+    padding: 0 6px 12px;
+}
+
+.ordersInfoDetailSummary > div {
     display: flex;
     gap: 8px;
 }
@@ -184,8 +199,151 @@
     font-weight: bold;
 }
 
-.ordersInfoDetailExtension {
-    flex-basis: 100%;
+.ordersInfoDetailTabs {
+    min-width: 0;
+}
+
+.ordersInfoDetailTabContents {
+    background: white;
+    border: 1px solid #d4d4d4;
+    border-top: 0;
+}
+
+.ordersInfoDetailTabContent {
+    min-height: 70px;
+    padding: 14px;
+}
+
+.ordersInfoDetailLoading,
+.ordersInfoDetailEmpty,
+.ordersInfoDetailError {
+    padding: 16px;
+    text-align: center;
+}
+
+.ordersInfoDetailError {
+    color: #a40000;
+}
+
+.ordersInfoNote + .ordersInfoNote {
+    border-top: 1px solid #ddd;
+    margin-top: 12px;
+    padding-top: 12px;
+}
+
+.ordersInfoNoteType {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.ordersInfoNote pre {
+    font-family: inherit;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.ordersInfoItemsHeader,
+.ordersInfoItemRow {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: minmax(260px, 1fr) 110px 130px;
+    padding: 7px 9px;
+}
+
+.ordersInfoItemsHeader {
+    background: #eee;
+    font-weight: bold;
+}
+
+.ordersInfoItem + .ordersInfoItem {
+    border-top: 1px solid #ddd;
+}
+
+.ordersInfoKitItemRow {
+    background: #f7f7f7;
+    padding-left: 30px;
+}
+
+.ordersInfoKitItemRow > .ordersInfoItemProduct::before {
+    color: #888;
+    content: "↳ ";
+}
+
+.ordersInfoItemProduct {
+    min-width: 0;
+}
+
+.ordersInfoBatchSummary {
+    color: #444;
+    display: inline;
+    margin-left: 10px;
+}
+
+.ordersInfoBatchSummary .fa-box {
+    color: #777;
+    margin-right: 3px;
+}
+
+.ordersInfoKitBatchSummary {
+    margin-left: 10px;
+}
+
+.ordersInfoNumeric {
+    text-align: right;
+}
+
+.ordersInfoPaymentMethodHeader,
+.ordersInfoPaymentOverview {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    justify-content: space-between;
+}
+
+.ordersInfoPaymentMethodHeader h3 {
+    margin: 0;
+}
+
+.ordersInfoPaymentCheckbox {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+}
+
+.ordersInfoPaymentOverview {
+    border-bottom: 1px solid #ddd;
+    padding: 12px 0;
+}
+
+.ordersInfoPaymentOverview > div,
+.ordersInfoPaymentProperties > div {
+    display: flex;
+    gap: 8px;
+}
+
+.ordersInfoPaymentSection {
+    margin-top: 18px;
+}
+
+.ordersInfoPaymentSection h4 {
+    margin: 0 0 9px;
+}
+
+.ordersInfoPaymentProperties {
+    display: grid;
+    gap: 9px 24px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.ordersInfoPaymentMessage {
+    grid-column: 1 / -1;
+}
+
+.ordersInfoPaymentMessage pre {
+    font-family: inherit;
+    margin: 0;
+    white-space: pre-wrap;
 }
 
 .ordersInfoPager {

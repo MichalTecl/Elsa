@@ -1,0 +1,45 @@
+<div id="orderItems{%GENERATE%}" class="ordersInfoItems">
+    <div class="ordersInfoDetailEmpty hidden" data-bind="class!.hidden:isEmpty">Objednávka nemá žádné položky.</div>
+
+    <div class="ordersInfoItemsHeader">
+        <span>Produkt</span>
+        <span>Množství</span>
+        <span>Cena s DPH</span>
+    </div>
+
+    <div data-bind="itemsSource:data" data-key="ItemId">
+        <div class="lt-template ordersInfoItem">
+            <div class="ordersInfoItemRow">
+                <div class="ordersInfoItemProduct">
+                    <span data-bind="text:PlacedName"></span>
+                    <span class="ordersInfoBatchSummary hidden" data-bind="class!.hidden:HasBatchAssignments">
+                        <i class="fas fa-box"></i>
+                        <span data-bind="text:BatchAssignmentsText"></span>
+                    </span>
+                </div>
+                <span class="ordersInfoNumeric" data-bind="text:QuantityText"></span>
+                <span class="ordersInfoNumeric" data-bind="text:PriceWithVatText"></span>
+            </div>
+
+            <div class="ordersInfoKitItems" data-bind="itemsSource:Children" data-key="ItemId">
+                <div class="lt-template ordersInfoKitItem">
+                    <div class="ordersInfoItemRow ordersInfoKitItemRow">
+                        <div class="ordersInfoItemProduct">
+                            <span data-bind="text:PlacedName"></span>
+                            <span class="ordersInfoBatchSummary ordersInfoKitBatchSummary hidden" data-bind="class!.hidden:HasBatchAssignments">
+                                <i class="fas fa-box"></i>
+                                <span data-bind="text:BatchAssignmentsText"></span>
+                            </span>
+                        </div>
+                        <span class="ordersInfoNumeric" data-bind="text:QuantityText"></span>
+                        <span class="ordersInfoNumeric" data-bind="text:PriceWithVatText"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("orderItems{%GENERATE%}").attach(function () { });
+</script>

@@ -1,0 +1,14 @@
+<div id="orderNotes{%GENERATE%}" class="ordersInfoNotes">
+    <div class="ordersInfoDetailEmpty hidden" data-bind="class!.hidden:isEmpty">Objednávka nemá žádné poznámky.</div>
+
+    <div data-bind="itemsSource:data" data-key="NoteType">
+        <div class="lt-template ordersInfoNote">
+            <div class="ordersInfoNoteType" data-bind="text:NoteType"></div>
+            <pre data-bind="text:NoteText"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("orderNotes{%GENERATE%}").attach(function () { });
+</script>

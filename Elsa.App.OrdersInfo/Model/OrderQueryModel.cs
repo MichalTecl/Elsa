@@ -25,5 +25,7 @@ namespace Elsa.App.OrdersInfo.Model
         public string ShipmentMethodNameWildcard { get; set; }
 
         public string PaymentMethodNameWildcard { get; set; }
+
+        public string DiscountTextWidlcard { get; set; }
     }
 }

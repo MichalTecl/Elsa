@@ -42,6 +42,15 @@ namespace Elsa.App.OrdersInfo.App
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
+            IEnumerable<string> GetDiscounts()
+            {
+                yield return source.DiscountsText;
+                yield return source.PercentDiscountText;
+
+                foreach (var pe in source.PriceElements.Where(pe => pe.TypeName != "shipping" && pe.TypeName != "payment"))
+                    yield return pe.Title;
+            }
+
             return new OrderInfoModel
             {
                 OrderId = source.Id,
@@ -51,7 +60,9 @@ namespace Elsa.App.OrdersInfo.App
                 ErpStatusName = source.ErpStatusName,
                 ShippingMethodName = source.ShippingMethodName,
                 PaymentMethodName = source.PaymentMethodName,
-                CustomerName = source.CustomerName
+                CustomerName = source.CustomerName,
+                CustomerErpUid = source.CustomerErpUid,
+                Discounts = string.Join(", ", GetDiscounts().Where(d => !string.IsNullOrWhiteSpace(d)).Distinct())
             };
         }
 

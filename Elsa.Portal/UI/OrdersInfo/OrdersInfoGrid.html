@@ -10,6 +10,8 @@
             <span>Zákazník</span>
             <span>Stav</span>
             <span>Způsob dopravy</span>
+            <span>Platební metoda</span>
+            <span>Slevy</span>
             <span class="ordersInfoPrice">Cena s DPH</span>
         </div>
 
@@ -21,23 +23,20 @@
                         <i class="fas fa-chevron-down hidden" data-bind="class!.hidden:IsExpanded"></i>
                     </span>
                     <span data-bind="text:OrderNumber"></span>
-                    <span data-bind="text:PurchaseDateText"></span>
-                    <span data-bind="text:CustomerName"></span>
+                    <span data-bind="text:PurchaseDateText; title:PurchaseDateTitle"></span>
+                    <span>
+                        <span data-bind="class.hidden:CanOpenCustomerInCrm; text:CustomerName"></span>
+                        <a href="#" class="hidden" data-bind="class!.hidden:CanOpenCustomerInCrm; text:CustomerName" event-bind="click:openCustomerInCrm(VM, event)"></a>
+                    </span>
                     <span data-bind="text:ErpStatusName"></span>
-                    <span data-bind="text:ShippingMethodName"></span>
+                    <span class="ordersInfoShipping" data-bind="text:ShippingMethodName; title:ShippingMethodName"></span>
+                    <span data-bind="text:PaymentMethodName; title:PaymentMethodName"></span>
+                    <span data-bind="text:Discounts; title:Discounts"></span>
                     <span class="ordersInfoPrice" data-bind="text:PriceWithVatText"></span>
                 </div>
 
                 <div class="ordersInfoGridDetail hidden" data-bind="class!.hidden:IsExpanded">
-                    <div>
-                        <span class="ordersInfoDetailLabel">ID objednávky</span>
-                        <span data-bind="text:OrderId"></span>
-                    </div>
-                    <div>
-                        <span class="ordersInfoDetailLabel">Způsob platby</span>
-                        <span data-bind="text:PaymentMethodName"></span>
-                    </div>
-                    <div class="ordersInfoDetailExtension"></div>
+                    <div data-bind="fill-by:detailControl"></div>
                 </div>
             </div>
         </div>
@@ -56,6 +55,12 @@
 
         this.toggleOrderDetail = function (order) {
             vm.toggleOrderDetail(order.OrderId);
+        };
+
+        this.openCustomerInCrm = function (order, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            vm.openCustomerInCrm(order);
         };
 
         this.previousPage = function () {

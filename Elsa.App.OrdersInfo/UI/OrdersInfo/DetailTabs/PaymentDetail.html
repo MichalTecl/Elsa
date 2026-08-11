@@ -1,0 +1,68 @@
+<div id="paymentDetail{%GENERATE%}" class="ordersInfoPaymentDetail">
+    <div class="ordersInfoPaymentMethodHeader">
+        <h3 data-bind="text:data.PaymentMethodName"></h3>
+        <label class="ordersInfoPaymentCheckbox">
+            <input type="checkbox" disabled="disabled" data-bind="checked:data.IsPayOnDelivery" />
+            <span>Dobírka</span>
+        </label>
+    </div>
+
+    <div class="ordersInfoPaymentOverview">
+        <div>
+            <span class="ordersInfoDetailLabel">Cena platební metody</span>
+            <span data-bind="text:data.PaymentCostText"></span>
+        </div>
+        <a class="hidden" target="_blank" rel="noopener noreferrer" data-bind="class!.hidden:data.HasComgateUrl; href:data.ComgateUrl">
+            <i class="fas fa-external-link-alt"></i>
+            Vyhledat transakci v Comgate
+        </a>
+    </div>
+
+    <div class="ordersInfoPaymentSection hidden" data-bind="class!.hidden:data.HasPairingInfo">
+        <h4>Spárování platby</h4>
+        <div class="ordersInfoPaymentProperties">
+            <div>
+                <span class="ordersInfoDetailLabel">Spároval</span>
+                <span data-bind="text:data.PaymentPairingUser"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Datum spárování</span>
+                <span data-bind="text:data.PaymentPairingDtText"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="ordersInfoPaymentSection hidden" data-bind="class!.hidden:data.HasPayment">
+        <h4>Načtená platba</h4>
+        <div class="ordersInfoPaymentProperties">
+            <div>
+                <span class="ordersInfoDetailLabel">Zdroj</span>
+                <span data-bind="text:data.Payment.SourceName"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Datum platby</span>
+                <span data-bind="text:data.Payment.PaymentDtText"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Částka</span>
+                <span data-bind="text:data.Payment.AmountText"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Variabilní symbol</span>
+                <span data-bind="text:data.Payment.VariableSymbol"></span>
+            </div>
+            <div>
+                <span class="ordersInfoDetailLabel">Odesílatel</span>
+                <span data-bind="text:data.Payment.SenderName"></span>
+            </div>
+            <div class="ordersInfoPaymentMessage">
+                <span class="ordersInfoDetailLabel">Zpráva</span>
+                <pre data-bind="text:data.Payment.Message"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("paymentDetail{%GENERATE%}").attach(function () { });
+</script>

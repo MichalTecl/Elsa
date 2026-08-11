@@ -87,6 +87,7 @@
         erpStatusesText,
         erpStatusesMenu) {
 
+        var filterControl = this;
         var vm = app.OrdersInfo.vm;
         var currentParams = new URLSearchParams(window.location.search);
         var selectedStatusValues = currentParams.getAll("ErpStatuses");
@@ -197,6 +198,19 @@
             var targetUrl = window.location.pathname + (queryString ? "?" + queryString : "") + window.location.hash;
             window.location.assign(targetUrl);
         };
+
+        Array.prototype.forEach.call(
+            filterControl.querySelectorAll("input[type='text'], input[type='date']"),
+            function (input) {
+                input.addEventListener("keydown", function (event) {
+                    if (event.key !== "Enter") {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    filterControl.load();
+                });
+            });
 
         document.addEventListener("click", function (event) {
             if (!erpStatusesDropdown.contains(event.target)) {

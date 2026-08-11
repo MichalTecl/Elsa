@@ -1,0 +1,38 @@
+<div id="ordersInfoDetail{%GENERATE%}" class="ordersInfoDetail">
+    <div class="ordersInfoDetailSummary">
+        <div>
+            <span class="ordersInfoDetailLabel">ID objednávky</span>
+            <span data-bind="text:OrderId"></span>
+        </div>
+        <div>
+            <span class="ordersInfoDetailLabel">Způsob platby</span>
+            <span data-bind="text:PaymentMethodName"></span>
+        </div>
+    </div>
+
+    <div class="ordersInfoDetailTabs">
+        <div class="tabPanelHeadersContainer" data-bind="itemsSource:details" data-key="id">
+            <div class="lt-template tabControlTabHead" data-bind="active-tab:active" event-bind="click:activateTab(VM)">
+                <div class="tabControlHeadTitle" data-bind="text:tabTitle"></div>
+            </div>
+        </div>
+
+        <div class="ordersInfoDetailTabContents" data-bind="itemsSource:details" data-key="id">
+            <div class="lt-template ordersInfoDetailTabContent hidden" data-bind="class!.hidden:active">
+                <div class="ordersInfoDetailLoading hidden" data-bind="class!.hidden:isLoading">Načítám detail…</div>
+                <div class="ordersInfoDetailError hidden" data-bind="class!.hidden:hasError; text:error"></div>
+                <div data-bind="fill-by:contentControl"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("ordersInfoDetail{%GENERATE%}").attach(function () {
+        var order = lt.getViewModel(this);
+
+        this.activateTab = function (detail) {
+            app.OrdersInfo.vm.activateDetailTab(detail.id, order);
+        };
+    });
+</script>

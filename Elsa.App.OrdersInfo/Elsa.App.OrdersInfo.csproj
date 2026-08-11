@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <Folder Include="SQL\" />
-    <Folder Include="UI\OrdersInfo\" />
+    <Folder Include="UI\OrdersInfo\DetailTabs\" />
   </ItemGroup>
 
 </Project>
