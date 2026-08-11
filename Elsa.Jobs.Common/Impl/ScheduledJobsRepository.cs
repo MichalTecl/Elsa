@@ -251,7 +251,7 @@ namespace Elsa.Jobs.Common.Impl
             }
             catch (Exception ex)
             {
-                m_log.Error($"Cannot update scheduled jobs status version for project {projectId}", ex);
+                m_log.Info($"Cannot update scheduled jobs status version for project {projectId}: {ex.Message}");
             }
         }
 
