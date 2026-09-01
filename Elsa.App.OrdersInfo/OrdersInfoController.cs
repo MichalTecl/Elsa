@@ -297,6 +297,12 @@ namespace Elsa.App.OrdersInfo
                 .Execute()
                 .FirstOrDefault() ?? throw new ArgumentException("Objednávka nenalezena");
 
+            var orderItems = _db.SelectFrom<IOrderItem>()
+                .Where(item => item.PurchaseOrderId == orderId)
+                .Execute()
+                .OrderBy(item => item.Id)
+                .ToList();
+
             var result = new ShippingDetailModel
             {
                 ShippingMethodName = order.ShippingMethodName,
@@ -304,7 +310,13 @@ namespace Elsa.App.OrdersInfo
                 OrderCurrencySymbol = order.Currency?.Symbol,
                 HasPackingInfo = order.PackingUserId != null || order.PackingDt != null,
                 PackingUser = order.PackingUser?.EMail,
-                PackingDt = order.PackingDt
+                PackingDt = order.PackingDt,
+                TotalItemsWeightKg = orderItems.Sum(item => item.Weight ?? 0m),
+                ItemWeights = orderItems.Select(item => new ShippingItemWeightModel
+                {
+                    ItemName = item.PlacedName,
+                    WeightKg = item.Weight
+                }).ToList()
             };
 
             if (order.DeliveryAddress != null)

@@ -399,6 +399,19 @@ app.OrdersInfo.vm.registerDetailTab({
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }) + (detail.OrderCurrencySymbol ? " " + detail.OrderCurrencySymbol : "");
+        detail.ItemWeights = detail.ItemWeights || [];
+        detail.TotalItemsWeightText = Number(detail.TotalItemsWeightKg || 0).toLocaleString("cs-CZ", {
+            maximumFractionDigits: 6
+        }) + " kg";
+        detail.ItemWeightsTooltip = detail.ItemWeights.length > 0
+            ? detail.ItemWeights.map(function (item) {
+                var weightText = item.WeightKg === null || item.WeightKg === undefined
+                    ? "neuvedeno"
+                    : Number(item.WeightKg).toLocaleString("cs-CZ", { maximumFractionDigits: 6 }) + " kg";
+
+                return (item.ItemName || "Neznámá položka") + ": " + weightText;
+            }).join("\n")
+            : "Objednávka nemá žádné položky.";
 
         var packingDate = new Date(detail.PackingDt);
         detail.PackingDtText = detail.PackingDt && !isNaN(packingDate.getTime())

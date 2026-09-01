@@ -53,12 +53,16 @@
             <input id="shipmentFilter" type="text" />
         </label>
 
-        <label class="ordersInfoFilterField">
+        <div class="ordersInfoFilterField">
             <span class="ordersInfoFilterLabel">Způsob platby</span>
-            <select id="paymentFilter">
-                <option value="">Všechny způsoby platby</option>
-            </select>
-        </label>
+            <div id="paymentMethodsDropdown" class="ordersInfoStatusDropdown">
+                <button id="paymentMethodsButton" type="button" class="ordersInfoStatusButton" event-bind="click:togglePaymentMethods(event)">
+                    <span id="paymentMethodsText">Všechny způsoby platby</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div id="paymentMethodsMenu" class="ordersInfoStatusMenu hidden"></div>
+            </div>
+        </div>
 
         <div class="ordersInfoProductBatchGroup">
             <div class="ordersInfoProductBatchFields">
@@ -102,7 +106,9 @@
         placedItemFilter,
         materialBatchNumberFilter,
         shipmentFilter,
-        paymentFilter,
+        paymentMethodsDropdown,
+        paymentMethodsText,
+        paymentMethodsMenu,
         discountFilter,
         minPurchaseDateFilter,
         maxPurchaseDateFilter,
@@ -114,7 +120,13 @@
         var vm = app.OrdersInfo.vm;
         var currentParams = new URLSearchParams(window.location.search);
         var selectedStatusValues = currentParams.getAll("ErpStatuses");
-        var selectedPaymentMethod = currentParams.get("PaymentMethodName") || "";
+        var selectedPaymentMethodValues = currentParams.getAll("PaymentMethodNames");
+        var legacyPaymentMethodName = currentParams.get("PaymentMethodName");
+
+        if (selectedPaymentMethodValues.length === 0 && legacyPaymentMethodName) {
+            selectedPaymentMethodValues.push(legacyPaymentMethodName);
+        }
+
         var selectedOrderStatusId = /^\d+$/.test(currentParams.get("OrderStatusId") || "")
             ? currentParams.get("OrderStatusId")
             : null;
@@ -125,6 +137,10 @@
 
         var getStatusCheckboxes = function () {
             return erpStatusesMenu.querySelectorAll("input[type='checkbox']");
+        };
+
+        var getPaymentMethodCheckboxes = function () {
+            return paymentMethodsMenu.querySelectorAll("input[type='checkbox']");
         };
 
         var updateStatusesText = function () {
@@ -166,13 +182,39 @@
 
         var addPaymentOptions = function (paymentMethods) {
             (paymentMethods || []).forEach(function (paymentMethod) {
-                var option = document.createElement("option");
-                option.value = paymentMethod;
-                option.textContent = paymentMethod;
-                paymentFilter.appendChild(option);
+                var label = document.createElement("label");
+                var checkbox = document.createElement("input");
+                var text = document.createElement("span");
+
+                label.className = "ordersInfoStatusOption";
+                checkbox.type = "checkbox";
+                checkbox.value = paymentMethod;
+                checkbox.checked = selectedPaymentMethodValues.indexOf(paymentMethod) !== -1;
+                checkbox.addEventListener("change", updatePaymentMethodsText);
+                text.textContent = paymentMethod;
+
+                label.appendChild(checkbox);
+                label.appendChild(text);
+                paymentMethodsMenu.appendChild(label);
             });
 
-            paymentFilter.value = selectedPaymentMethod;
+            updatePaymentMethodsText();
+        };
+
+        var updatePaymentMethodsText = function () {
+            var selected = Array.prototype.filter.call(getPaymentMethodCheckboxes(), function (checkbox) {
+                return checkbox.checked;
+            }).map(function (checkbox) {
+                return checkbox.value;
+            });
+
+            if (selected.length === 0) {
+                paymentMethodsText.textContent = "Všechny způsoby platby";
+            } else if (selected.length === 1) {
+                paymentMethodsText.textContent = selected[0];
+            } else {
+                paymentMethodsText.textContent = "Vybráno: " + selected.length;
+            }
         };
 
         var appendValue = function (params, name, value) {
@@ -198,6 +240,13 @@
         this.toggleStatuses = function (event) {
             event.stopPropagation();
             erpStatusesMenu.classList.toggle("hidden");
+            paymentMethodsMenu.classList.add("hidden");
+        };
+
+        this.togglePaymentMethods = function (event) {
+            event.stopPropagation();
+            paymentMethodsMenu.classList.toggle("hidden");
+            erpStatusesMenu.classList.add("hidden");
         };
 
         this.clearFilters = function () {
@@ -206,7 +255,6 @@
             placedItemFilter.value = "";
             materialBatchNumberFilter.value = "";
             shipmentFilter.value = "";
-            paymentFilter.value = "";
             discountFilter.value = "";
             minPurchaseDateFilter.value = "";
             maxPurchaseDateFilter.value = "";
@@ -216,8 +264,14 @@
                 checkbox.checked = false;
             });
 
+            Array.prototype.forEach.call(getPaymentMethodCheckboxes(), function (checkbox) {
+                checkbox.checked = false;
+            });
+
             erpStatusesMenu.classList.add("hidden");
+            paymentMethodsMenu.classList.add("hidden");
             updateStatusesText();
+            updatePaymentMethodsText();
         };
 
         this.load = function () {
@@ -228,7 +282,6 @@
             appendValue(params, "ContainsPlacedItemWildcard", placedItemFilter.value);
             appendValue(params, "MaterialBatchNumberWildcard", materialBatchNumberFilter.value);
             appendValue(params, "ShipmentMethodNameWildcard", shipmentFilter.value);
-            appendValue(params, "PaymentMethodName", paymentFilter.value);
             appendValue(params, "DiscountTextWildcard", discountFilter.value);
             appendValue(params, "MinPurchaseDt", minPurchaseDateFilter.value);
             appendValue(params, "MaxPurchaseDt", maxPurchaseDateFilter.value);
@@ -237,6 +290,12 @@
             Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
                 if (checkbox.checked) {
                     params.append("ErpStatuses", checkbox.value);
+                }
+            });
+
+            Array.prototype.forEach.call(getPaymentMethodCheckboxes(), function (checkbox) {
+                if (checkbox.checked) {
+                    params.append("PaymentMethodNames", checkbox.value);
                 }
             });
 
@@ -261,6 +320,10 @@
         document.addEventListener("click", function (event) {
             if (!erpStatusesDropdown.contains(event.target)) {
                 erpStatusesMenu.classList.add("hidden");
+            }
+
+            if (!paymentMethodsDropdown.contains(event.target)) {
+                paymentMethodsMenu.classList.add("hidden");
             }
         });
     });

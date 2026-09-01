@@ -16,6 +16,10 @@
             <span class="ordersInfoDetailLabel">Cena dopravy s DPH</span>
             <span data-bind="text:data.ShippingCostText"></span>
         </div>
+        <div data-bind="title:data.ItemWeightsTooltip">
+            <span class="ordersInfoDetailLabel">Hmotnost položek</span>
+            <span data-bind="text:data.TotalItemsWeightText"></span>
+        </div>
     </div>
 
     <div class="ordersInfoShippingSection hidden" data-bind="class!.hidden:data.HasDeliveryAddress">

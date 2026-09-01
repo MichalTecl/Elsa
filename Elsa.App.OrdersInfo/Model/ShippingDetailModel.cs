@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Elsa.App.OrdersInfo.Model
 {
@@ -21,5 +22,16 @@ namespace Elsa.App.OrdersInfo.Model
         public DateTime? PackingDt { get; set; }
 
         public ShippingAddressInfoModel DeliveryAddress { get; set; }
+
+        public decimal TotalItemsWeightKg { get; set; }
+
+        public List<ShippingItemWeightModel> ItemWeights { get; set; }
+    }
+
+    public class ShippingItemWeightModel
+    {
+        public string ItemName { get; set; }
+
+        public decimal? WeightKg { get; set; }
     }
 }
