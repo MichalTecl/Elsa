@@ -119,6 +119,24 @@ namespace Elsa.Commerce.Core.Impl
             return order;
         }
 
+        public IPurchaseOrder SetOrderCancelled(long orderId)
+        {
+            var order = _orderRepository.GetOrder(orderId) ?? throw new ArgumentException("Invalid orderId");
+
+            return PerformErpActionSafe(
+                order,
+                (erp, o) => erp.MarkOrderCanceled(o),
+                synced =>
+                {
+                    if(synced.OrderStatusId != OrderStatus.Canceled.Id)
+                    {
+                        throw new InvalidOperationException($"Byl odeslán požadavek na storno objednávky, ale objednávka má stále stav '{synced.ErpStatusId} - {synced.ErpStatusName}', který Elsa mapuje na stav '{synced.OrderStatus?.Name}' ");
+                    }
+                },
+                nameof(SetOrderCancelled)
+                );
+        }
+
         public IPurchaseOrder SetOrderSent(long orderId)
         {
             var order = _orderRepository.GetOrder(orderId);

@@ -25,6 +25,7 @@
   <ItemGroup>
     <Folder Include="SQL\" />
     <Folder Include="UI\OrdersInfo\DetailTabs\" />
+    <Folder Include="UI\OrdersInfo\InspectorActions\" />
   </ItemGroup>
 
 </Project>

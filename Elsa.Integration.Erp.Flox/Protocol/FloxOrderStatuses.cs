@@ -1,4 +1,4 @@
-﻿namespace Elsa.Integration.Erp.Flox.Protocol
+namespace Elsa.Integration.Erp.Flox.Protocol
 {
     internal class FloxOrderStatuses
     {
@@ -8,5 +8,6 @@
         public const string PayPalPaid = "38";
         public const string InProgress = "12";
         public const string Completed = "16";
+        public const string Cancelled = "17";
     }
 }

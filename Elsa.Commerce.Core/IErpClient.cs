@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 using Elsa.Commerce.Core.Model;
@@ -24,6 +24,8 @@ namespace Elsa.Commerce.Core
         IEnumerable<IErpOrderModel> LoadPaidOrders(DateTime from, DateTime to);
 
         void MarkOrderPaid(IPurchaseOrder po);
+
+        void MarkOrderCanceled(IPurchaseOrder po);
 
         IErpOrderModel LoadOrder(string orderNumber);
 

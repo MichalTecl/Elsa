@@ -16,6 +16,7 @@ using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using System.Net;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.App.OrdersPacking.Entities;
+using Elsa.Smtp.Core;
 
 namespace Elsa.App.OrdersInfo
 {
@@ -34,6 +35,8 @@ namespace Elsa.App.OrdersInfo
         private readonly IUserRepository _userRepository;
         private readonly OrdersInfoXlsExporter _xlsExporter;
         private readonly OrderItemBatchAssignmentEditor _batchAssignmentEditor;
+        private readonly IOrdersFacade _ordersFacade;
+        private readonly IMailSender _mailSender;
 
         public OrdersInfoController(
             IWebSession webSession,
@@ -44,7 +47,9 @@ namespace Elsa.App.OrdersInfo
             ICustomerRepository customerRepository,
             IUserRepository userRepository,
             OrdersInfoXlsExporter xlsExporter,
-            OrderItemBatchAssignmentEditor batchAssignmentEditor) : base(webSession, log)
+            OrderItemBatchAssignmentEditor batchAssignmentEditor,
+            IOrdersFacade ordersFacade,
+            IMailSender mailSender) : base(webSession, log)
         {
             _orderInfoRepository = orderInfoRepository;
             _db = db;
@@ -53,6 +58,8 @@ namespace Elsa.App.OrdersInfo
             _userRepository = userRepository;
             _xlsExporter = xlsExporter;
             _batchAssignmentEditor = batchAssignmentEditor;
+            _ordersFacade = ordersFacade;
+            _mailSender = mailSender;
         }
 
         protected override void OnBeforeCall()
@@ -441,6 +448,22 @@ namespace Elsa.App.OrdersInfo
                 OrderId = orderId,
                 Events = sortedEvents
             };
+        }
+
+        public void CancelUnpaidOrder(long orderId)
+        {
+            const string mailTemplateName = "Storno nezaplacené objednávky";
+
+            EnsureUserRight(OrdersInfoUserRights.CancelUnpaidOrder);
+
+            var order = _ordersFacade.SetOrderCancelled(orderId);
+
+            _mailSender.Send(SenderMailboxType.CustomerFacingSender,
+                order.CustomerEmail,
+                mailTemplateName,
+                new Dictionary<string, string> { { "orderNumber", order.OrderNumber } }
+                );
+            
         }
 
         private static string BuildDpdUrl(string orderNumber)

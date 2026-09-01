@@ -69,7 +69,7 @@ namespace Elsa.Integration.Erp.Flox
             }
         }
 
-        private void ChangeOrderStatus(string orderId, string status)
+        private void ChangeOrderStatus(string orderId, string status, bool suppressErpEmail = false)
         {
             if (!_config.EnableWriteOperations)
             {
@@ -79,13 +79,15 @@ namespace Elsa.Integration.Erp.Flox
 
             EnsureSession();
 
-            var result =
-                _client.Post(ActionUrl("/erp/orders/main/changeStatus"))
+            var post = _client.Post(ActionUrl("/erp/orders/main/changeStatus"))
                     .Field("arf", _csrfToken)
                     .Field("order_id", orderId)
-                    .Field("status", status)
-                    .Field("statusmail", /*statusmail ? "on" :*/ string.Empty)
-                    .Call<DefaultResponse>();
+                    .Field("status", status);
+
+            if (!suppressErpEmail)
+                post = post.Field("statusmail", /*statusmail ? "on" :*/ string.Empty);
+
+            var result = post.Call<DefaultResponse>();
 
             if (!result.Success)
             {
@@ -96,6 +98,11 @@ namespace Elsa.Integration.Erp.Flox
         public void MarkOrderPaid(IPurchaseOrder po)
         {            
             ChangeOrderStatus(po.ErpOrderId, FloxOrderStatuses.Paid);
+        }
+
+        public void MarkOrderCanceled(IPurchaseOrder po)
+        {
+            ChangeOrderStatus(po.ErpOrderId, FloxOrderStatuses.Cancelled);
         }
 
         public IErpOrderModel LoadOrder(string orderNumber)

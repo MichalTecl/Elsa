@@ -1,0 +1,19 @@
+<div>
+    <div id="uctrlUnpaidOrderCancel_{%GENERATE%}" class="unpaidOrderCancel">       
+        <button class="unpaidOrderCancelBut" event-bind="click:cancelOrder(data.OrderId, callback)">Stornovat a poslat e-mail</button>       
+    </div>
+
+    <script>
+        lt.element("uctrlUnpaidOrderCancel_{%GENERATE%}").attach(function () {
+
+            this.cancelOrder = function (orderId, callback) {
+                lt.api("/ordersInfo/cancelUnpaidOrder").query({ "orderId": orderId }).post(function () {
+                    callback();
+                    alert("Hotovo - objednávka byla stornována a informační e-mail odeslán");
+                });
+            };
+
+
+        });
+    </script>
+</div>

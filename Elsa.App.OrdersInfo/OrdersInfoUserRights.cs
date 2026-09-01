@@ -7,9 +7,8 @@ namespace Elsa.App.OrdersInfo
     public static class OrdersInfoUserRights
     {
         public static readonly UserRight OrdersInfoAppView = new UserRight(nameof(OrdersInfoAppView), "Objednávky - Přístup do aplikace");
-        public static readonly UserRight EditOrderItemBatchAssignments = new UserRight(
-            nameof(EditOrderItemBatchAssignments),
-            "Objednávky - Změna přiřazení šarží",
-            OrdersInfoAppView);
+        public static readonly UserRight EditOrderItemBatchAssignments = new UserRight(nameof(EditOrderItemBatchAssignments), "Objednávky - Změna přiřazení šarží", OrdersInfoAppView);
+
+        public static readonly UserRight CancelUnpaidOrder = new UserRight(nameof(CancelUnpaidOrder), "Storno neuhrazených objednávek");
     }
 }

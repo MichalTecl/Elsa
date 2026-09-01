@@ -13,7 +13,7 @@ namespace Elsa.Smtp.Core
             SenderPassword = s.SenderPassword,
         });
 
-        public static readonly SenderMailboxType CustomerFacingSender = new SenderMailboxType(nameof(SystemRobot), s => new SmtpSettingsHolder
+        public static readonly SenderMailboxType CustomerFacingSender = new SenderMailboxType(nameof(CustomerFacingSender), s => new SmtpSettingsHolder
         {
             SmtpHost = s.CustomerFacingSmtpHost,
             SmtpPort = s.CustomerFacingSmtpPort,

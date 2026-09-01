@@ -10,6 +10,8 @@ namespace Elsa.Commerce.Core
     {
         IPurchaseOrder SetOrderPaid(long orderId, long? paymentId);
 
+        IPurchaseOrder SetOrderCancelled(long orderId);
+
         IPurchaseOrder SetOrderSent(long orderId);
 
         void SetOrderSentAsync(long orderId);
