@@ -1,0 +1,97 @@
+<div id="ordersInfoBatchDialog" class="popupOverlay" data-bind="class.open:batchDialogOpen" event-bind="click:closeBatchAssignmentDialog()">
+    <div class="popupBody ordersInfoBatchDialogBody" event-bind="click:stopEvent(event)">
+        <div class="ordersInfoBatchDialogHead">
+            <h3>Změna přiřazení šarží</h3>
+            <button type="button" class="ordersInfoBatchDialogClose" title="Zavřít" event-bind="click:closeBatchAssignmentDialog()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="ordersInfoBatchDialogItem">
+            <div><strong>Číslo zásilky:</strong> <span data-bind="text:batchDialogItem.OrderNumber"></span></div>
+            <div><strong>Množství:</strong> <span data-bind="text:batchDialogItem.QuantityText"></span></div>
+            <div class="ordersInfoBatchDialogItemName"><strong>Položka:</strong> <span data-bind="text:batchDialogItem.PlacedName"></span></div>
+        </div>
+
+        <div class="ordersInfoBatchDialogDateNotice hidden" data-bind="class!.hidden:batchDialogItem.HasBatchAssignmentDateNotice; text:batchDialogItem.BatchAssignmentDateNotice"></div>
+
+        <div class="ordersInfoBatchDialogTable">
+            <div class="ordersInfoBatchDialogTableHead">
+                <span>Množství</span>
+                <span>Číslo šarže</span>
+                <span>Kdo a kdy</span>
+                <span></span>
+            </div>
+            <div data-bind="itemsSource:batchDialogRows" data-key="RowKey">
+                <div class="lt-template ordersInfoBatchDialogRow">
+                    <span data-bind="text:QuantityText"></span>
+                    <span data-bind="text:BatchNumber"></span>
+                    <span>
+                        <span data-bind="text:AssignedByText"></span>
+                        <span data-bind="text:AssignmentDtText"></span>
+                    </span>
+                    <button type="button" class="ordersInfoBatchDeleteButton" title="Smazat přiřazení" data-bind="disabled:DeleteDisabled; title:DeleteBlockedReason" event-bind="click:removeBatchAssignmentRow(VM, event)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ordersInfoBatchDialogAddRow">
+            <label>
+                Množství
+                <input lt-name="newQuantity" type="number" min="0" step="any" data-bind="disabled:batchDialogSaving" />
+            </label>
+            <label>
+                Číslo šarže
+                <input lt-name="newBatchNumber" type="text" data-bind="disabled:batchDialogSaving" />
+            </label>
+            <button type="button" class="ordersInfoBatchAddButton" data-bind="disabled:batchDialogSaving" event-bind="click:addBatchAssignmentRow()">
+                <i class="fas fa-plus"></i> Přidat
+            </button>
+        </div>
+
+        <div class="ordersInfoBatchDialogTotal">
+            Přiřazeno <strong data-bind="text:batchDialogAssignedText"></strong>
+            z <strong data-bind="text:batchDialogItem.QuantityText"></strong>
+        </div>
+
+        <div class="ordersInfoBatchDialogError hidden" data-bind="class!.hidden:batchDialogHasError; text:batchDialogError"></div>
+
+        <div class="ordersInfoBatchDialogButtons hidden" data-bind="class!.hidden:batchDialogDirty">
+            <button type="button" event-bind="click:closeBatchAssignmentDialog()">Zrušit</button>
+            <button type="button" class="ordersInfoBatchSaveButton" data-bind="disabled:batchDialogSaving" event-bind="click:saveBatchAssignmentChanges()">
+                Uložit
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    lt.element("ordersInfoBatchDialog").withModel("app.OrdersInfo.vm").attach(function (newQuantity, newBatchNumber) {
+        this.stopEvent = function (event) {
+            event.stopPropagation();
+        };
+
+        this.closeBatchAssignmentDialog = function () {
+            app.OrdersInfo.vm.closeBatchAssignmentDialog();
+        };
+
+        this.removeBatchAssignmentRow = function (row, event) {
+            event.preventDefault();
+            app.OrdersInfo.vm.removeBatchAssignmentRow(row);
+        };
+
+        this.addBatchAssignmentRow = function () {
+            if (app.OrdersInfo.vm.addBatchAssignmentRow(newQuantity.value, newBatchNumber.value)) {
+                newQuantity.value = "";
+                newBatchNumber.value = "";
+                newQuantity.focus();
+            }
+        };
+
+        this.saveBatchAssignmentChanges = function () {
+            app.OrdersInfo.vm.saveBatchAssignmentChanges();
+        };
+    });
+</script>

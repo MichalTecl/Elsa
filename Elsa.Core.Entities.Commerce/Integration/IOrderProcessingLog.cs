@@ -13,7 +13,7 @@ namespace Elsa.Core.Entities.Commerce.Integration
     [Entity]
     public interface IOrderProcessingLog : IIntIdEntity, IOrderRelatedEntity
     {
-        [NVarchar(100, false)]
+        [NVarchar(1000, false)]
         string ProcessCode { get; set; }
 
         DateTime ProcessDt { get; set; }

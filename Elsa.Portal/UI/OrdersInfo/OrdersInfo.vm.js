@@ -18,6 +18,15 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     self.exportDisabled = true;
     self.totalOrdersText = "0";
     self.totalPriceWithVatText = "0,00";
+    self.batchDialogOpen = false;
+    self.batchDialogItem = null;
+    self.batchDialogRows = [];
+    self.batchDialogRemovedRows = [];
+    self.batchDialogDirty = false;
+    self.batchDialogSaving = false;
+    self.batchDialogError = null;
+    self.batchDialogHasError = false;
+    self.batchDialogAssignedText = "0";
 
     var receivePlacedItemNames = function (names) {
         placedItemNames = names || [];
@@ -226,6 +235,171 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         });
     };
 
+    var updateBatchDialogState = function () {
+        var assigned = self.batchDialogRows.reduce(function (sum, row) {
+            return sum + Number(row.Quantity || 0);
+        }, 0);
+        self.batchDialogAssignedText = assigned.toLocaleString("cs-CZ", { maximumFractionDigits: 6 });
+        self.batchDialogDirty = self.batchDialogRemovedRows.length > 0
+            || self.batchDialogRows.some(function (row) { return row.IsNew; });
+    };
+
+    var setBatchDialogError = function (error) {
+        self.batchDialogError = error && error.message ? error.message : (error || null);
+        self.batchDialogHasError = !!self.batchDialogError;
+        lt.notify();
+    };
+
+    self.openBatchAssignmentDialog = function (item) {
+        if (!item || item.BatchAssignmentEditDisabled) {
+            return;
+        }
+
+        self.batchDialogItem = item;
+        self.batchDialogRows = (item.BatchAssignments || []).map(function (assignment) {
+            return Object.assign({}, assignment, {
+                IsNew: false,
+                RowKey: "assignment-" + assignment.AssignmentId
+            });
+        });
+        self.batchDialogRemovedRows = [];
+        self.batchDialogSaving = false;
+        self.batchDialogError = null;
+        self.batchDialogHasError = false;
+        self.batchDialogOpen = true;
+        updateBatchDialogState();
+        lt.notify();
+    };
+
+    self.closeBatchAssignmentDialog = function () {
+        if (self.batchDialogSaving) {
+            return;
+        }
+
+        self.batchDialogOpen = false;
+        self.batchDialogItem = null;
+        self.batchDialogRows = [];
+        self.batchDialogRemovedRows = [];
+        self.batchDialogDirty = false;
+        self.batchDialogError = null;
+        self.batchDialogHasError = false;
+        lt.notify();
+    };
+
+    self.removeBatchAssignmentRow = function (row) {
+        if (!row || self.batchDialogSaving) {
+            return;
+        }
+
+        if (!row.CanDelete) {
+            setBatchDialogError(row.DeleteBlockedReason
+                || "Objednávka již byla zahrnuta do účetnictví a přiřazení šarže nelze smazat.");
+            return;
+        }
+
+        self.batchDialogRows = self.batchDialogRows.filter(function (candidate) {
+            return candidate !== row;
+        });
+
+        if (!row.IsNew) {
+            self.batchDialogRemovedRows.push(row);
+        }
+
+        setBatchDialogError(null);
+        updateBatchDialogState();
+        lt.notify();
+    };
+
+    self.addBatchAssignmentRow = function (quantityValue, batchNumberValue) {
+        if (self.batchDialogSaving || !self.batchDialogItem) {
+            return false;
+        }
+
+        var quantity = Number((quantityValue || "").toString().replace(",", "."));
+        var batchNumber = (batchNumberValue || "").trim();
+
+        if (!isFinite(quantity) || quantity <= 0) {
+            setBatchDialogError("Množství musí být kladné číslo.");
+            return false;
+        }
+
+        if (!batchNumber) {
+            setBatchDialogError("Číslo šarže musí být vyplněno.");
+            return false;
+        }
+
+        var currentlyAssigned = self.batchDialogRows.reduce(function (sum, row) {
+            return sum + Number(row.Quantity || 0);
+        }, 0);
+        if (currentlyAssigned + quantity > Number(self.batchDialogItem.Quantity || 0)) {
+            setBatchDialogError("Celkové přiřazené množství nesmí překročit množství položky.");
+            return false;
+        }
+
+        self.batchDialogRows.push({
+            AssignmentId: null,
+            BatchNumber: batchNumber,
+            Quantity: quantity,
+            QuantityText: quantity.toLocaleString("cs-CZ", { maximumFractionDigits: 6 }),
+            AssignedBy: "Nové přiřazení",
+            AssignedByText: "Nové přiřazení",
+            AssignmentDtText: "",
+            CanDelete: true,
+            DeleteDisabled: false,
+            DeleteBlockedReason: null,
+            IsNew: true,
+            RowKey: "new-" + Date.now() + "-" + self.batchDialogRows.length
+        });
+        setBatchDialogError(null);
+        updateBatchDialogState();
+        lt.notify();
+        return true;
+    };
+
+    self.saveBatchAssignmentChanges = function () {
+        if (!self.batchDialogDirty || self.batchDialogSaving || !self.batchDialogItem) {
+            return;
+        }
+
+        var changes = self.batchDialogRemovedRows.map(function (row) {
+            return { BatchNumber: row.BatchNumber, Delta: -Number(row.Quantity || 0) };
+        }).concat(self.batchDialogRows.filter(function (row) {
+            return row.IsNew;
+        }).map(function (row) {
+            return { BatchNumber: row.BatchNumber, Delta: Number(row.Quantity || 0) };
+        }));
+
+        self.batchDialogSaving = true;
+        setBatchDialogError(null);
+
+        lt.api("/ordersInfo/saveOrderItemBatchAssignments")
+            .body({
+                OrderId: self.batchDialogItem.OrderId,
+                OrderItemId: self.batchDialogItem.ItemId,
+                Changes: changes
+            })
+            .onerror(function (error) {
+                self.batchDialogSaving = false;
+                setBatchDialogError(error);
+            })
+            .post(function (items) {
+                var order = self.orders.find(function (candidate) {
+                    return candidate.OrderId === self.batchDialogItem.OrderId;
+                });
+                var detail = order && order.details.find(function (candidate) {
+                    return candidate.id === "orderItems";
+                });
+
+                if (detail) {
+                    detail.data = app.OrdersInfo.prepareOrderItems(items);
+                    detail.isEmpty = detail.data.length === 0;
+                }
+
+                self.batchDialogSaving = false;
+                self.closeBatchAssignmentDialog();
+            });
+    };
+
     self.toggleOrderDetail = function (orderId) {
         var order = self.orders.find(function (item) {
             return item.OrderId === orderId;
@@ -383,56 +557,68 @@ app.OrdersInfo.vm.registerDetailTab({
     control: "/UI/OrdersInfo/DetailTabs/OrderNotes.html"
 });
 
+app.OrdersInfo.prepareOrderItems = function (items) {
+    var formatItems = function (sourceItems) {
+        (sourceItems || []).forEach(function (item) {
+            item.QuantityText = Number(item.Quantity || 0).toLocaleString("cs-CZ", {
+                maximumFractionDigits: 6
+            });
+            item.PriceWithVatText = Number(item.PriceWithVat || 0).toLocaleString("cs-CZ", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            item.CanEditBatchAssignments = !!(window.can && window.can.EditOrderItemBatchAssignments);
+            item.BatchAssignmentEditDisabled = !item.CanEditBatchAssignments || item.BatchAssignmentsLocked;
+            item.BatchAssignmentButtonTitle = item.BatchAssignmentsLocked
+                ? item.BatchAssignmentsLockedReason
+                : (item.CanEditBatchAssignments
+                    ? "Změnit přiřazení šarží"
+                    : "Pro změnu přiřazení šarží nemáte oprávnění");
+            item.HasBatchAssignmentDateNotice = !!item.BatchAssignmentDateNotice;
+
+            (item.BatchAssignments || []).forEach(function (assignment) {
+                var assignmentDate = new Date(assignment.AssignmentDt);
+                var assignedBy = assignment.AssignedBy || "Neznámý uživatel";
+                var emailSeparator = assignedBy.indexOf("@");
+
+                if (emailSeparator > 0) {
+                    assignedBy = assignedBy.substring(0, emailSeparator)
+                        .replace(/[._-]+/g, " ")
+                        .replace(/(^|\s)\S/g, function (character) { return character.toUpperCase(); });
+                }
+
+                assignment.QuantityText = Number(assignment.Quantity || 0).toLocaleString("cs-CZ", {
+                    maximumFractionDigits: 6
+                });
+                assignment.DeleteDisabled = !assignment.CanDelete;
+                assignment.AssignmentDtText = isNaN(assignmentDate.getTime())
+                    ? ""
+                    : assignmentDate.toLocaleDateString("cs-CZ");
+                assignment.AssignedByText = assignedBy;
+                assignment.SummaryText = assignment.QuantityText
+                    + "× " + assignment.BatchNumber
+                    + " (" + assignedBy
+                    + (assignment.AssignmentDtText ? " " + assignment.AssignmentDtText : "")
+                    + ")";
+            });
+            item.BatchAssignmentsText = (item.BatchAssignments || []).length > 0
+                ? item.BatchAssignments.map(function (assignment) { return assignment.SummaryText; }).join(", ")
+                : "Šarže nepřiřazena";
+            formatItems(item.Children);
+        });
+
+        return sourceItems || [];
+    };
+
+    return formatItems(items);
+};
+
 app.OrdersInfo.vm.registerDetailTab({
     id: "orderItems",
     tabTitle: "Položky",
     action: "getOrderItems",
     control: "/UI/OrdersInfo/DetailTabs/OrderItems.html",
-    prepareData: function (items) {
-        var formatItems = function (sourceItems) {
-            (sourceItems || []).forEach(function (item) {
-                item.QuantityText = Number(item.Quantity || 0).toLocaleString("cs-CZ", {
-                    maximumFractionDigits: 6
-                });
-                item.PriceWithVatText = Number(item.PriceWithVat || 0).toLocaleString("cs-CZ", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                item.HasBatchAssignments = (item.BatchAssignments || []).length > 0;
-                (item.BatchAssignments || []).forEach(function (assignment) {
-                    var assignmentDate = new Date(assignment.AssignmentDt);
-                    var assignedBy = assignment.AssignedBy || "Neznámý uživatel";
-                    var emailSeparator = assignedBy.indexOf("@");
-
-                    if (emailSeparator > 0) {
-                        assignedBy = assignedBy.substring(0, emailSeparator)
-                            .replace(/[._-]+/g, " ")
-                            .replace(/(^|\s)\S/g, function (character) { return character.toUpperCase(); });
-                    }
-
-                    assignment.QuantityText = Number(assignment.Quantity || 0).toLocaleString("cs-CZ", {
-                        maximumFractionDigits: 6
-                    });
-                    assignment.AssignmentDtText = isNaN(assignmentDate.getTime())
-                        ? ""
-                        : assignmentDate.toLocaleDateString("cs-CZ");
-                    assignment.SummaryText = assignment.QuantityText
-                        + "× " + assignment.BatchNumber
-                        + " (" + assignedBy
-                        + (assignment.AssignmentDtText ? " " + assignment.AssignmentDtText : "")
-                        + ")";
-                });
-                item.BatchAssignmentsText = (item.BatchAssignments || []).map(function (assignment) {
-                    return assignment.SummaryText;
-                }).join(", ");
-                formatItems(item.Children);
-            });
-
-            return sourceItems || [];
-        };
-
-        return formatItems(items);
-    }
+    prepareData: app.OrdersInfo.prepareOrderItems
 });
 
 app.OrdersInfo.vm.registerDetailTab({

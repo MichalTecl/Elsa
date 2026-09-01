@@ -349,9 +349,31 @@
 }
 
 .ordersInfoBatchSummary {
+    background: #eef3f5;
+    border: 1px solid #c5d0d5;
+    border-radius: 3px;
     color: #444;
-    display: inline;
+    cursor: pointer;
+    display: inline-block;
+    font: inherit;
     margin-left: 10px;
+    max-width: calc(100% - 15px);
+    overflow: hidden;
+    padding: 2px 6px;
+    text-align: left;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.ordersInfoBatchSummary:hover:not(:disabled) {
+    background: #e1edf1;
+    border-color: #91aab4;
+}
+
+.ordersInfoBatchSummary:disabled {
+    cursor: not-allowed;
+    opacity: .72;
 }
 
 .ordersInfoBatchSummary .fa-box {
@@ -361,6 +383,149 @@
 
 .ordersInfoKitBatchSummary {
     margin-left: 10px;
+}
+
+.ordersInfoBatchDialogBody {
+    box-sizing: border-box;
+    max-height: 90vh;
+    max-width: 900px;
+    overflow: auto;
+    width: calc(100vw - 40px);
+}
+
+.ordersInfoBatchDialogHead {
+    align-items: center;
+    border-bottom: 1px solid #d3d3d3;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+}
+
+.ordersInfoBatchDialogHead h3 {
+    margin: 0;
+}
+
+.ordersInfoBatchDialogClose {
+    background: transparent;
+    border: 0;
+    color: #555;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.ordersInfoBatchDialogItem {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px 28px;
+    margin-bottom: 16px;
+}
+
+.ordersInfoBatchDialogItemName {
+    flex-basis: 100%;
+}
+
+.ordersInfoBatchDialogDateNotice {
+    background: #fff6d8;
+    border: 1px solid #dec36e;
+    color: #5d4a13;
+    margin-bottom: 14px;
+    padding: 9px 11px;
+}
+
+.ordersInfoBatchDialogTable {
+    border: 1px solid #d5d5d5;
+}
+
+.ordersInfoBatchDialogTableHead,
+.ordersInfoBatchDialogRow {
+    align-items: center;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 110px minmax(150px, 1fr) minmax(180px, 1.4fr) 40px;
+    padding: 7px 10px;
+}
+
+.ordersInfoBatchDialogTableHead {
+    background: #ececec;
+    font-weight: bold;
+}
+
+.ordersInfoBatchDialogRow + .ordersInfoBatchDialogRow {
+    border-top: 1px solid #e1e1e1;
+}
+
+.ordersInfoBatchDeleteButton {
+    background: #f2f2f2;
+    border: 1px solid #ccc;
+    color: #8c2525;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.ordersInfoBatchDeleteButton:disabled {
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.ordersInfoBatchDialogAddRow {
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.ordersInfoBatchDialogAddRow label {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ordersInfoBatchDialogAddRow input {
+    box-sizing: border-box;
+    max-width: none;
+}
+
+.ordersInfoBatchDialogAddRow input[type="number"] {
+    width: 120px;
+}
+
+.ordersInfoBatchDialogAddRow input[type="text"] {
+    width: 280px;
+}
+
+.ordersInfoBatchAddButton,
+.ordersInfoBatchSaveButton {
+    background: #16813a;
+    border: 1px solid #0e682c;
+    color: #fff;
+    cursor: pointer;
+    padding: 6px 12px;
+}
+
+.ordersInfoBatchDialogTotal {
+    margin-top: 12px;
+    text-align: right;
+}
+
+.ordersInfoBatchDialogError {
+    background: #ffe7e7;
+    border: 1px solid #d58a8a;
+    color: #8c1f1f;
+    margin-top: 12px;
+    padding: 8px 10px;
+}
+
+.ordersInfoBatchDialogButtons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.ordersInfoBatchDialogButtons.hidden {
+    display: none;
 }
 
 .ordersInfoNumeric {

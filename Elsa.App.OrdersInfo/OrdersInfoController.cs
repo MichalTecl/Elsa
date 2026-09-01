@@ -33,6 +33,7 @@ namespace Elsa.App.OrdersInfo
         private readonly ICustomerRepository _customerRepository;
         private readonly IUserRepository _userRepository;
         private readonly OrdersInfoXlsExporter _xlsExporter;
+        private readonly OrderItemBatchAssignmentEditor _batchAssignmentEditor;
 
         public OrdersInfoController(
             IWebSession webSession,
@@ -42,7 +43,8 @@ namespace Elsa.App.OrdersInfo
             IPurchaseOrderRepository purchaseOrderRepository,
             ICustomerRepository customerRepository,
             IUserRepository userRepository,
-            OrdersInfoXlsExporter xlsExporter) : base(webSession, log)
+            OrdersInfoXlsExporter xlsExporter,
+            OrderItemBatchAssignmentEditor batchAssignmentEditor) : base(webSession, log)
         {
             _orderInfoRepository = orderInfoRepository;
             _db = db;
@@ -50,6 +52,7 @@ namespace Elsa.App.OrdersInfo
             _customerRepository = customerRepository;
             _userRepository = userRepository;
             _xlsExporter = xlsExporter;
+            _batchAssignmentEditor = batchAssignmentEditor;
         }
 
         protected override void OnBeforeCall()
@@ -218,21 +221,38 @@ namespace Elsa.App.OrdersInfo
         {
             var order = GetOrder(orderId);
             var itemIds = GetAllOrderItems(order.Items).Select(item => item.Id).Distinct().ToList();
-            var assignmentsByItemId = itemIds.Count == 0
-                ? new Dictionary<long, List<IOrderItemMaterialBatch>>()
+            var assignments = itemIds.Count == 0
+                ? new List<IOrderItemMaterialBatch>()
                 : _db.SelectFrom<IOrderItemMaterialBatch>()
                     .Join(assignment => assignment.MaterialBatch)
                     .Join(assignment => assignment.User)
                     .Where(assignment => assignment.OrderItemId.InCsv(itemIds))
                     .Execute()
-                    .GroupBy(assignment => assignment.OrderItemId)
-                    .ToDictionary(group => group.Key, group => group.OrderBy(assignment => assignment.AssignmentDt).ToList());
+                    .ToList();
+            var assignmentsByItemId = assignments
+                .GroupBy(assignment => assignment.OrderItemId)
+                .ToDictionary(group => group.Key, group => group.OrderBy(assignment => assignment.AssignmentDt).ToList());
+            var editBlockReason = _batchAssignmentEditor.GetEditBlockReason(order);
+            var batchAssignmentDateNotice = _batchAssignmentEditor.GetBatchAssignmentDateNotice(order, DateTime.Now);
 
             return order.Items
                 .Where(item => item.KitParentId == null)
                 .OrderBy(item => item.Id)
-                .Select(item => MapOrderItem(item, assignmentsByItemId))
+                .Select(item => MapOrderItem(
+                    order,
+                    item,
+                    assignmentsByItemId,
+                    editBlockReason,
+                    batchAssignmentDateNotice))
                 .ToList();
+        }
+
+        public List<OrderItemInfoModel> SaveOrderItemBatchAssignments(
+            OrderItemBatchAssignmentChangeRequest request)
+        {
+            WebSession.EnsureUserRight(OrdersInfoUserRights.EditOrderItemBatchAssignments);
+            _batchAssignmentEditor.Apply(request);
+            return GetOrderItems(request.OrderId);
         }
 
         public string GetCrmLink(long orderId)
@@ -483,15 +503,23 @@ namespace Elsa.App.OrdersInfo
         }
 
         private static OrderItemInfoModel MapOrderItem(
+            IPurchaseOrder order,
             IOrderItem item,
-            IReadOnlyDictionary<long, List<IOrderItemMaterialBatch>> assignmentsByItemId)
+            IReadOnlyDictionary<long, List<IOrderItemMaterialBatch>> assignmentsByItemId,
+            string editBlockReason,
+            string batchAssignmentDateNotice)
         {
             var result = new OrderItemInfoModel
             {
+                OrderId = order.Id,
+                OrderNumber = order.OrderNumber,
                 ItemId = item.Id,
                 PlacedName = item.PlacedName,
                 Quantity = item.Quantity,
-                PriceWithVat = item.TaxedPrice
+                PriceWithVat = item.TaxedPrice,
+                BatchAssignmentsLocked = editBlockReason != null,
+                BatchAssignmentsLockedReason = editBlockReason,
+                BatchAssignmentDateNotice = batchAssignmentDateNotice
             };
 
             if (assignmentsByItemId.TryGetValue(item.Id, out var assignments))
@@ -503,14 +531,21 @@ namespace Elsa.App.OrdersInfo
                     BatchNumber = assignment.MaterialBatch?.BatchNumber ?? "Bez čísla šarže",
                     Quantity = assignment.Quantity,
                     AssignmentDt = assignment.AssignmentDt,
-                    AssignedBy = assignment.User?.EMail ?? "Neznámý uživatel"
+                    AssignedBy = assignment.User?.EMail ?? "Neznámý uživatel",
+                    CanDelete = editBlockReason == null,
+                    DeleteBlockedReason = editBlockReason
                 }));
             }
 
             result.Children.AddRange(item.KitChildren
                 .OrderBy(child => child.KitItemIndex)
                 .ThenBy(child => child.Id)
-                .Select(child => MapOrderItem(child, assignmentsByItemId)));
+                .Select(child => MapOrderItem(
+                    order,
+                    child,
+                    assignmentsByItemId,
+                    editBlockReason,
+                    batchAssignmentDateNotice)));
 
             return result;
         }

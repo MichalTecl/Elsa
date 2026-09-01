@@ -12,10 +12,10 @@
             <div class="ordersInfoItemRow">
                 <div class="ordersInfoItemProduct">
                     <span data-bind="text:PlacedName"></span>
-                    <span class="ordersInfoBatchSummary hidden" data-bind="class!.hidden:HasBatchAssignments">
+                    <button type="button" class="ordersInfoBatchSummary" data-bind="disabled:BatchAssignmentEditDisabled; title:BatchAssignmentButtonTitle" event-bind="click:openBatchAssignmentDialog(VM, event)">
                         <i class="fas fa-box"></i>
                         <span data-bind="text:BatchAssignmentsText"></span>
-                    </span>
+                    </button>
                 </div>
                 <span class="ordersInfoNumeric" data-bind="text:QuantityText"></span>
                 <span class="ordersInfoNumeric" data-bind="text:PriceWithVatText"></span>
@@ -26,10 +26,10 @@
                     <div class="ordersInfoItemRow ordersInfoKitItemRow">
                         <div class="ordersInfoItemProduct">
                             <span data-bind="text:PlacedName"></span>
-                            <span class="ordersInfoBatchSummary ordersInfoKitBatchSummary hidden" data-bind="class!.hidden:HasBatchAssignments">
+                            <button type="button" class="ordersInfoBatchSummary ordersInfoKitBatchSummary" data-bind="disabled:BatchAssignmentEditDisabled; title:BatchAssignmentButtonTitle" event-bind="click:openBatchAssignmentDialog(VM, event)">
                                 <i class="fas fa-box"></i>
                                 <span data-bind="text:BatchAssignmentsText"></span>
-                            </span>
+                            </button>
                         </div>
                         <span class="ordersInfoNumeric" data-bind="text:QuantityText"></span>
                         <span class="ordersInfoNumeric" data-bind="text:PriceWithVatText"></span>
@@ -41,5 +41,11 @@
 </div>
 
 <script>
-    lt.element("orderItems{%GENERATE%}").attach(function () { });
+    lt.element("orderItems{%GENERATE%}").attach(function () {
+        this.openBatchAssignmentDialog = function (item, event) {
+            event.preventDefault();
+            event.stopPropagation();
+            app.OrdersInfo.vm.openBatchAssignmentDialog(item);
+        };
+    });
 </script>

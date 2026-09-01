@@ -15,5 +15,9 @@ namespace Elsa.App.OrdersInfo.Model
         public DateTime AssignmentDt { get; set; }
 
         public string AssignedBy { get; set; }
+
+        public bool CanDelete { get; set; }
+
+        public string DeleteBlockedReason { get; set; }
     }
 }

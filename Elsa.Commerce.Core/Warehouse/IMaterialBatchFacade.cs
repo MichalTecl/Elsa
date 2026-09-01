@@ -22,6 +22,8 @@ namespace Elsa.Commerce.Core.Warehouse
         
         IEnumerable<OrderItemBatchAssignmentModel> TryResolveBatchAssignments(IPurchaseOrder order, Tuple<long, BatchKey, decimal> orderItemBatchPreference = null);
 
+        void AssignOrderItemToBatch(int batchId, IPurchaseOrder order, long orderItemId, decimal assignmentQuantity, out string batchChangeWarnMessage);
+
         BatchKey FindBatchBySearchQuery(int materialId, string query);
 
         bool AlignOrderBatches(long purchaseOrderId);
