@@ -185,13 +185,22 @@
                 var label = document.createElement("label");
                 var checkbox = document.createElement("input");
                 var text = document.createElement("span");
+                var paymentMethodName = paymentMethod.Name;
 
                 label.className = "ordersInfoStatusOption";
+                if (!paymentMethod.IsActive) {
+                    label.classList.add("ordersInfoPaymentOptionHistorical");
+                }
+
+                if (paymentMethod.LastUsedDtText) {
+                    label.title = "Naposledy použito: " + paymentMethod.LastUsedDtText;
+                }
+
                 checkbox.type = "checkbox";
-                checkbox.value = paymentMethod;
-                checkbox.checked = selectedPaymentMethodValues.indexOf(paymentMethod) !== -1;
+                checkbox.value = paymentMethodName;
+                checkbox.checked = selectedPaymentMethodValues.indexOf(paymentMethodName) !== -1;
                 checkbox.addEventListener("change", updatePaymentMethodsText);
-                text.textContent = paymentMethod;
+                text.textContent = paymentMethodName;
 
                 label.appendChild(checkbox);
                 label.appendChild(text);

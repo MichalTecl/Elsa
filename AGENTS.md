@@ -7,3 +7,4 @@
 - Nepouzivej legacy madarskou konvenci pro fieldy a konstanty. Pro fieldy pouzivej `_field`, pro konstanty `CONSTANT`.
 - Nepridavej rucni verzovani ani cache-busting do URL statickych souboru, napriklad `?v=20260817-2`. Verzovani assetu je zajisteno jinym mechanismem.
 - Pri zmene existujiciho C# souboru preved v celem upravovanem souboru privatni fieldy z legacy konvence `m_field` na `_field` a aktualizuj vsechny jejich reference.
+- Pri kazde uprave textoveho souboru zachovej jeho puvodni konce radku. V tomto repozitari pouzivej podle `.editorconfig` a `.gitattributes` Windows konce radku CRLF; pred dokoncenim over, ze upravene soubory nemaji LF ani smisene konce radku.

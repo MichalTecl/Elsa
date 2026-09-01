@@ -97,18 +97,32 @@ namespace Elsa.App.OrdersInfo.App
                 .MapRows(r => r.GetString(0)));
         }
 
-        public IList<string> GetPaymentMethods()
+        public IList<PaymentMethodInfoModel> GetPaymentMethods()
         {
-            return _cache.ReadThrough($"ordinf_allPaymentMethods_{_session.Project.Id}",
+            return _cache.ReadThrough($"ordinf_paymentMethodsWithLastUse_{_session.Project.Id}",
                 TimeSpan.FromHours(1),
-                () => _db.Sql()
-                    .ExecuteWithParams(@"SELECT DISTINCT PaymentMethodName
-                                           FROM PurchaseOrder
-                                          WHERE ProjectId = {0}
-                                            AND PaymentMethodName IS NOT NULL
-                                            AND LTRIM(RTRIM(PaymentMethodName)) <> ''
-                                          ORDER BY PaymentMethodName", _session.Project.Id)
-                    .MapRows(row => row.GetString(0)));
+                () =>
+                {
+                    var activeSince = DateTime.Now.AddYears(-1);
+                    var paymentMethods = _db.AggregateFrom<IPurchaseOrder>()
+                        .Where(order => order.ProjectId == _session.Project.Id)
+                        .GroupBy<PaymentMethodInfoModel>(order => order.PaymentMethodName, method => method.Name)
+                        .Bind(order => order.PurchaseDate.Max(), (method, value) => method.LastUsedDt = value)
+                        .Execute()
+                        .Where(method => !string.IsNullOrWhiteSpace(method.Name))
+                        .ToList();
+
+                    foreach (var paymentMethod in paymentMethods)
+                    {
+                        paymentMethod.IsActive = paymentMethod.LastUsedDt >= activeSince;
+                        paymentMethod.LastUsedDtText = paymentMethod.LastUsedDt.ToString("d. M. yyyy");
+                    }
+
+                    return paymentMethods
+                        .OrderBy(method => method.IsActive ? 0 : 1)
+                        .ThenBy(method => method.Name, StringComparer.CurrentCultureIgnoreCase)
+                        .ToList();
+                });
         }
 
         public IList<string> GetPlacedItemNames()

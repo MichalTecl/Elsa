@@ -170,7 +170,7 @@ namespace Elsa.App.OrdersInfo
             return _orderInfoRepository.GetErpStatuses();
         }
 
-        public IList<string> GetPaymentMethods()
+        public IList<PaymentMethodInfoModel> GetPaymentMethods()
         {
             return _orderInfoRepository.GetPaymentMethods();
         }

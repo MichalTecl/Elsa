@@ -149,6 +149,14 @@
     background: #eee;
 }
 
+.ordersInfoPaymentOptionHistorical {
+    color: #888;
+}
+
+.ordersInfoPaymentOptionHistorical:hover {
+    background: #f3f3f3;
+}
+
 .ordersInfoStatusOption input {
     margin: 0;
     min-height: auto;
