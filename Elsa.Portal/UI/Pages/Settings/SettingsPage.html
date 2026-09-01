@@ -1,4 +1,4 @@
-﻿<ElsaBody>
+<ElsaBody>
     <script src="/UI/Controls/Common/TabControl.js"></script>
 
     <div class="panel w4" id="mainTab">
@@ -9,6 +9,7 @@
         var tab = new app.ui.TabControl(document.getElementById("mainTab"));
         tab.addTab("Způsoby dopravy", "/UI/Controls/Settings/ShipmentMethodsMappingEditor.html", null, null, "shipMethods");
         tab.addTab("Adresáti e-mailů", "/UI/Controls/Settings/RecipientListsSettings.html", null, null, "recipLists");        
+        tab.addTab("Šablony e-mailů", "/UI/Controls/Settings/MailTemplates.html", null, null, "mailTemplates");
         tab.addTab("Import / Export", "/UI/ImportExport/Controls/ImportExport.html", null, null, "importExport");
         tab.addTab("Mapování produktů", "/UI/EshopMapping/EshopMappingEditorLight.html", null, null, "eshopMappingLight");
         tab.addTab("Podrobné mapování produktů", "/UI/EshopMapping/EshopMappingEditor.html", null, null, "eshopMapping");

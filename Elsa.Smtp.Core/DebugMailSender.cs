@@ -8,10 +8,12 @@ namespace Elsa.Smtp.Core
     public class DebugMailSender : IMailSender
     {
         private readonly ILog _log;
+        private readonly IMailTemplateRenderer _mailTemplateRenderer;
 
-        public DebugMailSender(ILog log)
+        public DebugMailSender(ILog log, IMailTemplateRenderer mailTemplateRenderer)
         {
             _log = log;
+            _mailTemplateRenderer = mailTemplateRenderer;
         }
 
         public void Send(SenderMailboxType mailbox, string to, string subject, string body, params string[] attachmentFiles)
@@ -32,6 +34,12 @@ namespace Elsa.Smtp.Core
             var fileContents = $"To: {groupName}\nSubject: {subject}\n\n{body}{attachments}";
             File.WriteAllText(Path.Combine(directoryPath, fileName), fileContents);
             _log.Info($"{subject} E-mail for {groupName} saved as: {fileName}");            
+        }
+
+        public void Send(SenderMailboxType mailbox, string to, string templateTypeName, Dictionary<string, string> values)
+        {
+            var content = _mailTemplateRenderer.Render(templateTypeName, values);
+            Send(mailbox, to, content.Subject, content.Body);
         }
     }
 }

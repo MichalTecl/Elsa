@@ -1,0 +1,209 @@
+<div id="mailTemplatesSettings" class="mailTemplatesSettings">
+    <style>
+        .mailTemplatesSettings .mailTemplatesToolbar { margin-bottom: 12px; }
+        .mailTemplatesSettings .mailTemplatesTable { width: 100%; border-collapse: collapse; }
+        .mailTemplatesSettings .mailTemplatesTable th,
+        .mailTemplatesSettings .mailTemplatesTable td { padding: 8px 10px; border-bottom: 1px solid #ddd; text-align: left; }
+        .mailTemplatesSettings .mailTemplatesRow { cursor: pointer; }
+        .mailTemplatesSettings .mailTemplatesRow:hover { background: #f5f5f5; }
+        .mailTemplatesSettings .mailTemplatesEditor { margin-top: 16px; }
+        .mailTemplatesSettings .mailTemplatesField { display: block; margin-bottom: 12px; }
+        .mailTemplatesSettings .mailTemplatesField span { display: block; margin-bottom: 4px; font-weight: bold; }
+        .mailTemplatesSettings .mailTemplatesField input,
+        .mailTemplatesSettings .mailTemplatesField textarea { box-sizing: border-box; width: 100%; }
+        .mailTemplatesSettings .mailTemplatesSubject { min-height: 54px; }
+        .mailTemplatesSettings .mailTemplatesBody { min-height: 300px; font-family: monospace; }
+        .mailTemplatesSettings .mailTemplatesHint { margin: -4px 0 12px; font-size: 11px; opacity: 0.65; }
+        .mailTemplatesSettings .mailTemplatesActions { display: flex; justify-content: space-between; }
+        .mailTemplatesSettings .mailTemplatesSaveActions { display: flex; gap: 8px; }
+        .mailTemplatesSettings .mailTemplatesDelete { color: #a00; }
+    </style>
+
+    <div class="mailTemplatesToolbar">
+        <button type="button" event-bind="click:createTemplate()">
+            <i class="fas fa-plus"></i>
+            Přidat šablonu
+        </button>
+    </div>
+
+    <table class="mailTemplatesTable">
+        <thead>
+            <tr>
+                <th>Typ šablony</th>
+                <th>Předmět</th>
+                <th>Naposledy změnil</th>
+                <th>Změněno</th>
+            </tr>
+        </thead>
+        <tbody data-bind="itemsSource:templates" data-key="Id">
+            <tr class="lt-template mailTemplatesRow" event-bind="click:openTemplate(Id)">
+                <td data-bind="text:TypeName"></td>
+                <td data-bind="text:Subject"></td>
+                <td data-bind="text:LastChangeUserName"></td>
+                <td data-bind="text:LastChangeText"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="panel mailTemplatesEditor hidden" data-bind="class!.hidden:hasEditor">
+        <div class="panelHead">
+            <div class="panelTitle" data-bind="text:editorTitle"></div>
+        </div>
+        <div class="panelContent">
+            <label class="mailTemplatesField">
+                <span>Typ šablony</span>
+                <input type="text" data-bind="value:editor.TypeName" event-bind="input:updateTypeName(this.value)" />
+            </label>
+
+            <label class="mailTemplatesField">
+                <span>Předmět</span>
+                <textarea class="mailTemplatesSubject" data-bind="value:editor.Subject" event-bind="input:updateSubject(this.value)"></textarea>
+            </label>
+
+            <label class="mailTemplatesField">
+                <span>Tělo e-mailu</span>
+                <textarea class="mailTemplatesBody" data-bind="value:editor.Body" event-bind="input:updateBody(this.value)"></textarea>
+            </label>
+
+            <div class="mailTemplatesHint">V předmětu i těle zapisujte placeholdery ve formátu <code>{%valueName%}</code>.</div>
+
+            <div class="mailTemplatesActions">
+                <button type="button" class="mailTemplatesDelete hidden" data-bind="class!.hidden:editor.CanDelete" event-bind="click:deleteTemplate()">Smazat</button>
+                <div class="mailTemplatesSaveActions">
+                    <button type="button" event-bind="click:closeEditor()">Zrušit</button>
+                    <button type="button" event-bind="click:saveTemplate()">Uložit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    app.MailTemplatesSettings = app.MailTemplatesSettings || {};
+    app.MailTemplatesSettings.VM = app.MailTemplatesSettings.VM || function () {
+        const self = this;
+
+        self.templates = [];
+        self.editor = null;
+        self.hasEditor = false;
+        self.editorTitle = "";
+
+        const formatDate = (value) => {
+            if (!value) {
+                return "";
+            }
+
+            const serializedTicks = /\/Date\((\d+)/.exec(value);
+            const date = serializedTicks ? new Date(parseInt(serializedTicks[1], 10)) : new Date(value);
+            return isNaN(date.getTime()) ? "" : date.toLocaleString("cs-CZ");
+        };
+
+        const mapTemplates = (templates) => {
+            self.templates = (templates || []).map(template => ({
+                Id: template.Id,
+                TypeName: template.TypeName || "",
+                Subject: template.Subject || "",
+                LastChangeUserName: template.LastChangeUserName || "",
+                LastChangeText: formatDate(template.LastChangeDt)
+            }));
+        };
+
+        const refresh = () => {
+            lt.api("/mailTemplates/getAll").get(templates => {
+                mapTemplates(templates);
+                lt.notify();
+            });
+        };
+
+        const showEditor = (template) => {
+            self.editor = {
+                Id: template.Id || null,
+                TypeName: template.TypeName || "",
+                Subject: template.Subject || "",
+                Body: template.Body || "",
+                CanDelete: !!template.Id
+            };
+            self.editorTitle = self.editor.Id ? "Upravit e-mailovou šablonu" : "Nová e-mailová šablona";
+            self.hasEditor = true;
+            lt.notify();
+        };
+
+        self.createTemplate = () => showEditor({});
+
+        self.openTemplate = (id) => {
+            lt.api("/mailTemplates/get").query({ id: id }).get(showEditor);
+        };
+
+        self.closeEditor = () => {
+            self.editor = null;
+            self.hasEditor = false;
+            lt.notify();
+        };
+
+        self.saveTemplate = () => {
+            if (!self.editor) {
+                return;
+            }
+
+            const typeName = (self.editor.TypeName || "").trim();
+            if (!typeName) {
+                alert("Typ šablony musí být vyplněný.");
+                return;
+            }
+
+            const duplicateExists = self.templates.some(template =>
+                template.Id !== self.editor.Id
+                && (template.TypeName || "").trim().toLocaleLowerCase() === typeName.toLocaleLowerCase());
+
+            if (duplicateExists) {
+                alert("Šablona se stejným typem již existuje.");
+                return;
+            }
+
+            lt.api("/mailTemplates/save").body({
+                Id: self.editor.Id,
+                TypeName: typeName,
+                Subject: self.editor.Subject || "",
+                Body: self.editor.Body || ""
+            }).post(() => {
+                self.closeEditor();
+                refresh();
+            });
+        };
+
+        self.deleteTemplate = () => {
+            if (!self.editor || !self.editor.Id || !confirm("Opravdu chcete e-mailovou šablonu smazat?")) {
+                return;
+            }
+
+            lt.api("/mailTemplates/delete").query({ id: self.editor.Id }).post(templates => {
+                self.closeEditor();
+                mapTemplates(templates);
+                lt.notify();
+            });
+        };
+
+        self.updateTypeName = value => self.editor.TypeName = value;
+        self.updateSubject = value => self.editor.Subject = value;
+        self.updateBody = value => self.editor.Body = value;
+
+        refresh();
+    };
+
+    app.MailTemplatesSettings.vm = app.MailTemplatesSettings.vm || new app.MailTemplatesSettings.VM();
+
+    lt.element("mailTemplatesSettings")
+        .withModel("app.MailTemplatesSettings.vm")
+        .attach(function () {
+            const vm = app.MailTemplatesSettings.vm;
+
+            this.createTemplate = () => vm.createTemplate();
+            this.openTemplate = id => vm.openTemplate(id);
+            this.closeEditor = () => vm.closeEditor();
+            this.saveTemplate = () => vm.saveTemplate();
+            this.deleteTemplate = () => vm.deleteTemplate();
+            this.updateTypeName = value => vm.updateTypeName(value);
+            this.updateSubject = value => vm.updateSubject(value);
+            this.updateBody = value => vm.updateBody(value);
+        });
+</script>

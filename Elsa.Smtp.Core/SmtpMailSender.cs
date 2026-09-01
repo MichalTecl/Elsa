@@ -13,16 +13,22 @@ namespace Elsa.Smtp.Core
         private readonly SmtpSettings _allSettings;
         private readonly ILog _log;
         private readonly IRecipientListsRepository _recipientListsRepository;
+        private readonly IMailTemplateRenderer _mailTemplateRenderer;
 
         private readonly DebugMailSender _debugMailSender;
 
-        public SmtpMailSender(SmtpSettings settings, ILog log, IRecipientListsRepository recipientListsRepository)
+        public SmtpMailSender(
+            SmtpSettings settings,
+            ILog log,
+            IRecipientListsRepository recipientListsRepository,
+            IMailTemplateRenderer mailTemplateRenderer)
         {
             _allSettings = settings;
             _log = log;
             _recipientListsRepository = recipientListsRepository;
+            _mailTemplateRenderer = mailTemplateRenderer;
 
-            _debugMailSender = new DebugMailSender(log);
+            _debugMailSender = new DebugMailSender(log, mailTemplateRenderer);
         }
 
         public void Send(SenderMailboxType mailbox, string to, string subject, string body, params string[] attachmentFiles)
@@ -47,6 +53,12 @@ namespace Elsa.Smtp.Core
             }
             
             Send(mailbox, recipients, subject, body, attachmentFiles);
+        }
+
+        public void Send(SenderMailboxType mailbox, string to, string templateTypeName, Dictionary<string, string> values)
+        {
+            var content = _mailTemplateRenderer.Render(templateTypeName, values);
+            Send(mailbox, to, content.Subject, content.Body);
         }
 
         private void Send(SenderMailboxType mailbox, IEnumerable<string> to, string subject, string body, string[] attachemntFiles)

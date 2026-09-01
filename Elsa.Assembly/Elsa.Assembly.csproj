@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -102,6 +102,10 @@
     <ProjectReference Include="..\Elsa.App.EshopExtensions\Elsa.App.EshopExtensions.csproj">
       <Project>{5726C7FD-20F1-4B6A-B2D5-31771548D3A1}</Project>
       <Name>Elsa.App.EshopExtensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.App.Emailing\Elsa.App.Emailing.csproj">
+      <Project>{5BF332D4-2D99-46A6-8A86-A1D0EC95764C}</Project>
+      <Name>Elsa.App.Emailing</Name>
     </ProjectReference>
     <ProjectReference Include="..\Elsa.App.ImportExport\Elsa.App.ImportExport.csproj">
       <Project>{2f701563-935d-43bd-8cf3-bbf47df17397}</Project>
