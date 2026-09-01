@@ -8,6 +8,7 @@ namespace Elsa.App.OrdersInfo
         public void Setup(IContainerSetup setup)
         {
             setup.For<OrdersInfoRepository>().Use<OrdersInfoRepository>();
+            setup.For<OrdersInfoXlsExporter>().Use<OrdersInfoXlsExporter>();
         }
     }
 }

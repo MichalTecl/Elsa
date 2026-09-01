@@ -32,6 +32,7 @@ namespace Elsa.App.OrdersInfo
         private readonly IPurchaseOrderRepository _purchaseOrderRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IUserRepository _userRepository;
+        private readonly OrdersInfoXlsExporter _xlsExporter;
 
         public OrdersInfoController(
             IWebSession webSession,
@@ -40,13 +41,15 @@ namespace Elsa.App.OrdersInfo
             IDatabase db,
             IPurchaseOrderRepository purchaseOrderRepository,
             ICustomerRepository customerRepository,
-            IUserRepository userRepository) : base(webSession, log)
+            IUserRepository userRepository,
+            OrdersInfoXlsExporter xlsExporter) : base(webSession, log)
         {
             _orderInfoRepository = orderInfoRepository;
             _db = db;
             _purchaseOrderRepository = purchaseOrderRepository;
             _customerRepository = customerRepository;
             _userRepository = userRepository;
+            _xlsExporter = xlsExporter;
         }
 
         protected override void OnBeforeCall()
@@ -56,6 +59,24 @@ namespace Elsa.App.OrdersInfo
 
         public OrderQueryResultModel Query(OrderQueryModel query)
         {
+            query = PrepareQuery(query);
+
+            var take = Math.Min(Math.Max(query.PageSize, 1), 200);
+            var page = Math.Max(query.Page, 0);
+            var skip = checked(page * take);
+
+            return _orderInfoRepository.Load(skip, take, CreateOrderFilter(query));
+        }
+
+        public FileResult Export(OrderQueryModel query)
+        {
+            query = PrepareQuery(query);
+            var bytes = _xlsExporter.Export(CreateOrderFilter(query));
+            return new FileResult($"Objednavky_{DateTime.Now:yyyyMMdd_HHmm}.xlsx", bytes);
+        }
+
+        private static OrderQueryModel PrepareQuery(OrderQueryModel query)
+        {
             query = query ?? new OrderQueryModel();
             query.OrderNumber = NormalizeWildcard(query.OrderNumber);
             query.ContainsPlacedItemWildcard = NormalizeWildcard(query.ContainsPlacedItemWildcard);
@@ -63,82 +84,77 @@ namespace Elsa.App.OrdersInfo
             query.CustomerNameWildcard = NormalizeWildcard(query.CustomerNameWildcard);
             query.ShipmentMethodNameWildcard = NormalizeWildcard(query.ShipmentMethodNameWildcard);
             query.DiscountTextWildcard = NormalizeWildcard(query.DiscountTextWildcard);
+            return query;
+        }
 
-            var take = Math.Min(Math.Max(query.PageSize, 1), 200);
-            var page = Math.Max(query.Page, 0);
-            var skip = checked(page * take);
+        private Action<IQueryBuilder<IPurchaseOrder>> CreateOrderFilter(OrderQueryModel query)
+        {
+            return q =>
+            {
+                if (!string.IsNullOrWhiteSpace(query.OrderNumber))
+                    q.Where(o => o.OrderNumber.Like(query.OrderNumber.ToSqlLike()));
 
+                if (query.MinPurchaseDt != null)
+                    q.Where(o => o.PurchaseDate >= query.MinPurchaseDt);
 
-            var result = _orderInfoRepository.Load(skip, take,
-                q => { 
+                if (query.MaxPurchaseDt != null)
+                    q.Where(o => o.PurchaseDate <= query.MaxPurchaseDt);
 
-                    if (!string.IsNullOrWhiteSpace(query.OrderNumber))
-                        q.Where(o => o.OrderNumber.Like(query.OrderNumber.ToSqlLike()));
+                if (query.ErpStatuses?.Count > 0)
+                    q.Where(o => o.ErpStatusName.InCsv(query.ErpStatuses));
 
-                    if (query.MinPurchaseDt != null)
-                        q.Where(o => o.PurchaseDate >= query.MinPurchaseDt);
+                if (query.OrderStatusId != null)
+                {
+                    var filteredOrderStatusId = query.OrderStatusId.Value;
+                    q.Where(o => o.OrderStatusId == filteredOrderStatusId);
+                }
 
-                    if (query.MaxPurchaseDt != null)
-                        q.Where(o => o.PurchaseDate <= query.MaxPurchaseDt);
+                if (!string.IsNullOrWhiteSpace(query.MaterialBatchNumberWildcard))
+                {
+                    var batchQuery = _db.SelectFrom<IOrderItemMaterialBatch>()
+                        .Join(assignment => assignment.MaterialBatch)
+                        .Join(assignment => assignment.OrderItem)
+                        .Join(assignment => assignment.OrderItem.KitParent)
+                        .Join(assignment => assignment.OrderItem.PurchaseOrder)
+                        .Where(assignment => assignment.MaterialBatch.BatchNumber.Like(
+                            query.MaterialBatchNumberWildcard.ToSqlLike()));
 
-                    if (query.ErpStatuses?.Count > 0)
-                        q.Where(o => o.ErpStatusName.InCsv(query.ErpStatuses));
-
-                    if (query.OrderStatusId != null)
+                    if (!string.IsNullOrWhiteSpace(query.ContainsPlacedItemWildcard))
                     {
-                        var filteredOrderStatusId = query.OrderStatusId.Value;
-                        q.Where(o => o.OrderStatusId == filteredOrderStatusId);
-                    }
-                    
-                    if (!string.IsNullOrWhiteSpace(query.MaterialBatchNumberWildcard))
-                    {
-                        var batchQuery = _db.SelectFrom<IOrderItemMaterialBatch>()
-                            .Join(assignment => assignment.MaterialBatch)
-                            .Join(assignment => assignment.OrderItem)
-                            .Join(assignment => assignment.OrderItem.KitParent)
-                            .Join(assignment => assignment.OrderItem.PurchaseOrder)
-                            .Where(assignment => assignment.MaterialBatch.BatchNumber.Like(
-                                query.MaterialBatchNumberWildcard.ToSqlLike()));
-
-                        if (!string.IsNullOrWhiteSpace(query.ContainsPlacedItemWildcard))
-                        {
-                            batchQuery.Where(assignment =>
-                                assignment.OrderItem.PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike())
-                                || assignment.OrderItem.KitParent.PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike()));
-                        }
-
-                        q.Where(order => order.Id.InSubquery(batchQuery
-                            .Transform(assignment => assignment.OrderItem.PurchaseOrder.Id)));
-                    }
-                    else if (!string.IsNullOrWhiteSpace(query.ContainsPlacedItemWildcard))
-                    {
-                        q.Where(o => o.Id.InSubquery(_db.SelectFrom<IOrderItem>()
-                                                        .Join(i => i.KitChildren)
-                                                        .Join(i => i.PurchaseOrder)
-                                                        .Where(i => i.PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike())
-                                                                 || i.KitChildren.Each().PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike()))
-                                                        .Transform(i => i.PurchaseOrder.Id)));
+                        batchQuery.Where(assignment =>
+                            assignment.OrderItem.PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike())
+                            || assignment.OrderItem.KitParent.PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike()));
                     }
 
-                    if (!string.IsNullOrWhiteSpace(query.CustomerNameWildcard))
-                        q.Where(o => o.CustomerName.Like(query.CustomerNameWildcard.ToSqlLike()));
+                    q.Where(order => order.Id.InSubquery(batchQuery
+                        .Transform(assignment => assignment.OrderItem.PurchaseOrder.Id)));
+                }
+                else if (!string.IsNullOrWhiteSpace(query.ContainsPlacedItemWildcard))
+                {
+                    q.Where(o => o.Id.InSubquery(_db.SelectFrom<IOrderItem>()
+                        .Join(i => i.KitChildren)
+                        .Join(i => i.PurchaseOrder)
+                        .Where(i => i.PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike())
+                                    || i.KitChildren.Each().PlacedName.Like(query.ContainsPlacedItemWildcard.ToSqlLike()))
+                        .Transform(i => i.PurchaseOrder.Id)));
+                }
 
-                    if (!string.IsNullOrWhiteSpace(query.ShipmentMethodNameWildcard))
-                        q.Where(o => o.ShippingMethodName.Like(query.ShipmentMethodNameWildcard.ToSqlLike()));
+                if (!string.IsNullOrWhiteSpace(query.CustomerNameWildcard))
+                    q.Where(o => o.CustomerName.Like(query.CustomerNameWildcard.ToSqlLike()));
 
-                    if (query.PaymentMethodNames?.Count > 0)
-                        q.Where(o => o.PaymentMethodName.InCsv(query.PaymentMethodNames));
+                if (!string.IsNullOrWhiteSpace(query.ShipmentMethodNameWildcard))
+                    q.Where(o => o.ShippingMethodName.Like(query.ShipmentMethodNameWildcard.ToSqlLike()));
 
-                    if (!string.IsNullOrWhiteSpace(query.DiscountTextWildcard))
-                    {
-                        q.Where(o => o.Id.InSubquery(_db.SelectFrom<IOrderPriceElement>()
-                            .Where(element => element.Title.Like(query.DiscountTextWildcard.ToSqlLike()))
-                            .Transform(element => element.PurchaseOrderId)));
-                    }
+                if (query.PaymentMethodNames?.Count > 0)
+                    q.Where(o => o.PaymentMethodName.InCsv(query.PaymentMethodNames));
 
-                });
-
-            return result;
+                if (!string.IsNullOrWhiteSpace(query.DiscountTextWildcard))
+                {
+                    q.Where(o => o.Id.InSubquery(_db.SelectFrom<IOrderPriceElement>()
+                        .Where(element => element.Title.Like(query.DiscountTextWildcard.ToSqlLike()))
+                        .Transform(element => element.PurchaseOrderId)));
+                }
+            };
         }
 
         private static string NormalizeWildcard(string value)

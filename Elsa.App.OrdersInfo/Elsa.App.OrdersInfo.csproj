@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="XlsSerializer.Core" Version="1.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Elsa.App.OrdersPacking\Elsa.App.OrdersPacking.csproj" />
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj" />
     <ProjectReference Include="..\Elsa.Common.DbUtils\Elsa.Common.DbUtils.csproj" />

@@ -15,6 +15,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     self.pageLabel = "Strana 1";
     self.previousDisabled = true;
     self.nextDisabled = true;
+    self.exportDisabled = true;
     self.totalOrdersText = "0";
     self.totalPriceWithVatText = "0,00";
 
@@ -155,6 +156,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
                 self.pageLabel = "Strana " + (query.Page + 1);
                 self.previousDisabled = query.Page === 0;
                 self.nextDisabled = (query.Page + 1) * query.PageSize >= (result.TotalCount || 0);
+                self.exportDisabled = (result.TotalCount || 0) === 0;
                 self.totalOrdersText = Number(result.TotalCount || 0).toLocaleString("cs-CZ");
                 self.totalPriceWithVatText = Number(result.TotalPriceWithVat || 0).toLocaleString("cs-CZ", {
                     minimumFractionDigits: 2,
@@ -187,6 +189,41 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         query.Page++;
         updatePageInAddress();
         loadOrders();
+    };
+
+    self.exportXls = function () {
+        if (self.exportDisabled || !query) {
+            return;
+        }
+
+        lt.api.usageManager.notifyOperationStart();
+
+        fetch("/ordersInfo/export", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "*/*; charset=utf-8" },
+            body: JSON.stringify(query)
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error("Export objednávek se nepodařilo stáhnout.");
+            }
+
+            return response.blob();
+        }).then(function (blob) {
+            var link = document.createElement("a");
+            var objectUrl = URL.createObjectURL(blob);
+            link.href = objectUrl;
+            link.download = "Objednavky.xlsx";
+            link.hidden = true;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(objectUrl);
+        }).catch(function (error) {
+            lanta.Extensions.defaultErrorHandler(error);
+        }).then(function () {
+            lt.api.usageManager.notifyOperationEnd();
+        });
     };
 
     self.toggleOrderDetail = function (orderId) {
