@@ -46,6 +46,10 @@
         <button type="button" data-bind="disabled:previousDisabled" event-bind="click:previousPage()">Předchozí</button>
         <span data-bind="text:pageLabel"></span>
         <button type="button" data-bind="disabled:nextDisabled" event-bind="click:nextPage()">Další</button>
+        <span class="ordersInfoQuerySummary">
+            <span>Celkem objednávek: <strong data-bind="text:totalOrdersText"></strong></span>
+            <span>Celková cena s DPH: <strong data-bind="text:totalPriceWithVatText"></strong></span>
+        </span>
     </div>
 </div>
 

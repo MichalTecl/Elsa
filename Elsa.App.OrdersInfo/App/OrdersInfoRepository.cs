@@ -3,6 +3,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Robowire.RobOrm.Core;
+using Robowire.RobOrm.SqlServer.Aggregations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,19 +23,34 @@ namespace Elsa.App.OrdersInfo.App
             _cache = cache;
         }
 
-        public List<OrderInfoModel> Load(int skip, int take, Action<IQueryBuilder<IPurchaseOrder>> query)
-        {            
-            var q = _db.SelectFrom<IPurchaseOrder>()
-                           .Where(o => o.ProjectId == _session.Project.Id)
-                           .OrderByDesc(o => o.PurchaseDate)
-                           .Take(take)
-                           .Skip(skip);
+        public OrderQueryResultModel Load(int skip, int take, Action<IQueryBuilder<IPurchaseOrder>> query)
+        {
+            var q = CreateOrdersQuery()
+                .OrderByDesc(order => order.PurchaseDate)
+                .Take(take)
+                .Skip(skip);
 
             query(q);
 
             var raw = q.Execute();
+            var result = _db.AggregateFrom<IPurchaseOrder>()
+                .Where(order => order.ProjectId == _session.Project.Id)
+                .Apply(query)
+                .GroupAll<OrderQueryResultModel>()
+                .Bind(order => order.Id.Count(), (summary, value) => summary.TotalCount = value)
+                .Bind(order => order.PriceWithVat.Sum(), (summary, value) => summary.TotalPriceWithVat = value)
+                .Execute()
+                .Single();
 
-            return new List<OrderInfoModel>(raw.Select(MapOrderModel));
+            result.Orders = raw.Select(MapOrderModel).ToList();
+
+            return result;
+        }
+
+        private IQueryBuilder<IPurchaseOrder> CreateOrdersQuery()
+        {
+            return _db.SelectFrom<IPurchaseOrder>()
+                .Where(order => order.ProjectId == _session.Project.Id);
         }
 
         public OrderInfoModel MapOrderModel(IPurchaseOrder source)

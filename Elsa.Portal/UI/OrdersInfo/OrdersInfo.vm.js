@@ -15,6 +15,8 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     self.pageLabel = "Strana 1";
     self.previousDisabled = true;
     self.nextDisabled = true;
+    self.totalOrdersText = "0";
+    self.totalPriceWithVatText = "0,00";
 
     var receivePlacedItemNames = function (names) {
         placedItemNames = names || [];
@@ -46,6 +48,12 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
 
     var readQueryString = function () {
         var params = new URLSearchParams(window.location.search);
+        var paymentMethodNames = params.getAll("PaymentMethodNames");
+        var legacyPaymentMethodName = params.get("PaymentMethodName");
+
+        if (paymentMethodNames.length === 0 && legacyPaymentMethodName) {
+            paymentMethodNames.push(legacyPaymentMethodName);
+        }
 
         return {
             Page: Math.max(readInt(params, "Page", 0), 0),
@@ -59,7 +67,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
             MaterialBatchNumberWildcard: params.get("MaterialBatchNumberWildcard") || null,
             CustomerNameWildcard: params.get("CustomerNameWildcard") || null,
             ShipmentMethodNameWildcard: params.get("ShipmentMethodNameWildcard") || null,
-            PaymentMethodName: params.get("PaymentMethodName") || null,
+            PaymentMethodNames: paymentMethodNames,
             DiscountTextWildcard: params.get("DiscountTextWildcard") || null
         };
     };
@@ -139,13 +147,19 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
 
         lt.api("/ordersInfo/query")
             .body(query)
-            .post(function (orders) {
-                self.orders = (orders || []).map(formatOrder);
+            .post(function (result) {
+                result = result || {};
+                self.orders = (result.Orders || []).map(formatOrder);
                 self.hasOrders = self.orders.length > 0;
                 self.isEmpty = !self.hasOrders;
                 self.pageLabel = "Strana " + (query.Page + 1);
                 self.previousDisabled = query.Page === 0;
-                self.nextDisabled = self.orders.length < query.PageSize;
+                self.nextDisabled = (query.Page + 1) * query.PageSize >= (result.TotalCount || 0);
+                self.totalOrdersText = Number(result.TotalCount || 0).toLocaleString("cs-CZ");
+                self.totalPriceWithVatText = Number(result.TotalPriceWithVat || 0).toLocaleString("cs-CZ", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
                 self.isLoading = false;
             });
     };

@@ -54,7 +54,7 @@ namespace Elsa.App.OrdersInfo
             EnsureUserRight(OrdersInfoUserRights.OrdersInfoAppView);
         }
 
-        public List<OrderInfoModel> Query(OrderQueryModel query)
+        public OrderQueryResultModel Query(OrderQueryModel query)
         {
             query = query ?? new OrderQueryModel();
             query.OrderNumber = NormalizeWildcard(query.OrderNumber);
@@ -126,8 +126,8 @@ namespace Elsa.App.OrdersInfo
                     if (!string.IsNullOrWhiteSpace(query.ShipmentMethodNameWildcard))
                         q.Where(o => o.ShippingMethodName.Like(query.ShipmentMethodNameWildcard.ToSqlLike()));
 
-                    if (!string.IsNullOrWhiteSpace(query.PaymentMethodName))
-                        q.Where(o => o.PaymentMethodName == query.PaymentMethodName);
+                    if (query.PaymentMethodNames?.Count > 0)
+                        q.Where(o => o.PaymentMethodName.InCsv(query.PaymentMethodNames));
 
                     if (!string.IsNullOrWhiteSpace(query.DiscountTextWildcard))
                     {

@@ -43,6 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aggregations\AggregationExpressionParser.cs" />
+    <Compile Include="Aggregations\AggregationFunctions.cs" />
+    <Compile Include="Aggregations\AggregationQueryBuilder.cs" />
+    <Compile Include="Aggregations\GroupedAggregationQueryBuilder.cs" />
     <Compile Include="Attributes\StringColumnMappingAttributeBase.cs" />
     <Compile Include="ConnectionCreator.cs" />
     <Compile Include="Database.cs" />
