@@ -544,7 +544,7 @@ namespace Elsa.Commerce.Core.Impl
             {
                 _log.Info($"Sending packing mail to {receiver}");
 
-                _mailSender.Send(receiver
+                _mailSender.Send(SenderMailboxType.SystemRobot, receiver
                     , subject
                     , body);
             }            

@@ -124,7 +124,7 @@ namespace Elsa.Jobs.CrmRobots
                 {
                     _log.Info($"Sending e-mail to {rm.Key}");
 
-                    _mailSender.Send(rm.Key, $"CRM Roboti provedli změny", rm.Value.ToString());
+                    _mailSender.Send(SenderMailboxType.SystemRobot, rm.Key, $"CRM Roboti provedli změny", rm.Value.ToString());
 
                     _log.Info("email sent");
                 }

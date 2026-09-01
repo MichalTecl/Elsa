@@ -15,47 +15,47 @@ namespace Elsa.App.Inspector.Jobs
 {
     public class LogReaderJob : IExecutableJob
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly IMailSender m_mailSender;
-        private readonly ILog m_log;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly IMailSender _mailSender;
+        private readonly ILog _log;
 
         public LogReaderJob(IDatabase database, ISession session, IMailSender mailSender, ILog log)
         {
-            m_database = database;
-            m_session = session;
-            m_mailSender = mailSender;
-            m_log = log;
+            _database = database;
+            _session = session;
+            _mailSender = mailSender;
+            _log = log;
         }
 
         public void Run(string customDataJson)
         {
             var logsFolder = @"C:\Elsa\Log\Jobs";
 
-            m_log.Info($"Reading log files from {logsFolder}");
+            _log.Info($"Reading log files from {logsFolder}");
 
             var logFiles = Directory.GetFiles(logsFolder, "*.log").OrderByDescending(l => l).Take(3).ToList();
 
-            m_log.Info($"Found {logFiles.Count} newest log files: {string.Join(",", logFiles.Select(l => Path.GetFileName(l)))} ");
+            _log.Info($"Found {logFiles.Count} newest log files: {string.Join(",", logFiles.Select(l => Path.GetFileName(l)))} ");
 
-            var lastCheckDt = m_database.SelectFrom<ILogReaderScanHistory>()
-                .Where(l => l.ProjectId == m_session.Project.Id)
+            var lastCheckDt = _database.SelectFrom<ILogReaderScanHistory>()
+                .Where(l => l.ProjectId == _session.Project.Id)
                 .OrderByDesc(l => l.CheckDt)
                 .Take(1).Execute()
                 .FirstOrDefault()?.CheckDt ?? DateTime.Now.AddDays(-31);
 
-            m_log.Info($"LastCheckDt = {lastCheckDt}");
+            _log.Info($"LastCheckDt = {lastCheckDt}");
 
             var rawEntries = Read(logFiles).ToList();
-            m_log.Info($"Log files contain {rawEntries.Count} of total entries");    
+            _log.Info($"Log files contain {rawEntries.Count} of total entries");
             
             rawEntries = rawEntries.Where(e => e.Dt > lastCheckDt).ToList();
-            m_log.Info($"Log files contain {rawEntries.Count} of entries logged after last check");
+            _log.Info($"Log files contain {rawEntries.Count} of entries logged after last check");
 
             ProcessInspectionIssues(rawEntries);
 
             var entries = rawEntries.Where(e => e.Severity == "ERR").OrderBy(e => e.Dt).ToList();
-            m_log.Info($"{entries.Count} of ER entries");
+            _log.Info($"{entries.Count} of ER entries");
 
             if (entries.Any())
             {
@@ -67,33 +67,33 @@ namespace Elsa.App.Inspector.Jobs
                     sb.Append(entry.Dt.ToString("dd/MM HH:mm:ss")).Append("\t").Append(entry.Message).AppendLine();
                 }
 
-                m_log.Info($"Mail message composed, sending");
+                _log.Info($"Mail message composed, sending");
 
-                m_mailSender.Send("mtecl.prg@gmail.com", "ELSA Chyby z logu", sb.ToString());
+                _mailSender.Send(SenderMailboxType.SystemRobot, "mtecl.prg@gmail.com", "ELSA Chyby z logu", sb.ToString());
 
-                m_log.Info($"Mail message sent");
+                _log.Info($"Mail message sent");
             }
             else
             {
-                m_log.Info($"No ER entries");
+                _log.Info($"No ER entries");
             }
 
-            var checkEntry = m_database.New<ILogReaderScanHistory>();
-            checkEntry.ProjectId = m_session.Project.Id;
+            var checkEntry = _database.New<ILogReaderScanHistory>();
+            checkEntry.ProjectId = _session.Project.Id;
             checkEntry.CheckDt = DateTime.Now;
             
-            m_database.Save(checkEntry);
+            _database.Save(checkEntry);
 
-            m_log.Info($"LastCheckDt set to {checkEntry.CheckDt}");
+            _log.Info($"LastCheckDt set to {checkEntry.CheckDt}");
         }
 
         private void ProcessInspectionIssues(List<LogEntryModel> rawEntries)
         {
             var pattern = $"\t{InspectionIssueModel.DataEntryMarker}";
 
-            m_log.Info($"Starting processing logged inspection issues (Marked by {InspectionIssueModel.DataEntryMarker})");
+            _log.Info($"Starting processing logged inspection issues (Marked by {InspectionIssueModel.DataEntryMarker})");
             var issues = rawEntries.Where(e => e.Message.Contains(pattern)).ToList();
-            m_log.Info($"Found {issues.Count} of logged inspection issues");
+            _log.Info($"Found {issues.Count} of logged inspection issues");
 
             if (issues.Count == 0)
             {
@@ -105,20 +105,20 @@ namespace Elsa.App.Inspector.Jobs
                 var message = i.Message.Split('\t').FirstOrDefault(part => part.StartsWith(InspectionIssueModel.DataEntryMarker));
                 if (string.IsNullOrWhiteSpace(message))
                 {
-                    m_log.Error($"Failed to extract inspection issue data from message: {i.Message}");
+                    _log.Error($"Failed to extract inspection issue data from message: {i.Message}");
                     continue;
                 }
 
                 var data = InspectionIssueModel.Deserialize(message);
 
-                var entry = m_database.New<ILogStoredInspectionIssue>();
-                entry.ProjectId = m_session.Project.Id;
+                var entry = _database.New<ILogStoredInspectionIssue>();
+                entry.ProjectId = _session.Project.Id;
                 entry.Message = data.Message;
                 entry.IssueCode = data.IssueCode;
                 entry.IssueTypeName = data.IssueTypeName;
                 entry.LogDt = i.Dt;
 
-                m_database.Save(entry);
+                _database.Save(entry);
             }
         }
 

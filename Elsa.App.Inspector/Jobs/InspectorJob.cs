@@ -119,7 +119,7 @@ namespace Elsa.App.Inspector.Jobs
 
                 sb.AppendLine().AppendLine("S pozdravem").AppendLine("Elsa");
 
-                _mailSender.Send(recipient, "Inspekce dat objevila problémy...", sb.ToString());
+                _mailSender.Send(SenderMailboxType.SystemRobot, recipient, "Inspekce dat objevila problémy...", sb.ToString());
 
                 tx.Commit();
             }

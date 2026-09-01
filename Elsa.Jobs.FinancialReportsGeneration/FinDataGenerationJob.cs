@@ -24,29 +24,29 @@ namespace Elsa.Jobs.FinancialReportsGeneration
 {
     public class FinDataGenerationJob : IExecutableJob
     {
-        private readonly ILog m_log;
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly IInvoiceFormsGenerationRunner m_formsGenerationRunner;
-        private readonly IInvoiceFormsRepository m_formsRepository;
-        private readonly IInvoiceFormRendererFactory m_formRendererFactory;
-        private readonly IStockReportLoader m_stockReportLoader;
-        private readonly InvoiceFormsController m_controller;
-        private readonly IMailSender m_mailSender;
+        private readonly ILog _log;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly IInvoiceFormsGenerationRunner _formsGenerationRunner;
+        private readonly IInvoiceFormsRepository _formsRepository;
+        private readonly IInvoiceFormRendererFactory _formRendererFactory;
+        private readonly IStockReportLoader _stockReportLoader;
+        private readonly InvoiceFormsController _controller;
+        private readonly IMailSender _mailSender;
 
         public FinDataGenerationJob(ILog log, IDatabase database, ISession session,
             IInvoiceFormsGenerationRunner formsGenerationRunner, IInvoiceFormsRepository formsRepository,
             IInvoiceFormRendererFactory formRendererFactory, IStockReportLoader stockReportLoader, InvoiceFormsController controller, IMailSender mailSender)
         {
-            m_log = log;
-            m_database = database;
-            m_session = session;
-            m_formsGenerationRunner = formsGenerationRunner;
-            m_formsRepository = formsRepository;
-            m_formRendererFactory = formRendererFactory;
-            m_stockReportLoader = stockReportLoader;
-            m_controller = controller;
-            m_mailSender = mailSender;
+            _log = log;
+            _database = database;
+            _session = session;
+            _formsGenerationRunner = formsGenerationRunner;
+            _formsRepository = formsRepository;
+            _formRendererFactory = formRendererFactory;
+            _stockReportLoader = stockReportLoader;
+            _controller = controller;
+            _mailSender = mailSender;
         }
 
         public void Run(string customDataJson)
@@ -55,35 +55,35 @@ namespace Elsa.Jobs.FinancialReportsGeneration
             {
                 DateTime lastExisting = DateTime.Now.AddMonths(-2);
 
-                m_log.Info("Checking for last existing findata");
+                _log.Info("Checking for last existing findata");
 
-                m_database.Sql()
-                    .ExecuteWithParams("SELECT TOP 1 [Year], [Month] FROM FinDataGenerationClosure WHERE ProjectId={0} ORDER BY closeDt DESC", m_session.Project.Id)
+                _database.Sql()
+                    .ExecuteWithParams("SELECT TOP 1 [Year], [Month] FROM FinDataGenerationClosure WHERE ProjectId={0} ORDER BY closeDt DESC", _session.Project.Id)
                     .ReadRows<int, int>((lyear, lmonth) =>
                     {
                         lastExisting = new DateTime(lyear, lmonth, 1);
-                        m_log.Info($"In DB last existing findata generation = {lastExisting}");
+                        _log.Info($"In DB last existing findata generation = {lastExisting}");
                     });
 
-                m_log.Info($"Last existing findat considered to be from {lastExisting}");
+                _log.Info($"Last existing findat considered to be from {lastExisting}");
 
                 var now = DateTime.Now;
                 var generateFor = lastExisting.AddMonths(1);
 
                 while (!((generateFor.Year == now.Year) && (generateFor.Month == now.Month)))
                 {
-                    m_log.Info($"Starting generation of findata for {generateFor.Year}/{generateFor.Month:00}");
+                    _log.Info($"Starting generation of findata for {generateFor.Year}/{generateFor.Month:00}");
 
                     Generate(generateFor);
 
                     generateFor = generateFor.AddMonths(1);
                 }
 
-                m_log.Info("Last generated findata are for prev month - done");
+                _log.Info("Last generated findata are for prev month - done");
             }
             catch (Exception ex)
             {
-                m_log.Error("Run failed", ex);
+                _log.Error("Run failed", ex);
                 throw;
             }
         }
@@ -92,7 +92,7 @@ namespace Elsa.Jobs.FinancialReportsGeneration
         {
             var year = now.Year;
             var month = now.Month;
-            m_log.Info($"Starting FinDataGeneration job for Year={year} Month={month}");
+            _log.Info($"Starting FinDataGeneration job for Year={year} Month={month}");
 
             var messages = new List<string>();
 
@@ -111,7 +111,7 @@ namespace Elsa.Jobs.FinancialReportsGeneration
         {
             if (!messages.Any())
             {
-                m_log.Info("No messages collected - email notification skipped");
+                _log.Info("No messages collected - email notification skipped");
                 return;
             }
 
@@ -122,9 +122,9 @@ namespace Elsa.Jobs.FinancialReportsGeneration
                 messages.RemoveAt(0);
             }
 
-            m_log.Info($"mail message created: {sb}");
+            _log.Info($"mail message created: {sb}");
 
-            m_mailSender.SendToGroup("Ucetni Vystupy", $"Účetní výstupy {month:00}/{year}", sb.ToString());
+            _mailSender.SendToGroup(SenderMailboxType.SystemRobot, "Ucetni Vystupy", $"Účetní výstupy {month:00}/{year}", sb.ToString());
 
         }
 
@@ -133,13 +133,13 @@ namespace Elsa.Jobs.FinancialReportsGeneration
             try
             {
             
-                m_log.Info("Checking closure");
+                _log.Info("Checking closure");
 
                 var closure = GetOrUpdateClosure(year, month);
 
                 if (closure == null)
                 {
-                    m_log.Info("Closure for {month}/{year} not found. Starting forms generation");
+                    _log.Info("Closure for {month}/{year} not found. Starting forms generation");
 
                     if (!ProcessCollections(year, month, mailReport))
                     {
@@ -158,97 +158,97 @@ namespace Elsa.Jobs.FinancialReportsGeneration
                 if (closure.NotificationDt == null)
                 {
                     mailReport(
-                        $"Balíček výstupních souborů byl úspěšně vygenerován a je připraven ke stažení: {m_session.Project.HomeUrl}/invoiceForms/getpackage?cid={closure.PublicUid}");
+                        $"Balíček výstupních souborů byl úspěšně vygenerován a je připraven ke stažení: {_session.Project.HomeUrl}/invoiceForms/getpackage?cid={closure.PublicUid}");
                     flushReport();
 
                     GetOrUpdateClosure(year, month, u => u.NotificationDt = DateTime.Now);
                 }
                 
-                m_log.Info($"Closure complete for {month}/{year}");
+                _log.Info($"Closure complete for {month}/{year}");
             }
             catch (Exception ex)
             {
-                m_log.Error("FinDataGenerationJob failed", ex);
+                _log.Error("FinDataGenerationJob failed", ex);
                 mailReport($"Při pokusu o generování účetních dat došlo k chybě, která neumožňuje pokračovat: {ex.Message}");
             }
         }
 
         private string GeneratePackage(int year, int month, Action<string> mailReport)
         {
-            var tempDir = Path.Combine($"C:\\Elsa\\Temp\\FinReportPackages\\{m_session.Project.Name}\\{month.ToString().PadLeft(2, '0')}-{year}");
+            var tempDir = Path.Combine($"C:\\Elsa\\Temp\\FinReportPackages\\{_session.Project.Name}\\{month.ToString().PadLeft(2, '0')}-{year}");
 
-            m_log.Info($"Starting package generation. Target = {tempDir}");
+            _log.Info($"Starting package generation. Target = {tempDir}");
 
             if (Directory.Exists(tempDir))
             {
-                m_log.Info($"{tempDir} already exists, deleting");
+                _log.Info($"{tempDir} already exists, deleting");
                 Directory.Delete(tempDir, true);
             }
 
             Directory.CreateDirectory(tempDir);
-            m_log.Info($"{tempDir} created");
+            _log.Info($"{tempDir} created");
 
             SaveCollections(year, month, tempDir);
 
-            m_log.Info("Loading InvoiceFormTypes");
-            var formTypes = m_formsRepository.GetInvoiceFormTypes().ToList();
-            m_log.Info($"Loaded {formTypes.Count} InvoiceFormTypes: [{string.Join(", ", formTypes.Select(ft => ft.Name))}]");
+            _log.Info("Loading InvoiceFormTypes");
+            var formTypes = _formsRepository.GetInvoiceFormTypes().ToList();
+            _log.Info($"Loaded {formTypes.Count} InvoiceFormTypes: [{string.Join(", ", formTypes.Select(ft => ft.Name))}]");
 
             foreach (var formType in formTypes)
             {
-                m_log.Info($"Loading collecton for formType.Name = {formType.Name}, formType.Id={formType.Id}, year={year}, month={month}");
+                _log.Info($"Loading collecton for formType.Name = {formType.Name}, formType.Id={formType.Id}, year={year}, month={month}");
 
-                var collection = m_formsRepository.FindCollection(formType.Id, year, month);
+                var collection = _formsRepository.FindCollection(formType.Id, year, month);
                 if (collection == null)
                 {
-                    m_log.Error($"Collection not found!");
+                    _log.Error($"Collection not found!");
                     continue;
                 }
 
-                m_log.Info($"Collection loaded: {collection.Forms.Count()} forms");
+                _log.Info($"Collection loaded: {collection.Forms.Count()} forms");
 
                 var ftDir = Path.Combine(tempDir, StringUtil.ReplaceNationalChars(formType.Name));
                 Directory.CreateDirectory(ftDir);
-                m_log.Info($"Created directory {ftDir}");
+                _log.Info($"Created directory {ftDir}");
 
                 var i = 0;
                 foreach (var form in collection.Forms)
                 {
                     i++;
-                    var renderer = m_formRendererFactory.GetRenderer(form);
+                    var renderer = _formRendererFactory.GetRenderer(form);
                     var path = Path.Combine(ftDir, $"{form.InvoiceFormNumber}.pdf");
                     File.WriteAllBytes(path, renderer.GetPdf());
                 }
-                m_log.Info($"{i} files generated");
+                _log.Info($"{i} files generated");
 
                 var zipTarget = $"{ftDir}.zip";
 
                 if (File.Exists(zipTarget))
                 {
-                    m_log.Info($"Zip archive {zipTarget} already exists - deleting");
+                    _log.Info($"Zip archive {zipTarget} already exists - deleting");
                     File.Delete(zipTarget);
                 }
 
-                m_log.Info($"Creating archive {zipTarget}");
+                _log.Info($"Creating archive {zipTarget}");
                 ZipFile.CreateFromDirectory(ftDir, zipTarget);
-                m_log.Info("Archive created");
+                _log.Info("Archive created");
                 Directory.Delete(ftDir, true);
             }
 
-            m_log.Info("All form types processed");
+            _log.Info("All form types processed");
 
             SaveStockReport(year, month, tempDir);
             
             var packagePath = $"{tempDir}.zip";
-            m_log.Info($"Compressing {tempDir} to {packagePath}");
+            _log.Info($"Compressing {tempDir} to {packagePath}");
             if (File.Exists(packagePath))
             {
-                m_log.Info($"{packagePath} already exists - deleting");
+                _log.Info($"{packagePath} already exists - deleting");
                 File.Delete(packagePath);
             }
 
             ZipFile.CreateFromDirectory(tempDir, packagePath);
-            m_log.Info($"Package created at {packagePath}");
+            _log.Info($"Package created at {packagePath}");
 
             try
             {
@@ -256,7 +256,7 @@ namespace Elsa.Jobs.FinancialReportsGeneration
             }
             catch (Exception ex)
             {
-                m_log.Error($"Cannot delete {tempDir}", ex);
+                _log.Error($"Cannot delete {tempDir}", ex);
                 throw;
             }
 
@@ -265,29 +265,29 @@ namespace Elsa.Jobs.FinancialReportsGeneration
 
         private void SaveCollections(int year, int month, string tempDir)
         {
-            SaveCollection(m_controller.GetReceivingInvoicesCollection(month, year).GetExcelModel<ReceivingFormXlsModel>().ToList(), tempDir, "SoupiskaPrijemek.xlsx");
-            SaveCollection(m_controller.GetReleaseFormsCollection(month, year).GetExcelModel<ReleaseFormXlsModel>().ToList(), tempDir, "SoupiskaVydejek.xlsx");
+            SaveCollection(_controller.GetReceivingInvoicesCollection(month, year).GetExcelModel<ReceivingFormXlsModel>().ToList(), tempDir, "SoupiskaPrijemek.xlsx");
+            SaveCollection(_controller.GetReleaseFormsCollection(month, year).GetExcelModel<ReleaseFormXlsModel>().ToList(), tempDir, "SoupiskaVydejek.xlsx");
         }
 
         private void SaveCollection<T>(IList<T> items, string path, string fileName)
         {
             var targetPath = Path.Combine(path, fileName);
 
-            m_log.Info($"Serializing to {targetPath}");
+            _log.Info($"Serializing to {targetPath}");
             XlsxSerializer.Instance.Serialize(items, targetPath);
-            m_log.Info($"Saved {targetPath}");
+            _log.Info($"Saved {targetPath}");
         }
 
         private void SaveStockReport(int year, int month, string root)
         {
             var rd = new DateTime(year, month,1).AddMonths(1).AddSeconds(-1);
-            m_log.Info("Starting generating stockReport for {rd}");
+            _log.Info("Starting generating stockReport for {rd}");
 
-            var stockReport = m_stockReportLoader.LoadStockReport(rd);
+            var stockReport = _stockReportLoader.LoadStockReport(rd);
             var bytes = XlsxSerializer.Instance.Serialize(stockReport);
 
             var tarPath = Path.Combine(root, $"Stav skladu {StringUtil.FormatDate(rd)}.xlsx");
-            m_log.Info($"Saving stockReport to {tarPath}");
+            _log.Info($"Saving stockReport to {tarPath}");
             File.WriteAllBytes(tarPath, bytes);
         }
 
@@ -295,13 +295,13 @@ namespace Elsa.Jobs.FinancialReportsGeneration
         {
             while (true)
             {
-                m_log.Info($"Processing {row}");
+                _log.Info($"Processing {row}");
 
                 if (row.IsGenerated)
                 {
                     if (row.IsApproved)
                     {
-                        m_log.Info($"{row.GeneratorName} is generated and approved OK");
+                        _log.Info($"{row.GeneratorName} is generated and approved OK");
                         return true;
                     }
                     else 
@@ -313,21 +313,21 @@ namespace Elsa.Jobs.FinancialReportsGeneration
                             return false;
                         }
 
-                        m_log.Info("Starting collection approval");
-                        m_formsRepository.ApproveCollection(row.CollectionId.Ensure("Unexpected CollectionId=null"));
+                        _log.Info("Starting collection approval");
+                        _formsRepository.ApproveCollection(row.CollectionId.Ensure("Unexpected CollectionId=null"));
                     }
                 }
                 else
                 {
-                    m_log.Info("Starting form generation");
+                    _log.Info("Starting form generation");
 
                     if (row.GeneratorName.Equals("ReceivingInvoice"))
                     {
-                        m_formsGenerationRunner.RunReceivingInvoicesGeneration(row.FormTypeId, year, month);
+                        _formsGenerationRunner.RunReceivingInvoicesGeneration(row.FormTypeId, year, month);
                     }
                     else
                     {
-                        m_formsGenerationRunner.RunTasks(year, month);
+                        _formsGenerationRunner.RunTasks(year, month);
                     }
                 }
 
@@ -352,8 +352,8 @@ namespace Elsa.Jobs.FinancialReportsGeneration
 
         private IFinDataGenerationClosure GetOrUpdateClosure(int year, int month, Action<IFinDataGenerationClosure> updater = null)
         {
-            var closure = m_database.SelectFrom<IFinDataGenerationClosure>()
-                .Where(c => c.ProjectId == m_session.Project.Id && c.Year == year && c.Month == month).Take(1)
+            var closure = _database.SelectFrom<IFinDataGenerationClosure>()
+                .Where(c => c.ProjectId == _session.Project.Id && c.Year == year && c.Month == month).Take(1)
                 .Execute()
                 .FirstOrDefault();
 
@@ -361,8 +361,8 @@ namespace Elsa.Jobs.FinancialReportsGeneration
             {
                 if (closure == null)
                 {
-                    closure = m_database.New<IFinDataGenerationClosure>();
-                    closure.ProjectId = m_session.Project.Id;
+                    closure = _database.New<IFinDataGenerationClosure>();
+                    closure.ProjectId = _session.Project.Id;
                     closure.Year = year;
                     closure.Month = month;
                     closure.PublicUid = Guid.NewGuid().ToString("N");
@@ -370,7 +370,7 @@ namespace Elsa.Jobs.FinancialReportsGeneration
 
                 updater(closure);
 
-                m_database.Save(closure);
+                _database.Save(closure);
             }
 
             return closure;
@@ -380,7 +380,7 @@ namespace Elsa.Jobs.FinancialReportsGeneration
         {
             var report = new List<OverviewRow>(10);
 
-            m_database.Sql().Call("GetFinFormsGenerationOverview").WithParam("@projectId", m_session.Project.Id)
+            _database.Sql().Call("GetFinFormsGenerationOverview").WithParam("@projectId", _session.Project.Id)
                 .WithParam("@year", year).WithParam("@month", month).ReadRows<int, string, string, bool, bool, bool, int?>(
                     (typeId, formName, generatorName, isGenerated, isApproved, canApprove, collectionId) =>
                     {

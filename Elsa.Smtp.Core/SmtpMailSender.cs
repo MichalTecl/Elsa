@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Elsa.Common.Logging;
@@ -10,7 +10,7 @@ namespace Elsa.Smtp.Core
 {
     public class SmtpMailSender : IMailSender
     {
-        private readonly SmtpSettings _settings;
+        private readonly SmtpSettings _allSettings;
         private readonly ILog _log;
         private readonly IRecipientListsRepository _recipientListsRepository;
 
@@ -18,25 +18,25 @@ namespace Elsa.Smtp.Core
 
         public SmtpMailSender(SmtpSettings settings, ILog log, IRecipientListsRepository recipientListsRepository)
         {
-            _settings = settings;
+            _allSettings = settings;
             _log = log;
             _recipientListsRepository = recipientListsRepository;
 
             _debugMailSender = new DebugMailSender(log);
         }
 
-        public void Send(string to, string subject, string body, params string[] attachmentFiles)
+        public void Send(SenderMailboxType mailbox, string to, string subject, string body, params string[] attachmentFiles)
         {
-            Send(new[] {to}, subject, body, attachmentFiles);
+            Send(mailbox, new[] {to}, subject, body, attachmentFiles);
 
             try
             {
-                _debugMailSender.Send(to, subject, body, attachmentFiles);
+                _debugMailSender.Send(mailbox, to, subject, body, attachmentFiles);
             }
             catch (Exception ex) { _log.Error("Failed to send debug e-mail", ex); }
         }
 
-        public void SendToGroup(string groupName, string subject, string body, params string[] attachmentFiles)
+        public void SendToGroup(SenderMailboxType mailbox, string groupName, string subject, string body, params string[] attachmentFiles)
         {
             var recipients = _recipientListsRepository.GetRecipients(groupName).ToList();
 
@@ -46,19 +46,21 @@ namespace Elsa.Smtp.Core
                 return;
             }
             
-            Send(recipients, subject, body, attachmentFiles);
+            Send(mailbox, recipients, subject, body, attachmentFiles);
         }
 
-        private void Send(IEnumerable<string> to, string subject, string body, string[] attachemntFiles)
+        private void Send(SenderMailboxType mailbox, IEnumerable<string> to, string subject, string body, string[] attachemntFiles)
         {
             var addresses = to.ToList();
 
-            _log.Info($"Sending e-mail to: {string.Join(";", addresses)}, subject: {subject}");
+            _log.Info($"Sending [{mailbox.TypeName}] e-mail to: {string.Join(";", addresses)}, subject: {subject}");
 
             try
             {
+                var settings = mailbox.MapSettings(_allSettings);
+
                 var mailMessage = new MimeMessage();
-                mailMessage.From.Add(new MailboxAddress(_settings.SenderName, _settings.SenderAddress));
+                mailMessage.From.Add(new MailboxAddress(settings.SenderName, settings.SenderAddress));
                 mailMessage.To.AddRange(addresses.Select(t => new MailboxAddress(t, t)) );
                 mailMessage.Subject = subject;
 
@@ -73,8 +75,8 @@ namespace Elsa.Smtp.Core
 
                 using (var smtpClient = new SmtpClient())
                 {
-                    smtpClient.Connect(_settings.SmtpHost, _settings.SmtpPort, true);
-                    smtpClient.Authenticate(_settings.SenderAddress, _settings.SenderPassword);
+                    smtpClient.Connect(settings.SmtpHost, settings.SmtpPort, true);
+                    smtpClient.Authenticate(settings.SenderAddress, settings.SenderPassword);
                     smtpClient.Send(mailMessage);
                     smtpClient.Disconnect(true);
                 }

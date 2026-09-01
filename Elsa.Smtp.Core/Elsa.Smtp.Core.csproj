@@ -64,6 +64,8 @@
     <Compile Include="Database\RecipientListsRepository.cs" />
     <Compile Include="DebugMailSender.cs" />
     <Compile Include="IMailSender.cs" />
+    <Compile Include="ISmtpSettings.cs" />
+    <Compile Include="SenderMailboxType.cs" />
     <Compile Include="SmtpMailSender.cs" />
     <Compile Include="SmtpRegistry.cs" />
     <Compile Include="SmtpSettings.cs" />

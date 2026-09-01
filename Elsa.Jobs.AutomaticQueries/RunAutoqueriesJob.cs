@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -18,56 +18,56 @@ namespace Elsa.Jobs.AutomaticQueries
 {
     public class RunAutoqueriesJob : IExecutableJob
     {
-        private readonly ISession m_session;
-        private readonly IDatabase m_database;
-        private readonly ILog m_log;
-        private readonly IParametersResolver m_paramResolver;
-        private readonly IMailSender m_mailSender;
-        private readonly AutoProceduresJob m_proceduresJob;
+        private readonly ISession _session;
+        private readonly IDatabase _database;
+        private readonly ILog _log;
+        private readonly IParametersResolver _paramResolver;
+        private readonly IMailSender _mailSender;
+        private readonly AutoProceduresJob _proceduresJob;
 
         public RunAutoqueriesJob(ISession session, IDatabase database, ILog log, IParametersResolver paramResolver, IMailSender mailSender, AutoProceduresJob proceduresJob)
         {
-            m_session = session;
-            m_database = database;
-            m_log = log;
-            m_paramResolver = paramResolver;
-            m_mailSender = mailSender;
-            m_proceduresJob = proceduresJob;
+            _session = session;
+            _database = database;
+            _log = log;
+            _paramResolver = paramResolver;
+            _mailSender = mailSender;
+            _proceduresJob = proceduresJob;
         }
 
         public void Run(string customDataJson)
         {
-            var queries = m_database.SelectFrom<IAutomaticQuery>().Join(q => q.Parameters)
-                .Where(q => q.ProjectId == m_session.Project.Id).Execute().ToList();
+            var queries = _database.SelectFrom<IAutomaticQuery>().Join(q => q.Parameters)
+                .Where(q => q.ProjectId == _session.Project.Id).Execute().ToList();
 
-            m_log.Info($"Loaded {queries.Count} of AutomaticQueries");
+            _log.Info($"Loaded {queries.Count} of AutomaticQueries");
 
             foreach (var automaticQuery in queries)
             {
-                m_log.Info($"Starting processing AutomaticQuery {automaticQuery.TitlePattern}");
+                _log.Info($"Starting processing AutomaticQuery {automaticQuery.TitlePattern}");
                 try
                 {
                     var parameters =
-                        m_paramResolver.ResolveParams(automaticQuery.Parameters, automaticQuery.TitlePattern);
+                        _paramResolver.ResolveParams(automaticQuery.Parameters, automaticQuery.TitlePattern);
                     
                     if ((automaticQuery.LastTriggerValue ?? string.Empty).Equals(parameters.Trigger))
                     {
-                        m_log.Info($"Trigger didn't change, skipping query");
+                        _log.Info($"Trigger didn't change, skipping query");
                         continue;
                     }
 
-                    m_log.Info($"{automaticQuery.TitlePattern}: lastTrigger={automaticQuery.LastTriggerValue ?? "NULL"} newTrigger={parameters.Trigger}");
+                    _log.Info($"{automaticQuery.TitlePattern}: lastTrigger={automaticQuery.LastTriggerValue ?? "NULL"} newTrigger={parameters.Trigger}");
 
                     string tempFile;
                     using (var table = Execute(automaticQuery.ProcedureName, parameters.Parameters))
                     {
                         tempFile = SaveToTempFile(parameters.TransformedTitle, table);
 
-                        m_mailSender.SendToGroup(automaticQuery.MailRecipientGroup, parameters.TransformedTitle, $"V příloze je nový report \"{parameters.TransformedTitle}\"", tempFile);
+                        _mailSender.SendToGroup(SenderMailboxType.SystemRobot, automaticQuery.MailRecipientGroup, parameters.TransformedTitle, $"V příloze je nový report \"{parameters.TransformedTitle}\"", tempFile);
                     }
 
                     automaticQuery.LastTriggerValue = parameters.Trigger;
-                    m_database.Save(automaticQuery);
+                    _database.Save(automaticQuery);
 
                     try
                     {
@@ -75,20 +75,20 @@ namespace Elsa.Jobs.AutomaticQueries
                     }
                     catch{;}
 
-                    m_log.Info($"AutoQuery \"{parameters.TransformedTitle}\" successful");
+                    _log.Info($"AutoQuery \"{parameters.TransformedTitle}\" successful");
                 }
                 catch (Exception ex)
                 {
-                    m_log.Error($"AutoQuery {automaticQuery.TitlePattern} execution failed", ex);
+                    _log.Error($"AutoQuery {automaticQuery.TitlePattern} execution failed", ex);
                 }
             }
 
-            m_proceduresJob.Run();
+            _proceduresJob.Run();
         }
 
         private DataTable Execute(string procedureName, Dictionary<string, object> parameters)
         {
-            var query = m_database.Sql().Call(procedureName);
+            var query = _database.Sql().Call(procedureName);
 
             foreach (var p in parameters)
             {
@@ -100,7 +100,7 @@ namespace Elsa.Jobs.AutomaticQueries
 
         private string SaveToTempFile(string title, DataTable table)
         {
-            var tempDir = $"C:\\Elsa\\Temp\\AutoQueries\\{m_session.Project.Name}\\{Guid.NewGuid():N}";
+            var tempDir = $"C:\\Elsa\\Temp\\AutoQueries\\{_session.Project.Name}\\{Guid.NewGuid():N}";
             Directory.CreateDirectory(tempDir);
 
             var file = Path.Combine(tempDir, $"{StringUtil.SanitizeFileName(title)}.xlsx");
