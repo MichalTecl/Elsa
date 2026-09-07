@@ -40,10 +40,9 @@ namespace Elsa.Common.Data
             _cacheTtl = (cacheTtlSeconds ?? 0) <= 0 ? null : (TimeSpan?)TimeSpan.FromMinutes(cacheTtlSeconds.Value);
             _cacheKeySuffix = cacheKeySuffix;
 
-            CacheKey = $"autorepo_{typeof(T).Name}_{_session.Project.Id}{_cacheKeySuffix}";
         }
                
-        public string CacheKey { get; }
+        public string CacheKey => $"autorepo_{typeof(T).Name}_{_session.Project?.Id}{_cacheKeySuffix}";
 
         public string BindCacheKey(string key)
         {
