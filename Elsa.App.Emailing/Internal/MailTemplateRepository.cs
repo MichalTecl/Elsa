@@ -17,9 +17,9 @@ namespace Elsa.App.Emailing.Internal
         private const string DELETED_PREFIX = "SMAZÁNO_";
 
         private readonly AutoRepo<IMailTemplate> _templates;
-        private readonly IWebSession _session;
+        private readonly ISession _session;
 
-        public MailTemplateRepository(IWebSession session, IDatabase database, ICache cache)
+        public MailTemplateRepository(ISession session, IDatabase database, ICache cache)
         {
             _session = session;
             _templates = new AutoRepo<IMailTemplate>(session, database, cache);
