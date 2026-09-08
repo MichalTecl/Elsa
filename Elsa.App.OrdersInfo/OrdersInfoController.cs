@@ -472,6 +472,18 @@ namespace Elsa.App.OrdersInfo
                 "Objednávka stornována a informační e-mail odeslán");
         }
 
+        public void CancelReplacedOrder(long orderId)
+        {
+            EnsureUserRight(OrdersInfoUserRights.CancelUnpaidOrder);
+
+            var order = _ordersFacade.SetOrderCancelled(orderId);
+                        
+            _ordersFacade.LogOrderProcess(
+                order.Id,
+                OrderProcessingCodes.UNPAID_ORDER_MANUAL_CANCEL,
+                "Objednávka stornována bez e-mailu, protože existuje novější");
+        }
+
         private static string BuildDpdUrl(string orderNumber)
         {
             return $"{DPD_SHIPMENTS_URL}?page=0&limit=10&parcelRef={WebUtility.UrlEncode(orderNumber)}";

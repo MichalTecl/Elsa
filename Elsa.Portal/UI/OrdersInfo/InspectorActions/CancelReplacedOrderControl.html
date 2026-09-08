@@ -1,0 +1,19 @@
+<div>
+    <div id="ctrlCancelReplacedOrder_{%GENERATE%}" class="cancelReplacedOrder">
+        <button class="cancelReplacedOrderBut" event-bind="click:cancelOrder(data.OrderId, callback)">Stornovat&nbsp;<span data-bind="text:data.OrderNumber"></span></button>
+    </div>
+
+    <script>
+        lt.element("ctrlCancelReplacedOrder_{%GENERATE%}").attach(function () {
+
+            this.cancelOrder = function (orderId, callback) {
+                lt.api("/ordersInfo/cancelReplacedOrder").query({ "orderId": orderId }).post(function () {
+                    callback();
+                    alert("Hotovo - objednávka byla stornována");
+                });
+            };
+
+
+        });
+    </script>
+</div>
