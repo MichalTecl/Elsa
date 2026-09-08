@@ -83,6 +83,7 @@
     <Compile Include="ImportExportModules\EshopProductMappingsImpExpModule.cs" />
     <Compile Include="ImportExportModules\MaterialReportingGroupsImpExpModule.cs" />
     <Compile Include="ImportExportModules\KitsImpExpModule.cs" />
+    <Compile Include="IOrderPaymentHelper.cs" />
     <Compile Include="IOrdersFacade.cs" />
     <Compile Include="IOrderStatusConverter.cs" />
     <Compile Include="IOrderStatusMappingRepository.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Model\OneClickProductionOption.cs" />
     <Compile Include="Model\OrderItemBatchAssignmentModel.cs" />
     <Compile Include="Model\PriceComponentModel.cs" />
+    <Compile Include="OrderPaymentHelper.cs" />
     <Compile Include="OrderWeightCalculator.cs" />
     <Compile Include="Production\IProductionFacade.cs" />
     <Compile Include="Production\Model\ProductionBatchComponentModel.cs" />

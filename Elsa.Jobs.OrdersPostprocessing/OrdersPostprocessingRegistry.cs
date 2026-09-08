@@ -1,3 +1,4 @@
+using Elsa.Jobs.OrdersPostprocessing.Steps;
 using Robowire;
 
 namespace Elsa.Jobs.OrdersPostprocessing
@@ -6,6 +7,7 @@ namespace Elsa.Jobs.OrdersPostprocessing
     {
         public void Setup(IContainerSetup setup)
         {
+            setup.For<SendPaymentReminder>().Use<SendPaymentReminder>();
         }
     }
 }

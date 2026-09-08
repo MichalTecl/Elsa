@@ -39,5 +39,6 @@ namespace Elsa.Commerce.Core
     {
         public const string UNPAID_ORDER_MANUAL_CANCEL = "UNPAID_ORDER_MANUAL_CANCEL";
         public const string ORDER_ITEM_BATCH_ASSIGNMENT_CHANGE = "ORDER_ITEM_BATCH_ASSIGNMENT_CHANGE";
+        public const string PAYMENT_REMINDER_SENT = "PAYMENT_REMINDER_SENT";
     }
 }

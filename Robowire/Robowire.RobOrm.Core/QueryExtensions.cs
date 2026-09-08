@@ -10,19 +10,25 @@ namespace Robowire.RobOrm.Core
         [MethodMapper(typeof(LikeMethodMapper))]
         public static bool Like(this string value, string pattern)
         {
-            throw new InvalidOperationException($"Do not call directly, for querying only");
+            throw new InvalidOperationException("Do not call directly, for querying only");
         }
 
         [MethodMapper(typeof(InCsvMethodMapper))]
         public static bool InCsv<T>(this T value, IEnumerable<T> values)
         {
-            throw new InvalidOperationException($"Do not call directly, for querying only");
+            throw new InvalidOperationException("Do not call directly, for querying only");
         }
 
         [MethodMapper(typeof(InSubqueryMethodMapper))]
         public static bool InSubquery<T>(this T value, ITransformedQuery<T> values)
         {
-            throw new InvalidOperationException($"Do not call directly, for querying only");
+            throw new InvalidOperationException("Do not call directly, for querying only");
+        }
+
+        [MethodMapper(typeof(NotInSubqueryMethodMapper))]
+        public static bool NotInSubquery<T>(this T value, ITransformedQuery<T> values)
+        {
+            throw new InvalidOperationException("Do not call directly, for querying only");
         }
 
     }

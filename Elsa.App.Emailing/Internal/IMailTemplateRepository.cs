@@ -12,6 +12,8 @@ namespace Elsa.App.Emailing.Internal
 
         MailTemplateModel GetByTypeName(string typeName);
 
+        bool Exists(string typeName);
+
         MailTemplateModel Save(MailTemplateModel model);
 
         void Delete(int id);

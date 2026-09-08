@@ -117,6 +117,7 @@
     <Compile Include="Extensions\AddressExtensions.cs" />
     <Compile Include="Extensions\MappedToOrderItemExtensions.cs" />
     <Compile Include="Extensions\MaterialBatchExtensions.cs" />
+    <Compile Include="Extensions\PurchaseOrderExtensions.cs" />
     <Compile Include="Integration\IErp.cs" />
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
     <Compile Include="Integration\IOrderProcessingLog.cs" />

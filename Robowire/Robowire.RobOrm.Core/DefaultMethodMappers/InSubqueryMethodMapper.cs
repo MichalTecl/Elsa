@@ -10,32 +10,36 @@ namespace Robowire.RobOrm.Core.DefaultMethodMappers
 {
     public class InSubqueryMethodMapper : IMethodMapper
     {
+        protected virtual string Operator => " IN ";
+
         public IQuerySegment Map(MethodCallExpression expression, ExpressionMapperBase<IQuerySegment> queryMapper, Type resultingTableType, IHasParameters paramTarget)
         {
             var operand = queryMapper.Map(expression.Arguments[0]);
 
             var builtSubquery = ExpressionEvaluator.Eval(expression.Arguments[1]) as ITransformedQuery;
 
-            return new InSubquerySegment(operand, builtSubquery.GetQuery(queryMapper, paramTarget));
+            return new InSubquerySegment(operand, builtSubquery.GetQuery(queryMapper, paramTarget), Operator);
         }
 
         private class InSubquerySegment : IQuerySegment, IBooleanSegment
         {
-            private IQuerySegment m_operand;
-            private IQuerySegment m_itemsSegment;
+            private readonly IQuerySegment _operand;
+            private readonly IQuerySegment _itemsSegment;
+            private readonly string _operator;
 
-            public InSubquerySegment(IQuerySegment operand, IQuerySegment itemsSegment)
+            public InSubquerySegment(IQuerySegment operand, IQuerySegment itemsSegment, string @operator)
             {
-                m_operand = operand;
-                m_itemsSegment = itemsSegment;
+                _operand = operand;
+                _itemsSegment = itemsSegment;
+                _operator = @operator;
             }
 
             public void Render(StringBuilder sb)
             {
                 sb.Append("(");
-                m_operand.Render(sb);
-                sb.Append(" IN ");
-                m_itemsSegment.Render(sb);
+                _operand.Render(sb);
+                sb.Append(_operator);
+                _itemsSegment.Render(sb);
                 sb.Append(")");
             }
 

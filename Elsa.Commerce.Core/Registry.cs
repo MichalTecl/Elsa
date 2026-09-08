@@ -68,6 +68,7 @@ namespace Elsa.Commerce.Core
             setup.Collect<IShipmentRequestDocumentGenerator>();
 
             setup.For<ShipmentRequestGeneratorFactory>().Use<ShipmentRequestGeneratorFactory>();
+            setup.For<IOrderPaymentHelper>().Use<OrderPaymentHelper>();
         }
     }
 }

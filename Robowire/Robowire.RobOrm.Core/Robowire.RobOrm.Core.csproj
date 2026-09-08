@@ -47,6 +47,7 @@
     <Compile Include="DefaultMethodMappers\InCsvMethodMapper.cs" />
     <Compile Include="DefaultMethodMappers\InSubqueryMethodMapper.cs" />
     <Compile Include="DefaultMethodMappers\LikeMethodMapper.cs" />
+    <Compile Include="DefaultMethodMappers\NotInSubqueryMethodMapper.cs" />
     <Compile Include="DefaultRules\DefaultEntityNamingConvention.cs" />
     <Compile Include="DefaultRules\DefaultRobOrmSetup.cs" />
     <Compile Include="EntityGeneration\EntityBehavior.cs" />

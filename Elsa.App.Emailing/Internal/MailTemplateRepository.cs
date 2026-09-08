@@ -59,6 +59,19 @@ namespace Elsa.App.Emailing.Internal
             return ToModel(template);
         }
 
+        public bool Exists(string typeName)
+        {
+            var normalizedTypeName = typeName?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedTypeName))
+            {
+                return false;
+            }
+
+            return _templates.GetAll().Any(item =>
+                !IsDeleted(item)
+                && string.Equals(item.TypeName?.Trim(), normalizedTypeName, StringComparison.OrdinalIgnoreCase));
+        }
+
         public MailTemplateModel Save(MailTemplateModel model)
         {
             if (model == null)

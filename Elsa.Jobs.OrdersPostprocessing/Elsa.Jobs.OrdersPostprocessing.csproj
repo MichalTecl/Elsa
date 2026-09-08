@@ -5,7 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Elsa.App.Emailing\Elsa.App.Emailing.csproj" />
+    <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj" />
+    <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj" />
+    <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj" />
+    <ProjectReference Include="..\Elsa.Core.Entities.Commerce\Elsa.Core.Entities.csproj" />
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj" />
+    <ProjectReference Include="..\Elsa.Smtp.Core\Elsa.Smtp.Core.csproj" />
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj" />
+    <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj" />
   </ItemGroup>
 
 </Project>
