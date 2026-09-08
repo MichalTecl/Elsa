@@ -52,6 +52,7 @@ using Elsa.Jobs.GeocodeAddresses;
 using Elsa.Jobs.ImportOrders;
 using Elsa.Jobs.LoadCurrencyRates;
 using Elsa.Jobs.OrderDataValidation;
+using Elsa.Jobs.OrdersPostprocessing;
 using Elsa.Jobs.PaymentPairing;
 using Elsa.Jobs.PrefillCalender;
 using Elsa.Jobs.SetPaidStatus;
@@ -127,6 +128,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(StoreMapRegistry).Assembly);
                     s.ScanAssembly(typeof(PublicFilesRegistry).Assembly);
                     s.ScanAssembly(typeof(OrderDataValidationJobRegistry).Assembly);
+                    s.ScanAssembly(typeof(OrdersPostprocessingRegistry).Assembly);
                     s.ScanAssembly(typeof(ChatGptRegistry).Assembly);
                     s.ScanAssembly(typeof(EntityCommentsRegistry).Assembly);
                     s.ScanAssembly(typeof(EshopMappingRegistry).Assembly);

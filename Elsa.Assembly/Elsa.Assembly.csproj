@@ -295,6 +295,10 @@
       <Project>{d166bce7-e639-4918-82c9-7acb1533ffa1}</Project>
       <Name>Elsa.Jobs.OrderDataValidation</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.OrdersPostprocessing\Elsa.Jobs.OrdersPostprocessing.csproj">
+      <Project>{F6CE11F3-20B5-4384-A541-37CB54D30E96}</Project>
+      <Name>Elsa.Jobs.OrdersPostprocessing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Jobs.PaymentPairing\Elsa.Jobs.PaymentPairing.csproj">
       <Project>{a4f5c43f-09c2-4df4-bbe1-4fa96d17271f}</Project>
       <Name>Elsa.Jobs.PaymentPairing</Name>
