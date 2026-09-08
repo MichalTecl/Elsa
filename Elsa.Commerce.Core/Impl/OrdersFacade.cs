@@ -572,5 +572,38 @@ namespace Elsa.Commerce.Core.Impl
         {
             throw new NotImplementedException();
         }
+
+        public IOrderProcessingLog LogOrderProcess(long orderId, string code, string description, bool throwIfAlreadyExists = true)
+        {
+            var existingLog = TryGetProcessingLog(orderId, code);
+            if (existingLog != null && throwIfAlreadyExists)
+                throw new InvalidOperationException($"Proces '{code}' již byl pro objednávku ID {orderId} zaznamenán.");
+
+            var processingLog = _database.New<IOrderProcessingLog>();
+            processingLog.PurchaseOrderId = orderId;
+            processingLog.ProcessCode = code;
+            processingLog.Description = description;
+            processingLog.ProcessDt = DateTime.Now;
+            processingLog.AuthorId = _session.User.Id;
+            _database.Save(processingLog);
+
+            return processingLog;
+        }
+
+        public IOrderProcessingLog TryGetProcessingLog(long orderId, string code)
+        {
+            return _database.SelectFrom<IOrderProcessingLog>()
+                .Where(processingLog => processingLog.PurchaseOrderId == orderId && processingLog.ProcessCode == code)
+                .Execute()
+                .FirstOrDefault();
+        }
+
+        public List<IOrderProcessingLog> GetProcessingLog(long orderId)
+        {
+            return _database.SelectFrom<IOrderProcessingLog>()
+                .Where(processingLog => processingLog.PurchaseOrderId == orderId)
+                .Execute()
+                .ToList();
+        }
     }
 }

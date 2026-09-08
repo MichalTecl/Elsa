@@ -14,7 +14,6 @@ using Elsa.Commerce.Core.Crm;
 using System.Linq;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using System.Net;
-using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.App.OrdersPacking.Entities;
 using Elsa.Smtp.Core;
 
@@ -429,8 +428,8 @@ namespace Elsa.App.OrdersInfo
             foreach (var blocker in _db.SelectFrom<IOrderProcessingBlocker>().Where(o => o.PurchaseOrderId == orderId).Execute())
                 AddEvent(blocker.CreateDt, blocker.Message, blocker.AuthorId);
 
-            foreach (var e in _db.SelectFrom<IOrderProcessingLog>().Where(l => l.PurchaseOrderId == orderId).Execute())
-                AddEvent(e.ProcessDt, e.ProcessCode);
+            foreach (var e in _ordersFacade.GetProcessingLog(orderId))
+                AddEvent(e.ProcessDt, string.IsNullOrWhiteSpace(e.Description) ? e.ProcessCode : e.Description, e.AuthorId);
 
             foreach (var rev in _db.SelectFrom<IOrderReviewResult>().Where(r => r.OrderId == orderId).Execute())
                 AddEvent(rev.ReviewDt, "Potvrzeno v 'Objednávky ke kontrole'", rev.AuthorId);
@@ -463,7 +462,11 @@ namespace Elsa.App.OrdersInfo
                 mailTemplateName,
                 new Dictionary<string, string> { { "orderNumber", order.OrderNumber } }
                 );
-            
+
+            _ordersFacade.LogOrderProcess(
+                order.Id,
+                OrderProcessingCodes.UNPAID_ORDER_MANUAL_CANCEL,
+                "Objednávka stornována a informační e-mail odeslán");
         }
 
         private static string BuildDpdUrl(string orderNumber)

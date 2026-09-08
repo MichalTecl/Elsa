@@ -32,7 +32,9 @@
                     <tr class="divTableRow">
                         <td class="divTableCell" data-bind="text:Order.OrderDate"></td>
                         <td class="divTableCell" data-bind="text:Order.Source"></td>
-                        <td class="divTableCell" data-bind="text:Order.VariableSymbol; class.warnCell:symbolNotMatch"></td>
+                        <td class="divTableCell" data-bind="class.warnCell:symbolNotMatch">
+                            <a data-bind="text:Order.VariableSymbol; href:orderLink"></a>
+                        </td>
                         <td class="divTableCell" data-bind="customerName:Order.CustomerName; customerEmail:Order.CustomerEmail" fill-by="/UI/Controls/Common/CustomerView/Customer.html">
                         </td>
                         <td class="divTableCell" data-bind="text:Order.Price; class.warnCell:priceNotMatch"></td>
@@ -61,6 +63,12 @@
         lt.element("pairingUi").withModel("app.paymentPairing.vm").attach(function(suggested, suggestedPairTemplate) {
 
             this.bind(function(suggestedPairs) {
+                if (!!suggestedPairs) {
+                    for (var i = 0; i < suggestedPairs.length; i++) {
+                        suggestedPairs[i].orderLink = "/UI/OrdersInfo/OrdersInfo.html?OrderNumber=" + encodeURIComponent(suggestedPairs[i].Order.VariableSymbol);
+                    }
+                }
+
                 lt.generate(suggested,
                     suggestedPairTemplate,
                     suggestedPairs,

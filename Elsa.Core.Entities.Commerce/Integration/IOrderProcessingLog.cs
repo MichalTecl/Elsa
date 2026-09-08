@@ -11,10 +11,13 @@ using System.Threading.Tasks;
 namespace Elsa.Core.Entities.Commerce.Integration
 {
     [Entity]
-    public interface IOrderProcessingLog : IIntIdEntity, IOrderRelatedEntity
+    public interface IOrderProcessingLog : IIntIdEntity, IOrderRelatedEntity, IHasAuthor
     {
-        [NVarchar(1000, false)]
+        [NVarchar(100, false)]
         string ProcessCode { get; set; }
+
+        [NVarchar(1000, true)]
+        string Description { get; set; }
 
         DateTime ProcessDt { get; set; }
     }

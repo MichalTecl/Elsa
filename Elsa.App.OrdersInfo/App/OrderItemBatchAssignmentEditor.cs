@@ -6,7 +6,6 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-using Elsa.Core.Entities.Commerce.Integration;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
@@ -18,13 +17,13 @@ namespace Elsa.App.OrdersInfo.App
     {
         private const string ACCOUNTING_BLOCK_MESSAGE =
             "Objednávka již byla zahrnuta do účetnictví a nelze ji měnit.";
-
         private readonly IDatabase _db;
         private readonly ISession _session;
         private readonly IPurchaseOrderRepository _orderRepository;
         private readonly IVirtualProductFacade _virtualProductFacade;
         private readonly IMaterialBatchFacade _batchFacade;
         private readonly IMaterialBatchRepository _batchRepository;
+        private readonly IOrdersFacade _ordersFacade;
 
         public OrderItemBatchAssignmentEditor(
             IDatabase db,
@@ -32,7 +31,8 @@ namespace Elsa.App.OrdersInfo.App
             IPurchaseOrderRepository orderRepository,
             IVirtualProductFacade virtualProductFacade,
             IMaterialBatchFacade batchFacade,
-            IMaterialBatchRepository batchRepository)
+            IMaterialBatchRepository batchRepository,
+            IOrdersFacade ordersFacade)
         {
             _db = db;
             _session = session;
@@ -40,6 +40,7 @@ namespace Elsa.App.OrdersInfo.App
             _virtualProductFacade = virtualProductFacade;
             _batchFacade = batchFacade;
             _batchRepository = batchRepository;
+            _ordersFacade = ordersFacade;
         }
 
         public void Apply(OrderItemBatchAssignmentChangeRequest request)
@@ -97,7 +98,6 @@ namespace Elsa.App.OrdersInfo.App
                     order,
                     item,
                     changes,
-                    realChangeDt,
                     effectiveChangeDt,
                     packingDtWasSet);
 
@@ -320,14 +320,13 @@ namespace Elsa.App.OrdersInfo.App
             IPurchaseOrder order,
             IOrderItem item,
             IReadOnlyCollection<OrderItemBatchAssignmentDeltaModel> changes,
-            DateTime realChangeDt,
             DateTime effectiveChangeDt,
             bool packingDtWasSet)
         {
             var changeText = string.Join(", ", changes.Select(change =>
                 $"{(change.Delta > 0m ? "přidáno" : "odebráno")} {Math.Abs(change.Delta)}× šarže {change.BatchNumber}"));
             var message =
-                $"Ruční změna přiřazení šarží uživatelem {_session.User.EMail}: " +
+                "Ruční změna přiřazení šarží: " +
                 $"objednávka {order.OrderNumber}, položka \"{item.PlacedName}\" (ID {item.Id}); {changeText}. " +
                 $"Datum skladové změny {effectiveChangeDt:d. M. yyyy H:mm}." +
                 (packingDtWasSet ? " Stejné datum bylo doplněno do PackingDt objednávky." : string.Empty);
@@ -335,11 +334,11 @@ namespace Elsa.App.OrdersInfo.App
             if (message.Length > 1000)
                 message = message.Substring(0, 997) + "...";
 
-            var log = _db.New<IOrderProcessingLog>();
-            log.PurchaseOrderId = order.Id;
-            log.ProcessDt = realChangeDt;
-            log.ProcessCode = message;
-            _db.Save(log);
+            _ordersFacade.LogOrderProcess(
+                order.Id,
+                OrderProcessingCodes.ORDER_ITEM_BATCH_ASSIGNMENT_CHANGE,
+                message,
+                false);
         }
 
         private static IEnumerable<IOrderItem> GetAllOrderItems(IEnumerable<IOrderItem> items)
