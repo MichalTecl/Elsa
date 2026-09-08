@@ -149,7 +149,10 @@ namespace Elsa.App.OrdersInfo
                 }
 
                 if (!string.IsNullOrWhiteSpace(query.CustomerNameWildcard))
-                    q.Where(o => o.CustomerName.Like(query.CustomerNameWildcard.ToSqlLike()));
+                {
+                    var mailq = query.CustomerNameWildcard.Contains("@") ? query.CustomerNameWildcard.Trim('*').Trim() : "nope";
+                    q.Where(o => o.CustomerName.Like(query.CustomerNameWildcard.ToSqlLike()) || o.CustomerEmail == mailq);
+                }
 
                 if (!string.IsNullOrWhiteSpace(query.ShipmentMethodNameWildcard))
                     q.Where(o => o.ShippingMethodName.Like(query.ShipmentMethodNameWildcard.ToSqlLike()));

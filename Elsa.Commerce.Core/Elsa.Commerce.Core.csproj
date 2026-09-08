@@ -278,6 +278,7 @@
     <Content Include="SQL\20240911_002_LoadBatchesReport.sql" />
     <Content Include="SQL\20240917_001_GetBatchPriceComponents.sql" />
     <Content Include="SQL\20251031_001_fix_productWeightIndex.sql" />
+    <Content Include="SQL\20260908_001_MissingPaymentsIndex.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
