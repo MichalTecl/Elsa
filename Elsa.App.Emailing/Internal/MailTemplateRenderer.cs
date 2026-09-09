@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 
 using Elsa.Smtp.Core;
@@ -23,13 +24,47 @@ namespace Elsa.App.Emailing.Internal
         public MailTemplateContent Render(string templateTypeName, Dictionary<string, string> values)
         {
             var template = _repository.GetByTypeName(templateTypeName);
-            var caseInsensitiveValues = ToCaseInsensitiveDictionary(values);
-            var subject = ReplaceKnownPlaceholders(template.Subject, caseInsensitiveValues);
-            var body = ReplaceKnownPlaceholders(template.Body, caseInsensitiveValues);
+            return RenderContent(
+                template.Subject,
+                template.Body,
+                template.BodyFormat,
+                values,
+                $"e-mailovou šablonu '{templateTypeName}'");
+        }
 
-            var unresolvedPlaceholders = _placeholderRegex.Matches(subject)
+        public MailTemplateContent RenderContent(
+            string subject,
+            string body,
+            string bodyFormat,
+            Dictionary<string, string> values)
+        {
+            return RenderContent(subject, body, bodyFormat, values, "testovanou šablonu");
+        }
+
+        private static MailTemplateContent RenderContent(
+            string subject,
+            string body,
+            string bodyFormat,
+            Dictionary<string, string> values,
+            string templateDescription)
+        {
+            var normalizedBodyFormat = bodyFormat ?? MailTemplateBodyFormats.PlainText;
+            if (normalizedBodyFormat != MailTemplateBodyFormats.PlainText
+                && normalizedBodyFormat != MailTemplateBodyFormats.Html)
+            {
+                throw new InvalidOperationException("Vybraný formát těla e-mailu není podporovaný.");
+            }
+
+            var caseInsensitiveValues = ToCaseInsensitiveDictionary(values);
+            var renderedSubject = ReplaceKnownPlaceholders(subject, caseInsensitiveValues);
+            var renderedBody = ReplaceKnownPlaceholders(
+                body,
+                caseInsensitiveValues,
+                normalizedBodyFormat == MailTemplateBodyFormats.Html);
+
+            var unresolvedPlaceholders = _placeholderRegex.Matches(renderedSubject)
                 .Cast<Match>()
-                .Concat(_placeholderRegex.Matches(body).Cast<Match>())
+                .Concat(_placeholderRegex.Matches(renderedBody).Cast<Match>())
                 .Select(match => match.Value)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -37,10 +72,13 @@ namespace Elsa.App.Emailing.Internal
             if (unresolvedPlaceholders.Count > 0)
             {
                 throw new InvalidOperationException(
-                    $"Pro e-mailovou šablonu '{templateTypeName}' nebyly vyplněny placeholdery: {string.Join(", ", unresolvedPlaceholders)}.");
+                    $"Pro {templateDescription} nebyly vyplněny placeholdery: {string.Join(", ", unresolvedPlaceholders)}.");
             }
 
-            return new MailTemplateContent(subject, body);
+            return new MailTemplateContent(
+                renderedSubject,
+                renderedBody,
+                normalizedBodyFormat == MailTemplateBodyFormats.Html);
         }
 
         private static Dictionary<string, string> ToCaseInsensitiveDictionary(Dictionary<string, string> values)
@@ -59,14 +97,20 @@ namespace Elsa.App.Emailing.Internal
             return result;
         }
 
-        private static string ReplaceKnownPlaceholders(string value, IReadOnlyDictionary<string, string> values)
+        private static string ReplaceKnownPlaceholders(
+            string value,
+            IReadOnlyDictionary<string, string> values,
+            bool htmlEncode = false)
         {
             return _placeholderRegex.Replace(value ?? string.Empty, match =>
             {
                 var placeholderName = match.Groups["name"].Value;
-                return values.TryGetValue(placeholderName, out var replacement)
-                    ? replacement
-                    : match.Value;
+                if (!values.TryGetValue(placeholderName, out var replacement))
+                {
+                    return match.Value;
+                }
+
+                return htmlEncode ? WebUtility.HtmlEncode(replacement) : replacement;
             });
         }
     }

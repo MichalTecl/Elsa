@@ -10,10 +10,17 @@
         .mailTemplatesSettings .mailTemplatesField { display: block; margin-bottom: 12px; }
         .mailTemplatesSettings .mailTemplatesField span { display: block; margin-bottom: 4px; font-weight: bold; }
         .mailTemplatesSettings .mailTemplatesField input,
-        .mailTemplatesSettings .mailTemplatesField textarea { box-sizing: border-box; width: 100%; }
+        .mailTemplatesSettings .mailTemplatesField textarea,
+        .mailTemplatesSettings .mailTemplatesField select { box-sizing: border-box; width: 100%; }
         .mailTemplatesSettings .mailTemplatesSubject { min-height: 54px; }
         .mailTemplatesSettings .mailTemplatesBody { min-height: 300px; font-family: monospace; }
+        .mailTemplatesSettings .mailTemplatesPreview { width: 100%; min-height: 360px; box-sizing: border-box; border: 1px solid #ccc; background: white; }
         .mailTemplatesSettings .mailTemplatesHint { margin: -4px 0 12px; font-size: 11px; opacity: 0.65; }
+        .mailTemplatesSettings .mailTemplatesTest { display: grid; grid-template-columns: minmax(160px, 220px) minmax(240px, 1fr) auto; gap: 8px; align-items: end; margin: 16px 0; padding-top: 16px; border-top: 1px solid #ddd; }
+        .mailTemplatesSettings .mailTemplatesTest .mailTemplatesField { margin-bottom: 0; }
+        .mailTemplatesSettings .mailTemplatesTest select { box-sizing: border-box; width: 100%; height: 27px; }
+        .mailTemplatesSettings .mailTemplatesTestValues { grid-column: 1 / -1; }
+        .mailTemplatesSettings .mailTemplatesTestValues textarea { min-height: 100px; font-family: monospace; }
         .mailTemplatesSettings .mailTemplatesActions { display: flex; justify-content: space-between; }
         .mailTemplatesSettings .mailTemplatesSaveActions { display: flex; gap: 8px; }
         .mailTemplatesSettings .mailTemplatesDelete { color: #a00; }
@@ -61,11 +68,43 @@
             </label>
 
             <label class="mailTemplatesField">
-                <span>Tělo e-mailu</span>
+                <span>Formát těla</span>
+                <select data-bind="value:editor.BodyFormat" event-bind="change:updateBodyFormat(this.value)">
+                    <option value="PlainText">Prostý text</option>
+                    <option value="Html">HTML</option>
+                </select>
+            </label>
+
+            <label class="mailTemplatesField">
+                <span data-bind="text:bodyEditorLabel"></span>
                 <textarea class="mailTemplatesBody" data-bind="value:editor.Body" event-bind="input:updateBody(this.value)"></textarea>
             </label>
 
+            <label class="mailTemplatesField hidden" data-bind="class!.hidden:isHtml">
+                <span>Náhled HTML</span>
+                <iframe class="mailTemplatesPreview" sandbox="" referrerpolicy="no-referrer" lt-name="htmlPreview" title="Náhled HTML e-mailu"></iframe>
+            </label>
+
             <div class="mailTemplatesHint">V předmětu i těle zapisujte placeholdery ve formátu <code>{%valueName%}</code>.</div>
+
+            <div class="mailTemplatesTest">
+                <label class="mailTemplatesField">
+                    <span>Odesílatel</span>
+                    <select data-bind="value:testMailboxType" event-bind="change:updateTestMailboxType(this.value)">
+                        <option value="SystemRobot">Systémový</option>
+                        <option value="CustomerFacingSender">Zákaznický</option>
+                    </select>
+                </label>
+                <label class="mailTemplatesField">
+                    <span>Testovací e-mail</span>
+                    <input type="email" data-bind="value:testRecipient" event-bind="input:updateTestRecipient(this.value)" />
+                </label>
+                <button type="button" event-bind="click:sendTestMail()">Odeslat test</button>
+                <label class="mailTemplatesField mailTemplatesTestValues">
+                    <span>Hodnoty placeholderů pro test (JSON)</span>
+                    <textarea data-bind="value:testValuesText" event-bind="input:updateTestValues(this.value)" placeholder='{"valueName":"Testovací hodnota"}'></textarea>
+                </label>
+            </div>
 
             <div class="mailTemplatesActions">
                 <button type="button" class="mailTemplatesDelete hidden" data-bind="class!.hidden:editor.CanDelete" event-bind="click:deleteTemplate()">Smazat</button>
@@ -87,6 +126,22 @@
         self.editor = null;
         self.hasEditor = false;
         self.editorTitle = "";
+        self.bodyEditorLabel = "Tělo e-mailu";
+        self.isHtml = false;
+        self.testMailboxType = "SystemRobot";
+        self.testRecipient = "";
+        self.testValuesText = "{}";
+
+        const testValuesStorageKey = template =>
+            "elsa.mailTemplates.testValues." + (template && template.Id ? template.Id : "new");
+
+        const loadTestValues = template => {
+            try {
+                self.testValuesText = localStorage.getItem(testValuesStorageKey(template)) || "{}";
+            } catch (error) {
+                self.testValuesText = "{}";
+            }
+        };
 
         const formatDate = (value) => {
             if (!value) {
@@ -115,14 +170,61 @@
             });
         };
 
+        let previewFrame = null;
+
+        const htmlEncode = value => String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+
+        const renderPreviewBody = () => {
+            const body = self.editor ? (self.editor.Body || "") : "";
+            let values;
+            try {
+                values = JSON.parse(self.testValuesText || "{}");
+            } catch (error) {
+                return body;
+            }
+
+            if (!values || Array.isArray(values) || typeof values !== "object") {
+                return body;
+            }
+
+            const normalizedValues = {};
+            Object.keys(values).forEach(key => {
+                normalizedValues[key.toLocaleLowerCase()] = values[key] == null ? "" : String(values[key]);
+            });
+
+            return body.replace(/\{%([^{}%]+)%\}/g, (placeholder, name) => {
+                const normalizedName = name.toLocaleLowerCase();
+                return Object.prototype.hasOwnProperty.call(normalizedValues, normalizedName)
+                    ? htmlEncode(normalizedValues[normalizedName])
+                    : placeholder;
+            });
+        };
+
+        const updatePreview = () => {
+            self.isHtml = !!self.editor && self.editor.BodyFormat === "Html";
+            self.bodyEditorLabel = self.isHtml ? "HTML zdroj" : "Tělo e-mailu";
+
+            if (previewFrame) {
+                previewFrame.srcdoc = self.isHtml ? renderPreviewBody() : "";
+            }
+        };
+
         const showEditor = (template) => {
             self.editor = {
                 Id: template.Id || null,
                 TypeName: template.TypeName || "",
                 Subject: template.Subject || "",
                 Body: template.Body || "",
+                BodyFormat: template.BodyFormat || "PlainText",
                 CanDelete: !!template.Id
             };
+            loadTestValues(self.editor);
+            updatePreview();
             self.editorTitle = self.editor.Id ? "Upravit e-mailovou šablonu" : "Nová e-mailová šablona";
             self.hasEditor = true;
             lt.notify();
@@ -137,6 +239,7 @@
         self.closeEditor = () => {
             self.editor = null;
             self.hasEditor = false;
+            updatePreview();
             lt.notify();
         };
 
@@ -164,7 +267,8 @@
                 Id: self.editor.Id,
                 TypeName: typeName,
                 Subject: self.editor.Subject || "",
-                Body: self.editor.Body || ""
+                Body: self.editor.Body || "",
+                BodyFormat: self.editor.BodyFormat || "PlainText"
             }).post(() => {
                 self.closeEditor();
                 refresh();
@@ -183,10 +287,77 @@
             });
         };
 
+        self.sendTestMail = () => {
+            if (!self.editor) {
+                return;
+            }
+
+            const recipient = (self.testRecipient || "").trim();
+            if (!recipient) {
+                alert("E-mail příjemce musí být vyplněný.");
+                return;
+            }
+
+            let parsedValues;
+            try {
+                parsedValues = JSON.parse(self.testValuesText || "{}");
+            } catch (error) {
+                alert("Hodnoty placeholderů nejsou platný JSON.");
+                return;
+            }
+
+            if (!parsedValues || Array.isArray(parsedValues) || typeof parsedValues !== "object") {
+                alert("Hodnoty placeholderů musí být JSON objekt.");
+                return;
+            }
+
+            const values = {};
+            Object.keys(parsedValues).forEach(key => {
+                values[key] = parsedValues[key] == null ? "" : String(parsedValues[key]);
+            });
+
+            lt.api("/mailTemplates/sendTestMail").body({
+                MailboxType: self.testMailboxType,
+                Recipient: recipient,
+                Subject: self.editor.Subject || "",
+                Body: self.editor.Body || "",
+                BodyFormat: self.editor.BodyFormat || "PlainText",
+                Values: values
+            }).post(() => alert("Testovací e-mail byl odeslán."));
+        };
+
         self.updateTypeName = value => self.editor.TypeName = value;
         self.updateSubject = value => self.editor.Subject = value;
-        self.updateBody = value => self.editor.Body = value;
+        self.updateBody = value => {
+            self.editor.Body = value;
+            updatePreview();
+            lt.notify();
+        };
+        self.updateBodyFormat = value => {
+            self.editor.BodyFormat = value;
+            updatePreview();
+            lt.notify();
+        };
+        self.updateTestMailboxType = value => self.testMailboxType = value;
+        self.updateTestRecipient = value => self.testRecipient = value;
+        self.updateTestValues = value => {
+            self.testValuesText = value;
+            updatePreview();
+            try {
+                localStorage.setItem(testValuesStorageKey(self.editor), value);
+            } catch (error) {
+                // Prohlížeč může mít lokální úložiště zakázané; test lze použít i bez něj.
+            }
+        };
+        self.setPreviewFrame = frame => {
+            previewFrame = frame;
+            updatePreview();
+        };
 
+        lt.api("/mailTemplates/getTestMailSettings").get(settings => {
+            self.testRecipient = settings.Recipient || "";
+            lt.notify();
+        });
         refresh();
     };
 
@@ -194,16 +365,22 @@
 
     lt.element("mailTemplatesSettings")
         .withModel("app.MailTemplatesSettings.vm")
-        .attach(function () {
+        .attach(function (htmlPreview) {
             const vm = app.MailTemplatesSettings.vm;
+            vm.setPreviewFrame(htmlPreview);
 
             this.createTemplate = () => vm.createTemplate();
             this.openTemplate = id => vm.openTemplate(id);
             this.closeEditor = () => vm.closeEditor();
             this.saveTemplate = () => vm.saveTemplate();
             this.deleteTemplate = () => vm.deleteTemplate();
+            this.sendTestMail = () => vm.sendTestMail();
             this.updateTypeName = value => vm.updateTypeName(value);
             this.updateSubject = value => vm.updateSubject(value);
             this.updateBody = value => vm.updateBody(value);
+            this.updateBodyFormat = value => vm.updateBodyFormat(value);
+            this.updateTestMailboxType = value => vm.updateTestMailboxType(value);
+            this.updateTestRecipient = value => vm.updateTestRecipient(value);
+            this.updateTestValues = value => vm.updateTestValues(value);
         });
 </script>

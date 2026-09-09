@@ -21,6 +21,11 @@ namespace Elsa.Smtp.Core
             SendToGroup(mailbox, to, subject, body, attachmentFiles);
         }
 
+        public void Send(SenderMailboxType mailbox, string to, MailTemplateContent content)
+        {
+            Send(mailbox, to, content.Subject, content.Body);
+        }
+
         public void SendToGroup(SenderMailboxType mailbox, string groupName, string subject, string body, params string[] attachmentFiles)
         {            
             string directoryPath = @"C:\Elsa\Log\MailSender";

@@ -10,6 +10,8 @@ namespace Elsa.Smtp.Core
     {
         void Send(SenderMailboxType mailbox, string to, string subject, string body, params string[] attachmentFiles);
 
+        void Send(SenderMailboxType mailbox, string to, MailTemplateContent content);
+
         void SendToGroup(SenderMailboxType mailbox, string groupName, string subject, string body, params string[] attachmentFiles);
 
         void Send(SenderMailboxType mailbox, string to, string templateTypeName, Dictionary<string, string> values);

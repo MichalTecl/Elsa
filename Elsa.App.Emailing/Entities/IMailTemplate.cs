@@ -20,6 +20,9 @@ namespace Elsa.App.Emailing.Entities
         [NVarchar(NVarchar.Max, false)]
         string Body { get; set; }
 
+        [NVarchar(32, true)]
+        string BodyFormat { get; set; }
+
         DateTime LastChangeDt { get; set; }
 
         int LastChangeUserId { get; set; }

@@ -7,6 +7,7 @@ using Elsa.App.Emailing.Model;
 using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
+using Elsa.Smtp.Core;
 
 using Robowire.RobOrm.Core;
 
@@ -100,6 +101,12 @@ namespace Elsa.App.Emailing.Internal
                 throw new InvalidOperationException($"Šablona typu '{typeName}' již existuje.");
             }
 
+            var bodyFormat = model.BodyFormat ?? MailTemplateBodyFormats.PlainText;
+            if (bodyFormat != MailTemplateBodyFormats.PlainText && bodyFormat != MailTemplateBodyFormats.Html)
+            {
+                throw new InvalidOperationException("Vybraný formát těla e-mailu není podporovaný.");
+            }
+
             var saved = _templates.Upsert(model.Id, template =>
             {
                 if (template.Id < 1)
@@ -114,6 +121,7 @@ namespace Elsa.App.Emailing.Internal
                 template.TypeName = typeName;
                 template.Subject = model.Subject?.Trim() ?? string.Empty;
                 template.Body = model.Body ?? string.Empty;
+                template.BodyFormat = bodyFormat;
                 SetChangeInfo(template);
             });
 
@@ -158,6 +166,7 @@ namespace Elsa.App.Emailing.Internal
                 TypeName = template.TypeName,
                 Subject = template.Subject,
                 Body = template.Body,
+                BodyFormat = template.BodyFormat ?? MailTemplateBodyFormats.PlainText,
                 LastChangeDt = template.LastChangeDt,
                 LastChangeUserName = template.LastChangeUser?.EMail
             };

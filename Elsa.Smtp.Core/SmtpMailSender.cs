@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 using Elsa.Common.Logging;
 using Elsa.Smtp.Core.Database;
 using MailKit.Net.Smtp;
@@ -10,6 +12,22 @@ namespace Elsa.Smtp.Core
 {
     public class SmtpMailSender : IMailSender
     {
+        private static readonly Regex _nonContentHtmlRegex = new Regex(
+            @"<(script|style)[^>]*>.*?</\1>",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+        private static readonly Regex _htmlLineBreakRegex = new Regex(
+            @"<(br\s*/?|/p|/div|/li|/tr|/h[1-6])\s*>",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex _htmlTagRegex = new Regex(
+            @"<[^>]+>",
+            RegexOptions.Compiled | RegexOptions.Singleline);
+
+        private static readonly Regex _extraLineBreakRegex = new Regex(
+            @"(\r?\n\s*){3,}",
+            RegexOptions.Compiled);
+
         private readonly SmtpSettings _allSettings;
         private readonly ILog _log;
         private readonly IRecipientListsRepository _recipientListsRepository;
@@ -33,11 +51,27 @@ namespace Elsa.Smtp.Core
 
         public void Send(SenderMailboxType mailbox, string to, string subject, string body, params string[] attachmentFiles)
         {
-            Send(mailbox, new[] {to}, subject, body, attachmentFiles);
+            Send(mailbox, new[] {to}, subject, body, false, attachmentFiles);
 
             try
             {
                 _debugMailSender.Send(mailbox, to, subject, body, attachmentFiles);
+            }
+            catch (Exception ex) { _log.Error("Failed to send debug e-mail", ex); }
+        }
+
+        public void Send(SenderMailboxType mailbox, string to, MailTemplateContent content)
+        {
+            if (content == null)
+            {
+                throw new ArgumentNullException(nameof(content));
+            }
+
+            Send(mailbox, new[] { to }, content.Subject, content.Body, content.IsHtml, new string[0]);
+
+            try
+            {
+                _debugMailSender.Send(mailbox, to, content);
             }
             catch (Exception ex) { _log.Error("Failed to send debug e-mail", ex); }
         }
@@ -52,16 +86,22 @@ namespace Elsa.Smtp.Core
                 return;
             }
             
-            Send(mailbox, recipients, subject, body, attachmentFiles);
+            Send(mailbox, recipients, subject, body, false, attachmentFiles);
         }
 
         public void Send(SenderMailboxType mailbox, string to, string templateTypeName, Dictionary<string, string> values)
         {
             var content = _mailTemplateRenderer.Render(templateTypeName, values);
-            Send(mailbox, to, content.Subject, content.Body);
+            Send(mailbox, to, content);
         }
 
-        private void Send(SenderMailboxType mailbox, IEnumerable<string> to, string subject, string body, string[] attachemntFiles)
+        private void Send(
+            SenderMailboxType mailbox,
+            IEnumerable<string> to,
+            string subject,
+            string body,
+            bool isHtml,
+            string[] attachemntFiles)
         {
             var addresses = to.ToList();
 
@@ -76,7 +116,9 @@ namespace Elsa.Smtp.Core
                 mailMessage.To.AddRange(addresses.Select(t => new MailboxAddress(t, t)) );
                 mailMessage.Subject = subject;
 
-                var builder = new BodyBuilder {TextBody = body};
+                var builder = isHtml
+                    ? new BodyBuilder { HtmlBody = body, TextBody = HtmlToPlainText(body) }
+                    : new BodyBuilder { TextBody = body };
 
                 foreach (var atf in attachemntFiles)
                 {
@@ -100,6 +142,15 @@ namespace Elsa.Smtp.Core
                 _log.Error($"Sending e-mail to: {to}, subject: {subject} failed", ex);
                 throw;
             }            
+        }
+
+        private static string HtmlToPlainText(string html)
+        {
+            var withoutNonContent = _nonContentHtmlRegex.Replace(html ?? string.Empty, string.Empty);
+            var withLineBreaks = _htmlLineBreakRegex.Replace(withoutNonContent, "\r\n");
+            var withoutTags = _htmlTagRegex.Replace(withLineBreaks, string.Empty);
+            var decoded = WebUtility.HtmlDecode(withoutTags);
+            return _extraLineBreakRegex.Replace(decoded, "\r\n\r\n").Trim();
         }
     }
 }
