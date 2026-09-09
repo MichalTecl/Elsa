@@ -13,6 +13,8 @@ namespace Elsa.App.Emailing.Model
 
         public string Body { get; set; }
 
+        public string BodyBase64 { get; set; }
+
         public string BodyFormat { get; set; }
 
         public DateTime? LastChangeDt { get; set; }

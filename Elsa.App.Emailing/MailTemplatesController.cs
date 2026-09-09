@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Mail;
+using System.Text;
 
 using Elsa.App.Emailing.Internal;
 using Elsa.App.Emailing.Model;
@@ -42,13 +44,19 @@ namespace Elsa.App.Emailing
         public MailTemplateModel Get(int? id)
         {
             EnsureUserRight(CommonDataUserRights.SettingsApp);
-            return _repository.Get(id);
+            var template = _repository.Get(id);
+            template.BodyBase64 = System.Convert.ToBase64String(
+                Encoding.UTF8.GetBytes(template.Body ?? string.Empty));
+            template.Body = null;
+            return template;
         }
 
         public MailTemplateModel Save(MailTemplateModel model)
         {
             EnsureUserRight(CommonDataUserRights.SettingsApp);
-            return _repository.Save(model);
+            var savedTemplate = _repository.Save(model);
+            savedTemplate.Body = null;
+            return savedTemplate;
         }
 
         public List<MailTemplateModel> Delete(int id)
@@ -111,6 +119,21 @@ namespace Elsa.App.Emailing
                 request.BodyFormat,
                 request.Values);
             _mailSender.Send(mailbox, recipient, content);
+        }
+
+        public FileResult GetPicture(string path)
+        {
+            EnsureUserRight(CommonDataUserRights.SettingsApp);
+
+            var picturePath = MailTemplatePictureStore.ResolvePath(path);
+            return new FileResult(
+                Path.GetFileName(picturePath),
+                File.ReadAllBytes(picturePath),
+                MailTemplatePictureStore.GetContentType(picturePath),
+                "inline")
+            {
+                DisableBrowserCache = true
+            };
         }
     }
 }

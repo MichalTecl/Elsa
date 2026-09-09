@@ -31,7 +31,7 @@ namespace Elsa.App.Emailing.Internal
             return _templates.GetAll()
                 .Where(template => !IsDeleted(template))
                 .OrderBy(template => template.TypeName)
-                .Select(ToModel)
+                .Select(ToListModel)
                 .ToList();
         }
 
@@ -166,6 +166,19 @@ namespace Elsa.App.Emailing.Internal
                 TypeName = template.TypeName,
                 Subject = template.Subject,
                 Body = template.Body,
+                BodyFormat = template.BodyFormat ?? MailTemplateBodyFormats.PlainText,
+                LastChangeDt = template.LastChangeDt,
+                LastChangeUserName = template.LastChangeUser?.EMail
+            };
+        }
+
+        private static MailTemplateModel ToListModel(IMailTemplate template)
+        {
+            return new MailTemplateModel
+            {
+                Id = template.Id,
+                TypeName = template.TypeName,
+                Subject = template.Subject,
                 BodyFormat = template.BodyFormat ?? MailTemplateBodyFormats.PlainText,
                 LastChangeDt = template.LastChangeDt,
                 LastChangeUserName = template.LastChangeUser?.EMail

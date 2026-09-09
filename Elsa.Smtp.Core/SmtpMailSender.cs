@@ -7,6 +7,7 @@ using Elsa.Common.Logging;
 using Elsa.Smtp.Core.Database;
 using MailKit.Net.Smtp;
 using MimeKit;
+using MimeKit.Utils;
 
 namespace Elsa.Smtp.Core
 {
@@ -27,6 +28,14 @@ namespace Elsa.Smtp.Core
         private static readonly Regex _extraLineBreakRegex = new Regex(
             @"(\r?\n\s*){3,}",
             RegexOptions.Compiled);
+
+        private static readonly Regex _htmlPictureRegex = new Regex(
+            @"(?<prefix><img\b[^>]*?\ssrc\s*=\s*)(?<quote>['""])(?<source>.*?)(\k<quote>)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+        private static readonly Regex _htmlPictureSourceRegex = new Regex(
+            @"<img\b[^>]*?\ssrc\s*=",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
         private readonly SmtpSettings _allSettings;
         private readonly ILog _log;
@@ -116,9 +125,16 @@ namespace Elsa.Smtp.Core
                 mailMessage.To.AddRange(addresses.Select(t => new MailboxAddress(t, t)) );
                 mailMessage.Subject = subject;
 
-                var builder = isHtml
-                    ? new BodyBuilder { HtmlBody = body, TextBody = HtmlToPlainText(body) }
-                    : new BodyBuilder { TextBody = body };
+                var builder = new BodyBuilder();
+                if (isHtml)
+                {
+                    builder.HtmlBody = EmbedPictures(builder, body);
+                    builder.TextBody = HtmlToPlainText(body);
+                }
+                else
+                {
+                    builder.TextBody = body;
+                }
 
                 foreach (var atf in attachemntFiles)
                 {
@@ -151,6 +167,34 @@ namespace Elsa.Smtp.Core
             var withoutTags = _htmlTagRegex.Replace(withLineBreaks, string.Empty);
             var decoded = WebUtility.HtmlDecode(withoutTags);
             return _extraLineBreakRegex.Replace(decoded, "\r\n\r\n").Trim();
+        }
+
+        private static string EmbedPictures(BodyBuilder builder, string html)
+        {
+            var htmlContent = html ?? string.Empty;
+            if (_htmlPictureSourceRegex.Matches(htmlContent).Count != _htmlPictureRegex.Matches(htmlContent).Count)
+            {
+                throw new InvalidOperationException(
+                    "Atribut src obrázku musí být uzavřený v jednoduchých nebo dvojitých uvozovkách.");
+            }
+
+            var contentIds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            return _htmlPictureRegex.Replace(htmlContent, match =>
+            {
+                var source = WebUtility.HtmlDecode(match.Groups["source"].Value);
+                var picturePath = MailTemplatePictureStore.ResolvePath(source);
+
+                if (!contentIds.TryGetValue(picturePath, out var contentId))
+                {
+                    var linkedPicture = builder.LinkedResources.Add(picturePath);
+                    linkedPicture.ContentId = MimeUtils.GenerateMessageId();
+                    contentId = linkedPicture.ContentId;
+                    contentIds[picturePath] = contentId;
+                }
+
+                var quote = match.Groups["quote"].Value;
+                return $"{match.Groups["prefix"].Value}{quote}cid:{contentId}{quote}";
+            });
         }
     }
 }

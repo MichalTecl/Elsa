@@ -82,10 +82,14 @@
 
             <label class="mailTemplatesField hidden" data-bind="class!.hidden:isHtml">
                 <span>Náhled HTML</span>
-                <iframe class="mailTemplatesPreview" sandbox="" referrerpolicy="no-referrer" lt-name="htmlPreview" title="Náhled HTML e-mailu"></iframe>
+                <iframe class="mailTemplatesPreview" sandbox="allow-same-origin" referrerpolicy="no-referrer" lt-name="htmlPreview" title="Náhled HTML e-mailu"></iframe>
             </label>
 
-            <div class="mailTemplatesHint">V předmětu i těle zapisujte placeholdery ve formátu <code>{%valueName%}</code>.</div>
+            <div class="mailTemplatesHint">
+                V předmětu i těle zapisujte placeholdery ve formátu <code>{%valueName%}</code>.
+                HTML obrázky zapisujte například jako <code>&lt;img src="obrazek1.jpg"&gt;</code>;
+                načítají se výhradně z <code>C:\Elsa\StaticPictures</code>.
+            </div>
 
             <div class="mailTemplatesTest">
                 <label class="mailTemplatesField">
@@ -153,8 +157,34 @@
             return isNaN(date.getTime()) ? "" : date.toLocaleString("cs-CZ");
         };
 
+        const parseApiResponse = response => {
+            let parsedResponse = response;
+            for (let attempt = 0; attempt < 2 && typeof parsedResponse === "string"; attempt++) {
+                try {
+                    parsedResponse = JSON.parse(parsedResponse.replace(/^\uFEFF/, ""));
+                } catch (error) {
+                    return null;
+                }
+            }
+
+            return parsedResponse;
+        };
+
+        const decodeUtf8Base64 = value => {
+            const binary = atob(value || "");
+            const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+            return new TextDecoder("utf-8").decode(bytes);
+        };
+
         const mapTemplates = (templates) => {
-            self.templates = (templates || []).map(template => ({
+            const templateList = parseApiResponse(templates);
+
+            if (!Array.isArray(templateList)) {
+                console.error("Seznam e-mailových šablon nemá očekávaný formát.", templates);
+                return;
+            }
+
+            self.templates = templateList.map(template => ({
                 Id: template.Id,
                 TypeName: template.TypeName || "",
                 Subject: template.Subject || "",
@@ -205,21 +235,37 @@
             });
         };
 
+        const rewritePreviewPictures = html => {
+            const documentModel = new DOMParser().parseFromString(html, "text/html");
+            documentModel.querySelectorAll("script, base, object, embed, meta[http-equiv='refresh']")
+                .forEach(element => element.remove());
+            documentModel.querySelectorAll("img[src]").forEach(image => {
+                const source = image.getAttribute("src");
+                image.removeAttribute("srcset");
+                image.setAttribute("src", "/mailTemplates/getPicture?path=" + encodeURIComponent(source));
+            });
+
+            return "<!doctype html>" + documentModel.documentElement.outerHTML;
+        };
+
         const updatePreview = () => {
             self.isHtml = !!self.editor && self.editor.BodyFormat === "Html";
             self.bodyEditorLabel = self.isHtml ? "HTML zdroj" : "Tělo e-mailu";
 
             if (previewFrame) {
-                previewFrame.srcdoc = self.isHtml ? renderPreviewBody() : "";
+                previewFrame.srcdoc = self.isHtml ? rewritePreviewPictures(renderPreviewBody()) : "";
             }
         };
 
         const showEditor = (template) => {
+            const body = template.BodyBase64 == null
+                ? (template.Body || "")
+                : decodeUtf8Base64(template.BodyBase64);
             self.editor = {
                 Id: template.Id || null,
                 TypeName: template.TypeName || "",
                 Subject: template.Subject || "",
-                Body: template.Body || "",
+                Body: body,
                 BodyFormat: template.BodyFormat || "PlainText",
                 CanDelete: !!template.Id
             };
@@ -233,7 +279,16 @@
         self.createTemplate = () => showEditor({});
 
         self.openTemplate = (id) => {
-            lt.api("/mailTemplates/get").query({ id: id }).get(showEditor);
+            lt.api("/mailTemplates/get").query({ id: id }).get(response => {
+                const template = parseApiResponse(response);
+                if (!template || Array.isArray(template) || !template.Id) {
+                    console.error("Detail e-mailové šablony nemá očekávaný formát.", response);
+                    alert("Detail e-mailové šablony se nepodařilo načíst.");
+                    return;
+                }
+
+                showEditor(template);
+            });
         };
 
         self.closeEditor = () => {

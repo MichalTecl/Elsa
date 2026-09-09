@@ -67,6 +67,7 @@
     <Compile Include="IMailTemplateRenderer.cs" />
     <Compile Include="ISmtpSettings.cs" />
     <Compile Include="MailTemplateContent.cs" />
+    <Compile Include="MailTemplatePictureStore.cs" />
     <Compile Include="SenderMailboxType.cs" />
     <Compile Include="SmtpMailSender.cs" />
     <Compile Include="SmtpRegistry.cs" />
