@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using Elsa.Common.Logging;
+using Elsa.Common.Utils;
 using Elsa.Smtp.Core.Database;
 using MailKit.Net.Smtp;
 using MimeKit;
@@ -13,6 +14,8 @@ namespace Elsa.Smtp.Core
 {
     public class SmtpMailSender : IMailSender
     {
+        private const string DEV_EMAIL_RECIPIENT = "mtecl.prg@gmail.com";
+
         private static readonly Regex _nonContentHtmlRegex = new Regex(
             @"<(script|style)[^>]*>.*?</\1>",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
@@ -60,13 +63,13 @@ namespace Elsa.Smtp.Core
 
         public void Send(SenderMailboxType mailbox, string to, string subject, string body, params string[] attachmentFiles)
         {
-            Send(mailbox, new[] {to}, subject, body, false, attachmentFiles);
-
             try
             {
                 _debugMailSender.Send(mailbox, to, subject, body, attachmentFiles);
             }
             catch (Exception ex) { _log.Error("Failed to send debug e-mail", ex); }
+
+            Send(mailbox, new[] {to}, subject, body, false, attachmentFiles);
         }
 
         public void Send(SenderMailboxType mailbox, string to, MailTemplateContent content)
@@ -76,25 +79,34 @@ namespace Elsa.Smtp.Core
                 throw new ArgumentNullException(nameof(content));
             }
 
-            Send(mailbox, new[] { to }, content.Subject, content.Body, content.IsHtml, new string[0]);
-
             try
             {
                 _debugMailSender.Send(mailbox, to, content);
             }
             catch (Exception ex) { _log.Error("Failed to send debug e-mail", ex); }
+
+            Send(mailbox, new[] { to }, content.Subject, content.Body, content.IsHtml, new string[0]);
         }
 
         public void SendToGroup(SenderMailboxType mailbox, string groupName, string subject, string body, params string[] attachmentFiles)
         {
             var recipients = _recipientListsRepository.GetRecipients(groupName).ToList();
 
-            if (!recipients.Any())
+            if (!recipients.Any() && !AppEnvironment.IsDev)
             {
                 _log.Error($"No recipients for group '{groupName}'");
                 return;
             }
             
+            if (AppEnvironment.IsDev)
+            {
+                try
+                {
+                    _debugMailSender.SendToGroup(mailbox, groupName, subject, body, attachmentFiles);
+                }
+                catch (Exception ex) { _log.Error("Failed to send debug e-mail", ex); }
+            }
+
             Send(mailbox, recipients, subject, body, false, attachmentFiles);
         }
 
@@ -112,9 +124,15 @@ namespace Elsa.Smtp.Core
             bool isHtml,
             string[] attachemntFiles)
         {
-            var addresses = to.ToList();
+            var requestedAddresses = to.ToList();
+            var addresses = AppEnvironment.IsDev
+                ? new List<string> { DEV_EMAIL_RECIPIENT }
+                : requestedAddresses;
 
-            _log.Info($"Sending [{mailbox.TypeName}] e-mail to: {string.Join(";", addresses)}, subject: {subject}");
+            var reroutedFrom = AppEnvironment.IsDev
+                ? $" (dev redirect from: {string.Join(";", requestedAddresses)})"
+                : string.Empty;
+            _log.Info($"Sending [{mailbox.TypeName}] e-mail to: {string.Join(";", addresses)}{reroutedFrom}, subject: {subject}");
 
             try
             {
@@ -128,7 +146,8 @@ namespace Elsa.Smtp.Core
                 var builder = new BodyBuilder();
                 if (isHtml)
                 {
-                    builder.HtmlBody = EmbedPictures(builder, body);
+                    var bodyWithPictures = EmbedPictures(builder, body);
+                    builder.HtmlBody = MailTemplateQrCode.Embed(builder, bodyWithPictures);
                     builder.TextBody = HtmlToPlainText(body);
                 }
                 else
@@ -155,7 +174,7 @@ namespace Elsa.Smtp.Core
             }
             catch (Exception ex)
             {
-                _log.Error($"Sending e-mail to: {to}, subject: {subject} failed", ex);
+                _log.Error($"Sending e-mail to: {string.Join(";", addresses)}, subject: {subject} failed", ex);
                 throw;
             }            
         }

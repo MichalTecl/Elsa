@@ -10,6 +10,7 @@ using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
+using Elsa.Jobs.OrdersPostprocessing.Steps;
 
 using Robowire.RoboApi;
 
@@ -18,16 +19,24 @@ namespace Elsa.App.Commerce.Payments
     [Controller("paymentPairing")]
     public class PaymentsPairingController : ElsaControllerBase
     {
-        private readonly IPurchaseOrderRepository m_orderRepository;
-        private readonly IPaymentRepository m_paymentRepository;
-        private readonly IOrdersFacade m_ordersFacade;
+        private readonly IPurchaseOrderRepository _orderRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly IOrdersFacade _ordersFacade;
+        private readonly SendPaymentReminder _sendPaymentReminder;
         
-        public PaymentsPairingController(IWebSession webSession, ILog log, IPurchaseOrderRepository orderRepository, IPaymentRepository paymentRepository, IOrdersFacade ordersFacade)
+        public PaymentsPairingController(
+            IWebSession webSession,
+            ILog log,
+            IPurchaseOrderRepository orderRepository,
+            IPaymentRepository paymentRepository,
+            IOrdersFacade ordersFacade,
+            SendPaymentReminder sendPaymentReminder)
             : base(webSession, log)
         {
-            m_orderRepository = orderRepository;
-            m_paymentRepository = paymentRepository;
-            m_ordersFacade = ordersFacade;
+            _orderRepository = orderRepository;
+            _paymentRepository = paymentRepository;
+            _ordersFacade = ordersFacade;
+            _sendPaymentReminder = sendPaymentReminder;
         }
 
         public IEnumerable<SuggestedPairModel> GetUnpaidOrders()
@@ -35,7 +44,7 @@ namespace Elsa.App.Commerce.Payments
             EnsureUserRight(OrdersOverviewUserRights.OpenPaymentPairingApp);
 
             var orders =
-                m_orderRepository.GetOrdersByStatus(OrderStatus.PendingPayment)
+                _orderRepository.GetOrdersByStatus(OrderStatus.PendingPayment)
                     .Where(o => !o.IsPayOnDelivery)
                     .OrderBy(o => o.PurchaseDate)
                     .ToList();
@@ -45,7 +54,7 @@ namespace Elsa.App.Commerce.Payments
                 yield break;
             }
 
-            var payments = m_paymentRepository.GetPayments(
+            var payments = _paymentRepository.GetPayments(
                 orders.Min(o => o.PurchaseDate).AddDays(-1),
                 DateTime.Now.AddDays(1)).Where(p => !p.Orders.Any()).ToList();
 
@@ -59,7 +68,16 @@ namespace Elsa.App.Commerce.Payments
                         p => p.VariableSymbol.Equals(order.VarSymbol, StringComparison.InvariantCultureIgnoreCase))
                     ?? GetBestMatch(order, eligiblePayments);
 
-                yield return new SuggestedPairModel(new OrderViewModel(order), payment == null ? null : new PaymentViewModel(payment));
+                var lastPaymentReminder = _ordersFacade
+                    .GetProcessingLog(order.Id)
+                    .Where(l => l.ProcessCode == OrderProcessingCodes.PAYMENT_REMINDER_SENT)
+                    .OrderByDescending(l => l.ProcessDt)
+                    .FirstOrDefault();
+
+                yield return new SuggestedPairModel(
+                    new OrderViewModel(order),
+                    payment == null ? null : new PaymentViewModel(payment),
+                    lastPaymentReminder);
             }
         }
 
@@ -67,8 +85,17 @@ namespace Elsa.App.Commerce.Payments
         {
             EnsureUserRight(OrdersOverviewUserRights.AllowManualPaymentPairing);
 
-            m_ordersFacade.SetOrderPaid(orderId, paymentId);
+            _ordersFacade.SetOrderPaid(orderId, paymentId);
             
+            return GetUnpaidOrders();
+        }
+
+        public IEnumerable<SuggestedPairModel> SendPaymentReminder(long orderId)
+        {
+            EnsureUserRight(OrdersOverviewUserRights.AllowManualPaymentPairing);
+
+            _sendPaymentReminder.SendManually(orderId);
+
             return GetUnpaidOrders();
         }
 

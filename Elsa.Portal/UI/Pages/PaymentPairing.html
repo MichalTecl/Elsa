@@ -49,7 +49,11 @@
                         <td class="divTableCell" data-bind="text:Payment.Message">-</td>
                     </tr>
                     <tr class="divTableRow" style="text-align: right">
-                        <td colspan="99" style="border:none"><button class="restricted-AllowManualPaymentPairing" style="margin-top: 5px; margin-bottom: 20px; " data-bind="disabled:noPayment" event-bind="click:setPair(Order.OrderId)">Přijmout</button></td>
+                        <td colspan="99" class="paymentPairActions">
+                            <span class="hidden paymentReminderInfo" data-bind="text:PaymentReminderInfo; class!.hidden:hasPaymentReminder"></span>
+                            <button class="hidden restricted-AllowManualPaymentPairing" data-bind="class!.hidden:noPayment" event-bind="click:sendPaymentReminder(Order.OrderId, Order.CustomerEmail)">Odeslat upomínku</button>
+                            <button class="restricted-AllowManualPaymentPairing" data-bind="disabled:noPayment" event-bind="click:setPair(Order.OrderId)">Přijmout</button>
+                        </td>
                     </tr>
                 </tbody>      
 
@@ -90,6 +94,14 @@
                 }
 
             };
+
+            this.sendPaymentReminder = function(orderId, customerEmail) {
+                if (!confirm("Opravdu odeslat upomínku platby na " + customerEmail + "?")) {
+                    return;
+                }
+
+                app.paymentPairing.vm.sendPaymentReminder(orderId);
+            };
         });
             
     </script>
@@ -114,6 +126,21 @@
     .warnCell {
         color: #9F6000;
         background-color: #FEEFB3;
+    }
+
+    .paymentPairActions {
+        border: none !important;
+        padding-top: 5px !important;
+        padding-bottom: 20px !important;
+    }
+
+    .paymentPairActions button {
+        margin-left: 5px;
+    }
+
+    .paymentReminderInfo {
+        color: #666666;
+        margin-right: 8px;
     }
 </style>
     

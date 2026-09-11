@@ -87,6 +87,10 @@
       <Project>{1393f234-b177-4411-bb48-364e6be597d0}</Project>
       <Name>Elsa.Integration.PaymentSystems.Fio</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.OrdersPostprocessing\Elsa.Jobs.OrdersPostprocessing.csproj">
+      <Project>{F6CE11F3-20B5-4384-A541-37CB54D30E96}</Project>
+      <Name>Elsa.Jobs.OrdersPostprocessing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Users\Elsa.Users.csproj">
       <Project>{a9148d58-0f0e-43e7-8a11-a9f9bb04333c}</Project>
       <Name>Elsa.Users</Name>

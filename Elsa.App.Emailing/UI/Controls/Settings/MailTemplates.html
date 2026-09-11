@@ -13,6 +13,8 @@
         .mailTemplatesSettings .mailTemplatesField textarea,
         .mailTemplatesSettings .mailTemplatesField select { box-sizing: border-box; width: 100%; }
         .mailTemplatesSettings .mailTemplatesBody { min-height: 300px; font-family: monospace; }
+        .mailTemplatesSettings .mailTemplatesFieldHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+        .mailTemplatesSettings .mailTemplatesFieldHeader span { margin-bottom: 0; }
         .mailTemplatesSettings .mailTemplatesPreview { width: 100%; min-height: 360px; box-sizing: border-box; border: 1px solid #ccc; background: white; }
         .mailTemplatesSettings .mailTemplatesHint { margin: -4px 0 12px; font-size: 11px; opacity: 0.65; }
         .mailTemplatesSettings .mailTemplatesTest { display: grid; grid-template-columns: minmax(160px, 220px) minmax(240px, 1fr) auto; gap: 8px; align-items: end; margin: 16px 0; padding-top: 16px; border-top: 1px solid #ddd; }
@@ -72,10 +74,13 @@
                 </select>
             </label>
 
-            <label class="mailTemplatesField">
-                <span data-bind="text:bodyEditorLabel"></span>
+            <div class="mailTemplatesField">
+                <div class="mailTemplatesFieldHeader">
+                    <span data-bind="text:bodyEditorLabel"></span>
+                    <button type="button" class="hidden" data-bind="class!.hidden:isHtml" event-bind="click:formatHtml()">Formátovat HTML</button>
+                </div>
                 <textarea class="mailTemplatesBody" data-bind="value:editor.Body" event-bind="input:updateBody(this.value)"></textarea>
-            </label>
+            </div>
 
             <label class="mailTemplatesField hidden" data-bind="class!.hidden:isHtml">
                 <span>Náhled HTML</span>
@@ -86,6 +91,8 @@
                 V předmětu i těle zapisujte placeholdery ve formátu <code>{%valueName%}</code>.
                 HTML obrázky zapisujte například jako <code>&lt;img src="obrazek1.jpg"&gt;</code>;
                 načítají se výhradně z <code>C:\Elsa\EmailTemplates</code>.
+                QR kód vložíte jako <code>&lt;x:QRCODE value="{%paymentinfo%}" /&gt;</code>;
+                velikost lze změnit atributem <code>size="180"</code>.
             </div>
 
             <div class="mailTemplatesTest">
@@ -197,6 +204,94 @@
             .replace(/\"/g, "&quot;")
             .replace(/'/g, "&#39;");
 
+        const htmlVoidElements = new Set([
+            "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"
+        ]);
+
+        const tokenizeHtml = source => {
+            const tokens = [];
+            let position = 0;
+
+            while (position < source.length) {
+                const tagStart = source.indexOf("<", position);
+                if (tagStart < 0) {
+                    tokens.push(source.substring(position));
+                    break;
+                }
+
+                if (tagStart > position) {
+                    tokens.push(source.substring(position, tagStart));
+                }
+
+                if (source.substring(tagStart, tagStart + 4) === "<!--") {
+                    const commentEnd = source.indexOf("-->", tagStart + 4);
+                    if (commentEnd < 0) {
+                        tokens.push(source.substring(tagStart));
+                        break;
+                    }
+                    tokens.push(source.substring(tagStart, commentEnd + 3));
+                    position = commentEnd + 3;
+                    continue;
+                }
+
+                let quote = null;
+                let tagEnd = tagStart + 1;
+                for (; tagEnd < source.length; tagEnd++) {
+                    const character = source[tagEnd];
+                    if (quote) {
+                        if (character === quote) {
+                            quote = null;
+                        }
+                    } else if (character === "\"" || character === "'") {
+                        quote = character;
+                    } else if (character === ">") {
+                        break;
+                    }
+                }
+
+                if (tagEnd >= source.length) {
+                    tokens.push(source.substring(tagStart));
+                    break;
+                }
+
+                tokens.push(source.substring(tagStart, tagEnd + 1));
+                position = tagEnd + 1;
+            }
+
+            return tokens;
+        };
+
+        const prettyPrintHtml = source => {
+            const tokens = tokenizeHtml((source || "").replace(/\r\n?/g, "\n"));
+            const lines = [];
+            let depth = 0;
+
+            tokens.forEach(token => {
+                const trimmedToken = token.trim();
+                if (!trimmedToken) {
+                    return;
+                }
+
+                const closingTag = /^<\s*\/\s*([\w:-]+)/.exec(trimmedToken);
+                const openingTag = /^<\s*([\w:-]+)/.exec(trimmedToken);
+                const isClosingTag = !!closingTag;
+                const tagName = (closingTag ? closingTag[1] : openingTag ? openingTag[1] : "").toLocaleLowerCase();
+                const isSelfClosing = /\/\s*>$/.test(trimmedToken) || htmlVoidElements.has(tagName);
+
+                if (isClosingTag) {
+                    depth = Math.max(0, depth - 1);
+                }
+
+                lines.push("  ".repeat(depth) + trimmedToken);
+
+                if (openingTag && !isClosingTag && !isSelfClosing && !/^<!/.test(trimmedToken)) {
+                    depth++;
+                }
+            });
+
+            return lines.join("\r\n");
+        };
+
         const renderPreviewBody = () => {
             const body = self.editor ? (self.editor.Body || "") : "";
             let values;
@@ -227,10 +322,28 @@
             const documentModel = new DOMParser().parseFromString(html, "text/html");
             documentModel.querySelectorAll("script, base, object, embed, meta[http-equiv='refresh']")
                 .forEach(element => element.remove());
+
+            Array.from(documentModel.getElementsByTagName("x:qrcode")).forEach(qrCode => {
+                const value = qrCode.getAttribute("value") || "";
+                const requestedSize = Number.parseInt(qrCode.getAttribute("size"), 10);
+                const size = Number.isInteger(requestedSize) && requestedSize >= 40 && requestedSize <= 1000
+                    ? requestedSize
+                    : 220;
+                const image = documentModel.createElement("img");
+                image.setAttribute("src", "/mailTemplates/getQrCode?value=" + encodeURIComponent(value));
+                image.setAttribute("alt", "QR kód");
+                image.setAttribute("width", size);
+                image.setAttribute("height", size);
+                image.setAttribute("style", "display:block;border:0;width:" + size + "px;height:" + size + "px;");
+                qrCode.replaceWith(image);
+            });
+
             documentModel.querySelectorAll("img[src]").forEach(image => {
                 const source = image.getAttribute("src");
                 image.removeAttribute("srcset");
-                image.setAttribute("src", "/mailTemplates/getPicture?path=" + encodeURIComponent(source));
+                if (!source.startsWith("/mailTemplates/getQrCode?")) {
+                    image.setAttribute("src", "/mailTemplates/getPicture?path=" + encodeURIComponent(source));
+                }
             });
 
             return "<!doctype html>" + documentModel.documentElement.outerHTML;
@@ -394,6 +507,15 @@
             updatePreview();
             lt.notify();
         };
+        self.formatHtml = () => {
+            if (!self.editor || self.editor.BodyFormat !== "Html") {
+                return;
+            }
+
+            self.editor.Body = prettyPrintHtml(self.editor.Body);
+            updatePreview();
+            lt.notify();
+        };
         self.updateBodyFormat = value => {
             self.editor.BodyFormat = value;
             updatePreview();
@@ -439,6 +561,7 @@
             this.updateTypeName = value => vm.updateTypeName(value);
             this.updateSubject = value => vm.updateSubject(value);
             this.updateBody = value => vm.updateBody(value);
+            this.formatHtml = () => vm.formatHtml();
             this.updateBodyFormat = value => vm.updateBodyFormat(value);
             this.updateTestMailboxType = value => vm.updateTestMailboxType(value);
             this.updateTestRecipient = value => vm.updateTestRecipient(value);

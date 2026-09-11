@@ -40,6 +40,9 @@
     <Reference Include="MimeKit, Version=2.15.0.0, Culture=neutral, PublicKeyToken=bede1c8a46c66814, processorArchitecture=MSIL">
       <HintPath>..\packages\MimeKit.2.15.0\lib\net46\MimeKit.dll</HintPath>
     </Reference>
+    <Reference Include="QRCoder">
+      <HintPath>..\packages\QRCoder.1.8.0\lib\net40\QRCoder.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -68,6 +71,7 @@
     <Compile Include="ISmtpSettings.cs" />
     <Compile Include="MailTemplateContent.cs" />
     <Compile Include="MailTemplatePictureStore.cs" />
+    <Compile Include="MailTemplateQrCode.cs" />
     <Compile Include="SenderMailboxType.cs" />
     <Compile Include="SmtpMailSender.cs" />
     <Compile Include="SmtpRegistry.cs" />

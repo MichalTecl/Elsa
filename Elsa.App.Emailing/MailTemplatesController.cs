@@ -135,5 +135,19 @@ namespace Elsa.App.Emailing
                 DisableBrowserCache = true
             };
         }
+
+        public FileResult GetQrCode(string value)
+        {
+            EnsureUserRight(CommonDataUserRights.SettingsApp);
+
+            return new FileResult(
+                "qrcode.png",
+                MailTemplateQrCode.GeneratePng(value),
+                "image/png",
+                "inline")
+            {
+                DisableBrowserCache = true
+            };
+        }
     }
 }

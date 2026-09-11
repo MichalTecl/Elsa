@@ -11,6 +11,7 @@ app.paymentPairing.ViewModel = app.paymentPairing.ViewModel || function() {
         if (!!pairs) {
             for (var i = 0; i < pairs.length; i++) {
                 pairs[i].noPayment = (!pairs[i].Payment);
+                pairs[i].hasPaymentReminder = !!pairs[i].PaymentReminderInfo;
 
                 pairs[i].priceNotMatch = !((!pairs[i].Payment) || pairs[i].Order.Price === pairs[i].Payment.Amount);
                 pairs[i].symbolNotMatch = !((!pairs[i].Payment) || pairs[i].Order.VariableSymbol === pairs[i].Payment.VariableSymbol);
@@ -38,6 +39,12 @@ app.paymentPairing.ViewModel = app.paymentPairing.ViewModel || function() {
 
         lt.api("/paymentPairing/pair").query({ "orderId": orderId, "paymentId": paymentId }).get(receive);
 
+    };
+
+    this.sendPaymentReminder = function(orderId) {
+        lt.notify();
+
+        lt.api("/paymentPairing/sendPaymentReminder").query({ "orderId": orderId }).get(receive);
     };
 
     self.update();
