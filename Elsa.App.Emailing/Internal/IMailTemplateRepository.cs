@@ -8,7 +8,7 @@ namespace Elsa.App.Emailing.Internal
     {
         List<MailTemplateModel> GetAll();
 
-        MailTemplateModel Get(int? id);
+        MailTemplateModel Get(string typeName);
 
         MailTemplateModel GetByTypeName(string typeName);
 
@@ -16,6 +16,6 @@ namespace Elsa.App.Emailing.Internal
 
         MailTemplateModel Save(MailTemplateModel model);
 
-        void Delete(int id);
+        void Delete(string typeName, string bodyFormat);
     }
 }

@@ -41,10 +41,10 @@ namespace Elsa.App.Emailing
             return _repository.GetAll();
         }
 
-        public MailTemplateModel Get(int? id)
+        public MailTemplateModel Get(string typeName)
         {
             EnsureUserRight(CommonDataUserRights.SettingsApp);
-            var template = _repository.Get(id);
+            var template = _repository.Get(typeName);
             template.BodyBase64 = System.Convert.ToBase64String(
                 Encoding.UTF8.GetBytes(template.Body ?? string.Empty));
             template.Body = null;
@@ -59,10 +59,10 @@ namespace Elsa.App.Emailing
             return savedTemplate;
         }
 
-        public List<MailTemplateModel> Delete(int id)
+        public List<MailTemplateModel> Delete(string typeName, string bodyFormat)
         {
             EnsureUserRight(CommonDataUserRights.SettingsApp);
-            _repository.Delete(id);
+            _repository.Delete(typeName, bodyFormat);
             return _repository.GetAll();
         }
 

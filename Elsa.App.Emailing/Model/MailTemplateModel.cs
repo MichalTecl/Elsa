@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
 
 namespace Elsa.App.Emailing.Model
 {
     public class MailTemplateModel
     {
-        public int? Id { get; set; }
-
         public string TypeName { get; set; }
+
+        public string OriginalTypeName { get; set; }
 
         public string Subject { get; set; }
 
@@ -17,9 +16,7 @@ namespace Elsa.App.Emailing.Model
 
         public string BodyFormat { get; set; }
 
-        public DateTime? LastChangeDt { get; set; }
-
-        public string LastChangeUserName { get; set; }
+        public string OriginalBodyFormat { get; set; }
     }
 
     public class MailTemplateTestSettings

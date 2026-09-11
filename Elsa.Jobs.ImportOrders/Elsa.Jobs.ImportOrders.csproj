@@ -89,6 +89,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="sencha.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SQL\20260911_001_OrderImportFailureRecipients.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

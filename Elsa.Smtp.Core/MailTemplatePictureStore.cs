@@ -6,7 +6,7 @@ namespace Elsa.Smtp.Core
 {
     public static class MailTemplatePictureStore
     {
-        public const string ROOT_DIRECTORY = @"C:\Elsa\StaticPictures";
+        public const string ROOT_DIRECTORY = @"C:\Elsa\EmailTemplates";
 
         private static readonly IReadOnlyDictionary<string, string> _contentTypes =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

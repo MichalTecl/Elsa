@@ -1,76 +1,76 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
-using Elsa.App.Emailing.Entities;
 using Elsa.App.Emailing.Model;
-using Elsa.Common.Caching;
-using Elsa.Common.Data;
-using Elsa.Common.Interfaces;
 using Elsa.Smtp.Core;
-
-using Robowire.RobOrm.Core;
 
 namespace Elsa.App.Emailing.Internal
 {
     public class MailTemplateRepository : IMailTemplateRepository
     {
-        private const string DELETED_PREFIX = "SMAZÁNO_";
+        private const string SUBJECT_PREFIX = "<!-- SUBJECT:";
+        private const string SUBJECT_SUFFIX = "-->";
 
-        private readonly AutoRepo<IMailTemplate> _templates;
-        private readonly ISession _session;
+        private static readonly Regex _subjectRegex = new Regex(
+            @"^\s*<!--\s*SUBJECT:\s*(?<subject>.*?)\s*-->\s*$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        public MailTemplateRepository(ISession session, IDatabase database, ICache cache)
-        {
-            _session = session;
-            _templates = new AutoRepo<IMailTemplate>(session, database, cache);
-        }
+        private static readonly Encoding _fileEncoding = new UTF8Encoding(false);
 
         public List<MailTemplateModel> GetAll()
         {
-            return _templates.GetAll()
-                .Where(template => !IsDeleted(template))
-                .OrderBy(template => template.TypeName)
-                .Select(ToListModel)
+            EnsureDirectory();
+            var templates = Directory.EnumerateFiles(
+                    MailTemplatePictureStore.ROOT_DIRECTORY,
+                    "*",
+                    SearchOption.TopDirectoryOnly)
+                .Where(IsTemplateFile)
+                .Select(path => ReadTemplate(path, false))
+                .ToList();
+
+            var duplicate = templates
+                .GroupBy(template => template.TypeName, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(group => group.Count() > 1);
+            if (duplicate != null)
+            {
+                throw new InvalidOperationException(
+                    $"E-mailová šablona '{duplicate.Key}' existuje současně jako HTML i prostý text.");
+            }
+
+            return templates
+                .OrderBy(template => template.TypeName, StringComparer.CurrentCultureIgnoreCase)
+                .Select(template => new MailTemplateModel
+                {
+                    TypeName = template.TypeName,
+                    Subject = template.Subject,
+                    BodyFormat = template.BodyFormat
+                })
                 .ToList();
         }
 
-        public MailTemplateModel Get(int? id)
+        public MailTemplateModel Get(string typeName)
         {
-            if (id == null)
-            {
-                return new MailTemplateModel();
-            }
-
-            return ToModel(FindActive(id.Value));
+            return ReadTemplate(FindTemplatePath(typeName), true);
         }
 
         public MailTemplateModel GetByTypeName(string typeName)
         {
-            var normalizedTypeName = typeName?.Trim();
-            var template = _templates.GetAll().FirstOrDefault(item =>
-                !IsDeleted(item)
-                && string.Equals(item.TypeName?.Trim(), normalizedTypeName, StringComparison.OrdinalIgnoreCase));
-
-            if (template == null)
-            {
-                throw new InvalidOperationException($"E-mailová šablona typu '{normalizedTypeName}' neexistuje.");
-            }
-
-            return ToModel(template);
+            return Get(typeName);
         }
 
         public bool Exists(string typeName)
         {
-            var normalizedTypeName = typeName?.Trim();
-            if (string.IsNullOrWhiteSpace(normalizedTypeName))
+            if (string.IsNullOrWhiteSpace(typeName))
             {
                 return false;
             }
 
-            return _templates.GetAll().Any(item =>
-                !IsDeleted(item)
-                && string.Equals(item.TypeName?.Trim(), normalizedTypeName, StringComparison.OrdinalIgnoreCase));
+            EnsureDirectory();
+            return FindTemplatePaths(NormalizeTypeName(typeName)).Any();
         }
 
         public MailTemplateModel Save(MailTemplateModel model)
@@ -80,109 +80,218 @@ namespace Elsa.App.Emailing.Internal
                 throw new ArgumentNullException(nameof(model));
             }
 
-            var typeName = model.TypeName?.Trim();
-            if (string.IsNullOrWhiteSpace(typeName))
+            var typeName = NormalizeTypeName(model.TypeName);
+            var bodyFormat = NormalizeBodyFormat(model.BodyFormat);
+            var originalTypeName = string.IsNullOrWhiteSpace(model.OriginalTypeName)
+                ? null
+                : NormalizeTypeName(model.OriginalTypeName);
+            var originalBodyFormat = originalTypeName == null
+                ? null
+                : NormalizeBodyFormat(model.OriginalBodyFormat);
+
+            ValidateSubject(model.Subject);
+            EnsureDirectory();
+
+            var targetPath = GetTemplatePath(typeName, bodyFormat);
+            var sourcePath = originalTypeName == null
+                ? null
+                : GetTemplatePath(originalTypeName, originalBodyFormat);
+
+            if (sourcePath != null && !File.Exists(sourcePath))
             {
-                throw new InvalidOperationException("Typ šablony musí být vyplněný.");
+                throw new InvalidOperationException($"Původní e-mailová šablona '{originalTypeName}' neexistuje.");
             }
 
-            if (typeName.StartsWith(DELETED_PREFIX, StringComparison.OrdinalIgnoreCase))
+            var conflictingTemplateExists = FindTemplatePaths(typeName).Any(path =>
+                !string.Equals(path, sourcePath, StringComparison.OrdinalIgnoreCase));
+            if (conflictingTemplateExists)
             {
-                throw new InvalidOperationException($"Typ šablony nesmí začínat rezervovaným prefixem {DELETED_PREFIX}.");
+                throw new InvalidOperationException($"E-mailová šablona '{typeName}' již existuje.");
             }
 
-            var duplicateExists = _templates.GetAll().Any(template =>
-                !IsDeleted(template)
-                && template.Id != model.Id
-                && string.Equals(template.TypeName?.Trim(), typeName, StringComparison.OrdinalIgnoreCase));
+            var temporaryPath = Path.Combine(
+                MailTemplatePictureStore.ROOT_DIRECTORY,
+                $".{Guid.NewGuid():N}.mailtemplate.tmp");
 
-            if (duplicateExists)
+            try
             {
-                throw new InvalidOperationException($"Šablona typu '{typeName}' již existuje.");
+                File.WriteAllText(
+                    temporaryPath,
+                    $"{SUBJECT_PREFIX} {model.Subject ?? string.Empty} {SUBJECT_SUFFIX}\r\n{model.Body ?? string.Empty}",
+                    _fileEncoding);
+
+                if (sourcePath != null
+                    && !string.Equals(sourcePath, targetPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    File.Move(temporaryPath, targetPath);
+                    try
+                    {
+                        File.Delete(sourcePath);
+                    }
+                    catch
+                    {
+                        File.Delete(targetPath);
+                        throw;
+                    }
+                }
+                else if (File.Exists(targetPath))
+                {
+                    File.Replace(temporaryPath, targetPath, null);
+                }
+                else
+                {
+                    File.Move(temporaryPath, targetPath);
+                }
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath))
+                {
+                    File.Delete(temporaryPath);
+                }
             }
 
-            var bodyFormat = model.BodyFormat ?? MailTemplateBodyFormats.PlainText;
-            if (bodyFormat != MailTemplateBodyFormats.PlainText && bodyFormat != MailTemplateBodyFormats.Html)
+            return ReadTemplate(targetPath, true);
+        }
+
+        public void Delete(string typeName, string bodyFormat)
+        {
+            var templatePath = GetTemplatePath(NormalizeTypeName(typeName), NormalizeBodyFormat(bodyFormat));
+            if (!File.Exists(templatePath))
+            {
+                throw new InvalidOperationException($"E-mailová šablona '{typeName}' neexistuje.");
+            }
+
+            var deletedPath = $"{templatePath}.deleted_{DateTime.Now:yyyyMMdd_HHmmssfff}";
+            File.Move(templatePath, deletedPath);
+        }
+
+        private static MailTemplateModel ReadTemplate(string path, bool includeBody)
+        {
+            using (var reader = new StreamReader(path, _fileEncoding, true))
+            {
+                var subjectLine = reader.ReadLine();
+                var subjectMatch = _subjectRegex.Match(subjectLine ?? string.Empty);
+                if (!subjectMatch.Success)
+                {
+                    throw new InvalidOperationException(
+                        $"První řádek šablony '{Path.GetFileName(path)}' musí mít formát {SUBJECT_PREFIX} ... {SUBJECT_SUFFIX}.");
+                }
+
+                var bodyFormat = GetBodyFormat(path);
+                var typeName = Path.GetFileNameWithoutExtension(path);
+                return new MailTemplateModel
+                {
+                    TypeName = typeName,
+                    OriginalTypeName = typeName,
+                    Subject = subjectMatch.Groups["subject"].Value,
+                    Body = includeBody ? reader.ReadToEnd() : null,
+                    BodyFormat = bodyFormat,
+                    OriginalBodyFormat = bodyFormat
+                };
+            }
+        }
+
+        private static string FindTemplatePath(string typeName)
+        {
+            var normalizedTypeName = NormalizeTypeName(typeName);
+            EnsureDirectory();
+            var paths = FindTemplatePaths(normalizedTypeName).ToList();
+            if (paths.Count == 0)
+            {
+                throw new InvalidOperationException($"E-mailová šablona '{normalizedTypeName}' neexistuje.");
+            }
+
+            if (paths.Count > 1)
+            {
+                throw new InvalidOperationException(
+                    $"E-mailová šablona '{normalizedTypeName}' existuje současně jako HTML i prostý text.");
+            }
+
+            return paths[0];
+        }
+
+        private static IEnumerable<string> FindTemplatePaths(string typeName)
+        {
+            var plainTextPath = GetTemplatePath(typeName, MailTemplateBodyFormats.PlainText);
+            var htmlPath = GetTemplatePath(typeName, MailTemplateBodyFormats.Html);
+
+            if (File.Exists(plainTextPath))
+            {
+                yield return plainTextPath;
+            }
+
+            if (File.Exists(htmlPath))
+            {
+                yield return htmlPath;
+            }
+        }
+
+        private static string GetTemplatePath(string typeName, string bodyFormat)
+        {
+            var extension = bodyFormat == MailTemplateBodyFormats.Html ? ".html" : ".txt";
+            return Path.Combine(MailTemplatePictureStore.ROOT_DIRECTORY, typeName + extension);
+        }
+
+        private static string NormalizeTypeName(string typeName)
+        {
+            var normalizedTypeName = typeName?.Trim();
+            if (string.IsNullOrWhiteSpace(normalizedTypeName))
+            {
+                throw new InvalidOperationException("Název šablony musí být vyplněný.");
+            }
+
+            if (normalizedTypeName == "."
+                || normalizedTypeName == ".."
+                || normalizedTypeName.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
+                || normalizedTypeName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)
+                || normalizedTypeName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+            {
+                throw new InvalidOperationException(
+                    "Název šablony musí být platný název souboru bez přípony .html nebo .txt.");
+            }
+
+            return normalizedTypeName;
+        }
+
+        private static string NormalizeBodyFormat(string bodyFormat)
+        {
+            var normalizedBodyFormat = bodyFormat ?? MailTemplateBodyFormats.PlainText;
+            if (normalizedBodyFormat != MailTemplateBodyFormats.PlainText
+                && normalizedBodyFormat != MailTemplateBodyFormats.Html)
             {
                 throw new InvalidOperationException("Vybraný formát těla e-mailu není podporovaný.");
             }
 
-            var saved = _templates.Upsert(model.Id, template =>
-            {
-                if (template.Id < 1)
-                {
-                    template.ProjectId = _session.Project.Id;
-                }
-                else if (IsDeleted(template))
-                {
-                    throw new InvalidOperationException("Smazanou šablonu nelze upravit.");
-                }
-
-                template.TypeName = typeName;
-                template.Subject = model.Subject?.Trim() ?? string.Empty;
-                template.Body = model.Body ?? string.Empty;
-                template.BodyFormat = bodyFormat;
-                SetChangeInfo(template);
-            });
-
-            return ToModel(saved);
+            return normalizedBodyFormat;
         }
 
-        public void Delete(int id)
+        private static void ValidateSubject(string subject)
         {
-            var template = FindActive(id);
-            template.TypeName = $"{DELETED_PREFIX}{template.Id}";
-            SetChangeInfo(template);
-            _templates.Save(template);
-        }
-
-        private IMailTemplate FindActive(int id)
-        {
-            var template = _templates.GetAll().FirstOrDefault(item => item.Id == id);
-            if (template == null || IsDeleted(template))
+            if ((subject ?? string.Empty).IndexOfAny(new[] { '\r', '\n' }) >= 0
+                || (subject ?? string.Empty).Contains(SUBJECT_SUFFIX))
             {
-                throw new InvalidOperationException($"E-mailová šablona s Id={id} neexistuje.");
+                throw new InvalidOperationException("Předmět musí být na jednom řádku a nesmí obsahovat '-->'.");
             }
-
-            return template;
         }
 
-        private void SetChangeInfo(IMailTemplate template)
+        private static bool IsTemplateFile(string path)
         {
-            template.LastChangeDt = DateTime.Now;
-            template.LastChangeUserId = _session.User.Id;
+            var extension = Path.GetExtension(path);
+            return extension.Equals(".html", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".txt", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool IsDeleted(IMailTemplate template)
+        private static string GetBodyFormat(string path)
         {
-            return template.TypeName?.StartsWith(DELETED_PREFIX, StringComparison.OrdinalIgnoreCase) == true;
+            return Path.GetExtension(path).Equals(".html", StringComparison.OrdinalIgnoreCase)
+                ? MailTemplateBodyFormats.Html
+                : MailTemplateBodyFormats.PlainText;
         }
 
-        private static MailTemplateModel ToModel(IMailTemplate template)
+        private static void EnsureDirectory()
         {
-            return new MailTemplateModel
-            {
-                Id = template.Id,
-                TypeName = template.TypeName,
-                Subject = template.Subject,
-                Body = template.Body,
-                BodyFormat = template.BodyFormat ?? MailTemplateBodyFormats.PlainText,
-                LastChangeDt = template.LastChangeDt,
-                LastChangeUserName = template.LastChangeUser?.EMail
-            };
-        }
-
-        private static MailTemplateModel ToListModel(IMailTemplate template)
-        {
-            return new MailTemplateModel
-            {
-                Id = template.Id,
-                TypeName = template.TypeName,
-                Subject = template.Subject,
-                BodyFormat = template.BodyFormat ?? MailTemplateBodyFormats.PlainText,
-                LastChangeDt = template.LastChangeDt,
-                LastChangeUserName = template.LastChangeUser?.EMail
-            };
+            Directory.CreateDirectory(MailTemplatePictureStore.ROOT_DIRECTORY);
         }
     }
 }
