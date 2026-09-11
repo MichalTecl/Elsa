@@ -1,0 +1,73 @@
+<ElsaBody>
+    <script src="/UI/OrdersInfo/OrderImportFailures.vm.js"></script>
+    <link href="/UI/OrdersInfo/OrderImportFailures.css" rel="stylesheet" />
+
+    <div class="panel w4">
+        <div class="panelHead">
+            <div class="panelTitle">Nezdařené importy objednávek</div>
+        </div>
+
+        <div id="orderImportFailuresPage" class="panelContent orderImportFailuresPage">
+            <div class="orderImportFailuresToolbar">
+                <a href="/UI/OrdersInfo/OrdersInfo.html">Zpět na přehled objednávek</a>
+                <button type="button" data-bind="disabled:isLoading" event-bind="click:reload()">
+                    <i class="fas fa-sync-alt"></i>
+                    Obnovit
+                </button>
+            </div>
+
+            <div class="orderImportFailuresLoading hidden" data-bind="class!.hidden:isLoading">
+                Načítám nezdařené importy…
+            </div>
+
+            <div class="orderImportFailuresEmpty hidden" data-bind="class!.hidden:isEmpty">
+                <i class="far fa-check-circle"></i>
+                Aktuálně nejsou evidovány žádné nezdařené importy objednávek.
+            </div>
+
+            <div class="orderImportFailuresTable hidden" data-bind="class!.hidden:hasFailures">
+                <div class="orderImportFailuresHeader">
+                    <span>ERP</span>
+                    <span>Číslo objednávky</span>
+                    <span>První selhání</span>
+                    <span>Poslední selhání</span>
+                    <span>Počet</span>
+                    <span>Poslední chyba</span>
+                    <span></span>
+                </div>
+
+                <div data-bind="itemsSource:failures" data-key="Id">
+                    <div class="lt-template orderImportFailuresRow">
+                        <span data-bind="text:ErpName"></span>
+                        <strong data-bind="text:OrderNumber"></strong>
+                        <span data-bind="text:FirstFailureDtText;title:FirstFailureDtTitle"></span>
+                        <span data-bind="text:LastFailureDtText;title:LastFailureDtTitle"></span>
+                        <span class="orderImportFailuresCount" data-bind="text:FailureCount"></span>
+                        <span class="orderImportFailuresError" data-bind="text:LastErrorSummary;title:LastError"></span>
+                        <span class="orderImportFailuresAction">
+                            <button type="button" data-bind="disabled:IsRetrying" event-bind="click:retry(VM)">
+                                <i class="fas fa-redo-alt"></i>
+                                <span data-bind="text:RetryButtonText"></span>
+                            </button>
+                            <span class="orderImportFailuresRetryError hidden" data-bind="class!.hidden:HasRetryError;text:RetryError"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lt.element("orderImportFailuresPage").withModel("app.OrderImportFailures.vm").attach(function () {
+            this.reload = function () {
+                app.OrderImportFailures.vm.load();
+            };
+
+            this.retry = function (failure) {
+                app.OrderImportFailures.vm.retry(failure);
+            };
+
+            app.OrderImportFailures.vm.load();
+        });
+    </script>
+</ElsaBody>

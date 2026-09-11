@@ -14,10 +14,13 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection.Model
 
         public ApiPriceElementModel(OrderPriceElement source)
         {
-            _source = source;
+            _source = source ?? throw new InvalidOperationException("Seznam cenových položek objednávky obsahuje prázdný záznam.");
 
             if (_source.price == null)
-                throw new ArgumentNullException("priceElement.price");
+            {
+                var identification = _source.id ?? _source.title ?? _source.type ?? "bez ID a názvu";
+                throw new InvalidOperationException($"Cenové položce {identification} chybí cena (price).");
+            }
         }
 
         public string ErpPriceElementId => _source.id;

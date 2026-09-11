@@ -93,6 +93,7 @@
     <Compile Include="IPackingPreferredBatchRepository.cs" />
     <Compile Include="IPaymentRepository.cs" />
     <Compile Include="IProductRepository.cs" />
+    <Compile Include="IOrderImportFailureRepository.cs" />
     <Compile Include="IPurchaseOrderRepository.cs" />
     <Compile Include="ISupplierRepository.cs" />
     <Compile Include="IUnitRepository.cs" />
@@ -180,6 +181,7 @@
     <Compile Include="Repositories\OrderStatusRepository.cs" />
     <Compile Include="Repositories\PaymentRepository.cs" />
     <Compile Include="Repositories\ProductRepository.cs" />
+    <Compile Include="Repositories\OrderImportFailureRepository.cs" />
     <Compile Include="Repositories\PurchaseOrderRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />

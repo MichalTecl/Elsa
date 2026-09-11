@@ -120,6 +120,7 @@
     <Compile Include="Extensions\PurchaseOrderExtensions.cs" />
     <Compile Include="Integration\IErp.cs" />
     <Compile Include="Integration\IErpOrderStatusMapping.cs" />
+    <Compile Include="Integration\IOrderImportFailure.cs" />
     <Compile Include="Integration\IOrderProcessingLog.cs" />
     <Compile Include="Integration\IOrdersSyncHistory.cs" />
     <Compile Include="Integration\IPaymentSource.cs" />

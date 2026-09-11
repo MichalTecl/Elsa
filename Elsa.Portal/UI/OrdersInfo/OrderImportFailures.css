@@ -1,0 +1,88 @@
+.orderImportFailuresPage {
+    min-height: 180px;
+}
+
+.orderImportFailuresToolbar {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.orderImportFailuresLoading,
+.orderImportFailuresEmpty {
+    padding: 24px;
+    text-align: center;
+}
+
+.orderImportFailuresEmpty {
+    color: #357a38;
+}
+
+.orderImportFailuresEmpty i {
+    margin-right: 6px;
+}
+
+.orderImportFailuresTable {
+    border: 1px solid #d2d2d2;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.orderImportFailuresHeader,
+.orderImportFailuresRow {
+    align-items: start;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: minmax(100px, 0.8fr) minmax(130px, 0.9fr) minmax(135px, 0.9fr) minmax(135px, 0.9fr) 55px minmax(260px, 2.4fr) minmax(150px, 1fr);
+    padding: 9px 12px;
+}
+
+.orderImportFailuresHeader {
+    background: #eeeeee;
+    font-weight: bold;
+}
+
+.orderImportFailuresRow {
+    border-top: 1px solid #dddddd;
+}
+
+.orderImportFailuresRow:nth-child(even) {
+    background: #fafafa;
+}
+
+.orderImportFailuresCount {
+    text-align: center;
+}
+
+.orderImportFailuresError {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.orderImportFailuresAction button {
+    white-space: nowrap;
+}
+
+.orderImportFailuresAction button i {
+    margin-right: 5px;
+}
+
+.orderImportFailuresRetryError {
+    color: #b00020;
+    display: block;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+@media (max-width: 1050px) {
+    .orderImportFailuresTable {
+        overflow-x: auto;
+    }
+
+    .orderImportFailuresHeader,
+    .orderImportFailuresRow {
+        min-width: 1050px;
+    }
+}

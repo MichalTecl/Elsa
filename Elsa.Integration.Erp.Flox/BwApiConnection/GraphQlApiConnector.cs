@@ -28,11 +28,13 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
 
         private readonly FloxClientConfig _config;
         private readonly ILog _log;
+        private readonly Action<Order, Exception> _invalidOrderHandler;
 
-        public GraphQlApiConnector(FloxClientConfig config, ILog log)
+        public GraphQlApiConnector(FloxClientConfig config, ILog log, Action<Order, Exception> invalidOrderHandler)
         {
             _config = config;
-            _log = log;                  
+            _log = log;
+            _invalidOrderHandler = invalidOrderHandler ?? throw new ArgumentNullException(nameof(invalidOrderHandler));
         }
 
         public IErpOrderModel LoadOrder(string orderNumber)
@@ -54,6 +56,7 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
             _log.Info($"Loading orders changed after {changedFrom}");
 
             var result = new List<IErpOrderModel>();
+            var skippedOrdersCount = 0;
 
             int? cursor = null;
 
@@ -103,14 +106,28 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
                     throw new Exception("Cannot download orders");
                 }
 
-                foreach (var o in page.data)
-                    result.Add(Map(o));
+                foreach (var order in page.data)
+                {
+                    try
+                    {
+                        result.Add(Map(order));
+                    }
+                    catch (Exception ex)
+                    {
+                        skippedOrdersCount++;
+
+                        var orderId = order?.id ?? "<null>";
+                        var orderNumber = order?.order_num ?? "<null>";
+                        _log.Error($"Invalid order returned by BW API (id={orderId}, number={orderNumber}). It will be queued for retry.", ex);
+                        _invalidOrderHandler(order, ex);
+                    }
+                }
 
                 _log.Info("Orders mapped");
 
             } while (cursor != null);
 
-            _log.Info($"Completed loading of {result.Count} orders");
+            _log.Info($"Completed loading of {result.Count} orders; skipped invalid orders: {skippedOrdersCount}");
 
             return result;
         }
@@ -252,7 +269,7 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
         private IErpOrderModel Map(Order order)
         {
             if (order == null)
-                return null;
+                throw new ArgumentNullException(nameof(order));
 
             return new ApiOrderModel(order);
         }

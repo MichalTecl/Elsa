@@ -17,53 +17,55 @@ namespace Elsa.Commerce.Core.Repositories
 {
     public class PurchaseOrderRepository : IPurchaseOrderRepository
     {
-        private readonly IErpClientFactory m_erpClientFactory;
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly IDictionary<int, IErpDataMapper> m_mapperIndex = new Dictionary<int, IErpDataMapper>();
-        private readonly IProductRepository m_productRepository;
+        private readonly IErpClientFactory _erpClientFactory;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly IDictionary<int, IErpDataMapper> _mapperIndex = new Dictionary<int, IErpDataMapper>();
+        private readonly IProductRepository _productRepository;
 
-        private readonly ICurrencyRepository m_currencyRepository;
-        private readonly IOrderStatusMappingRepository m_statusMappingRepository;
+        private readonly ICurrencyRepository _currencyRepository;
+        private readonly IOrderStatusMappingRepository _statusMappingRepository;
         private readonly List<IPurchaseOrder> _ordersCache = new List<IPurchaseOrder>();
-        private readonly ICache m_cache;
-        private readonly ILog m_log;
+        private readonly ICache _cache;
+        private readonly ILog _log;
+        private readonly IOrderImportFailureRepository _orderImportFailureRepository;
 
-        public PurchaseOrderRepository(IErpClientFactory erpClientFactory, IDatabase database, ISession session, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productRepository, ICache cache, ILog log)
+        public PurchaseOrderRepository(IErpClientFactory erpClientFactory, IDatabase database, ISession session, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productRepository, ICache cache, ILog log, IOrderImportFailureRepository orderImportFailureRepository)
         {
-            m_erpClientFactory = erpClientFactory;
-            m_database = database;
-            m_session = session;
-            m_currencyRepository = currencyRepository;
-            m_statusMappingRepository = statusMappingRepository;
-            m_productRepository = productRepository;
-            m_cache = cache;
-            m_log = log;
+            _erpClientFactory = erpClientFactory;
+            _database = database;
+            _session = session;
+            _currencyRepository = currencyRepository;
+            _statusMappingRepository = statusMappingRepository;
+            _productRepository = productRepository;
+            _cache = cache;
+            _log = log;
+            _orderImportFailureRepository = orderImportFailureRepository;
         }
 
         public long ImportErpOrder(IErpOrderModel orderModel)
         {
-            m_log.Info($"Starting import of order {orderModel.OrderNumber}");
+            _log.Info($"Starting import of order {orderModel.OrderNumber}");
 
             long result;
-            using (var trx = m_database.OpenTransaction())
+            using (var trx = _database.OpenTransaction())
             {
                 var mapper = GetMapper(orderModel);
 
-                var host = new OrderMapperHost(mapper, orderModel, this, m_database, m_currencyRepository, m_statusMappingRepository, m_productRepository);
+                var host = new OrderMapperHost(mapper, orderModel, this, _database, _currencyRepository, _statusMappingRepository, _productRepository);
                 if (!host.Map())
                 {
-                    m_log.Info($"Order {orderModel.OrderNumber} unchanged (orderId={host.Order.Id}) - done");
+                    _log.Info($"Order {orderModel.OrderNumber} unchanged (orderId={host.Order.Id}) - done");
                     trx.Commit();
                     return host.Order.Id;
                 }
-                
-                m_currencyRepository.SaveCurrency(host.Currency);
+
+                _currencyRepository.SaveCurrency(host.Currency);
                 host.Order.CurrencyId = host.Currency.Id;
 
                 if (host.DeliveryAddress != null)
                 {
-                    m_database.Save(host.DeliveryAddress);
+                    _database.Save(host.DeliveryAddress);
                     host.Order.DeliveryAddressId = host.DeliveryAddress.Id;
                 }
                 else
@@ -73,88 +75,88 @@ namespace Elsa.Commerce.Core.Repositories
 
                 if (host.InvoiceAddress != null)
                 {
-                    m_database.Save(host.InvoiceAddress);
+                    _database.Save(host.InvoiceAddress);
                     host.Order.InvoiceAddressId = host.InvoiceAddress.Id;
                 }
                 else
                 {
                     host.Order.InvoiceAddressId = null;
                 }
-                
+
                 host.Order.ErpId = orderModel.ErpSystemId;
 
                 if (host.Order.Id < 1)
                 {
-                    m_log.Info($"Order {orderModel.OrderNumber} will be INSERTed");
-                    host.Order.InsertUserId = m_session.User.Id;
+                    _log.Info($"Order {orderModel.OrderNumber} will be INSERTed");
+                    host.Order.InsertUserId = _session.User.Id;
                     host.Order.InsertDt = DateTime.Now;
                 }
                 else
                 {
-                    m_log.Info($"Order {orderModel.OrderNumber} will be UPDATEd (orderId={host.Order.Id})");
+                    _log.Info($"Order {orderModel.OrderNumber} will be UPDATEd (orderId={host.Order.Id})");
                 }
 
-                host.Order.ProjectId = m_session.Project.Id;
+                host.Order.ProjectId = _session.Project.Id;
 
-                m_database.Save(host.Order);
+                _database.Save(host.Order);
 
                 foreach (var item in host.Items)
                 {
                     var isInsert = item.Id < 1;
 
                     item.PurchaseOrderId = host.Order.Id;
-                    m_database.Save(item);
+                    _database.Save(item);
 
-                    m_log.Info($"OrderItem OrderId={host.Order?.Id} OrderNr={host.Order?.OrderNumber} ItemId={item.Id} {(isInsert ? "inserted" : "updated")}");
+                    _log.Info($"OrderItem OrderId={host.Order?.Id} OrderNr={host.Order?.OrderNumber} ItemId={item.Id} {(isInsert ? "inserted" : "updated")}");
                 }
 
-                foreach(var priceElement in host.PriceElements) 
+                foreach(var priceElement in host.PriceElements)
                 {
                     priceElement.PurchaseOrderId = host.Order.Id;
-                    m_database.Save(priceElement);
+                    _database.Save(priceElement);
                 }
 
                 foreach (var delId in host.OrderItemsToDelete)
                 {
-                    m_log.Info($"Existing orderItem OrderId={host.Order?.Id} OrderNr={host.Order?.OrderNumber} ItemId={delId} will be deleted");
+                    _log.Info($"Existing orderItem OrderId={host.Order?.Id} OrderNr={host.Order?.OrderNumber} ItemId={delId} will be deleted");
 
-                    var kitChildren = m_database.SelectFrom<IOrderItem>().Where(i => i.KitParentId == delId).Execute()
+                    var kitChildren = _database.SelectFrom<IOrderItem>().Where(i => i.KitParentId == delId).Execute()
                         .ToList();
 
                     var orderItemIds = new List<long>(1 + kitChildren.Count);
                     orderItemIds.Add(delId);
                     orderItemIds.AddRange(kitChildren.Select(ch => ch.Id));
 
-                    var oimbs = m_database.SelectFrom<IOrderItemMaterialBatch>().Where(ob => ob.OrderItemId.InCsv(orderItemIds)).Execute().ToList();
+                    var oimbs = _database.SelectFrom<IOrderItemMaterialBatch>().Where(ob => ob.OrderItemId.InCsv(orderItemIds)).Execute().ToList();
                     if (oimbs.Any())
                     {
-                        m_database.DeleteAll(oimbs);
+                        _database.DeleteAll(oimbs);
                     }
 
                     if (kitChildren.Any())
                     {
-                        m_database.DeleteAll(kitChildren);
+                        _database.DeleteAll(kitChildren);
                     }
 
-                    var item = m_database.SelectFrom<IOrderItem>().Where(i => i.Id == delId).Execute().FirstOrDefault();
+                    var item = _database.SelectFrom<IOrderItem>().Where(i => i.Id == delId).Execute().FirstOrDefault();
                     if (item != null)
                     {
-                        m_database.Delete(item);
+                        _database.Delete(item);
                     }
                 }
 
-                foreach(var pelmDelId in host.PriceElementsToDelete) 
+                foreach(var pelmDelId in host.PriceElementsToDelete)
                 {
-                    var item = m_database.SelectFrom<IOrderPriceElement>().Where(i => i.Id == pelmDelId).Execute().FirstOrDefault();
-                    if (item != null) 
+                    var item = _database.SelectFrom<IOrderPriceElement>().Where(i => i.Id == pelmDelId).Execute().FirstOrDefault();
+                    if (item != null)
                     {
-                        m_database.Delete(item);
+                        _database.Delete(item);
                     }
                 }
 
                 result = host.Order.Id;
 
-                m_log.Info($"Import of order {orderModel.OrderNumber} (orderId={host.Order.Id}) completed, commiting the transaction");
+                _log.Info($"Import of order {orderModel.OrderNumber} (orderId={host.Order.Id}) completed, commiting the transaction");
 
                 trx.Commit();
             }
@@ -164,39 +166,57 @@ namespace Elsa.Commerce.Core.Repositories
 
         public void ImportErpOrders(int erpId, List<IErpOrderModel> orders)
         {
-            m_log.Info($"Got {orders.Count} orders to sync");
+            _log.Info($"Got {orders.Count} orders to sync");
 
             if (orders.Count == 0)
             {
-                m_log.Info("Skipping saving...");
+                _log.Info("Skipping saving...");
                 return;
             }
 
-            if (orders.Any(o => o.ErpSystemId != erpId))
-                throw new Exception("Passed order for another erp");
+            var erp = _erpClientFactory.GetErpClient(erpId);
+            var candidates = new List<OrderImportCandidate>(orders.Count);
+            var failedOrdersCount = 0;
 
-            var erp = m_erpClientFactory.GetErpClient(erpId);
-
-            for (int i = orders.Count - 1; i >= 0; i--)
+            foreach (var order in orders)
             {
-                var eOrd = orders[i];
-
-                var purDate = erp.Mapper.GetPurchaseDate(eOrd);
-                if ((DateTime.Now - purDate).TotalDays > 400)
+                try
                 {
-                    m_log.Error($"ERP exported order {eOrd.OrderNumber} which has purchase date older than 400 days ({purDate}). Removing from import.");
+                    if (order == null)
+                        throw new ArgumentNullException(nameof(order));
 
-                    orders.RemoveAt(i);
+                    if (order.ErpSystemId != erpId)
+                        throw new Exception($"Passed order for another ERP (expected={erpId}, actual={order.ErpSystemId})");
+
+                    var purchaseDate = erp.Mapper.GetPurchaseDate(order);
+                    if ((DateTime.Now - purchaseDate).TotalDays > 400)
+                    {
+                        _log.Error($"ERP exported order {GetOrderIdentification(order)} which has purchase date older than 400 days ({purchaseDate}). Removing from import.");
+                        continue;
+                    }
+
+                    candidates.Add(new OrderImportCandidate(order, purchaseDate));
+                }
+                catch (Exception ex)
+                {
+                    failedOrdersCount++;
+                    HandleOrderImportFailure(erpId, order, "initial validation", ex);
                 }
             }
 
-            var loadExistingFrom = orders.Min(o => erp.Mapper.GetPurchaseDate(o));
-            var loadExistingTo = orders.Max(o => erp.Mapper.GetPurchaseDate(o));
+            if (candidates.Count == 0)
+            {
+                _log.Info($"No valid orders to save; failed orders: {failedOrdersCount}");
+                return;
+            }
 
-            m_log.Info($"Loading existing orders index from {loadExistingFrom} to {loadExistingTo}");
+            var loadExistingFrom = candidates.Min(c => c.PurchaseDate);
+            var loadExistingTo = candidates.Max(c => c.PurchaseDate);
 
-            var existingOrders = m_database.SelectFrom<IPurchaseOrder>()
-                .Where(o => o.ProjectId == m_session.Project.Id)
+            _log.Info($"Loading existing orders index from {loadExistingFrom} to {loadExistingTo}");
+
+            var existingOrders = _database.SelectFrom<IPurchaseOrder>()
+                .Where(o => o.ProjectId == _session.Project.Id)
                 .Where(o => o.ErpId == erpId)
                 .Where(o => o.PurchaseDate >= loadExistingFrom)
                 .OrderByDesc(o => o.Id)
@@ -209,64 +229,117 @@ namespace Elsa.Commerce.Core.Repositories
             {
                 if (existingOrdersIndex.ContainsKey(order.OrderNumber))
                 {
-                    m_log.Error($"Duplicity order number found in the database: {order.OrderNumber}");
+                    _log.Error($"Duplicity order number found in the database: {order.OrderNumber}");
                     continue;
                 }
 
                 existingOrdersIndex[order.OrderNumber] = order;
             }
 
-            m_log.Info($"Loaded {existingOrdersIndex.Count} existing records");
+            _log.Info($"Loaded {existingOrdersIndex.Count} existing records");
 
-            var dirtyOrders = new List<IErpOrderModel>(orders.Count);
+            var dirtyOrders = new List<OrderImportCandidate>(candidates.Count);
 
-            foreach(var o in orders)
-            {
-                if(!existingOrdersIndex.TryGetValue(o.OrderNumber, out var existingOrder))
-                {
-                    m_log.Info($"Order {o.OrderNumber} is new - adding to import");
-                    dirtyOrders.Add(o);
-                    continue;
-                }
-
-                if (existingOrder.OrderHash != o.OrderHash)
-                {
-                    m_log.Info($"Order {o.OrderNumber} is changed - adding to import");
-                    dirtyOrders.Add(o);
-                }
-            }
-
-            m_log.Info($"{dirtyOrders.Count} orders considered to be new or changed");
-
-            if(dirtyOrders.Count == 0)
-            {
-                m_log.Info("Skipping orders saving");
-                return;
-            }
-
-            var preloadFrom = dirtyOrders.Min(o => erp.Mapper.GetPurchaseDate(o));
-            var preloadTo = dirtyOrders.Max(o => erp.Mapper.GetPurchaseDate(o));
-
-            PreloadOrders(preloadFrom, preloadTo);
-
-            foreach(var o in dirtyOrders)
+            foreach (var candidate in candidates)
             {
                 try
                 {
-                    ImportErpOrder(o);
+                    var order = candidate.Order;
+                    if (!existingOrdersIndex.TryGetValue(order.OrderNumber, out var existingOrder))
+                    {
+                        _log.Info($"Order {order.OrderNumber} is new - adding to import");
+                        dirtyOrders.Add(candidate);
+                        continue;
+                    }
+
+                    if (existingOrder.OrderHash != order.OrderHash)
+                    {
+                        _log.Info($"Order {order.OrderNumber} is changed - adding to import");
+                        dirtyOrders.Add(candidate);
+                    }
+                    else
+                    {
+                        _orderImportFailureRepository.Resolve(erpId, order.OrderNumber);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    m_log.Error($"Failed to save order {o.OrderNumber}", ex);
-                    throw;
+                    failedOrdersCount++;
+                    HandleOrderImportFailure(erpId, candidate.Order, "change detection", ex);
                 }
             }
+
+            _log.Info($"{dirtyOrders.Count} orders considered to be new or changed");
+
+            if(dirtyOrders.Count == 0)
+            {
+                _log.Info("Skipping orders saving");
+                return;
+            }
+
+            var preloadFrom = dirtyOrders.Min(c => c.PurchaseDate);
+            var preloadTo = dirtyOrders.Max(c => c.PurchaseDate);
+
+            PreloadOrders(preloadFrom, preloadTo);
+
+            foreach (var candidate in dirtyOrders)
+            {
+                try
+                {
+                    ImportErpOrder(candidate.Order);
+                    _orderImportFailureRepository.Resolve(erpId, candidate.Order.OrderNumber);
+                }
+                catch (Exception ex)
+                {
+                    failedOrdersCount++;
+                    HandleOrderImportFailure(erpId, candidate.Order, "database save", ex);
+                }
+            }
+
+            _log.Info($"Orders import completed; received: {orders.Count}, failed: {failedOrdersCount}");
+        }
+
+        private void HandleOrderImportFailure(int erpId, IErpOrderModel order, string phase, Exception exception)
+        {
+            var orderNumber = order?.OrderNumber;
+            if (!string.IsNullOrWhiteSpace(orderNumber))
+                _orderImportFailureRepository.RegisterFailure(erpId, orderNumber, exception.ToString());
+
+            _log.Error($"Import of order {GetOrderIdentification(order)} failed during {phase}. The order will be skipped and the import will continue.", exception);
+        }
+
+        private static string GetOrderIdentification(IErpOrderModel order)
+        {
+            if (order == null)
+                return "<null>";
+
+            try
+            {
+                return order.OrderNumber ?? order.ErpOrderId ?? "<unknown>";
+            }
+            catch
+            {
+                return "<unavailable>";
+            }
+        }
+
+        private sealed class OrderImportCandidate
+        {
+            public OrderImportCandidate(IErpOrderModel order, DateTime purchaseDate)
+            {
+                Order = order;
+                PurchaseDate = purchaseDate;
+            }
+
+            public IErpOrderModel Order { get; }
+
+            public DateTime PurchaseDate { get; }
         }
 
         public IPurchaseOrder TryLoadOrderByOrderNumber(string orderNumber)
         {
             var cachedOrder =
-                _ordersCache.FirstOrDefault(i => (i.ProjectId == m_session.Project.Id) && (i.OrderNumber == orderNumber));
+                _ordersCache.FirstOrDefault(i => (i.ProjectId == _session.Project.Id) && (i.OrderNumber == orderNumber));
             if (cachedOrder != null)
             {
                 return cachedOrder;
@@ -284,11 +357,11 @@ namespace Elsa.Commerce.Core.Repositories
         {
             _ordersCache.Clear();
 
-            m_log.Info($"Preloading orders cache {from} - {to}");
+            _log.Info($"Preloading orders cache {from} - {to}");
 
             _ordersCache.AddRange(BuildOrdersQuery().Where(o => (o.PurchaseDate >= @from) && (o.PurchaseDate <= to)).Execute());
 
-            m_log.Info($"Orders cache loaded {_ordersCache.Count} orders");
+            _log.Info($"Orders cache loaded {_ordersCache.Count} orders");
         }
 
         public IEnumerable<OrdersOverviewModel> GetOrdersOverview(DateTime from, DateTime to)
@@ -303,11 +376,11 @@ namespace Elsa.Commerce.Core.Repositories
                                     ORDER BY po.OrderStatusId, erp.Description; ";
 
             return
-                m_database.Sql()
+                _database.Sql()
                     .Execute(sql)
                     .WithParam("@from", from)
                     .WithParam("@to", to)
-                    .WithParam("@projectId", m_session.Project.Id)
+                    .WithParam("@projectId", _session.Project.Id)
                     .MapRows(row => new OrdersOverviewModel()
                                         {
                                             ErpName = row.GetString(0),
@@ -328,9 +401,9 @@ namespace Elsa.Commerce.Core.Repositories
 
         public int CountOrdersToPack()
         {
-            return m_database.Sql()
+            return _database.Sql()
                 .ExecuteWithParams("SELECT COUNT(Id) FROM PurchaseOrder WHERE ProjectId={0} AND OrderStatusId = {1}",
-                    m_session.Project.Id, 
+                    _session.Project.Id,
                     OrderStatus.ReadyToPack.Id)
                 .Scalar<int>();
         }
@@ -355,11 +428,11 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IEnumerable<IPurchaseOrder> GetOrdersToMarkPaidInErp()
         {
-            var orderIds = m_database.Sql().Execute(@"SELECT DISTINCT po.Id
+            var orderIds = _database.Sql().Execute(@"SELECT DISTINCT po.Id
                                           FROM PurchaseOrder po
-                                    INNER JOIN ErpOrderStatusMapping mp ON (po.ErpStatusId = mp.ErpStatusId 
+                                    INNER JOIN ErpOrderStatusMapping mp ON (po.ErpStatusId = mp.ErpStatusId
                                                                         AND po.ErpId = mp.ErpId)
-                                    WHERE po.PaymentPairingDt IS NULL AND mp.SetPaidInErp = 1 AND po.ProjectId = @projectId").WithParam("@projectId", m_session.Project.Id).MapRows(r => r.GetInt64(0));
+                                    WHERE po.PaymentPairingDt IS NULL AND mp.SetPaidInErp = 1 AND po.ProjectId = @projectId").WithParam("@projectId", _session.Project.Id).MapRows(r => r.GetInt64(0));
 
             foreach (var orderId in orderIds)
             {
@@ -371,34 +444,34 @@ namespace Elsa.Commerce.Core.Repositories
         {
             const string sql = @"SELECT COUNT(Id)
                                   FROM PurchaseOrder po
-                                 WHERE po.IsPayOnDelivery = 0                                    
-                                   AND po.OrderStatusId = 2                                     
-                                   AND po.ProjectId = {0} 
+                                 WHERE po.IsPayOnDelivery = 0
+                                   AND po.OrderStatusId = 2
+                                   AND po.ProjectId = {0}
                                 ";
 
-            return m_database.Sql().ExecuteWithParams(sql, m_session.Project.Id).Scalar<int?>() ?? 0;
+            return _database.Sql().ExecuteWithParams(sql, _session.Project.Id).Scalar<int?>() ?? 0;
         }
 
         public IEnumerable<IOrderItem> GetChildItemsByParentItemId(long parentItemId)
         {
             return
-                m_database.SelectFrom<IOrderItem>()
+                _database.SelectFrom<IOrderItem>()
                     .Join(i => i.KitParent)
                     .Join(i => i.KitParent.PurchaseOrder)
                     .Join(i => i.AssignedBatches)
                     //.Where(i => i.KitParentId != null)
                     .Where(i => i.KitParentId == parentItemId)
-                    .Where(i => i.KitParent.PurchaseOrder.ProjectId == m_session.Project.Id)
+                    .Where(i => i.KitParent.PurchaseOrder.ProjectId == _session.Project.Id)
                     .Execute();
         }
 
         public IEnumerable<IPurchaseOrder> GetOrdersByMaterialBatch(int batchId)
         {
-            return m_database.SelectFrom<IPurchaseOrder>()
+            return _database.SelectFrom<IPurchaseOrder>()
                     .Join(po => po.Items)
                     .Join(po => po.Items.Each().AssignedBatches.Each().MaterialBatch)
                     .Join(po => po.Items.Each().KitChildren.Each().AssignedBatches.Each().MaterialBatch)
-                    .Where(po => po.ProjectId == m_session.Project.Id)
+                    .Where(po => po.ProjectId == _session.Project.Id)
                     .Where(
                         po =>
                             (po.Items.Each().AssignedBatches.Each().MaterialBatchId == batchId)
@@ -413,17 +486,17 @@ namespace Elsa.Commerce.Core.Repositories
                 throw new InvalidOperationException($"Ze šarže nemůže být odebráno množství větší, než je množství objednané položky");
             }
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var existingAssignments =
-                    m_database.SelectFrom<IOrderItemMaterialBatch>()
+                    _database.SelectFrom<IOrderItemMaterialBatch>()
                         .Where(a => a.OrderItemId == orderItem.Id)
                         .Execute()
                         .ToList();
 
                 /*
                 var assignmentsToRemove = existingAssignments.Where(a => a.MaterialBatchId == batchId);
-                m_database.DeleteAll(assignmentsToRemove);
+                _database.DeleteAll(assignmentsToRemove);
                 */
 
                 var alreadyAllocatedAmount =
@@ -434,14 +507,14 @@ namespace Elsa.Commerce.Core.Repositories
                     throw new InvalidOperationException($"Položka již má přiřazené šarže. Výsledné přiřazení by překračovalo celkové množství položky.");
                 }
 
-                var assignment = m_database.New<IOrderItemMaterialBatch>();
+                var assignment = _database.New<IOrderItemMaterialBatch>();
                 assignment.MaterialBatchId = batchId;
                 assignment.OrderItemId = orderItem.Id;
                 assignment.Quantity = quantity;
                 assignment.AssignmentDt = DateTime.Now;
-                assignment.UserId = m_session.User.Id;
+                assignment.UserId = _session.User.Id;
 
-                m_database.Save(assignment);
+                _database.Save(assignment);
 
                 tx.Commit();
             }
@@ -451,9 +524,9 @@ namespace Elsa.Commerce.Core.Repositories
         {
             var ids = new List<long>();
 
-            m_database.Sql().ExecuteWithParams(
+            _database.Sql().ExecuteWithParams(
                 "SELECT Id FROM PurchaseOrder WHERE OrderStatusId=6 AND ProjectId = {0} AND MONTH(ReturnDt) = {1} AND YEAR(ReturnDt) = {2}",
-                m_session.Project.Id,
+                _session.Project.Id,
                 month,
                 year).ReadRows<long>(ids.Add);
 
@@ -465,9 +538,9 @@ namespace Elsa.Commerce.Core.Repositories
 
         public long? SearchOrder(string orderNumberEndsWith, int orderStatusId)
         {
-            var x = m_database.Sql().ExecuteWithParams(
+            var x = _database.Sql().ExecuteWithParams(
                 "SELECT TOP 2 Id FROM PurchaseOrder po WHERE po.ProjectId = {0} AND po.OrderStatusId = {1} AND po.OrderNumber LIKE {2}",
-                m_session.Project.Id,
+                _session.Project.Id,
                 orderStatusId,
                 $"%{orderNumberEndsWith}"
             ).MapRows(reader => reader.GetInt64(0));
@@ -483,7 +556,7 @@ namespace Elsa.Commerce.Core.Repositories
         private IQueryBuilder<IPurchaseOrder> BuildOrdersQuery()
         {
             return
-                m_database.SelectFrom<IPurchaseOrder>()
+                _database.SelectFrom<IPurchaseOrder>()
                     .Join(o => o.DeliveryAddress)
                     .Join(o => o.InvoiceAddress)
                     .Join(o => o.Currency)
@@ -500,21 +573,21 @@ namespace Elsa.Commerce.Core.Repositories
                     .Join(o => o.Items.Each().KitChildren.Each().AssignedBatches.Each().MaterialBatch)
                     .Join(o => o.Payment)
                     .Join(o => o.PriceElements)
-                    .Where(o => o.ProjectId == m_session.Project.Id);
+                    .Where(o => o.ProjectId == _session.Project.Id);
         }
-        
+
         private IErpDataMapper GetMapper(IErpOrderModel model)
         {
             IErpDataMapper mapper;
-            if (!m_mapperIndex.TryGetValue(model.ErpSystemId, out mapper))
+            if (!_mapperIndex.TryGetValue(model.ErpSystemId, out mapper))
             {
-                mapper = m_erpClientFactory.GetErpClient(model.ErpSystemId)?.Mapper;
+                mapper = _erpClientFactory.GetErpClient(model.ErpSystemId)?.Mapper;
                 if (mapper == null)
                 {
                     throw new InvalidOperationException($"Cannot find DataMapper for ErpSystem Id={model.ErpSystemId}");
                 }
 
-                m_mapperIndex.Add(model.ErpSystemId, mapper);
+                _mapperIndex.Add(model.ErpSystemId, mapper);
             }
 
              return mapper;
@@ -522,32 +595,32 @@ namespace Elsa.Commerce.Core.Repositories
 
         public void SetProcessBlock(IPurchaseOrder order, string stage, string message)
         {
-            var record = m_database.New<IOrderProcessingBlocker>();
+            var record = _database.New<IOrderProcessingBlocker>();
 
             record.PurchaseOrderId = order.Id;
             record.CreateDt = DateTime.Now;
             record.Message = message;
             record.DisabledStageSymbol = stage;
-            record.AuthorId = m_session.User.Id;
+            record.AuthorId = _session.User.Id;
 
-            m_database.Save(record);            
+            _database.Save(record);
 
-            m_cache.Remove($"OrderProcessingBlockers_{order.Id}");
+            _cache.Remove($"OrderProcessingBlockers_{order.Id}");
         }
 
         public string TryGetProcessBlockMessage(long orderId, string stage)
         {
-            var blocks = m_cache.ReadThrough(
-                $"OrderProcessingBlockers_{orderId}", 
-                TimeSpan.FromMinutes(10), 
-                () => m_database.SelectFrom<IOrderProcessingBlocker>().Where(b => b.PurchaseOrderId == orderId).Execute().ToList());
+            var blocks = _cache.ReadThrough(
+                $"OrderProcessingBlockers_{orderId}",
+                TimeSpan.FromMinutes(10),
+                () => _database.SelectFrom<IOrderProcessingBlocker>().Where(b => b.PurchaseOrderId == orderId).Execute().ToList());
 
             return blocks.FirstOrDefault(b => b.DisabledStageSymbol.Equals(stage, StringComparison.InvariantCultureIgnoreCase))?.Message;
         }
 
         public DateTime? GetLastSuccessSyncDt(int erpId)
         {
-            return m_database.SelectFrom<IOrdersSyncHistory>()
+            return _database.SelectFrom<IOrdersSyncHistory>()
                 .Where(h => h.ErpId == erpId)
                 .Where(h => h.EndDt != null)
                 .OrderByDesc(h => h.StartDt)
@@ -559,17 +632,17 @@ namespace Elsa.Commerce.Core.Repositories
 
         public int StartSyncSession(int erpId)
         {
-            var s = m_database.New<IOrdersSyncHistory>();
+            var s = _database.New<IOrdersSyncHistory>();
             s.ErpId = erpId;
             s.StartDt = DateTime.Now;
-            m_database.Save(s);
+            _database.Save(s);
 
             return s.Id;
         }
 
         public void EndSyncSession(int sessionId)
         {
-            var record = m_database.SelectFrom<IOrdersSyncHistory>()
+            var record = _database.SelectFrom<IOrdersSyncHistory>()
                 .Where(h => h.Id == sessionId)
                 .Execute()
                 .FirstOrDefault() ?? throw new ArgumentException($"OrdersSyncSession id={sessionId} does not exist");
@@ -579,7 +652,7 @@ namespace Elsa.Commerce.Core.Repositories
 
             record.EndDt = DateTime.Now;
 
-            m_database.Save(record);
-        }        
+            _database.Save(record);
+        }
     }
 }

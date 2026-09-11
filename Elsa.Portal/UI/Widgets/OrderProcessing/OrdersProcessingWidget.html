@@ -17,6 +17,12 @@
             <a id="reviewLink" href="/UI/OrdersReview/OrdersReview.html">Objednávky ke kontrole</a>
         </div>
 
+        <div class="actionTile orderImportFailuresTile restricted-OrdersInfoAppView" data-bind="class.orderImportFailuresTileHasFailures:hasFailedOrderImports">
+            <i class="fas fa-cloud-rain actionTileIcon hidden" data-bind="class!.hidden:hasFailedOrderImports"></i>
+            <i class="far fa-check-circle actionTileIcon" data-bind="class.hidden:hasFailedOrderImports"></i>
+            <a href="/UI/OrdersInfo/OrderImportFailures.html" data-bind="text:failedOrderImportsText"></a>
+        </div>
+
         <div class="actionTile restricted-DownloadTrackingDocument">
             <i class="fas fa-truck actionTileIcon"></i>
             <a href="/shipment/GetShipmentRequestDocument?uniformat=false&provider=zasilkovna">Stáhnout dokument pro Zásilkovnu</a>
@@ -28,6 +34,28 @@
     </div>
 
 </div>
+<style>
+    .orderImportFailuresTile {
+        background-color: #dddddd;
+    }
+
+    .orderImportFailuresTile:hover {
+        background-color: #cccccc;
+    }
+
+    .orderImportFailuresTile.orderImportFailuresTileHasFailures {
+        background-color: #c62828;
+    }
+
+    .orderImportFailuresTile.orderImportFailuresTileHasFailures:hover {
+        background-color: #a91f1f;
+    }
+
+    .orderImportFailuresTile.orderImportFailuresTileHasFailures a,
+    .orderImportFailuresTile.orderImportFailuresTileHasFailures .actionTileIcon {
+        color: #ffffff;
+    }
+</style>
 <script>
     lt.element("ordersProcessingPanel").withModel("app.orders.vm").attach(function (packingLink) {
         

@@ -5,6 +5,7 @@ using System.Linq;
 using Elsa.Jobs.Common;
 
 using Newtonsoft.Json;
+using System.Text;
 
 using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.StockEvents;
@@ -15,19 +16,26 @@ using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Robowire.RobOrm.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Integration;
+using Elsa.Smtp.Core;
+using Elsa.Smtp.Core.Database;
 
 namespace Elsa.Jobs.ImportOrders
 {
     public class ImportOrdersJob : IExecutableJob, IAdHocOrdersSyncProvider
     {
+        private const string FAILURE_RECIPIENT_GROUP = "Selhani importu objednavek";
+
         private readonly IErpClientFactory _erpClientFactory;
         private readonly IPurchaseOrderRepository _purchaseOrderRepository;
         private readonly IDatabase _database;
         private readonly ISession _session;
         private readonly ILog _log;
         private readonly IStockEventRepository _stockEventRepository;
+        private readonly IOrderImportFailureRepository _orderImportFailureRepository;
+        private readonly IMailSender _mailSender;
+        private readonly IRecipientListsRepository _recipientListsRepository;
         
-        public ImportOrdersJob(IErpClientFactory erpClientFactory, IDatabase database, ISession session, IPurchaseOrderRepository purchaseOrderRepository, ILog log, IStockEventRepository stockEventRepository)
+        public ImportOrdersJob(IErpClientFactory erpClientFactory, IDatabase database, ISession session, IPurchaseOrderRepository purchaseOrderRepository, ILog log, IStockEventRepository stockEventRepository, IOrderImportFailureRepository orderImportFailureRepository, IMailSender mailSender, IRecipientListsRepository recipientListsRepository)
         {
             _erpClientFactory = erpClientFactory;
             _database = database;
@@ -35,6 +43,9 @@ namespace Elsa.Jobs.ImportOrders
             _purchaseOrderRepository = purchaseOrderRepository;
             _log = log;
             _stockEventRepository = stockEventRepository;
+            _orderImportFailureRepository = orderImportFailureRepository;
+            _mailSender = mailSender;
+            _recipientListsRepository = recipientListsRepository;
         }
 
         public void Run(string customDataJson)
@@ -49,6 +60,8 @@ namespace Elsa.Jobs.ImportOrders
             {
                 InSyncSession(erp.Erp.Id, () =>
                 {
+                    RetryFailedOrders(erp);
+
                     if (erp.CommonSettings.UseIncrementalOrderChangeMode)
                     {
                         _log.Info("erp.CommonSettings.AllowsChangedFromOrdersDownload = true -> starting importing orders changed after last sync");
@@ -67,6 +80,7 @@ namespace Elsa.Jobs.ImportOrders
             }
             finally
             {
+                SendFailureNotifications();
                 (erp as IDisposable)?.Dispose();
             }
         }
@@ -79,6 +93,18 @@ namespace Elsa.Jobs.ImportOrders
         }
 
         public void SyncPaidOrders()
+        {
+            try
+            {
+                SyncPaidOrdersCore();
+            }
+            finally
+            {
+                SendFailureNotifications();
+            }
+        }
+
+        private void SyncPaidOrdersCore()
         {
             _log.Info("Requested SyncPaidOrders");
 
@@ -93,6 +119,7 @@ namespace Elsa.Jobs.ImportOrders
                         _log.Info($"ERP {erp.Erp.Description} is set to {nameof(erp.CommonSettings.UseIncrementalOrderChangeMode)} = true => the paid orders sync is replaced by complete orders sync");
 
                         InSyncSession(erp.Erp.Id, () => {
+                            RetryFailedOrders(erp);
                             DownloadOrdersInIncrementalMode(erp);
                         });                        
                     }
@@ -106,6 +133,64 @@ namespace Elsa.Jobs.ImportOrders
                 {
                     _log.Error($"Faild attempt to sync paid orders from erp {erp.Erp.Description}: {ex.Message}", ex);
                 }
+            }
+        }
+
+        private void SendFailureNotifications()
+        {
+            try
+            {
+                SendFailureNotificationsCore();
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Zpracování e-mailových upozornění na selhání importu objednávek se nezdařilo. Odeslání bude zopakováno při příštím importu.", ex);
+            }
+        }
+
+        private void SendFailureNotificationsCore()
+        {
+            var failures = _orderImportFailureRepository.GetNotNotifiedForCurrentProject();
+            if (failures.Count == 0)
+                return;
+
+            var body = new StringBuilder();
+            body.AppendLine($"Během importu objednávek bylo nově zaznamenáno {failures.Count} selhání.");
+            body.AppendLine();
+
+            foreach (var failure in failures)
+            {
+                body.AppendLine($"ERP: {failure.Erp?.Description ?? failure.ErpId.ToString()}");
+                body.AppendLine($"Objednávka: {failure.OrderNumber}");
+                body.AppendLine($"První selhání: {failure.FirstFailureDt:dd.MM.yyyy HH:mm:ss}");
+                body.AppendLine($"Poslední selhání: {failure.LastFailureDt:dd.MM.yyyy HH:mm:ss}");
+                body.AppendLine($"Počet zaznamenaných selhání: {failure.FailureCount}");
+                body.AppendLine(failure.ResolveDate == null
+                    ? "Stav: čeká na úspěšný import"
+                    : $"Stav: vyřešeno {failure.ResolveDate:dd.MM.yyyy HH:mm:ss}");
+                body.AppendLine("Chyba:");
+                body.AppendLine(failure.LastError ?? "Bez detailu chyby");
+                body.AppendLine();
+                body.AppendLine(new string('-', 72));
+                body.AppendLine();
+            }
+
+            try
+            {
+                if (!_recipientListsRepository.GetRecipients(FAILURE_RECIPIENT_GROUP).Any())
+                    throw new InvalidOperationException($"Skupina příjemců '{FAILURE_RECIPIENT_GROUP}' nemá žádnou e-mailovou adresu.");
+
+                _mailSender.SendToGroup(
+                    SenderMailboxType.SystemRobot,
+                    FAILURE_RECIPIENT_GROUP,
+                    $"Selhání importu objednávek ({failures.Count})",
+                    body.ToString());
+
+                _orderImportFailureRepository.MarkNotificationsSent(failures.Select(f => f.Id));
+            }
+            catch (Exception ex)
+            {
+                _log.Error("Odeslání souhrnu selhání importu objednávek se nezdařilo. Odeslání bude zopakováno při příštím importu.", ex);
             }
         }
 
@@ -129,6 +214,41 @@ namespace Elsa.Jobs.ImportOrders
             var orders = erp.LoadOrdersIncremental(lastSyncDt).ToList();
 
             _purchaseOrderRepository.ImportErpOrders(erp.Erp.Id, orders);
+        }
+
+        private void RetryFailedOrders(IErpClient erp)
+        {
+            var failedOrders = _orderImportFailureRepository.GetPendingForErp(erp.Erp.Id);
+            if (failedOrders.Count == 0)
+                return;
+
+            _log.Info($"Retrying {failedOrders.Count} previously failed orders from ERP {erp.Erp.Description}");
+
+            foreach (var failure in failedOrders)
+            {
+                try
+                {
+                    _log.Info($"Retrying import of order {failure.OrderNumber}");
+
+                    var order = erp.LoadOrder(failure.OrderNumber);
+                    if (order == null)
+                        throw new Exception($"ERP returned no data for order {failure.OrderNumber}");
+
+                    _purchaseOrderRepository.ImportErpOrder(order);
+                    _orderImportFailureRepository.Resolve(erp.Erp.Id, failure.OrderNumber);
+
+                    _log.Info($"Retry of order {failure.OrderNumber} completed successfully");
+                }
+                catch (Exception ex)
+                {
+                    _orderImportFailureRepository.RegisterFailure(
+                        erp.Erp.Id,
+                        failure.OrderNumber,
+                        ex.ToString());
+
+                    _log.Error($"Retry of order {failure.OrderNumber} failed. Other orders will continue to be imported.", ex);
+                }
+            }
         }
 
         private void DownloadOrdersInSnapshotMode(ImportOrdersCustomData cuData, IErpClient erp)

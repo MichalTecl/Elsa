@@ -26,6 +26,7 @@ namespace Elsa.Commerce.Core
         public void Setup(IContainerSetup setup)
         {
             setup.For<IErpClientFactory>().Use<ErpClientFactory>();
+            setup.For<IOrderImportFailureRepository>().Use<OrderImportFailureRepository>();
             setup.For<IPurchaseOrderRepository>().Use<PurchaseOrderRepository>();
             setup.For<ICurrencyRepository>().Use<CurrencyRepository>();
             setup.For<IProductRepository>().Use<ProductRepository>();

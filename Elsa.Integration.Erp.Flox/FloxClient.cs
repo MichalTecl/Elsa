@@ -28,13 +28,16 @@ namespace Elsa.Integration.Erp.Flox
         private DateTime _lastAccess = DateTime.MinValue;
         private readonly WebFormsClient _client;
         private readonly ICustomerRepository _customerRepository;
+        private readonly IOrderImportFailureRepository _orderImportFailureRepository;
         private readonly GraphQlApiConnector _apiConnector;
 
         public FloxClient(
             FloxClientConfig config,
             FloxDataMapper mapper,
             ILog log,
-            IOrderStatusMappingRepository statusMappingRepository, ICustomerRepository customerRepository)
+            IOrderStatusMappingRepository statusMappingRepository,
+            ICustomerRepository customerRepository,
+            IOrderImportFailureRepository orderImportFailureRepository)
         {
             _config = config;
             Mapper = mapper;
@@ -42,8 +45,17 @@ namespace Elsa.Integration.Erp.Flox
             _statusMappingRepository = statusMappingRepository;
             _client = new WebFormsClient(_log);
             _customerRepository = customerRepository;
+            _orderImportFailureRepository = orderImportFailureRepository;
 
-            _apiConnector = new GraphQlApiConnector(config, log);
+            _apiConnector = new GraphQlApiConnector(config, log, RegisterInvalidApiOrder);
+        }
+
+        private void RegisterInvalidApiOrder(BwApiClient.Model.Data.Order order, Exception exception)
+        {
+            _orderImportFailureRepository.RegisterFailure(
+                Erp.Id,
+                order?.order_num,
+                exception.ToString());
         }
 
         public IErp Erp { get; set; }
@@ -107,22 +119,12 @@ namespace Elsa.Integration.Erp.Flox
 
         public IErpOrderModel LoadOrder(string orderNumber)
         {
-            if (_config.PreferApi)
-            {
-                try
-                {
-                    var loaded = _apiConnector.LoadOrder(orderNumber);
-                    loaded.ErpSystemId = Erp.Id;
+            EnsureOrderApiEnabled();
 
-                    return loaded;
-                }
-                catch (Exception ex)
-                {
-                    _log.Error($"Failed to load order ({orderNumber}) using API. Activating fallback to 'webform' mode", ex);
-                }
-            }
+            var loaded = _apiConnector.LoadOrder(orderNumber);
+            loaded.ErpSystemId = Erp.Id;
 
-            return LoadOrderWithoutApi(orderNumber);
+            return loaded;
         }
 
         private IErpOrderModel LoadOrderWithoutApi(string orderNumber)
@@ -381,19 +383,21 @@ namespace Elsa.Integration.Erp.Flox
 
         private IEnumerable<IErpOrderModel> LoadOrders(DateTime from, DateTime? to, DateTime? changedAfter, string status)
         {
-            if (_config.PreferApi)
+            EnsureOrderApiEnabled();
+
+            int? statusId = null;
+
+            if (!string.IsNullOrEmpty(status))
             {
-                int? statusId = null;
-
-                if (!string.IsNullOrEmpty(status))
-                {
-                    statusId = int.Parse(status);
-                }
-
-                var received = _apiConnector.LoadOrders(changedAfter ?? from, statusId);
-                return PostMap(received);
+                statusId = int.Parse(status);
             }
 
+            var received = _apiConnector.LoadOrders(changedAfter ?? from, statusId);
+            return PostMap(received);
+        }
+
+        private IEnumerable<IErpOrderModel> LoadOrdersWithoutApi(DateTime from, DateTime? to, DateTime? changedAfter, string status)
+        {
             LogLegacyXmlUsage($"load order list from={from:yyyy-MM-dd HH:mm:ss}, to={to:yyyy-MM-dd HH:mm:ss}, changedAfter={changedAfter:yyyy-MM-dd HH:mm:ss}, status={status ?? "<null>"}");
 
             _log.Info($"Zacinam stahovani objednavek od={from}, do={to}, status={status}");
@@ -525,15 +529,8 @@ namespace Elsa.Integration.Erp.Flox
 
         public string LoadOrderInternalNote(string orderNumber)
         {
-            try
-            {
-                return LoadOrder(orderNumber)?.InternalNote;
-            }
-            catch (Exception ex) 
-            {
-                _log.Error("Failed attempt to load order internal note", ex);
-                return LoadOrderWithoutApi(orderNumber)?.InternalNote;
-            }
+            EnsureOrderApiEnabled();
+            return _apiConnector.LoadOrderInternalNote(orderNumber);
         }
 
         public ICollection<string> GetProductNames()
@@ -548,13 +545,17 @@ namespace Elsa.Integration.Erp.Flox
 
         public DateTime ObtainOrderLastChange(string orderNumber)
         {
+            EnsureOrderApiEnabled();
+            return _apiConnector.GetOrderLastChangeDt(orderNumber);
+        }
+
+        private void EnsureOrderApiEnabled()
+        {
             if (!_config.PreferApi)
             {
-                var order  = LoadOrder(orderNumber)?.Ensure();
-                return DateTime.Parse(order.ErpLastChangeDt);
+                throw new InvalidOperationException(
+                    "Flox order import requires BW API. Configuration Flox.PreferApi must be enabled.");
             }
-
-            return _apiConnector.GetOrderLastChangeDt(orderNumber);
         }
     }
 }

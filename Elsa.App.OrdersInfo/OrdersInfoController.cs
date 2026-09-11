@@ -13,6 +13,7 @@ using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.Crm;
 using System.Linq;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
+using Elsa.Core.Entities.Commerce.Integration;
 using System.Net;
 using Elsa.App.OrdersPacking.Entities;
 using Elsa.Smtp.Core;
@@ -36,6 +37,8 @@ namespace Elsa.App.OrdersInfo
         private readonly OrderItemBatchAssignmentEditor _batchAssignmentEditor;
         private readonly IOrdersFacade _ordersFacade;
         private readonly IMailSender _mailSender;
+        private readonly IErpClientFactory _erpClientFactory;
+        private readonly IOrderImportFailureRepository _orderImportFailureRepository;
 
         public OrdersInfoController(
             IWebSession webSession,
@@ -48,7 +51,9 @@ namespace Elsa.App.OrdersInfo
             OrdersInfoXlsExporter xlsExporter,
             OrderItemBatchAssignmentEditor batchAssignmentEditor,
             IOrdersFacade ordersFacade,
-            IMailSender mailSender) : base(webSession, log)
+            IMailSender mailSender,
+            IErpClientFactory erpClientFactory,
+            IOrderImportFailureRepository orderImportFailureRepository) : base(webSession, log)
         {
             _orderInfoRepository = orderInfoRepository;
             _db = db;
@@ -59,6 +64,8 @@ namespace Elsa.App.OrdersInfo
             _batchAssignmentEditor = batchAssignmentEditor;
             _ordersFacade = ordersFacade;
             _mailSender = mailSender;
+            _erpClientFactory = erpClientFactory;
+            _orderImportFailureRepository = orderImportFailureRepository;
         }
 
         protected override void OnBeforeCall()
@@ -437,6 +444,32 @@ namespace Elsa.App.OrdersInfo
             foreach (var rev in _db.SelectFrom<IOrderReviewResult>().Where(r => r.OrderId == orderId).Execute())
                 AddEvent(rev.ReviewDt, "Potvrzeno v 'Objednávky ke kontrole'", rev.AuthorId);
 
+            if (order.ErpId != null)
+            {
+                var importFailures = _db.SelectFrom<IOrderImportFailure>()
+                    .Where(f => f.ErpId == order.ErpId.Value)
+                    .Where(f => f.OrderNumber == order.OrderNumber)
+                    .Execute();
+
+                foreach (var failure in importFailures)
+                {
+                    var lastError = failure.LastError?
+                        .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                        .FirstOrDefault();
+
+                    var isResolved = failure.ResolveDate != null;
+                    var eventDate = isResolved ? failure.ResolveDate : failure.LastFailureDt;
+                    var text = isResolved
+                        ? $"Import objednávky byl dokončen po předchozím selhání (počet selhání: {failure.FailureCount})."
+                        : $"Aktualizace objednávky z ERP selhala a dosud nebyla úspěšně dokončena (počet selhání: {failure.FailureCount}).";
+
+                    if (!string.IsNullOrWhiteSpace(lastError))
+                        text += $" Poslední chyba: {lastError}";
+
+                    AddEvent(eventDate, text);
+                }
+            }
+
             var sortedEvents = events
                 .OrderBy(orderEvent => orderEvent.Dt)
                 .ThenBy(orderEvent => orderEvent.Text)
@@ -450,6 +483,55 @@ namespace Elsa.App.OrdersInfo
                 OrderId = orderId,
                 Events = sortedEvents
             };
+        }
+
+        public List<OrderImportFailureModel> GetOrderImportFailures()
+        {
+            return _orderImportFailureRepository.GetPendingForCurrentProject()
+                .Select(f => new OrderImportFailureModel
+                {
+                    Id = f.Id,
+                    ErpName = f.Erp.Description,
+                    OrderNumber = f.OrderNumber,
+                    FirstFailureDt = f.FirstFailureDt,
+                    LastFailureDt = f.LastFailureDt,
+                    FailureCount = f.FailureCount,
+                    LastError = f.LastError
+                })
+                .ToList();
+        }
+
+        [DoNotLog]
+        public int GetOrderImportFailuresCount()
+        {
+            return _orderImportFailureRepository.CountPendingForCurrentProject();
+        }
+
+        public void RetryOrderImport(int failureId)
+        {
+            var failure = _orderImportFailureRepository.GetPendingById(failureId);
+            if (failure == null)
+                throw new ArgumentException($"Nevyřešené selhání importu ID={failureId} nebylo nalezeno");
+
+            var erp = _erpClientFactory.GetErpClient(failure.ErpId);
+            try
+            {
+                var order = erp.LoadOrder(failure.OrderNumber);
+                if (order == null)
+                    throw new InvalidOperationException($"ERP nevrátilo data objednávky {failure.OrderNumber}");
+
+                _purchaseOrderRepository.ImportErpOrder(order);
+                _orderImportFailureRepository.Resolve(failure.ErpId, failure.OrderNumber);
+            }
+            catch (Exception ex)
+            {
+                _orderImportFailureRepository.RegisterFailure(failure.ErpId, failure.OrderNumber, ex.ToString());
+                throw new Exception($"Opakovaný import objednávky {failure.OrderNumber} selhal: {ex.Message}", ex);
+            }
+            finally
+            {
+                (erp as IDisposable)?.Dispose();
+            }
         }
 
         public void CancelUnpaidOrder(long orderId)

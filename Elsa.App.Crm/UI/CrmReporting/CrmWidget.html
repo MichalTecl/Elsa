@@ -60,12 +60,4 @@
         setTimeout(loadOverview, 100);
 
     });
-
-    lt.element("customersImportTile").attach(function () {
-        this.importCustomers = () => {
-            lt.api("/customers/importCustomers").get(() => {
-                alert("Hotovo");
-            });
-        };
-    });
 </script>

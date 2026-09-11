@@ -10,7 +10,21 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection.Model
 
         public ApiLineItemModel(OrderItem source)
         {
-            _source = source ?? throw new ArgumentNullException(nameof(source));            
+            _source = source ?? throw new InvalidOperationException("Seznam položek objednávky obsahuje prázdný záznam.");
+
+            var identification = _source.id ?? _source.item_label ?? "bez ID a názvu";
+
+            if (_source.product == null)
+                throw new InvalidOperationException($"Položce objednávky {identification} chybí produkt (product).");
+
+            if (_source.sum_with_tax == null)
+                throw new InvalidOperationException($"Položce objednávky {identification} chybí cena s DPH (sum_with_tax).");
+
+            if (_source.price == null)
+                throw new InvalidOperationException($"Položce objednávky {identification} chybí cena bez DPH (price).");
+
+            if (_source.weight == null)
+                throw new InvalidOperationException($"Položce objednávky {identification} chybí hmotnost (weight).");
         }
 
         public string ErpOrderItemId => _source.id?.Trim();
