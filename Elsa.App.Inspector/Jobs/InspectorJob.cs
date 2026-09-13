@@ -106,7 +106,7 @@ namespace Elsa.App.Inspector.Jobs
                         sb.AppendLine(currentItemType);
                     }
 
-                    sb.AppendLine($"\t{item.Message}");
+                    sb.AppendLine($"\t{HtmlToPlainTextConverter.Convert(item.Message)}");
 
                     var logItem = _database.New<IInspectionMailingHistory>(h =>
                     {

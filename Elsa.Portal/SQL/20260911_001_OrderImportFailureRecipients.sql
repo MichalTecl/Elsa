@@ -10,4 +10,3 @@ SELECT p.Id, @GroupName, @Addresses
             WHERE erl.ProjectId = p.Id
               AND erl.GroupName = @GroupName
        );
-

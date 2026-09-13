@@ -21,7 +21,14 @@
         <div class="panelContent" id="packingUi" >
             <div class="panelHead" style="margin: 0; margin-bottom: 10px;">
                 <div class="panelTitle">Balení objednávek</div>
-            </div> 
+            </div>
+            <a id="orderImportFailuresRibbon"
+               class="orderImportFailuresRibbon"
+               href="/UI/OrdersInfo/OrderImportFailures.html"
+               style="display:none">
+                <i class="fas fa-cloud-rain"></i>
+                <span id="orderImportFailuresRibbonText"></span>
+            </a>
             <div id="packingUiMainCont">
                 <div id="orderSearchPanel">
                     <div id="tbSearchContainer">
@@ -397,6 +404,24 @@
 
         });
 
+</script>
+
+<script>
+    (function () {
+        var ribbon = document.getElementById("orderImportFailuresRibbon");
+        var ribbonText = document.getElementById("orderImportFailuresRibbonText");
+
+        var updateOrderImportFailuresRibbon = function () {
+            lt.api("/ordersInfo/GetOrderImportFailuresCount").silent().get(function (count) {
+                var failuresCount = Number(count || 0);
+                ribbon.style.display = failuresCount > 0 ? "flex" : "none";
+                ribbonText.textContent = "Nezdařené importy (" + failuresCount + ")";
+            });
+        };
+
+        updateOrderImportFailuresRibbon();
+        setInterval(updateOrderImportFailuresRibbon, 30000);
+    })();
 </script>
     
 <script src="/Script/Apps/Packing/OrdersPacking.VM.js"></script>

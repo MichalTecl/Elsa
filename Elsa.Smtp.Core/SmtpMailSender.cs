@@ -16,22 +16,6 @@ namespace Elsa.Smtp.Core
     {
         private const string DEV_EMAIL_RECIPIENT = "mtecl.prg@gmail.com";
 
-        private static readonly Regex _nonContentHtmlRegex = new Regex(
-            @"<(script|style)[^>]*>.*?</\1>",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-        private static readonly Regex _htmlLineBreakRegex = new Regex(
-            @"<(br\s*/?|/p|/div|/li|/tr|/h[1-6])\s*>",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private static readonly Regex _htmlTagRegex = new Regex(
-            @"<[^>]+>",
-            RegexOptions.Compiled | RegexOptions.Singleline);
-
-        private static readonly Regex _extraLineBreakRegex = new Regex(
-            @"(\r?\n\s*){3,}",
-            RegexOptions.Compiled);
-
         private static readonly Regex _htmlPictureRegex = new Regex(
             @"(?<prefix><img\b[^>]*?\ssrc\s*=\s*)(?<quote>['""])(?<source>.*?)(\k<quote>)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
@@ -148,7 +132,7 @@ namespace Elsa.Smtp.Core
                 {
                     var bodyWithPictures = EmbedPictures(builder, body);
                     builder.HtmlBody = MailTemplateQrCode.Embed(builder, bodyWithPictures);
-                    builder.TextBody = HtmlToPlainText(body);
+                    builder.TextBody = HtmlToPlainTextConverter.Convert(body);
                 }
                 else
                 {
@@ -177,15 +161,6 @@ namespace Elsa.Smtp.Core
                 _log.Error($"Sending e-mail to: {string.Join(";", addresses)}, subject: {subject} failed", ex);
                 throw;
             }            
-        }
-
-        private static string HtmlToPlainText(string html)
-        {
-            var withoutNonContent = _nonContentHtmlRegex.Replace(html ?? string.Empty, string.Empty);
-            var withLineBreaks = _htmlLineBreakRegex.Replace(withoutNonContent, "\r\n");
-            var withoutTags = _htmlTagRegex.Replace(withLineBreaks, string.Empty);
-            var decoded = WebUtility.HtmlDecode(withoutTags);
-            return _extraLineBreakRegex.Replace(decoded, "\r\n\r\n").Trim();
         }
 
         private static string EmbedPictures(BodyBuilder builder, string html)
