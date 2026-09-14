@@ -227,12 +227,24 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elsa.Jobs.OrdersPostprocess
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.App.OrdersInfo", "Elsa.App.OrdersInfo\Elsa.App.OrdersInfo.csproj", "{44DC0977-317B-4669-BB27-FA117D19C9A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.BulletinGeneration", "Elsa.Jobs.BulletinGeneration\Elsa.Jobs.BulletinGeneration.csproj", "{A9E9E18D-DF1C-473C-99A1-397F9488931E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocGen", "DocGen\DocGen.csproj", "{0A638FAC-F3AA-442A-9696-431F12B997CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0A638FAC-F3AA-442A-9696-431F12B997CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A638FAC-F3AA-442A-9696-431F12B997CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A638FAC-F3AA-442A-9696-431F12B997CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A638FAC-F3AA-442A-9696-431F12B997CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9E9E18D-DF1C-473C-99A1-397F9488931E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9E9E18D-DF1C-473C-99A1-397F9488931E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9E9E18D-DF1C-473C-99A1-397F9488931E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9E9E18D-DF1C-473C-99A1-397F9488931E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{91481B08-E437-474D-9793-A135F1DB465C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{91481B08-E437-474D-9793-A135F1DB465C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91481B08-E437-474D-9793-A135F1DB465C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -574,6 +586,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{A9E9E18D-DF1C-473C-99A1-397F9488931E} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
 		{91481B08-E437-474D-9793-A135F1DB465C} = {326F0792-00AF-4D82-B170-4CE248D4A975}
 		{957A9B48-FEFD-4874-8D36-D082EEA7F750} = {56FB2203-E4D8-428D-938B-7251897BE1D0}
 		{D4DEADFC-53EA-4477-8798-DA625A98285B} = {C66BF91A-FD6A-4F8E-BAF1-B8E7040D4B1F}

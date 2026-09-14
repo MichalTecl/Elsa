@@ -9,6 +9,7 @@ using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,22 +21,51 @@ namespace Elsa.Apps.Reporting.Controllers
     [Controller("reporting")]
     public class ReportingController : ElsaControllerBase
     {
-        private readonly IDatabase m_database;
-        private readonly IWebSession m_session;
-        private readonly Repo.ReportRepository m_reportRepository;
+        private const string BULLETIN_DIRECTORY = @"C:\Elsa\Bulletin";
+        private readonly IDatabase _database;
+        private readonly IWebSession _session;
+        private readonly Repo.ReportRepository _reportRepository;
 
         public ReportingController(IWebSession webSession, ILog log, IDatabase database, Repo.ReportRepository reportRepository) : base(webSession, log)
         {
-            m_database = database;
-            m_session = webSession;
-            m_reportRepository = reportRepository;
+            _database = database;
+            _session = webSession;
+            _reportRepository = reportRepository;
+        }
+
+        public FileResult GetLatestBulletin()
+        {
+            EnsureUserRight(ReportingUserRights.ViewBulletin);
+
+            var latest = Directory.Exists(BULLETIN_DIRECTORY)
+                ? Directory.EnumerateFiles(BULLETIN_DIRECTORY, "bulletin_*.html")
+                    .Where(path => DateTime.TryParseExact(
+                        Path.GetFileNameWithoutExtension(path).Substring("bulletin_".Length),
+                        "yyyyMMdd_HHmmss_fffffff", CultureInfo.InvariantCulture,
+                        DateTimeStyles.None, out _))
+                    .OrderByDescending(path => Path.GetFileName(path), StringComparer.Ordinal)
+                    .FirstOrDefault()
+                : null;
+
+            if (latest == null)
+            {
+                const string EMPTY_MESSAGE = "<!DOCTYPE html><html lang=\"cs\"><head><meta charset=\"utf-8\">"
+                    + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+                    + "<title>Bulletin</title></head><body><h1>Bulletin</h1>"
+                    + "<p>Zatím nebyl vygenerován žádný Bulletin. Zkuste to prosím později.</p></body></html>";
+                return new FileResult("bulletin.html", Encoding.UTF8.GetBytes(EMPTY_MESSAGE),
+                    "text/html; charset=utf-8", "inline") { DisableBrowserCache = true };
+            }
+
+            return new FileResult(Path.GetFileName(latest), File.ReadAllBytes(latest),
+                "text/html; charset=utf-8", "inline") { DisableBrowserCache = true };
         }
 
         public List<ReportTypeModel> GetReportTypes()
         {
             EnsureUserRight(ReportingUserRights.ReportingApp);
 
-            return m_reportRepository.GetReportTypes();                
+            return _reportRepository.GetReportTypes();
         }
 
         public FileResult GetReport(string code)
@@ -47,7 +77,7 @@ namespace Elsa.Apps.Reporting.Controllers
                 throw new ArgumentException("Neznámý kód reportu");
 
             byte[] bytes;
-            using (var report = m_database.Sql().Call(rt.Code).WithParam("@projectId", m_session.Project.Id)
+            using (var report = _database.Sql().Call(rt.Code).WithParam("@projectId", _session.Project.Id)
                 .Table())
             {
                 DynamicColumnNamesProcessor.SetDynamicColumnNames(report);

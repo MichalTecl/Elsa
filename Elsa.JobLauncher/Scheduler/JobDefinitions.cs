@@ -35,6 +35,8 @@ namespace Elsa.JobLauncher.Scheduler
 
         //public static readonly ElsaJob OrderDataValidation = new ElsaJob("ORDER_DATA_VALIDATION", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
+        public static readonly ElsaJob BulletinGeneration = new ElsaJob("BULLETIN_GENERATION", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
+
         public static IEnumerable<ElsaJob> All
         {
             get
@@ -59,6 +61,7 @@ namespace Elsa.JobLauncher.Scheduler
                 yield return StoreMap;
                 yield return CrmRobots;
                 yield return CrmMailPull;
+                yield return BulletinGeneration;
             }
         }
     }

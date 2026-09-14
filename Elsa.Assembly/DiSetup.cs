@@ -42,6 +42,7 @@ using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Jobs.AutomaticQueries;
 using Elsa.Jobs.BuildStoresMap;
+using Elsa.Jobs.BulletinGeneration;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.Common.EntityChangeProcessing;
 using Elsa.Jobs.CrmMailPull;
@@ -126,6 +127,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(EntityChangeProcessingRegistry).Assembly);
                     s.ScanAssembly(typeof(ProductionPlannerRegistry).Assembly);
                     s.ScanAssembly(typeof(StoreMapRegistry).Assembly);
+                    s.ScanAssembly(typeof(BulletinGenerationRegistry).Assembly);
                     s.ScanAssembly(typeof(PublicFilesRegistry).Assembly);
                     s.ScanAssembly(typeof(OrderDataValidationJobRegistry).Assembly);
                     s.ScanAssembly(typeof(OrdersPostprocessingRegistry).Assembly);

@@ -81,6 +81,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Elsa.Jobs.BulletinGeneration\Elsa.Jobs.BulletinGeneration.csproj">
+      <Project>{A9E9E18D-DF1C-473C-99A1-397F9488931E}</Project>
+      <Name>Elsa.Jobs.BulletinGeneration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Assembly\Elsa.Assembly.csproj">
       <Project>{D610496E-A291-4EB5-A7B0-B6A693D485BE}</Project>
       <Name>Elsa.Assembly</Name>

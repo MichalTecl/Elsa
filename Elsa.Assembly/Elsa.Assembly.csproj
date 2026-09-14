@@ -87,6 +87,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Elsa.Jobs.BulletinGeneration\Elsa.Jobs.BulletinGeneration.csproj">
+      <Project>{A9E9E18D-DF1C-473C-99A1-397F9488931E}</Project>
+      <Name>Elsa.Jobs.BulletinGeneration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.App.Commerce\Elsa.App.Commerce.csproj">
       <Project>{92898b3b-012f-43f0-9044-55d6de1a4afb}</Project>
       <Name>Elsa.App.Commerce</Name>
