@@ -26,7 +26,7 @@ namespace Elsa.App.OrdersPacking
     public class PackingController : ElsaControllerBase
     {
         private readonly IPurchaseOrderRepository _orderRepository;
-        private readonly IShipmentProvider _shipmentProvider;
+        private readonly IShipmentFacade _shipmentFacade;
         private readonly IOrdersFacade _ordersFacade;
         private readonly IKitProductRepository _kitProductRepository;
         private readonly IErpClientFactory _erpClientFactory;
@@ -41,7 +41,7 @@ namespace Elsa.App.OrdersPacking
             IWebSession webSession,
             ILog log,
             IPurchaseOrderRepository orderRepository,
-            IShipmentProvider shipmentProvider,
+            IShipmentFacade shipmentFacade,
             IOrdersFacade ordersFacade,
             IKitProductRepository kitProductRepository,
             IErpClientFactory erpClientFactory,
@@ -51,7 +51,7 @@ namespace Elsa.App.OrdersPacking
             : base(webSession, log)
         {
             _orderRepository = orderRepository;
-            _shipmentProvider = shipmentProvider;
+            _shipmentFacade = shipmentFacade;
             _ordersFacade = ordersFacade;
             _kitProductRepository = kitProductRepository;
             _erpClientFactory = erpClientFactory;
@@ -85,7 +85,7 @@ namespace Elsa.App.OrdersPacking
             {
                 Log.Info("Číslo objednávky nenalezeno");
                 Log.Info("Spojuji se se Zásilkovnou...");
-                var orderNumber = _shipmentProvider.GetOrderNumberByPackageNumber(number);
+                var orderNumber = _shipmentFacade.GetOrderNumberByPackageNumber(number);
                 if (string.IsNullOrWhiteSpace(orderNumber))
                 {
                     throw new Exception($"Objednávka {number} nebyla nalezena");

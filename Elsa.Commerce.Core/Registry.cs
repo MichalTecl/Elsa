@@ -66,6 +66,8 @@ namespace Elsa.Commerce.Core
             setup.For<AbandonedBatchRulesImpExp>().Use<AbandonedBatchRulesImpExp>();
             setup.For<IUserNickProvider>().Import.FromFactory(sl => sl.Get<IUserRepository>());
 
+            setup.For<IShipmentFacade>().Use<ShipmentFacade>();
+
             setup.Collect<IShipmentRequestDocumentGenerator>();
 
             setup.For<ShipmentRequestGeneratorFactory>().Use<ShipmentRequestGeneratorFactory>();

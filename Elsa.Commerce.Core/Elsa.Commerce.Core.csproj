@@ -156,7 +156,9 @@
     <Compile Include="SaleEvents\ISaleEventRepository.cs" />
     <Compile Include="SaleEvents\SaleEventAllocationDto.cs" />
     <Compile Include="SaleEvents\SaleEventRepository.cs" />
-    <Compile Include="Shipment\IShipmentProvider.cs" />
+    <Compile Include="Shipment\IShipmentFacade.cs" />
+    <Compile Include="Shipment\ILegacyShipmentService.cs" />
+    <Compile Include="Shipment\ShipmentFacade.cs" />
     <Compile Include="Shipment\IShipmentRequestDocumentGenerator.cs" />
     <Compile Include="Shipment\ShipmentRequestGeneratorFactory.cs" />
     <Compile Include="StockEvents\IStockEventRepository.cs" />

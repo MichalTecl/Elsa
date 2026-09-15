@@ -20,14 +20,14 @@ namespace Elsa.App.Shipment
     public class ShipmentController : ElsaControllerBase
     {
         private readonly IOrdersFacade _ordersFacade;
-        private readonly IShipmentProvider _shipmentProvider;
+        private readonly IShipmentFacade _shipmentFacade;
         private readonly ShipmentRequestGeneratorFactory _shipmentRequestGeneratorFactory;
 
-        public ShipmentController(IWebSession webSession, ILog log, IOrdersFacade ordersFacade, IShipmentProvider shipmentProvider, ShipmentRequestGeneratorFactory shipmentRequestGeneratorFactory)
+        public ShipmentController(IWebSession webSession, ILog log, IOrdersFacade ordersFacade, IShipmentFacade shipmentFacade, ShipmentRequestGeneratorFactory shipmentRequestGeneratorFactory)
             : base(webSession, log)
         {
             _ordersFacade = ordersFacade;
-            _shipmentProvider = shipmentProvider;
+            _shipmentFacade = shipmentFacade;
             _shipmentRequestGeneratorFactory = shipmentRequestGeneratorFactory;
         }
 
@@ -55,7 +55,7 @@ namespace Elsa.App.Shipment
 
         public HtmlResult GetShipmentMethodNamesList() 
         {
-            var methods = _shipmentProvider.GetShipmentMethodsList();
+            var methods = _shipmentFacade.GetShipmentMethodsList();
             var sb = new StringBuilder();
                         
             foreach (var sm in methods.OrderBy(m => m).Distinct())
@@ -66,7 +66,7 @@ namespace Elsa.App.Shipment
 
         public MappingDocModel GetShipmentMapping()
         {
-            var mapping = _shipmentProvider.GetShipmentMethodsMapping();
+            var mapping = _shipmentFacade.GetShipmentMethodsMapping();
 
             var sb = new StringBuilder();
             foreach (var map in mapping)
@@ -104,7 +104,7 @@ namespace Elsa.App.Shipment
                 map[parts[0]] = parts[1];
             }
 
-            _shipmentProvider.SetShipmentMethodsMapping(map);
+            _shipmentFacade.SetShipmentMethodsMapping(map);
 
             return GetShipmentMapping();
         }

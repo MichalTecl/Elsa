@@ -1,12 +1,12 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
-
-using Elsa.Core.Entities.Commerce.Commerce;
 
 namespace Elsa.Commerce.Core.Shipment
 {
-    public interface IShipmentProvider
+    /// <summary>
+    /// Bridge to the existing shipment implementation used by ShipmentFacade.
+    /// New carrier-specific operations belong in separate provider contracts.
+    /// </summary>
+    public interface ILegacyShipmentService
     {
         string GetOrderNumberByPackageNumber(string packageNumber);
         void SetShipmentMethodsMapping(Dictionary<string, string> mapping);

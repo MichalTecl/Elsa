@@ -14,7 +14,7 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
     {
         public void Setup(IContainerSetup setup)
         {
-            setup.For<IShipmentProvider>().Use<ZasilkovnaClient>();
+            setup.For<ILegacyShipmentService>().Use<ZasilkovnaClient>();
             setup.For<ZasilkovnaClient>().Use<ZasilkovnaClient>();
 
             setup.For<Zasilkovna4CsvGenerator>().Use<Zasilkovna4CsvGenerator>();

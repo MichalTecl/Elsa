@@ -21,7 +21,7 @@ using Robowire.RobOrm.Core;
 
 namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 {
-    public class ZasilkovnaClient : IShipmentProvider
+    public class ZasilkovnaClient : ILegacyShipmentService
     {
         private readonly WebFormsClient _formsClient;
                         
