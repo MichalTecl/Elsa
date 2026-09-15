@@ -34,6 +34,9 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.11.36.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.36\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -47,6 +50,9 @@
     <Compile Include="Entities\IZasilkovnaShipMapping.cs" />
     <Compile Include="Model\BranchesDocument.cs" />
     <Compile Include="Registry.cs" />
+    <Compile Include="PacketaWebClient.cs" />
+    <Compile Include="PacketaShipmentListParser.cs" />
+    <Compile Include="PacketaTrackingClient.cs" />
     <Compile Include="ShipmentRequestDocumentGenerators\DpdCsvGenerator.cs" />
     <Compile Include="ShipmentRequestDocumentGenerators\ShipmentDataHelper.cs" />
     <Compile Include="ShipmentRequestDocumentGenerators\Zasilkovna8CsvGenerator.cs" />
@@ -54,6 +60,7 @@
     <Compile Include="ZasilkovnaClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZasilkovnaClientConfig.cs" />
+    <Compile Include="ZasilkovnaShipmentProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">

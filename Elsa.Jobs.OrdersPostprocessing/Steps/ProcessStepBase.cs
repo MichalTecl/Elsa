@@ -20,7 +20,7 @@ namespace Elsa.Jobs.OrdersPostprocessing.Steps
 
         protected abstract string ProcessCode { get; }
 
-        protected abstract int HistoryDepthDays { get; }
+        protected abstract int? HistoryDepthDays { get; }
 
         protected virtual int PageSize { get; } = 1000;
 
@@ -40,10 +40,12 @@ namespace Elsa.Jobs.OrdersPostprocessing.Steps
         {
             _log.Info($"Starting orders postprocessing step {this}");
 
-            var minDate = DateTime.Now.AddDays(-1 * HistoryDepthDays);
-
-            
-            _log.Info($"Loading orders placed after {minDate}");
+            DateTime? minDate = null;
+            if (HistoryDepthDays.HasValue)
+            {
+                minDate = DateTime.Now.AddDays(-1 * HistoryDepthDays.Value);
+                _log.Info($"Loading orders placed after {minDate}");
+            }
 
             long lastSeenId = -1;
 
@@ -55,8 +57,13 @@ namespace Elsa.Jobs.OrdersPostprocessing.Steps
                     .SelectFrom<IPurchaseOrder>()
                     .OrderBy(o => o.Id)
                     .Where(o => o.ProjectId == _session.Project.Id)
-                    .Where(o => o.PurchaseDate > minDate)
                     .Where(o => o.Id > lastSeenId);
+
+                if (minDate.HasValue)
+                {
+                    var minimumPurchaseDate = minDate.Value;
+                    query = query.Where(o => o.PurchaseDate > minimumPurchaseDate);
+                }
                     
                 if (statuses.Count > 0)
                 {

@@ -158,6 +158,10 @@
     <Compile Include="SaleEvents\SaleEventRepository.cs" />
     <Compile Include="Shipment\IShipmentFacade.cs" />
     <Compile Include="Shipment\ILegacyShipmentService.cs" />
+    <Compile Include="Shipment\IShipmentProvider.cs" />
+    <Compile Include="Shipment\IShipmentProviderFactory.cs" />
+    <Compile Include="Shipment\ShipmentProviderFactory.cs" />
+    <Compile Include="Shipment\ShipmentTrackingInfo.cs" />
     <Compile Include="Shipment\ShipmentFacade.cs" />
     <Compile Include="Shipment\IShipmentRequestDocumentGenerator.cs" />
     <Compile Include="Shipment\ShipmentRequestGeneratorFactory.cs" />

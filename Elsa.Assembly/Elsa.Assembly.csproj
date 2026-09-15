@@ -243,6 +243,10 @@
       <Project>{1393f234-b177-4411-bb48-364e6be597d0}</Project>
       <Name>Elsa.Integration.PaymentSystems.Fio</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Elsa.Integration.ShipmentProviders.Dpd\Elsa.Integration.ShipmentProviders.Dpd.csproj">
+      <Project>{B629DF9F-6162-4C2F-BBCC-BC3195F1FBCA}</Project>
+      <Name>Elsa.Integration.ShipmentProviders.Dpd</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Integration.ShipmentProviders.Zasilkovna\Elsa.Integration.ShipmentProviders.Zasilkovna.csproj">
       <Project>{07e140fe-7d72-4138-80d6-781e712acb0a}</Project>
       <Name>Elsa.Integration.ShipmentProviders.Zasilkovna</Name>

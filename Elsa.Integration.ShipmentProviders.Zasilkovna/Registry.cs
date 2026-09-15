@@ -16,6 +16,8 @@ namespace Elsa.Integration.ShipmentProviders.Zasilkovna
         {
             setup.For<ILegacyShipmentService>().Use<ZasilkovnaClient>();
             setup.For<ZasilkovnaClient>().Use<ZasilkovnaClient>();
+            setup.For<PacketaTrackingClient>().Use<PacketaTrackingClient>();
+            setup.For<ZasilkovnaShipmentProvider>().Use<ZasilkovnaShipmentProvider>();
 
             setup.For<Zasilkovna4CsvGenerator>().Use<Zasilkovna4CsvGenerator>();
             setup.For<DpdCsvGenerator>().Use<DpdCsvGenerator>();

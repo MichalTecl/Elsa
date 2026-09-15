@@ -38,6 +38,7 @@ using Elsa.Integration.ChatGpt;
 using Elsa.Integration.Erp.Flox;
 using Elsa.Integration.PaymentSystems.Common;
 using Elsa.Integration.PaymentSystems.Fio;
+using Elsa.Integration.ShipmentProviders.Dpd;
 using Elsa.Integration.ShipmentProviders.Zasilkovna;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Jobs.AutomaticQueries;
@@ -100,6 +101,7 @@ namespace Elsa.Assembly
                     s.ScanAssembly(typeof(IPurchaseOrderRepository).Assembly);
                     s.ScanAssembly(typeof(PaymentsPairingController).Assembly);
                     s.ScanAssembly(typeof(ZasilkovnaClient).Assembly);
+                    s.ScanAssembly(typeof(DpdShipmentProvider).Assembly);
                     s.ScanAssembly(typeof(ShipmentController).Assembly);
                     s.ScanAssembly(typeof(OrdersInfoRegistry).Assembly);
                     s.ScanAssembly(typeof(OrdersPackingRegistry).Assembly);

@@ -74,6 +74,7 @@
     <Compile Include="Commerce\IProduct.cs" />
     <Compile Include="Commerce\IPurchaseOrder.cs" />
     <Compile Include="Commerce\IPurchaseOrderHistory.cs" />
+    <Compile Include="Commerce\IPurchaseOrderShipmentInfo.cs" />
     <Compile Include="Commerce\ISupplier.cs" />
     <Compile Include="Commerce\OrderProcessingStageNames.cs" />
     <Compile Include="Commerce\SaleEvents\ISaleEvent.cs" />

@@ -68,6 +68,9 @@ namespace Elsa.Commerce.Core
 
             setup.For<IShipmentFacade>().Use<ShipmentFacade>();
 
+            setup.Collect<IShipmentProvider>();
+            setup.For<IShipmentProviderFactory>().Use<ShipmentProviderFactory>();
+
             setup.Collect<IShipmentRequestDocumentGenerator>();
 
             setup.For<ShipmentRequestGeneratorFactory>().Use<ShipmentRequestGeneratorFactory>();

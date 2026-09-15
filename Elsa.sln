@@ -231,12 +231,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Jobs.BulletinGeneratio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocGen", "DocGen\DocGen.csproj", "{0A638FAC-F3AA-442A-9696-431F12B997CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elsa.Integration.ShipmentProviders.Dpd", "Elsa.Integration.ShipmentProviders.Dpd\Elsa.Integration.ShipmentProviders.Dpd.csproj", "{B629DF9F-6162-4C2F-BBCC-BC3195F1FBCA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B629DF9F-6162-4C2F-BBCC-BC3195F1FBCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B629DF9F-6162-4C2F-BBCC-BC3195F1FBCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B629DF9F-6162-4C2F-BBCC-BC3195F1FBCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B629DF9F-6162-4C2F-BBCC-BC3195F1FBCA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0A638FAC-F3AA-442A-9696-431F12B997CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0A638FAC-F3AA-442A-9696-431F12B997CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A638FAC-F3AA-442A-9696-431F12B997CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -586,6 +592,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{B629DF9F-6162-4C2F-BBCC-BC3195F1FBCA} = {AAAD30FC-9422-4033-A443-18F4C8F37E85}
 		{A9E9E18D-DF1C-473C-99A1-397F9488931E} = {2E1A0EFD-CAFD-4EA0-B91F-0F3A81EBD94E}
 		{91481B08-E437-474D-9793-A135F1DB465C} = {326F0792-00AF-4D82-B170-4CE248D4A975}
 		{957A9B48-FEFD-4874-8D36-D082EEA7F750} = {56FB2203-E4D8-428D-938B-7251897BE1D0}

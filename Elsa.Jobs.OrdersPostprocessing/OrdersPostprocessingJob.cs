@@ -9,7 +9,12 @@ namespace Elsa.Jobs.OrdersPostprocessing
 {
     public class OrdersPostprocessingJob : IExecutableJob
     {
-        private static readonly Type[] _steps = { typeof(SendPaymentReminder) };
+        private static readonly Type[] _steps =
+            {
+                typeof(SendPaymentReminder),
+                typeof(ObtainShipmentInfo),
+                typeof(TrackShipments)
+            };
 
         private readonly ILog _log;
         private readonly IServiceLocator _serviceLocator;

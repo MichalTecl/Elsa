@@ -54,7 +54,7 @@ namespace Elsa.Jobs.OrdersPostprocessing.Steps
 
         protected override string ProcessCode => OrderProcessingCodes.PAYMENT_REMINDER_SENT;
 
-        protected override int HistoryDepthDays => 100;
+        protected override int? HistoryDepthDays => 100;
 
         protected override IOrderStatus[] SourceOrderStatuses => new[] { OrderStatus.PendingPayment };
 

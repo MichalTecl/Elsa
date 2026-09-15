@@ -8,6 +8,8 @@ namespace Elsa.Jobs.OrdersPostprocessing
         public void Setup(IContainerSetup setup)
         {
             setup.For<SendPaymentReminder>().Use<SendPaymentReminder>();
+            setup.For<ObtainShipmentInfo>().Use<ObtainShipmentInfo>();
+            setup.For<TrackShipments>().Use<TrackShipments>();
         }
     }
 }
