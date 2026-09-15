@@ -1,3 +1,4 @@
+using Elsa.Apps.Reporting.Entities;
 using Elsa.Apps.Reporting.Model;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
@@ -37,15 +38,7 @@ namespace Elsa.Apps.Reporting.Controllers
         {
             EnsureUserRight(ReportingUserRights.ViewBulletin);
 
-            var latest = Directory.Exists(BULLETIN_DIRECTORY)
-                ? Directory.EnumerateFiles(BULLETIN_DIRECTORY, "bulletin_*.html")
-                    .Where(path => DateTime.TryParseExact(
-                        Path.GetFileNameWithoutExtension(path).Substring("bulletin_".Length),
-                        "yyyyMMdd_HHmmss_fffffff", CultureInfo.InvariantCulture,
-                        DateTimeStyles.None, out _))
-                    .OrderByDescending(path => Path.GetFileName(path), StringComparer.Ordinal)
-                    .FirstOrDefault()
-                : null;
+            var latest = FindLatestBulletin();
 
             if (latest == null)
             {
@@ -57,8 +50,44 @@ namespace Elsa.Apps.Reporting.Controllers
                     "text/html; charset=utf-8", "inline") { DisableBrowserCache = true };
             }
 
-            return new FileResult(Path.GetFileName(latest), File.ReadAllBytes(latest),
+            var bytes = File.ReadAllBytes(latest);
+            var view = _database.New<IBulletinView>();
+            view.ProjectId = _session.Project.Id;
+            view.UserId = _session.User.Id;
+            view.BulletinFileName = Path.GetFileName(latest);
+            view.OpenedAt = DateTime.Now;
+            _database.Save(view);
+
+            return new FileResult(view.BulletinFileName, bytes,
                 "text/html; charset=utf-8", "inline") { DisableBrowserCache = true };
+        }
+
+        public object GetBulletinStatus()
+        {
+            EnsureUserRight(ReportingUserRights.ViewBulletin);
+            var latest = FindLatestBulletin();
+            var fileName = latest == null ? null : Path.GetFileName(latest);
+            var projectId = _session.Project.Id;
+            var userId = _session.User.Id;
+            var seen = fileName != null && _database.SelectFrom<IBulletinView>()
+                .Where(v => v.ProjectId == projectId && v.UserId == userId
+                    && v.BulletinFileName == fileName)
+                .Take(1).Execute().Any();
+
+            return new { HasBulletin = fileName != null, IsUnread = fileName != null && !seen };
+        }
+
+        private static string FindLatestBulletin()
+        {
+            return Directory.Exists(BULLETIN_DIRECTORY)
+                ? Directory.EnumerateFiles(BULLETIN_DIRECTORY, "bulletin_*.html")
+                    .Where(path => DateTime.TryParseExact(
+                        Path.GetFileNameWithoutExtension(path).Substring("bulletin_".Length),
+                        "yyyyMMdd_HHmmss_fffffff", CultureInfo.InvariantCulture,
+                        DateTimeStyles.None, out _))
+                    .OrderByDescending(path => Path.GetFileName(path), StringComparer.Ordinal)
+                    .FirstOrDefault()
+                : null;
         }
 
         public List<ReportTypeModel> GetReportTypes()

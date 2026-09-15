@@ -35,7 +35,7 @@ namespace Elsa.JobLauncher.Scheduler
 
         //public static readonly ElsaJob OrderDataValidation = new ElsaJob("ORDER_DATA_VALIDATION", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
 
-        public static readonly ElsaJob BulletinGeneration = new ElsaJob("BULLETIN_GENERATION", 1, TimeSpan.FromHours(1), eval => eval.DidntRunMoreThan(8, 0, 0) && eval.NowIsBetween(0, 5));
+        public static readonly ElsaJob BulletinGeneration = new ElsaJob("BULLETIN_GENERATION", 1, TimeSpan.FromHours(1), eval => DateTime.Now.DayOfWeek == DayOfWeek.Saturday && eval.NowIsBetween(2, 3) && eval.DidntRunMoreThan(24, 0, 0));
 
         public static IEnumerable<ElsaJob> All
         {

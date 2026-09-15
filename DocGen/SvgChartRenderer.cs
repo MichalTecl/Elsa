@@ -22,15 +22,16 @@ namespace DocGen
                 return figure;
             }
 
-            var width = Math.Max(960, chart.Groups.Count * 140 + LEFT + 20);
+            var width = Math.Max(960, chart.Groups.Count * 90 + LEFT + 20);
             var groupWidth = (width - LEFT - 20) / chart.Groups.Count;
-            var maximum = chart.Groups.SelectMany(g => g.Columns).Max(c => c.Values.Sum());
+            var maximum = chart.Groups.SelectMany(g => g.Columns).Max(c => c.Values.Sum() + (c.ProjectedAdditions?.Sum() ?? 0));
             var step = NiceStep(maximum / 4);
             var axisMax = Math.Max(step, Math.Ceiling(maximum / step) * step);
             var svg = new XElement(_svg + "svg", new XAttribute("viewBox", $"0 0 {Number(width)} 390"),
+                new XAttribute("style", $"--chart-min-width:{Number(width)}px"),
                 new XAttribute("role", "img"), new XAttribute("aria-label", chart.Title ?? "Graf"),
                 new XElement(_svg + "title", chart.Title),
-                new XElement(_svg + "desc", "Přesné hodnoty jsou uvedeny v tabulce pod grafem."));
+                new XElement(_svg + "desc", "Syté části představují skutečné hodnoty, světlé části odhad přírůstku do konce období."));
 
             for (decimal value = 0; value <= axisMax; value += step)
             {
@@ -40,24 +41,16 @@ namespace DocGen
                 svg.Add(Text(LEFT - 10, y + 4, Format(value, chart.Unit), "end"));
             }
 
-            var table = new XElement("table", new XElement("caption", "Hodnoty grafu"));
-            var headings = new XElement("tr", Heading("Skupina"), Heading("Sloupec"));
-            foreach (var segment in chart.Segments) headings.Add(Heading(segment.Label));
-            headings.Add(Heading("Celkem"));
-            table.Add(new XElement("thead", headings));
-            var rows = new XElement("tbody");
-
             for (var index = 0; index < chart.Groups.Count; index++)
             {
                 var group = chart.Groups[index];
-                var barWidth = Math.Min(38, groupWidth / group.Columns.Count * 0.65);
+                var barWidth = Math.Min(38, groupWidth / group.Columns.Count * 0.8);
                 var groupLeft = LEFT + index * groupWidth + (groupWidth - barWidth * group.Columns.Count) / 2;
                 for (var columnIndex = 0; columnIndex < group.Columns.Count; columnIndex++)
                 {
                     var column = group.Columns[columnIndex];
                     var center = groupLeft + barWidth * (columnIndex + 0.5);
                     var y = BASELINE;
-                    var row = new XElement("tr", new XElement("td", group.Label), new XElement("td", column.Label));
                     for (var segmentIndex = 0; segmentIndex < chart.Segments.Count; segmentIndex++)
                     {
                         var segment = chart.Segments[segmentIndex];
@@ -65,13 +58,45 @@ namespace DocGen
                         var height = (double)(value / axisMax) * PLOT_HEIGHT;
                         y -= height;
                         svg.Add(new XElement(_svg + "rect", Attr("x", center - barWidth / 2), Attr("y", y),
-                            Attr("width", barWidth), Attr("height", height), new XAttribute("fill", segment.Color),
+                            Attr("width", barWidth), Attr("height", height), new XAttribute("fill", segment.Color), SegmentLink(column.SegmentKeys?[segmentIndex]),
                             new XElement(_svg + "title", $"{group.Label} {column.Label}, {segment.Label}: {Format(value, chart.Unit)}")));
-                        row.Add(new XElement("td", Format(value, chart.Unit)));
+                        var label = column.SegmentLabels?[segmentIndex];
+                        if (!string.IsNullOrWhiteSpace(label) && height > 0)
+                        {
+                            var labelElement = Text(center, y + height / 2, label);
+                            if (column.SegmentKeys != null)
+                                labelElement.SetAttributeValue("data-trend-key", column.SegmentKeys[segmentIndex]);
+                            labelElement.SetAttributeValue("dominant-baseline", "central");
+                            labelElement.SetAttributeValue("font-size", Number(Math.Min(10, height * 0.8)));
+                            labelElement.SetAttributeValue("font-weight", "600");
+                            labelElement.SetAttributeValue("fill", "#ffffff");
+                            labelElement.SetAttributeValue("stroke", "#17283b");
+                            labelElement.SetAttributeValue("stroke-width", "0.5");
+                            labelElement.SetAttributeValue("paint-order", "stroke");
+                            labelElement.SetAttributeValue("pointer-events", "none");
+                            if (label.Length * 6 > barWidth - 4)
+                            {
+                                labelElement.SetAttributeValue("textLength", Number(barWidth - 4));
+                                labelElement.SetAttributeValue("lengthAdjust", "spacingAndGlyphs");
+                            }
+                            svg.Add(labelElement);
+                        }
+                    }
+                    if (column.ProjectedAdditions != null)
+                    {
+                        for (var segmentIndex = 0; segmentIndex < chart.Segments.Count; segmentIndex++)
+                        {
+                            var segment = chart.Segments[segmentIndex];
+                            var addition = column.ProjectedAdditions[segmentIndex];
+                            var height = (double)(addition / axisMax) * PLOT_HEIGHT;
+                            y -= height;
+                            svg.Add(new XElement(_svg + "rect", Attr("x", center - barWidth / 2), Attr("y", y),
+                                Attr("width", barWidth), Attr("height", height), new XAttribute("fill", Lighten(segment.Color)), SegmentLink(column.SegmentKeys == null ? null : column.SegmentKeys[segmentIndex] + "-projection"),
+                                new XElement(_svg + "title", $"{group.Label} {column.Label}, {segment.Label} — odhad přírůstku: {Format(addition, chart.Unit)}, "
+                                    + $"odhad celého období: {Format(column.Values[segmentIndex] + addition, chart.Unit)}")));
+                        }
                     }
                     svg.Add(Text(center, BASELINE + 22, column.Label));
-                    row.Add(new XElement("td", Format(column.Values.Sum(), chart.Unit)));
-                    rows.Add(row);
                 }
                 svg.Add(Text(LEFT + (index + 0.5) * groupWidth, BASELINE + 50, group.Label));
             }
@@ -80,9 +105,13 @@ namespace DocGen
             foreach (var segment in chart.Segments)
                 legend.Add(new XElement("span", new XElement("span", new XAttribute("class", "swatch"),
                     new XAttribute("style", "background:" + segment.Color), ""), segment.Label));
-            table.Add(rows);
-            figure.Add(legend, new XElement("div", new XAttribute("class", "chart-scroll"), svg),
-                new XElement("div", new XAttribute("class", "chart-scroll"), table));
+            if (chart.Groups.SelectMany(g => g.Columns).Any(c => c.ProjectedAdditions != null))
+            {
+                foreach (var segment in chart.Segments)
+                    legend.Add(new XElement("span", new XElement("span", new XAttribute("class", "swatch"),
+                        new XAttribute("style", "background:" + Lighten(segment.Color)), ""), segment.Label + " — odhad přírůstku"));
+            }
+            figure.Add(legend, new XElement("div", new XAttribute("class", "chart-scroll"), svg));
             return figure;
         }
 
@@ -91,8 +120,30 @@ namespace DocGen
             if (chart.Segments.Count == 0 || chart.Segments.Any(s => s == null || !Regex.IsMatch(s.Color ?? "", @"\A#[0-9a-fA-F]{6}\z")))
                 throw new ArgumentException("Chart segments require colors in #RRGGBB format.");
             if (chart.Groups.Any(g => g == null || g.Columns.Count == 0 || g.Columns.Any(c => c == null ||
-                c.Values == null || c.Values.Length != chart.Segments.Count || c.Values.Any(v => v < 0))))
+                (c.SegmentKeys != null && c.SegmentKeys.Length != chart.Segments.Count) ||
+                (c.SegmentLabels != null && c.SegmentLabels.Length != chart.Segments.Count) ||
+                c.Values == null || c.Values.Length != chart.Segments.Count || c.Values.Any(v => v < 0) ||
+                (c.ProjectedAdditions != null && (c.ProjectedAdditions.Length != chart.Segments.Count || c.ProjectedAdditions.Any(v => v < 0))))))
                 throw new ArgumentException("Each column requires one non-negative value per segment.");
+        }
+
+        private static object SegmentLink(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return null;
+            return new[]
+            {
+                new XAttribute("data-link-key", key),
+                new XAttribute("data-highlight-targets", key),
+                new XAttribute("tabindex", "0")
+            };
+        }
+
+        private static string Lighten(string color)
+        {
+            var components = Enumerable.Range(0, 3).Select(index =>
+                Convert.ToInt32(color.Substring(1 + index * 2, 2), 16));
+            return "#" + string.Concat(components.Select(value =>
+                ((int)Math.Round(value * 0.25 + 255 * 0.75)).ToString("X2")));
         }
 
         private static decimal NiceStep(decimal value)
@@ -108,7 +159,6 @@ namespace DocGen
         private static string Number(double value)
             => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
         private static XAttribute Attr(string name, double value) => new XAttribute(name, Number(value));
-        private static XElement Heading(string text) => new XElement("th", new XAttribute("scope", "col"), text);
         private static XElement Text(double x, double y, string text, string anchor = "middle")
             => new XElement(_svg + "text", Attr("x", x), Attr("y", y), new XAttribute("text-anchor", anchor),
                 new XAttribute("font-size", "12"), new XAttribute("fill", "#475569"), text);

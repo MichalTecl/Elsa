@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DynamicColumnNamesProcessor.cs" />
+    <Compile Include="Entities\IBulletinView.cs" />
     <Compile Include="Model\ReportTypeModel.cs" />
     <Compile Include="ReportingRegistry.cs" />
     <Compile Include="Controllers\ReportingController.cs" />
@@ -113,6 +114,7 @@
     <Content Include="SQL\20250521_004_xrep_productUnitCosts.sql" />
     <Content Include="SQL\20250529_001_UpdatePureBatchPriceCalculation_fix.sql" />
     <Content Include="UI\Widgets\Reporting\ReportingWidget.html" />
+    <Content Include="UI\Widgets\Reporting\BulletinWidget.js" />
     <Content Include="UI\Reporting\Reporting.VM.js" />
     <Content Include="UI\Reporting\ReportListPage.css" />
     <Content Include="UI\Reporting\ReportListPage.html" />

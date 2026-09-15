@@ -4,6 +4,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\DocGen\DocGen.csproj" />
+    <ProjectReference Include="..\Elsa.Common.Interfaces\Elsa.Common.Interfaces.csproj" />
+    <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj" />
     <ProjectReference Include="..\Elsa.Common\Elsa.Common.csproj" />
     <ProjectReference Include="..\Elsa.Jobs.Common\Elsa.Jobs.Common.csproj" />
     <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj" />

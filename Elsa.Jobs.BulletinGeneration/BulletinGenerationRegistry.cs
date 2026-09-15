@@ -6,6 +6,7 @@ namespace Elsa.Jobs.BulletinGeneration
     {
         public void Setup(IContainerSetup setup)
         {
+            setup.For<BulletinDataRepository>().Use<BulletinDataRepository>();
             setup.For<BulletinGenerationJob>().Use<BulletinGenerationJob>();
             setup.For<BulletinDocumentGenerator>().Use<BulletinDocumentGenerator>();
         }

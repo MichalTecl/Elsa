@@ -76,11 +76,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BulletinAnalyticsTests.cs" />
     <Compile Include="Mocks\CacheMock.cs" />
     <Compile Include="Mocks\SessionMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DocGen\DocGen.csproj">
+      <Project>{0A638FAC-F3AA-442A-9696-431F12B997CC}</Project>
+      <Name>DocGen</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Elsa.Jobs.BulletinGeneration\Elsa.Jobs.BulletinGeneration.csproj">
+      <Project>{A9E9E18D-DF1C-473C-99A1-397F9488931E}</Project>
+      <Name>Elsa.Jobs.BulletinGeneration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Elsa.Commerce.Core\Elsa.Commerce.Core.csproj">
       <Project>{61dd96b7-bf13-4c48-9353-08f2f907048e}</Project>
       <Name>Elsa.Commerce.Core</Name>

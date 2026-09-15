@@ -14,7 +14,14 @@ namespace Elsa.Jobs.BulletinGeneration
         }
 
         protected override string Title => "Bulletin — přehled podniku";
-        protected override Type[] Chapters => new[] { typeof(ExampleRevenueChapter) };
+        protected override Type[] Chapters => new[]
+        {
+            typeof(RevenueChapter),
+            typeof(ProductPerformanceChapter),
+            typeof(OrderVolumeChapter),
+            typeof(DormantWholesaleChapter),
+            typeof(CustomerLifecycleChapter)
+        };
         protected override object CreateInstance(Type t) => _serviceLocator.InstantiateNow(t);
     }
 }
