@@ -87,6 +87,7 @@
     <Compile Include="Logging\InspectionIssueModel.cs" />
     <Compile Include="Logging\LogExtensions.cs" />
     <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\DeadlockDiagnosticFileSink.cs" />
     <Compile Include="Logging\NoActionLogWriter.cs" />
     <Compile Include="PasswordHashHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

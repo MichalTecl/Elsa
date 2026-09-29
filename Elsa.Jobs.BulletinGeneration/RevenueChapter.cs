@@ -25,17 +25,17 @@ namespace Elsa.Jobs.BulletinGeneration
             var currentMonth = new DateTime(generatedAt.Year, generatedAt.Month, 1);
             var firstMonth = currentMonth.AddMonths(1 - MONTH_COUNT);
             var data = _database.Sql().ExecuteWithParams(@"SELECT
-                YEAR(po.PurchaseDate) AS [Year],
-                MONTH(po.PurchaseDate) AS [Month],
+                YEAR(po.BuyDate) AS [Year],
+                MONTH(po.BuyDate) AS [Month],
                 SUM(CASE WHEN ISNULL(c.IsDistributor, 0) = 0 THEN revenue.NetRevenue ELSE 0 END) AS Retail,
                 SUM(CASE WHEN c.IsDistributor = 1 THEN revenue.NetRevenue ELSE 0 END) AS Wholesale,
                 SUM(CASE WHEN firstItem.TaxPercent IS NULL OR firstItem.TaxPercent < 0 THEN 1 ELSE 0 END) AS InvalidTaxCount
             " + BulletinQueries.OrderFrom + @"
             WHERE po.OrderStatusId = 5
               AND po.ProjectId = {0}
-              AND po.PurchaseDate >= {1}
-              AND po.PurchaseDate < {2}
-            GROUP BY YEAR(po.PurchaseDate), MONTH(po.PurchaseDate)
+              AND po.BuyDate >= {1}
+              AND po.BuyDate < {2}
+            GROUP BY YEAR(po.BuyDate), MONTH(po.BuyDate)
             ORDER BY [Year], [Month];", _session.Project.Id, firstMonth.AddYears(-1), generatedAt)
                 .AutoMap<RevData>()
                 .ToDictionary(row => new DateTime(row.Year, row.Month, 1));

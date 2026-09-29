@@ -12,7 +12,7 @@ namespace Elsa.Common
     {
         public void Setup(IContainerSetup setup)
         {
-            //AsyncLogger.Initialize(new ConnectionStringProvider());
+            Robowire.RobOrm.SqlServer.DeadlockDiagnostics.Configure(new DeadlockDiagnosticFileSink());
 
             setup.For<IConfigurationRepository>().Use<ConfigurationRepository>();
             setup.For<ILog>().Use<Logger>();

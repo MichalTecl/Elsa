@@ -9,13 +9,13 @@ namespace Elsa.Common.Logging
 {
     public class Logger : ILog
     {
-        private readonly ISession m_session;
-        private readonly ILogWriter m_logWriter;
+        private readonly ISession _session;
+        private readonly ILogWriter _logWriter;
 
         public Logger(ISession session, ILogWriter logWriter)
         {
-            m_session = session;
-            m_logWriter = logWriter;
+            _session = session;
+            _logWriter = logWriter;
         }
 
         public void Info(string s, 
@@ -33,6 +33,15 @@ namespace Elsa.Common.Logging
             [CallerLineNumber] int line = 0)
         {
             var spacer = e == null ? string.Empty : "\t";
+            for (var current = e; current != null; current = current.InnerException)
+            {
+                var diagnosticId = current.Data[Robowire.RobOrm.SqlServer.DeadlockDiagnostics.EXCEPTION_DATA_KEY];
+                if (diagnosticId == null)
+                    continue;
+
+                s = $"DeadlockDiagnosticId={diagnosticId}; {s}";
+                break;
+            }
 
             var msg = $"{s}{spacer}{e?.Message ?? string.Empty} {e?.ToString() ?? string.Empty}";
             CreateEntry(member, path, line,
@@ -79,7 +88,7 @@ namespace Elsa.Common.Logging
 
             entrySetter(entry);
 
-            m_logWriter.Write(entry);
+            _logWriter.Write(entry);
         }
 
         private ISysLog CreateEntry(string member, string path, int line)
@@ -87,7 +96,7 @@ namespace Elsa.Common.Logging
             var entry = new Entry
             {
                 EventDt = DateTime.Now,
-                SessionId = m_session.SessionId,
+                SessionId = _session.SessionId,
                 Method = $"{path}.{member}:{line}"
             };
 
@@ -99,36 +108,36 @@ namespace Elsa.Common.Logging
 
         private sealed class StopWatch : IDisposable
         {
-            private readonly Logger m_owner;
-            private readonly DateTime m_startTime;
-            private readonly string m_watchName;
-            private readonly string m_member;
-            private readonly string m_path;
-            private readonly int m_line;
+            private readonly Logger _owner;
+            private readonly DateTime _startTime;
+            private readonly string _watchName;
+            private readonly string _member;
+            private readonly string _path;
+            private readonly int _line;
 
             public StopWatch(Logger owner, string watchName, string member, string path, int line)
             {
-                m_owner = owner;
-                m_watchName = watchName;
-                m_member = member;
-                m_path = path;
-                m_line = line;
-                m_startTime = DateTime.Now;
+                _owner = owner;
+                _watchName = watchName;
+                _member = member;
+                _path = path;
+                _line = line;
+                _startTime = DateTime.Now;
             }
 
             public void Dispose()
             {
-                var time = (DateTime.Now - m_startTime).TotalMilliseconds;
+                var time = (DateTime.Now - _startTime).TotalMilliseconds;
 
-                m_owner.CreateEntry(
-                    m_member,
-                    m_path,
-                    m_line,
+                _owner.CreateEntry(
+                    _member,
+                    _path,
+                    _line,
                     e =>
                         {
                             e.MeasuredTime = (int)time;
                             e.IsStopWatch = true;
-                            e.Message = m_watchName;
+                            e.Message = _watchName;
                         });
             }
         }

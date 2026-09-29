@@ -113,6 +113,7 @@
     <Content Include="SQL\20250521_003_UpdatePureBatchPriceCalculation.sql" />
     <Content Include="SQL\20250521_004_xrep_productUnitCosts.sql" />
     <Content Include="SQL\20250529_001_UpdatePureBatchPriceCalculation_fix.sql" />
+    <Content Include="SQL\20260929_001_xrep_ordersByDaysAndHours.sql" />
     <Content Include="UI\Widgets\Reporting\ReportingWidget.html" />
     <Content Include="UI\Widgets\Reporting\BulletinWidget.js" />
     <Content Include="UI\Reporting\Reporting.VM.js" />

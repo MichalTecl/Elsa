@@ -50,6 +50,7 @@
     <Compile Include="Attributes\StringColumnMappingAttributeBase.cs" />
     <Compile Include="ConnectionCreator.cs" />
     <Compile Include="Database.cs" />
+    <Compile Include="DeadlockDiagnostics.cs" />
     <Compile Include="HierarchicSqlDataReader.cs" />
     <Compile Include="ISqlConnectionStringProvider.cs" />
     <Compile Include="Migration\MigrationCustomizer.cs" />

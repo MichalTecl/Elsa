@@ -125,15 +125,7 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
                                 var chosenValue = this.getElementsByTagName("input")[0].value;
                                 inp.customizer.applySelectedValue(chosenValue, inp, inp.customizerContext);
                                 
-                                if ("createEvent" in document) {
-                                    var evt = document.createEvent("HTMLEvents");
-                                    evt.initEvent("change", false, true);
-                                    evt.initEvent("input", false, true);
-                                    inp.dispatchEvent(evt);
-                                } else {
-                                    inp.fireEvent("onchange");
-                                    inp.fireEvent("oninput");
-                                }
+                                dispatchValueChangedEvents();
 
                                 if (!!pickCallback)
                                     pickCallback(chosenValue);
@@ -171,15 +163,7 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
                 if (x) x[currentFocus].click();
             } else {
                 /* If no item is active, trigger change event with current input value: */
-                if ("createEvent" in document) {
-                    var evt = document.createEvent("HTMLEvents");
-                    evt.initEvent("change", false, true);
-                    evt.initEvent("input", false, true);
-                    inp.dispatchEvent(evt);
-                } else {
-                    inp.fireEvent("onchange");
-                    inp.fireEvent("oninput");
-                }
+                dispatchValueChangedEvents();
                                 
                 /* Close all autocomplete lists: */
                 closeAllLists();
@@ -203,6 +187,20 @@ app.ui.autosuggest = app.ui.autosuggest || function (container, itemsSource, arg
         /*a function to remove the "active" class from all autocomplete items:*/
         for (var i = 0; i < x.length; i++) {
             x[i].classList.remove("autocomplete-active");
+        }
+    }
+    function dispatchValueChangedEvents() {
+        if ("createEvent" in document) {
+            var changeEvent = document.createEvent("HTMLEvents");
+            changeEvent.initEvent("change", false, true);
+            inp.dispatchEvent(changeEvent);
+
+            var inputEvent = document.createEvent("HTMLEvents");
+            inputEvent.initEvent("input", false, true);
+            inp.dispatchEvent(inputEvent);
+        } else {
+            inp.fireEvent("onchange");
+            inp.fireEvent("oninput");
         }
     }
     function closeAllLists(elmnt) {

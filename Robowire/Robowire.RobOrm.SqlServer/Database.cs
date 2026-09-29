@@ -15,12 +15,12 @@ namespace Robowire.RobOrm.SqlServer
 {
     public class Database : DatabaseBase<SqlConnection>
     {
-        private readonly ITransactionManager<SqlConnection> m_connectionFactory;
+        private readonly ITransactionManager<SqlConnection> _connectionFactory;
 
         public Database(IServiceLocator locator, IDataModelHelper dataModel, ITransactionManager<SqlConnection> connectionFactory)
             : base(locator, dataModel, connectionFactory)
         {
-            m_connectionFactory = connectionFactory;
+            _connectionFactory = connectionFactory;
         }
 
         public override string GetQueryText<T>(IQueryModel<T> model, IQueryBuilder<T> builder) 
@@ -46,8 +46,16 @@ namespace Robowire.RobOrm.SqlServer
                 parameters.AddWithValue(p.Key, p.Value);
             }
 
-            var sqlReader = command.ExecuteReader();
-            return new HierarchicSqlDataReader(sqlReader, null);
+            try
+            {
+                var sqlReader = ExecuteWithDiagnostics(command, () => command.ExecuteReader());
+                return new HierarchicSqlDataReader(sqlReader, null, ex => DeadlockDiagnostics.Capture(ex, command, _connectionFactory.OpenUnmanagedConnection), command);
+            }
+            catch
+            {
+                command.Dispose();
+                throw;
+            }
         }
 
         protected override object InsertEntity(IEntity entity, ITransaction<SqlConnection> transaction)
@@ -67,7 +75,7 @@ namespace Robowire.RobOrm.SqlServer
                     command.Parameters.AddWithValue($"@{entityColumnValue.ColumnName}", entityColumnValue.Value ?? DBNull.Value);
                 }
 
-                var newPk = command.ExecuteScalar();
+                var newPk = ExecuteWithDiagnostics(command, () => command.ExecuteScalar());
                 entity.PrimaryKeyValue = newPk;
 
                 return newPk;
@@ -105,7 +113,7 @@ namespace Robowire.RobOrm.SqlServer
                 command.Connection = transaction.GetConnection();
                 command.CommandText = sb.ToString();
 
-                command.ExecuteNonQuery();
+                ExecuteWithDiagnostics(command, () => command.ExecuteNonQuery());
             }
         }
 
@@ -123,7 +131,7 @@ namespace Robowire.RobOrm.SqlServer
             using (var cmd = new SqlCommand(sql, transaction.GetConnection()))
             {
                 cmd.Parameters.AddWithValue("@pk", pk.Value);
-                cmd.ExecuteNonQuery();
+                ExecuteWithDiagnostics(cmd, () => cmd.ExecuteNonQuery());
             }
         }
 
@@ -133,7 +141,20 @@ namespace Robowire.RobOrm.SqlServer
             {
                 setParameters(cmd.Parameters);
 
-                return cmd.ExecuteScalar();
+                return ExecuteWithDiagnostics(cmd, () => cmd.ExecuteScalar());
+            }
+        }
+
+        private T ExecuteWithDiagnostics<T>(SqlCommand command, Func<T> action)
+        {
+            try
+            {
+                return action();
+            }
+            catch (SqlException ex)
+            {
+                DeadlockDiagnostics.Capture(ex, command, _connectionFactory.OpenUnmanagedConnection);
+                throw;
             }
         }
 
@@ -147,7 +168,7 @@ namespace Robowire.RobOrm.SqlServer
                 cmd.Connection = transaction.GetConnection();
                 setupCommand(cmd);
 
-                return action(cmd);
+                return ExecuteWithDiagnostics(cmd, () => action(cmd));
             }
         }
     }

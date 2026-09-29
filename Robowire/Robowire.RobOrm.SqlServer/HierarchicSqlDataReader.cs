@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 
 using Robowire.RobOrm.Core;
@@ -8,57 +9,71 @@ namespace Robowire.RobOrm.SqlServer
 {
     public class HierarchicSqlDataReader : DataReaderBase
     {
-        private List<string> m_columnIndex;
-        private readonly SqlDataReader m_reader;
+        private List<string> _columnIndex;
+        private readonly SqlDataReader _reader;
+        private readonly Action<SqlException> _onError;
+        private readonly SqlCommand _ownedCommand;
 
-        public HierarchicSqlDataReader(SqlDataReader reader, string path) : this(reader, path, null)
+        public HierarchicSqlDataReader(SqlDataReader reader, string path) : this(reader, path, null, null, null)
         {
         }
 
-        private HierarchicSqlDataReader(SqlDataReader reader, string path, List<string> columnIndex)
+        internal HierarchicSqlDataReader(SqlDataReader reader, string path, Action<SqlException> onError, SqlCommand ownedCommand)
+            : this(reader, path, null, onError, ownedCommand)
         {
-            m_reader = reader;
+        }
+
+        private HierarchicSqlDataReader(SqlDataReader reader, string path, List<string> columnIndex, Action<SqlException> onError, SqlCommand ownedCommand)
+        {
+            _reader = reader;
+            _onError = onError;
+            _ownedCommand = ownedCommand;
             RootPath = path;
-            m_columnIndex = columnIndex;
+            _columnIndex = columnIndex;
         }
 
         public override void Dispose()
         {
-            m_reader.Dispose();
+            try { _reader.Dispose(); }
+            catch (SqlException ex) { _onError?.Invoke(ex); throw; }
+            finally { _ownedCommand?.Dispose(); }
         }
 
         protected override IDataReader CreateChildReader(string childPath, List<string> columnIndex)
         {
-            return new HierarchicSqlDataReader(m_reader, childPath, columnIndex);
+            return new HierarchicSqlDataReader(_reader, childPath, columnIndex, _onError, null);
         }
 
         protected override bool GetIsNull(int column)
         {
-            return m_reader.IsDBNull(column);
+            try { return _reader.IsDBNull(column); }
+            catch (SqlException ex) { _onError?.Invoke(ex); throw; }
         }
 
         protected override T GetValue<T>(int column)
         {
-            return m_reader.GetFieldValue<T>(column);
+            try { return _reader.GetFieldValue<T>(column); }
+            catch (SqlException ex) { _onError?.Invoke(ex); throw; }
         }
 
         protected override bool NextRecord()
         {
-            return m_reader.Read();
+            try { return _reader.Read(); }
+            catch (SqlException ex) { _onError?.Invoke(ex); throw; }
         }
 
         protected override IEnumerable<string> GetColumnsOrder()
         {
-            if (m_columnIndex == null)
+            if (_columnIndex == null)
             {
-                m_columnIndex = new List<string>(m_reader.FieldCount);
-                for (var i = 0; i < m_reader.FieldCount; i++)
+                _columnIndex = new List<string>(_reader.FieldCount);
+                for (var i = 0; i < _reader.FieldCount; i++)
                 {
-                    m_columnIndex.Add(m_reader.GetName(i));
+                    _columnIndex.Add(_reader.GetName(i));
                 }
             }
 
-            return m_columnIndex;
+            return _columnIndex;
         }
     }
 }

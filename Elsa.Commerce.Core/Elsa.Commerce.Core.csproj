@@ -287,6 +287,8 @@
     <Content Include="SQL\20240917_001_GetBatchPriceComponents.sql" />
     <Content Include="SQL\20251031_001_fix_productWeightIndex.sql" />
     <Content Include="SQL\20260908_001_MissingPaymentsIndex.sql" />
+    <Content Include="SQL\20260929_001_vwOrderDiscount_PriceMultiplier.sql" />
+    <Content Include="SQL\20260929_002_PurchaseOrderPurchaseDateIndex.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
