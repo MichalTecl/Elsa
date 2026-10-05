@@ -75,10 +75,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Facade\InvoiceFormsManagementFacade.cs" />
     <Compile Include="Facade\InvoiceFormsQueryingFacade.cs" />
     <Compile Include="UiForms\IFormRendererFactory.cs" />
     <Compile Include="UiForms\InvoiceFormRendererFactory.cs" />
     <Compile Include="InvoiceFormsController.cs" />
+    <Compile Include="InvoiceFormPackagesController.cs" />
     <Compile Include="Model\FormReportTypeViewModel.cs" />
     <Compile Include="Model\GenerationInfoModel.cs" />
     <Compile Include="Model\InvoiceFormModelBase.cs" />
@@ -144,6 +146,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="UI\InvoiceFormPackages\InvoiceFormPackages.css" />
+    <Content Include="UI\InvoiceFormPackages\InvoiceFormPackages.html" />
+    <Content Include="UI\InvoiceFormPackages\InvoiceFormPackages.vm.js" />
+    <None Include="sencha.json" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

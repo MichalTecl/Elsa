@@ -1,0 +1,94 @@
+#invoiceFormPackagesUi {
+    padding: 16px;
+    background: #f9f9fb;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    color: #2c2c2c;
+}
+
+.invoicePackagesTable {
+    width: 100%;
+    max-width: 480px;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #d6d6e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    font-size: 16px;
+}
+
+.invoicePackagesTable td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #ececf1;
+}
+
+.invoicePackagesTable tr:last-child td {
+    border-bottom: 0;
+}
+
+.invoicePackagesTable tr:hover {
+    background: #f1f5fa;
+}
+
+.invoicePackageDownload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 32px;
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.invoicePackageDownload:hover {
+    color: #003e80;
+    text-decoration: underline;
+}
+
+.invoicePackageDownload > .fa-file-archive {
+    color: #72849b;
+}
+
+.invoicePackageDownloadIcon {
+    margin-left: auto;
+    font-size: 13px;
+    color: #72849b;
+}
+
+.invoicePackageActions {
+    width: 36px;
+    text-align: right;
+}
+
+.invoicePackageDelete {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #8d6262;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.invoicePackageDelete:hover {
+    background: #fce8e8;
+    color: #b42323;
+}
+
+.invoicePackageDelete:disabled {
+    opacity: 0.4;
+    cursor: wait;
+}
+
+.invoicePackageDelete:focus-visible,
+.invoicePackageDownload:focus-visible {
+    outline: 2px solid #0056b3;
+    outline-offset: 2px;
+}
+
+#invoiceFormPackagesUi [role="alert"] {
+    margin-bottom: 12px;
+    color: #b42323;
+}

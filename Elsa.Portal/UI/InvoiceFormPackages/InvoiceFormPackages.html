@@ -1,0 +1,31 @@
+<ElsaBody>
+    <link href="/UI/InvoiceFormPackages/InvoiceFormPackages.css" rel="stylesheet" />
+    <script src="/UI/InvoiceFormPackages/InvoiceFormPackages.vm.js"></script>
+    <div class="panel w4 restricted-ManageInvoicingFormPackages">
+        <div class="panelHead">
+            <div class="panelTitle">Balíčky účetních dat</div>
+        </div>
+        <div id="invoiceFormPackagesUi" class="panelContent">
+            <div data-bind="text:error;class!.hidden:error" role="alert"></div>
+            <div class="hidden" data-bind="class!.hidden:isEmpty">Nejsou k dispozici žádné balíčky účetních dat.</div>
+            <table class="invoicePackagesTable" aria-label="Balíčky účetních dat">
+                <tbody data-bind="itemsSource:collections" data-key="PublicUid">
+                    <tr class="lt-template">
+                        <td><a class="invoicePackageDownload" data-bind="href:DownloadLink" title="Stáhnout balíček účetních dat"><i class="fas fa-file-archive" aria-hidden="true"></i><span data-bind="text:Title"></span><i class="fas fa-download invoicePackageDownloadIcon" aria-hidden="true"></i></a></td>
+                        <td class="invoicePackageActions">
+                            <button type="button" class="invoicePackageDelete hidden" title="Smazat balíček účetních dat" aria-label="Smazat balíček účetních dat" data-bind="class!.hidden:CanDelete;disabled:isBusy"
+                                    event-bind="click:deletePackage(VM)"><i class="far fa-trash-alt" aria-hidden="true"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        lt.element("invoiceFormPackagesUi").withModel("app.InvoiceFormPackages.vm").attach(function () {
+            this.deletePackage = function (collection) {
+                app.InvoiceFormPackages.vm.deletePackage(collection);
+            };
+        });
+    </script>
+</ElsaBody>

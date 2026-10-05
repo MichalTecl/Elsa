@@ -14,6 +14,8 @@ namespace Elsa.Apps.Reporting
         public static readonly UserRight InspectorOtherUsers = new UserRight(nameof(InspectorOtherUsers), "Inspektor - Přehled ostatních uživatelů", InspectorApp);
         public static readonly UserRight InspectorIssuesAssignment = new UserRight(nameof(InspectorIssuesAssignment), "Inspektor - Přiřazování odpovědných uživatelů", InspectorApp);
 
-        public static readonly UserRight DownloadInvoicingFormPackages = new UserRight(nameof(DownloadInvoicingFormPackages), "Stahování balíčků účetních dat");
+        public static readonly UserRight DownloadInvoicingFormPackages = new UserRight(nameof(DownloadInvoicingFormPackages), "Stahování balíčků účetních dat", ViewReportingWidget);
+
+        public static readonly UserRight ManageInvoicingFormPackages = new UserRight(nameof(ManageInvoicingFormPackages), "Mazání balíčků účetních dat", DownloadInvoicingFormPackages);
     }
 }

@@ -65,6 +65,11 @@ namespace Elsa.Jobs.OrdersPostprocessing.Steps
                     throw new InvalidOperationException($"Zásilka {shipment.Id} objednávky {order.OrderNumber} nemá tracking number.");
 
                 var provider = _shipmentProviders.GetBySymbol(shipment.ShipmentProviderSymbol);
+
+                //TODO - cekame na odpoved DPD, API zatim nefunguje
+                if (provider.Name == "DPD")
+                    return false;
+
                 _log.Info($"Zjišťuji stav zásilky {shipment.ExternalTrackingNumber}, objednávka {order.OrderNumber}, dopravce {provider.Name}.");
                 var trackingInfo = provider.GetTrackingInfo(shipment.ExternalTrackingNumber);
                 if (trackingInfo == null)

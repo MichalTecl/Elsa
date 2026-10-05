@@ -8,6 +8,7 @@ namespace Elsa.Apps.InvoiceForms
     {
         public void Setup(IContainerSetup setup)
         {
+            setup.For<InvoiceFormsManagementFacade>().Use<InvoiceFormsManagementFacade>();
             setup.For<InvoiceFormsQueryingFacade>().Use<InvoiceFormsQueryingFacade>();
             setup.For<IInvoiceFormRendererFactory>().Use<InvoiceFormRendererFactory>();
         }
