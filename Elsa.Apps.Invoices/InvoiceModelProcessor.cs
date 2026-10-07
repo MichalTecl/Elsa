@@ -17,23 +17,23 @@ namespace Elsa.Apps.Invoices
 {
     public class InvoiceModelProcessor : IInvoiceFileProcessor
     {
-        private readonly IDatabase m_database;
-        private readonly ISupplierRepository m_supplierRepository;
-        private readonly ICurrencyRepository m_currencyRepository;
-        private readonly IMaterialBatchRepository m_batchRepository;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly IMaterialFacade m_materialFacade;
+        private readonly IDatabase _database;
+        private readonly ISupplierRepository _supplierRepository;
+        private readonly ICurrencyRepository _currencyRepository;
+        private readonly IMaterialBatchRepository _batchRepository;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IMaterialFacade _materialFacade;
 
         public InvoiceModelProcessor(IDatabase database, ISupplierRepository supplierRepository, ICurrencyRepository currencyRepository, IMaterialBatchRepository batchRepository, IMaterialRepository materialRepository, IUnitRepository unitRepository, IMaterialFacade materialFacade)
         {
-            m_database = database;
-            m_supplierRepository = supplierRepository;
-            m_currencyRepository = currencyRepository;
-            m_batchRepository = batchRepository;
-            m_materialRepository = materialRepository;
-            m_unitRepository = unitRepository;
-            m_materialFacade = materialFacade;
+            _database = database;
+            _supplierRepository = supplierRepository;
+            _currencyRepository = currencyRepository;
+            _batchRepository = batchRepository;
+            _materialRepository = materialRepository;
+            _unitRepository = unitRepository;
+            _materialFacade = materialFacade;
         }
 
         public void ProcessFile(InvoiceModel model)
@@ -47,8 +47,8 @@ namespace Elsa.Apps.Invoices
             if (!(model.Date.Year == now.Year && model.Date.Month == now.Month))
                 throw new Exception("Lze naskladnit pouze v aktuálním měsíci");
 
-            var supplier = m_supplierRepository.GetSupplier(model.SupplierName ?? string.Empty).Ensure($"Neexistující dodavatel \"{model.SupplierName}\"");
-            var currency = m_currencyRepository.GetCurrency(model.Currency).Ensure($"Neexistující symbol měny \"{model.Currency}\"");
+            var supplier = _supplierRepository.GetSupplier(model.SupplierName ?? string.Empty).Ensure($"Neexistující dodavatel \"{model.SupplierName}\"");
+            var currency = _currencyRepository.GetCurrency(model.Currency).Ensure($"Neexistující symbol měny \"{model.Currency}\"");
             
             if (string.IsNullOrWhiteSpace(model.InvoiceNumber))
             {
@@ -82,18 +82,18 @@ namespace Elsa.Apps.Invoices
                 itemsWithCorrectedPrices.Add(new Tuple<InvoiceItem, decimal>(item, item.Price * priceFactor));
             }
             
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var existingBatches = m_batchRepository.GetBatchesByInvoiceNumber(model.InvoiceNumber, supplier.Id).ToList();
+                var existingBatches = _batchRepository.GetBatchesByInvoiceNumber(model.InvoiceNumber, supplier.Id).ToList();
                 
                 foreach (var itemWithCorrectedPrice in itemsWithCorrectedPrices)
                 {
                     var invoiceItem = itemWithCorrectedPrice.Item1;
 
-                    var material = m_materialRepository.GetMaterialByName(invoiceItem.MaterialName)
+                    var material = _materialRepository.GetMaterialByName(invoiceItem.MaterialName)
                         .Ensure($"Neznámý materiál \"{invoiceItem.MaterialName}\"");
 
-                    var unit = m_unitRepository.GetUnitBySymbol(invoiceItem.Unit)
+                    var unit = _unitRepository.GetUnitBySymbol(invoiceItem.Unit)
                         .Ensure($"Neznámá jednotka \"{invoiceItem.Unit}");
 
 
@@ -110,7 +110,7 @@ namespace Elsa.Apps.Invoices
 
                         //existingBatches.Remove(existing);
 
-                        //m_batchRepository.UpdateBatch(invoiceItem.Id, b =>
+                        //_batchRepository.UpdateBatch(invoiceItem.Id, b =>
                         //{
                         //    b.BatchNumber = invoiceItem.BatchNumber;
                         //    b.Created = receiveDate;
@@ -125,7 +125,7 @@ namespace Elsa.Apps.Invoices
 
                     if (string.IsNullOrWhiteSpace(batchNumber))
                     {
-                        var materialInfo = m_materialFacade.GetMaterialInfo(invoiceItem.MaterialName);
+                        var materialInfo = _materialFacade.GetMaterialInfo(invoiceItem.MaterialName);
                         if (materialInfo == null)
                         {
                             throw new InvalidOperationException($"Neznamy material {invoiceItem.MaterialName}");
@@ -139,7 +139,12 @@ namespace Elsa.Apps.Invoices
                         batchNumber = materialInfo.AutoBatchNr;
                     }
 
-                    m_batchRepository.SaveBottomLevelMaterialBatch(0, 
+                    if ((batchNumber?.Trim().Length ?? 0) < 3)
+                    {
+                        throw new InvalidOperationException($"Číslo šarže pro materiál \"{invoiceItem.MaterialName}\" musí mít alespoň tři znaky.");
+                    }
+
+                    _batchRepository.SaveBottomLevelMaterialBatch(0,
                         material.Adaptee, 
                         invoiceItem.Quantity, 
                         unit,

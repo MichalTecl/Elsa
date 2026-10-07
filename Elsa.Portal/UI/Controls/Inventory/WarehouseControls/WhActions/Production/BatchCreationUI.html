@@ -12,7 +12,7 @@
         <div class="formRow bcHead stackLeft">
             <div class="formRow">
                 <label>Šarže</label>
-                <input type="text" class="bcBatchNumber" data-bind="value:producingRecipe.ProducingBatchNumber" event-bind="change:updatemodel(producingRecipe, 'ProducingBatchNumber', this.value)"/>
+                <input type="text" class="bcBatchNumber" required minlength="3" data-bind="value:producingRecipe.ProducingBatchNumber" event-bind="change:updatemodel(producingRecipe, 'ProducingBatchNumber', this.value)"/>
             </div>
 
             <div class="formRow">
@@ -156,6 +156,14 @@
         };
 
         this.save = function() {
+            var batchNumberInput = self.querySelector('.bcBatchNumber');
+            batchNumberInput.setCustomValidity(batchNumberInput.value.trim().length < 3
+                ? 'Číslo šarže musí mít alespoň tři znaky.'
+                : '');
+            if (!batchNumberInput.reportValidity()) {
+                return;
+            }
+
             cancelPendingCommit();
             app.productionService.vm.saveProducingRecipe();
         };

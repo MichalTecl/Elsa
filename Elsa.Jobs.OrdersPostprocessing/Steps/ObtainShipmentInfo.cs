@@ -51,6 +51,10 @@ namespace Elsa.Jobs.OrdersPostprocessing.Steps
 
             var provider = _shipmentProviders.GetByShipmentMethod(order.ShippingMethodName);
 
+            // TODO: Docasne vypnuto do opravy DPD Tracking API na strane DPD.
+            if (string.Equals(provider.Symbol, "dpd", StringComparison.OrdinalIgnoreCase))
+                return false;
+
             // Use the same customer reference that the shipment CSV exports to the carrier.
             var orderReference = _erpClients.GetErpClient(order.ErpId.Value).GetPackingReferenceNumber(order);
             if (string.IsNullOrWhiteSpace(orderReference))
