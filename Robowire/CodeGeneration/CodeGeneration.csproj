@@ -67,6 +67,7 @@
     <Compile Include="Primitives\ISetterBuilder.cs" />
     <Compile Include="Primitives\IWithModifiers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UniqueNames.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json">

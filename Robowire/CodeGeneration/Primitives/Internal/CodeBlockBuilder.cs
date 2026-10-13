@@ -5,31 +5,31 @@ namespace CodeGeneration.Primitives.Internal
 {
     public class CodeBlockBuilder : MemberBuilderBase, ICodeBlockBuilder
     {
-        private readonly int m_indent;
+        private readonly int _indent;
 
-        private readonly StringBuilder m_stringBuilder;
+        private readonly StringBuilder _stringBuilder;
 
         private CodeBlockBuilder(int indent, StringBuilder sb)
             : base(null)
         {
-            m_indent = indent;
-            m_stringBuilder = sb;
+            _indent = indent;
+            _stringBuilder = sb;
         }
 
         public CodeBlockBuilder(int indent) : this(indent, new StringBuilder())
         {
-            m_indent = indent;
+            _indent = indent;
         }
 
         public void Render(ICompiler compiler)
         {
-            compiler.Write(m_stringBuilder.ToString());
+            compiler.Write(_stringBuilder.ToString());
             RegisterTypes(compiler);
         }
 
         public ICodeBlockBuilder Write(string value)
         {
-            m_stringBuilder.Append(value);
+            _stringBuilder.Append(value);
             return this;
         }
 
@@ -50,7 +50,7 @@ namespace CodeGeneration.Primitives.Internal
 
         public ICodeBlockBuilder NewLine()
         {
-            m_stringBuilder.AppendLine();
+            _stringBuilder.AppendLine();
             Indent();
             return this;
         }
@@ -181,7 +181,7 @@ namespace CodeGeneration.Primitives.Internal
         {
             Write("{").NewLine();
 
-            var childBuilder = new CodeBlockBuilder(m_indent+1, m_stringBuilder);
+            var childBuilder = new CodeBlockBuilder(_indent+1, _stringBuilder);
 
             inner(childBuilder);
 
@@ -197,7 +197,7 @@ namespace CodeGeneration.Primitives.Internal
 
         public ICodeBlockBuilder ForEach(INamedReference collection, Action<INamedReference, ICodeBlockBuilder> itemVariableAndInnerBlock)
         {
-            var variableName = new NamedReference($"v{Guid.NewGuid():N}");
+            var variableName = new NamedReference($"v{UniqueNames.Next()}");
             Write("foreach(var ").Write(variableName).Write(" in ").Write(collection).Write(")").NewLine();
 
             InnerBlock(i => itemVariableAndInnerBlock(variableName, i));
@@ -232,7 +232,7 @@ namespace CodeGeneration.Primitives.Internal
         /// <returns></returns>
         public INamedReference Var(Action<ICodeBlockBuilder> assignment)
         {
-            var variableName = new NamedReference($"v{Guid.NewGuid():N}");
+            var variableName = new NamedReference($"v{UniqueNames.Next()}");
 
             Write("var ").Write(variableName).Write(" = ");
             assignment(this);
@@ -283,9 +283,9 @@ namespace CodeGeneration.Primitives.Internal
 
         private void Indent()
         {
-            for (var i = 0; i < m_indent; i++)
+            for (var i = 0; i < _indent; i++)
             {
-                m_stringBuilder.Append("    ");
+                _stringBuilder.Append("    ");
             }
         }
     }

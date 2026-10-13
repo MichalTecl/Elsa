@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Web.SessionState;
@@ -8,29 +9,36 @@ namespace Robowire.RoboApi.Internal
 {
     internal sealed class RaControllerFactory : IControllerFactory
     {
-        private readonly IContainer m_container;
-        private readonly Action<RequestContext, IServiceLocator> m_requestScopeInitializer;
-        private readonly IControllerNameExtractor m_nameExtractor;
-        private readonly ControllerIndex m_controllerIndex;
+        private readonly IContainer _container;
+        private readonly Action<RequestContext, IServiceLocator> _requestScopeInitializer;
+        private readonly Lazy<IControllerNameExtractor> _nameExtractor;
+        private readonly Lazy<ControllerIndex> _controllerIndex;
 
         public RaControllerFactory(IContainer container, Action<RequestContext, IServiceLocator> requestScopeInitializer)
         {
-            m_container = container;
-            m_requestScopeInitializer = requestScopeInitializer;
+            _container = container;
+            _requestScopeInitializer = requestScopeInitializer;
 
-            using (var locator = m_container.GetLocator())
+            // Resolved lazily (on the first request), so the factory can be installed before the rest
+            // of the container setup is done and the container gets compiled only once at startup.
+            _nameExtractor = new Lazy<IControllerNameExtractor>(Resolve<IControllerNameExtractor>, LazyThreadSafetyMode.ExecutionAndPublication);
+            _controllerIndex = new Lazy<ControllerIndex>(Resolve<ControllerIndex>, LazyThreadSafetyMode.ExecutionAndPublication);
+        }
+
+        private T Resolve<T>()
+        {
+            using (var locator = _container.GetLocator())
             {
-                m_nameExtractor = locator.Get<IControllerNameExtractor>();
-                m_controllerIndex = locator.Get<ControllerIndex>();
+                return locator.Get<T>();
             }
         }
 
         public IController CreateController(RequestContext requestContext, string controllerName)
         {
-            var locator = m_container.GetLocator();
+            var locator = _container.GetLocator();
 
-            var ctlrName = m_nameExtractor.GetControllerName(requestContext, controllerName);
-            var controllerType = m_controllerIndex.GetControllerType(ctlrName);
+            var ctlrName = _nameExtractor.Value.GetControllerName(requestContext, controllerName);
+            var controllerType = _controllerIndex.Value.GetControllerType(ctlrName);
             var controllerAttribute = controllerType.GetCustomAttributes(typeof(ControllerAttribute), true)
                 .OfType<ControllerAttribute>()
                 .FirstOrDefault();
@@ -40,7 +48,7 @@ namespace Robowire.RoboApi.Internal
                 RequestContextFlags.SetSuppressSessionCookieWrite(requestContext.HttpContext.Items, true);
             }
 
-            m_requestScopeInitializer?.Invoke(requestContext, locator);
+            _requestScopeInitializer?.Invoke(requestContext, locator);
 
             var controller = locator.Get(controllerType) as IController;
 
@@ -54,8 +62,8 @@ namespace Robowire.RoboApi.Internal
 
         public SessionStateBehavior GetControllerSessionBehavior(RequestContext requestContext, string controllerName)
         {
-            var ctlrName = m_nameExtractor.GetControllerName(requestContext, controllerName);
-            var controllerType = m_controllerIndex.GetControllerType(ctlrName);
+            var ctlrName = _nameExtractor.Value.GetControllerName(requestContext, controllerName);
+            var controllerType = _controllerIndex.Value.GetControllerType(ctlrName);
             var controllerAttribute = controllerType.GetCustomAttributes(typeof(ControllerAttribute), true)
                 .OfType<ControllerAttribute>()
                 .FirstOrDefault();

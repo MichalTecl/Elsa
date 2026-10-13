@@ -10,74 +10,74 @@ namespace CodeGeneration
 {
     public class ClassBuilder : MemberBuilderBase, IClassBuilder
     {
-        private INamedReference m_baseClass;
-        private readonly LazyCollection m_interfaces = new LazyCollection();
+        private INamedReference _baseClass;
+        private readonly LazyCollection _interfaces = new LazyCollection();
         
-        private readonly LazyCollection<IMethodBuilder> m_methodBuilders = new LazyCollection<IMethodBuilder>();
-        private readonly LazyCollection<IClassBuilder> m_nestedClasses = new LazyCollection<IClassBuilder>();
-        private readonly LazyCollection<IClassFieldBuilder> m_fields = new LazyCollection<IClassFieldBuilder>();
-        private readonly LazyCollection<IPropertyBuilder> m_properties = new LazyCollection<IPropertyBuilder>();
+        private readonly LazyCollection<IMethodBuilder> _methodBuilders = new LazyCollection<IMethodBuilder>();
+        private readonly LazyCollection<IClassBuilder> _nestedClasses = new LazyCollection<IClassBuilder>();
+        private readonly LazyCollection<IClassFieldBuilder> _fields = new LazyCollection<IClassFieldBuilder>();
+        private readonly LazyCollection<IPropertyBuilder> _properties = new LazyCollection<IPropertyBuilder>();
         
-        private readonly IConstructorBuilder m_constructor;
+        private readonly IConstructorBuilder _constructor;
 
-        private readonly int m_indent;
+        private readonly int _indent;
 
         public ClassBuilder(string name, int indent)
             : base(name)
         {
-            m_baseClass = GetTypeReference(typeof(object));
-            m_indent = indent;
-            m_constructor = new ConstructorBuilder(name, indent + 1);
+            _baseClass = GetTypeReference(typeof(object));
+            _indent = indent;
+            _constructor = new ConstructorBuilder(name, indent + 1);
         }
 
         public ClassBuilder(string name) : this(name, 0) { }
 
         public void Render(ICompiler compiler)
         {
-            WriteIndent(compiler, m_indent);
+            WriteIndent(compiler, _indent);
             WriteModifiers(compiler);
             //TODO indent
-            compiler.Write(" class ").Write(Name).Write(" : ").Write(m_baseClass.Name);
+            compiler.Write(" class ").Write(Name).Write(" : ").Write(_baseClass.Name);
 
-            for(var i = 0; i < m_interfaces.Count; i++)
+            for(var i = 0; i < _interfaces.Count; i++)
             {
-                compiler.Write(", ").Write(m_interfaces[i].Name);
+                compiler.Write(", ").Write(_interfaces[i].Name);
             }
             
             compiler.WriteLine();
-            WriteIndent(compiler, m_indent);
+            WriteIndent(compiler, _indent);
             compiler.WriteLine("{");
 
-            foreach (var field in m_fields)
+            foreach (var field in _fields)
             {
                 field.Render(compiler);
             }
 
             compiler.WriteLine();
 
-            m_constructor.Render(compiler);
+            _constructor.Render(compiler);
 
             compiler.WriteLine();
 
-            foreach (var property in m_properties)
+            foreach (var property in _properties)
             {
                 property.Render(compiler);
                 compiler.WriteLine();
             }
 
-            foreach (var method in m_methodBuilders)
+            foreach (var method in _methodBuilders)
             {
                 method.Render(compiler);
                 compiler.WriteLine();
             }
 
-            foreach (var nested in m_nestedClasses)
+            foreach (var nested in _nestedClasses)
             {
                 nested.Render(compiler);
                 compiler.WriteLine();
             }
 
-            WriteIndent(compiler, m_indent);
+            WriteIndent(compiler, _indent);
             compiler.WriteLine("}");
 
             RegisterTypes(compiler);
@@ -85,7 +85,7 @@ namespace CodeGeneration
         
         public IConstructorBuilder WithConstructor()
         {
-            return m_constructor;
+            return _constructor;
         }
 
         public IClassBuilder Inherits(Type baseClassType)
@@ -110,14 +110,14 @@ namespace CodeGeneration
 
         public IClassBuilder Inherits(INamedReference baseClassReference)
         {
-            m_baseClass = baseClassReference;
+            _baseClass = baseClassReference;
 
             return this;
         }
 
         public IClassBuilder Implements(INamedReference interfaceReference)
         {
-            m_interfaces.TryAdd(interfaceReference);
+            _interfaces.TryAdd(interfaceReference);
 
             return this;
         }
@@ -130,7 +130,7 @@ namespace CodeGeneration
 
         public IMethodBuilder HasMethod(string name, out bool alreadyExisted)
         {
-            return m_methodBuilders.TryAdd(new MethodBuilder(name, m_indent + 1), out alreadyExisted);
+            return _methodBuilders.TryAdd(new MethodBuilder(name, _indent + 1), out alreadyExisted);
         }
 
         public IMethodBuilder OverridesMethod(MethodInfo method)
@@ -154,7 +154,7 @@ namespace CodeGeneration
 
         public IClassBuilder HasNestedClass(string name)
         {
-            return m_nestedClasses.TryAdd(new ClassBuilder(name, m_indent + 1));
+            return _nestedClasses.TryAdd(new ClassBuilder(name, _indent + 1));
         }
 
         public IClassFieldBuilder HasField(string name, Type type)
@@ -169,7 +169,7 @@ namespace CodeGeneration
 
         public IClassFieldBuilder HasField(INamedReference typeReference)
         {
-            return HasField($"_f{Guid.NewGuid():N}", typeReference);
+            return HasField($"_f{UniqueNames.Next()}", typeReference);
         }
 
         public IClassFieldBuilder HasField(Type type)
@@ -184,7 +184,7 @@ namespace CodeGeneration
 
         public IClassFieldBuilder HasField(string name, INamedReference typeReference)
         {
-            return m_fields.TryAdd(new ClassFieldBuilder(name, typeReference, m_indent + 1));
+            return _fields.TryAdd(new ClassFieldBuilder(name, typeReference, _indent + 1));
         }
 
         public IPropertyBuilder HasProperty(string name, Type t)
@@ -199,7 +199,7 @@ namespace CodeGeneration
 
         public IPropertyBuilder HasProperty(string name, INamedReference typeReference)
         {
-            return m_properties.TryAdd(new PropertyBuilder(name, typeReference, m_indent + 1));
+            return _properties.TryAdd(new PropertyBuilder(name, typeReference, _indent + 1));
         }
 
         public IPropertyBuilder HasPublicProperty<T>(string name)
@@ -235,17 +235,17 @@ namespace CodeGeneration
 
         private class DebugCompiler : ICompiler
         {
-            private readonly StringBuilder m_stringBuilder = new StringBuilder();
+            private readonly StringBuilder _stringBuilder = new StringBuilder();
 
             public ICompiler Write(string value)
             {
-                m_stringBuilder.Append(value);
+                _stringBuilder.Append(value);
                 return this;
             }
 
             public ICompiler WriteLine(string value = null)
             {
-                m_stringBuilder.AppendLine(value ?? string.Empty);
+                _stringBuilder.AppendLine(value ?? string.Empty);
                 return this;
             }
 
@@ -260,7 +260,7 @@ namespace CodeGeneration
 
             public override string ToString()
             {
-                return m_stringBuilder.ToString();
+                return _stringBuilder.ToString();
             }
         }
     }

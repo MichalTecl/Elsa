@@ -26,7 +26,7 @@ namespace Robowire.Plugin.DefaultPlugins
         {
             var implementingType = setup.ImplementingType ?? setup.InterfaceType;
 
-            var methodName = $"Factory{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{Guid.NewGuid():N}";
+            var methodName = $"Factory{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{UniqueNames.Next()}";
 
             var method = locatorBuilder.HasMethod(methodName).WithModifier("private").Returns(setup.InterfaceType);
 

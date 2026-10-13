@@ -31,7 +31,7 @@ namespace Robowire.Plugin.DefaultPlugins
         {
             var implClass =
                 locatorBuilder.HasNestedClass(
-                        $"{TypeNameHelper.GetTypeMark(this.GetType())}_implements_{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{Guid.NewGuid():N}")
+                        $"{TypeNameHelper.GetTypeMark(this.GetType())}_implements_{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{UniqueNames.Next()}")
                     .Implements(setup.InterfaceType)
                     .WithModifier("private")
                     .WithModifier("sealed");
@@ -62,7 +62,7 @@ namespace Robowire.Plugin.DefaultPlugins
             }
 
             var factoryMethod =
-                locatorBuilder.HasMethod($"factory_{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{Guid.NewGuid():N}").Returns(setup.InterfaceType).WithModifier("private");
+                locatorBuilder.HasMethod($"factory_{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{UniqueNames.Next()}").Returns(setup.InterfaceType).WithModifier("private");
 
             factoryMethod.Body.Write(" return ")
                 .InvokeConstructor(implClass, i => i.WithParam(p => p.Write("this")))
@@ -78,7 +78,7 @@ namespace Robowire.Plugin.DefaultPlugins
 
         private void DefaultImplementProperty(IClassBuilder cls, PropertyInfo property)
         {
-            var storageField = cls.HasField($"storage{property.Name}_{Guid.NewGuid():N}", property.PropertyType);
+            var storageField = cls.HasField($"storage{property.Name}_{UniqueNames.Next()}", property.PropertyType);
 
             cls.WithConstructor()
                 .Body.Assign(

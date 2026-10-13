@@ -16,7 +16,7 @@ namespace Robowire.RoboApi.Internal
     {
         public virtual INamedReference BuildProxyClass(IClassBuilder locatorBuilder, Type controllerType, Type callBuilderType)
         {
-            var proxy = locatorBuilder.HasNestedClass($"ControllerProxy_{controllerType.Name}_{Guid.NewGuid():N}");
+            var proxy = locatorBuilder.HasNestedClass($"ControllerProxy_{controllerType.Name}_{UniqueNames.Next()}");
 
             proxy.Inherits(controllerType);
             proxy.Implements<ILocatorBoundController>();

@@ -32,7 +32,7 @@ namespace Robowire.Plugin.DefaultPlugins
                 return previousPluginMethod;
             }
 
-            var method = locatorBuilder.HasMethod($"Dispose{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{Guid.NewGuid():N}")
+            var method = locatorBuilder.HasMethod($"Dispose{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{UniqueNames.Next()}")
                 .Returns(setup.InterfaceType);
 
             method.Body.Write("return ")

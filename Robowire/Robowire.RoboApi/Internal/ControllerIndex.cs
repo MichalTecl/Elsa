@@ -10,11 +10,11 @@ namespace Robowire.RoboApi.Internal
 {
     public sealed class ControllerIndex
     {
-        private readonly Dictionary<string, Type> m_index;
+        private readonly Dictionary<string, Type> _index;
 
         public ControllerIndex(IEnumerable<KeyValuePair<string, Type>> source)
         {
-            m_index = source.ToDictionary(kv => kv.Key.ToLowerInvariant(), kv => kv.Value);
+            _index = source.ToDictionary(kv => kv.Key.ToLowerInvariant(), kv => kv.Value);
         }
 
         public Type GetControllerType(string controllerName)
@@ -22,7 +22,7 @@ namespace Robowire.RoboApi.Internal
             var key = controllerName.Trim().ToLowerInvariant();
 
             Type t;
-            if (!m_index.TryGetValue(key, out t))
+            if (!_index.TryGetValue(key, out t))
             {
                 throw new InvalidOperationException($"Unknown controller \"{controllerName}\"");
             }
@@ -34,7 +34,7 @@ namespace Robowire.RoboApi.Internal
         {
             public INamedReference GenerateFactoryMethod(IServiceSetupRecord setup, Dictionary<string, INamedReference> ctorParamValueFactoryFields, INamedReference valueFactoryField, IClassBuilder locatorBuilder, INamedReference previousPluginMethod)
             {
-                var fm = locatorBuilder.HasMethod($"ControllerIndexFactory_{Guid.NewGuid():N}").Returns<ControllerIndex>().WithModifier("private");
+                var fm = locatorBuilder.HasMethod($"ControllerIndexFactory_{UniqueNames.Next()}").Returns<ControllerIndex>().WithModifier("private");
 
                 fm.Body.Write("return new ").Write(typeof(ControllerIndex)).Write("(this.GetRoboapiControllerIndexFactory())").EndStatement();
 

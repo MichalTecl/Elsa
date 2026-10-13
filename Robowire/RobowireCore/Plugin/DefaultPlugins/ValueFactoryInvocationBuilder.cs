@@ -22,7 +22,7 @@ namespace Robowire.Plugin.DefaultPlugins
             IClassBuilder locatorBuilder,
             INamedReference previousPluginMethod)
         {
-            var methodName = $"Factory{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{Guid.NewGuid():N}";
+            var methodName = $"Factory{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{UniqueNames.Next()}";
 
             var method = locatorBuilder.HasMethod(methodName).WithModifier("private").Returns(setup.InterfaceType);
 

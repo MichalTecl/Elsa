@@ -14,7 +14,7 @@ namespace Robowire.Core.LocatorGeneration
         {
             var recordsList = records.ToList();
 
-            var locatorClass = new ClassBuilder($"Locator_{Guid.NewGuid():N}").WithModifier("public").WithModifier("sealed")
+            var locatorClass = new ClassBuilder($"Locator_{UniqueNames.Next()}").WithModifier("public").WithModifier("sealed")
                 .Inherits<CompiledLocatorBase>();
 
             var getMethod = locatorClass.OverridesMethod(typeof(CompiledLocatorBase).GetMethod("InternalGet", BindingFlags.NonPublic | BindingFlags.Instance));

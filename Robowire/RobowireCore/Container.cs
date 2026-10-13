@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 
+using CodeGeneration;
 using CodeGeneration.Compilation;
 
 using Robowire.Core;
@@ -15,68 +16,68 @@ namespace Robowire
 {
     public class Container : IContainer
     {
-        private readonly ReaderWriterLockSlim m_compiledLocatorLock = new ReaderWriterLockSlim();
+        private readonly ReaderWriterLockSlim _compiledLocatorLock = new ReaderWriterLockSlim();
 
-        private readonly IContainer m_parent;
+        private readonly IContainer _parent;
 
-        private readonly List<InstanceRecord> m_records = new List<InstanceRecord>();
-        private readonly IPluginCollection m_plugins;
-        private readonly List<IGeneratedCodeListener> m_generatorListeners = new List<IGeneratedCodeListener>();
-        private Dictionary<string, Func<IServiceLocator, object>> m_factories;
-        private ILocatorFactory m_locatorFactory;
+        private readonly List<InstanceRecord> _records = new List<InstanceRecord>();
+        private readonly IPluginCollection _plugins;
+        private readonly List<IGeneratedCodeListener> _generatorListeners = new List<IGeneratedCodeListener>();
+        private Dictionary<string, Func<IServiceLocator, object>> _factories;
+        private ILocatorFactory _locatorFactory;
         
         public Container(IContainer parent)
         {
-            m_parent = parent;
+            _parent = parent;
 
-            m_plugins = m_parent == null ? new PluginCollection() : new PluginCollection(parent.Plugins);
+            _plugins = _parent == null ? new PluginCollection() : new PluginCollection(parent.Plugins);
         }
 
         public Container() : this(null)
         {
         }
 
-        public IContainer Parent => m_parent;
+        public IContainer Parent => _parent;
 
-        public IReadOnlyPluginCollection Plugins => m_plugins as IReadOnlyPluginCollection;
+        public IReadOnlyPluginCollection Plugins => _plugins as IReadOnlyPluginCollection;
 
         public IServiceLocator GetLocator()
         {
             try
             {
-                m_compiledLocatorLock.EnterReadLock();
+                _compiledLocatorLock.EnterReadLock();
 
-                if (!m_records.Any() && (m_parent != null))
+                if (!_records.Any() && (_parent != null))
                 {
-                    return m_parent.GetLocator();
+                    return _parent.GetLocator();
                 }
 
-                if (m_locatorFactory != null)
+                if (_locatorFactory != null)
                 {
-                    return m_locatorFactory.CreateLocatorInstance(m_parent?.GetLocator(), m_factories);
+                    return _locatorFactory.CreateLocatorInstance(_parent?.GetLocator(), _factories);
                 }
             }
             finally
             {
-                m_compiledLocatorLock.ExitReadLock();
+                _compiledLocatorLock.ExitReadLock();
             }
 
             try
             {
-                m_compiledLocatorLock.EnterUpgradeableReadLock();
+                _compiledLocatorLock.EnterUpgradeableReadLock();
 
-                if (m_locatorFactory != null)
+                if (_locatorFactory != null)
                 {
-                    return m_locatorFactory.CreateLocatorInstance(m_parent?.GetLocator(), m_factories);
+                    return _locatorFactory.CreateLocatorInstance(_parent?.GetLocator(), _factories);
                 }
 
                 CompileLocator();
 
-                return m_locatorFactory.CreateLocatorInstance(m_parent?.GetLocator(), m_factories);
+                return _locatorFactory.CreateLocatorInstance(_parent?.GetLocator(), _factories);
             }
             finally
             {
-                m_compiledLocatorLock.ExitUpgradeableReadLock();
+                _compiledLocatorLock.ExitUpgradeableReadLock();
             }
         }
 
@@ -84,32 +85,38 @@ namespace Robowire
         {
             try
             {
-                m_compiledLocatorLock.EnterWriteLock();
+                _compiledLocatorLock.EnterWriteLock();
 
                 SetApplicablePlugins();
                 ResolveConstructors();
 
-                m_factories = new Dictionary<string, Func<IServiceLocator, object>>();
+                _factories = new Dictionary<string, Func<IServiceLocator, object>>();
 
-                foreach (var record in m_records)
+                foreach (var record in _records)
                 {
                     if (record.Factory != null)
                     {
-                        m_factories[record.Factory.Name] = record.Factory.Factory;
+                        _factories[record.Factory.Name] = record.Factory.Factory;
                     }
 
                     if (record.ConstructorParameters != null)
                     {
                         foreach (var param in record.ConstructorParameters.Where(p => p.ValueProvider != null))
                         {
-                            m_factories[param.ValueProvider.Name] = param.ValueProvider.Factory;
+                            _factories[param.ValueProvider.Name] = param.ValueProvider.Factory;
                         }
                     }
                 }
 
                 var cplr = new Compiler();
                 var bdr = new LocatorBuilder();
-                bdr.BuildLocatorCode(m_records, cplr);
+
+                // Names in the generated code are numbered from the beginning for each locator,
+                // so the same setup produces the same code and the compiled assembly can be reused from the disk cache.
+                using (UniqueNames.BeginScope())
+                {
+                    bdr.BuildLocatorCode(_records, cplr);
+                }
 
                 var code = cplr.ToString();
                 
@@ -129,16 +136,16 @@ namespace Robowire
                         throw new InvalidOperationException("Compiled locator doesn't have expected constructor");
                     }
 
-                    m_locatorFactory = (ILocatorFactory)ctor.Invoke(new object[] { m_parent?.GetLocator(), m_factories });
+                    _locatorFactory = (ILocatorFactory)ctor.Invoke(new object[] { _parent?.GetLocator(), _factories });
 
-                    foreach (var listener in m_generatorListeners)
+                    foreach (var listener in _generatorListeners)
                     {
                         listener.OnContainerGenerated(code, false, null);
                     }
                 }
                 catch (Exception ex)
                 {
-                    foreach (var listener in m_generatorListeners)
+                    foreach (var listener in _generatorListeners)
                     {
                         listener.OnContainerGenerated(code, true, ex);
                     }
@@ -148,25 +155,25 @@ namespace Robowire
             }
             finally
             {
-                m_compiledLocatorLock.ExitWriteLock();
+                _compiledLocatorLock.ExitWriteLock();
             }
         }
 
         public IContainer Setup(Action<IContainerSetup> setup)
         {
-            var setupObject = new ContainerSetup(m_records, m_plugins, m_generatorListeners);
+            var setupObject = new ContainerSetup(_records, _plugins, _generatorListeners);
             
             try
             {
-                m_compiledLocatorLock.EnterWriteLock();
+                _compiledLocatorLock.EnterWriteLock();
 
                 setup(setupObject);
 
-                m_locatorFactory = null;
+                _locatorFactory = null;
             }
             finally
             {
-                m_compiledLocatorLock.ExitWriteLock();
+                _compiledLocatorLock.ExitWriteLock();
             }
 
             return this;
@@ -174,7 +181,7 @@ namespace Robowire
 
         private void SetApplicablePlugins()
         {
-            foreach (var record in m_records)
+            foreach (var record in _records)
             {
                 SetApplicablePlugins(record);
             }
@@ -189,7 +196,7 @@ namespace Robowire
                     lst.AddRange(source.Where(p => p.IsApplicable(record)));
                 };
 
-            find(m_plugins.CustomInstanceCreators);
+            find(_plugins.CustomInstanceCreators);
             if (lst.Count > 1)
             {
                 throw new InvalidOperationException($"Not more than one plugin from CustomInstanceCreators could be applicable to the resource. For {record.InterfaceType.Name} are applicable: {string.Join(", ", lst.Select(pl => pl.GetType().Name))}");
@@ -197,7 +204,7 @@ namespace Robowire
 
             if (lst.Count == 0)
             {
-                find(m_plugins.DefaultInstanceCreators);
+                find(_plugins.DefaultInstanceCreators);
             }
 
             if (lst.Count == 0)
@@ -205,15 +212,15 @@ namespace Robowire
                 throw new InvalidOperationException($"No instance creator found for {record.InterfaceType.Name}");
             }
 
-            find(m_plugins.AfterNewInstanceCreated);
-            find(m_plugins.LifecyclePlugins);
+            find(_plugins.AfterNewInstanceCreated);
+            find(_plugins.LifecyclePlugins);
 
             record.ApplicablePlugins = lst;
         }
 
         private void ResolveConstructors()
         {
-            foreach (var record in m_records)
+            foreach (var record in _records)
             {
                 ResolveConstructor(record);
             }

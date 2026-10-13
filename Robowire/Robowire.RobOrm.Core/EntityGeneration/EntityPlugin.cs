@@ -17,11 +17,11 @@ namespace Robowire.RobOrm.Core.EntityGeneration
 {
     public class EntityPlugin : IPlugin
     {
-        private readonly IRobOrmSetup m_setup;
+        private readonly IRobOrmSetup _setup;
 
         public EntityPlugin(IRobOrmSetup setup)
         {
-            m_setup = setup;
+            _setup = setup;
         }
 
         public bool IsApplicable(IServiceSetupRecord setup)
@@ -44,7 +44,7 @@ namespace Robowire.RobOrm.Core.EntityGeneration
             var behavior = setup.Behaviors.OfType<EntityBehavior>().Last();
             
             var entityClass =
-                locatorBuilder.HasNestedClass($"{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_Impl_{Guid.NewGuid():N}")
+                locatorBuilder.HasNestedClass($"{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_Impl_{UniqueNames.Next()}")
                     .WithModifier("private")
                     .WithModifier("sealed")
                     .Implements<IEntity>()
@@ -64,7 +64,7 @@ namespace Robowire.RobOrm.Core.EntityGeneration
             ImplementGetSaveMethodTypeMethod(entityClass, pkProperty);
             ImplementGetValuesMethod(entityClass, entityProperties, pkProperty);
             ImplementReadSelfMethod(entityClass, locatorField, entityProperties);
-            ImplementReferenceEntityProperties(entityClass, setup.InterfaceType, m_setup.EntityNamingConvention);
+            ImplementReferenceEntityProperties(entityClass, setup.InterfaceType, _setup.EntityNamingConvention);
             ImplementDbEntityNameProperty(entityClass, setup.InterfaceType);
             ImplementPkTypeProperty(entityClass, pkProperty);
             ImplementIsPkAuto(entityClass, pkProperty);
@@ -76,7 +76,7 @@ namespace Robowire.RobOrm.Core.EntityGeneration
                 .EndStatement()
                 .NewLine();
 
-            var factoryMethod = locatorBuilder.HasMethod($"{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{Guid.NewGuid():N}").Returns(setup.InterfaceType);
+            var factoryMethod = locatorBuilder.HasMethod($"{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{UniqueNames.Next()}").Returns(setup.InterfaceType);
             factoryMethod.Body.Write("return ")
                 .InvokeConstructor(entityClass, inv => inv.WithParam("this"))
                 .EndStatement();
@@ -243,9 +243,9 @@ namespace Robowire.RobOrm.Core.EntityGeneration
 
                 try
                 {
-                    if (string.IsNullOrWhiteSpace(m_setup.EntityNamingConvention.GetColumnName(sourceProperty)))
+                    if (string.IsNullOrWhiteSpace(_setup.EntityNamingConvention.GetColumnName(sourceProperty)))
                     {
-                        if (m_setup.EntityNamingConvention.TryGetRefEntityType(sourceProperty) == null)
+                        if (_setup.EntityNamingConvention.TryGetRefEntityType(sourceProperty) == null)
                         {
                             ImplementDefaultProperty(entityClass, sourceProperty);
                         }
@@ -266,7 +266,7 @@ namespace Robowire.RobOrm.Core.EntityGeneration
 
                             var typedProp = ReflectionUtil.GetProperty(setupInterfaceType, typedPropName);
                             if ((typedProp == null)
-                                || (m_setup.EntityNamingConvention.TryGetRefEntityType(typedProp) == null))
+                                || (_setup.EntityNamingConvention.TryGetRefEntityType(typedProp) == null))
                             {
                                 throw new InvalidOperationException($"Property {sourceProperty.DeclaringType}.{sourceProperty.Name} seems to be a foreign key, but there is not any property {typedPropName} of Entity type to describe the reference. Add {typedPropName} or mark the property with {typeof(NotFkAttribute)}");
                             }

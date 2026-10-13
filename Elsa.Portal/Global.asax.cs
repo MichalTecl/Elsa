@@ -31,10 +31,8 @@ namespace Elsa.Portal
 
             Debug.WriteLine("Routes registration done");
 
-            Debug.WriteLine("Setting up the container");
-            DiSetup.SetupContainer(Container, new FileLogWriter("Frontend"));
-            Debug.WriteLine("Container set up");
-
+            // RoboApi is registered before DiSetup: DiSetup runs the DB migration, which compiles the container,
+            // and any later container.Setup() would force a second compilation.
             Debug.WriteLine("Initializing RoboApi");
             var installer = new RoboApiInstaller();
             installer.Install(
@@ -46,6 +44,10 @@ namespace Elsa.Portal
                         session.Initialize(context.HttpContext);
                     });
             Debug.WriteLine("RoboApi initialized");
+
+            Debug.WriteLine("Setting up the container");
+            DiSetup.SetupContainer(Container, new FileLogWriter("Frontend"));
+            Debug.WriteLine("Container set up");
 
             Debug.WriteLine("Loading startup jobs");
             using (var startupJobsLocator = Container.GetLocator())

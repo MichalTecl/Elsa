@@ -32,7 +32,7 @@ namespace Robowire.Plugin.DefaultPlugins
 
             var field = locatorBuilder.HasField(setup.InterfaceType).WithModifier("private");
 
-            var fMethod = locatorBuilder.HasMethod($"Singleton_{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{Guid.NewGuid():N}").Returns(setup.InterfaceType);
+            var fMethod = locatorBuilder.HasMethod($"Singleton_{TypeNameHelper.GetTypeMark(setup.InterfaceType)}_{UniqueNames.Next()}").Returns(setup.InterfaceType);
 
             fMethod.Body.Write(" return ")
                 .LazyReadOrAssign(field, a => a.Invoke(previousPluginMethod, inv => { }))

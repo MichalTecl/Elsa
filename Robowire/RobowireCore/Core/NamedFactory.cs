@@ -1,12 +1,14 @@
 ﻿using System;
 
+using CodeGeneration;
+
 namespace Robowire.Core
 {
     public class NamedFactory
     {
         public NamedFactory(Func<IServiceLocator, object> factory)
         {
-            Name = $"f{Guid.NewGuid():N}";
+            Name = $"f{UniqueNames.Next()}";
             Factory = factory;
         }
 
