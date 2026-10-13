@@ -27,15 +27,6 @@ namespace Elsa.Portal
         /// </summary>
         public static void PreApplicationStart()
         {
-            // TODO temporary diagnostics - remove
-            try
-            {
-                System.IO.File.AppendAllText(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Elsa_PreApplicationStart.txt"), $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}\tPreApplicationStart called\r\n");
-            }
-            catch (Exception)
-            {
-            }
-
             StartupLog.SetApplicationName(typeof(Global).Assembly.GetName().Name);
             StartupLog.Write("PreApplicationStart (app domain started)");
         }
