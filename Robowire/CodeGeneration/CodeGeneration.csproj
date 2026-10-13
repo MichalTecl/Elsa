@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClassBuilder.cs" />
+    <Compile Include="Compilation\AssemblyCache.cs" />
     <Compile Include="Compilation\Compiler.cs" />
     <Compile Include="Impl\MethodBuilder.cs" />
     <Compile Include="Primitives\IClassBuilder.cs" />

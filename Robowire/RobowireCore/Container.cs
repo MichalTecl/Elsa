@@ -9,6 +9,7 @@ using CodeGeneration.Compilation;
 
 using Robowire.Core;
 using Robowire.Core.LocatorGeneration;
+using Robowire.Diagnostics;
 using Robowire.Plugin;
 using Robowire.Plugin.Flow;
 
@@ -87,56 +88,46 @@ namespace Robowire
             {
                 _compiledLocatorLock.EnterWriteLock();
 
+                StartupLog.Write($"Container: locator compilation started ({_records.Count} records)");
+
+                var cacheKey = TryGetCacheKey();
+
+                StartupLog.Write("Container: cache key computed");
+
+                if (TryCreateLocatorFromCache(cacheKey))
+                {
+                    StartupLog.Write("Container: locator loaded from cache");
+                    return;
+                }
+
                 SetApplicablePlugins();
                 ResolveConstructors();
 
-                _factories = new Dictionary<string, Func<IServiceLocator, object>>();
-
-                foreach (var record in _records)
-                {
-                    if (record.Factory != null)
-                    {
-                        _factories[record.Factory.Name] = record.Factory.Factory;
-                    }
-
-                    if (record.ConstructorParameters != null)
-                    {
-                        foreach (var param in record.ConstructorParameters.Where(p => p.ValueProvider != null))
-                        {
-                            _factories[param.ValueProvider.Name] = param.ValueProvider.Factory;
-                        }
-                    }
-                }
+                _factories = CollectFactories();
 
                 var cplr = new Compiler();
                 var bdr = new LocatorBuilder();
 
                 // Names in the generated code are numbered from the beginning for each locator,
-                // so the same setup produces the same code and the compiled assembly can be reused from the disk cache.
+                // so the same setup produces the same code on every start.
                 using (UniqueNames.BeginScope())
                 {
                     bdr.BuildLocatorCode(_records, cplr);
                 }
 
+                StartupLog.Write("Container: locator code generated");
+
                 var code = cplr.ToString();
                 
                 try
                 {
-                    var assembly = cplr.Compile();
+                    var assembly = cplr.Compile(cacheKey);
 
-                    var factoryType = assembly.GetTypes().FirstOrDefault(i => typeof(ILocatorFactory).IsAssignableFrom(i));
-                    if (factoryType == null)
-                    {
-                        throw new InvalidOperationException("No Servicelocator compiled");
-                    }
+                    StartupLog.Write("Container: assembly compiled");
 
-                    var ctor = factoryType.GetConstructors().FirstOrDefault();
-                    if (ctor == null)
-                    {
-                        throw new InvalidOperationException("Compiled locator doesn't have expected constructor");
-                    }
+                    _locatorFactory = CreateLocatorFactory(assembly);
 
-                    _locatorFactory = (ILocatorFactory)ctor.Invoke(new object[] { _parent?.GetLocator(), _factories });
+                    StartupLog.Write("Container: locator ready");
 
                     foreach (var listener in _generatorListeners)
                     {
@@ -157,6 +148,99 @@ namespace Robowire
             {
                 _compiledLocatorLock.ExitWriteLock();
             }
+        }
+
+        /// <summary>
+        /// The key identifies the generated locator by the application build and the container setup,
+        /// so the cached assembly can be used without generating the code. Returns null when the cache can't be used.
+        /// </summary>
+        private string TryGetCacheKey()
+        {
+            if (!AssemblyCache.Enabled || _generatorListeners.Any())
+            {
+                // Listeners need the generated code
+                return null;
+            }
+
+            try
+            {
+                return $"{ApplicationBuild.Hash}\n{SetupFingerprint.Compute(_records, _plugins)}";
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private bool TryCreateLocatorFromCache(string cacheKey)
+        {
+            if (cacheKey == null)
+            {
+                return false;
+            }
+
+            var assembly = AssemblyCache.TryLoad(cacheKey);
+            if (assembly == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                _factories = CollectFactories();
+                _locatorFactory = CreateLocatorFactory(assembly);
+                return true;
+            }
+            catch (Exception)
+            {
+                // The cached assembly doesn't fit (it should not happen); the locator gets generated again
+                AssemblyCache.TryRemove(cacheKey);
+
+                _factories = null;
+                _locatorFactory = null;
+
+                return false;
+            }
+        }
+
+        private Dictionary<string, Func<IServiceLocator, object>> CollectFactories()
+        {
+            var factories = new Dictionary<string, Func<IServiceLocator, object>>();
+
+            foreach (var record in _records)
+            {
+                if (record.Factory != null)
+                {
+                    factories[record.Factory.Name] = record.Factory.Factory;
+                }
+
+                if (record.ConstructorParameters != null)
+                {
+                    foreach (var param in record.ConstructorParameters.Where(p => p.ValueProvider != null))
+                    {
+                        factories[param.ValueProvider.Name] = param.ValueProvider.Factory;
+                    }
+                }
+            }
+
+            return factories;
+        }
+
+        private ILocatorFactory CreateLocatorFactory(Assembly assembly)
+        {
+            var factoryType = assembly.GetTypes().FirstOrDefault(i => typeof(ILocatorFactory).IsAssignableFrom(i));
+            if (factoryType == null)
+            {
+                throw new InvalidOperationException("No Servicelocator compiled");
+            }
+
+            var ctor = factoryType.GetConstructors().FirstOrDefault();
+            if (ctor == null)
+            {
+                throw new InvalidOperationException("Compiled locator doesn't have expected constructor");
+            }
+
+            return (ILocatorFactory)ctor.Invoke(new object[] { _parent?.GetLocator(), _factories });
         }
 
         public IContainer Setup(Action<IContainerSetup> setup)

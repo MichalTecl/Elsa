@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 
 using CodeGeneration.Primitives;
@@ -16,21 +15,8 @@ namespace CodeGeneration.Compilation
 {
     public class Compiler : ICompiler
     {
-        private const string CACHE_FORMAT_VERSION = "1";
-        private const string CACHE_FOLDER_NAME = "RobowireContainers";
-        private const int MAX_CACHED_ASSEMBLIES_PER_APPLICATION = 10;
-
-        private static readonly TimeSpan _maxUnusedCachedAssemblyAge = TimeSpan.FromDays(7);
-        private static readonly TimeSpan _abandonedTempFileAge = TimeSpan.FromHours(1);
-
         private readonly StringBuilder _code = new StringBuilder();
         private readonly HashSet<Assembly> _registeredAssemblies = new HashSet<Assembly>();
-
-        /// <summary>
-        /// When enabled, compiled assemblies are stored in %TEMP%\RobowireContainers and reused on the next start
-        /// if the generated code and all referenced assemblies are the same.
-        /// </summary>
-        public static bool UseAssemblyCache { get; set; } = true;
 
         public ICompiler Write(string value)
         {
@@ -80,23 +66,19 @@ namespace CodeGeneration.Compilation
 
         public Assembly Compile()
         {
-            var code = _code.ToString();
+            return Compile(null);
+        }
 
-            var cacheFile = UseAssemblyCache ? TryGetCacheFilePath(code) : null;
-            if (cacheFile != null)
+        /// <summary>
+        /// Compiles the code and stores the result in <see cref="AssemblyCache"/> under the given key (when not null).
+        /// </summary>
+        public Assembly Compile(string cacheKey)
+        {
+            var assemblyBytes = CompileToBytes(_code.ToString());
+
+            if (cacheKey != null)
             {
-                var cached = TryLoadFromCache(cacheFile);
-                if (cached != null)
-                {
-                    return cached;
-                }
-            }
-
-            var assemblyBytes = CompileToBytes(code);
-
-            if (cacheFile != null)
-            {
-                TrySaveToCache(cacheFile, assemblyBytes);
+                AssemblyCache.TrySave(cacheKey, assemblyBytes);
             }
 
             return Assembly.Load(assemblyBytes);
@@ -137,186 +119,17 @@ namespace CodeGeneration.Compilation
             }
             finally
             {
-                TryDeleteFile(outputPath);
-            }
-        }
-
-        /// <summary>
-        /// The cache key covers the generated code and the identity (including the build-specific MVID)
-        /// of every referenced assembly, so any rebuild or new deployment results in a different key.
-        /// </summary>
-        private string TryGetCacheFilePath(string code)
-        {
-            try
-            {
-                var applicationFolder = ComputeHash(AppDomain.CurrentDomain.BaseDirectory.ToLowerInvariant()).Substring(0, 16);
-                var directory = Path.Combine(Path.GetTempPath(), CACHE_FOLDER_NAME, applicationFolder);
-
-                var assemblyIdentities = _registeredAssemblies
-                    .Select(a => $"{a.FullName}|{a.ManifestModule.ModuleVersionId:N}")
-                    .OrderBy(i => i, StringComparer.Ordinal);
-
-                var key = new StringBuilder();
-                key.AppendLine(CACHE_FORMAT_VERSION);
-
-                foreach (var identity in assemblyIdentities)
+                try
                 {
-                    key.AppendLine(identity);
-                }
-
-                key.AppendLine();
-                key.Append(code);
-
-                return Path.Combine(directory, ComputeHash(key.ToString()) + ".dll");
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        private static Assembly TryLoadFromCache(string cacheFile)
-        {
-            byte[] assemblyBytes;
-
-            try
-            {
-                if (!File.Exists(cacheFile))
-                {
-                    return null;
-                }
-
-                assemblyBytes = File.ReadAllBytes(cacheFile);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-
-            Assembly assembly;
-
-            try
-            {
-                assembly = Assembly.Load(assemblyBytes);
-            }
-            catch (Exception)
-            {
-                TryDeleteFile(cacheFile);
-                return null;
-            }
-
-            try
-            {
-                // Marks the file as used, so the cleanup keeps it.
-                File.SetLastWriteTimeUtc(cacheFile, DateTime.UtcNow);
-            }
-            catch (Exception)
-            {
-                // Not important
-            }
-
-            return assembly;
-        }
-
-        private static void TrySaveToCache(string cacheFile, byte[] assemblyBytes)
-        {
-            var directory = Path.GetDirectoryName(cacheFile);
-            var tempFile = $"{cacheFile}.{Guid.NewGuid():N}.tmp";
-
-            try
-            {
-                Directory.CreateDirectory(directory);
-
-                // Written under a temporary name and moved, so another process never reads a partially written file.
-                File.WriteAllBytes(tempFile, assemblyBytes);
-
-                if (!File.Exists(cacheFile))
-                {
-                    File.Move(tempFile, cacheFile);
-                }
-            }
-            catch (Exception)
-            {
-                // The cache is optional; another process could have saved the same file in the meantime.
-            }
-            finally
-            {
-                TryDeleteFile(tempFile);
-            }
-
-            TryCleanUpCache(directory, Path.GetFileName(cacheFile));
-        }
-
-        /// <summary>
-        /// Removes assemblies of previous versions. Several containers (and processes) of one application can
-        /// share the directory, so the most recently used files are kept instead of deleting everything else.
-        /// </summary>
-        private static void TryCleanUpCache(string directory, string currentFileName)
-        {
-            try
-            {
-                var directoryInfo = new DirectoryInfo(directory);
-                if (!directoryInfo.Exists)
-                {
-                    return;
-                }
-
-                var now = DateTime.UtcNow;
-
-                foreach (var abandonedTempFile in directoryInfo.GetFiles("*.tmp").Where(f => (now - f.LastWriteTimeUtc) > _abandonedTempFileAge))
-                {
-                    TryDeleteFile(abandonedTempFile.FullName);
-                }
-
-                var cachedAssemblies = directoryInfo.GetFiles("*.dll")
-                    .Where(f => !string.Equals(f.Name, currentFileName, StringComparison.OrdinalIgnoreCase))
-                    .OrderByDescending(f => f.LastWriteTimeUtc)
-                    .ToList();
-
-                for (var i = 0; i < cachedAssemblies.Count; i++)
-                {
-                    var file = cachedAssemblies[i];
-
-                    if ((i >= (MAX_CACHED_ASSEMBLIES_PER_APPLICATION - 1)) || ((now - file.LastWriteTimeUtc) > _maxUnusedCachedAssemblyAge))
+                    if (File.Exists(outputPath))
                     {
-                        TryDeleteFile(file.FullName);
+                        File.Delete(outputPath);
                     }
                 }
-            }
-            catch (Exception)
-            {
-                // The cleanup is not important
-            }
-        }
-
-        private static void TryDeleteFile(string path)
-        {
-            try
-            {
-                if (File.Exists(path))
+                catch (Exception)
                 {
-                    File.Delete(path);
+                    // Not important
                 }
-            }
-            catch (Exception)
-            {
-                // The file can be in use by another process
-            }
-        }
-
-        private static string ComputeHash(string value)
-        {
-            using (var sha = SHA256.Create())
-            {
-                var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(value));
-
-                var sb = new StringBuilder(hash.Length * 2);
-                foreach (var b in hash)
-                {
-                    sb.Append(b.ToString("x2"));
-                }
-
-                return sb.ToString();
             }
         }
 

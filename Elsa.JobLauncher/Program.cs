@@ -10,6 +10,8 @@ using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.JobLauncher.Scheduler;
 
+using Robowire.Diagnostics;
+
 using Schedoo.Core;
 
 namespace Elsa.JobLauncher
@@ -18,8 +20,11 @@ namespace Elsa.JobLauncher
     {
         static void Main(string[] args)
         {
+            StartupLog.Write("Main");
+
             Console.WriteLine("Checking for another instances...");
             SingleInstanceBlock.EnsureSignleInstance("elsa_job_launcher");
+            StartupLog.Write("Single instance check done");
             Console.WriteLine("Starting...");
 
             SharedFilesUtil.SetSharedValue("JobHeartbeat", DateTime.Now.Ticks.ToString());
@@ -28,6 +33,7 @@ namespace Elsa.JobLauncher
             container.Setup(s => s.For<ISession>().Use<JobSession>());
             container.Setup(s => s.For<IDataRepository>().Use<ElsaJobRepo>());
             container.Setup(s => s.For<ElsaJobsScheduler>().Use<ElsaJobsScheduler>());
+            StartupLog.Write("Container set up");
             
             var user = ConfigurationManager.AppSettings["robotLogin"];
             var password = ConfigurationManager.AppSettings["robotPassword"];
@@ -37,6 +43,7 @@ namespace Elsa.JobLauncher
             using (var locator = container.GetLocator())
             {
                 Console.WriteLine("Container created");
+                StartupLog.Write("Container created");
 
                 var session = (locator.Get<ISession>() as JobSession);
 
@@ -48,6 +55,7 @@ namespace Elsa.JobLauncher
                 session.Login(user, password);
 
                 Console.WriteLine("Authenticated, starting scheduler");
+                StartupLog.Write("Authenticated, starting scheduler");
 
                 var scheduler = locator.Get<ElsaJobsScheduler>();
                 scheduler.Start(args.FirstOrDefault());

@@ -3,6 +3,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Reflection;
 using System.Web;
+using Robowire.Diagnostics;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.Core.DefaultRules;
 using Robowire.RobOrm.Core.Migration;
@@ -34,6 +35,7 @@ namespace Robowire.RobOrm.SqlServer
 
             Action<IContainer, MigrationCustomizer> migratorFunc = (container, customizer) =>
                 {
+                    StartupLog.Write("RobOrm: schema migration started");
                     Console.WriteLine($"[RobOrm] Starting schema migration. Mode={(ProceduralMigrationFeatures.UseStoredProcedureSchemaMigration ? "procedural" : "legacy")}");
 
                     IMigrationScriptBuilder sqlScriptGenerator = ProceduralMigrationFeatures.UseStoredProcedureSchemaMigration
@@ -54,15 +56,11 @@ namespace Robowire.RobOrm.SqlServer
 
                         var hash = hashBuilder.GetHash();
                         var script = RenderMigrationScript(sqlScriptGenerator, hash);
+                        StartupLog.Write("RobOrm: schema hash computed");
                         Console.WriteLine($"[RobOrm] Computed schema hash: {hash}");
                         TryPersistMigrationScript(script);
 
                         var connectionBuilder = locator.Get<ITransactionManager<SqlConnection>>();
-
-                        if (ProceduralMigrationFeatures.UseStoredProcedureSchemaMigration)
-                        {
-                            SchemaMigrationProceduresInstaller.EnsureInstalled(connectionBuilder);
-                        }
 
                         bool versionMatches = false;
                         try
@@ -87,9 +85,19 @@ namespace Robowire.RobOrm.SqlServer
                             Console.WriteLine(ex.ToString());                            
                         }
 
+                        StartupLog.Write("RobOrm: schema version checked");
+
                         if (!versionMatches)
                         {
                             Console.WriteLine("[RobOrm] Schema hash differs, applying schema migration script");
+
+                            // The procedures are used only by the migration script, so they are (re)installed only when the migration runs
+                            if (ProceduralMigrationFeatures.UseStoredProcedureSchemaMigration)
+                            {
+                                SchemaMigrationProceduresInstaller.EnsureInstalled(connectionBuilder);
+                                StartupLog.Write("RobOrm: migration procedures installed");
+                            }
+
                             using (var connection = connectionBuilder.Open(false))
                             {
                                 var sqlConnection = connection.GetConnection();
@@ -103,19 +111,24 @@ namespace Robowire.RobOrm.SqlServer
 
                                 connection.Commit();
                             }
+
+                            StartupLog.Write("RobOrm: schema migration script applied");
                         }
                         else
                         {
                             Console.WriteLine("[RobOrm] Schema hash matches, skipping schema migration");
+                            StartupLog.Write("RobOrm: schema migration skipped (hash matches)");
                         }
                         
                         if (!string.IsNullOrWhiteSpace(customizer.ScriptsRoot))
                         {
                             Console.WriteLine($"[RobOrm] Running additional SQL scripts from '{customizer.ScriptsRoot}'");
                             ScriptsMigrator.RunScripts(connectionBuilder, customizer.ScriptsRoot);
+                            StartupLog.Write("RobOrm: additional SQL scripts done");
                         }
 
                         Console.WriteLine("[RobOrm] Schema migration finished");
+                        StartupLog.Write("RobOrm: schema migration finished");
                     }
                 };
 

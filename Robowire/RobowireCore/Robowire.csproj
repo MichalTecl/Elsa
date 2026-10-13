@@ -42,6 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behavior\ServiceRecordExtensions.cs" />
+    <Compile Include="Diagnostics\StartupLog.cs" />
+    <Compile Include="ApplicationBuild.cs" />
+    <Compile Include="Core\LocatorGeneration\SetupFingerprint.cs" />
     <Compile Include="Behavior\DisposeBehavior.cs" />
     <Compile Include="Behavior\LifecycleBehavior.cs" />
     <Compile Include="Container.cs" />

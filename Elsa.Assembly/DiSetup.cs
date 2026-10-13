@@ -62,6 +62,7 @@ using Elsa.Jobs.SyncErpCustomers;
 using Elsa.Smtp.Core;
 using Elsa.Users;
 using Robowire;
+using Robowire.Diagnostics;
 
 namespace Elsa.Assembly
 {
@@ -77,6 +78,7 @@ namespace Elsa.Assembly
         public static void SetupContainer(IContainer container, ILogWriter logWriter)
         {
             Debug.WriteLine("Setting up the container");
+            StartupLog.Write("DiSetup: container setup started");
 
             container.Setup(s => s.For<IWebSession>().Use<UserWebSession>());
             container.Setup(s => s.For<ISession>().Import.FromFactory(l => l.Get<IWebSession>()));
@@ -148,12 +150,15 @@ namespace Elsa.Assembly
                 });
 
             Debug.WriteLine("Container set up");
+            StartupLog.Write("DiSetup: container registrations done");
 
             Debug.WriteLine("Initializing ElsaDb");
             ElsaDbInstaller.Initialize(container);
             Debug.WriteLine("ElsaDb initialized");
+            StartupLog.Write("DiSetup: ElsaDb initialized");
 
             TlsSetter.Setup();
+            StartupLog.Write("DiSetup: done");
         }
     }    
 }
