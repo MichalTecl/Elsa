@@ -163,6 +163,9 @@
     <Content Include="UI\Controls\Common\Popups\Popups.css" />
     <Content Include="UI\Controls\Common\TabControl.js" />
     <Content Include="UI\Controls\Common\wintersnow.html" />
+    <Content Include="UI\Controls\Common\HalloweenBat.html" />
+    <Content Include="UI\Controls\Common\HalloweenBat.css" />
+    <Content Include="UI\Controls\Common\HalloweenBat.js" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.css" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchList.html" />
     <Content Include="UI\Controls\Inventory\BatchesOverview\BatchSearch.css" />

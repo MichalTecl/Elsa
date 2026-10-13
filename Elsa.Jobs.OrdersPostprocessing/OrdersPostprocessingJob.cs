@@ -12,8 +12,8 @@ namespace Elsa.Jobs.OrdersPostprocessing
         private static readonly Type[] _steps =
             {
                 typeof(SendPaymentReminder),
-                typeof(ObtainShipmentInfo),
-                typeof(TrackShipments)
+                // typeof(ObtainShipmentInfo),
+                // typeof(TrackShipments)
             };
 
         private readonly ILog _log;

@@ -33,6 +33,7 @@ namespace Elsa.Common.Logging
                 writer.WriteElementString("SessionId", diagnostic.SessionId?.ToString());
                 writer.WriteElementString("CommandText", diagnostic.CommandText);
                 writer.WriteElementString("Status", diagnostic.Status);
+                writer.WriteElementString("CollectionStage", diagnostic.CollectionStage);
                 writer.WriteElementString("Details", diagnostic.Details);
                 writer.WriteElementString("CandidateCount", diagnostic.CandidateGraphs.Count.ToString());
                 writer.WriteEndElement();

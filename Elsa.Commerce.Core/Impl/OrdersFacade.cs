@@ -241,32 +241,36 @@ namespace Elsa.Commerce.Core.Impl
                 {
                     Task.Run(() =>
                     {
-                        try
+                        // Background ERP sync must not join the request's ambient transaction (it flows via TransactionScopeAsyncFlowOption.Enabled).
+                        using (new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Suppress, System.Transactions.TransactionScopeAsyncFlowOption.Enabled))
                         {
-                            order = PerformErpActionSafe(
-                                order,
-                                (e, o) => e.MakeOrderSent(o, warn =>
-                                {
-                                    SendPackingMail(o,
-                                        $"Objednávku {order.OrderNumber} {order.CustomerName} je třeba překontrolovat",
-                                        $"V průběhu dokončování objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: \"{warn}\". \r\nTato chyba nemusí bránit vyřízení objednávky, je ale třeba zkontrolovat ve Floxu, že je vše v pořádku (vydána faktura, faktura odeslána, stav objednávky...)");
-                                }),
-                                synced =>
-                                {
-                                    if (synced.OrderStatusId != OrderStatus.Sent.Id)
+                            try
+                            {
+                                order = PerformErpActionSafe(
+                                    order,
+                                    (e, o) => e.MakeOrderSent(o, warn =>
                                     {
-                                        throw new InvalidOperationException(
-                                            $" Byl odeslan pozadavek na dokonceni objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
-                                    }
-                                }, "SetOrderSent");
-                        }
-                        catch (Exception ex)
-                        {
-                            _log.Error($"Chyba pri posilani zabalene objednavky", ex);
-                            SendPackingMail(order, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
-                                $"Pozor - při dokončení balení objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: '{ex.Message}'\r\nZkontrolujte objednávku ručně.");
+                                        SendPackingMail(o,
+                                            $"Objednávku {order.OrderNumber} {order.CustomerName} je třeba překontrolovat",
+                                            $"V průběhu dokončování objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: \"{warn}\". \r\nTato chyba nemusí bránit vyřízení objednávky, je ale třeba zkontrolovat ve Floxu, že je vše v pořádku (vydána faktura, faktura odeslána, stav objednávky...)");
+                                    }),
+                                    synced =>
+                                    {
+                                        if (synced.OrderStatusId != OrderStatus.Sent.Id)
+                                        {
+                                            throw new InvalidOperationException(
+                                                $" Byl odeslan pozadavek na dokonceni objednavky, ale objednavka ma stale stav '{synced.ErpStatusId} - {synced.ErpStatusName}', ktery Elsa mapuje na stav '{synced.OrderStatus?.Name}'");
+                                        }
+                                    }, "SetOrderSent");
+                            }
+                            catch (Exception ex)
+                            {
+                                _log.Error($"Chyba pri posilani zabalene objednavky", ex);
+                                SendPackingMail(order, $"Chyba odesílání objednávky {order.OrderNumber} {order.CustomerName}",
+                                    $"Pozor - při dokončení balení objednávky {order.OrderNumber} {order.CustomerName} nastala chyba: '{ex.Message}'\r\nZkontrolujte objednávku ručně.");
 
-                            _orderRepository.SetProcessBlock(order, OrderProcessingStageNames.Packing, "Předchozí pokus o zabalení této objednávky selhal - je třeba ji odbavit v systému Flox");
+                                _orderRepository.SetProcessBlock(order, OrderProcessingStageNames.Packing, "Předchozí pokus o zabalení této objednávky selhal - je třeba ji odbavit v systému Flox");
+                            }
                         }
                     });
                 }

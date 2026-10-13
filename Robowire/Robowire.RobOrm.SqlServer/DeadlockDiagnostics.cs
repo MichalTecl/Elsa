@@ -25,6 +25,7 @@ namespace Robowire.RobOrm.SqlServer
         public int? SessionId { get; internal set; }
         public string CommandText { get; internal set; }
         public string Status { get; internal set; }
+        public string CollectionStage { get; internal set; }
         public string Details { get; internal set; }
         public List<string> CandidateGraphs { get; } = new List<string>();
     }
@@ -124,7 +125,7 @@ namespace Robowire.RobOrm.SqlServer
                 {
                     request.Diagnostic.Status = "CollectionFailed";
                     // No connection strings or parameter values are written to diagnostics.
-                    request.Diagnostic.Details = ex.Message;
+                    request.Diagnostic.Details = ex.ToString();
                 }
                 Save(request);
             }
@@ -149,13 +150,15 @@ namespace Robowire.RobOrm.SqlServer
                 connection.ConnectionString = builder.ConnectionString;
                 if (_deniedConnections.Contains(builder.ConnectionString))
                     throw new InvalidOperationException("Extended Events access was denied earlier. Collection is disabled for this connection until process restart.");
+                request.Diagnostic.CollectionStage = "Open diagnostic connection";
                 connection.Open();
                 string filename;
                 int databaseId;
                 using (var command = connection.CreateCommand())
                 {
+                    request.Diagnostic.CollectionStage = "Query Extended Events target";
                     command.CommandTimeout = 5;
-                    command.CommandText = @"SELECT DB_ID(), x.TargetXml.value('(EventFileTarget/File/@name)[1]', 'nvarchar(4000)')
+                    command.CommandText = @"SELECT CAST(DB_ID() AS int), x.TargetXml.value('(EventFileTarget/File/@name)[1]', 'nvarchar(4000)')
 FROM sys.dm_xe_sessions s
 JOIN sys.dm_xe_session_targets t ON t.event_session_address = s.address
 CROSS APPLY (SELECT CAST(t.target_data AS xml) AS TargetXml) x
@@ -164,7 +167,9 @@ WHERE s.name = 'system_health' AND t.target_name = 'event_file'";
                     {
                         if (!reader.Read())
                             throw new InvalidOperationException("system_health event_file target is unavailable.");
-                        databaseId = reader.GetInt32(0);
+                        request.Diagnostic.CollectionStage = "Read database ID";
+                        databaseId = Convert.ToInt32(reader.GetValue(0), CultureInfo.InvariantCulture);
+                        request.Diagnostic.CollectionStage = "Read Extended Events filename";
                         filename = reader.GetString(1);
                     }
                 }
@@ -172,6 +177,7 @@ WHERE s.name = 'system_health' AND t.target_name = 'event_file'";
                 var pattern = filename.Substring(0, separator + 1) + "system_health*.xel";
                 using (var command = connection.CreateCommand())
                 {
+                    request.Diagnostic.CollectionStage = "Read Extended Events files";
                     command.CommandTimeout = 10;
                     command.CommandText = @"SELECT x.EventXml
 FROM sys.fn_xe_file_target_read_file(@path, NULL, NULL, NULL)
@@ -185,9 +191,11 @@ AND x.EventXml.value('(event/@timestamp)[1]', 'datetime2') BETWEEN @from AND @to
                     {
                         while (reader.Read())
                         {
+                            request.Diagnostic.CollectionStage = "Decode deadlock event XML";
                             var eventXml = XElement.Parse(reader.GetSqlXml(0).Value);
                             foreach (var graph in eventXml.Descendants("deadlock"))
                             {
+                                request.Diagnostic.CollectionStage = "Match deadlock victim";
                                 if (!Matches(graph, request.Diagnostic.SessionId, databaseId))
                                     continue;
                                 var xml = graph.ToString();

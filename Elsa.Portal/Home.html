@@ -29,6 +29,11 @@
 
             var funContainer = document.getElementById("fun");
             var today = new Date();
+            // October 27 through November 4, inclusive, in the user's local time.
+            if ((today.getMonth() === 9 && today.getDate() >= 27) ||
+                (today.getMonth() === 10 && today.getDate() <= 4)) {
+                lt.fillBy(funContainer, "/UI/Controls/Common/HalloweenBat.html");
+            }
             if ((today.getMonth() === 11) && (today.getDate() > 3) && (today.getDate() < 26)) {
 
                 lt.api("/userProfile/getClientConfig").get(function (r) { 

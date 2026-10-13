@@ -1,0 +1,61 @@
+.halloween-bat {
+    visibility: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 96px;
+    height: 64px;
+    z-index: 110;
+    pointer-events: none;
+    will-change: transform;
+    filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .3));
+}
+
+.halloween-bat__pose {
+    width: 100%;
+    height: 100%;
+    transition: transform .45s ease-in-out;
+}
+
+.halloween-bat svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.halloween-bat__wing {
+    transform-box: view-box;
+    animation: halloween-bat-flap .075s ease-in-out infinite alternate;
+}
+
+.halloween-bat__wing--left { transform-origin: 55px 40px; }
+.halloween-bat__wing--right { transform-origin: 65px 40px; }
+.halloween-bat--away .halloween-bat__wing { animation-play-state: paused; }
+.halloween-bat--frantic .halloween-bat__wing { animation-duration: .065s; }
+.halloween-bat--hanging .halloween-bat__pose,
+.halloween-bat--settling .halloween-bat__pose { transform: rotate(180deg); }
+.halloween-bat--hanging .halloween-bat__wing {
+    animation: none;
+    transform: scaleX(.18);
+}
+.halloween-bat--hanging .halloween-bat__eye {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: halloween-bat-blink 6.5s ease-in-out infinite;
+}
+
+@keyframes halloween-bat-blink {
+    0%, 60%, 64%, 94%, 98%, 100% { transform: scaleY(.65); }
+    62%, 96% { transform: scaleY(.04); }
+}
+
+@keyframes halloween-bat-flap {
+    from { transform: scaleY(.35) rotate(-8deg); }
+    to { transform: scaleY(1) rotate(5deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .halloween-bat { display: none; }
+    .halloween-bat__wing, .halloween-bat__eye { animation: none; }
+}

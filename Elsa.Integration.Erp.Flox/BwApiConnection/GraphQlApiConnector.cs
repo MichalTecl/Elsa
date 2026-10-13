@@ -237,7 +237,8 @@ namespace Elsa.Integration.Erp.Flox.BwApiConnection
 
                         var call = Task.Run<T>(async () => await op(client));
 
-                        result = call.Result;
+                        // GetResult() rethrows the original exception instead of wrapping it in AggregateException
+                        result = call.GetAwaiter().GetResult();
                     }
                     finally
                     {

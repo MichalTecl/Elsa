@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
@@ -66,8 +66,17 @@ namespace Elsa.Integration.Erp.Flox.Protocol.CustomerModel
         public string MainUserEmail { get; set; }
         public bool IsCompany { get; set; }
 
+
+        private string _salesRepresentativeEmail = null;
         [XmlElement("main_salesrep")]
-        public string SalesRepresentativeEmail { get; set; }
+        public string SalesRepresentativeEmail 
+        { 
+            get { return string.IsNullOrWhiteSpace(_salesRepresentativeEmail) ? _altSalesRep : SalesRepresentativeEmail; } 
+            set { _salesRepresentativeEmail = value; } 
+        }
+
+        [XmlElement("salesrep")]
+        public string _altSalesRep { get; set; }
     }
 
     [XmlRoot("persons")]
