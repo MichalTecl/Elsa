@@ -13,5 +13,10 @@ namespace Elsa.App.OrdersInfo.Model
         public bool IsAggregated { get; set; }
 
         public AggregatedResultModel AggregatedResult { get; set; }
+
+        public List<OrderAggregatorParamModel> AggregationParameters { get; set; }
+
+        // <OptionId, SelectedValue>
+        public Dictionary<string, string> SelectedAggregationParameters { get; set; }
     }
 }

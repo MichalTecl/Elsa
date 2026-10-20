@@ -90,7 +90,10 @@ namespace Elsa.App.OrdersInfo.App
             return XlsxSerializer.Instance.Serialize(exportRows);
         }
 
-        public byte[] ExportAggregated(AggregatedResultModel aggregation, string aggregationName)
+        public byte[] ExportAggregated(
+            AggregatedResultModel aggregation,
+            string aggregationName,
+            IEnumerable<KeyValuePair<string, string>> parameterValues)
         {
             if (aggregation == null)
                 throw new ArgumentNullException(nameof(aggregation));
@@ -131,6 +134,15 @@ namespace Elsa.App.OrdersInfo.App
                 infoSheet.Cells["A3"].Value = "Legenda";
                 infoSheet.Cells["B3"].Value = aggregation.Legend;
                 infoSheet.Cells["B3"].Style.WrapText = true;
+
+                var infoRow = 4;
+                foreach (var parameterValue in parameterValues ?? Enumerable.Empty<KeyValuePair<string, string>>())
+                {
+                    infoSheet.Cells[infoRow, 1].Value = parameterValue.Key;
+                    infoSheet.Cells[infoRow, 2].Value = parameterValue.Value;
+                    infoRow++;
+                }
+
                 infoSheet.Column(1).Style.Font.Bold = true;
                 infoSheet.Column(1).AutoFit();
                 infoSheet.Column(2).Width = 100;

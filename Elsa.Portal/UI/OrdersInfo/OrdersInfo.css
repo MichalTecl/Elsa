@@ -726,6 +726,20 @@
     width: 100%;
 }
 
+.ordersInfoAggregationParams {
+    align-items: flex-start;
+    border-top: 1px solid #e3e3e3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 14px;
+    padding-top: 12px;
+}
+
+.ordersInfoAggregationParam {
+    flex: 0 1 260px;
+}
+
 .ordersInfoAggregation {
     border: 1px solid #d5d5d5;
     overflow-x: auto;

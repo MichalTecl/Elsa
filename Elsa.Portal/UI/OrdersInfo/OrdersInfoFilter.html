@@ -130,6 +130,8 @@
             <i class="fas fa-search"></i>
         </button>
     </div>
+
+    <div id="aggregationParamsContainer" class="ordersInfoAggregationParams hidden"></div>
 </div>
 
 <script>
@@ -151,7 +153,8 @@
         erpStatusesDropdown,
         erpStatusesText,
         erpStatusesMenu,
-        aggregationTypeSelect) {
+        aggregationTypeSelect,
+        aggregationParamsContainer) {
 
         var filterControl = this;
         var vm = app.OrdersInfo.vm;
@@ -289,6 +292,48 @@
                 : "Typ agregace";
         };
 
+        var renderAggregationParameters = function (parameters) {
+            aggregationParamsContainer.innerHTML = "";
+            aggregationParamsContainer.classList.toggle("hidden", !parameters || parameters.length === 0);
+
+            (parameters || []).forEach(function (parameter) {
+                var label = document.createElement("label");
+                var title = document.createElement("span");
+                var select = document.createElement("select");
+
+                label.className = "ordersInfoFilterField ordersInfoAggregationParam";
+                title.className = "ordersInfoFilterLabel";
+                title.textContent = parameter.Title;
+
+                select.setAttribute("data-option-id", parameter.OptionId);
+
+                if (parameter.Values.length === 0) {
+                    var emptyOption = document.createElement("option");
+                    emptyOption.value = "";
+                    emptyOption.textContent = "";
+                    select.appendChild(emptyOption);
+                    select.disabled = true;
+                }
+
+                parameter.Values.forEach(function (value) {
+                    var option = document.createElement("option");
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                });
+
+                select.value = parameter.SelectedValue;
+                select.title = parameter.Title + ": " + select.value;
+                select.addEventListener("change", function () {
+                    filterControl.load();
+                });
+
+                label.appendChild(title);
+                label.appendChild(select);
+                aggregationParamsContainer.appendChild(label);
+            });
+        };
+
         var appendValue = function (params, name, value) {
             var normalizedValue = (value || "").trim();
             if (normalizedValue) {
@@ -311,6 +356,7 @@
         vm.getErpStatuses(addStatusOptions);
         vm.getPaymentMethods(addPaymentOptions);
         vm.getAggregationTypes(addAggregationTypeOptions);
+        vm.setAggregationParametersRenderer(renderAggregationParameters);
 
         this.toggleStatuses = function (event) {
             event.stopPropagation();
@@ -378,6 +424,12 @@
             appendValue(params, "MaxPriceWithVat", maxPriceWithVatFilter.value);
             appendValue(params, "OrderStatusId", selectedOrderStatusId);
             appendValue(params, "AggregationId", aggregationTypeSelect.value);
+
+            if (aggregationTypeSelect.value && aggregationTypeSelect.value === selectedAggregationId) {
+                Array.prototype.forEach.call(aggregationParamsContainer.querySelectorAll("select[data-option-id]"), function (select) {
+                    params.append(app.OrdersInfo.AGGREGATION_PARAM_PREFIX + select.getAttribute("data-option-id"), select.value);
+                });
+            }
 
             Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
                 if (checkbox.checked) {

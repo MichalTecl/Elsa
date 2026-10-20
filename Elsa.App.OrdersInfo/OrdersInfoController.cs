@@ -77,7 +77,7 @@ namespace Elsa.App.OrdersInfo
             EnsureUserRight(OrdersInfoUserRights.OrdersInfoAppView);
         }
 
-        public OrderQueryResultModel Query(OrderQueryModel query, string aggregationId)
+        public OrderQueryResultModel Query(OrderQueryModel query, string aggregationId, Dictionary<string, string> aggregationParams)
         {
             query = PrepareQuery(query);
 
@@ -87,7 +87,7 @@ namespace Elsa.App.OrdersInfo
             {
                 EnsureUserRight(OrdersInfoUserRights.OrdersInfoAggrgations);
 
-                return _orderInfoRepository.LoadAggregated(filter, GetAggregator(aggregationId));
+                return _orderInfoRepository.LoadAggregated(filter, GetAggregator(aggregationId), aggregationParams);
             }
             else
             {
@@ -106,7 +106,7 @@ namespace Elsa.App.OrdersInfo
             return new FileResult($"Objednavky_{DateTime.Now:yyyyMMdd_HHmm}.xlsx", bytes);
         }
 
-        public FileResult ExportAggregated(OrderQueryModel query, string aggregationId)
+        public FileResult ExportAggregated(OrderQueryModel query, string aggregationId, Dictionary<string, string> aggregationParams)
         {
             EnsureUserRight(OrdersInfoUserRights.OrdersInfoAggrgations);
 
@@ -117,8 +117,13 @@ namespace Elsa.App.OrdersInfo
 
             var aggregator = GetAggregator(aggregationId);
             var aggregationType = _aggregators.FindType(aggregationId);
-            var result = _orderInfoRepository.LoadAggregated(CreateOrderFilter(query), aggregator);
-            var bytes = _xlsExporter.ExportAggregated(result.AggregatedResult, aggregationType.Name);
+            var result = _orderInfoRepository.LoadAggregated(CreateOrderFilter(query), aggregator, aggregationParams);
+            var parameterValues = result.AggregationParameters
+                .Select(parameter => new KeyValuePair<string, string>(
+                    parameter.Title,
+                    result.SelectedAggregationParameters[parameter.OptionId]))
+                .ToList();
+            var bytes = _xlsExporter.ExportAggregated(result.AggregatedResult, aggregationType.Name, parameterValues);
 
             return new FileResult($"Objednavky_agregace_{DateTime.Now:yyyyMMdd_HHmm}.xlsx", bytes);
         }

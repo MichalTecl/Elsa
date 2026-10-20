@@ -9,6 +9,8 @@ namespace Elsa.App.OrdersInfo.App.Aggregations
 {
     public interface IOrdersAggregator
     {
-        AggregatedResultModel Process(IQueryBuilder<IPurchaseOrder> sourceOrdersQuery);
+        List<OrderAggregatorParamModel> Parameters { get; set; }
+
+        AggregatedResultModel Process(IQueryBuilder<IPurchaseOrder> sourceOrdersQuery, Dictionary<string, string> selectedParameters);
     }
 }

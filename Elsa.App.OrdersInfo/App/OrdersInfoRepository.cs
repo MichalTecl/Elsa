@@ -140,13 +140,19 @@ namespace Elsa.App.OrdersInfo.App
                     .MapRows(r => r.GetString(0)));
         }
 
-        public OrderQueryResultModel LoadAggregated(Action<IQueryBuilder<IPurchaseOrder>> filter, IOrdersAggregator aggregator)
+        public OrderQueryResultModel LoadAggregated(
+            Action<IQueryBuilder<IPurchaseOrder>> filter,
+            IOrdersAggregator aggregator,
+            Dictionary<string, string> requestedParameters)
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
 
             if (aggregator == null)
                 throw new ArgumentNullException(nameof(aggregator));
+
+            var parameters = aggregator.Parameters ?? new List<OrderAggregatorParamModel>();
+            var selectedParameters = ResolveAggregationParameters(parameters, requestedParameters);
 
             var q = CreateOrdersQuery();
 
@@ -156,8 +162,40 @@ namespace Elsa.App.OrdersInfo.App
             {
                 Orders = new List<OrderInfoModel>(),
                 IsAggregated = true,
-                AggregatedResult = aggregator.Process(q) ?? new AggregatedResultModel()
+                AggregatedResult = aggregator.Process(q, selectedParameters) ?? new AggregatedResultModel(),
+                AggregationParameters = parameters,
+                SelectedAggregationParameters = selectedParameters
             };
+        }
+
+        private static Dictionary<string, string> ResolveAggregationParameters(
+            IEnumerable<OrderAggregatorParamModel> parameters,
+            Dictionary<string, string> requestedParameters)
+        {
+            var result = new Dictionary<string, string>();
+
+            foreach (var parameter in parameters)
+            {
+                if (string.IsNullOrWhiteSpace(parameter.OptionId))
+                    throw new InvalidOperationException("Parametr agregace nemá vyplněné OptionId");
+
+                if (result.ContainsKey(parameter.OptionId))
+                    throw new InvalidOperationException($"Parametr agregace '{parameter.OptionId}' je definován vícekrát");
+
+                var values = parameter.Values ?? new List<string>();
+                var selectedValue = values.FirstOrDefault() ?? string.Empty;
+
+                if (requestedParameters != null
+                    && requestedParameters.TryGetValue(parameter.OptionId, out var requestedValue)
+                    && values.Contains(requestedValue))
+                {
+                    selectedValue = requestedValue;
+                }
+
+                result[parameter.OptionId] = selectedValue;
+            }
+
+            return result;
         }
     }
 }

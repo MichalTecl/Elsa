@@ -1,6 +1,8 @@
 var app = app || {};
 app.OrdersInfo = app.OrdersInfo || {};
 
+app.OrdersInfo.AGGREGATION_PARAM_PREFIX = "AggregationParam.";
+
 app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     var self = this;
     var detailTabDefinitions = [];
@@ -8,6 +10,8 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     var placedItemNamesCallbacks = [];
     var query = null;
     var aggregationId = null;
+    var aggregationParams = {};
+    var aggregationParametersRenderer = null;
 
     self.orders = [];
     self.isLoading = false;
@@ -27,6 +31,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     self.aggregationLegend = "";
     self.hasAggregationLegend = false;
     self.aggregatedExportDisabled = true;
+    self.aggregationParameters = [];
     self.batchDialogOpen = false;
     self.batchDialogItem = null;
     self.batchDialogRows = [];
@@ -96,6 +101,43 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     var readAggregationId = function () {
         var params = new URLSearchParams(window.location.search);
         return params.get("AggregationId") || null;
+    };
+
+    var readAggregationParams = function () {
+        var params = new URLSearchParams(window.location.search);
+        var result = {};
+
+        params.forEach(function (value, name) {
+            if (name.indexOf(app.OrdersInfo.AGGREGATION_PARAM_PREFIX) === 0) {
+                result[name.substring(app.OrdersInfo.AGGREGATION_PARAM_PREFIX.length)] = value;
+            }
+        });
+
+        return result;
+    };
+
+    var receiveAggregationParameters = function (parameters, selectedParameters) {
+        selectedParameters = selectedParameters || {};
+
+        self.aggregationParameters = (parameters || []).map(function (parameter) {
+            var selectedValue = selectedParameters[parameter.OptionId];
+
+            return {
+                OptionId: parameter.OptionId,
+                Title: parameter.Title || parameter.OptionId,
+                Values: parameter.Values || [],
+                SelectedValue: selectedValue === null || selectedValue === undefined ? "" : selectedValue
+            };
+        });
+
+        aggregationParams = {};
+        self.aggregationParameters.forEach(function (parameter) {
+            aggregationParams[parameter.OptionId] = parameter.SelectedValue;
+        });
+
+        if (aggregationParametersRenderer) {
+            aggregationParametersRenderer(self.aggregationParameters);
+        }
     };
 
     var receiveAggregatedResult = function (aggregation) {
@@ -207,7 +249,10 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         lt.notify();
 
         lt.api("/ordersInfo/query")
-            .query({ "aggregationId": aggregationId })
+            .query({
+                "aggregationId": aggregationId,
+                "aggregationParams": JSON.stringify(aggregationParams)
+            })
             .body(query)
             .post(function (result) {
                 result = result || {};
@@ -216,6 +261,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
                     self.orders = [];
                     self.isAggregated = true;
                     receiveAggregatedResult(result.AggregatedResult);
+                    receiveAggregationParameters(result.AggregationParameters, result.SelectedAggregationParameters);
                     self.isLoading = false;
                     return;
                 }
@@ -239,6 +285,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     self.init = function () {
         query = readQueryString();
         aggregationId = readAggregationId();
+        aggregationParams = readAggregationParams();
         loadOrders();
     };
 
@@ -306,13 +353,22 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
             return;
         }
 
-        downloadXls("/ordersInfo/exportAggregated?aggregationId=" + encodeURIComponent(aggregationId),
+        downloadXls("/ordersInfo/exportAggregated?aggregationId=" + encodeURIComponent(aggregationId)
+            + "&aggregationParams=" + encodeURIComponent(JSON.stringify(aggregationParams)),
             "Objednavky_agregace.xlsx",
             "Export agregace objednávek se nepodařilo stáhnout.");
     };
 
     self.getAggregationTypes = function (callback) {
         lt.api("/ordersInfo/getAggregationTypes").get(callback);
+    };
+
+    self.setAggregationParametersRenderer = function (renderer) {
+        aggregationParametersRenderer = renderer;
+
+        if (renderer) {
+            renderer(self.aggregationParameters);
+        }
     };
 
     var updateBatchDialogState = function () {
