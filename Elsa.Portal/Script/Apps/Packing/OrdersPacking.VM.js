@@ -36,10 +36,25 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         }
     };
 
+    var getChecklistItems = function (items) {
+        var checklistItems = [];
+        for (var i = 0; i < items.length; i++) {
+            checklistItems.push(items[i]);
+            var kitItems = items[i].KitItems || [];
+            for (var j = 0; j < kitItems.length; j++) {
+                if (kitItems[j].SelectedItem) {
+                    checklistItems.push(kitItems[j].SelectedItem);
+                }
+            }
+        }
+        return checklistItems;
+    };
+
     var updateChecklistMode = function (items, mode) {
 
-        for (var i = 0; i < items.length; i++) {
-            items[i].showCheckbox = !!mode;
+        var checklistItems = getChecklistItems(items);
+        for (var i = 0; i < checklistItems.length; i++) {
+            checklistItems[i].showCheckbox = !!mode;
         }
     };
 
@@ -106,7 +121,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         }
 
         if (!!self.checklistMode) {
-            var uncheckedItem = self.currentOrder.Items.filter(i => !i.isChecked);
+            var uncheckedItem = getChecklistItems(self.currentOrder.Items).filter(i => !i.isChecked);
             if (uncheckedItem.length > 0) {
                 // ask the user whether they wants to proceed 
                 var result = confirm("Všechny položky nebyly zaškrtnuty. Chcete přesto pokračovat?");
@@ -172,6 +187,9 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
                 kitItem.uid = kitItem.GroupId + ":" + kitItem.KitItemIndex;
 
                 kitItem.hasSelectedItem = (!!kitItem.SelectedItem);
+                if (kitItem.hasSelectedItem) {
+                    kitItem.SelectedItem.isChecked = checkedItems.indexOf(kitItem.SelectedItem.ItemId) >= 0;
+                }
 
                 kitItem.isKitItemIndexHead = (kitItem.KitItemIndex !== lastKitIndex);
                 lastKitIndex = kitItem.KitItemIndex;
@@ -202,11 +220,14 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         var localOrderRecord = getLocalOrderRecord(order.OrderId, false, null);
 
         var checkedItems = [];
+        self.checklistMode = order.Items.length >= 10 || order.Items.some(function (item) {
+            return !!item.KitItems && item.KitItems.length > 0;
+        });
         if (!!localOrderRecord) {
-            self.checklistMode = !!localOrderRecord.checklistMode;
+            if (typeof localOrderRecord.checklistMode === "boolean") {
+                self.checklistMode = localOrderRecord.checklistMode;
+            }
             checkedItems = localOrderRecord.checkedItems || checkedItems;
-        } else {
-            self.checklistMode = order.Items.length >= 10;
         }
                 
         for (var i = 0; i < order.Items.length; i++) {
@@ -364,7 +385,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     };
 
     self.setItemChecked = function (itemId, checked) {
-        var foundItems = self.currentOrder.Items.filter(function (i) { return i.ItemId === itemId; });
+        var foundItems = getChecklistItems(self.currentOrder.Items).filter(function (i) { return i.ItemId === itemId; });
         if (foundItems.length !== 1)
             return;
 

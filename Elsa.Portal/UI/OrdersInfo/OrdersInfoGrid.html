@@ -46,14 +46,6 @@
         <button type="button" data-bind="disabled:previousDisabled" event-bind="click:previousPage()">Předchozí</button>
         <span data-bind="text:pageLabel"></span>
         <button type="button" data-bind="disabled:nextDisabled" event-bind="click:nextPage()">Další</button>
-        <span class="ordersInfoQuerySummary">
-            <span>Celkem objednávek: <strong data-bind="text:totalOrdersText"></strong></span>
-            <span>Celková cena s DPH: <strong data-bind="text:totalPriceWithVatText"></strong></span>
-        </span>
-        <button type="button" class="ordersInfoExportButton" data-bind="disabled:exportDisabled" title="Stáhnout výsledky dotazu jako XLSX" event-bind="click:exportXls()">
-            <i class="far fa-file-excel"></i>
-            XLSX
-        </button>
     </div>
 </div>
 
@@ -77,10 +69,6 @@
 
         this.nextPage = function () {
             vm.nextPage();
-        };
-
-        this.exportXls = function () {
-            vm.exportXls();
         };
 
         vm.init();

@@ -71,6 +71,8 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
             OrderNumber: params.get("OrderNumber") || null,
             MinPurchaseDt: readDate(params, "MinPurchaseDt", false),
             MaxPurchaseDt: readDate(params, "MaxPurchaseDt", true),
+            MinPriceWithVat: params.get("MinPriceWithVat") || null,
+            MaxPriceWithVat: params.get("MaxPriceWithVat") || null,
             ErpStatuses: params.getAll("ErpStatuses"),
             OrderStatusId: readInt(params, "OrderStatusId", null),
             ContainsPlacedItemWildcard: params.get("ContainsPlacedItemWildcard") || null,

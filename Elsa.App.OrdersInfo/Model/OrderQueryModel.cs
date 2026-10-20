@@ -16,6 +16,10 @@ namespace Elsa.App.OrdersInfo.Model
 
         public DateTime? MaxPurchaseDt { get; set; }
 
+        public decimal? MinPriceWithVat { get; set; }
+
+        public decimal? MaxPriceWithVat { get; set; }
+
         public List<string> ErpStatuses { get; set; }
 
         public int? OrderStatusId { get; set; }

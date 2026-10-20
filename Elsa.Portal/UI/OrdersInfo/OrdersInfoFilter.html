@@ -34,6 +34,22 @@
             <input id="maxPurchaseDateFilter" type="date" />
         </label>
 
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">
+                <span>Cena objednávky od</span>
+                <span class="ordersInfoWildcardHelp" tabindex="0" title="Jedná se o celkovou cenu objednávky s DPH včetně poštovného a uplatněných slev.">?</span>
+            </span>
+            <input id="minPriceWithVatFilter" type="number" step="any" />
+        </label>
+
+        <label class="ordersInfoFilterField">
+            <span class="ordersInfoFilterLabel">
+                <span>Cena objednávky do</span>
+                <span class="ordersInfoWildcardHelp" tabindex="0" title="Jedná se o celkovou cenu objednávky s DPH včetně poštovného a uplatněných slev.">?</span>
+            </span>
+            <input id="maxPriceWithVatFilter" type="number" step="any" />
+        </label>
+
         <div class="ordersInfoFilterField">
             <span class="ordersInfoFilterLabel">Stavy objednávky</span>
             <div id="erpStatusesDropdown" class="ordersInfoStatusDropdown">
@@ -89,6 +105,13 @@
     </div>
 
     <div class="ordersInfoFilterActions">
+        <span class="ordersInfoQuerySummary">
+            <span>Celkem objednávek: <strong data-bind="text:totalOrdersText"></strong></span>
+            <span>Celková cena s DPH: <strong data-bind="text:totalPriceWithVatText"></strong></span>
+            <button type="button" class="ordersInfoExportButton" data-bind="disabled:exportDisabled" title="Stáhnout výsledky dotazu jako XLSX" aria-label="Stáhnout výsledky dotazu jako XLSX" event-bind="click:exportXls()">
+                <i class="far fa-file-excel" aria-hidden="true"></i>
+            </button>
+        </span>
         <button type="button" class="ordersInfoClearButton" title="Vymazat filtry" aria-label="Vymazat filtry" event-bind="click:clearFilters()">
             <i class="fas fa-eraser"></i>
         </button>
@@ -112,6 +135,8 @@
         discountFilter,
         minPurchaseDateFilter,
         maxPurchaseDateFilter,
+        minPriceWithVatFilter,
+        maxPriceWithVatFilter,
         erpStatusesDropdown,
         erpStatusesText,
         erpStatusesMenu) {
@@ -241,6 +266,8 @@
         setValueFromQuery(discountFilter, "DiscountTextWildcard");
         setValueFromQuery(minPurchaseDateFilter, "MinPurchaseDt");
         setValueFromQuery(maxPurchaseDateFilter, "MaxPurchaseDt");
+        setValueFromQuery(minPriceWithVatFilter, "MinPriceWithVat");
+        setValueFromQuery(maxPriceWithVatFilter, "MaxPriceWithVat");
 
         app.ui.autosuggest(placedItemAutocomplete, vm.getPlacedItemNames);
         vm.getErpStatuses(addStatusOptions);
@@ -267,6 +294,8 @@
             discountFilter.value = "";
             minPurchaseDateFilter.value = "";
             maxPurchaseDateFilter.value = "";
+            minPriceWithVatFilter.value = "";
+            maxPriceWithVatFilter.value = "";
             selectedOrderStatusId = null;
 
             Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
@@ -283,7 +312,15 @@
             updatePaymentMethodsText();
         };
 
+        this.exportXls = function () {
+            vm.exportXls();
+        };
+
         this.load = function () {
+            if (!minPriceWithVatFilter.reportValidity() || !maxPriceWithVatFilter.reportValidity()) {
+                return;
+            }
+
             var params = new URLSearchParams();
 
             appendValue(params, "OrderNumber", orderNumberFilter.value);
@@ -294,6 +331,8 @@
             appendValue(params, "DiscountTextWildcard", discountFilter.value);
             appendValue(params, "MinPurchaseDt", minPurchaseDateFilter.value);
             appendValue(params, "MaxPurchaseDt", maxPurchaseDateFilter.value);
+            appendValue(params, "MinPriceWithVat", minPriceWithVatFilter.value);
+            appendValue(params, "MaxPriceWithVat", maxPriceWithVatFilter.value);
             appendValue(params, "OrderStatusId", selectedOrderStatusId);
 
             Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
@@ -314,7 +353,7 @@
         };
 
         Array.prototype.forEach.call(
-            filterControl.querySelectorAll("input[type='text'], input[type='date']"),
+            filterControl.querySelectorAll("input[type='text'], input[type='date'], input[type='number']"),
             function (input) {
                 input.addEventListener("keydown", function (event) {
                     if (event.key !== "Enter") {

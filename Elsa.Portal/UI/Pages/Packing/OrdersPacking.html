@@ -121,6 +121,9 @@
                             <div class="stackLeft">
                                 <div class="selectionGroupName" data-bind="text:GroupName"></div>
                                 <div class="kitSelectedItemContainer stackLeft" data-bind="class!.hidden:hasSelectedItem">
+                                    <div class="checklistModeCheckboxContainer" data-bind="class!.hidden:SelectedItem.showCheckbox">
+                                        <input type="checkbox" data-bind="checked:SelectedItem.isChecked" event-bind="change:onItemCheckboxChanged(SelectedItem, this.checked)" />
+                                    </div>
                                     <div class="kitSelectedItem" data-bind="text:SelectedItem.ProductName"></div>
                                     <div lt-name="rootItemBatchSelector">
                                     </div>

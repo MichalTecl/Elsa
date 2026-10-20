@@ -116,6 +116,12 @@ namespace Elsa.App.OrdersInfo
                 if (query.MaxPurchaseDt != null)
                     q.Where(o => o.PurchaseDate <= query.MaxPurchaseDt);
 
+                if (query.MinPriceWithVat != null)
+                    q.Where(o => o.PriceWithVat >= query.MinPriceWithVat);
+
+                if (query.MaxPriceWithVat != null)
+                    q.Where(o => o.PriceWithVat <= query.MaxPriceWithVat);
+
                 if (query.ErpStatuses?.Count > 0)
                     q.Where(o => o.ErpStatusName.InCsv(query.ErpStatuses));
 
