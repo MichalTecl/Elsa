@@ -450,15 +450,20 @@ namespace Elsa.Commerce.Core.Repositories
                                    AND po.OrderStatusId = 2
                                    AND po.ProjectId = {0}
                                 ";
-
-            try
+            int executeQry() 
             {
                 return _database.Sql().ExecuteWithParams(sql, _session.Project.Id).Scalar<int?>() ?? 0;
+            }
+            
+            // Retry on deadlock
+            try
+            {
+                return executeQry();
             }
             catch (SqlException ex) when (ex.Number == 1205)
             {
                 Thread.Sleep(500);
-                return _database.Sql().ExecuteWithParams(sql, _session.Project.Id).Scalar<int?>() ?? 0;
+                return executeQry();
             }
         }
 
