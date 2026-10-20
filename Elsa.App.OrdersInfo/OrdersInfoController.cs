@@ -17,6 +17,7 @@ using Elsa.Core.Entities.Commerce.Integration;
 using System.Net;
 using Elsa.App.OrdersPacking.Entities;
 using Elsa.Smtp.Core;
+using Elsa.App.OrdersInfo.App.Aggregations;
 
 namespace Elsa.App.OrdersInfo
 {
@@ -39,6 +40,7 @@ namespace Elsa.App.OrdersInfo
         private readonly IMailSender _mailSender;
         private readonly IErpClientFactory _erpClientFactory;
         private readonly IOrderImportFailureRepository _orderImportFailureRepository;
+        private readonly OrdersAggregatorFactory _aggregators;
 
         public OrdersInfoController(
             IWebSession webSession,
@@ -53,7 +55,8 @@ namespace Elsa.App.OrdersInfo
             IOrdersFacade ordersFacade,
             IMailSender mailSender,
             IErpClientFactory erpClientFactory,
-            IOrderImportFailureRepository orderImportFailureRepository) : base(webSession, log)
+            IOrderImportFailureRepository orderImportFailureRepository,
+            OrdersAggregatorFactory aggregators) : base(webSession, log)
         {
             _orderInfoRepository = orderInfoRepository;
             _db = db;
@@ -66,6 +69,7 @@ namespace Elsa.App.OrdersInfo
             _mailSender = mailSender;
             _erpClientFactory = erpClientFactory;
             _orderImportFailureRepository = orderImportFailureRepository;
+            _aggregators = aggregators;
         }
 
         protected override void OnBeforeCall()
@@ -73,15 +77,26 @@ namespace Elsa.App.OrdersInfo
             EnsureUserRight(OrdersInfoUserRights.OrdersInfoAppView);
         }
 
-        public OrderQueryResultModel Query(OrderQueryModel query)
+        public OrderQueryResultModel Query(OrderQueryModel query, string aggregationId)
         {
             query = PrepareQuery(query);
 
-            var take = Math.Min(Math.Max(query.PageSize, 1), 200);
-            var page = Math.Max(query.Page, 0);
-            var skip = checked(page * take);
+            var filter = CreateOrderFilter(query);
 
-            return _orderInfoRepository.Load(skip, take, CreateOrderFilter(query));
+            if (!string.IsNullOrWhiteSpace(aggregationId))
+            {
+                EnsureUserRight(OrdersInfoUserRights.OrdersInfoAggrgations);
+
+                return _orderInfoRepository.LoadAggregated(filter, GetAggregator(aggregationId));
+            }
+            else
+            {
+                var take = Math.Min(Math.Max(query.PageSize, 1), 200);
+                var page = Math.Max(query.Page, 0);
+                var skip = checked(page * take);
+
+                return _orderInfoRepository.Load(skip, take, filter);
+            }
         }
 
         public FileResult Export(OrderQueryModel query)
@@ -89,6 +104,43 @@ namespace Elsa.App.OrdersInfo
             query = PrepareQuery(query);
             var bytes = _xlsExporter.Export(CreateOrderFilter(query));
             return new FileResult($"Objednavky_{DateTime.Now:yyyyMMdd_HHmm}.xlsx", bytes);
+        }
+
+        public FileResult ExportAggregated(OrderQueryModel query, string aggregationId)
+        {
+            EnsureUserRight(OrdersInfoUserRights.OrdersInfoAggrgations);
+
+            if (string.IsNullOrWhiteSpace(aggregationId))
+                throw new ArgumentException("Není vybrán typ agregace");
+
+            query = PrepareQuery(query);
+
+            var aggregator = GetAggregator(aggregationId);
+            var aggregationType = _aggregators.FindType(aggregationId);
+            var result = _orderInfoRepository.LoadAggregated(CreateOrderFilter(query), aggregator);
+            var bytes = _xlsExporter.ExportAggregated(result.AggregatedResult, aggregationType.Name);
+
+            return new FileResult($"Objednavky_agregace_{DateTime.Now:yyyyMMdd_HHmm}.xlsx", bytes);
+        }
+
+        public IList<OrderAggregationTypeInfoModel> GetAggregationTypes()
+        {
+            if (!HasUserRight(OrdersInfoUserRights.OrdersInfoAggrgations))
+                return new List<OrderAggregationTypeInfoModel>();
+
+            return OrdersAggregatorFactory.AllTypes
+                .Select(type => new OrderAggregationTypeInfoModel
+                {
+                    Id = type.Id,
+                    Name = type.Name
+                })
+                .ToList();
+        }
+
+        private IOrdersAggregator GetAggregator(string aggregationId)
+        {
+            return _aggregators.Get(aggregationId)
+                   ?? throw new ArgumentException($"Neznámý typ agregace {aggregationId}");
         }
 
         private static OrderQueryModel PrepareQuery(OrderQueryModel query)

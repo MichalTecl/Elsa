@@ -3,6 +3,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
+using OfficeOpenXml;
 using Robowire.RobOrm.Core;
 using System;
 using System.Collections.Generic;
@@ -87,6 +88,72 @@ namespace Elsa.App.OrdersInfo.App
                 .ToList();
 
             return XlsxSerializer.Instance.Serialize(exportRows);
+        }
+
+        public byte[] ExportAggregated(AggregatedResultModel aggregation, string aggregationName)
+        {
+            if (aggregation == null)
+                throw new ArgumentNullException(nameof(aggregation));
+
+            using (var package = new ExcelPackage())
+            {
+                var sheet = package.Workbook.Worksheets.Add("Agregace");
+
+                sheet.Cells[1, 1].Value = aggregation.RowsTitle;
+
+                for (var columnIndex = 0; columnIndex < aggregation.Columns.Count; columnIndex++)
+                    sheet.Cells[1, columnIndex + 2].Value = aggregation.Columns[columnIndex];
+
+                for (var rowIndex = 0; rowIndex < aggregation.Rows.Count; rowIndex++)
+                {
+                    var row = aggregation.Rows[rowIndex];
+                    sheet.Cells[rowIndex + 2, 1].Value = row;
+
+                    for (var columnIndex = 0; columnIndex < aggregation.Columns.Count; columnIndex++)
+                    {
+                        sheet.Cells[rowIndex + 2, columnIndex + 2].Value =
+                            ToCellValue(aggregation.Read(row, aggregation.Columns[columnIndex]));
+                    }
+                }
+
+                sheet.Row(1).Style.Font.Bold = true;
+                sheet.Column(1).Style.Font.Bold = true;
+                sheet.View.FreezePanes(2, 2);
+
+                if (sheet.Dimension != null)
+                    sheet.Cells[sheet.Dimension.Address].AutoFitColumns();
+
+                var infoSheet = package.Workbook.Worksheets.Add("Popis");
+                infoSheet.Cells["A1"].Value = "Typ agregace";
+                infoSheet.Cells["B1"].Value = aggregationName;
+                infoSheet.Cells["A2"].Value = "Vygenerováno";
+                infoSheet.Cells["B2"].Value = DateTime.Now.ToString("d. M. yyyy HH:mm", _czechCulture);
+                infoSheet.Cells["A3"].Value = "Legenda";
+                infoSheet.Cells["B3"].Value = aggregation.Legend;
+                infoSheet.Cells["B3"].Style.WrapText = true;
+                infoSheet.Column(1).Style.Font.Bold = true;
+                infoSheet.Column(1).AutoFit();
+                infoSheet.Column(2).Width = 100;
+
+                return package.GetAsByteArray();
+            }
+        }
+
+        private static object ToCellValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return value;
+
+            var groupSeparator = _czechCulture.NumberFormat.NumberGroupSeparator;
+            var normalized = value.Trim()
+                .Replace("\u00A0", groupSeparator)
+                .Replace("\u202F", groupSeparator)
+                .Replace(" ", groupSeparator);
+
+            if (decimal.TryParse(normalized, NumberStyles.Number, _czechCulture, out var number))
+                return number;
+
+            return value;
         }
 
         private static OrderExportXlsModel MapOrder(

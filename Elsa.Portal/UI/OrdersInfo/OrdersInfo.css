@@ -708,3 +708,56 @@
     background: #e5e5e5;
     color: #555;
 }
+
+.ordersInfoAggregationLegend {
+    white-space: pre-line;
+}
+
+.ordersInfoAggregationSelectWrapper {
+    flex: 0 1 460px;
+    max-width: 50%;
+    min-width: 200px;
+}
+
+.ordersInfoAggregationSelect {
+    box-sizing: border-box;
+    min-height: 34px;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.ordersInfoAggregation {
+    border: 1px solid #d5d5d5;
+    overflow-x: auto;
+}
+
+.ordersInfoAggregationTable {
+    border-collapse: collapse;
+    min-width: 100%;
+}
+
+.ordersInfoAggregationTable th,
+.ordersInfoAggregationTable td {
+    border-bottom: 1px solid #ddd;
+    padding: 8px 11px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.ordersInfoAggregationTable th {
+    background: #eee;
+    border-bottom-color: #ccc;
+    font-weight: bold;
+}
+
+.ordersInfoAggregationTable tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.ordersInfoAggregationTable tbody tr:hover td {
+    background: #f5f5f5;
+}
+
+.ordersInfoAggregationTable .ordersInfoAggregationRowTitle {
+    font-weight: bold;
+}

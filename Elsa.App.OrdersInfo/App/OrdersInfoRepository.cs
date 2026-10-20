@@ -1,3 +1,4 @@
+using Elsa.App.OrdersInfo.App.Aggregations;
 using Elsa.App.OrdersInfo.Model;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
@@ -137,6 +138,26 @@ namespace Elsa.App.OrdersInfo.App
                                             AND oi.PlacedName IS NOT NULL
                                           ORDER BY oi.PlacedName", _session.Project.Id)
                     .MapRows(r => r.GetString(0)));
+        }
+
+        public OrderQueryResultModel LoadAggregated(Action<IQueryBuilder<IPurchaseOrder>> filter, IOrdersAggregator aggregator)
+        {
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
+
+            if (aggregator == null)
+                throw new ArgumentNullException(nameof(aggregator));
+
+            var q = CreateOrdersQuery();
+
+            filter(q);
+
+            return new OrderQueryResultModel
+            {
+                Orders = new List<OrderInfoModel>(),
+                IsAggregated = true,
+                AggregatedResult = aggregator.Process(q) ?? new AggregatedResultModel()
+            };
         }
     }
 }

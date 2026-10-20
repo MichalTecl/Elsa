@@ -42,7 +42,24 @@
         </div>
     </div>
 
-    <div class="ordersInfoPager">
+    <div class="ordersInfoEmpty hidden" data-bind="class!.hidden:isAggregatedEmpty">Agregace pro zadané filtry nevrátila žádná data.</div>
+
+    <div class="ordersInfoAggregation hidden" data-bind="class!.hidden:hasAggregatedResult">
+        <table class="ordersInfoAggregationTable">
+            <thead>
+                <tr data-bind="itemsSource:aggregatedColumns" data-key="Key">
+                    <th class="lt-template" data-bind="text:Title"></th>
+                </tr>
+            </thead>
+            <tbody data-bind="itemsSource:aggregatedRows" data-key="Key">
+                <tr class="lt-template" data-bind="itemsSource:Cells" data-key="Key">
+                    <td class="lt-template" data-bind="text:Value; class.ordersInfoAggregationRowTitle:IsRowTitle"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="ordersInfoPager" data-bind="class.hidden:isAggregated">
         <button type="button" data-bind="disabled:previousDisabled" event-bind="click:previousPage()">Předchozí</button>
         <span data-bind="text:pageLabel"></span>
         <button type="button" data-bind="disabled:nextDisabled" event-bind="click:nextPage()">Další</button>

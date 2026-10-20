@@ -7,6 +7,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     var placedItemNames = null;
     var placedItemNamesCallbacks = [];
     var query = null;
+    var aggregationId = null;
 
     self.orders = [];
     self.isLoading = false;
@@ -18,6 +19,14 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     self.exportDisabled = true;
     self.totalOrdersText = "0";
     self.totalPriceWithVatText = "0,00";
+    self.isAggregated = false;
+    self.hasAggregatedResult = false;
+    self.isAggregatedEmpty = false;
+    self.aggregatedColumns = [];
+    self.aggregatedRows = [];
+    self.aggregationLegend = "";
+    self.hasAggregationLegend = false;
+    self.aggregatedExportDisabled = true;
     self.batchDialogOpen = false;
     self.batchDialogItem = null;
     self.batchDialogRows = [];
@@ -82,6 +91,46 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
             PaymentMethodNames: paymentMethodNames,
             DiscountTextWildcard: params.get("DiscountTextWildcard") || null
         };
+    };
+
+    var readAggregationId = function () {
+        var params = new URLSearchParams(window.location.search);
+        return params.get("AggregationId") || null;
+    };
+
+    var receiveAggregatedResult = function (aggregation) {
+        aggregation = aggregation || {};
+
+        var columns = aggregation.Columns || [];
+        var rows = aggregation.Rows || [];
+        var table = aggregation.Table || {};
+
+        self.aggregatedColumns = [{ Key: "rowTitle", Title: aggregation.RowsTitle || "" }].concat(columns.map(function (column, index) {
+            return { Key: "c" + index, Title: column };
+        }));
+
+        self.aggregatedRows = rows.map(function (row) {
+            var values = table[row] || {};
+
+            return {
+                Key: row,
+                Cells: [{ Key: "rowTitle", Value: row, IsRowTitle: true }].concat(columns.map(function (column, index) {
+                    var value = values[column];
+
+                    return {
+                        Key: "c" + index,
+                        Value: value === null || value === undefined ? "" : value,
+                        IsRowTitle: false
+                    };
+                }))
+            };
+        });
+
+        self.aggregationLegend = aggregation.Legend || "";
+        self.hasAggregationLegend = !!self.aggregationLegend;
+        self.hasAggregatedResult = self.aggregatedRows.length > 0;
+        self.isAggregatedEmpty = !self.hasAggregatedResult;
+        self.aggregatedExportDisabled = !self.hasAggregatedResult;
     };
 
     var createDetailTab = function (definition, orderId) {
@@ -158,9 +207,19 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         lt.notify();
 
         lt.api("/ordersInfo/query")
+            .query({ "aggregationId": aggregationId })
             .body(query)
             .post(function (result) {
                 result = result || {};
+
+                if (result.IsAggregated) {
+                    self.orders = [];
+                    self.isAggregated = true;
+                    receiveAggregatedResult(result.AggregatedResult);
+                    self.isLoading = false;
+                    return;
+                }
+
                 self.orders = (result.Orders || []).map(formatOrder);
                 self.hasOrders = self.orders.length > 0;
                 self.isEmpty = !self.hasOrders;
@@ -179,6 +238,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
 
     self.init = function () {
         query = readQueryString();
+        aggregationId = readAggregationId();
         loadOrders();
     };
 
@@ -202,21 +262,17 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         loadOrders();
     };
 
-    self.exportXls = function () {
-        if (self.exportDisabled || !query) {
-            return;
-        }
-
+    var downloadXls = function (url, fileName, errorMessage) {
         lt.api.usageManager.notifyOperationStart();
 
-        fetch("/ordersInfo/export", {
+        fetch(url, {
             method: "POST",
             credentials: "same-origin",
             headers: { "Content-Type": "*/*; charset=utf-8" },
             body: JSON.stringify(query)
         }).then(function (response) {
             if (!response.ok) {
-                throw new Error("Export objednávek se nepodařilo stáhnout.");
+                throw new Error(errorMessage);
             }
 
             return response.blob();
@@ -224,7 +280,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
             var link = document.createElement("a");
             var objectUrl = URL.createObjectURL(blob);
             link.href = objectUrl;
-            link.download = "Objednavky.xlsx";
+            link.download = fileName;
             link.hidden = true;
             document.body.appendChild(link);
             link.click();
@@ -235,6 +291,28 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         }).then(function () {
             lt.api.usageManager.notifyOperationEnd();
         });
+    };
+
+    self.exportXls = function () {
+        if (self.exportDisabled || !query) {
+            return;
+        }
+
+        downloadXls("/ordersInfo/export", "Objednavky.xlsx", "Export objednávek se nepodařilo stáhnout.");
+    };
+
+    self.exportAggregatedXls = function () {
+        if (self.aggregatedExportDisabled || !query || !aggregationId) {
+            return;
+        }
+
+        downloadXls("/ordersInfo/exportAggregated?aggregationId=" + encodeURIComponent(aggregationId),
+            "Objednavky_agregace.xlsx",
+            "Export agregace objednávek se nepodařilo stáhnout.");
+    };
+
+    self.getAggregationTypes = function (callback) {
+        lt.api("/ordersInfo/getAggregationTypes").get(callback);
     };
 
     var updateBatchDialogState = function () {

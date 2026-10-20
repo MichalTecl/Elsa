@@ -105,12 +105,23 @@
     </div>
 
     <div class="ordersInfoFilterActions">
-        <span class="ordersInfoQuerySummary">
+        <span class="ordersInfoQuerySummary" data-bind="class.hidden:isAggregated">
             <span>Celkem objednávek: <strong data-bind="text:totalOrdersText"></strong></span>
             <span>Celková cena s DPH: <strong data-bind="text:totalPriceWithVatText"></strong></span>
             <button type="button" class="ordersInfoExportButton" data-bind="disabled:exportDisabled" title="Stáhnout výsledky dotazu jako XLSX" aria-label="Stáhnout výsledky dotazu jako XLSX" event-bind="click:exportXls()">
                 <i class="far fa-file-excel" aria-hidden="true"></i>
             </button>
+        </span>
+        <span class="ordersInfoQuerySummary ordersInfoAggregationSummary hidden" data-bind="class!.hidden:isAggregated">
+            <span class="ordersInfoAggregationLegend" data-bind="text:aggregationLegend; class!.hidden:hasAggregationLegend"></span>
+            <button type="button" class="ordersInfoExportButton" data-bind="disabled:aggregatedExportDisabled" title="Stáhnout agregovaný výsledek jako XLSX" aria-label="Stáhnout agregovaný výsledek jako XLSX" event-bind="click:exportAggregatedXls()">
+                <i class="far fa-file-excel" aria-hidden="true"></i>
+            </button>
+        </span>
+        <span class="ordersInfoAggregationSelectWrapper restricted-OrdersInfoAggrgations">
+            <select id="aggregationTypeSelect" class="ordersInfoAggregationSelect" title="Typ agregace" aria-label="Typ agregace">
+                <option value="">Bez agregace</option>
+            </select>
         </span>
         <button type="button" class="ordersInfoClearButton" title="Vymazat filtry" aria-label="Vymazat filtry" event-bind="click:clearFilters()">
             <i class="fas fa-eraser"></i>
@@ -139,7 +150,8 @@
         maxPriceWithVatFilter,
         erpStatusesDropdown,
         erpStatusesText,
-        erpStatusesMenu) {
+        erpStatusesMenu,
+        aggregationTypeSelect) {
 
         var filterControl = this;
         var vm = app.OrdersInfo.vm;
@@ -151,6 +163,8 @@
         if (selectedPaymentMethodValues.length === 0 && legacyPaymentMethodName) {
             selectedPaymentMethodValues.push(legacyPaymentMethodName);
         }
+
+        var selectedAggregationId = currentParams.get("AggregationId") || "";
 
         var selectedOrderStatusId = /^\d+$/.test(currentParams.get("OrderStatusId") || "")
             ? currentParams.get("OrderStatusId")
@@ -251,6 +265,30 @@
             }
         };
 
+        var addAggregationTypeOptions = function (aggregationTypes) {
+            (aggregationTypes || []).forEach(function (aggregationType) {
+                var option = document.createElement("option");
+                option.value = aggregationType.Id;
+                option.textContent = aggregationType.Name;
+                aggregationTypeSelect.appendChild(option);
+            });
+
+            aggregationTypeSelect.value = selectedAggregationId;
+
+            if (aggregationTypeSelect.value !== selectedAggregationId) {
+                aggregationTypeSelect.value = "";
+            }
+
+            updateAggregationTypeTitle();
+        };
+
+        var updateAggregationTypeTitle = function () {
+            var selectedOption = aggregationTypeSelect.options[aggregationTypeSelect.selectedIndex];
+            aggregationTypeSelect.title = selectedOption && selectedOption.value
+                ? "Typ agregace: " + selectedOption.textContent
+                : "Typ agregace";
+        };
+
         var appendValue = function (params, name, value) {
             var normalizedValue = (value || "").trim();
             if (normalizedValue) {
@@ -272,6 +310,7 @@
         app.ui.autosuggest(placedItemAutocomplete, vm.getPlacedItemNames);
         vm.getErpStatuses(addStatusOptions);
         vm.getPaymentMethods(addPaymentOptions);
+        vm.getAggregationTypes(addAggregationTypeOptions);
 
         this.toggleStatuses = function (event) {
             event.stopPropagation();
@@ -316,6 +355,10 @@
             vm.exportXls();
         };
 
+        this.exportAggregatedXls = function () {
+            vm.exportAggregatedXls();
+        };
+
         this.load = function () {
             if (!minPriceWithVatFilter.reportValidity() || !maxPriceWithVatFilter.reportValidity()) {
                 return;
@@ -334,6 +377,7 @@
             appendValue(params, "MinPriceWithVat", minPriceWithVatFilter.value);
             appendValue(params, "MaxPriceWithVat", maxPriceWithVatFilter.value);
             appendValue(params, "OrderStatusId", selectedOrderStatusId);
+            appendValue(params, "AggregationId", aggregationTypeSelect.value);
 
             Array.prototype.forEach.call(getStatusCheckboxes(), function (checkbox) {
                 if (checkbox.checked) {
@@ -364,6 +408,11 @@
                     filterControl.load();
                 });
             });
+
+        aggregationTypeSelect.addEventListener("change", function () {
+            updateAggregationTypeTitle();
+            filterControl.load();
+        });
 
         document.addEventListener("click", function (event) {
             if (!erpStatusesDropdown.contains(event.target)) {
