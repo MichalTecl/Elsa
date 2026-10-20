@@ -113,10 +113,12 @@
             </button>
         </span>
         <span class="ordersInfoQuerySummary ordersInfoAggregationSummary hidden" data-bind="class!.hidden:isAggregated">
-            <span class="ordersInfoAggregationLegend" data-bind="text:aggregationLegend; class!.hidden:hasAggregationLegend"></span>
             <button type="button" class="ordersInfoExportButton" data-bind="disabled:aggregatedExportDisabled" title="Stáhnout agregovaný výsledek jako XLSX" aria-label="Stáhnout agregovaný výsledek jako XLSX" event-bind="click:exportAggregatedXls()">
                 <i class="far fa-file-excel" aria-hidden="true"></i>
             </button>
+            <span class="ordersInfoAggregationLegend" tabindex="0" data-bind="class!.hidden:hasAggregationLegend">
+                <span class="ordersInfoAggregationLegendText" data-bind="text:aggregationLegend"></span>
+            </span>
         </span>
         <span class="ordersInfoAggregationSelectWrapper restricted-OrdersInfoAggrgations">
             <select id="aggregationTypeSelect" class="ordersInfoAggregationSelect" title="Typ agregace" aria-label="Typ agregace">

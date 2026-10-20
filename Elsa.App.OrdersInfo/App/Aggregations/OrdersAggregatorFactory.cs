@@ -16,7 +16,10 @@ namespace Elsa.App.OrdersInfo.App.Aggregations
             _serviceLocator = serviceLocator;
         }
 
-        public static readonly OrderAggregationTypeModel[] AllTypes = new [] { new OrderAggregationTypeModel(typeof(HelloWorldAggregation), "Testovací") };
+        public static readonly OrderAggregationTypeModel[] AllTypes = new []
+        {
+            new OrderAggregationTypeModel(typeof(OrdersTimeDistributionAggregation), "Časové rozložení objednávek")
+        };
 
         public OrderAggregationTypeModel FindType(string id)
         {

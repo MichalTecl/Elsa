@@ -35,5 +35,12 @@ namespace Elsa.App.OrdersInfo.Model
         public List<string> PaymentMethodNames { get; set; }
 
         public string DiscountTextWildcard { get; set; }
+
+        // Restricts orders to a cell of an aggregation (link from the aggregated table)
+        public string DrilldownAggregationId { get; set; }
+
+        public string DrilldownCell { get; set; }
+
+        public Dictionary<string, string> DrilldownParams { get; set; }
     }
 }

@@ -162,6 +162,33 @@ namespace Elsa.App.OrdersInfo
 
         private Action<IQueryBuilder<IPurchaseOrder>> CreateOrderFilter(OrderQueryModel query)
         {
+            var filter = CreateBaseOrderFilter(query);
+
+            if (string.IsNullOrWhiteSpace(query.DrilldownAggregationId))
+                return filter;
+
+            EnsureUserRight(OrdersInfoUserRights.OrdersInfoAggrgations);
+
+            var aggregator = GetAggregator(query.DrilldownAggregationId) as IOrdersDrilldownAggregator
+                             ?? throw new ArgumentException("Vybraná agregace neumožňuje zobrazit objednávky buňky");
+
+            var orderIds = _orderInfoRepository.LoadDrilldownOrderIds(filter, aggregator, query.DrilldownParams, query.DrilldownCell)
+                .Distinct()
+                .ToList();
+
+            // InCsv with an empty list would produce invalid SQL
+            if (orderIds.Count == 0)
+                orderIds.Add(-1);
+
+            return q =>
+            {
+                filter(q);
+                q.Where(o => o.Id.InCsv(orderIds));
+            };
+        }
+
+        private Action<IQueryBuilder<IPurchaseOrder>> CreateBaseOrderFilter(OrderQueryModel query)
+        {
             return q =>
             {
                 if (!string.IsNullOrWhiteSpace(query.OrderNumber))

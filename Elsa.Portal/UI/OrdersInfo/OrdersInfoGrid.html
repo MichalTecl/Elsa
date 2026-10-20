@@ -1,4 +1,11 @@
 <div id="ordersInfoGrid" class="ordersInfoGrid">
+    <div class="ordersInfoDrilldownInfo hidden" data-bind="class!.hidden:isDrilldown">
+        <i class="fas fa-filter" aria-hidden="true"></i>
+        <span>Zobrazeny jen objednávky z buňky agregace: <strong data-bind="text:drilldownTitle"></strong></span>
+        <a data-bind="href:drilldownBackUrl">Zpět na agregaci</a>
+        <a data-bind="href:drilldownCancelUrl">Zobrazit všechny objednávky</a>
+    </div>
+
     <div class="ordersInfoLoading hidden" data-bind="class!.hidden:isLoading">Načítám objednávky…</div>
     <div class="ordersInfoEmpty hidden" data-bind="class!.hidden:isEmpty">Žádné objednávky neodpovídají zadaným filtrům.</div>
 
@@ -43,6 +50,7 @@
     </div>
 
     <div class="ordersInfoEmpty hidden" data-bind="class!.hidden:isAggregatedEmpty">Agregace pro zadané filtry nevrátila žádná data.</div>
+    <div class="ordersInfoEmpty ordersInfoAggregationMessage hidden" data-bind="text:aggregationMessage; class!.hidden:hasAggregationMessage"></div>
 
     <div class="ordersInfoAggregation hidden" data-bind="class!.hidden:hasAggregatedResult">
         <table class="ordersInfoAggregationTable">
@@ -53,7 +61,10 @@
             </thead>
             <tbody data-bind="itemsSource:aggregatedRows" data-key="Key">
                 <tr class="lt-template" data-bind="itemsSource:Cells" data-key="Key">
-                    <td class="lt-template" data-bind="text:Value; class.ordersInfoAggregationRowTitle:IsRowTitle"></td>
+                    <td class="lt-template" data-bind="class.ordersInfoAggregationRowTitle:IsRowTitle">
+                        <span data-bind="text:Value; class.hidden:HasLink"></span>
+                        <a class="hidden" target="_blank" data-bind="text:Value; href:Href; title:LinkTitle; class!.hidden:HasLink"></a>
+                    </td>
                 </tr>
             </tbody>
         </table>

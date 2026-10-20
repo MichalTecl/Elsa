@@ -2,6 +2,7 @@ using Elsa.App.OrdersInfo.App.Aggregations;
 using Elsa.App.OrdersInfo.Model;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
+using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Robowire.RobOrm.Core;
 using Robowire.RobOrm.SqlServer.Aggregations;
@@ -16,12 +17,14 @@ namespace Elsa.App.OrdersInfo.App
         private readonly IDatabase _db;
         private readonly ISession _session;
         private readonly ICache _cache;
+        private readonly ILog _log;
 
-        public OrdersInfoRepository(IDatabase db, ISession session, ICache cache)
+        public OrdersInfoRepository(IDatabase db, ISession session, ICache cache, ILog log)
         {
             _db = db;
             _session = session;
             _cache = cache;
+            _log = log;
         }
 
         public OrderQueryResultModel Load(int skip, int take, Action<IQueryBuilder<IPurchaseOrder>> query)
@@ -154,18 +157,59 @@ namespace Elsa.App.OrdersInfo.App
             var parameters = aggregator.Parameters ?? new List<OrderAggregatorParamModel>();
             var selectedParameters = ResolveAggregationParameters(parameters, requestedParameters);
 
-            var q = CreateOrdersQuery();
+            AggregatedResultModel aggregatedResult;
+            try
+            {
+                var q = CreateOrdersQuery();
 
-            filter(q);
+                filter(q);
+
+                aggregatedResult = aggregator.Process(new AggregationSourceOrders(_db, q), selectedParameters)
+                                   ?? new AggregatedResultModel();
+            }
+            catch (Exception ex)
+            {
+                // The result must still carry the parameters, so the user can change them and fix the problem
+                _log.Error($"Agregace {aggregator.GetType().Name} selhala", ex);
+
+                aggregatedResult = new AggregatedResultModel
+                {
+                    Message = $"Agregaci se nepodařilo vytvořit: {ex.Message}"
+                };
+            }
 
             return new OrderQueryResultModel
             {
                 Orders = new List<OrderInfoModel>(),
                 IsAggregated = true,
-                AggregatedResult = aggregator.Process(q, selectedParameters) ?? new AggregatedResultModel(),
+                AggregatedResult = aggregatedResult,
                 AggregationParameters = parameters,
                 SelectedAggregationParameters = selectedParameters
             };
+        }
+
+        public IList<long> LoadDrilldownOrderIds(
+            Action<IQueryBuilder<IPurchaseOrder>> filter,
+            IOrdersDrilldownAggregator aggregator,
+            Dictionary<string, string> requestedParameters,
+            string drilldownKey)
+        {
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
+
+            if (aggregator == null)
+                throw new ArgumentNullException(nameof(aggregator));
+
+            var selectedParameters = ResolveAggregationParameters(
+                aggregator.Parameters ?? new List<OrderAggregatorParamModel>(),
+                requestedParameters);
+
+            var q = CreateOrdersQuery();
+
+            filter(q);
+
+            return aggregator.GetDrilldownOrderIds(new AggregationSourceOrders(_db, q), selectedParameters, drilldownKey)
+                   ?? new List<long>();
         }
 
         private static Dictionary<string, string> ResolveAggregationParameters(

@@ -710,7 +710,37 @@
 }
 
 .ordersInfoAggregationLegend {
+    cursor: help;
+    flex: 1 1 0;
+    line-height: 1.4;
+    min-height: 1.4em;
+    min-width: 80px;
+    outline: none;
+    position: relative;
+}
+
+.ordersInfoAggregationLegendText {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ordersInfoAggregationLegend:hover .ordersInfoAggregationLegendText,
+.ordersInfoAggregationLegend:focus .ordersInfoAggregationLegendText {
+    background: white;
+    border: 1px solid #d5d5d5;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    color: #444;
+    box-sizing: border-box;
+    left: -9px;
+    overflow: visible;
+    padding: 6px 8px;
+    position: absolute;
+    top: -7px;
+    width: max(calc(100% + 9px), min(560px, calc(100vw - 70px)));
     white-space: pre-line;
+    z-index: 30;
 }
 
 .ordersInfoAggregationSelectWrapper {
@@ -724,6 +754,35 @@
     min-height: 34px;
     text-overflow: ellipsis;
     width: 100%;
+}
+
+.ordersInfoAggregationTable a {
+    color: inherit;
+    text-decoration: underline dotted #999;
+}
+
+.ordersInfoAggregationTable a:hover {
+    color: #2e8b57;
+    text-decoration: underline;
+}
+
+.ordersInfoDrilldownInfo {
+    align-items: center;
+    background: #fff8e1;
+    border: 1px solid #f0d58a;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-bottom: 10px;
+    padding: 8px 11px;
+}
+
+.ordersInfoDrilldownInfo i {
+    color: #b58a00;
+}
+
+.ordersInfoAggregationMessage {
+    color: #8a5a00;
 }
 
 .ordersInfoAggregationParams {
@@ -742,16 +801,20 @@
 
 .ordersInfoAggregation {
     border: 1px solid #d5d5d5;
-    overflow-x: auto;
+    max-height: calc(100vh - 160px);
+    max-width: 100%;
+    overflow: auto;
 }
 
 .ordersInfoAggregationTable {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     min-width: 100%;
 }
 
 .ordersInfoAggregationTable th,
 .ordersInfoAggregationTable td {
+    background: white;
     border-bottom: 1px solid #ddd;
     padding: 8px 11px;
     text-align: left;
@@ -762,6 +825,21 @@
     background: #eee;
     border-bottom-color: #ccc;
     font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.ordersInfoAggregationTable th:first-child,
+.ordersInfoAggregationTable td:first-child {
+    border-right: 1px solid #ccc;
+    left: 0;
+    position: sticky;
+    z-index: 1;
+}
+
+.ordersInfoAggregationTable th:first-child {
+    z-index: 3;
 }
 
 .ordersInfoAggregationTable tbody tr:last-child td {

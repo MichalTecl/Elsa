@@ -26,12 +26,18 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
     self.isAggregated = false;
     self.hasAggregatedResult = false;
     self.isAggregatedEmpty = false;
+    self.aggregationMessage = "";
+    self.hasAggregationMessage = false;
     self.aggregatedColumns = [];
     self.aggregatedRows = [];
     self.aggregationLegend = "";
     self.hasAggregationLegend = false;
     self.aggregatedExportDisabled = true;
     self.aggregationParameters = [];
+    self.isDrilldown = false;
+    self.drilldownTitle = "";
+    self.drilldownBackUrl = "";
+    self.drilldownCancelUrl = "";
     self.batchDialogOpen = false;
     self.batchDialogItem = null;
     self.batchDialogRows = [];
@@ -94,8 +100,74 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
             CustomerNameWildcard: params.get("CustomerNameWildcard") || null,
             ShipmentMethodNameWildcard: params.get("ShipmentMethodNameWildcard") || null,
             PaymentMethodNames: paymentMethodNames,
-            DiscountTextWildcard: params.get("DiscountTextWildcard") || null
+            DiscountTextWildcard: params.get("DiscountTextWildcard") || null,
+            DrilldownAggregationId: params.get("DrilldownAggregationId") || null,
+            DrilldownCell: params.get("DrilldownCell") || null,
+            DrilldownParams: params.get("DrilldownAggregationId") ? readAggregationParams() : null
         };
+    };
+
+    var DRILLDOWN_URL_PARAMS = ["DrilldownAggregationId", "DrilldownCell", "DrilldownTitle"];
+
+    var createAddress = function (params) {
+        var queryString = params.toString();
+        return window.location.pathname + (queryString ? "?" + queryString : "") + window.location.hash;
+    };
+
+    var deleteParams = function (params, predicate) {
+        var names = [];
+        params.forEach(function (value, name) {
+            if (predicate(name) && names.indexOf(name) < 0) {
+                names.push(name);
+            }
+        });
+        names.forEach(function (name) { params.delete(name); });
+    };
+
+    var isAggregationParamName = function (name) {
+        return name.indexOf(app.OrdersInfo.AGGREGATION_PARAM_PREFIX) === 0;
+    };
+
+    var createDrilldownUrl = function (drilldownKey, title) {
+        var params = new URLSearchParams(window.location.search);
+
+        params.delete("AggregationId");
+        params.delete("Page");
+        deleteParams(params, isAggregationParamName);
+        deleteParams(params, function (name) { return DRILLDOWN_URL_PARAMS.indexOf(name) >= 0; });
+
+        Object.keys(aggregationParams).forEach(function (optionId) {
+            params.append(app.OrdersInfo.AGGREGATION_PARAM_PREFIX + optionId, aggregationParams[optionId]);
+        });
+
+        params.set("DrilldownAggregationId", aggregationId);
+        params.set("DrilldownCell", drilldownKey);
+        params.set("DrilldownTitle", title);
+
+        return createAddress(params);
+    };
+
+    var initDrilldown = function () {
+        var params = new URLSearchParams(window.location.search);
+        var drilldownAggregationId = params.get("DrilldownAggregationId");
+
+        self.isDrilldown = !!drilldownAggregationId;
+        if (!self.isDrilldown) {
+            return;
+        }
+
+        self.drilldownTitle = params.get("DrilldownTitle") || params.get("DrilldownCell") || "";
+
+        var backParams = new URLSearchParams(window.location.search);
+        deleteParams(backParams, function (name) { return DRILLDOWN_URL_PARAMS.indexOf(name) >= 0; });
+        backParams.delete("Page");
+        backParams.set("AggregationId", drilldownAggregationId);
+        self.drilldownBackUrl = createAddress(backParams);
+
+        var cancelParams = new URLSearchParams(window.location.search);
+        deleteParams(cancelParams, function (name) { return DRILLDOWN_URL_PARAMS.indexOf(name) >= 0 || isAggregationParamName(name); });
+        cancelParams.delete("Page");
+        self.drilldownCancelUrl = createAddress(cancelParams);
     };
 
     var readAggregationId = function () {
@@ -146,6 +218,9 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         var columns = aggregation.Columns || [];
         var rows = aggregation.Rows || [];
         var table = aggregation.Table || {};
+        var links = aggregation.Links || {};
+        var drilldowns = aggregation.Drilldowns || {};
+        var rowsTitle = aggregation.RowsTitle || "";
 
         self.aggregatedColumns = [{ Key: "rowTitle", Title: aggregation.RowsTitle || "" }].concat(columns.map(function (column, index) {
             return { Key: "c" + index, Title: column };
@@ -153,16 +228,25 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
 
         self.aggregatedRows = rows.map(function (row) {
             var values = table[row] || {};
+            var rowLinks = links[row] || {};
+            var rowDrilldowns = drilldowns[row] || {};
 
             return {
                 Key: row,
                 Cells: [{ Key: "rowTitle", Value: row, IsRowTitle: true }].concat(columns.map(function (column, index) {
                     var value = values[column];
+                    var drilldownKey = rowDrilldowns[column];
+                    var href = drilldownKey
+                        ? createDrilldownUrl(drilldownKey, (rowsTitle ? rowsTitle + ": " : "") + row + ", " + column)
+                        : (rowLinks[column] || "");
 
                     return {
                         Key: "c" + index,
                         Value: value === null || value === undefined ? "" : value,
-                        IsRowTitle: false
+                        IsRowTitle: false,
+                        HasLink: !!href,
+                        Href: href,
+                        LinkTitle: drilldownKey ? "Zobrazit objednávky" : ""
                     };
                 }))
             };
@@ -170,8 +254,10 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
 
         self.aggregationLegend = aggregation.Legend || "";
         self.hasAggregationLegend = !!self.aggregationLegend;
-        self.hasAggregatedResult = self.aggregatedRows.length > 0;
-        self.isAggregatedEmpty = !self.hasAggregatedResult;
+        self.aggregationMessage = aggregation.Message || "";
+        self.hasAggregationMessage = !!self.aggregationMessage;
+        self.hasAggregatedResult = !self.hasAggregationMessage && self.aggregatedRows.length > 0;
+        self.isAggregatedEmpty = !self.hasAggregationMessage && !self.hasAggregatedResult;
         self.aggregatedExportDisabled = !self.hasAggregatedResult;
     };
 
@@ -260,8 +346,8 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
                 if (result.IsAggregated) {
                     self.orders = [];
                     self.isAggregated = true;
-                    receiveAggregatedResult(result.AggregatedResult);
                     receiveAggregationParameters(result.AggregationParameters, result.SelectedAggregationParameters);
+                    receiveAggregatedResult(result.AggregatedResult);
                     self.isLoading = false;
                     return;
                 }
@@ -286,6 +372,7 @@ app.OrdersInfo.VM = app.OrdersInfo.VM || function () {
         query = readQueryString();
         aggregationId = readAggregationId();
         aggregationParams = readAggregationParams();
+        initDrilldown();
         loadOrders();
     };
 

@@ -114,8 +114,9 @@ namespace Elsa.App.OrdersInfo.App
 
                     for (var columnIndex = 0; columnIndex < aggregation.Columns.Count; columnIndex++)
                     {
-                        sheet.Cells[rowIndex + 2, columnIndex + 2].Value =
-                            ToCellValue(aggregation.Read(row, aggregation.Columns[columnIndex]));
+                        WriteCellValue(
+                            sheet.Cells[rowIndex + 2, columnIndex + 2],
+                            aggregation.Read(row, aggregation.Columns[columnIndex]));
                     }
                 }
 
@@ -151,21 +152,43 @@ namespace Elsa.App.OrdersInfo.App
             }
         }
 
-        private static object ToCellValue(string value)
+        private static void WriteCellValue(ExcelRange cell, string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-                return value;
+            cell.Value = value;
 
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+
+            var normalized = value.Trim();
+            var isPercent = normalized.EndsWith("%");
+
+            if (isPercent)
+                normalized = normalized.Substring(0, normalized.Length - 1);
+
+            if (!TryParseNumber(normalized, out var number))
+                return;
+
+            if (isPercent)
+            {
+                cell.Value = number / 100m;
+                cell.Style.Numberformat.Format = "0.0%";
+            }
+            else
+            {
+                cell.Value = number;
+            }
+        }
+
+        private static bool TryParseNumber(string value, out decimal number)
+        {
             var groupSeparator = _czechCulture.NumberFormat.NumberGroupSeparator;
             var normalized = value.Trim()
                 .Replace("\u00A0", groupSeparator)
                 .Replace("\u202F", groupSeparator)
-                .Replace(" ", groupSeparator);
+                .Replace(" ", groupSeparator)
+                .Trim();
 
-            if (decimal.TryParse(normalized, NumberStyles.Number, _czechCulture, out var number))
-                return number;
-
-            return value;
+            return decimal.TryParse(normalized, NumberStyles.Number, _czechCulture, out number);
         }
 
         private static OrderExportXlsModel MapOrder(
