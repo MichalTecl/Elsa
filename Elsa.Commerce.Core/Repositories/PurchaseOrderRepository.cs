@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Threading;
 
 using Elsa.Commerce.Core.Model;
 using Elsa.Common;
@@ -449,7 +451,15 @@ namespace Elsa.Commerce.Core.Repositories
                                    AND po.ProjectId = {0}
                                 ";
 
-            return _database.Sql().ExecuteWithParams(sql, _session.Project.Id).Scalar<int?>() ?? 0;
+            try
+            {
+                return _database.Sql().ExecuteWithParams(sql, _session.Project.Id).Scalar<int?>() ?? 0;
+            }
+            catch (SqlException ex) when (ex.Number == 1205)
+            {
+                Thread.Sleep(500);
+                return _database.Sql().ExecuteWithParams(sql, _session.Project.Id).Scalar<int?>() ?? 0;
+            }
         }
 
         public IEnumerable<IOrderItem> GetChildItemsByParentItemId(long parentItemId)
