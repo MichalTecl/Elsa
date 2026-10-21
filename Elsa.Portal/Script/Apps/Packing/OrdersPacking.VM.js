@@ -4,6 +4,8 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     var self = this;
 
+    const AUTO_CHECKLIST_FOR_KITS = false;
+
     self.customerNoteExpanded = true;
     self.internalNoteExpanded = true;
 
@@ -220,9 +222,9 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         var localOrderRecord = getLocalOrderRecord(order.OrderId, false, null);
 
         var checkedItems = [];
-        self.checklistMode = order.Items.length >= 10 || order.Items.some(function (item) {
+        self.checklistMode = order.Items.length >= 10 || (AUTO_CHECKLIST_FOR_KITS && order.Items.some(function (item) {
             return !!item.KitItems && item.KitItems.length > 0;
-        });
+        }));
         if (!!localOrderRecord) {
             if (typeof localOrderRecord.checklistMode === "boolean") {
                 self.checklistMode = localOrderRecord.checklistMode;
