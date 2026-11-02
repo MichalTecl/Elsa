@@ -412,7 +412,8 @@ namespace Elsa.Commerce.Core.Repositories
                             ProductName = item.ItemName,
                             Shortcut = item.Shortcut,
                             CustomerGroupTitle = group.InTextMarker,
-                            CustomerProductName = item.InTextMarker
+                            CustomerProductName = item.InTextMarker,
+                            ShowPackingCheckboxes = KitProductXlsModel.FormatBool(kit.ShowPackingCheckboxes)
                         });
 
             return result;
@@ -469,13 +470,22 @@ namespace Elsa.Commerce.Core.Repositories
                     return;
                 }
 
+                var showPackingCheckboxes = KitProductXlsModel.ParseBool(kit.Select(k => k.ShowPackingCheckboxes).FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)));
+
                 if (dbKitDefinition == null)
                 {
                     _log.Info($"\tKit '{kit.Key}' does not exist - creating");
                     dbKitDefinition = _database.New<IKitDefinition>();
                     dbKitDefinition.ProjectId = _session.Project.Id;
                     dbKitDefinition.ItemName = kit.Key;
+                    dbKitDefinition.ShowPackingCheckboxes = showPackingCheckboxes;
                     
+                    _database.Save(dbKitDefinition);
+                }
+                else if (dbKitDefinition.ShowPackingCheckboxes != showPackingCheckboxes)
+                {
+                    _log.Info($"\tKit '{kit.Key}' - changing {nameof(IKitDefinition.ShowPackingCheckboxes)} to '{showPackingCheckboxes}'");
+                    dbKitDefinition.ShowPackingCheckboxes = showPackingCheckboxes;
                     _database.Save(dbKitDefinition);
                 }
 

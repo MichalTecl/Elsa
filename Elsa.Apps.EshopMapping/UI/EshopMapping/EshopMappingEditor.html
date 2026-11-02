@@ -108,6 +108,10 @@
                                 </div>
                             </div>  
                             <i class="far fa-file-code faButton emapKitCodeButton" title="HTML kód sady do schránky" event-bind="click:getKitCode(VM)" ></i>
+                            <label class="emapKitPackingCheckboxes stackLeft" title="Při balení zobrazovat u položek sady zaškrtávátka">
+                                <input type="checkbox" data-bind="checked:singleProduct.KitDefinition.ShowPackingCheckboxes" event-bind="change:setKitShowPackingCheckboxes(VM, this.checked)" />
+                                <span>Zaškrtávátka při balení</span>
+                            </label>
                         </div>
                         <div class="emapKitContentCont">
                             <div class="emapKitList" data-bind="itemsSource:singleProduct.KitDefinition.SelectionGroups" data-key="Id">
@@ -238,6 +242,11 @@
         this.confirmKitItemEdit = (record, newItemName) => {
             record.isEditing = false;
             app.EshopMapping.vm.updateKitItem(record.Id, newItemName);
+        };
+
+        this.setKitShowPackingCheckboxes = (vm, checked) => {
+            const kitDefinitionId = vm.singleProduct.KitDefinition.Id;
+            app.EshopMapping.vm.setKitShowPackingCheckboxes(kitDefinitionId, checked);
         };
 
         this.getKitCode = (vm) => {

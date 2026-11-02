@@ -371,6 +371,12 @@ app.EshopMapping.VM = app.EshopMapping.VM ||
                 .post(receiveMappings);
         };
 
+        self.setKitShowPackingCheckboxes = (kitDefinitionId, showPackingCheckboxes) => {
+            lt.api("/eshopMapping/setKitShowPackingCheckboxes")
+                .query({ kitDefinitionId, "showPackingCheckboxes": (!!showPackingCheckboxes) })
+                .post(receiveMappings);
+        };
+
         let load = (reloadErp) => {
             lt.api("/eshopMapping/getMappings").query({ "reloadErpProducts": (!!reloadErp) }).get(receiveMappings);
         };

@@ -24,5 +24,7 @@ namespace Elsa.Commerce.Core
         ICollection<IKitDefinition> GetKitsByItemName(string itemName);
 
         void UpdateKitItemMapping(int kitItemId, string newItemName);
+
+        void SetShowPackingCheckboxes(int kitDefinitionId, bool? showPackingCheckboxes);
     }
 }

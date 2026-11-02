@@ -17,6 +17,8 @@ namespace Elsa.Core.Entities.Commerce.Inventory.Kits
     {
         int Id { get; }
 
+        bool? ShowPackingCheckboxes { get; set; }
+
         IEnumerable<IKitSelectionGroup> SelectionGroups { get; }
     }
 }

@@ -84,6 +84,13 @@ namespace Elsa.Apps.EshopMapping.Controllers
             return GetMappings(false);
         }
 
+        public List<EshopItemMappingRecord> SetKitShowPackingCheckboxes(int kitDefinitionId, bool showPackingCheckboxes)
+        {
+            _kitProductRepository.SetShowPackingCheckboxes(kitDefinitionId, showPackingCheckboxes);
+
+            return GetMappings(false);
+        }
+
         public List<EshopItemMappingRecord> HideMaterial(string elsaMaterialName)
         {
             var material = _materialRepository.GetMaterialByName(elsaMaterialName).Ensure();

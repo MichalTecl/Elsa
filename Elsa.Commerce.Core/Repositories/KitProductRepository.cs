@@ -245,6 +245,21 @@ namespace Elsa.Commerce.Core.Repositories
             ClearCache();
         }
 
+        public void SetShowPackingCheckboxes(int kitDefinitionId, bool? showPackingCheckboxes)
+        {
+            var kitDefinition = GetKitDefinition(kitDefinitionId);
+            if (kitDefinition == null)
+                throw new ArgumentException($"Sada s Id={kitDefinitionId} neexistuje");
+
+            if (kitDefinition.ShowPackingCheckboxes == showPackingCheckboxes)
+                return;
+
+            kitDefinition.ShowPackingCheckboxes = showPackingCheckboxes;
+            _database.Save(kitDefinition);
+
+            ClearCache();
+        }
+
         private void ClearCache()
         {
             _cache.Remove(_cacheKey);
