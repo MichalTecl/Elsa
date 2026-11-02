@@ -1,7 +1,7 @@
 ﻿using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Jobs.Common.EntityChangeProcessing.Entities;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Jobs.Common.EntityChangeProcessing.Helpers
 {

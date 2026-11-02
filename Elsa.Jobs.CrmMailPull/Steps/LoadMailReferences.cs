@@ -3,7 +3,7 @@ using Elsa.Common.Utils;
 using Elsa.Jobs.CrmMailPull.Entities;
 using Elsa.Jobs.CrmMailPull.Infrastructure;
 using MailKit;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

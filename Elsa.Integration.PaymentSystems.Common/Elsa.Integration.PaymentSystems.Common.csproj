@@ -66,9 +66,9 @@
       <Project>{91481B08-E437-474D-9793-A135F1DB465C}</Project>
       <Name>Elsa.Core.Entities</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+    <ProjectReference Include="..\RobOrm\RobOrm.Core\RobOrm.Core.csproj">
       <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
-      <Name>Robowire.RobOrm.Core</Name>
+      <Name>RobOrm.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>

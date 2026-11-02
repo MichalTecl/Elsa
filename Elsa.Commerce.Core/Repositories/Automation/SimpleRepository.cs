@@ -10,7 +10,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories.Automation
 {
@@ -18,30 +18,30 @@ namespace Elsa.Commerce.Core.Repositories.Automation
         where TEntity : class, IIntIdEntity, IProjectRelatedEntity
     {
         private static readonly string s_cacheKey = $"srb_{typeof(TEntity).Name}_{{0}}";
-        private readonly ICache m_cache;
-        private readonly ISession m_session;
-        private readonly Action<IQueryBuilder<TEntity>> m_queryCustomization;
-        private readonly IDatabase m_database;
+        private readonly ICache _cache;
+        private readonly ISession _session;
+        private readonly Action<IQueryBuilder<TEntity>> _queryCustomization;
+        private readonly IDatabase _database;
 
         public SimpleRepository(ICache cache, ISession session, IDatabase database, Action<IQueryBuilder<TEntity>> queryCustomization = null)
         {
-            m_cache = cache;
-            m_session = session;
-            m_database = database;
+            _cache = cache;
+            _session = session;
+            _database = database;
 
             queryCustomization = queryCustomization ?? (q => { });
 
-            m_queryCustomization = queryCustomization;
+            _queryCustomization = queryCustomization;
         }
 
-        private string CacheKey => string.Format(s_cacheKey, m_session.Project.Id);
+        private string CacheKey => string.Format(s_cacheKey, _session.Project.Id);
 
         public IQueryBuilder<TEntity> Query
         {
             get
             {
-                var query = m_database.SelectFrom<TEntity>().Where(e => e.ProjectId == m_session.Project.Id);
-                m_queryCustomization(query);
+                var query = _database.SelectFrom<TEntity>().Where(e => e.ProjectId == _session.Project.Id);
+                _queryCustomization(query);
 
                 return query;
             }
@@ -49,7 +49,7 @@ namespace Elsa.Commerce.Core.Repositories.Automation
 
         public IEnumerable<TEntity> All()
         {
-            return m_cache.ReadThrough(CacheKey, TimeSpan.FromHours(1), () => Query.Execute().ToList());
+            return _cache.ReadThrough(CacheKey, TimeSpan.FromHours(1), () => Query.Execute().ToList());
         }
 
         public TEntity Get(int id, bool throwIfNotFound = true)
@@ -66,13 +66,13 @@ namespace Elsa.Commerce.Core.Repositories.Automation
 
         public void Delete(int id)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var entity = Get(id, false);
                 if (entity != null)
                 {
-                    m_database.Delete(entity);
-                    m_cache.Remove(CacheKey);
+                    _database.Delete(entity);
+                    _cache.Remove(CacheKey);
                 }
 
                 tx.Commit();
@@ -81,16 +81,16 @@ namespace Elsa.Commerce.Core.Repositories.Automation
 
         public TEntity Set(int? id, Action<TEntity> setup)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var entity = id == null ? m_database.New<TEntity>() : Get(id.Value);
+                var entity = id == null ? _database.New<TEntity>() : Get(id.Value);
 
                 setup(entity);
 
-                entity.ProjectId = m_session.Project.Id;
+                entity.ProjectId = _session.Project.Id;
 
-                m_database.Save(entity);
-                m_cache.Remove(CacheKey);
+                _database.Save(entity);
+                _cache.Remove(CacheKey);
 
                 var result = Get(entity.Id);
 
@@ -102,7 +102,7 @@ namespace Elsa.Commerce.Core.Repositories.Automation
 
         public void ClearCache()
         {
-            m_cache.Remove(CacheKey);
+            _cache.Remove(CacheKey);
         }
     }
 }

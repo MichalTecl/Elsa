@@ -25,7 +25,7 @@ using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse.Impl
 {

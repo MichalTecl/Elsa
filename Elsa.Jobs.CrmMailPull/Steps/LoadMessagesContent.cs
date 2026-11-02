@@ -2,7 +2,7 @@ using Elsa.Common.Logging;
 using Elsa.Common.Utils;
 using Elsa.Jobs.CrmMailPull.Infrastructure;
 using MimeKit;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

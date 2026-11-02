@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Elsa.Common.Interfaces;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Jobs.BulletinGeneration
 {

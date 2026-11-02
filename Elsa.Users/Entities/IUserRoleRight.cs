@@ -1,7 +1,7 @@
 ﻿using System;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Users.Entities
 {

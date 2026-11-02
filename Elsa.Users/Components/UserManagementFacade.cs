@@ -8,7 +8,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Smtp.Core;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Users.Components
 {

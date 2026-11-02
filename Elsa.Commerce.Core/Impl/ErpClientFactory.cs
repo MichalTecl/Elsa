@@ -7,30 +7,30 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Integration;
 
 using Robowire;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Impl
 {
     public class ErpClientFactory : IErpClientFactory
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly IServiceLocator m_serviceLocator;
-        private readonly IErpRepository m_erpRepository;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly IServiceLocator _serviceLocator;
+        private readonly IErpRepository _erpRepository;
         
         public ErpClientFactory(IDatabase database, ISession session, IServiceLocator serviceLocator, IErpRepository erpRepository)
         {
-            m_database = database;
-            m_session = session;
-            m_serviceLocator = serviceLocator;
-            m_erpRepository = erpRepository;
+            _database = database;
+            _session = session;
+            _serviceLocator = serviceLocator;
+            _erpRepository = erpRepository;
         }
 
         public IErpClient GetErpClient(int erpId)
         {
             var erp =
-                m_database.SelectFrom<IErp>()
-                    .Where(i => (i.ProjectId == m_session.Project.Id) && (i.Id == erpId))
+                _database.SelectFrom<IErp>()
+                    .Where(i => (i.ProjectId == _session.Project.Id) && (i.Id == erpId))
                     .Execute()
                     .FirstOrDefault();
 
@@ -39,7 +39,7 @@ namespace Elsa.Commerce.Core.Impl
                 throw new InvalidOperationException("ErpClient not found");
             }
 
-            var erpClient = m_serviceLocator.InstantiateNow<IErpClient>(erp.ClientClass);
+            var erpClient = _serviceLocator.InstantiateNow<IErpClient>(erp.ClientClass);
             erpClient.Erp = erp;
 
             return erpClient;
@@ -47,7 +47,7 @@ namespace Elsa.Commerce.Core.Impl
 
         public IEnumerable<IErpClient> GetAllErpClients()
         {
-            return m_erpRepository.GetAllErps().Select(e => GetErpClient(e.Id));
+            return _erpRepository.GetAllErps().Select(e => GetErpClient(e.Id));
         }
     }
 }

@@ -11,7 +11,7 @@ using Elsa.Commerce.Core;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
 using Elsa.Common.Utils;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Apps.Invoices
 {

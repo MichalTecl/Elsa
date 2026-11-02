@@ -1,6 +1,6 @@
 ﻿using Elsa.Core.Entities.Commerce.Core;
-using Robowire.RobOrm.Core;
-using Robowire.RobOrm.SqlServer.Attributes;
+using RobOrm.Core;
+using RobOrm.SqlServer.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

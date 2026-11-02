@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 
-using Robowire.RobOrm.SqlServer;
+using RobOrm.SqlServer;
 
 namespace Elsa.Core.Entities.Commerce
 {

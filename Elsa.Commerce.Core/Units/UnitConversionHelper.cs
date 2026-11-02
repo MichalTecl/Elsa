@@ -9,25 +9,25 @@ using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
 
 using Robowire;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Units
 {
     public class UnitConversionHelper : IUnitConversionHelper
     {
-        private readonly ISession m_session;
-        private readonly IDatabase m_database;
-        private readonly IPerProjectDbCache m_cache;
-        private readonly IServiceLocator m_serviceLocator;
-        private readonly IUnitRepository m_unitRepository;
+        private readonly ISession _session;
+        private readonly IDatabase _database;
+        private readonly IPerProjectDbCache _cache;
+        private readonly IServiceLocator _serviceLocator;
+        private readonly IUnitRepository _unitRepository;
 
         public UnitConversionHelper(IPerProjectDbCache cache, IServiceLocator serviceLocator, IDatabase database, ISession session, IUnitRepository unitRepository)
         {
-            m_cache = cache;
-            m_serviceLocator = serviceLocator;
-            m_database = database;
-            m_session = session;
-            m_unitRepository = unitRepository;
+            _cache = cache;
+            _serviceLocator = serviceLocator;
+            _database = database;
+            _session = session;
+            _unitRepository = unitRepository;
         }
 
         public decimal ConvertAmount(int sourceUnitId, int targetUnitId, decimal sourceAmount)
@@ -64,7 +64,7 @@ namespace Elsa.Commerce.Core.Units
                 return u;
             }
 
-            return m_unitRepository.GetUnit(smallest.TargetUnitId);
+            return _unitRepository.GetUnit(smallest.TargetUnitId);
         }
 
         public bool AreCompatible(int unitId1, int unitId2)
@@ -76,11 +76,11 @@ namespace Elsa.Commerce.Core.Units
 
         public IEnumerable<IMaterialUnit> GetCompatibleUnits(int sourceUnitId)
         {
-            return m_cache.ReadThrough($"compatibleUnits_{sourceUnitId}",
+            return _cache.ReadThrough($"compatibleUnits_{sourceUnitId}",
                 () =>
                     {
                         var result = new List<IMaterialUnit>();
-                        foreach (var conversion in m_unitRepository.GetAllUnits())
+                        foreach (var conversion in _unitRepository.GetAllUnits())
                         {
                             if (AreCompatible(sourceUnitId, conversion.Id))
                             {
@@ -99,12 +99,12 @@ namespace Elsa.Commerce.Core.Units
         {
             var convertedValue = ConvertAmount(sourceAmount.Unit.Id, targetUnitId, sourceAmount.Value);
 
-            return new Amount(convertedValue, m_unitRepository.GetUnit(targetUnitId));
+            return new Amount(convertedValue, _unitRepository.GetUnit(targetUnitId));
         }
 
         private ConvertorInstance GetConvertor(int sourceUnit, int targetUnit)
         {
-            return m_cache.ReadThrough(
+            return _cache.ReadThrough(
                 $"unitConversionHelper:convertor_{sourceUnit}_to_{targetUnit}",
                 () =>
                     {
@@ -116,20 +116,20 @@ namespace Elsa.Commerce.Core.Units
                             throw new InvalidOperationException($"No unit conversion defined from {sourceUnit} to {targetUnit}");
                         }
 
-                        return new ConvertorInstance(conversion, m_serviceLocator);
+                        return new ConvertorInstance(conversion, _serviceLocator);
                     });
         }
 
         private IEnumerable<IUnitConversion> GetAllConversions()
         {
 
-            return m_cache.ReadThrough(
+            return _cache.ReadThrough(
                 "unitConversionHelper:all_conversion_records",
                 () =>
                     {
                         var pure =
-                            m_database.SelectFrom<IUnitConversion>()
-                                .Where(uc => uc.ProjectId == m_session.Project.Id)
+                            _database.SelectFrom<IUnitConversion>()
+                                .Where(uc => uc.ProjectId == _session.Project.Id)
                                 .Execute()
                                 .ToList();
 
@@ -186,13 +186,13 @@ namespace Elsa.Commerce.Core.Units
 
         private sealed class ConvertorInstance : IUnitConvertor
         {
-            private readonly IUnitConvertor m_convertor;
+            private readonly IUnitConvertor _convertor;
 
             public ConvertorInstance(IUnitConversion conversionEntry, IServiceLocator locator)
             {
                 if (!string.IsNullOrWhiteSpace(conversionEntry.ConvertorClass))
                 {
-                    m_convertor = locator.InstantiateNow<IUnitConvertor>(conversionEntry.ConvertorClass);
+                    _convertor = locator.InstantiateNow<IUnitConvertor>(conversionEntry.ConvertorClass);
                 }
                 else
                 {
@@ -201,28 +201,28 @@ namespace Elsa.Commerce.Core.Units
                         throw new InvalidOperationException("Conversion must have convertor class or mutiplier");
                     }
 
-                    m_convertor = new DefaultConvertor(conversionEntry.Multiplier.Value);
+                    _convertor = new DefaultConvertor(conversionEntry.Multiplier.Value);
                 }
             }
 
             private sealed class DefaultConvertor : IUnitConvertor
             {
-                private readonly decimal m_multiplier;
+                private readonly decimal _multiplier;
 
                 public DefaultConvertor(decimal multiplier)
                 {
-                    m_multiplier = multiplier;
+                    _multiplier = multiplier;
                 }
 
                 public decimal ConvertAmount(int sourceUnitId, int targetUnitId, decimal sourceAmount)
                 {
-                    return sourceAmount * m_multiplier;
+                    return sourceAmount * _multiplier;
                 }
             }
 
             public decimal ConvertAmount(int sourceUnitId, int targetUnitId, decimal sourceAmount)
             {
-                return m_convertor.ConvertAmount(sourceUnitId, targetUnitId, sourceAmount);
+                return _convertor.ConvertAmount(sourceUnitId, targetUnitId, sourceAmount);
             }
         }
        

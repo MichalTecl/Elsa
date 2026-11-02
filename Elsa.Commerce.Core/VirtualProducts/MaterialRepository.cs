@@ -12,28 +12,28 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Accounting.InvoiceFormItemBridges;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.VirtualProducts
 {
     public class MaterialRepository : IMaterialRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly ICache m_cache;
-        private readonly IUnitConversionHelper m_conversionHelper;
-        private readonly IEntityCommentsFacade m_entityComments;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly ICache _cache;
+        private readonly IUnitConversionHelper _conversionHelper;
+        private readonly IEntityCommentsFacade _entityComments;
         
-        private string MaterialsCacheKey => $"AllMaterialsBy_ProjectId={m_session.Project.Id}";
-        private string VirtualProductCompositionsCacheKey => $"AllVPCompositionsBy_ProjectID={m_session.Project.Id}";
+        private string MaterialsCacheKey => $"AllMaterialsBy_ProjectId={_session.Project.Id}";
+        private string VirtualProductCompositionsCacheKey => $"AllVPCompositionsBy_ProjectID={_session.Project.Id}";
 
         public MaterialRepository(IDatabase database, ISession session, ICache cache, IUnitConversionHelper conversionHelper, IEntityCommentsFacade entityComments)
         {
-            m_database = database;
-            m_session = session;
-            m_cache = cache;
-            m_conversionHelper = conversionHelper;
-            m_entityComments = entityComments;
+            _database = database;
+            _session = session;
+            _cache = cache;
+            _conversionHelper = conversionHelper;
+            _entityComments = entityComments;
         }
 
         public IExtendedMaterialModel GetMaterialById(int materialId)
@@ -44,8 +44,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 return mat;
             }
 
-            m_cache.Remove(MaterialsCacheKey);
-            m_cache.Remove(VirtualProductCompositionsCacheKey);
+            _cache.Remove(MaterialsCacheKey);
+            _cache.Remove(VirtualProductCompositionsCacheKey);
 
             mat = GetAllMaterials(null, true).FirstOrDefault(m => m.Id == materialId);
             if (mat != null)
@@ -66,7 +66,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             foreach (var composition in GetAllCompositions().Where(c => c.VirtualProductId == virtualProductId))
             {
                 var material = GetMaterialById(composition.ComponentId);
-                var batch = material.CreateBatch(composition.Amount, composition.Unit, m_conversionHelper);
+                var batch = material.CreateBatch(composition.Amount, composition.Unit, _conversionHelper);
 
                 yield return new MaterialComponent(batch.BatchUnit, batch, batch.BatchAmount, composition.Id);
             }
@@ -74,7 +74,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IEnumerable<IExtendedMaterialModel> GetAllMaterials(int? inventoryId, bool includeHidden)
         {
-            var all = m_cache.ReadThrough(MaterialsCacheKey, TimeSpan.FromMinutes(10), GetAllMaterialsFromDatabase);
+            var all = _cache.ReadThrough(MaterialsCacheKey, TimeSpan.FromMinutes(10), GetAllMaterialsFromDatabase);
 
             if (inventoryId != null)
             {
@@ -98,35 +98,35 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         private IEnumerable<IVirtualProductMaterial> GetAllCompositions()
         {
-            return m_cache.ReadThrough(
+            return _cache.ReadThrough(
                 VirtualProductCompositionsCacheKey,
                 TimeSpan.FromMinutes(10),
                 () =>
-                    m_database.SelectFrom<IVirtualProductMaterial>()
+                    _database.SelectFrom<IVirtualProductMaterial>()
                         .Join(v => v.Unit)
                         .Join(v => v.VirtualProduct)
-                        .Where(vpm => vpm.VirtualProduct.ProjectId == m_session.Project.Id)
+                        .Where(vpm => vpm.VirtualProduct.ProjectId == _session.Project.Id)
                         .Execute());
         }
 
         protected virtual IEnumerable<IMaterial> LoadMaterialEntities()
         {
-            return m_database.SelectFrom<IMaterial>()
+            return _database.SelectFrom<IMaterial>()
                     .Join(m => m.NominalUnit)
                     .Join(m => m.VirtualProductMaterials)
                     .Join(m => m.Thresholds)
                     .Join(m => m.Thresholds.Each().Unit)
                     .Join(m => m.Inventory)
-                    .Where(m => m.ProjectId == m_session.Project.Id)
+                    .Where(m => m.ProjectId == _session.Project.Id)
                     .Execute();
         }
 
         public void DetachMaterial(int virtualProductId, int materialId)
         {
-            var prid = m_session.Project.Id;
+            var prid = _session.Project.Id;
 
             var srcMapping =
-                m_database.SelectFrom<IVirtualProductMaterial>()
+                _database.SelectFrom<IVirtualProductMaterial>()
                     .Join(vpm => vpm.VirtualProduct)
                     .Join(vpm => vpm.Component)
                     .Where(vpm => (vpm.VirtualProduct.ProjectId == prid) && (vpm.Component.ProjectId == prid))
@@ -140,8 +140,8 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 return;
             }
 
-            m_database.Delete(srcMapping);
-            m_cache.Remove(VirtualProductCompositionsCacheKey);
+            _database.Delete(srcMapping);
+            _cache.Remove(VirtualProductCompositionsCacheKey);
         }
 
         public void AddOrUpdateComponent(int vpId, int materialId, decimal requestComponentAmount, int unitId)
@@ -150,7 +150,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             var existing = GetAllCompositions().FirstOrDefault(c => (c.VirtualProductId == vpId) && (c.ComponentId == materialId));
             if (existing == null)
             {
-                existing = m_database.New<IVirtualProductMaterial>(v => v.VirtualProductId = vpId);
+                existing = _database.New<IVirtualProductMaterial>(v => v.VirtualProductId = vpId);
             }
             else
             {
@@ -161,18 +161,18 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 }
             }
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 existing.Amount = requestComponentAmount;
                 existing.UnitId = unitId;
                 existing.ComponentId = materialId;
 
-                m_database.Save(existing);
+                _database.Save(existing);
 
                 tx.Commit();
             }
 
-            m_cache.Remove(VirtualProductCompositionsCacheKey);
+            _cache.Remove(VirtualProductCompositionsCacheKey);
         }
 
         public IExtendedMaterialModel UpsertMaterial(int? materialId, Action<IMaterial> setup)
@@ -193,7 +193,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 if (material.NominalUnitId != oldNominalUnitId)
                 {
                     if (
-                        m_database.SelectFrom<IRecipe>()
+                        _database.SelectFrom<IRecipe>()
                             .Where(mc => mc.ProducedMaterialId == materialId)
                             .Execute()
                             .Any())
@@ -202,7 +202,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     }
 
                     if (
-                        m_database.SelectFrom<IVirtualProductMaterial>()
+                        _database.SelectFrom<IVirtualProductMaterial>()
                             .Where(mc => mc.ComponentId == materialId)
                             .Execute()
                             .Any())
@@ -213,7 +213,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             }
             else
             {
-                material = m_database.New<IMaterial>();
+                material = _database.New<IMaterial>();
 
                 setup(material);
 
@@ -229,10 +229,10 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 throw new InvalidOperationException("Invalid reference to inventory");
             }
                         
-            material.ProjectId = m_session.Project.Id;            
+            material.ProjectId = _session.Project.Id;            
             material.UnusedWarnMaterialType = string.IsNullOrWhiteSpace(material.UnusedWarnMaterialType) ? null : material.UnusedWarnMaterialType;
             
-            m_database.Save(material);
+            _database.Save(material);
 
             CleanCache();
 
@@ -274,7 +274,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 if (material.NominalUnitId != nominalUnitId)
                 {
                     if (
-                        m_database.SelectFrom<IRecipe>()
+                        _database.SelectFrom<IRecipe>()
                             .Where(mc => mc.ProducedMaterialId == materialId)
                             .Execute()
                             .Any())
@@ -283,7 +283,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     }
 
                     if (
-                        m_database.SelectFrom<IVirtualProductMaterial>()
+                        _database.SelectFrom<IVirtualProductMaterial>()
                             .Where(mc => mc.ComponentId == materialId)
                             .Execute()
                             .Any())
@@ -300,7 +300,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     throw new InvalidOperationException("Název materiálu byl již použit");
                 }
                 
-                material = m_database.New<IMaterial>();
+                material = _database.New<IMaterial>();
             }
 
             var inventory = GetMaterialInventories().FirstOrDefault(i => i.Id == materialInventoryId);
@@ -312,7 +312,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             material.Name = name;
             material.NominalUnitId = nominalUnitId;
             material.NominalAmount = nominalAmount;
-            material.ProjectId = m_session.Project.Id;
+            material.ProjectId = _session.Project.Id;
             material.InventoryId = inventory.Id;
             material.AutomaticBatches = automaticBatches;
             material.RequiresPrice = requiresPrice;
@@ -325,7 +325,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
             material.DaysBeforeWarnForUnused = daysBeforeWarnForUnused;
             material.UsageProlongsLifetime = usageProlongsLifetime;
 
-            m_database.Save(material);
+            _database.Save(material);
 
             CleanCache();
 
@@ -334,17 +334,17 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public void CleanCache()
         {
-            m_cache.Remove(VirtualProductCompositionsCacheKey);
-            m_cache.Remove(MaterialsCacheKey);
+            _cache.Remove(VirtualProductCompositionsCacheKey);
+            _cache.Remove(MaterialsCacheKey);
         }
         
         public void DeleteMaterial(int id)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var material =
-                    m_database.SelectFrom<IMaterial>()
-                        .Where(m => m.ProjectId == m_session.Project.Id)
+                    _database.SelectFrom<IMaterial>()
+                        .Where(m => m.ProjectId == _session.Project.Id)
                         .Where(m => m.Id == id)
                         .Execute()
                         .FirstOrDefault();
@@ -354,9 +354,9 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     throw new InvalidOperationException("Material not found");
                 }
 
-                var toVp = m_database.SelectFrom<IVirtualProductMaterial>().Where(t => t.ComponentId == id).Execute();
+                var toVp = _database.SelectFrom<IVirtualProductMaterial>().Where(t => t.ComponentId == id).Execute();
                 var conns =
-                    m_database.SelectFrom<IRecipe>()
+                    _database.SelectFrom<IRecipe>()
                         .Where(c => c.ProducedMaterialId == id)
                         .Execute();
 
@@ -365,11 +365,11 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     throw new InvalidOperationException("Nelze smazat materiál, který má recepturu");
                 }
 
-                var thresholds = m_database.SelectFrom<IMaterialThreshold>().Where(t => t.ProjectId == m_session.Project.Id && t.MaterialId == id).Execute();
+                var thresholds = _database.SelectFrom<IMaterialThreshold>().Where(t => t.ProjectId == _session.Project.Id && t.MaterialId == id).Execute();
 
-                m_database.DeleteAll(thresholds);
-                m_database.DeleteAll(toVp);
-                m_database.Delete(material);
+                _database.DeleteAll(thresholds);
+                _database.DeleteAll(toVp);
+                _database.Delete(material);
 
                 tx.Commit();
 
@@ -379,19 +379,19 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IEnumerable<IMaterialInventory> GetMaterialInventories()
         {
-            return m_cache.ReadThrough(
-                $"allMatInventories_{m_session.Project.Id}",
+            return _cache.ReadThrough(
+                $"allMatInventories_{_session.Project.Id}",
                 TimeSpan.FromHours(1),
                 () =>
-                    m_database.SelectFrom<IMaterialInventory>()
+                    _database.SelectFrom<IMaterialInventory>()
                         .Join(i => i.AllowedUnit)
-                        .Where(i => i.ProjectId == m_session.Project.Id)
+                        .Where(i => i.ProjectId == _session.Project.Id)
                         .Execute());
         }
         
         public void EnsureCompatibleUnit(IExtendedMaterialModel material, IMaterialUnit unit)
         {
-            if (!m_conversionHelper.AreCompatible(material.NominalUnit.Id, unit.Id))
+            if (!_conversionHelper.AreCompatible(material.NominalUnit.Id, unit.Id))
             {
                 throw new InvalidOperationException($"Jednotku '{unit.Symbol}' nelze použít pro materiál '{material.Name}'");
             }
@@ -399,19 +399,19 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public IMaterialRepositoryWithPostponedCache GetWithPostponedCache()
         {
-            return new MaterialRepositoryWithPostponedCache(m_database, m_session, new CacheWithPostponedRemoval(m_cache), m_conversionHelper, m_entityComments);
+            return new MaterialRepositoryWithPostponedCache(_database, _session, new CacheWithPostponedRemoval(_cache), _conversionHelper, _entityComments);
         }
 
         public List<MaterialReportingGroupAssignmentModel> GetMaterialReportingGroupAssignments()
         {
-            return m_database.Sql().ExecuteWithParams(@"SELECT m.Name, rmg.Name
+            return _database.Sql().ExecuteWithParams(@"SELECT m.Name, rmg.Name
                                                 FROM Material m
                                                 LEFT JOIN ReportingMaterialGroupMaterial rmgm ON (m.Id = rmgm.MaterialId)
                                                 LEFT JOIN ReportingMaterialGroup rmg ON (rmgm.GroupId = rmg.Id)
                                                 JOIN MaterialInventory mi ON (m.InventoryId = mi.Id)
                                                 WHERE mi.CanBeConnectedToTag = 1
                                                 AND m.ProjectId = {0}
-                                                ORDER BY m.Name", m_session.Project.Id)
+                                                ORDER BY m.Name", _session.Project.Id)
                 .MapRows<MaterialReportingGroupAssignmentModel>(rdr => new MaterialReportingGroupAssignmentModel
                 {
                     MaterialName = rdr.GetString(0),
@@ -425,15 +425,15 @@ namespace Elsa.Commerce.Core.VirtualProducts
             groupsCreated = 0;
             materialsAssigned = 0;
 
-            var materialGroups = m_database.SelectFrom<IReportingMaterialGroup>()
-                .Where(g => g.ProjectId == m_session.Project.Id)
+            var materialGroups = _database.SelectFrom<IReportingMaterialGroup>()
+                .Where(g => g.ProjectId == _session.Project.Id)
                 .Execute()
                 .ToList();
 
-            var materials = m_database.SelectFrom<IMaterial>().Where(m => m.ProjectId == m_session.Project.Id).Execute().ToList();
-            var assignments = m_database.SelectFrom<IReportingMaterialGroupMaterial>().Execute().ToList();
+            var materials = _database.SelectFrom<IMaterial>().Where(m => m.ProjectId == _session.Project.Id).Execute().ToList();
+            var assignments = _database.SelectFrom<IReportingMaterialGroupMaterial>().Execute().ToList();
 
-            using(var tx = m_database.OpenTransaction())
+            using(var tx = _database.OpenTransaction())
             {
                 foreach(var model in models)
                 {
@@ -443,12 +443,12 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     if (group == null && !string.IsNullOrWhiteSpace(model.ReportingGroupName))
                     {
                         groupsCreated++;
-                        group = m_database.New<IReportingMaterialGroup>();
-                        group.ProjectId = m_session.Project.Id;
+                        group = _database.New<IReportingMaterialGroup>();
+                        group.ProjectId = _session.Project.Id;
                         group.Name = model.ReportingGroupName;
                         group.DisplayOrder = materialGroups.Max(g => g.DisplayOrder ?? 0) + 1;
 
-                        m_database.Save(group);
+                        _database.Save(group);
                         materialGroups.Add(group);
                     }
 
@@ -461,17 +461,17 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
                     if (existingAssignment != null)
                     {
-                        m_database.Delete(existingAssignment);
+                        _database.Delete(existingAssignment);
                         assignments.Remove(existingAssignment);
                     }
 
                     if (group != null)
                     {
-                        var assignment = m_database.New<IReportingMaterialGroupMaterial>();
+                        var assignment = _database.New<IReportingMaterialGroupMaterial>();
                         assignment.MaterialId = material.Id;
                         assignment.GroupId = group.Id;
 
-                        m_database.Save(assignment);
+                        _database.Save(assignment);
                         assignments.Add(assignment);
                     }
                 }
@@ -484,11 +484,11 @@ namespace Elsa.Commerce.Core.VirtualProducts
         public void SaveOrderDt(int materialId, DateTime? orderDt)
         {
             //(@materialId INT, @orderDt DATETIME, @userId INT)
-            m_database.Sql()
+            _database.Sql()
                 .Call("SaveMaterialOrderDt")
                 .WithParam("@materialId", materialId)
                 .WithParam("@orderDt", orderDt)
-                .WithParam("@userId", m_session.User.Id)
+                .WithParam("@userId", _session.User.Id)
                 .NonQuery();
         }
 
@@ -501,7 +501,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
             mat.CommentText = comment;
 
-            m_entityComments.AddComment(writeCommentUserRight, mat);
+            _entityComments.AddComment(writeCommentUserRight, mat);
 
             CleanCache();
         }
@@ -514,15 +514,15 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
             var dbRecord = mat.Adaptee;
 
-            dbRecord.HideUserId = hide ? (int?)m_session.User.Id : null;
+            dbRecord.HideUserId = hide ? (int?)_session.User.Id : null;
             dbRecord.HideDt = hide ? (DateTime?)DateTime.Now : null;
 
-            m_database.Save(dbRecord);
+            _database.Save(dbRecord);
 
             // there is so much stuff related to material visibility...
             if (clearCache)
             {
-                m_cache.Clear();
+                _cache.Clear();
             }
             else
             {
@@ -535,17 +535,17 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         private sealed class MaterialRepositoryWithPostponedCache : MaterialRepository, IMaterialRepositoryWithPostponedCache
         {
-            private readonly CacheWithPostponedRemoval m_ppCache;
+            private readonly CacheWithPostponedRemoval _ppCache;
 
             public MaterialRepositoryWithPostponedCache(IDatabase database, ISession session, CacheWithPostponedRemoval cache, IUnitConversionHelper conversionHelper, IEntityCommentsFacade comments)
                 : base(database, session, cache, conversionHelper, comments)
             {
-                m_ppCache = cache;
+                _ppCache = cache;
             }
 
             public void Dispose()
             {
-                m_ppCache.Dispose();
+                _ppCache.Dispose();
             }
         }
     }

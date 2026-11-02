@@ -11,7 +11,7 @@ using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Core.Entities.Commerce.Inventory.Kits;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {

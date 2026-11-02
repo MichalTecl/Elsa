@@ -12,7 +12,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Robowire;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Apps.ProductionService.Service
 {
@@ -33,19 +33,19 @@ namespace Elsa.Apps.ProductionService.Service
 
         private static readonly object s_lock = new object();
 
-        private readonly IServiceLocator m_serviceLocator;
-        private readonly ISession m_session;
-        private readonly IDatabase m_database;
-        private readonly Lazy<IMaterialBatchRepository> m_batchRepository;
-        private readonly IUnitRepository m_unitRepository;
+        private readonly IServiceLocator _serviceLocator;
+        private readonly ISession _session;
+        private readonly IDatabase _database;
+        private readonly Lazy<IMaterialBatchRepository> _batchRepository;
+        private readonly IUnitRepository _unitRepository;
 
         public ProductionService(IServiceLocator serviceLocator, ISession session, IDatabase database, Lazy<IMaterialBatchRepository> batchRepository, IUnitRepository unitRepository)
         {
-            m_serviceLocator = serviceLocator;
-            m_session = session;
-            m_database = database;
-            m_batchRepository = batchRepository;
-            m_unitRepository = unitRepository;
+            _serviceLocator = serviceLocator;
+            _session = session;
+            _database = database;
+            _batchRepository = batchRepository;
+            _unitRepository = unitRepository;
         }
 
 
@@ -54,7 +54,7 @@ namespace Elsa.Apps.ProductionService.Service
             //TODO i wouldn't even try to process multiple allocations in parallel, but should be optimized to lock by user (project?)
             lock (s_lock)
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     Validate(request);
 
@@ -65,7 +65,7 @@ namespace Elsa.Apps.ProductionService.Service
 
         private ProductionRequestContext Validate(ProductionRequest request)
         {
-            var context = new ProductionRequestContext(m_session, request);
+            var context = new ProductionRequestContext(_session, request);
 
             foreach (var step in GetSteps())
             {
@@ -82,7 +82,7 @@ namespace Elsa.Apps.ProductionService.Service
         {
             lock (s_lock)
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     var context = Validate(request);
 
@@ -100,11 +100,11 @@ namespace Elsa.Apps.ProductionService.Service
                     {
                         foreach (var aloc in component.Resolutions.Where(r => r.Amount > 0m))
                         {
-                            components.Add(new Tuple<BatchKey, Amount>(new BatchKey(component.MaterialId, aloc.BatchNumber), new Amount(aloc.Amount, m_unitRepository.GetUnitBySymbol(aloc.UnitSymbol).Ensure())));
+                            components.Add(new Tuple<BatchKey, Amount>(new BatchKey(component.MaterialId, aloc.BatchNumber), new Amount(aloc.Amount, _unitRepository.GetUnitBySymbol(aloc.UnitSymbol).Ensure())));
                         }
                     }
 
-                    m_batchRepository.Value.CreateBatchWithComponents(request.RecipeId, context.RequestedAmount,
+                    _batchRepository.Value.CreateBatchWithComponents(request.RecipeId, context.RequestedAmount,
                         request.ProducingBatchNumber.Trim(), request.ProducingPrice ?? 0, components, request.SourceSegmentId);
 
                     tx.Commit();
@@ -116,7 +116,7 @@ namespace Elsa.Apps.ProductionService.Service
         {
             foreach (var stepType in s_steps)
             {
-                yield return (IProductionRequestProcessingStep)m_serviceLocator.InstantiateNow(stepType);
+                yield return (IProductionRequestProcessingStep)_serviceLocator.InstantiateNow(stepType);
             }
         }
     }

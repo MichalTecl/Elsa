@@ -1,8 +1,8 @@
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Integration;
-using Robowire.RobOrm.Core;
-using Robowire.RobOrm.SqlServer.Aggregations;
+using RobOrm.Core;
+using RobOrm.SqlServer.Aggregations;
 using System;
 using System.Collections.Generic;
 using System.Linq;

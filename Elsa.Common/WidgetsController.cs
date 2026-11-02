@@ -8,21 +8,21 @@ using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Common.Widgets;
 
 using Robowire.RoboApi;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Common
 {
     [Controller("widgets")]
     public class WidgetsController : ElsaControllerBase
     {
-        private readonly IDatabase m_database;
-        private readonly ICache m_cache;
+        private readonly IDatabase _database;
+        private readonly ICache _cache;
 
         public WidgetsController(IWebSession webSession, IDatabase database, ILog log, ICache cache)
             : base(webSession, log)
         {
-            m_database = database;
-            m_cache = cache;
+            _database = database;
+            _cache = cache;
         }
 
         [AllowAnonymous]
@@ -56,9 +56,9 @@ namespace Elsa.Common
                 
         private List<IAppWidget> GetAllWidgets()
         {
-            return m_cache.ReadThrough("all_widgets",
+            return _cache.ReadThrough("all_widgets",
                 TimeSpan.FromHours(1),
-                () => m_database.SelectFrom<IAppWidget>().Execute().ToList()
+                () => _database.SelectFrom<IAppWidget>().Execute().ToList()
             );
         }        
     }

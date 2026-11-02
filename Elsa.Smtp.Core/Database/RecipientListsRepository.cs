@@ -5,21 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Smtp.Core.Database
 {
     public class RecipientListsRepository : IRecipientListsRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly ICache m_cache;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly ICache _cache;
 
         public RecipientListsRepository(IDatabase database, ISession session, ICache cache)
         {
-            m_database = database;
-            m_session = session;
-            m_cache = cache;
+            _database = database;
+            _session = session;
+            _cache = cache;
         }
 
         public IEnumerable<string> GetRecipients(string groupName)
@@ -40,13 +40,13 @@ namespace Elsa.Smtp.Core.Database
         {
             try
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     var list = GetAllLists().FirstOrDefault(l => l.GroupName.Equals(groupName)) ??
-                               m_database.New<IEmailRecipientList>(
+                               _database.New<IEmailRecipientList>(
                                    l =>
                                    {
-                                       l.ProjectId = m_session.Project.Id;
+                                       l.ProjectId = _session.Project.Id;
                                        l.GroupName = groupName;
                                    });
 
@@ -54,14 +54,14 @@ namespace Elsa.Smtp.Core.Database
                         recipients.Select(r => r?.Trim()?.ToLowerInvariant())
                             .Where(r => !string.IsNullOrWhiteSpace(r)));
 
-                    m_database.Save(list);
+                    _database.Save(list);
 
                     tx.Commit();
                 }
             }
             finally
             {
-                m_cache.Remove(GetCacheKey());
+                _cache.Remove(GetCacheKey());
             }
         }
 
@@ -72,15 +72,15 @@ namespace Elsa.Smtp.Core.Database
 
         private List<IEmailRecipientList> GetAllLists()
         {
-            return m_cache.ReadThrough(GetCacheKey(), TimeSpan.FromDays(1),
-                () => m_database.SelectFrom<IEmailRecipientList>().Where(m => m.ProjectId == m_session.Project.Id)
+            return _cache.ReadThrough(GetCacheKey(), TimeSpan.FromDays(1),
+                () => _database.SelectFrom<IEmailRecipientList>().Where(m => m.ProjectId == _session.Project.Id)
                     .OrderBy(m => m.GroupName).Execute().ToList()
             );
         }
 
         private string GetCacheKey()
         {
-            return $"mailRecipients:{m_session.Project.Id}";
+            return $"mailRecipients:{_session.Project.Id}";
         }
     }
 }

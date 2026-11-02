@@ -6,31 +6,31 @@ using System.Net;
 using Elsa.Common.Logging;
 using Elsa.Jobs.Common;
 using Ionic.Zip;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Jobs.DbBackup
 {
     public class DbBackupJob : IExecutableJob
     {
-        private readonly ITransactionManager<SqlConnection> m_database;
-        private readonly DbBackupConfig m_backupConfig;
-        private readonly ILog m_log;
+        private readonly ITransactionManager<SqlConnection> _database;
+        private readonly DbBackupConfig _backupConfig;
+        private readonly ILog _log;
 
         public DbBackupJob(ITransactionManager<SqlConnection> database, DbBackupConfig backupConfig, ILog log)
         {
-            m_database = database;
-            m_backupConfig = backupConfig;
-            m_log = log;
+            _database = database;
+            _backupConfig = backupConfig;
+            _log = log;
         }
 
         public void Run(string customDataJson)
         {
-            m_log.Info("Starting db backup");
+            _log.Info("Starting db backup");
             string fileName;
 
             try
             {
-                using (var conn = m_database.OpenUnmanagedConnection())
+                using (var conn = _database.OpenUnmanagedConnection())
                 {                    
                     conn.Open();
 
@@ -51,30 +51,30 @@ namespace Elsa.Jobs.DbBackup
             }
             catch (Exception ex)
             {
-                m_log.Error("Db backup failed", ex);
+                _log.Error("Db backup failed", ex);
                 throw;
             }
 
-            m_log.Info($"Backup file generated: {fileName}");
+            _log.Info($"Backup file generated: {fileName}");
 
             var zipFile = $"{Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName))}_{DateTime.Now.Hour:00}{DateTime.Now.Minute:00}.zip";
 
-            m_log.Info($"Starting Zip file generation: {fileName}");
+            _log.Info($"Starting Zip file generation: {fileName}");
 
             try
             {
                 using (var zip = new ZipFile())
                 {
-                    //zip.Password = m_backupConfig.ZipPassword;
+                    //zip.Password = _backupConfig.ZipPassword;
                     zip.AddFile(fileName);
                     zip.Save(zipFile);
                 }
 
-                m_log.Info($"Zip file created");
+                _log.Info($"Zip file created");
             }
             catch (Exception ex)
             {
-                m_log.Error("Zipping failed", ex);
+                _log.Error("Zipping failed", ex);
                 throw;
             }
 
@@ -82,28 +82,28 @@ namespace Elsa.Jobs.DbBackup
             {
                 using (var client = new WebClient())
                 {
-                    client.Credentials = new NetworkCredential(m_backupConfig.FtpUser, m_backupConfig.FtpPassword);
-                    client.BaseAddress = m_backupConfig.FtpUrl;
-                    var remfile = $"{m_backupConfig.DbBakFtpFolder}/{Path.GetFileName(zipFile)}";
+                    client.Credentials = new NetworkCredential(_backupConfig.FtpUser, _backupConfig.FtpPassword);
+                    client.BaseAddress = _backupConfig.FtpUrl;
+                    var remfile = $"{_backupConfig.DbBakFtpFolder}/{Path.GetFileName(zipFile)}";
 
-                    m_log.Info($"Uploading zip file to {remfile}");
+                    _log.Info($"Uploading zip file to {remfile}");
 
                     client.UploadFile(remfile, WebRequestMethods.Ftp.UploadFile, zipFile);
                 }
 
-                m_log.Info("Backup uploaded");
+                _log.Info("Backup uploaded");
             }
             catch (Exception ex)
             {
-                m_log.Error("Uploading failed", ex);
+                _log.Error("Uploading failed", ex);
                 throw;
             }
 
             File.Delete(zipFile);
-            m_log.Info($"Zip file deleted");
+            _log.Info($"Zip file deleted");
 
             File.Delete(fileName);
-            m_log.Info($"Backup file deleted");
+            _log.Info($"Backup file deleted");
         }
     }
 }

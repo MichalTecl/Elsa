@@ -6,29 +6,29 @@ using Elsa.App.MaterialLevels.Entities;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.App.MaterialLevels.Components
 {
     public class InventoryWatchRepository : IInventoryWatchRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ICache m_cache;
-        private readonly ISession m_session;
-        private readonly IMaterialRepository m_materialRepository;
+        private readonly IDatabase _database;
+        private readonly ICache _cache;
+        private readonly ISession _session;
+        private readonly IMaterialRepository _materialRepository;
 
         public InventoryWatchRepository(ICache cache, IDatabase database, ISession session,
             IMaterialRepository materialRepository)
         {
-            m_cache = cache;
-            m_database = database;
-            m_session = session;
-            m_materialRepository = materialRepository;
+            _cache = cache;
+            _database = database;
+            _session = session;
+            _materialRepository = materialRepository;
         }
 
         public List<InventoryModel> GetVisibleTabs()
         {
-            return m_cache.ReadThrough(GetVisibleTabsCacheKey(), TimeSpan.FromMinutes(10), () =>
+            return _cache.ReadThrough(GetVisibleTabsCacheKey(), TimeSpan.FromMinutes(10), () =>
             {
                 var allTabs = GetAllTabs();
                 var hiddenTabs = GetHiddenTabsFromDatabase();
@@ -43,12 +43,12 @@ namespace Elsa.App.MaterialLevels.Components
         {
             try
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     var hiddenTab = GetHiddenTab(inventoryId, materialLevelReportingGroup);
                     if (hiddenTab != null)
                     {
-                        m_database.Delete(hiddenTab);
+                        _database.Delete(hiddenTab);
                     }
 
                     tx.Commit();
@@ -56,7 +56,7 @@ namespace Elsa.App.MaterialLevels.Components
             }
             finally
             {
-                m_cache.Remove(GetTabCacheKeys());
+                _cache.Remove(GetTabCacheKeys());
             }
         }
 
@@ -64,17 +64,17 @@ namespace Elsa.App.MaterialLevels.Components
         {
             try
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     var hiddenTab = GetHiddenTab(inventoryId, materialLevelReportingGroup);
                     if (hiddenTab == null)
                     {
-                        hiddenTab = m_database.New<IUserHiddenMaterialLevelTab>();
+                        hiddenTab = _database.New<IUserHiddenMaterialLevelTab>();
                         hiddenTab.InventoryId = inventoryId;
                         hiddenTab.MaterialLevelReportingGroup = NormalizeGroup(materialLevelReportingGroup);
-                        hiddenTab.UserId = m_session.User.Id;
+                        hiddenTab.UserId = _session.User.Id;
 
-                        m_database.Save(hiddenTab);
+                        _database.Save(hiddenTab);
                     }
 
                     tx.Commit();
@@ -82,13 +82,13 @@ namespace Elsa.App.MaterialLevels.Components
             }
             finally
             {
-                m_cache.Remove(GetTabCacheKeys());
+                _cache.Remove(GetTabCacheKeys());
             }
         }
 
         public List<InventoryModel> GetHiddenTabs()
         {
-            return m_cache.ReadThrough(GetHiddenTabsCacheKey(), TimeSpan.FromMinutes(10), () =>
+            return _cache.ReadThrough(GetHiddenTabsCacheKey(), TimeSpan.FromMinutes(10), () =>
             {
                 var allTabs = GetAllTabs();
                 var hiddenTabs = GetHiddenTabsFromDatabase();
@@ -101,12 +101,12 @@ namespace Elsa.App.MaterialLevels.Components
 
         private List<InventoryModel> GetAllTabs()
         {
-            var inventories = m_materialRepository.GetMaterialInventories()
+            var inventories = _materialRepository.GetMaterialInventories()
                 .OrderBy(i => i.CanBeConnectedToTag ? 0 : 1)
                 .ThenBy(i => i.Name)
                 .ToList();
 
-            var materials = m_materialRepository.GetAllMaterials(null, true).ToList();
+            var materials = _materialRepository.GetAllMaterials(null, true).ToList();
             var result = new List<InventoryModel>();
 
             foreach (var inventory in inventories)
@@ -146,9 +146,9 @@ namespace Elsa.App.MaterialLevels.Components
 
         private List<IUserHiddenMaterialLevelTab> GetHiddenTabsFromDatabase()
         {
-            return m_database.SelectFrom<IUserHiddenMaterialLevelTab>().Join(w => w.Inventory)
-                .Where(w => w.UserId == m_session.User.Id)
-                .Where(w => w.Inventory.ProjectId == m_session.Project.Id)
+            return _database.SelectFrom<IUserHiddenMaterialLevelTab>().Join(w => w.Inventory)
+                .Where(w => w.UserId == _session.User.Id)
+                .Where(w => w.Inventory.ProjectId == _session.Project.Id)
                 .Execute()
                 .ToList();
         }
@@ -172,17 +172,17 @@ namespace Elsa.App.MaterialLevels.Components
         {
             yield return GetVisibleTabsCacheKey();
             yield return GetHiddenTabsCacheKey();
-            yield return $"matLevelInventories_{m_session.Project.Id}:{m_session.User.Id}";
+            yield return $"matLevelInventories_{_session.Project.Id}:{_session.User.Id}";
         }
 
         private string GetVisibleTabsCacheKey()
         {
-            return $"materialLevelVisibleTabs_{m_session.Project.Id}:{m_session.User.Id}";
+            return $"materialLevelVisibleTabs_{_session.Project.Id}:{_session.User.Id}";
         }
 
         private string GetHiddenTabsCacheKey()
         {
-            return $"materialLevelHiddenTabs_{m_session.Project.Id}:{m_session.User.Id}";
+            return $"materialLevelHiddenTabs_{_session.Project.Id}:{_session.User.Id}";
         }
 
         private static string CreateKey(int inventoryId, string materialLevelReportingGroup)

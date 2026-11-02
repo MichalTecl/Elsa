@@ -13,7 +13,7 @@ using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Kits;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {
@@ -21,17 +21,17 @@ namespace Elsa.Commerce.Core.Repositories
     {
         private const string c_vpMappingCacheKey = "AllVirtualProductMappingsBy_ProjectId={0}";
         private const string c_vpCacheKey = "AllvirtualProductsBy_ProjectId_{0}";
-        private readonly ICache m_cache;
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly ILog m_log;
+        private readonly ICache _cache;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly ILog _log;
 
         public VirtualProductRepository(ICache cache, IDatabase database, ISession session, ILog log)
         {
-            m_cache = cache;
-            m_database = database;
-            m_session = session;
-            m_log = log;
+            _cache = cache;
+            _database = database;
+            _session = session;
+            _log = log;
         }
 
         public IEnumerable<IVirtualProduct> GetVirtualProductsByOrderItem(IPurchaseOrder order, IOrderItem item)
@@ -58,18 +58,18 @@ namespace Elsa.Commerce.Core.Repositories
                     return;
                 }
 
-                var newMapping = m_database.New<IVirtualProductOrderItemMapping>();
+                var newMapping = _database.New<IVirtualProductOrderItemMapping>();
                 //newMapping.ErpId = erpId;
                 //newMapping.ErpProductId = erpProductId;
                 newMapping.ItemName = placedName;
                 newMapping.VirtualProductId = virtualProductId;
-                newMapping.ProjectId = m_session.Project.Id;
-                m_database.Save(newMapping);
+                newMapping.ProjectId = _session.Project.Id;
+                _database.Save(newMapping);
             }
             finally
             {
-                var key = string.Format(c_vpMappingCacheKey, m_session.Project.Id);
-                m_cache.Remove(key);
+                var key = string.Format(c_vpMappingCacheKey, _session.Project.Id);
+                _cache.Remove(key);
             }
         }
 
@@ -77,12 +77,12 @@ namespace Elsa.Commerce.Core.Repositories
         {
             var result = new List<IVirtualProductMappableItem>();
 
-            m_database.Sql().ExecuteWithParams(@"select distinct po.ErpId, oi.ErpProductId, oi.PlacedName
+            _database.Sql().ExecuteWithParams(@"select distinct po.ErpId, oi.ErpProductId, oi.PlacedName
                                                          from OrderItem oi
                                                          inner join PurchaseOrder po ON (oi.PurchaseOrderId = po.Id)
                                                           where po.ProjectId = {0} 
                                                             AND po.PurchaseDate > DATEADD(year, -1, GETDATE())", 
-                            m_session.Project.Id)
+                            _session.Project.Id)
                            .ReadRows<int?, string, string>(
                     (erpId, erpProductId, placedName) =>
                         {
@@ -112,26 +112,26 @@ namespace Elsa.Commerce.Core.Repositories
                     return;
                 }
 
-                m_database.Delete(mappingToDelete);
+                _database.Delete(mappingToDelete);
             }
             finally
             {
-                var key = string.Format(c_vpMappingCacheKey, m_session.Project.Id);
-                m_cache.Remove(key);
+                var key = string.Format(c_vpMappingCacheKey, _session.Project.Id);
+                _cache.Remove(key);
             }
         }
         
         public IEnumerable<IVirtualProduct> GetAllVirtualProducts()
         {
-            var cacheKey = string.Format(c_vpCacheKey, m_session.Project.Id);
-            return m_cache.ReadThrough(cacheKey, TimeSpan.FromMinutes(10),
+            var cacheKey = string.Format(c_vpCacheKey, _session.Project.Id);
+            return _cache.ReadThrough(cacheKey, TimeSpan.FromMinutes(10),
                 () =>
                     {
 
 
                         return
-                            m_database.SelectFrom<IVirtualProduct>()
-                                .Where(p => p.ProjectId == m_session.Project.Id)
+                            _database.SelectFrom<IVirtualProduct>()
+                                .Where(p => p.ProjectId == _session.Project.Id)
                                 .Join(p => p.Materials)
                                 .Execute();
                     });
@@ -158,8 +158,8 @@ namespace Elsa.Commerce.Core.Repositories
             if (virtualProductId == null)
             {
                 var existing =
-                    m_database.SelectFrom<IVirtualProduct>()
-                        .Where(v => v.ProjectId == m_session.Project.Id)
+                    _database.SelectFrom<IVirtualProduct>()
+                        .Where(v => v.ProjectId == _session.Project.Id)
                         .Where(v => v.Name == name)
                         .Execute()
                         .FirstOrDefault();
@@ -169,8 +169,8 @@ namespace Elsa.Commerce.Core.Repositories
                     throw new ArgumentException($"Název tagu musí být jedinečný, již existuje \"{existing.Name}\"");
                 }
 
-                vp = m_database.New<IVirtualProduct>();
-                vp.ProjectId = m_session.Project.Id;
+                vp = _database.New<IVirtualProduct>();
+                vp.ProjectId = _session.Project.Id;
             }
             else
             {
@@ -187,7 +187,7 @@ namespace Elsa.Commerce.Core.Repositories
             }
 
             vp.Name = name;
-            m_database.Save(vp);
+            _database.Save(vp);
             CleanCache();
 
             return vp;
@@ -195,19 +195,19 @@ namespace Elsa.Commerce.Core.Repositories
 
         public void CleanCache()
         {
-            m_cache.Remove(string.Format(c_vpMappingCacheKey, m_session.Project.Id));
-            m_cache.Remove(string.Format(c_vpCacheKey, m_session.Project.Id));
+            _cache.Remove(string.Format(c_vpMappingCacheKey, _session.Project.Id));
+            _cache.Remove(string.Format(c_vpCacheKey, _session.Project.Id));
         }
 
         public void DeleteVirtualProduct(int vpId)
         {
             
-            var prid = m_session.Project.Id;
+            var prid = _session.Project.Id;
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var vp =
-                    m_database.SelectFrom<IVirtualProduct>()
+                    _database.SelectFrom<IVirtualProduct>()
                         .Where(p => p.Id == vpId)
                         .Where(p => p.ProjectId == prid)
                         .Execute()
@@ -215,28 +215,28 @@ namespace Elsa.Commerce.Core.Repositories
 
                 if (vp == null)
                 {
-                    m_log.Info($"VirtualProductId = {vpId} not found");
+                    _log.Info($"VirtualProductId = {vpId} not found");
                     return;
                 }
 
                 var materialMappings =
-                    m_database.SelectFrom<IVirtualProductMaterial>()
+                    _database.SelectFrom<IVirtualProductMaterial>()
                         .Join(m => m.Component)
                         .Where(m => m.Component.ProjectId == prid)
                         .Where(m => m.VirtualProductId == vpId)
                         .Execute();
 
-                m_database.DeleteAll(materialMappings);
+                _database.DeleteAll(materialMappings);
 
                 var itemMappings =
-                    m_database.SelectFrom<IVirtualProductOrderItemMapping>()
+                    _database.SelectFrom<IVirtualProductOrderItemMapping>()
                         .Where(m => m.ProjectId == prid)
                         .Where(m => m.VirtualProductId == vpId)
                         .Execute();
 
-                m_database.DeleteAll(itemMappings);
+                _database.DeleteAll(itemMappings);
 
-                m_database.Delete(vp);
+                _database.Delete(vp);
                 
                 tx.Commit();
                 CleanCache();
@@ -245,24 +245,24 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IDisposableVirtualProductsRepository GetWithPostponedCache()
         {
-            return new WithPostopnedCacheRemoval(new CacheWithPostponedRemoval(m_cache), m_database, m_session, m_log);
+            return new WithPostopnedCacheRemoval(new CacheWithPostponedRemoval(_cache), _database, _session, _log);
         }
 
         private IEnumerable<IVirtualProductOrderItemMapping> GetAllMappings()
         {
-            var key = string.Format(c_vpMappingCacheKey, m_session.Project.Id);
-            return m_cache.ReadThrough(key, TimeSpan.FromMinutes(10), GetAllMappingsFromDatabase);
+            var key = string.Format(c_vpMappingCacheKey, _session.Project.Id);
+            return _cache.ReadThrough(key, TimeSpan.FromMinutes(10), GetAllMappingsFromDatabase);
         }
 
         private IEnumerable<IVirtualProductOrderItemMapping> GetAllMappingsFromDatabase()
         {
             return
-                m_database.SelectFrom<IVirtualProductOrderItemMapping>()
+                _database.SelectFrom<IVirtualProductOrderItemMapping>()
                     .Join(m => m.VirtualProduct)
                     .Join(m => m.VirtualProduct.Materials)
                     .Join(m => m.VirtualProduct.Materials.Each().Unit)
-                    .Where(m => m.ProjectId == m_session.Project.Id)
-                    .Where(m => m.VirtualProduct.ProjectId == m_session.Project.Id)
+                    .Where(m => m.ProjectId == _session.Project.Id)
+                    .Where(m => m.VirtualProduct.ProjectId == _session.Project.Id)
                     .Execute();
         }
 
@@ -296,7 +296,7 @@ namespace Elsa.Commerce.Core.Repositories
 
         public List<ErpProductMapping> ExportErpProductMappings()
         {
-            return m_database.Sql().ExecuteWithParams(@"
+            return _database.Sql().ExecuteWithParams(@"
             select vpim.ItemName, m.Name
               from VirtualProductOrderItemMapping vpim
               join VirtualProduct vp ON (vpim.VirtualProductId = vp.Id)
@@ -305,7 +305,7 @@ namespace Elsa.Commerce.Core.Repositories
               join MaterialInventory mi ON (m.InventoryId = mi.Id)  
               where vpim.ProjectId = {0}
               order by vpim.ItemName, m.Name",
-            m_session.Project.Id)
+            _session.Project.Id)
                 .MapRows<ErpProductMapping>(row => new ErpProductMapping { EshopItem = row.GetString(0), Material = row.GetString(1) }).ToList();
         }
 
@@ -313,52 +313,52 @@ namespace Elsa.Commerce.Core.Repositories
         {            
             var current = ExportErpProductMappings();
 
-            m_log.Info($"Existing product mappings = {current.Count}, import length = {mappings.Count}");
+            _log.Info($"Existing product mappings = {current.Count}, import length = {mappings.Count}");
 
             var toProcess = mappings.Distinct()
                 .Where(m => !(string.IsNullOrWhiteSpace(m.EshopItem) && string.IsNullOrWhiteSpace(m.Material)))
                 .Where(m => !current.Any(c => c.EshopItem == m.EshopItem && c.Material == m.Material))
                 .ToList();
 
-            m_log.Info($"After filtering and removal of already existing entries there is {toProcess.Count} of records to be imported");
+            _log.Info($"After filtering and removal of already existing entries there is {toProcess.Count} of records to be imported");
 
             if (toProcess.Count == 0)
                 return 0;
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 foreach(var imp in toProcess)
                 {
                     try
                     {
-                        m_log.Info($"Going to import mapping {imp.EshopItem} -> {imp.Material}");
+                        _log.Info($"Going to import mapping {imp.EshopItem} -> {imp.Material}");
 
                         var tag = Tagify(imp.EshopItem);
 
-                        var res = m_database.Sql()
+                        var res = _database.Sql()
                             .Call("sp_assignEshopItemToMaterial")
                             .WithParam("@placedName", imp.EshopItem)
                             .WithParam("@materialName", imp.Material)
                             .WithParam("@tagName", tag)
-                            .WithParam("@projectId", m_session.Project.Id)
+                            .WithParam("@projectId", _session.Project.Id)
                             .WithParam("@keepOldLinks", keepOldLinks ? 1 : 0)
                             .Scalar<string>();
 
                         if (!string.IsNullOrWhiteSpace(res))
                             throw new Exception(res);
 
-                        m_log.Info($"Successfully imported mapping {imp.EshopItem} -> {imp.Material} (tag: {tag})");
+                        _log.Info($"Successfully imported mapping {imp.EshopItem} -> {imp.Material} (tag: {tag})");
                     }
                     catch (Exception ex)
                     {
-                        m_log.Error($"An attempt to import {imp.EshopItem} -> {imp.Material} failed", ex);
+                        _log.Error($"An attempt to import {imp.EshopItem} -> {imp.Material} failed", ex);
                         throw;
                     }
                 }
 
                 tx.Commit();
 
-                m_log.Info($"Done");
+                _log.Info($"Done");
             }
 
             return toProcess.Count;
@@ -420,10 +420,10 @@ namespace Elsa.Commerce.Core.Repositories
 
         private List<IKitDefinition> GetAllKitDefinitions()
         {
-            return m_database.SelectFrom<IKitDefinition>()
+            return _database.SelectFrom<IKitDefinition>()
                             .Join(kd => kd.SelectionGroups)
                             .Join(kd => kd.SelectionGroups.Each().Items)
-                            .Where(k => k.ProjectId == m_session.Project.Id)
+                            .Where(k => k.ProjectId == _session.Project.Id)
                             .OrderBy(kd => kd.ItemName)
                             .OrderBy(kd => kd.SelectionGroups.Each().Name)
                             .OrderBy(kd => kd.SelectionGroups.Each().Items.Each().ItemName)
@@ -435,10 +435,10 @@ namespace Elsa.Commerce.Core.Repositories
         {
             var kits = data.GroupBy(kd => kd.KitName).ToList();
 
-            m_log.Info($"Uploaded {kits.Count} of kits");
+            _log.Info($"Uploaded {kits.Count} of kits");
 
             var existingKits = GetAllKitDefinitions();
-            m_log.Info($"Exists {existingKits.Count} of kits");
+            _log.Info($"Exists {existingKits.Count} of kits");
 
             foreach (var kit in kits)
                 ProcessKitImport(kit, existingKits);
@@ -448,22 +448,22 @@ namespace Elsa.Commerce.Core.Repositories
 
         private void ProcessKitImport(IGrouping<string, KitProductXlsModel> kit, List<IKitDefinition> existingKits)
         {
-            m_log.Info($"Processing import of kit \"{kit.Key}\"");
+            _log.Info($"Processing import of kit \"{kit.Key}\"");
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var dbKitDefinition = existingKits.FirstOrDefault(ek => ek.ItemName == kit.Key);
                 if (dbKitDefinition != null && kit.All(k => string.IsNullOrEmpty(k.SelectionGroupName)))
                 {
-                    m_log.Info($"Kit definition '{kit.Key}' imported with empty {nameof(KitProductXlsModel.SelectionGroupName)} - deleting");
+                    _log.Info($"Kit definition '{kit.Key}' imported with empty {nameof(KitProductXlsModel.SelectionGroupName)} - deleting");
 
                     foreach(var existingGroup in dbKitDefinition.SelectionGroups)
                     {
-                        m_database.DeleteAll(existingGroup.Items);
-                        m_database.Delete(existingGroup);
+                        _database.DeleteAll(existingGroup.Items);
+                        _database.Delete(existingGroup);
                     }
 
-                    m_database.Delete(dbKitDefinition);
+                    _database.Delete(dbKitDefinition);
 
                     tx.Commit();
                     return;
@@ -471,12 +471,12 @@ namespace Elsa.Commerce.Core.Repositories
 
                 if (dbKitDefinition == null)
                 {
-                    m_log.Info($"\tKit '{kit.Key}' does not exist - creating");
-                    dbKitDefinition = m_database.New<IKitDefinition>();
-                    dbKitDefinition.ProjectId = m_session.Project.Id;
+                    _log.Info($"\tKit '{kit.Key}' does not exist - creating");
+                    dbKitDefinition = _database.New<IKitDefinition>();
+                    dbKitDefinition.ProjectId = _session.Project.Id;
                     dbKitDefinition.ItemName = kit.Key;
                     
-                    m_database.Save(dbKitDefinition);
+                    _database.Save(dbKitDefinition);
                 }
 
                 // Delete removed groups
@@ -484,9 +484,9 @@ namespace Elsa.Commerce.Core.Repositories
                 {
                     if(kit.All(newGroup => newGroup.SelectionGroupName != existingGroup.Name))
                     {
-                        m_log.Info($"\tSelection group '{existingGroup.Name}' is not present in the import - deleting");
-                        m_database.DeleteAll(existingGroup.Items);
-                        m_database.Delete(existingGroup);
+                        _log.Info($"\tSelection group '{existingGroup.Name}' is not present in the import - deleting");
+                        _database.DeleteAll(existingGroup.Items);
+                        _database.Delete(existingGroup);
                     }
                 }
 
@@ -500,24 +500,24 @@ namespace Elsa.Commerce.Core.Repositories
                     {
                         var xlsGroupInTextMarker = xlsGroup.Select(kg => kg.CustomerGroupTitle).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
 
-                        m_log.Info($"\tSelection group '{xlsGroup.Key}' does not exist - creating");
-                        dbGroup = m_database.New<IKitSelectionGroup>();
+                        _log.Info($"\tSelection group '{xlsGroup.Key}' does not exist - creating");
+                        dbGroup = _database.New<IKitSelectionGroup>();
                         dbGroup.KitDefinitionId = dbKitDefinition.Id;
                         dbGroup.Name = xlsGroup.Key;
                         dbGroup.InTextMarker = xlsGroupInTextMarker;
 
-                        m_database.Save(dbGroup);
+                        _database.Save(dbGroup);
                     }
 
-                    m_log.Info($"\tProcessing import of selection group '{xlsGroup.Key}'");
+                    _log.Info($"\tProcessing import of selection group '{xlsGroup.Key}'");
 
                     // process group items:
                     foreach(var existingGroupItem in dbGroup.Items)
                     {
                         if(xlsGroup.All(xg => xg.ProductName == existingGroupItem.ItemName))
                         {
-                            m_log.Info($"\t\tItem '{existingGroupItem.ItemName}' not included in the import - deleting");
-                            m_database.Delete(existingGroupItem);
+                            _log.Info($"\t\tItem '{existingGroupItem.ItemName}' not included in the import - deleting");
+                            _database.Delete(existingGroupItem);
                         }
                     }
 
@@ -526,19 +526,19 @@ namespace Elsa.Commerce.Core.Repositories
                         var dbItem = dbGroup.Items.FirstOrDefault(i => i.ItemName == xlsItem.ProductName);
                         if (dbItem == null)
                         {
-                            m_log.Info($"\t\tItem '{xlsItem.ProductName}' does not exist - creating");
-                            dbItem = m_database.New<IKitSelectionGroupItem>();
+                            _log.Info($"\t\tItem '{xlsItem.ProductName}' does not exist - creating");
+                            dbItem = _database.New<IKitSelectionGroupItem>();
                             dbItem.KitSelectionGroupId = dbGroup.Id;
                             dbItem.ItemName = xlsItem.ProductName;
                             dbItem.Shortcut = xlsItem.Shortcut ?? xlsItem.ProductName;
                             dbItem.InTextMarker = string.IsNullOrWhiteSpace(xlsItem.CustomerProductName) ? null : xlsItem.CustomerProductName;
 
-                            m_database.Save(dbItem);
+                            _database.Save(dbItem);
                         }
                         else if (dbItem.Shortcut != xlsItem.Shortcut)
                         {
                             dbItem.Shortcut = xlsItem.Shortcut;
-                            m_database.Save(dbItem);
+                            _database.Save(dbItem);
                         }
                     }
                 }
@@ -559,16 +559,16 @@ namespace Elsa.Commerce.Core.Repositories
 
         private sealed class WithPostopnedCacheRemoval : VirtualProductRepository, IDisposableVirtualProductsRepository
         {
-            private readonly CacheWithPostponedRemoval m_ppCache;
+            private readonly CacheWithPostponedRemoval _ppCache;
 
             public WithPostopnedCacheRemoval(CacheWithPostponedRemoval cache, IDatabase database, ISession session, ILog log) : base(cache, database, session, log)
             {
-                m_ppCache = cache;
+                _ppCache = cache;
             }
             
             public void Dispose()
             {
-                m_ppCache.Dispose();
+                _ppCache.Dispose();
             }
         }
     }

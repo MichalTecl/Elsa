@@ -6,17 +6,17 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.JobLauncher
 {
     public class JobSession : ISession
     {
-        private IDatabase m_database;
+        private IDatabase _database;
 
         public JobSession(IDatabase database)
         {
-            m_database = database;
+            _database = database;
         }
 
         public IUser User { get; private set; }
@@ -53,7 +53,7 @@ namespace Elsa.JobLauncher
 
         public void Login(string user, string password)
         {
-            var userRecord = m_database.SelectFrom<IUser>().Where(i => i.EMail == user).Join(u => u.Project).Execute().FirstOrDefault();
+            var userRecord = _database.SelectFrom<IUser>().Where(i => i.EMail == user).Join(u => u.Project).Execute().FirstOrDefault();
 
             if (userRecord == null || !VerifyPassword(userRecord.PasswordHash, password, userRecord.UsesDefaultPassword))
             {

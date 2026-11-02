@@ -10,27 +10,27 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories.Automation
 {
     public class RepositoryFactory : IRepositoryFactory
     {
-        private readonly ICache m_cache;
-        private readonly ISession m_session;
-        private readonly IDatabase m_database;
+        private readonly ICache _cache;
+        private readonly ISession _session;
+        private readonly IDatabase _database;
 
         public RepositoryFactory(ISession session, IDatabase database, ICache cache)
         {
-            m_session = session;
-            m_database = database;
-            m_cache = cache;
+            _session = session;
+            _database = database;
+            _cache = cache;
         }
 
         public IRepository<T> GetForSmallTable<T>(Action<IQueryBuilder<T>> queryCustomization = null)
             where T : class, IIntIdEntity, IProjectRelatedEntity
         {
-            return new SimpleRepository<T>(m_cache, m_session, m_database, queryCustomization);
+            return new SimpleRepository<T>(_cache, _session, _database, queryCustomization);
         }
     }
 }

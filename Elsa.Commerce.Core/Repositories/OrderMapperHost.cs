@@ -6,41 +6,41 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {
     internal class OrderMapperHost
     {
-        private bool m_stopMapping;
+        private bool _stopMapping;
 
-        private readonly IErpDataMapper m_mapper;
-        private readonly IErpOrderModel m_erpOrder;
+        private readonly IErpDataMapper _mapper;
+        private readonly IErpOrderModel _erpOrder;
 
-        private readonly IPurchaseOrderRepository m_purchaseOrderRepository;
-        private readonly IDatabase m_database;
-        private readonly ICurrencyRepository m_currencyRepository;
+        private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+        private readonly IDatabase _database;
+        private readonly ICurrencyRepository _currencyRepository;
 
-        private readonly IOrderStatusMappingRepository m_statusMappingRepository;
-        private readonly IProductRepository m_productRepository;
+        private readonly IOrderStatusMappingRepository _statusMappingRepository;
+        private readonly IProductRepository _productRepository;
 
-        private IPurchaseOrder m_order;
+        private IPurchaseOrder _order;
 
         public IPurchaseOrder Order
         {
             get
             {
-                if (m_order == null)
+                if (_order == null)
                 {
                     throw new InvalidOperationException("orderObjectFactory must be called as first");
                 }
 
-                return m_order;
+                return _order;
             }
 
             private set
             {
-                m_order = value;
+                _order = value;
             }
         }
 
@@ -60,29 +60,29 @@ namespace Elsa.Commerce.Core.Repositories
 
         public OrderMapperHost(IErpDataMapper mapper, IErpOrderModel erpOrder, IPurchaseOrderRepository purchaseOrderRepository, IDatabase database, ICurrencyRepository currencyRepository, IOrderStatusMappingRepository statusMappingRepository, IProductRepository productMappingRepository)
         {
-            m_mapper = mapper;
-            m_erpOrder = erpOrder;
-            m_purchaseOrderRepository = purchaseOrderRepository;
-            m_database = database;
-            m_currencyRepository = currencyRepository;
-            m_statusMappingRepository = statusMappingRepository;
-            m_productRepository = productMappingRepository;
+            _mapper = mapper;
+            _erpOrder = erpOrder;
+            _purchaseOrderRepository = purchaseOrderRepository;
+            _database = database;
+            _currencyRepository = currencyRepository;
+            _statusMappingRepository = statusMappingRepository;
+            _productRepository = productMappingRepository;
         }
 
         public bool Map()
         {
-            m_mapper.MapOrder(
-                m_erpOrder,
+            _mapper.MapOrder(
+                _erpOrder,
                 GetOrder,
                 GetOrderItem,
                 GetPriceElement,
                 i => GetAddress(i.ErpOrderId, true),
                 i => GetAddress(i.ErpOrderId, false),
                 GetCurrency,
-                m_statusMappingRepository.GetMappings(m_erpOrder.ErpSystemId),
-                m_productRepository);
+                _statusMappingRepository.GetMappings(_erpOrder.ErpSystemId),
+                _productRepository);
 
-            return !m_stopMapping;
+            return !_stopMapping;
         }
 
         private IOrderPriceElement GetPriceElement(string arg)
@@ -96,7 +96,7 @@ namespace Elsa.Commerce.Core.Repositories
             }
             else 
             {
-                priceElement = m_database.New<IOrderPriceElement>(i => i.ExternalId = xid);
+                priceElement = _database.New<IOrderPriceElement>(i => i.ExternalId = xid);
             }
 
             PriceElements.Add(priceElement);
@@ -106,14 +106,14 @@ namespace Elsa.Commerce.Core.Repositories
 
         private IPurchaseOrder GetOrder(OrderIdentifier identifier)
         {
-            var order =  m_purchaseOrderRepository.TryLoadOrderByOrderNumber(identifier.ErpOrderId);
+            var order =  _purchaseOrderRepository.TryLoadOrderByOrderNumber(identifier.ErpOrderId);
             if (order == null)
             {
-                order = m_database.New<IPurchaseOrder>();
+                order = _database.New<IPurchaseOrder>();
             }
             else if (order.OrderHash == identifier.OrderHash)
             {
-                m_stopMapping = true;
+                _stopMapping = true;
                 Order = order;
                 return null;
             }
@@ -139,7 +139,7 @@ namespace Elsa.Commerce.Core.Repositories
             }
             else
             {
-                item = m_database.New<IOrderItem>(i => i.ErpOrderItemId = erpItemId);
+                item = _database.New<IOrderItem>(i => i.ErpOrderItemId = erpItemId);
             }
 
             Items.Add(item);
@@ -150,7 +150,7 @@ namespace Elsa.Commerce.Core.Repositories
         private IAddress GetAddress(string erpOrderId, bool isInvoiceAddress)
         {
             IAddress address = (isInvoiceAddress ? Order.InvoiceAddress : Order.DeliveryAddress)
-                               ?? m_database.New<IAddress>();
+                               ?? _database.New<IAddress>();
 
             if (isInvoiceAddress)
             {
@@ -172,7 +172,7 @@ namespace Elsa.Commerce.Core.Repositories
             }
             else
             {
-                Currency = m_currencyRepository.GetCurrency(symbol) ?? m_database.New<ICurrency>(c =>
+                Currency = _currencyRepository.GetCurrency(symbol) ?? _database.New<ICurrency>(c =>
                                {
                                    c.Symbol = symbol; 
                                });

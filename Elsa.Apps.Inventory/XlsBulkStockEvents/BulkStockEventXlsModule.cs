@@ -3,7 +3,7 @@ using Elsa.Commerce.Core.StockEvents;
 using Elsa.Commerce.Core.Units;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.Warehouse;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

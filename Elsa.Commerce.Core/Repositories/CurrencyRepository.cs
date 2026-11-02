@@ -8,23 +8,23 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core.CurrencyConversions;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {
     public class CurrencyRepository : ICurrencyRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
 
-        private readonly IPerProjectDbCache m_cache;
+        private readonly IPerProjectDbCache _cache;
         
 
         public CurrencyRepository(IDatabase database, ISession session, IPerProjectDbCache cache)
         {
-            m_database = database;
-            m_session = session;
-            m_cache = cache;
+            _database = database;
+            _session = session;
+            _cache = cache;
         }
 
         public ICurrency GetCurrency(string symbol)
@@ -43,24 +43,24 @@ namespace Elsa.Commerce.Core.Repositories
         {
             try
             {
-                currency.ProjectId = m_session.Project.Id;
+                currency.ProjectId = _session.Project.Id;
 
-                m_database.Save(currency);
+                _database.Save(currency);
             }
             finally
             {
-                m_cache.Remove("currencies");
+                _cache.Remove("currencies");
             }
         }
 
         public IEnumerable<ICurrency> GetAllCurrencies()
         {
-            return m_cache.ReadThrough("currencies", db => db.SelectFrom<ICurrency>());
+            return _cache.ReadThrough("currencies", db => db.SelectFrom<ICurrency>());
         }
 
         public IEnumerable<ICurrencyRate> GetActualCurrencyRates()
         {
-            return m_cache.ReadThrough("currates", db => db.SelectFrom<ICurrencyRate>().Join(r => r.SourceCurrency).Join(r => r.TargetCurrency).Where(i => i.ValidTo == null));
+            return _cache.ReadThrough("currates", db => db.SelectFrom<ICurrencyRate>().Join(r => r.SourceCurrency).Join(r => r.TargetCurrency).Where(i => i.ValidTo == null));
         }
 
         public ICurrencyRate GetCurrencyRate(ICurrency sourceCurrency, ICurrency targetCurrency, DateTime? forDate = null)
@@ -74,8 +74,8 @@ namespace Elsa.Commerce.Core.Repositories
             }
 
             return
-                m_database.SelectFrom<ICurrencyRate>()
-                    .Where(r => r.ProjectId == m_session.Project.Id)
+                _database.SelectFrom<ICurrencyRate>()
+                    .Where(r => r.ProjectId == _session.Project.Id)
                     .Where(c => (c.SourceCurrencyId == sourceCurrency.Id) && (c.TargetCurrencyId == targetCurrency.Id))
                     .Where(r => (r.ValidFrom <= forDate.Value) && (r.ValidTo >= forDate.Value))
                     .Execute()
@@ -91,7 +91,7 @@ namespace Elsa.Commerce.Core.Repositories
         {
             try
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     var oldRate = GetCurrencyRate(sourceCurrency, targetCurrency);
 
@@ -104,25 +104,25 @@ namespace Elsa.Commerce.Core.Repositories
                     if (oldRate != null)
                     {
                         oldRate.ValidTo = validFrom;
-                        m_database.Save(oldRate);
+                        _database.Save(oldRate);
                     }
 
-                    var actualRate = m_database.New<ICurrencyRate>();
+                    var actualRate = _database.New<ICurrencyRate>();
                     actualRate.SourceCurrencyId = sourceCurrency.Id;
                     actualRate.TargetCurrencyId = targetCurrency.Id;
                     actualRate.ValidFrom = validFrom;
                     actualRate.Rate = rate;
                     actualRate.SourceLink = sourceLink;
-                    actualRate.ProjectId = m_session.Project.Id;
+                    actualRate.ProjectId = _session.Project.Id;
                     
-                    m_database.Save(actualRate);
+                    _database.Save(actualRate);
 
                     tx.Commit();
                 }
             }
             finally
             {
-                m_cache.Remove("currates");
+                _cache.Remove("currates");
             }
         }
 
@@ -130,7 +130,7 @@ namespace Elsa.Commerce.Core.Repositories
         {
             var converted = sourceValue * usedRate.Rate;
 
-            var conversion = m_database.New<ICurrencyConversion>(c =>
+            var conversion = _database.New<ICurrencyConversion>(c =>
             {
                 c.ConversionDt = DateTime.Now;
                 c.CurrencyRateId = usedRate.Id;
@@ -142,14 +142,14 @@ namespace Elsa.Commerce.Core.Repositories
                 c.ProjectId = usedRate.ProjectId;
             });
 
-            m_database.Save(conversion);
+            _database.Save(conversion);
 
             return conversion;
         }
 
         public ICurrencyConversion GetCurrencyConversion(int id)
         {
-            return m_cache.ReadThrough($"currency_conversion_{id}",
+            return _cache.ReadThrough($"currency_conversion_{id}",
                 db => db.SelectFrom<ICurrencyConversion>().Join(c => c.CurrencyRate).Join(c => c.SourceCurrency)
                     .Join(c => c.TargetCurrency).Where(c => c.Id == id)).FirstOrDefault();
         }

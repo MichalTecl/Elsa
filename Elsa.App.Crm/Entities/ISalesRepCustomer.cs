@@ -1,7 +1,7 @@
 ﻿using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 using Elsa.Core.Entities.Commerce.Crm;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 
 namespace Elsa.App.Crm.Entities

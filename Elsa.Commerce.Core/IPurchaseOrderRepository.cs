@@ -5,7 +5,7 @@ using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Accounting;
 using Elsa.Core.Entities.Commerce.Commerce;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core
 {

@@ -45,9 +45,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\..\Robowire\Robowire\Robowire.RobOrm.Core\Robowire.RobOrm.Core.csproj">
+    <ProjectReference Include="..\..\Robowire\RobOrm\RobOrm.Core\RobOrm.Core.csproj">
       <Project>{FF79ECB2-9A11-45BA-BE08-E6D4471E7A0F}</Project>
-      <Name>Robowire.RobOrm.Core</Name>
+      <Name>RobOrm.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Robowire\Robowire\RobowireCore\Robowire.csproj">
       <Project>{1EDCBAB3-DA52-40B1-998B-88F878FF2875}</Project>

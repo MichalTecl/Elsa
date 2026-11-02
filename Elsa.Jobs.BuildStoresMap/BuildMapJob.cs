@@ -6,7 +6,7 @@ using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Crm;
 using Elsa.Jobs.BuildStoresMap.Config;
 using Elsa.Jobs.Common;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.IO;
 using System.Linq;

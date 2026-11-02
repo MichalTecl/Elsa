@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Xml;
-using Robowire.RobOrm.SqlServer;
+using RobOrm.SqlServer;
 
 namespace Elsa.Common.Logging
 {

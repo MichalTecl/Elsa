@@ -75,10 +75,6 @@
       <Project>{8d5fb7d2-8960-4bf7-938e-2ec9584bdec5}</Project>
       <Name>CodeGeneration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Robowire.Common.Expressions\Robowire.Common.Expressions.csproj">
-      <Project>{e9aeacb2-d6e8-4f61-af63-3578f9831594}</Project>
-      <Name>Robowire.Common.Expressions</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RobowireCore\Robowire.csproj">
       <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
       <Name>Robowire</Name>

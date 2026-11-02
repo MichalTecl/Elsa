@@ -21,7 +21,7 @@ using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 {
@@ -29,21 +29,21 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
     {
         private const int c_pageSize = 10;
 
-        private readonly ISession m_session;
-        private readonly IDatabase m_database;
-        private readonly IMaterialBatchFacade m_batchFacade;
-        private readonly IMaterialBatchRepository m_batchRepository;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IProductionFacade m_productionFacade;
-        private readonly AmountProcessor m_amountProcessor;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly IOrdersFacade m_ordersFacade;
-        private readonly IOrderStatusRepository m_orderStatusRepository;
-        private readonly IPurchaseOrderRepository m_orderRepository;
-        private readonly IUserRepository m_userRepository;
-        private readonly IStockEventRepository m_stockEventRepository;
-        private readonly ISaleEventRepository m_saleEventRepository;
-        private readonly ILog m_log;
+        private readonly ISession _session;
+        private readonly IDatabase _database;
+        private readonly IMaterialBatchFacade _batchFacade;
+        private readonly IMaterialBatchRepository _batchRepository;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IProductionFacade _productionFacade;
+        private readonly AmountProcessor _amountProcessor;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IOrdersFacade _ordersFacade;
+        private readonly IOrderStatusRepository _orderStatusRepository;
+        private readonly IPurchaseOrderRepository _orderRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IStockEventRepository _stockEventRepository;
+        private readonly ISaleEventRepository _saleEventRepository;
+        private readonly ILog _log;
 
         public BatchReportingFacade(ISession session,
             IDatabase database,
@@ -61,26 +61,26 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             ISaleEventRepository saleEventRepository,
             ILog log)
         {
-            m_session = session;
-            m_database = database;
-            m_batchFacade = batchFacade;
-            m_batchRepository = batchRepository;
-            m_materialRepository = materialRepository;
-            m_productionFacade = productionFacade;
-            m_amountProcessor = amountProcessor;
-            m_unitRepository = unitRepository;
-            m_ordersFacade = ordersFacade;
-            m_orderStatusRepository = orderStatusRepository;
-            m_orderRepository = orderRepository;
-            m_userRepository = userRepository;
-            m_stockEventRepository = stockEventRepository;
-            m_saleEventRepository = saleEventRepository;
-            m_log = log;
+            _session = session;
+            _database = database;
+            _batchFacade = batchFacade;
+            _batchRepository = batchRepository;
+            _materialRepository = materialRepository;
+            _productionFacade = productionFacade;
+            _amountProcessor = amountProcessor;
+            _unitRepository = unitRepository;
+            _ordersFacade = ordersFacade;
+            _orderStatusRepository = orderStatusRepository;
+            _orderRepository = orderRepository;
+            _userRepository = userRepository;
+            _stockEventRepository = stockEventRepository;
+            _saleEventRepository = saleEventRepository;
+            _log = log;
         }
 
         public BatchReportModel QueryBatches(BatchReportQuery query)
         {
-            m_log.Info($"Querying batches. Query={query}");
+            _log.Info($"Querying batches. Query={query}");
 
             if (query.LoadOrdersPage != null)
             {
@@ -109,12 +109,12 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 || query.CompositionId != null)
             {
                 query.LoadBatchDetails = true;
-                m_log.Info("Loaing batch details for composition or component");
+                _log.Info("Loaing batch details for composition or component");
             }
 
             if (query.RelativeToOrderId != null)
             {
-                order = m_orderRepository.GetOrder(query.RelativeToOrderId.Value);
+                order = _orderRepository.GetOrder(query.RelativeToOrderId.Value);
 
                 if (order == null)
                 {
@@ -125,14 +125,14 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 pageNumber = 0;
             }
 
-            m_log.Info("Calling LoadBatchesReport");
+            _log.Info("Calling LoadBatchesReport");
 
             var procedureName = query.LoadBatchDetails ? "LoadBatchesReport" : "LoadBatchesReport_Fast";
 
-            var sqlStopwatch = m_log.StartStopwatch($"Calling {procedureName} procedure");
+            var sqlStopwatch = _log.StartStopwatch($"Calling {procedureName} procedure");
 
-            var sql = m_database.Sql().Call(procedureName)
-                .WithParam("@projectId", m_session.Project.Id)
+            var sql = _database.Sql().Call(procedureName)
+                .WithParam("@projectId", _session.Project.Id)
                 .WithParam("@pageSize", pageSize)
                 .WithParam("@pageNumber", pageNumber)
                 .WithParam("@batchId", query.HasKey ? query.ToKey().UnsafeToString() : null) 
@@ -158,19 +158,19 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
             var rawEntries = sql.MapRows(MapEntry);
 
             sqlStopwatch.Dispose();
-            m_log.Info($"loaded {rawEntries.Count} rows");
+            _log.Info($"loaded {rawEntries.Count} rows");
 
             result.Report.AddRange(rawEntries);
             result.CanLoadMore = (result.Report.Count == c_pageSize);
 
-            m_log.Info("Processing report entries");
+            _log.Info("Processing report entries");
 
-            using (m_log.StartStopwatch("Processing report entries"))
+            using (_log.StartStopwatch("Processing report entries"))
                 foreach (var b in result.Report.OfType<BatchReportEntry>())
                 {
                     b.HasDetail = query.LoadBatchDetails;
 
-                    var material = m_materialRepository.GetMaterialById(b.MaterialId);
+                    var material = _materialRepository.GetMaterialById(b.MaterialId);
 
                     if (b.IsClosed)
                     {
@@ -178,20 +178,20 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     }
                     else
                     {
-                        var available = new Amount(b.AvailableAmountValue, m_unitRepository.GetUnit(b.AvailableAmountUnitId));
+                        var available = new Amount(b.AvailableAmountValue, _unitRepository.GetUnit(b.AvailableAmountUnitId));
 
-                        available = m_amountProcessor.Convert(available, material.NominalUnit);
+                        available = _amountProcessor.Convert(available, material.NominalUnit);
                         b.AvailableAmount = $"{StringUtil.FormatDecimal(available.Value)} {available.Unit.Symbol}";
                         b.Available = available;
                     }
 
-                    var totalUnit = m_unitRepository.GetUnitBySymbol(b.TotalAmountUnitName);
+                    var totalUnit = _unitRepository.GetUnitBySymbol(b.TotalAmountUnitName);
                     var totalAmount = new Amount(b.TotalAmountValue, totalUnit);
-                    totalAmount = m_amountProcessor.Convert(totalAmount, material.NominalUnit);
+                    totalAmount = _amountProcessor.Convert(totalAmount, material.NominalUnit);
 
                     b.BatchVolume = $"{StringUtil.FormatDecimal(totalAmount.Value)} {totalAmount.Unit.Symbol}";
 
-                    //b.NoDelReason = m_batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
+                    //b.NoDelReason = _batchFacade.GetDeletionBlockReasons(b.BatchId).FirstOrDefault();
                     b.CanDelete = !(b.HasStockEvents || b.NumberOfCompositions > 0 || b.NumberOfOrders > 0 || b.NumberOfSaleEvents > 0);
 
                     if (b.HasStockEvents)
@@ -243,7 +243,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
             Func<IStockEventType, Amount, BatchStockEventSuggestion> addSuggestion = (type, amount) =>
             {
-                var manipulationAmount = m_amountProcessor.ToSmallestUnit(amount);
+                var manipulationAmount = _amountProcessor.ToSmallestUnit(amount);
 
                 var sug = new BatchStockEventSuggestion()
                 {
@@ -261,7 +261,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 return sug;
             };
 
-            foreach (var eventType in m_stockEventRepository.GetAllEventTypes())
+            foreach (var eventType in _stockEventRepository.GetAllEventTypes())
             {
                 if (available.Unit.IntegerOnly)
                 {
@@ -274,13 +274,13 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         private void PopulateProductionSuggestions(BatchMenuItems target, string batchNumber, IMaterial material, Amount available)
         {
-            var prods = m_batchFacade.GetOneClickProductionOptions().Where(p => p.BatchNumber == batchNumber && p.SourceMaterialId == material.Id).ToList();
+            var prods = _batchFacade.GetOneClickProductionOptions().Where(p => p.BatchNumber == batchNumber && p.SourceMaterialId == material.Id).ToList();
             target.ProductionSuggestions.AddRange(prods);
         }
 
         private void PopulateStockEventCounts(BatchReportEntry batchReportEntry)
         {            
-            foreach (var evt in m_stockEventRepository.GetBatchEvents(batchReportEntry.BatchKey))
+            foreach (var evt in _stockEventRepository.GetBatchEvents(batchReportEntry.BatchKey))
             {
                 int sum;
                 if (!batchReportEntry.StockEventCounts.TryGetValue(evt.Type.TabTitle, out sum))
@@ -294,7 +294,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         private List<BatchReportEntryBase> PopulateRelativeToOrder(IPurchaseOrder order, List<BatchReportEntryBase> batches)
         {
-            var concreteItems = m_ordersFacade.GetAllConcreteOrderItems(order).ToList();
+            var concreteItems = _ordersFacade.GetAllConcreteOrderItems(order).ToList();
             var result = new List<BatchReportEntryBase>(concreteItems.Count * 2);
 
             foreach (var orderItem in concreteItems)
@@ -311,12 +311,12 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 {
                     var assignmentBatchKey = new BatchKey(assignment.MaterialBatchId);
 
-                    var assignmentBatchMaterialId = assignmentBatchKey.GetMaterialId(m_batchFacade);
-                    var assignmentBatchNumber = assignmentBatchKey.GetBatchNumber(m_batchFacade);
+                    var assignmentBatchMaterialId = assignmentBatchKey.GetMaterialId(_batchFacade);
+                    var assignmentBatchNumber = assignmentBatchKey.GetBatchNumber(_batchFacade);
 
                     var sourceRecord = batches.OfType<BatchReportEntry>().FirstOrDefault(b => b.MaterialId == assignmentBatchMaterialId && b.BatchNumber.Equals(assignmentBatchNumber, StringComparison.InvariantCultureIgnoreCase));
 
-                    var user = assignment == null ? string.Empty : m_userRepository.GetUserNick(assignment.UserId);
+                    var user = assignment == null ? string.Empty : _userRepository.GetUserNick(assignment.UserId);
 
                     var reportRow = new BatchReportEntry(BatchKey.Parse(sourceRecord.BatchId))
                     {
@@ -358,7 +358,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         private BatchReportModel LoadOrders(BatchKey key, int ordersPageNumber)
         {
-            var orders = m_ordersFacade.GetOrdersByUsedBatch(key, c_pageSize, ordersPageNumber).ToList();
+            var orders = _ordersFacade.GetOrdersByUsedBatch(key, c_pageSize, ordersPageNumber).ToList();
 
             var entry = new BatchOrdersReportEntry(key)
             {
@@ -374,10 +374,10 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                     Customer = entity.Item1.CustomerEmail,
                     OrderNumber = entity.Item1.OrderNumber,
                     PurchaseDate = StringUtil.FormatDateTime(entity.Item1.PurchaseDate),
-                    Status = m_orderStatusRepository.Translate(entity.Item1.OrderStatusId),
+                    Status = _orderStatusRepository.Translate(entity.Item1.OrderStatusId),
                     Quantity = StringUtil.FormatDecimal(entity.Item2),
                     IsAllocation = !OrderStatus.IsSent(entity.Item1.OrderStatusId),
-                    AllocationHandle = OrderStatus.IsSent(entity.Item1.OrderStatusId) ? null : $"{entity.Item1.Id}|{key.ToString(m_batchFacade)}"
+                    AllocationHandle = OrderStatus.IsSent(entity.Item1.OrderStatusId) ? null : $"{entity.Item1.Id}|{key.ToString(_batchFacade)}"
                 });
             }
 
@@ -389,19 +389,19 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         private BatchReportModel LoadSaleEvents(BatchKey key, int pageNumber)
         {
-            var events = m_saleEventRepository.GetAllocationsByBatch(key).ToList();
+            var events = _saleEventRepository.GetAllocationsByBatch(key).ToList();
 
             var aggregatedAllocations = new List<SaleEventAllocationModel>(events.Count);
 
             foreach (var evt in events)
             {
-                if (aggregatedAllocations.Any(ag => ag.Populate(evt, m_amountProcessor)))
+                if (aggregatedAllocations.Any(ag => ag.Populate(evt, _amountProcessor)))
                 {
                     continue;
                 }
 
                 var newRecord = new SaleEventAllocationModel();
-                newRecord.Populate(evt, m_amountProcessor);
+                newRecord.Populate(evt, _amountProcessor);
                 aggregatedAllocations.Add(newRecord);
             }
 
@@ -416,7 +416,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         private BatchReportModel LoadSegments(BatchKey key, int pageNumber)
         {
-            var segments = m_batchRepository.GetBatches(key).OrderBy(b => b.Created).ToList();
+            var segments = _batchRepository.GetBatches(key).OrderBy(b => b.Created).ToList();
 
             var entry = new BatchSegmentsReportEntry(key);
 
@@ -425,8 +425,8 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
                 entry.Segments.Add(new BatchSegmentModel
                 {
                     SegmentId = b.Id,
-                    Amount = new Amount(b.Volume, m_unitRepository.GetUnit(b.UnitId)).ToString(),
-                    Author = m_userRepository.GetUserNick(b.AuthorId),
+                    Amount = new Amount(b.Volume, _unitRepository.GetUnit(b.UnitId)).ToString(),
+                    Author = _userRepository.GetUserNick(b.AuthorId),
                     Date = StringUtil.FormatDate(b.Created),
                     Price = $"{StringUtil.FormatPrice(b.ProductionWorkPrice ?? 0m)} CZK",
                     HasRecipe = b.RecipeId != null
@@ -442,7 +442,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         private BatchReportModel LoadPriceComponents(BatchKey key, int queryLoadPriceComponentsPage)
         {
             var entry = new PriceComponentsReportEntry(key);
-            entry.PriceComponents.AddRange(m_batchFacade.GetPriceComponents(key));
+            entry.PriceComponents.AddRange(_batchFacade.GetPriceComponents(key));
 
             var result = new BatchReportModel();
             result.Report.Add(entry);
@@ -454,7 +454,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         {
             foreach (var reportRow in report.OfType<BatchReportEntry>())
             {
-                var componentBatches = m_batchRepository.GetBatches(componentBatchId).ToList();
+                var componentBatches = _batchRepository.GetBatches(componentBatchId).ToList();
                 if (!componentBatches.Any())
                 {
                     continue;
@@ -464,13 +464,13 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                 foreach (var compnentBatch in componentBatches)
                 {
-                    foreach (var compositionBatch in m_batchRepository.GetBatches(reportRow.BatchKey))
+                    foreach (var compositionBatch in _batchRepository.GetBatches(reportRow.BatchKey))
                     {
                         foreach (var componentEntity in compositionBatch.Components)
                         {
                             var componentBatch = componentEntity.Component;
-                            if (componentBatch.MaterialId != componentBatchId.GetMaterialId(m_batchRepository) ||
-                                (!componentBatch.BatchNumber.Equals(componentBatchId.GetBatchNumber(m_batchRepository),
+                            if (componentBatch.MaterialId != componentBatchId.GetMaterialId(_batchRepository) ||
+                                (!componentBatch.BatchNumber.Equals(componentBatchId.GetBatchNumber(_batchRepository),
                                     StringComparison.InvariantCultureIgnoreCase)))
                             {
                                 continue;
@@ -478,7 +478,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                             var usedAmount = new Amount(componentEntity.Volume, componentEntity.Unit);
 
-                            theAmount = m_amountProcessor.Add(theAmount, usedAmount);
+                            theAmount = _amountProcessor.Add(theAmount, usedAmount);
                         }
                     }
                 }
@@ -489,7 +489,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
         private void PopulateComponentAmounts(BatchKey compositionId, List<BatchReportEntryBase> resultReport)
         {
-            var compositionPartials = m_batchRepository.GetBatches(compositionId);
+            var compositionPartials = _batchRepository.GetBatches(compositionId);
 
             var usedAmounts = new Dictionary<string, Amount>(resultReport.Count);
 
@@ -504,7 +504,7 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
 
                     if (usedAmounts.TryGetValue(componentBatchKey, out var rollingSum))
                     {
-                        usedAmount = m_amountProcessor.Add(rollingSum, usedAmount);
+                        usedAmount = _amountProcessor.Add(rollingSum, usedAmount);
                     }
 
                     usedAmounts[componentBatchKey] = usedAmount;
@@ -591,12 +591,12 @@ namespace Elsa.Commerce.Core.Warehouse.BatchReporting
         {
             var result = new BatchMenuItems() { BatchKey = batchKey.UnsafeToString() };
 
-            var available = m_batchFacade.GetAvailableAmount(batchKey);
+            var available = _batchFacade.GetAvailableAmount(batchKey);
 
-            var material = m_materialRepository.GetMaterialById(batchKey.GetMaterialId(m_batchFacade));
+            var material = _materialRepository.GetMaterialById(batchKey.GetMaterialId(_batchFacade));
 
-            PopulateStockEventSuggestions(result, batchKey.GetBatchNumber(m_batchFacade), material.Adaptee, available);
-            PopulateProductionSuggestions(result, batchKey.GetBatchNumber(m_batchFacade), material.Adaptee, available);
+            PopulateStockEventSuggestions(result, batchKey.GetBatchNumber(_batchFacade), material.Adaptee, available);
+            PopulateProductionSuggestions(result, batchKey.GetBatchNumber(_batchFacade), material.Adaptee, available);
             
             return result;
         }

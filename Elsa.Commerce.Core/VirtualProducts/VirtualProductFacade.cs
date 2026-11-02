@@ -9,30 +9,30 @@ using Elsa.Common;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Inventory;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.VirtualProducts
 {
     public class VirtualProductFacade : IVirtualProductFacade
     {
-        private readonly IVirtualProductRepository m_virtualProductRepository;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly IUnitConversionHelper m_unitConversionHelper;
-        private readonly IDatabase m_database;
+        private readonly IVirtualProductRepository _virtualProductRepository;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IUnitConversionHelper _unitConversionHelper;
+        private readonly IDatabase _database;
 
         public VirtualProductFacade(IVirtualProductRepository virtualProductRepository, IMaterialRepository materialRepository, IUnitRepository unitRepository, IUnitConversionHelper unitConversionHelper, IDatabase database)
         {
-            m_virtualProductRepository = virtualProductRepository;
-            m_materialRepository = materialRepository;
-            m_unitRepository = unitRepository;
-            m_unitConversionHelper = unitConversionHelper;
-            m_database = database;
+            _virtualProductRepository = virtualProductRepository;
+            _materialRepository = materialRepository;
+            _unitRepository = unitRepository;
+            _unitConversionHelper = unitConversionHelper;
+            _database = database;
         }
 
         public IVirtualProduct ProcessVirtualProductEditRequest(int? virtualProductId, string name, string[] materialEntries)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
                 var requestMaterials = ProcessMaterialEntries(materialEntries).ToList();
 
@@ -47,12 +47,12 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     throw new ArgumentException($"Materiál \"{cnt.Material}\" nesmí být k tagu připojen více než jednou");
                 }
                 
-                var vp = m_virtualProductRepository.CreateOrUpdateVirtualProduct(virtualProductId, name);
+                var vp = _virtualProductRepository.CreateOrUpdateVirtualProduct(virtualProductId, name);
 
-                using (var materialRepository = m_materialRepository.GetWithPostponedCache())
+                using (var materialRepository = _materialRepository.GetWithPostponedCache())
                 {
 
-                    var existingMaterials = m_materialRepository.GetMaterialsByVirtualProductId(vp.Id).ToList();
+                    var existingMaterials = _materialRepository.GetMaterialsByVirtualProductId(vp.Id).ToList();
 
                     //disconnections:
                     var toDetach = existingMaterials.Where(m => requestMaterials.All(rqm => rqm.Material.Id != m.Material.Id))
@@ -77,7 +77,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
                 
                 tx.Commit();
 
-                m_virtualProductRepository.CleanCache();
+                _virtualProductRepository.CleanCache();
 
                 return vp;
             }
@@ -85,7 +85,7 @@ namespace Elsa.Commerce.Core.VirtualProducts
 
         public MaterialAmountModel GetOrderItemMaterialForSingleUnit(IPurchaseOrder order, IOrderItem item)
         {
-            var tags = m_virtualProductRepository.GetVirtualProductsByOrderItem(order, item);
+            var tags = _virtualProductRepository.GetVirtualProductsByOrderItem(order, item);
 
             var materialTags = tags.Where(t => t.Materials.Any()).ToList();
             if (materialTags.Count != 1)
@@ -113,19 +113,19 @@ namespace Elsa.Commerce.Core.VirtualProducts
                     throw new ArgumentException($"Chybné množství {entry.Amount} - musí být větší než 0");
                 }
 
-                var material = m_materialRepository.GetMaterialByName(entry.MaterialName);
+                var material = _materialRepository.GetMaterialByName(entry.MaterialName);
                 if (material == null)
                 {
                     throw new ArgumentException($"Materiál \"{entry.MaterialName}\" neexistuje");
                 }
 
-                var entryUnit = m_unitRepository.GetUnitBySymbol(entry.UnitName);
+                var entryUnit = _unitRepository.GetUnitBySymbol(entry.UnitName);
                 if (entryUnit == null)
                 {
                     throw new ArgumentException($"Neznámá jednotka \"{entry.UnitName}\"");
                 }
 
-                if (!m_unitConversionHelper.AreCompatible(material.NominalUnit.Id, entryUnit.Id))
+                if (!_unitConversionHelper.AreCompatible(material.NominalUnit.Id, entryUnit.Id))
                 {
                     throw new ArgumentException($"Pro materiál \"{entry.MaterialName}\" nelze použít jednotku \"{entry.UnitName}\", protože není převoditelná na nominální jednotku materiálu \"{material.NominalUnit.Symbol}\"");
                 }

@@ -12,7 +12,7 @@ using Elsa.Jobs.AutomaticQueries.Database;
 using Elsa.Jobs.Common;
 using Elsa.Smtp.Core;
 using OfficeOpenXml;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Jobs.AutomaticQueries
 {

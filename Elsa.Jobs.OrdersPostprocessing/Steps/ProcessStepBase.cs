@@ -3,7 +3,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Linq;
 

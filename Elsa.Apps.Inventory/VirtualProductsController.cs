@@ -21,7 +21,7 @@ using Elsa.Core.Entities.Commerce.Inventory;
 using Newtonsoft.Json;
 
 using Robowire.RoboApi;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Apps.Inventory
 {
@@ -30,37 +30,37 @@ namespace Elsa.Apps.Inventory
     {
         private const string c_mappablesCacheKey = "AllMappableItemsConvertedToModelFor_ProjectId:{0}";
 
-        private readonly IVirtualProductRepository m_virtualProductRepository;
-        private readonly IErpRepository m_erpRepository;
-        private readonly ICache m_cache;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IVirtualProductFacade m_virtualProductFacade;
-        private readonly IMaterialFacade m_materialFacade;
-        private readonly IUnitConversionHelper m_conversionHelper;
-        private readonly IDatabase m_database;
-        private readonly IMaterialThresholdRepository m_materialThresholdRepository;
-        private readonly IEntityCommentsFacade m_entityCommentsFacade;
+        private readonly IVirtualProductRepository _virtualProductRepository;
+        private readonly IErpRepository _erpRepository;
+        private readonly ICache _cache;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IVirtualProductFacade _virtualProductFacade;
+        private readonly IMaterialFacade _materialFacade;
+        private readonly IUnitConversionHelper _conversionHelper;
+        private readonly IDatabase _database;
+        private readonly IMaterialThresholdRepository _materialThresholdRepository;
+        private readonly IEntityCommentsFacade _entityCommentsFacade;
 
         public VirtualProductsController(IWebSession webSession, ILog log, IVirtualProductRepository virtualProductRepository, IErpRepository erpRepository, ICache cache, IMaterialRepository materialRepository, IVirtualProductFacade virtualProductFacade, IMaterialFacade materialFacade, IUnitConversionHelper conversionHelper, IDatabase database, IMaterialThresholdRepository materialThresholdRepository, IEntityCommentsFacade entityCommentsFacade)
             : base(webSession, log)
         {
-            m_virtualProductRepository = virtualProductRepository;
-            m_erpRepository = erpRepository;
-            m_cache = cache;
-            m_materialRepository = materialRepository;
-            m_virtualProductFacade = virtualProductFacade;
-            m_materialFacade = materialFacade;
-            m_conversionHelper = conversionHelper;
-            m_database = database;
-            m_materialThresholdRepository = materialThresholdRepository;
-            m_entityCommentsFacade = entityCommentsFacade;
+            _virtualProductRepository = virtualProductRepository;
+            _erpRepository = erpRepository;
+            _cache = cache;
+            _materialRepository = materialRepository;
+            _virtualProductFacade = virtualProductFacade;
+            _materialFacade = materialFacade;
+            _conversionHelper = conversionHelper;
+            _database = database;
+            _materialThresholdRepository = materialThresholdRepository;
+            _entityCommentsFacade = entityCommentsFacade;
         }
 
         public IEnumerable<VirtualProductViewModel> GetVirtualProducts(string searchQuery)
         {
             var normQuery = StringUtil.NormalizeSearchText(99, searchQuery);
 
-            var allProds = m_virtualProductRepository.GetAllVirtualProducts();
+            var allProds = _virtualProductRepository.GetAllVirtualProducts();
 
             foreach (var prod in allProds)
             {
@@ -79,7 +79,7 @@ namespace Elsa.Apps.Inventory
 
         private VirtualProductViewModel MapVirtualProductToVm(Core.Entities.Commerce.Inventory.IVirtualProduct prod)
         {
-            var materials = m_materialRepository.GetMaterialsByVirtualProductId(prod.Id);
+            var materials = _materialRepository.GetMaterialsByVirtualProductId(prod.Id);
 
             var result = new VirtualProductViewModel(prod);
             result.MaterialEntries.AddRange(materials.Select(m => new MaterialCompositionInfo(m.Material)
@@ -128,11 +128,11 @@ namespace Elsa.Apps.Inventory
                     throw new InvalidOperationException("Id not found");
                 }
 
-                m_virtualProductRepository.Map(mappable.ErpId, mappable.ErpProductId, mappable.OrderItemText, virtualProductId);
+                _virtualProductRepository.Map(mappable.ErpId, mappable.ErpProductId, mappable.OrderItemText, virtualProductId);
             }
             finally
             {
-                m_cache.Remove(GetMappablesCacheKey());
+                _cache.Remove(GetMappablesCacheKey());
             }
 
             return GetMappableItems(activeSearchQuery);
@@ -152,11 +152,11 @@ namespace Elsa.Apps.Inventory
                     throw new InvalidOperationException("Id not found");
                 }
 
-                m_virtualProductRepository.Unmap(mappable.ErpId, mappable.ErpProductId, mappable.OrderItemText, virtualProductId);
+                _virtualProductRepository.Unmap(mappable.ErpId, mappable.ErpProductId, mappable.OrderItemText, virtualProductId);
             }
             finally
             {
-                m_cache.Remove(GetMappablesCacheKey());
+                _cache.Remove(GetMappablesCacheKey());
             }
 
             return GetMappableItems(activeSearchQuery);
@@ -164,14 +164,14 @@ namespace Elsa.Apps.Inventory
 
         public IEnumerable<MaterialInfo> GetAllMaterials(int? inventoryId)
         {
-            return m_materialRepository.GetAllMaterials(inventoryId, true).Select(m => new MaterialInfo(m));
+            return _materialRepository.GetAllMaterials(inventoryId, true).Select(m => new MaterialInfo(m));
         }
 
         public VirtualProductViewModel GetVirtualProductById(int id)
         {
             EnsureUserRight(InventoryUserRights.ProductsAndTags);
 
-            var vp = m_virtualProductRepository.GetVirtualProductById(id);
+            var vp = _virtualProductRepository.GetVirtualProductById(id);
             if (vp == null)
             {
                 return null;
@@ -186,13 +186,13 @@ namespace Elsa.Apps.Inventory
 
             try
             {
-                var vp = m_virtualProductFacade.ProcessVirtualProductEditRequest(request.VirtualProductId, request.UnhashedName, request.Materials.Select(m => m.DisplayText).ToArray());
+                var vp = _virtualProductFacade.ProcessVirtualProductEditRequest(request.VirtualProductId, request.UnhashedName, request.Materials.Select(m => m.DisplayText).ToArray());
 
                 return MapVirtualProductToVm(vp);
             }
             finally
             {
-                m_cache.Remove(GetMappablesCacheKey());
+                _cache.Remove(GetMappablesCacheKey());
             }
         }
 
@@ -200,13 +200,13 @@ namespace Elsa.Apps.Inventory
         {
             EnsureUserRight(InventoryUserRights.ProductsAndTags);
 
-            m_virtualProductRepository.DeleteVirtualProduct(vpId);
-            m_materialRepository.CleanCache();
+            _virtualProductRepository.DeleteVirtualProduct(vpId);
+            _materialRepository.CleanCache();
         }
 
         public IEnumerable<IExtendedMaterialModel> SearchMaterials(string query, int? inventoryId)
         {
-            var allMats = m_materialRepository.GetAllMaterials(inventoryId, true);
+            var allMats = _materialRepository.GetAllMaterials(inventoryId, true);
 
             var normQuery = StringUtil.NormalizeSearchText(99, query);
 
@@ -220,14 +220,14 @@ namespace Elsa.Apps.Inventory
 
         public IExtendedMaterialModel GetMaterialById(int id)
         {
-            var material = m_materialRepository.GetMaterialById(id);
+            var material = _materialRepository.GetMaterialById(id);
 
             if (material == null)
             {
                 return null;
             }
 
-            m_entityCommentsFacade.TryLoadComment(InventoryUserRights.MaterialCommentsView, material);
+            _entityCommentsFacade.TryLoadComment(InventoryUserRights.MaterialCommentsView, material);
             
             return material;
         }
@@ -238,15 +238,15 @@ namespace Elsa.Apps.Inventory
 
             var thresholdText = request.HasThreshold ? (request.ThresholdText ?? string.Empty) : null;
 
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {                
-                var saved = m_materialFacade.ProcessMaterialEditRequest(request);
+                var saved = _materialFacade.ProcessMaterialEditRequest(request);
 
                 saved.CommentText = request.Comment;
 
-                m_entityCommentsFacade.AddComment(InventoryUserRights.MaterialCommentsEdit, saved);
+                _entityCommentsFacade.AddComment(InventoryUserRights.MaterialCommentsEdit, saved);
 
-                m_cache.Remove(GetMappablesCacheKey());
+                _cache.Remove(GetMappablesCacheKey());
 
                 tx.Commit();
 
@@ -258,34 +258,34 @@ namespace Elsa.Apps.Inventory
         {
             EnsureUserRight(InventoryUserRights.MaterialEdits);
             
-            return m_materialRepository.SetMaterialHidden(id, true);
+            return _materialRepository.SetMaterialHidden(id, true);
         }
 
         public IExtendedMaterialModel UnhideMaterial(int id)
         {
             EnsureUserRight(InventoryUserRights.MaterialEdits);
 
-            return m_materialRepository.SetMaterialHidden(id, false);
+            return _materialRepository.SetMaterialHidden(id, false);
         }
 
         public IEnumerable<string> GetAllMaterialNames()
         {
-            return m_materialRepository.GetAllMaterials(null, true).Select(m => m.Name);
+            return _materialRepository.GetAllMaterials(null, true).Select(m => m.Name);
         }
 
         public IEnumerable<IMaterialInventory> GetMaterialInventories()
         {
-            return m_materialRepository.GetMaterialInventories();
+            return _materialRepository.GetMaterialInventories();
         }
 
         public Dictionary<string, List<string>> GetAllMaterialsWithCompatibleUnits()
         {
-            var materials = m_materialRepository.GetAllMaterials(null, false).ToList();
+            var materials = _materialRepository.GetAllMaterials(null, false).ToList();
 
             var result = new Dictionary<string, List<string>>(materials.Count);
             foreach (var m in materials)
             {
-                var lst = m_conversionHelper.GetCompatibleUnits(m.Adaptee.NominalUnitId).Select(u => u.Symbol).ToList();
+                var lst = _conversionHelper.GetCompatibleUnits(m.Adaptee.NominalUnitId).Select(u => u.Symbol).ToList();
                 result[m.Name] = lst;
             }
 
@@ -296,23 +296,23 @@ namespace Elsa.Apps.Inventory
         {
             EnsureUserRight(InventoryUserRights.MaterialEdits);
 
-            m_materialRepository.DeleteMaterial(id);
+            _materialRepository.DeleteMaterial(id);
 
-            m_cache.Remove(GetMappablesCacheKey());
-            m_materialRepository.CleanCache();
-            m_virtualProductRepository.CleanCache();
+            _cache.Remove(GetMappablesCacheKey());
+            _materialRepository.CleanCache();
+            _virtualProductRepository.CleanCache();
         }
 
         private List<MappableItemViewModel> GetAllMappablesThroughCache()
         {
             var cacheKey = GetMappablesCacheKey();
 
-            return m_cache.ReadThrough(cacheKey, TimeSpan.FromMinutes(10), LoadMappables);
+            return _cache.ReadThrough(cacheKey, TimeSpan.FromMinutes(10), LoadMappables);
         }
 
         private List<MappableItemViewModel> LoadMappables()
         {
-            var allItems = m_virtualProductRepository.GetMappableItems().ToList();
+            var allItems = _virtualProductRepository.GetMappableItems().ToList();
 
             var result = new List<MappableItemViewModel>(allItems.Count);
 
@@ -321,19 +321,19 @@ namespace Elsa.Apps.Inventory
                 IErp erp = null;
                 if (item.ErpId != null)
                 {
-                    erp = m_erpRepository.GetErp(item.ErpId.Value);
+                    erp = _erpRepository.GetErp(item.ErpId.Value);
                 }
 
                 var model = MappableItemViewModel.Create(item, erp);
                 result.Add(model);
 
-                foreach (var virtualProduct in m_virtualProductRepository.GetVirtualProducts(item.ErpId, item.ErpProductId, item.ItemName))
+                foreach (var virtualProduct in _virtualProductRepository.GetVirtualProducts(item.ErpId, item.ErpProductId, item.ItemName))
                 {
                     if (model.AssignedVirtualProducts.All(existing => existing.VirtualProductId != virtualProduct.Id))
                     {
                         var vpvm = new VirtualProductViewModel(virtualProduct);
 
-                        var virtualProductComponents = m_materialRepository.GetMaterialsByVirtualProductId(vpvm.VirtualProductId).ToList();
+                        var virtualProductComponents = _materialRepository.GetMaterialsByVirtualProductId(vpvm.VirtualProductId).ToList();
 
                         var materialsSb = new StringBuilder();
 

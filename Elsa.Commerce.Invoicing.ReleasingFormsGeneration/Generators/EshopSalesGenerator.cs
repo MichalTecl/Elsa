@@ -12,25 +12,25 @@ using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 {
     public class EshopSalesGenerator : ReleaseFormsGeneratorBase<EshopOrderDescriptor>
     {
-        private readonly IPurchaseOrderRepository m_orderRepository;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly IDatabase m_database;
+        private readonly IPurchaseOrderRepository _orderRepository;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IDatabase _database;
 
         public EshopSalesGenerator(IMaterialBatchFacade batchFacade, IInvoiceFormsRepository invoiceFormsRepository,
             IPurchaseOrderRepository orderRepository, IMaterialRepository materialRepository,
             IUnitRepository unitRepository, IDatabase database) : base(batchFacade, invoiceFormsRepository, materialRepository)
         {
-            m_orderRepository = orderRepository;
-            m_materialRepository = materialRepository;
-            m_unitRepository = unitRepository;
-            m_database = database;
+            _orderRepository = orderRepository;
+            _materialRepository = materialRepository;
+            _unitRepository = unitRepository;
+            _database = database;
         }
         
         protected override string GetExplanation(List<ItemReleaseModel> item, IInvoiceForm invoiceForm)
@@ -52,13 +52,13 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                 throw new InvalidOperationException($"Pro sklad \"{forInventory.Name}\" musi byt nastavena dovolena merna jednotka");
             }
 
-            var unit = m_unitRepository.GetUnit(forInventory.AllowedUnitId.Value);
+            var unit = _unitRepository.GetUnit(forInventory.AllowedUnitId.Value);
 
             DateUtil.GetMonthDt(year, month, out var fromDt, out var toDt);
 
-            m_orderRepository.PreloadOrders(fromDt, toDt);
+            _orderRepository.PreloadOrders(fromDt, toDt);
 
-            var allOrders = m_orderRepository.GetOrders(q => q.Where(o => o.BuyDate >= fromDt && o.BuyDate < toDt))
+            var allOrders = _orderRepository.GetOrders(q => q.Where(o => o.BuyDate >= fromDt && o.BuyDate < toDt))
                 .ToList();
 
             foreach (var order in allOrders)
@@ -105,7 +105,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
         protected override void OnAfterItemSaved(IInvoiceForm form, IInvoiceFormItem item, ItemReleaseModel releaseModel)
         {
-            m_database.Save(m_database.New<IOrderItemInvoiceFormItem>(i =>
+            _database.Save(_database.New<IOrderItemInvoiceFormItem>(i =>
             {
                 i.InvoiceFormItemId = item.Id;
                 i.BatchAssignmentId = releaseModel.Descriptor.OrderItemBatchAssignmentId;

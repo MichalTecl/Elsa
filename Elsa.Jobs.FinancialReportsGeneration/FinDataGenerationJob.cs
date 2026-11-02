@@ -17,7 +17,7 @@ using Elsa.Invoicing.Core.Data;
 using Elsa.Jobs.Common;
 using Elsa.Jobs.FinancialReportsGeneration.Entities;
 using Elsa.Smtp.Core;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using XlsSerializer.Core;
 
 namespace Elsa.Jobs.FinancialReportsGeneration

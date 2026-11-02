@@ -20,7 +20,7 @@ using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
 
 using Robowire.RoboApi;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using SelectPdf;
 
 namespace Elsa.Apps.InvoiceForms
@@ -28,13 +28,13 @@ namespace Elsa.Apps.InvoiceForms
     [Controller("invoiceForms")]
     public class InvoiceFormsController : ElsaControllerBase
     {
-        private readonly ILog m_log;
-        private readonly InvoiceFormsQueryingFacade m_facade;
-        private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
-        private readonly IInvoiceFormsGenerationRunner m_generationRunner;
-        private readonly ISession m_session;
-        private readonly IInvoiceFormRendererFactory m_formRendererFactory;
-        private readonly IDatabase m_database;
+        private readonly ILog _log;
+        private readonly InvoiceFormsQueryingFacade _facade;
+        private readonly IInvoiceFormsRepository _invoiceFormsRepository;
+        private readonly IInvoiceFormsGenerationRunner _generationRunner;
+        private readonly ISession _session;
+        private readonly IInvoiceFormRendererFactory _formRendererFactory;
+        private readonly IDatabase _database;
 
         public InvoiceFormsController(IWebSession webSession,
             ILog log,
@@ -44,13 +44,13 @@ namespace Elsa.Apps.InvoiceForms
             IInvoiceFormRendererFactory formRendererFactory, IDatabase database)
             : base(webSession, log)
         {
-            m_log = log;
-            m_facade = facade;
-            m_invoiceFormsRepository = invoiceFormsRepository;
-            m_generationRunner = generationRunner;
-            m_formRendererFactory = formRendererFactory;
-            m_database = database;
-            m_session = webSession;
+            _log = log;
+            _facade = facade;
+            _invoiceFormsRepository = invoiceFormsRepository;
+            _generationRunner = generationRunner;
+            _formRendererFactory = formRendererFactory;
+            _database = database;
+            _session = webSession;
         }
 
         public InvoiceFormsCollection<ReceivingInvoiceFormModel> GetReceivingInvoicesCollection(int month, int year)
@@ -80,7 +80,7 @@ namespace Elsa.Apps.InvoiceForms
 
         public IEnumerable<IInvoiceFormReportType> GetInvoicingReportTypes()
         {
-            return m_invoiceFormsRepository.GetInvoiceFormReportTypes();
+            return _invoiceFormsRepository.GetInvoiceFormReportTypes();
         }
 
         public IEnumerable<ReportMonthModel> GetReportMonths()
@@ -96,30 +96,30 @@ namespace Elsa.Apps.InvoiceForms
 
         public HtmlResult GetFormHtml(int id)
         {
-            var inv = m_invoiceFormsRepository.GetInvoiceFormById(id);
+            var inv = _invoiceFormsRepository.GetInvoiceFormById(id);
 
-            var renderer = m_formRendererFactory.GetRenderer(inv);
+            var renderer = _formRendererFactory.GetRenderer(inv);
 
             return new HtmlResult(new Paper(inv.InvoiceFormNumber, renderer));
         }
 
         public FileResult LoadFormPdf(int id)
         {
-            var invoiceForm = m_invoiceFormsRepository.GetInvoiceFormById(id);
+            var invoiceForm = _invoiceFormsRepository.GetInvoiceFormById(id);
             if (invoiceForm == null)
             {
                 throw new InvalidOperationException("no access");
             }
 
             //TODO distinguish generator
-            var renderer = m_formRendererFactory.GetRenderer(invoiceForm);
+            var renderer = _formRendererFactory.GetRenderer(invoiceForm);
             
             return new FileResult($"{invoiceForm.InvoiceFormNumber}.pdf", renderer.GetPdf(), "application/pdf", "inline");
         }
 
         public FileResult GetAllForms(int year, int month)
         {
-            var formTypes = m_invoiceFormsRepository.GetInvoiceFormTypes().ToList();
+            var formTypes = _invoiceFormsRepository.GetInvoiceFormTypes().ToList();
 
             var tempDir = Path.Combine($"C:\\Elsa\\Temp\\{Guid.NewGuid()}\\{month.ToString().PadLeft(2, '0')}-{year}");
             Directory.CreateDirectory(tempDir);
@@ -129,7 +129,7 @@ namespace Elsa.Apps.InvoiceForms
                 var ftDir = Path.Combine(tempDir, formType.Name);
                 Directory.CreateDirectory(ftDir);
 
-                var collection = m_invoiceFormsRepository.FindCollection(formType.Id, year, month);
+                var collection = _invoiceFormsRepository.FindCollection(formType.Id, year, month);
                 if (collection == null)
                 {
                     continue;
@@ -137,7 +137,7 @@ namespace Elsa.Apps.InvoiceForms
 
                 foreach (var form in collection.Forms)
                 {
-                    var renderer = m_formRendererFactory.GetRenderer(form);
+                    var renderer = _formRendererFactory.GetRenderer(form);
                     var path = Path.Combine(ftDir, $"{form.InvoiceFormNumber}.pdf");
                     File.WriteAllBytes(path, renderer.GetPdf());
                 }
@@ -148,7 +148,7 @@ namespace Elsa.Apps.InvoiceForms
 
         public InvoiceFormsCollection<ReceivingInvoiceFormModel> GenerateReceivingInvoicesCollection(int type, int year, int month)
         {
-            var x = m_generationRunner.RunReceivingInvoicesGeneration(type, year, month);
+            var x = _generationRunner.RunReceivingInvoicesGeneration(type, year, month);
 
             return GetReceivingInvoicesCollection(month, year);
         }
@@ -157,33 +157,33 @@ namespace Elsa.Apps.InvoiceForms
         {
             // type has probably no sense here, but the method signature needs to be same as GenerateReceivingInvoicesCollection
 
-            var x = m_generationRunner.RunTasks(year, month);
+            var x = _generationRunner.RunTasks(year, month);
 
             return GetReleaseFormsCollection(month, year);
         }
 
         public void ApproveLogWarnings(List<int> ids)
         {
-            m_invoiceFormsRepository.ApproveLogWarnings(ids);
+            _invoiceFormsRepository.ApproveLogWarnings(ids);
         }
 
         public void DeleteCollection(int id)
         {
-            m_invoiceFormsRepository.DeleteCollection(id);
+            _invoiceFormsRepository.DeleteCollection(id);
         }
 
         public void ApproveCollection(int id)
         {
-            m_invoiceFormsRepository.ApproveCollection(id);
+            _invoiceFormsRepository.ApproveCollection(id);
         }
 
         public FileResult GetPackage(string cid)
         {
             EnsureUserRight(ReportingUserRights.DownloadInvoicingFormPackages);
 
-            var file = m_database.Sql()
+            var file = _database.Sql()
                 .ExecuteWithParams(
-                    "SELECT TOP 1 PackagePath FROM FinDataGenerationClosure WHERE ProjectId = {0} AND PublicUid = {1}", m_session.Project.Id, cid)
+                    "SELECT TOP 1 PackagePath FROM FinDataGenerationClosure WHERE ProjectId = {0} AND PublicUid = {1}", _session.Project.Id, cid)
                 .Scalar<string>();
 
             if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
@@ -197,14 +197,14 @@ namespace Elsa.Apps.InvoiceForms
         private InvoiceFormsCollection<T> GetFormsCollection<T>(int month, int year, string generatorName,
             Func<IInvoiceForm, T> itemMapper) where T : InvoiceFormModelBase
         {
-            var type = m_invoiceFormsRepository.GetInvoiceFormTypes()
+            var type = _invoiceFormsRepository.GetInvoiceFormTypes()
                 .FirstOrDefault(t => t.GeneratorName == generatorName);
             if (type == null)
             {
                 throw new InvalidOperationException($"Nenalezen InvoiceFormType.GeneratroName=ReceivingInvoice");
             }
 
-            return m_facade.Load(type.Id, year, month, itemMapper);
+            return _facade.Load(type.Id, year, month, itemMapper);
         }
     }
 }

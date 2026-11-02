@@ -4,7 +4,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Data;
 using Elsa.Common.Interfaces;
 using Elsa.Jobs.CrmMailPull.Entities;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

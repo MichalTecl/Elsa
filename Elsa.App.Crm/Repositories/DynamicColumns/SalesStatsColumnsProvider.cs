@@ -1,7 +1,7 @@
 using Elsa.App.Crm.Model;
 using Elsa.App.Crm.Repositories.DynamicColumns.Infrastructure;
 using Elsa.Common.Caching;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

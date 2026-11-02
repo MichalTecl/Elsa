@@ -22,7 +22,7 @@ using Elsa.Core.Entities.Commerce.Crm;
 using Elsa.Core.Entitites.Crm;
 using Microsoft.SqlServer.Server;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {

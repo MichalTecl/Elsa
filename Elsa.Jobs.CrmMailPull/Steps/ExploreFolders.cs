@@ -6,7 +6,7 @@ using Elsa.Jobs.CrmMailPull.Infrastructure;
 using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Security;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -8,37 +8,37 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Automation;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Jobs.Common.Impl
 {
     public class ScheduledJobsRepository : IScheduledJobsRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly ILog m_log;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly ILog _log;
 
         public ScheduledJobsRepository(IDatabase database, ISession session, ILog log)
         {
-            m_database = database;
-            m_session = session;
-            m_log = log;
+            _database = database;
+            _session = session;
+            _log = log;
         }
 
         public IJobSchedule GetCurrentJob(int projectId)
         {
             //0. update jobs with missing EndDt
             var misalignedJobs =
-                m_database.SelectFrom<IJobSchedule>().Where(i => i.LastStartDt != null && i.LastEndDt == null).Execute();
+                _database.SelectFrom<IJobSchedule>().Where(i => i.LastStartDt != null && i.LastEndDt == null).Execute();
 
             foreach (var misaljob in misalignedJobs)
             {
                 misaljob.LastEndDt = misaljob.LastStartDt;
                 misaljob.LastRunFailed = true;
-                m_database.Save(misaljob);
+                _database.Save(misaljob);
             }
 
-            var interruptedExecutions = m_database.SelectFrom<IJobExecutionLog>()
+            var interruptedExecutions = _database.SelectFrom<IJobExecutionLog>()
                 .Join(e => e.ScheduledJob)
                 .Where(e => e.ScheduledJob.ProjectId == projectId && e.EndDt == null)
                 .Execute()
@@ -48,7 +48,7 @@ namespace Elsa.Jobs.Common.Impl
             {
                 execution.EndDt = execution.StartDt;
                 execution.ErrorMessage = "Běh úlohy nebyl korektně ukončen.";
-                m_database.Save(execution);
+                _database.Save(execution);
             }
 
             if (interruptedExecutions.Any())
@@ -57,7 +57,7 @@ namespace Elsa.Jobs.Common.Impl
             }
             
             var schedule =
-                m_database.SelectFrom<IJobSchedule>()
+                _database.SelectFrom<IJobSchedule>()
                     .Join(s => s.ScheduledJob)
                     .Where(s => s.ProjectId == projectId && s.ScheduledJob.ProjectId == projectId)
                     .Where(s => s.Active)
@@ -113,7 +113,7 @@ namespace Elsa.Jobs.Common.Impl
 
         public IJobExecutionLog MarkJobStarted(IJobSchedule job)
         {
-            m_log.Info($"MarkJobStarted called for job.Uid = {job?.Uid}");
+            _log.Info($"MarkJobStarted called for job.Uid = {job?.Uid}");
 
             if (string.IsNullOrEmpty(job?.Uid))
                 return null;
@@ -130,16 +130,16 @@ namespace Elsa.Jobs.Common.Impl
             var startDt = DateTime.Now;
             job.LastEndDt = null;
             job.LastStartDt = startDt;
-            m_database.Save(job);
+            _database.Save(job);
 
-            var executionLog = m_database.New<IJobExecutionLog>();
+            var executionLog = _database.New<IJobExecutionLog>();
             executionLog.ScheduledJobId = job.ScheduledJobId;
-            executionLog.StartUserId = m_session.User.Id;
+            executionLog.StartUserId = _session.User.Id;
             executionLog.StartDt = startDt;
-            m_database.Save(executionLog);
+            _database.Save(executionLog);
             TouchStatusVersion(job.ProjectId);
 
-            m_log.Info($"MarkJobStarted OK {job?.Uid}");
+            _log.Info($"MarkJobStarted OK {job?.Uid}");
             return executionLog;
         }
 
@@ -160,24 +160,24 @@ namespace Elsa.Jobs.Common.Impl
 
         public void MarkJobSucceeded(IJobSchedule job, IJobExecutionLog executionLog)
         {
-            m_log.Info($"MarkJobSucceeded called for job.Uid = {job?.Uid}");
+            _log.Info($"MarkJobSucceeded called for job.Uid = {job?.Uid}");
 
             if (string.IsNullOrEmpty(job?.Uid))
                 return;
 
             job.LastEndDt = DateTime.Now;
             job.LastRunFailed = false;
-            m_database.Save(job);
+            _database.Save(job);
 
             if (executionLog != null)
             {
                 executionLog.EndDt = job.LastEndDt;
-                m_database.Save(executionLog);
+                _database.Save(executionLog);
             }
 
             TouchStatusVersion(job.ProjectId);
 
-            m_log.Info($"MarkJobSucceeded OK {job?.Uid}");
+            _log.Info($"MarkJobSucceeded OK {job?.Uid}");
         }
 
         public void MarkJobFailed(IJobSchedule job)
@@ -197,30 +197,30 @@ namespace Elsa.Jobs.Common.Impl
 
         public void MarkJobFailed(IJobSchedule job, IJobExecutionLog executionLog, string errorMessage)
         {
-            m_log.Info($"MarkJobFailed called for job.Uid = {job?.Uid}");
+            _log.Info($"MarkJobFailed called for job.Uid = {job?.Uid}");
 
             if (string.IsNullOrEmpty(job?.Uid))
                 return;
 
             job.LastEndDt = DateTime.Now;
             job.LastRunFailed = true;
-            m_database.Save(job);
+            _database.Save(job);
 
             if (executionLog != null)
             {
                 executionLog.EndDt = job.LastEndDt;
                 executionLog.ErrorMessage = errorMessage;
-                m_database.Save(executionLog);
+                _database.Save(executionLog);
             }
 
             TouchStatusVersion(job.ProjectId);
 
-            m_log.Info($"MarkJobFailed OK {job?.Uid}");
+            _log.Info($"MarkJobFailed OK {job?.Uid}");
         }
 
         public IEnumerable<IJobExecutionLog> GetExecutionLogs(int scheduledJobId, int maxCount)
         {
-            return m_database.SelectFrom<IJobExecutionLog>()
+            return _database.SelectFrom<IJobExecutionLog>()
                 .Join(e => e.StartUser)
                 .Where(e => e.ScheduledJobId == scheduledJobId)
                 .OrderByDesc(e => e.StartDt)
@@ -235,7 +235,7 @@ namespace Elsa.Jobs.Common.Impl
                 return null;
             }
 
-            return m_database.SelectFrom<IJobExecutionLog>()
+            return _database.SelectFrom<IJobExecutionLog>()
                 .Where(e => e.ScheduledJobId == scheduledJobId.Value && e.EndDt == null)
                 .OrderByDesc(e => e.StartDt)
                 .Take(1)
@@ -251,15 +251,15 @@ namespace Elsa.Jobs.Common.Impl
             }
             catch (Exception ex)
             {
-                m_log.Info($"Cannot update scheduled jobs status version for project {projectId}: {ex.Message}");
+                _log.Info($"Cannot update scheduled jobs status version for project {projectId}: {ex.Message}");
             }
         }
 
         public IEnumerable<IJobSchedule> GetCompleteScheduler()
         {
-            var projectId = m_session.Project.Id;
+            var projectId = _session.Project.Id;
             return
-                m_database.SelectFrom<IJobSchedule>()
+                _database.SelectFrom<IJobSchedule>()
                     .Join(s => s.ScheduledJob)
                     .Where(j => j.ProjectId == projectId)
                     .Execute();
@@ -270,7 +270,7 @@ namespace Elsa.Jobs.Common.Impl
             var schedule = GetCompleteScheduler().FirstOrDefault(j => j.Uid == uid);
             if (schedule == null)
             {
-                m_log.Info($"Schedule for job \"{uid}\" not found");
+                _log.Info($"Schedule for job \"{uid}\" not found");
             }
 
             return schedule;

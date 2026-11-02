@@ -7,7 +7,7 @@ using System.Threading;
 
 using Elsa.Core.Entities.Commerce.Common.Logging;
 
-using Robowire.RobOrm.SqlServer;
+using RobOrm.SqlServer;
 
 namespace Elsa.Common.Logging
 {

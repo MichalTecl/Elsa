@@ -7,7 +7,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common.SystemCounters;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Common.SysCounters
 {
@@ -16,28 +16,28 @@ namespace Elsa.Common.SysCounters
         private static readonly ConcurrentDictionary<string, object> s_locks =
             new ConcurrentDictionary<string, object>();
 
-        private readonly IDatabase m_database;
+        private readonly IDatabase _database;
 
-        private readonly ISession m_session;
-        private readonly ICache m_cache;
+        private readonly ISession _session;
+        private readonly ICache _cache;
 
         public SysCounterManager(IDatabase database, ISession session, ICache cache)
         {
-            m_database = database;
-            m_session = session;
-            m_cache = cache;
+            _database = database;
+            _session = session;
+            _cache = cache;
         }
 
         public void WithCounter(int counterTypeId, Action<string> newValueCallback)
         {
-            var lockKey = $"{counterTypeId}_lock_{m_session.Project.Id}";
+            var lockKey = $"{counterTypeId}_lock_{_session.Project.Id}";
             var lockObj = s_locks.GetOrAdd(lockKey, k => new object());
 
             try
             {
                 Monitor.Enter(lockObj);
 
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     var counter = GetCounter(counterTypeId);
 
@@ -70,7 +70,7 @@ namespace Elsa.Common.SysCounters
 
                     newValueCallback(sb.ToString());
 
-                    m_database.Save(counter);
+                    _database.Save(counter);
 
                     tx.Commit();
                 }
@@ -78,15 +78,15 @@ namespace Elsa.Common.SysCounters
             finally
             {
                 Monitor.Exit(lockObj);
-                m_cache.Remove($"syscounter_{ counterTypeId}");
+                _cache.Remove($"syscounter_{ counterTypeId}");
             }
         }
 
         public ISystemCounter GetCounter(int counterTypeId)
         {
-            return m_cache.ReadThrough($"syscounter_{counterTypeId}", TimeSpan.FromMinutes(1), () => m_database
+            return _cache.ReadThrough($"syscounter_{counterTypeId}", TimeSpan.FromMinutes(1), () => _database
                 .SelectFrom<ISystemCounter>()
-                .Where(c => (c.ProjectId == m_session.Project.Id) && (c.Id == counterTypeId)).Take(1).Execute()
+                .Where(c => (c.ProjectId == _session.Project.Id) && (c.Id == counterTypeId)).Take(1).Execute()
                 .FirstOrDefault());
         }
 

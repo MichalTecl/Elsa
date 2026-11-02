@@ -4,28 +4,28 @@ using Elsa.Commerce.Core.Configuration;
 using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Commerce;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core
 {
     public class OrderWeightCalculator : IOrderWeightCalculator
     {
-        private readonly ILog m_log;
-        private readonly IDatabase m_database;
-        private readonly ICache m_cache;
-        private readonly OrdersSystemConfig m_ordersConfig;
+        private readonly ILog _log;
+        private readonly IDatabase _database;
+        private readonly ICache _cache;
+        private readonly OrdersSystemConfig _ordersConfig;
 
         public OrderWeightCalculator(ILog log, IDatabase database, ICache cache, OrdersSystemConfig ordersConfig)
         {
-            m_log = log;
-            m_database = database;
-            m_cache = cache;
-            m_ordersConfig = ordersConfig;
+            _log = log;
+            _database = database;
+            _cache = cache;
+            _ordersConfig = ordersConfig;
         }
         
         public decimal? GetWeight(IPurchaseOrder po)
         {
-            if (!m_ordersConfig.UseOrderWeight)
+            if (!_ordersConfig.UseOrderWeight)
                 return null;
 
             var isValid = true;
@@ -40,7 +40,7 @@ namespace Elsa.Commerce.Core
 
                     if ((!inx.TryGetValue(i.Item1, out var w)) || (w == null))
                     {
-                        m_log.Error($"No weight found for \"{i.Item1}\"");
+                        _log.Error($"No weight found for \"{i.Item1}\"");
                         isValid = false;
 
                         continue;
@@ -56,7 +56,7 @@ namespace Elsa.Commerce.Core
                 sum += weight; // * i.Item2;
             }
             
-            return isValid ? (sum + (m_ordersConfig.OrderWeightAddition ?? 0)) : (decimal?)null;
+            return isValid ? (sum + (_ordersConfig.OrderWeightAddition ?? 0)) : (decimal?)null;
         }
 
         /// <returns>Product|Qty|SavedWeight</returns>
@@ -82,11 +82,11 @@ namespace Elsa.Commerce.Core
 
         private Dictionary<string, decimal?> GetWeightIndex()
         {
-            return m_cache.ReadThrough("productWeightIndex", TimeSpan.FromSeconds(10), () =>
+            return _cache.ReadThrough("productWeightIndex", TimeSpan.FromSeconds(10), () =>
             {
                 var result = new Dictionary<string, decimal?>();
 
-                m_database.Sql().Execute("SELECT PlacedName, Weight FROM vw_productWeightIndex").ReadRows(r =>
+                _database.Sql().Execute("SELECT PlacedName, Weight FROM vw_productWeightIndex").ReadRows(r =>
                 {
                     var w = r.IsDBNull(1) ? null : (decimal?) r.GetDecimal(1);
                     result[r.GetString(0)] = w;

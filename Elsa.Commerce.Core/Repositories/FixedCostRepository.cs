@@ -6,31 +6,31 @@ using Elsa.Commerce.Core.Repositories.Automation;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Accounting;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {
     public class FixedCostRepository : IFixedCostRepository
     {
-        private readonly IRepository<IFixedCostType> m_costTypeRepository;
-        private readonly IRepository<IFixedCostValue> m_costValueRepository;
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
+        private readonly IRepository<IFixedCostType> _costTypeRepository;
+        private readonly IRepository<IFixedCostValue> _costValueRepository;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
 
         public FixedCostRepository(IRepositoryFactory repositories, IDatabase database, ISession session)
         {
-            m_database = database;
-            m_session = session;
+            _database = database;
+            _session = session;
             var hStart = DateTime.Now.Year - 2;
 
-            m_costTypeRepository = repositories.GetForSmallTable<IFixedCostType>();
-            m_costValueRepository =
+            _costTypeRepository = repositories.GetForSmallTable<IFixedCostType>();
+            _costValueRepository =
                 repositories.GetForSmallTable<IFixedCostValue>(q => q.Where(e => e.Year >= hStart));
         }
 
         public IEnumerable<IFixedCostType> GetFixedCostTypes()
         {
-            return m_costTypeRepository.All().OrderBy(e => e.Name);
+            return _costTypeRepository.All().OrderBy(e => e.Name);
         }
 
         public IFixedCostType SetFixedCostType(int? id, string name, int percent)
@@ -40,7 +40,7 @@ namespace Elsa.Commerce.Core.Repositories
                 throw new InvalidOperationException($"Procento musi byt cele cislo 0 az 100");
             }
 
-            return m_costTypeRepository.Set(id,
+            return _costTypeRepository.Set(id,
                 e =>
                 {
                     e.Name = name;
@@ -50,20 +50,20 @@ namespace Elsa.Commerce.Core.Repositories
 
         public void DeleteFixedCostType(int id)
         {
-            m_costTypeRepository.Delete(id);
+            _costTypeRepository.Delete(id);
         }
 
         public IEnumerable<IFixedCostValue> GetValues(int year, int month)
         {
-            return m_costValueRepository.All().Where(e => (e.Year == year) && (e.Month == month));
+            return _costValueRepository.All().Where(e => (e.Year == year) && (e.Month == month));
         }
 
         public void SetValue(int typeId, int year, int month, decimal value)
         {
-            var ett = m_costValueRepository.All()
+            var ett = _costValueRepository.All()
                 .FirstOrDefault(e => (e.FixedCostTypeId == typeId) && (e.Year == year) && (e.Month == month));
 
-            m_costValueRepository.Set(ett?.Id,
+            _costValueRepository.Set(ett?.Id,
                 e =>
                 {
                     e.FixedCostTypeId = typeId;
@@ -82,9 +82,9 @@ namespace Elsa.Commerce.Core.Repositories
                 throw new InvalidOperationException($"Není možné zpracovat nepřímé náklady před ukončením {month}/{year}");
             }
 
-            m_database.Sql().Call("ApplyFixedCosts")
-                .WithParam("@projectId", m_session.Project.Id)
-                .WithParam("@userId", m_session.User.Id)
+            _database.Sql().Call("ApplyFixedCosts")
+                .WithParam("@projectId", _session.Project.Id)
+                .WithParam("@userId", _session.User.Id)
                 .WithParam("@year", year)
                 .WithParam("@month", month)
                 .WithParam("@overwrite", false).NonQuery();

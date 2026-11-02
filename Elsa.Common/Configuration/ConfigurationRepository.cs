@@ -9,23 +9,23 @@ using Elsa.Core.Entities.Commerce.Common;
 
 using Newtonsoft.Json;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Common.Configuration
 {
     public class ConfigurationRepository : IConfigurationRepository
     {
-        private readonly ILog m_log;
-        private readonly IDatabase m_database;
-        private readonly ICache m_cache;
-        private readonly ISession m_session;
+        private readonly ILog _log;
+        private readonly IDatabase _database;
+        private readonly ICache _cache;
+        private readonly ISession _session;
 
         public ConfigurationRepository(IDatabase database, ILog log, ICache cache, ISession session)
         {
-            m_database = database;
-            m_log = log;
-            m_cache = cache;
-            m_session = session;
+            _database = database;
+            _log = log;
+            _cache = cache;
+            _session = session;
         }
       
         public T Load<T>(int? projectId, int? userId) where T : new()
@@ -37,7 +37,7 @@ namespace Elsa.Common.Configuration
         {
             var cacheKey = $"config_class_{t.FullName}_{projectId}_{userId}";
 
-            return m_cache.ReadThrough(cacheKey,
+            return _cache.ReadThrough(cacheKey,
                 TimeSpan.FromHours(1),
                 () =>
                 {
@@ -85,8 +85,8 @@ namespace Elsa.Common.Configuration
 
         public Dictionary<string, string> GetClientVisibleConfig()
         {
-            var entries = m_cache.ReadThrough("global_clivissettings", TimeSpan.FromDays(1),
-                () => m_database.SelectFrom<ISysConfig>().Where(c => c.ClientSideVisible == true).Execute()
+            var entries = _cache.ReadThrough("global_clivissettings", TimeSpan.FromDays(1),
+                () => _database.SelectFrom<ISysConfig>().Where(c => c.ClientSideVisible == true).Execute()
                     .ToList()).Where(e => e.ValidFrom < DateTime.Now && (e.ValidTo ?? DateTime.Now.AddDays(1)) > DateTime.Now).OrderBy(GetEntryPriority).ToList();
 
             var result = new Dictionary<string, string>();
@@ -141,7 +141,7 @@ namespace Elsa.Common.Configuration
 
             if (entry == null)
             {
-                m_log.Error($"Config entry {definition.Key} not found. ProjectId={projectId}, UserId={userId}");
+                _log.Error($"Config entry {definition.Key} not found. ProjectId={projectId}, UserId={userId}");
             }
 
             return entry;
@@ -149,9 +149,9 @@ namespace Elsa.Common.Configuration
 
         private List<ISysConfig> GetAllConfiguration()
         {
-            return m_cache.ReadThrough($"All_sysConfig",
+            return _cache.ReadThrough($"All_sysConfig",
                 TimeSpan.FromHours(1),
-                () => m_database.SelectFrom<ISysConfig>().Execute().ToList());
+                () => _database.SelectFrom<ISysConfig>().Execute().ToList());
         }
 
         private static int GetEntryPriority(ISysConfig entry)

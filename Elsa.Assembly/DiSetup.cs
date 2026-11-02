@@ -153,7 +153,7 @@ namespace Elsa.Assembly
             StartupLog.Write("DiSetup: container registrations done");
 
             Debug.WriteLine("Initializing ElsaDb");
-            ElsaDbInstaller.Initialize(container);
+            ElsaDbInstaller.Initialize(container, ElsaEntityAssemblies.Find());
             Debug.WriteLine("ElsaDb initialized");
             StartupLog.Write("DiSetup: ElsaDb initialized");
 

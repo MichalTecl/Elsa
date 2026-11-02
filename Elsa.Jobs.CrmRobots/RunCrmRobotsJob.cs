@@ -6,7 +6,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Logging;
 using Elsa.Jobs.Common;
 using Elsa.Smtp.Core;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

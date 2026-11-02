@@ -14,23 +14,23 @@ using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 {
     public class DirectSalesGenerator : ReleaseFormsGeneratorBase<DirectSaleDescriptor>
     {
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly IDatabase m_database;
-        private readonly ISaleEventRepository m_saleEventRepository;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IDatabase _database;
+        private readonly ISaleEventRepository _saleEventRepository;
 
         public DirectSalesGenerator(IMaterialBatchFacade batchFacade, IInvoiceFormsRepository invoiceFormsRepository, IMaterialRepository materialRepository, IUnitRepository unitRepository, IDatabase database, ISaleEventRepository saleEventRepository) : base(batchFacade, invoiceFormsRepository, materialRepository)
         {
-            m_materialRepository = materialRepository;
-            m_unitRepository = unitRepository;
-            m_database = database;
-            m_saleEventRepository = saleEventRepository;
+            _materialRepository = materialRepository;
+            _unitRepository = unitRepository;
+            _database = database;
+            _saleEventRepository = saleEventRepository;
         }
 
         protected override string GetExplanation(List<ItemReleaseModel> item, IInvoiceForm invoiceForm)
@@ -52,11 +52,11 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
                 throw new InvalidOperationException($"Pro sklad \"{forInventory.Name}\" musi byt nastavena dovolena merna jednotka");
             }
 
-            var unit = m_unitRepository.GetUnit(forInventory.AllowedUnitId.Value);
+            var unit = _unitRepository.GetUnit(forInventory.AllowedUnitId.Value);
 
             DateUtil.GetMonthDt(year, month, out var fromDt, out var toDt);
 
-            var events = m_saleEventRepository.GetEvents(fromDt, toDt);
+            var events = _saleEventRepository.GetEvents(fromDt, toDt);
 
             foreach (var evt in events)
             {

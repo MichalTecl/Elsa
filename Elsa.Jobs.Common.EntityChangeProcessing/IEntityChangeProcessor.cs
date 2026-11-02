@@ -1,6 +1,6 @@
 ﻿using Elsa.Common.Logging;
 using Elsa.Jobs.Common.EntityChangeProcessing.Helpers;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -1,6 +1,6 @@
 ﻿using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Inventory;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Core.Entities.Commerce.Accounting
 {

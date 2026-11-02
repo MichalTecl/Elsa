@@ -9,21 +9,21 @@ using Elsa.Commerce.Core;
 using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Inventory;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.App.CommonReports
 {
     public class StockReportLoader : IStockReportLoader
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly IUnitRepository m_unitRepository;
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly IUnitRepository _unitRepository;
 
         public StockReportLoader(IDatabase database, ISession session, IUnitRepository unitRepository)
         {
-            m_database = database;
-            m_session = session;
-            m_unitRepository = unitRepository;
+            _database = database;
+            _session = session;
+            _unitRepository = unitRepository;
         }
 
         public StockReportModel LoadStockReport(DateTime forDateTime)
@@ -31,9 +31,9 @@ namespace Elsa.App.CommonReports
             var report = new List<StockReportItemModel>(1000);
             var summary = new List<InventorySummaryValueItemModel>();
 
-            m_database.Sql().Call("GetStockReport")
-                .WithParam("@projectId", m_session.Project.Id)
-                .WithParam("@culture", m_session.Culture)
+            _database.Sql().Call("GetStockReport")
+                .WithParam("@projectId", _session.Project.Id)
+                .WithParam("@culture", _session.Culture)
                 .WithParam("@reportDate", forDateTime)
                 .SetupCommand(c => c.CommandTimeout = 120000)
                 .ReadRows<string, string, string, decimal, string, decimal>(
@@ -76,12 +76,12 @@ namespace Elsa.App.CommonReports
 
         public List<BatchPriceComponentItemModel> LoadPriceComponentsReport()
         {
-            var unitIndex = m_unitRepository.GetAllUnits().ToList();
+            var unitIndex = _unitRepository.GetAllUnits().ToList();
             var result = new List<BatchPriceComponentItemModel>(10000);
             
-            m_database.Sql().Call("GetBatchPricesReport")
-                .WithParam("@projectId", m_session.Project.Id)
-                .WithParam("@culture", m_session.Culture)
+            _database.Sql().Call("GetBatchPricesReport")
+                .WithParam("@projectId", _session.Project.Id)
+                .WithParam("@culture", _session.Culture)
                 .ReadRows<string, string, string, decimal, string, int, decimal>((material, batch, text, price, month, unitId, unitPrice) =>
                 {
                     var item =  new BatchPriceComponentItemModel
@@ -106,8 +106,8 @@ namespace Elsa.App.CommonReports
         {            
             var result = new List<FixedCostReportItemModel>();
 
-            m_database.Sql().Call("GetFixedCostReport")
-                .WithParam("@projectId", m_session.Project.Id)
+            _database.Sql().Call("GetFixedCostReport")
+                .WithParam("@projectId", _session.Project.Id)
                 .ReadRows<string, string, decimal, int>((month, text, value, percent) =>
                 {
                     result.Add(new FixedCostReportItemModel()

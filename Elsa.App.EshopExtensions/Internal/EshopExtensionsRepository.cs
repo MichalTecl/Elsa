@@ -12,7 +12,7 @@ using Elsa.Common.Interfaces;
 
 using Newtonsoft.Json;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.App.EshopExtensions.Internal
 {

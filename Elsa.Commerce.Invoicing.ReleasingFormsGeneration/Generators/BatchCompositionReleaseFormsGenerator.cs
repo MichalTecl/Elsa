@@ -12,22 +12,22 @@ using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 {
     public class BatchCompositionReleaseFormsGenerator : ReleaseFormsGeneratorBase<BatchCompositionReleaseFormsGenerator.ManufacturingReleseEventDescriptor>
     {
-        private readonly IMaterialBatchRepository m_batchRepository;
-        private readonly IDatabase m_database;
+        private readonly IMaterialBatchRepository _batchRepository;
+        private readonly IDatabase _database;
 
         public BatchCompositionReleaseFormsGenerator(IMaterialBatchFacade batchFacade,
             IInvoiceFormsRepository invoiceFormsRepository, IMaterialBatchRepository batchRepository,
             IDatabase database, IMaterialRepository materialRepo) : base(
             batchFacade, invoiceFormsRepository, materialRepo)
         {
-            m_batchRepository = batchRepository;
-            m_database = database;
+            _batchRepository = batchRepository;
+            _database = database;
         }
         
         protected override void GenerateItems(IMaterialInventory forInventory, int year, int month, IInvoiceFormGenerationContext context,
@@ -39,13 +39,13 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         private void CreateItemsByBatchComposition(IMaterialInventory forInventory, int year, int month, Action<DateTime, IMaterialBatch, Amount, ManufacturingReleseEventDescriptor> itemCallback)
         {
             var allBatchesWithComponentsFromThisInventory =
-                m_batchRepository.GetBatchesByComponentInventory(forInventory.Id, year, month).Where(b => b.Batch.IsHiddenForAccounting != true).ToList();
+                _batchRepository.GetBatchesByComponentInventory(forInventory.Id, year, month).Where(b => b.Batch.IsHiddenForAccounting != true).ToList();
 
             foreach (var composition in allBatchesWithComponentsFromThisInventory.Select(c => c.Batch))
             {
                 foreach (var componentRecord in composition.Components)
                 {
-                    var componentBatch = m_batchRepository.GetBatchById(componentRecord.ComponentId).Batch;
+                    var componentBatch = _batchRepository.GetBatchById(componentRecord.ComponentId).Batch;
                     if (componentBatch.Material.InventoryId != forInventory.Id)
                     {
                         continue;
@@ -75,7 +75,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         {
             if (releaseModel.Descriptor.BatchCompositionRecordId != null)
             {
-                m_database.Save(m_database.New<IMaterialBatchCompositionFormItem>(i =>
+                _database.Save(_database.New<IMaterialBatchCompositionFormItem>(i =>
                 {
                     i.InvoiceFormItemId = item.Id;
                     i.MaterialBatchCompositionId = releaseModel.Descriptor.BatchCompositionRecordId.Value;

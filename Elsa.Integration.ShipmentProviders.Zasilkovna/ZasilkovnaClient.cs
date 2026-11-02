@@ -17,7 +17,7 @@ using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Integration.ShipmentProviders.Zasilkovna.Entities;
 using Elsa.Integration.ShipmentProviders.Zasilkovna.Model;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Integration.ShipmentProviders.Zasilkovna
 {

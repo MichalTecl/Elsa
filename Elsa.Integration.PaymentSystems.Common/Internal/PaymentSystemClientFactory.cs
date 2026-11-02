@@ -6,26 +6,26 @@ using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Integration;
 
 using Robowire;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Integration.PaymentSystems.Common.Internal
 {
     public class PaymentSystemClientFactory : IPaymentSystemClientFactory
     {
-        private readonly IServiceLocator m_locator;
-        private readonly ISession m_session;
-        private readonly IDatabase m_database;
+        private readonly IServiceLocator _locator;
+        private readonly ISession _session;
+        private readonly IDatabase _database;
 
         public PaymentSystemClientFactory(IServiceLocator locator, ISession session, IDatabase database)
         {
-            m_locator = locator;
-            m_session = session;
-            m_database = database;
+            _locator = locator;
+            _session = session;
+            _database = database;
         }
 
         public IPaymentSystemClient GetClient(IPaymentSource source)
         {
-            var client = m_locator.InstantiateNow<IPaymentSystemClient>(source.ClientClass);
+            var client = _locator.InstantiateNow<IPaymentSystemClient>(source.ClientClass);
             client.Entity = source;
 
             return client;
@@ -38,7 +38,7 @@ namespace Elsa.Integration.PaymentSystems.Common.Internal
 
         public IEnumerable<IPaymentSystemClient> GetAllPaymentSystemClients()
         {
-            return m_database.SelectFrom<IPaymentSource>().Where(p => p.ProjectId == m_session.Project.Id && (p.IsActive != false)).Execute().Select(GetClient);
+            return _database.SelectFrom<IPaymentSource>().Where(p => p.ProjectId == _session.Project.Id && (p.IsActive != false)).Execute().Select(GetClient);
         }
     }
 }

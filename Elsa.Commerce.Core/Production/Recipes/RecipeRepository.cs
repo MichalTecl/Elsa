@@ -13,29 +13,29 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Inventory.Recipes;
 using Elsa.Users;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Production.Recipes
 {
     public class RecipeRepository : IRecipeRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ICache m_cache;
-        private readonly ISession m_session;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly IUnitConversionHelper m_conversionHelper;
-        private readonly IUserRoleRepository m_userRepository;
+        private readonly IDatabase _database;
+        private readonly ICache _cache;
+        private readonly ISession _session;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly IUnitConversionHelper _conversionHelper;
+        private readonly IUserRoleRepository _userRepository;
 
         public RecipeRepository(IDatabase database, ICache cache, ISession session, IMaterialRepository materialRepository, IUnitRepository unitRepository, IUnitConversionHelper conversionHelper, IUserRoleRepository userRepository)
         {
-            m_database = database;
-            m_cache = cache;
-            m_session = session;
-            m_materialRepository = materialRepository;
-            m_unitRepository = unitRepository;
-            m_conversionHelper = conversionHelper;
-            m_userRepository = userRepository;
+            _database = database;
+            _cache = cache;
+            _session = session;
+            _materialRepository = materialRepository;
+            _unitRepository = unitRepository;
+            _conversionHelper = conversionHelper;
+            _userRepository = userRepository;
         }
 
         public IEnumerable<IRecipe> GetRecipesByMaterialId(int materialId)
@@ -46,24 +46,24 @@ namespace Elsa.Commerce.Core.Production.Recipes
         public IRecipe GetRecipe(int recipeId)
         {
             //TODO cache
-            return m_database.SelectFrom<IRecipe>()
+            return _database.SelectFrom<IRecipe>()
                 .Join(r => r.Components)
-                .Where(r => r.ProjectId == m_session.Project.Id)
+                .Where(r => r.ProjectId == _session.Project.Id)
                 .Where(r => r.Id == recipeId)
                 .OrderBy(r => r.Components.Each().SortOrder).Execute().FirstOrDefault();
         }
 
         public IList<RecipeInfo> GetRecipes()
         {
-            return m_cache.ReadThrough($"recipes{m_session.User.Id}", TimeSpan.FromMinutes(3), () =>
+            return _cache.ReadThrough($"recipes{_session.User.Id}", TimeSpan.FromMinutes(3), () =>
             {
-                var favorites = new HashSet<int>(m_database.SelectFrom<IUserFavoriteRecipe>()
-                    .Where(r => r.UserId == m_session.User.Id).Transform(r => r.RecipeId).Execute());
+                var favorites = new HashSet<int>(_database.SelectFrom<IUserFavoriteRecipe>()
+                    .Where(r => r.UserId == _session.User.Id).Transform(r => r.RecipeId).Execute());
 
-                var dbRecipes = m_database.SelectFrom<IRecipe>().Where(r => r.ProjectId == m_session.Project.Id)
+                var dbRecipes = _database.SelectFrom<IRecipe>().Where(r => r.ProjectId == _session.Project.Id)
                     .Execute();
 
-                var materials = m_materialRepository.GetAllMaterials(null, true).ToList();
+                var materials = _materialRepository.GetAllMaterials(null, true).ToList();
                                
                 var result = new List<RecipeInfo>(dbRecipes
                     .Where(FilterByUserRoleVisibility).Select(e => new RecipeInfo
@@ -87,49 +87,49 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
         private bool FilterByUserRoleVisibility(IRecipe arg)
         {
-            if (m_session.HasUserRight("ViewAllReceptures"))
+            if (_session.HasUserRight("ViewAllReceptures"))
                 return true;
 
             if (string.IsNullOrWhiteSpace(arg.VisibleForUserRole))
                 return false;
 
-            var roleMap = m_userRepository.GetProjectRoles();
-            var usersRoles = roleMap.FindRolesByUserId(m_session.User.Id);
+            var roleMap = _userRepository.GetProjectRoles();
+            var usersRoles = roleMap.FindRolesByUserId(_session.User.Id);
 
             return usersRoles.Any(ur => ur.Name == arg.VisibleForUserRole);
         }
 
         public RecipeInfo SetRecipeFavorite(int recipeId, bool isFavorite)
         {
-            var entity = m_database.SelectFrom<IUserFavoriteRecipe>()
-                .Where(f => f.RecipeId == recipeId && f.UserId == m_session.User.Id).Take(1).Execute().FirstOrDefault();
+            var entity = _database.SelectFrom<IUserFavoriteRecipe>()
+                .Where(f => f.RecipeId == recipeId && f.UserId == _session.User.Id).Take(1).Execute().FirstOrDefault();
             
             if (isFavorite && (entity == null))
             {
-                entity = m_database.New<IUserFavoriteRecipe>(f =>
+                entity = _database.New<IUserFavoriteRecipe>(f =>
                 {
                     f.RecipeId = recipeId;
-                    f.UserId = m_session.User.Id;
+                    f.UserId = _session.User.Id;
                 });
 
-                m_database.Save(entity);
+                _database.Save(entity);
             }
 
             if ((!isFavorite) && (entity != null))
             {
-                m_database.Delete(entity);
+                _database.Delete(entity);
             }
 
-            m_cache.Remove($"recipes{m_session.User.Id}");
+            _cache.Remove($"recipes{_session.User.Id}");
 
             return GetRecipes().FirstOrDefault(r => r.RecipeId == recipeId);
         }
 
         public RecipeInfoWithItems LoadRecipe(int recipeId)
         {
-            var entity = m_database.SelectFrom<IRecipe>().Join(r => r.Components).Join(r => r.ProducedMaterial)
+            var entity = _database.SelectFrom<IRecipe>().Join(r => r.Components).Join(r => r.ProducedMaterial)
                 .Join(r => r.Components.Each().Material)
-                .Where(r => r.ProjectId == m_session.Project.Id && r.Id == recipeId).Execute().FirstOrDefault();
+                .Where(r => r.ProjectId == _session.Project.Id && r.Id == recipeId).Execute().FirstOrDefault();
 
             if (entity == null)
             {
@@ -145,7 +145,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 RecipeName = entity.RecipeName,
                 Amount = entity.RecipeProducedAmount,
                 ProductionPrice = entity.ProductionPricePerUnit ?? 0,
-                AmountUnit = m_unitRepository.GetUnit(entity.ProducedAmountUnitId).Symbol,
+                AmountUnit = _unitRepository.GetUnit(entity.ProducedAmountUnitId).Symbol,
                 VisibleForUserRole = entity.VisibleForUserRole,
                 Note = entity.Note,
                 AllowOneClickProduction = entity.AllowOneClickProduction ?? false
@@ -157,7 +157,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 {
                     Amount = c.Amount,
                     MaterialName = c.Material.Name,
-                    UnitName = m_unitRepository.GetUnit(c.UnitId).Symbol
+                    UnitName = _unitRepository.GetUnit(c.UnitId).Symbol
                 };
 
                 model.Items.Add(new RecipeItem()
@@ -173,8 +173,8 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
         public RecipeInfo SetRecipeDeleted(int recipeId, bool shouldBeDeleted)
         {
-            var entity = m_database.SelectFrom<IRecipe>()
-                .Where(r => r.ProjectId == m_session.Project.Id && r.Id == recipeId).Take(1).Execute().FirstOrDefault().Ensure();
+            var entity = _database.SelectFrom<IRecipe>()
+                .Where(r => r.ProjectId == _session.Project.Id && r.Id == recipeId).Take(1).Execute().FirstOrDefault().Ensure();
 
             if (shouldBeDeleted == (entity.DeleteUserId != null))
             {
@@ -183,7 +183,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
             if (shouldBeDeleted)
             {
-                entity.DeleteUserId = m_session.User.Id;
+                entity.DeleteUserId = _session.User.Id;
                 entity.DeleteDateTime = DateTime.Now;
             }
             else
@@ -192,9 +192,9 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 entity.DeleteDateTime = null;
             }
 
-            m_database.Save(entity);
+            _database.Save(entity);
 
-            m_cache.Remove($"recipes{m_session.User.Id}");
+            _cache.Remove($"recipes{_session.User.Id}");
 
             return GetRecipes().FirstOrDefault(r => r.RecipeId == recipeId);
         }
@@ -203,17 +203,17 @@ namespace Elsa.Commerce.Core.Production.Recipes
             Amount producedAmount,
             string note, string visibleForUserRole, bool allowOneClickProduction, IEnumerable<RecipeComponentModel> components)
         {
-            using (var tx = m_database.OpenTransaction())
+            using (var tx = _database.OpenTransaction())
             {
-                var recipeMaterial = m_materialRepository.GetMaterialById(materialId).Ensure();
+                var recipeMaterial = _materialRepository.GetMaterialById(materialId).Ensure();
                 if (!recipeMaterial.IsManufactured)
                 {
                     throw new InvalidOperationException(
                         $"Material {recipeMaterial.Name} není nastaven jako vyráběný (podle skladu {recipeMaterial.InventoryName}, do kterého patří)");
                 }
 
-                var allMaterialRecipes = m_database.SelectFrom<IRecipe>().Join(r => r.Components)
-                    .Where(r => r.ProjectId == m_session.Project.Id)
+                var allMaterialRecipes = _database.SelectFrom<IRecipe>().Join(r => r.Components)
+                    .Where(r => r.ProjectId == _session.Project.Id)
                     .Where(r => r.ProducedMaterialId == materialId).Execute().ToList();
 
                 if (allMaterialRecipes.Any(r =>
@@ -223,7 +223,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                         $"Pro \"{recipeMaterial.Name}\" již existuje receptura s názvem \"{recipeName}\"");
                 }
 
-                if (!m_conversionHelper.AreCompatible(recipeMaterial.NominalUnit.Id, producedAmount.Unit.Id))
+                if (!_conversionHelper.AreCompatible(recipeMaterial.NominalUnit.Id, producedAmount.Unit.Id))
                 {
                     throw new InvalidOperationException(
                         $"Pro \"{recipeMaterial.Name}\" nelze použít jednotku \"{producedAmount.Unit.Symbol}\"");
@@ -241,11 +241,11 @@ namespace Elsa.Commerce.Core.Production.Recipes
                     throw new InvalidOperationException("!");
                 }
 
-                entity = entity ?? m_database.New<IRecipe>(r =>
+                entity = entity ?? _database.New<IRecipe>(r =>
                 {
                     r.ValidFrom = DateTime.Now;
-                    r.CreateUserId = m_session.User.Id;
-                    r.ProjectId = m_session.Project.Id;
+                    r.CreateUserId = _session.User.Id;
+                    r.ProjectId = _session.Project.Id;
                 });
 
                 entity.RecipeName = recipeName;
@@ -257,7 +257,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                 entity.VisibleForUserRole = visibleForUserRole;
                 entity.AllowOneClickProduction = allowOneClickProduction;
 
-                m_database.Save(entity);
+                _database.Save(entity);
 
                 var transfSrcFound = false;
                 var usedMaterials = new HashSet<int>();
@@ -274,14 +274,14 @@ namespace Elsa.Commerce.Core.Production.Recipes
                         transfSrcFound = true;
                     }
 
-                    var componetMaterial = m_materialRepository.GetMaterialById(srcComponent.MaterialId).Ensure();
+                    var componetMaterial = _materialRepository.GetMaterialById(srcComponent.MaterialId).Ensure();
 
                     if (!srcComponent.Amount.IsPositive)
                     {
                         throw new InvalidOperationException($"Množství složky {componetMaterial.Name} musí být kladné číslo");
                     }
 
-                    if (!m_conversionHelper.AreCompatible(componetMaterial.NominalUnit.Id, srcComponent.Amount.Unit.Id))
+                    if (!_conversionHelper.AreCompatible(componetMaterial.NominalUnit.Id, srcComponent.Amount.Unit.Id))
                     {
                         throw new InvalidOperationException(
                             $"Pro \"{componetMaterial.Name}\" nelze použít jednotku \"{srcComponent.Amount.Unit.Symbol}\"");
@@ -295,7 +295,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
                     var componentEntity =
                         entity.Components.FirstOrDefault(c => c.MaterialId == srcComponent.MaterialId) ??
-                        m_database.New<IRecipeComponent>(
+                        _database.New<IRecipeComponent>(
                             c =>
                             {
                                 c.MaterialId = srcComponent.MaterialId;
@@ -308,7 +308,7 @@ namespace Elsa.Commerce.Core.Production.Recipes
                     componentEntity.Amount = srcComponent.Amount.Value;
                     componentEntity.UnitId = srcComponent.Amount.Unit.Id;
 
-                    m_database.Save(componentEntity);
+                    _database.Save(componentEntity);
                 }
 
                 if (!usedMaterials.Any())
@@ -323,12 +323,12 @@ namespace Elsa.Commerce.Core.Production.Recipes
 
                 foreach (var removedComponent in entity.Components.Where(rc => !usedMaterials.Contains(rc.MaterialId)))
                 {
-                    m_database.Delete(removedComponent);
+                    _database.Delete(removedComponent);
                 }
 
                 tx.Commit();
 
-                m_cache.Remove($"recipes{m_session.User.Id}");
+                _cache.Remove($"recipes{_session.User.Id}");
 
                 return LoadRecipe(entity.Id);
             }

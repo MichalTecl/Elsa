@@ -1,7 +1,7 @@
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
-using Robowire.RobOrm.Core;
-using Robowire.RobOrm.SqlServer.Attributes;
+using RobOrm.Core;
+using RobOrm.SqlServer.Attributes;
 using System;
 
 namespace Elsa.Jobs.CrmMailPull.Entities

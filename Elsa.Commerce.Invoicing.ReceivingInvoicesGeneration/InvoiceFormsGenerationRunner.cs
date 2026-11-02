@@ -11,19 +11,19 @@ using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 {
     public class InvoiceFormsGenerationRunner : IInvoiceFormsGenerationRunner
     {
-        private readonly IDatabase m_database;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly ILog m_log;
-        private readonly IInvoiceFormGeneratorFactory m_generatorFactory;
-        private readonly IInvoiceFormsRepository m_invoiceFormsRepository;
-        private readonly ISession m_session;
-        private readonly IFixedCostRepository m_fixedCostRepository;
+        private readonly IDatabase _database;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly ILog _log;
+        private readonly IInvoiceFormGeneratorFactory _generatorFactory;
+        private readonly IInvoiceFormsRepository _invoiceFormsRepository;
+        private readonly ISession _session;
+        private readonly IFixedCostRepository _fixedCostRepository;
         
         public InvoiceFormsGenerationRunner(IDatabase database,
             ILog log,
@@ -32,24 +32,24 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
             IInvoiceFormsRepository invoiceFormsRepository,
             ISession session, IFixedCostRepository fixedCostRepository)
         {
-            m_database = database;
-            m_log = log;
-            m_materialRepository = materialRepository;
-            m_generatorFactory = generatorFactory;
-            m_invoiceFormsRepository = invoiceFormsRepository;
-            m_session = session;
-            m_fixedCostRepository = fixedCostRepository;
+            _database = database;
+            _log = log;
+            _materialRepository = materialRepository;
+            _generatorFactory = generatorFactory;
+            _invoiceFormsRepository = invoiceFormsRepository;
+            _session = session;
+            _fixedCostRepository = fixedCostRepository;
         }
 
         public IInvoiceFormGenerationContext RunReceivingInvoicesGeneration(int formTypeId, int year, int month)
         {
-            m_log.Info($"Called for month={month}, year={year}");
+            _log.Info($"Called for month={month}, year={year}");
 
-            m_fixedCostRepository.CalculateFixedCostComponents(year, month);
+            _fixedCostRepository.CalculateFixedCostComponents(year, month);
 
             var context = PrepareContext(formTypeId, year, month);
 
-            foreach (var inventory in m_materialRepository.GetMaterialInventories())
+            foreach (var inventory in _materialRepository.GetMaterialInventories())
             {
                 if (string.IsNullOrWhiteSpace(inventory.ReceivingInvoiceFormGeneratorName))
                 {
@@ -77,7 +77,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 
         private IInvoiceFormGenerationContext PrepareContext(int formTypeId, int year, int month)
         {
-            var existingCollection = m_invoiceFormsRepository.FindCollection(formTypeId, year, month);
+            var existingCollection = _invoiceFormsRepository.FindCollection(formTypeId, year, month);
 
             if (existingCollection?.ApproveUserId != null)
             {
@@ -89,15 +89,15 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
             if (existingCollection != null)
             {
                 foreach (var m in existingCollection.Log.Where(l =>
-                    l.IsWarning && (l.ApproveUserId == m_session.User.Id)))
+                    l.IsWarning && (l.ApproveUserId == _session.User.Id)))
                 {
                     preapprovedMessages.Add(m.Message);
                 }
 
-                m_invoiceFormsRepository.DeleteCollection(existingCollection.Id);
+                _invoiceFormsRepository.DeleteCollection(existingCollection.Id);
             }
 
-            var context = m_invoiceFormsRepository.StartGeneration($"{month.ToString().PadLeft(2, '0')}/{year}",
+            var context = _invoiceFormsRepository.StartGeneration($"{month.ToString().PadLeft(2, '0')}/{year}",
                 year,
                 month,
                 formTypeId);
@@ -107,33 +107,33 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 
         public IInvoiceFormGenerationContext RunTasks(int year, int month)
         {
-            m_fixedCostRepository.CalculateFixedCostComponents(year, month);
+            _fixedCostRepository.CalculateFixedCostComponents(year, month);
 
-            var invoiceFormType = m_invoiceFormsRepository.GetInvoiceFormTypes()
+            var invoiceFormType = _invoiceFormsRepository.GetInvoiceFormTypes()
                 .FirstOrDefault(t => t.GeneratorName == "ReleasingForm");
             if (invoiceFormType == null)
             {
                 throw new InvalidOperationException("InvoiceFormType was not found by GeneratorName 'ReleasingForm'");
             }
 
-            m_log.Info($"Called for month={month}, year={year}");
+            _log.Info($"Called for month={month}, year={year}");
             
-            //using (var tx = m_database.OpenTransaction())
+            //using (var tx = _database.OpenTransaction())
             //{
                 var context = PrepareContext(invoiceFormType.Id, year, month);
-                var allGenerationTasks = m_invoiceFormsRepository.GetReleasingFormsTasks();
+                var allGenerationTasks = _invoiceFormsRepository.GetReleasingFormsTasks();
 
                 foreach (var task in allGenerationTasks)
                 {
                     var inventories = task.Inventories?.Select(i => i.MaterialInventoryId).ToList();
                     if (inventories?.Any() != true)
                     {
-                        inventories = m_materialRepository.GetMaterialInventories().Select(i => i.Id).ToList();
+                        inventories = _materialRepository.GetMaterialInventories().Select(i => i.Id).ToList();
                     }
                     
                     foreach (var inventoryId in inventories)
                     {
-                        var materialInventory = m_materialRepository.GetMaterialInventories()
+                        var materialInventory = _materialRepository.GetMaterialInventories()
                             .FirstOrDefault(i => i.Id == inventoryId);
 
                         if (materialInventory == null)
@@ -167,7 +167,7 @@ namespace Elsa.Commerce.Invoicing.ReceivingInvoicesGeneration
 
         private void DoGeneration(IMaterialInventory inventory, IInvoiceFormGenerationContext context, int year, int month, IReleasingFormsGenerationTask task)
         {
-            var generator = m_generatorFactory.Get(task == null ? inventory.ReceivingInvoiceFormGeneratorName : task.GeneratorName);
+            var generator = _generatorFactory.Get(task == null ? inventory.ReceivingInvoiceFormGeneratorName : task.GeneratorName);
 
             if (task == null)
             {

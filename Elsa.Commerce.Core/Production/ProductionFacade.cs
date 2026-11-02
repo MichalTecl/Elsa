@@ -16,21 +16,21 @@ using Elsa.Core.Entities.Commerce.Extensions;
 using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Production
 {
     public class ProductionFacade : IProductionFacade
     {
-        private readonly IDatabase m_database;
-        private readonly IMaterialBatchRepository m_batchRepository;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IUnitConversionHelper m_unitConversion;
-        private readonly AmountProcessor m_amountProcessor;
-        private readonly IMaterialBatchFacade m_batchFacade;
-        private readonly ILog m_log;
-        private readonly IUnitRepository m_unitRepository;
-        private readonly ISession m_session;
+        private readonly IDatabase _database;
+        private readonly IMaterialBatchRepository _batchRepository;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IUnitConversionHelper _unitConversion;
+        private readonly AmountProcessor _amountProcessor;
+        private readonly IMaterialBatchFacade _batchFacade;
+        private readonly ILog _log;
+        private readonly IUnitRepository _unitRepository;
+        private readonly ISession _session;
 
         public ProductionFacade(
             IDatabase database,
@@ -41,25 +41,25 @@ namespace Elsa.Commerce.Core.Production
             ILog log, 
             IMaterialBatchFacade batchFacade, IUnitRepository unitRepository, ISession session)
         {
-            m_database = database;
-            m_batchRepository = batchRepository;
-            m_materialRepository = materialRepository;
-            m_unitConversion = unitConversion;
-            m_amountProcessor = amountProcessor;
-            m_log = log;
-            m_batchFacade = batchFacade;
-            m_unitRepository = unitRepository;
-            m_session = session;
+            _database = database;
+            _batchRepository = batchRepository;
+            _materialRepository = materialRepository;
+            _unitConversion = unitConversion;
+            _amountProcessor = amountProcessor;
+            _log = log;
+            _batchFacade = batchFacade;
+            _unitRepository = unitRepository;
+            _session = session;
         }
 
         public IEnumerable<IMaterialBatch> LoadProductionBatches(long? fromDt, int pageSize)
         {
             var query =
-                m_database.SelectFrom<IMaterialBatch>()
+                _database.SelectFrom<IMaterialBatch>()
                     .Join(b => b.Material)
                     .Join(b => b.Unit)
                     .Join(b => b.Author)
-                    .Where(b => b.ProjectId == m_session.Project.Id)
+                    .Where(b => b.ProjectId == _session.Project.Id)
                     .OrderByDesc(b => b.Created)
                     .Take(pageSize);
 

@@ -7,21 +7,21 @@ using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Commerce;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {
     public class SupplierRepository : ISupplierRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ICache m_cache;
-        private readonly ISession m_session;
+        private readonly IDatabase _database;
+        private readonly ICache _cache;
+        private readonly ISession _session;
 
         public SupplierRepository(IDatabase database, ICache cache, ISession session)
         {
-            m_database = database;
-            m_cache = cache;
-            m_session = session;
+            _database = database;
+            _cache = cache;
+            _session = session;
         }
 
         public ISupplier GetSupplier(int supplierId)
@@ -39,15 +39,15 @@ namespace Elsa.Commerce.Core.Repositories
         {
             if (supplier.Id < 1)
             {
-                supplier.InsertUserId = m_session.User.Id;
+                supplier.InsertUserId = _session.User.Id;
                 supplier.InsertDt = DateTime.Now;
             }
 
-            supplier.ProjectId = m_session.Project.Id;
+            supplier.ProjectId = _session.Project.Id;
 
-            m_database.Save(supplier);
+            _database.Save(supplier);
 
-            m_cache.Remove(GetSuppliersCacheKey());
+            _cache.Remove(GetSuppliersCacheKey());
 
             return GetSupplier(supplier.Id);
         }
@@ -66,7 +66,7 @@ namespace Elsa.Commerce.Core.Repositories
             }
             else
             {
-                entity = m_database.New<ISupplier>();
+                entity = _database.New<ISupplier>();
             }
 
             populate(entity);
@@ -83,26 +83,26 @@ namespace Elsa.Commerce.Core.Repositories
             }
 
             entity.DeleteDt = DateTime.Now;
-            entity.DeleteUserId = m_session.User.Id;
+            entity.DeleteUserId = _session.User.Id;
 
             SaveSupplier(entity);
         }
 
         public IEnumerable<ISupplier> GetSuppliers()
         {
-            return m_cache.ReadThrough(GetSuppliersCacheKey(),
+            return _cache.ReadThrough(GetSuppliersCacheKey(),
                 TimeSpan.FromHours(1),
                 () =>
-                    m_database.SelectFrom<ISupplier>()
+                    _database.SelectFrom<ISupplier>()
                         .Join(s => s.Currency)
-                        .Where(s => s.ProjectId == m_session.Project.Id)
+                        .Where(s => s.ProjectId == _session.Project.Id)
                         .Where(s => s.DeleteDt == null)
                         .Execute());
         }
 
         private string GetSuppliersCacheKey()
         {
-            return $"all_suppliers_{m_session.Project.Id}";
+            return $"all_suppliers_{_session.Project.Id}";
         }
     }
 }

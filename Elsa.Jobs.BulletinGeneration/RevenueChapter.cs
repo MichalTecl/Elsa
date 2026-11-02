@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Elsa.Common.Interfaces;
 using DocGen;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Jobs.BulletinGeneration
 {

@@ -3,7 +3,7 @@
 using Elsa.Core.Entities.Commerce.Core;
 using Elsa.Core.Entities.Commerce.Core.CurrencyConversions;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Core.Entities.Commerce.Common
 {

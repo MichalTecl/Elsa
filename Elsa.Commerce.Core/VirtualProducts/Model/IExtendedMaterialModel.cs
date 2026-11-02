@@ -5,7 +5,7 @@ using Elsa.Commerce.Core.Units;
 using Elsa.Common.EntityComments;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Inventory;
-using Robowire.RobOrm.SqlServer.Attributes;
+using RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Commerce.Core.VirtualProducts.Model
 {

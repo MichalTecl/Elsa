@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Elsa.Core.Entities.Commerce.Core;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Common.Caching
 {

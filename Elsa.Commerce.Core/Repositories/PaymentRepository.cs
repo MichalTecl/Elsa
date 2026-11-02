@@ -8,31 +8,31 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Common;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {
     public class PaymentRepository : IPaymentRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ISession m_session;
-        private readonly List<IPayment> m_cache = new List<IPayment>();
+        private readonly IDatabase _database;
+        private readonly ISession _session;
+        private readonly List<IPayment> _cache = new List<IPayment>();
 
         public PaymentRepository(IDatabase database, ISession session)
         {
-            m_database = database;
-            m_session = session;
+            _database = database;
+            _session = session;
         }
 
         public void PreloadCache(DateTime from, DateTime to)
         {
-            m_cache.Clear();
-            m_cache.AddRange(GetPaymentsQuery().Where(p => (p.PaymentDt >= @from) && (p.PaymentDt <= to)).Execute());
+            _cache.Clear();
+            _cache.AddRange(GetPaymentsQuery().Where(p => (p.PaymentDt >= @from) && (p.PaymentDt <= to)).Execute());
         }
 
         public IPayment GetPayment(int paymentSourceId, string transactionId)
         {
-            var payment = m_cache.FirstOrDefault(p => p.TransactionId == transactionId)
+            var payment = _cache.FirstOrDefault(p => p.TransactionId == transactionId)
                        ?? GetPaymentsQuery().Where(p => (p.PaymentSourceId == paymentSourceId) && (p.TransactionId == transactionId)).Execute().FirstOrDefault();
 
             return payment;
@@ -46,9 +46,9 @@ namespace Elsa.Commerce.Core.Repositories
                 return;
             }
 
-            payment.ProjectId = m_session.Project.Id;
+            payment.ProjectId = _session.Project.Id;
 
-            var entity = m_database.New(payment);
+            var entity = _database.New(payment);
 
             entity.RemoteAccountNumber = entity.RemoteAccountNumber.Limit(255);
             entity.RemoteAccountBankCode = entity.RemoteAccountBankCode.Limit(64);
@@ -60,8 +60,8 @@ namespace Elsa.Commerce.Core.Repositories
             entity.SearchText = entity.SearchText.Limit(255);
             entity.SenderName = entity.SenderName.Limit(100);
 
-            m_database.Save(entity);
-            m_cache.Add(entity);
+            _database.Save(entity);
+            _cache.Add(entity);
         }
 
         public IEnumerable<LastPaymentInfo> GetLastPaymentDates()
@@ -75,7 +75,7 @@ namespace Elsa.Commerce.Core.Repositories
 			                                 ) x ON (x.SourceId = ps.Id)
                                 WHERE ps.ProjectId = @p";
 
-            var payments = m_database.Sql().Execute(sql).WithParam("@p", m_session.Project.Id).MapRows(
+            var payments = _database.Sql().Execute(sql).WithParam("@p", _session.Project.Id).MapRows(
                 row =>
                     {
                         DateTime lPayment = DateTime.MinValue;
@@ -92,7 +92,7 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IEnumerable<IPayment> GetPaymentsByVarSymb(string orderVarSymbol)
         {
-            var cached = m_cache.Where(p => p.VariableSymbol.Equals(orderVarSymbol, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            var cached = _cache.Where(p => p.VariableSymbol.Equals(orderVarSymbol, StringComparison.InvariantCultureIgnoreCase)).ToList();
 
             if (cached.Any())
             {
@@ -109,17 +109,17 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IPayment GetPayment(long id)
         {
-            return m_cache.FirstOrDefault(p => p.Id == id) ?? GetPaymentsQuery().Where(p => p.Id == id).Execute().FirstOrDefault();
+            return _cache.FirstOrDefault(p => p.Id == id) ?? GetPaymentsQuery().Where(p => p.Id == id).Execute().FirstOrDefault();
         }
 
         private IQueryBuilder<IPayment> GetPaymentsQuery()
         {
             return
-                m_database.SelectFrom<IPayment>()
+                _database.SelectFrom<IPayment>()
                     .Join(p => p.Currency)
                     .Join(p => p.PaymentSource)
                     .Join(p => p.Orders)
-                    .Where(p => p.ProjectId == m_session.Project.Id);
+                    .Where(p => p.ProjectId == _session.Project.Id);
         }
     }
 }

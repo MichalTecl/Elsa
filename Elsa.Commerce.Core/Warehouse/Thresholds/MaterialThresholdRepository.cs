@@ -9,7 +9,7 @@ using Elsa.Common.Caching;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Inventory;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Warehouse.Thresholds
 {
@@ -17,11 +17,11 @@ namespace Elsa.Commerce.Core.Warehouse.Thresholds
     {
         private const string c_cacheKey = "allMaterialThresholds";
 
-        private readonly IPerProjectDbCache m_cache;
-        private readonly ISession m_session;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly IDatabase m_database;
-        private readonly IUnitConversionHelper m_unitConvertor;
+        private readonly IPerProjectDbCache _cache;
+        private readonly ISession _session;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly IDatabase _database;
+        private readonly IUnitConversionHelper _unitConvertor;
 
         public MaterialThresholdRepository(IPerProjectDbCache cache,
             ISession session,
@@ -29,28 +29,28 @@ namespace Elsa.Commerce.Core.Warehouse.Thresholds
             IDatabase database,
             IUnitConversionHelper unitConvertor)
         {
-            m_cache = cache;
-            m_session = session;
-            m_materialRepository = materialRepository;
-            m_database = database;
-            m_unitConvertor = unitConvertor;
+            _cache = cache;
+            _session = session;
+            _materialRepository = materialRepository;
+            _database = database;
+            _unitConvertor = unitConvertor;
         }
 
         public IMaterialThreshold SaveThreshold(int materialId, decimal value, int unitId)
         {
-            var material = m_materialRepository.GetMaterialById(materialId);
+            var material = _materialRepository.GetMaterialById(materialId);
             if (material == null)
             {
                 throw new InvalidOperationException("Invalid entity reference");
             }
 
-            if (!m_unitConvertor.AreCompatible(material.NominalUnit.Id, unitId))
+            if (!_unitConvertor.AreCompatible(material.NominalUnit.Id, unitId))
             {
                 throw new InvalidOperationException($"Zvolenou jednotku nelze použít pro materiál \"{material.Name}\"");
             }
 
             var existing = GetThreshold(materialId) ??
-                            m_database.New<IMaterialThreshold>(th => th.MaterialId = materialId);
+                            _database.New<IMaterialThreshold>(th => th.MaterialId = materialId);
 
             if ((existing.UnitId == unitId) && (existing.ThresholdQuantity == value))
             {
@@ -59,20 +59,20 @@ namespace Elsa.Commerce.Core.Warehouse.Thresholds
 
             existing.UnitId = unitId;
             existing.ThresholdQuantity = value;
-            existing.ProjectId = m_session.Project.Id;
-            existing.UpdateUserId = m_session.User.Id;
+            existing.ProjectId = _session.Project.Id;
+            existing.UpdateUserId = _session.User.Id;
             existing.UpdateDt = DateTime.Now;
 
-            m_database.Save(existing);
+            _database.Save(existing);
 
-            m_cache.Remove(c_cacheKey);
+            _cache.Remove(c_cacheKey);
 
             return existing;
         }
 
         public IEnumerable<IMaterialThreshold> GetAllThresholds()
         {
-            return m_cache.ReadThrough(c_cacheKey, q => q.SelectFrom<IMaterialThreshold>());
+            return _cache.ReadThrough(c_cacheKey, q => q.SelectFrom<IMaterialThreshold>());
         }
 
         public IMaterialThreshold GetThreshold(int materialId)
@@ -88,8 +88,8 @@ namespace Elsa.Commerce.Core.Warehouse.Thresholds
                 return;
             }
 
-            m_database.Delete(existing);
-            m_cache.Remove(c_cacheKey);
+            _database.Delete(existing);
+            _cache.Remove(c_cacheKey);
         }
 
         public bool HasThreshold(int materialId)

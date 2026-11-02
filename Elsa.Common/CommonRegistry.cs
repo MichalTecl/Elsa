@@ -12,7 +12,7 @@ namespace Elsa.Common
     {
         public void Setup(IContainerSetup setup)
         {
-            Robowire.RobOrm.SqlServer.DeadlockDiagnostics.Configure(new DeadlockDiagnosticFileSink());
+            RobOrm.SqlServer.DeadlockDiagnostics.Configure(new DeadlockDiagnosticFileSink());
 
             setup.For<IConfigurationRepository>().Use<ConfigurationRepository>();
             setup.For<ILog>().Use<Logger>();

@@ -1,6 +1,6 @@
 using Elsa.Common.Logging;
 using Elsa.Common.Utils;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Jobs.CrmMailPull.Steps
 {

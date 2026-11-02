@@ -14,63 +14,63 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Commerce.SaleEvents;
 using Robowire;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.SaleEvents
 {
     public class SaleEventRepository : ISaleEventRepository
     {
-        private readonly IDatabase m_database;
-        private readonly ICache m_cache;
-        private readonly ISession m_session;
-        private readonly IServiceLocator m_serviceLocator;
-        private readonly IMaterialBatchFacade m_batchFacade;
-        private readonly IMaterialRepository m_materialRepository;
-        private readonly AmountProcessor m_amountProcessor;
+        private readonly IDatabase _database;
+        private readonly ICache _cache;
+        private readonly ISession _session;
+        private readonly IServiceLocator _serviceLocator;
+        private readonly IMaterialBatchFacade _batchFacade;
+        private readonly IMaterialRepository _materialRepository;
+        private readonly AmountProcessor _amountProcessor;
 
         public SaleEventRepository(IDatabase database, ICache cache, ISession session, IServiceLocator serviceLocator, IMaterialBatchFacade batchFacade, IMaterialRepository materialRepository, AmountProcessor amountProcessor)
         {
-            m_database = database;
-            m_cache = cache;
-            m_session = session;
-            m_serviceLocator = serviceLocator;
-            m_batchFacade = batchFacade;
-            m_materialRepository = materialRepository;
-            m_amountProcessor = amountProcessor;
+            _database = database;
+            _cache = cache;
+            _session = session;
+            _serviceLocator = serviceLocator;
+            _batchFacade = batchFacade;
+            _materialRepository = materialRepository;
+            _amountProcessor = amountProcessor;
         }
 
         public ISaleEvent GetEventById(int id)
         {
-            return m_cache.ReadThrough(GetEventCacheKey(id), TimeSpan.FromDays(1), () => m_database
-                .SelectFrom<ISaleEvent>().Where(e => e.ProjectId == m_session.Project.Id)
-                .Where(e => e.Id == id).Execute().Select(e => new SaleEventAdapter(m_serviceLocator, e))
+            return _cache.ReadThrough(GetEventCacheKey(id), TimeSpan.FromDays(1), () => _database
+                .SelectFrom<ISaleEvent>().Where(e => e.ProjectId == _session.Project.Id)
+                .Where(e => e.Id == id).Execute().Select(e => new SaleEventAdapter(_serviceLocator, e))
                 .FirstOrDefault());
         }
 
         public IEnumerable<ISaleEventAllocation> GetAllocationsByEventId(int saleEventId)
         {
-            return m_cache.ReadThrough(GetAllocationsCacheKey(saleEventId), TimeSpan.FromDays(1),
-                () => m_database.SelectFrom<ISaleEventAllocation>().Where(a => a.SaleEventId == saleEventId).Execute().Select(a => new SaleEventAllocationAdapter(m_serviceLocator, a))
+            return _cache.ReadThrough(GetAllocationsCacheKey(saleEventId), TimeSpan.FromDays(1),
+                () => _database.SelectFrom<ISaleEventAllocation>().Where(a => a.SaleEventId == saleEventId).Execute().Select(a => new SaleEventAllocationAdapter(_serviceLocator, a))
                     .ToList());
         }
 
         public IEnumerable<ISaleEvent> GetEvents(int pageNumber, int pageSize)
         {
-            var events = m_database.SelectFrom<ISaleEvent>().Where(e => e.ProjectId == m_session.Project.Id).OrderByDesc(e => e.EventDt)
+            var events = _database.SelectFrom<ISaleEvent>().Where(e => e.ProjectId == _session.Project.Id).OrderByDesc(e => e.EventDt)
                 .Skip(pageSize * pageNumber).Take(pageSize).Execute();
 
             foreach (var e in events)
             {
-                yield return new SaleEventAdapter(m_serviceLocator, e);
+                yield return new SaleEventAdapter(_serviceLocator, e);
             }
         }
 
         public IEnumerable<ISaleEvent> GetEvents(DateTime @from, DateTime to)
         {
-            return m_database.SelectFrom<ISaleEvent>()
-                .Where(e => e.ProjectId == m_session.Project.Id)
+            return _database.SelectFrom<ISaleEvent>()
+                .Where(e => e.ProjectId == _session.Project.Id)
                 .Where(e => e.EventDt >= from && e.EventDt < to).Execute()
-                .Select(e => new SaleEventAdapter(m_serviceLocator, e));
+                .Select(e => new SaleEventAdapter(_serviceLocator, e));
         }
 
         public ISaleEvent WriteEvent(int id, Action<ISaleEvent> entity, IEnumerable<SaleEventAllocationDto> allocations)
@@ -95,7 +95,7 @@ namespace Elsa.Commerce.Core.SaleEvents
 
             try
             {
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
                     List<ISaleEventAllocation> existingAllocations;
 
@@ -120,15 +120,15 @@ namespace Elsa.Commerce.Core.SaleEvents
             }
             finally
             {
-                m_cache.Remove(GetEventCacheKey(id));
-                m_cache.Remove(GetAllocationsCacheKey(id));
+                _cache.Remove(GetEventCacheKey(id));
+                _cache.Remove(GetAllocationsCacheKey(id));
             }
 
             var evt = GetEventById(id);
 
             foreach (var batch in evt.Allocations.Select(a => a.Batch).Distinct())
             {
-                m_batchFacade.ReleaseBatchAmountCache(batch);
+                _batchFacade.ReleaseBatchAmountCache(batch);
             }
 
             return evt;
@@ -136,29 +136,29 @@ namespace Elsa.Commerce.Core.SaleEvents
 
         public IEnumerable<ISaleEventAllocation> GetAllocationsByBatch(BatchKey key)
         {
-            var batchNumber = key.GetBatchNumber(m_batchFacade);
-            var materialId = key.GetMaterialId(m_batchFacade);
+            var batchNumber = key.GetBatchNumber(_batchFacade);
+            var materialId = key.GetMaterialId(_batchFacade);
 
-            var allocs = m_database.SelectFrom<ISaleEventAllocation>()
+            var allocs = _database.SelectFrom<ISaleEventAllocation>()
                 .Join(a => a.Batch)
                 .Where(b =>    b.Batch.MaterialId == materialId 
                             && b.Batch.BatchNumber == batchNumber 
-                            && b.Batch.ProjectId == m_session.Project.Id)
+                            && b.Batch.ProjectId == _session.Project.Id)
                 .Execute();
 
-            return allocs.Select(a => new SaleEventAllocationAdapter(m_serviceLocator, a));
+            return allocs.Select(a => new SaleEventAllocationAdapter(_serviceLocator, a));
         }
 
         private ISaleEvent CreateEvent(Action<ISaleEvent> entity)
         {
-            var e = m_database.New<ISaleEvent>();
+            var e = _database.New<ISaleEvent>();
             entity(e);
 
-            e.UserId = m_session.User.Id;
-            e.ProjectId = m_session.Project.Id;
+            e.UserId = _session.User.Id;
+            e.ProjectId = _session.Project.Id;
             e.EventDt = DateTime.Now;
 
-            m_database.Save(e);
+            _database.Save(e);
 
             return e;
         }
@@ -174,36 +174,36 @@ namespace Elsa.Commerce.Core.SaleEvents
             }
 
             if (dto.ReturnedQuantity != null &&
-                m_amountProcessor.GreaterThan(dto.ReturnedQuantity, dto.AllocatedQuantity))
+                _amountProcessor.GreaterThan(dto.ReturnedQuantity, dto.AllocatedQuantity))
             {
                 throw new InvalidOperationException("Nelze vracet vetsi nez blokovane mnozstvi");
             }
 
             if (!existingAllocations.Any())
             {
-                var batches = m_batchFacade.ProposeAllocations(dto.MaterialId, dto.BatchNumber, dto.AllocatedQuantity)
+                var batches = _batchFacade.ProposeAllocations(dto.MaterialId, dto.BatchNumber, dto.AllocatedQuantity)
                     .ToList();
                 if (batches.Any(b => b.Item1 == null))
                 {
-                    throw new InvalidOperationException($"Pozadovane mnozstvi {dto.AllocatedQuantity} {m_materialRepository.GetMaterialById(dto.MaterialId)?.Name} neni v sarzi {dto.BatchNumber} k dispozici");
+                    throw new InvalidOperationException($"Pozadovane mnozstvi {dto.AllocatedQuantity} {_materialRepository.GetMaterialById(dto.MaterialId)?.Name} neni v sarzi {dto.BatchNumber} k dispozici");
                 }
 
                 foreach (var batch in batches)
                 {
-                    m_database.Save(m_database.New<ISaleEventAllocation>(a =>
+                    _database.Save(_database.New<ISaleEventAllocation>(a =>
                     {
                         a.AllocationDt = DateTime.Now;
                         a.AllocatedQuantity = batch.Item2.Value;
                         a.UnitId = batch.Item2.Unit.Id;
                         a.BatchId = batch.Item1.Value;
-                        a.AllocationUserId = m_session.User.Id;
+                        a.AllocationUserId = _session.User.Id;
                         a.SaleEventId = eventId;
 
                         if (dto.ReturnedQuantity != null)
                         {
                             a.ReturnedQuantity = dto.ReturnedQuantity.Value;
                             a.ReturnDt = DateTime.Now;
-                            a.ReturnUserId = m_session.User.Id;
+                            a.ReturnUserId = _session.User.Id;
                         }
                     }));
                 }
@@ -212,31 +212,31 @@ namespace Elsa.Commerce.Core.SaleEvents
             }
 
             var totalAllocatedInDb =
-                m_amountProcessor.Sum(existingAllocations.Select(a => new Amount(a.AllocatedQuantity, a.Unit)));
+                _amountProcessor.Sum(existingAllocations.Select(a => new Amount(a.AllocatedQuantity, a.Unit)));
 
-            if (!m_amountProcessor.AreEqual(totalAllocatedInDb, dto.AllocatedQuantity))
+            if (!_amountProcessor.AreEqual(totalAllocatedInDb, dto.AllocatedQuantity))
             {
                 throw new InvalidOperationException("Nelze zmenit alokovane mnozstvi pro existujici akci");
             }
 
-            var totalReturnedInDb = m_amountProcessor.Sum(existingAllocations.Where(a => a.ReturnedQuantity != null)
+            var totalReturnedInDb = _amountProcessor.Sum(existingAllocations.Where(a => a.ReturnedQuantity != null)
                 .Select(a => new Amount(a.ReturnedQuantity.Value, a.Unit)));
 
             var returnedAmount = dto.ReturnedQuantity == null
                 ? new Amount(0, dto.AllocatedQuantity.Unit)
                 : dto.ReturnedQuantity;
 
-            if (m_amountProcessor.AreEqual(totalReturnedInDb, returnedAmount))
+            if (_amountProcessor.AreEqual(totalReturnedInDb, returnedAmount))
             {
                 return;
             }
 
-            if (m_amountProcessor.GreaterThan(totalReturnedInDb, returnedAmount))
+            if (_amountProcessor.GreaterThan(totalReturnedInDb, returnedAmount))
             {
                 throw new InvalidOperationException("Nelze snizovat vracene mnozstvi");
             }
 
-            var newReturn = m_amountProcessor.Subtract(returnedAmount, totalReturnedInDb);
+            var newReturn = _amountProcessor.Subtract(returnedAmount, totalReturnedInDb);
 
             foreach (var existingAloc in existingAllocations)
             {
@@ -250,7 +250,7 @@ namespace Elsa.Commerce.Core.SaleEvents
                     : new Amount(existingAloc.ReturnedQuantity.Value, existingAloc.Unit);
 
                 var toReturnHere =
-                    m_amountProcessor.Subtract(new Amount(existingAloc.AllocatedQuantity, existingAloc.Unit),
+                    _amountProcessor.Subtract(new Amount(existingAloc.AllocatedQuantity, existingAloc.Unit),
                         alreadyReturnedHere);
 
                 if (!toReturnHere.IsPositive)
@@ -258,13 +258,13 @@ namespace Elsa.Commerce.Core.SaleEvents
                     continue;
                 }
 
-                var actuallyReturningHere = m_amountProcessor.Min(toReturnHere, newReturn);
+                var actuallyReturningHere = _amountProcessor.Min(toReturnHere, newReturn);
 
                 existingAloc.ReturnedQuantity = actuallyReturningHere.Value;
                 existingAloc.UnitId = actuallyReturningHere.Unit.Id;
-                m_database.Save(existingAloc);
+                _database.Save(existingAloc);
 
-                newReturn = m_amountProcessor.Subtract(newReturn, actuallyReturningHere);
+                newReturn = _amountProcessor.Subtract(newReturn, actuallyReturningHere);
             }
 
             if (newReturn.IsPositive)

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Common.Logging;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Common.Logging
 {
@@ -35,7 +35,7 @@ namespace Elsa.Common.Logging
             var spacer = e == null ? string.Empty : "\t";
             for (var current = e; current != null; current = current.InnerException)
             {
-                var diagnosticId = current.Data[Robowire.RobOrm.SqlServer.DeadlockDiagnostics.EXCEPTION_DATA_KEY];
+                var diagnosticId = current.Data[RobOrm.SqlServer.DeadlockDiagnostics.EXCEPTION_DATA_KEY];
                 if (diagnosticId == null)
                     continue;
 

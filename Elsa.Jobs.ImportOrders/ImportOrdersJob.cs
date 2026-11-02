@@ -13,7 +13,7 @@ using Elsa.Common;
 using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using Elsa.Commerce.Core.Model;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Smtp.Core;

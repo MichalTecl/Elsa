@@ -10,27 +10,27 @@ using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
 using Robowire.RoboApi;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Users
 {
     public class UserWebSession : IWebSession
     {
         private const string c_sessionCookieIdentifier = "elsa_sid";
-        private bool m_initialized;
-        private Guid? m_sessionPublicId;
-        private readonly ICache m_cache;
-        private readonly Lazy<IUserRepository> m_userRepository;
+        private bool _initialized;
+        private Guid? _sessionPublicId;
+        private readonly ICache _cache;
+        private readonly Lazy<IUserRepository> _userRepository;
 
-        private readonly IDatabase m_database;
+        private readonly IDatabase _database;
 
-        private IUserSession m_session;
+        private IUserSession _session;
 
         public UserWebSession(IDatabase database, ICache cache, Lazy<IUserRepository> userRepository)
         {
-            m_database = database;
-            m_cache = cache;
-            m_userRepository = userRepository;
+            _database = database;
+            _cache = cache;
+            _userRepository = userRepository;
         }
 
         public IUser User
@@ -38,9 +38,9 @@ namespace Elsa.Users
             get
             {
                 EnsureInitialized();
-                m_cache.ReadThrough<DateTime?>($"userOnline_{m_session?.UserId}", TimeSpan.FromMinutes(10), () => DateTime.Now);
+                _cache.ReadThrough<DateTime?>($"userOnline_{_session?.UserId}", TimeSpan.FromMinutes(10), () => DateTime.Now);
 
-                return m_session?.User;
+                return _session?.User;
             }
         }
 
@@ -49,11 +49,11 @@ namespace Elsa.Users
             get
             {
                 EnsureInitialized();
-                return m_session?.Project;
+                return _session?.Project;
             }
         }
 
-        public long? SessionId => m_session?.Id;
+        public long? SessionId => _session?.Id;
 
         public void Login(string user, string password)
         {
@@ -62,12 +62,12 @@ namespace Elsa.Users
             user = user?.Trim();
             password = password?.Trim();
 
-            if (m_session?.User != null)
+            if (_session?.User != null)
             {
                 throw new InvalidOperationException("User already loged in");
             }
 
-            var userRecord = m_database.SelectFrom<IUser>().Where(u => u.EMail == user).Execute().FirstOrDefault();
+            var userRecord = _database.SelectFrom<IUser>().Where(u => u.EMail == user).Execute().FirstOrDefault();
             if (userRecord == null)
             {
                 return;
@@ -83,17 +83,17 @@ namespace Elsa.Users
                 return;
             }
 
-            m_session = m_database.New<IUserSession>();
-            m_session.PublicId = m_sessionPublicId ?? Guid.Empty;
-            m_session.UserId = userRecord.Id;
-            m_session.ProjectId = userRecord.ProjectId;
-            m_session.StartDt = DateTime.Now;
-            m_session.EndDt = null;
+            _session = _database.New<IUserSession>();
+            _session.PublicId = _sessionPublicId ?? Guid.Empty;
+            _session.UserId = userRecord.Id;
+            _session.ProjectId = userRecord.ProjectId;
+            _session.StartDt = DateTime.Now;
+            _session.EndDt = null;
             
-            m_database.Save(m_session);
+            _database.Save(_session);
 
-            m_session =
-                m_database.SelectFrom<IUserSession>().Where(s => s.Id == m_session.Id).Join(s => s.User).Join(s => s.Project).Execute().FirstOrDefault();
+            _session =
+                _database.SelectFrom<IUserSession>().Where(s => s.Id == _session.Id).Join(s => s.User).Join(s => s.Project).Execute().FirstOrDefault();
         }
 
         public void Logout()
@@ -102,11 +102,11 @@ namespace Elsa.Users
 
             if (User != null)
             {
-                m_cache.Remove($"userOnline_{m_session?.UserId}");
-                m_cache.Remove(GetCacheKey(m_session.PublicId));
-                m_session.EndDt = DateTime.Now;
-                m_database.Save(m_session);
-                m_session = null;
+                _cache.Remove($"userOnline_{_session?.UserId}");
+                _cache.Remove(GetCacheKey(_session.PublicId));
+                _session.EndDt = DateTime.Now;
+                _database.Save(_session);
+                _session = null;
             }
         }
 
@@ -134,7 +134,7 @@ namespace Elsa.Users
                 return false;
             }
             
-            return m_userRepository.Value.GetUserRights(User.Id).Contains(symbol);
+            return _userRepository.Value.GetUserRights(User.Id).Contains(symbol);
         }
 
         public void EnsureUserRight(UserRight right)
@@ -154,7 +154,7 @@ namespace Elsa.Users
                     return new string[0];
                 }
 
-                return m_userRepository.Value.GetUserRights(User.Id).ToArray();
+                return _userRepository.Value.GetUserRights(User.Id).ToArray();
             }
         }
 
@@ -176,10 +176,10 @@ namespace Elsa.Users
                 Guid sid;
                 if (Guid.TryParse(sessionCookie.Value, out sid))
                 {
-                    m_session = m_cache.ReadThrough(GetCacheKey(sid),
+                    _session = _cache.ReadThrough(GetCacheKey(sid),
                         TimeSpan.FromMinutes(1),
                         () =>
-                            m_database.SelectFrom<IUserSession>()
+                            _database.SelectFrom<IUserSession>()
                                 .Join(s => s.User)
                                 .Join(s => s.Project)
                                 .Take(1)
@@ -187,7 +187,7 @@ namespace Elsa.Users
                                 .Execute()
                                 .FirstOrDefault());
 
-                    if (m_session == null)
+                    if (_session == null)
                     {
                         sessionCookie = null;
                     }
@@ -200,18 +200,18 @@ namespace Elsa.Users
 
             if (sessionCookie == null)
             {
-                m_session = null;
+                _session = null;
 
                 if (suppressCookieWrite)
                 {
-                    m_initialized = true;
+                    _initialized = true;
                     return;
                 }
 
-                m_sessionPublicId = Guid.NewGuid();
-                m_cache.Remove(GetCacheKey(m_sessionPublicId.Value));
+                _sessionPublicId = Guid.NewGuid();
+                _cache.Remove(GetCacheKey(_sessionPublicId.Value));
 
-                sessionCookie = new HttpCookie(c_sessionCookieIdentifier, m_sessionPublicId.ToString())
+                sessionCookie = new HttpCookie(c_sessionCookieIdentifier, _sessionPublicId.ToString())
                                     {
                                         Expires = DateTime.Now
                                     };
@@ -223,7 +223,7 @@ namespace Elsa.Users
                 setCookie(sessionCookie);
             }
             
-            m_initialized = true;
+            _initialized = true;
         }
 
         private static bool ShouldSuppressCookieWrite(System.Collections.IDictionary items)
@@ -233,7 +233,7 @@ namespace Elsa.Users
 
         private void EnsureInitialized()
         {
-            if (!m_initialized)
+            if (!_initialized)
             {
                 throw new InvalidOperationException("Session was not initialized");
             }

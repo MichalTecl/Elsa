@@ -8,7 +8,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Logging;
 using Elsa.Jobs.Common;
 using Elsa.Smtp.Core;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.App.Inspector.Jobs
 {

@@ -10,8 +10,8 @@ using Elsa.Core.Entities.Commerce.Common.SystemCounters;
 using Elsa.Core.Entities.Commerce.Core;
 using Elsa.Core.Entities.Commerce.Inventory;
 
-using Robowire.RobOrm.Core;
-using Robowire.RobOrm.SqlServer.Attributes;
+using RobOrm.Core;
+using RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Core.Entities.Commerce.Accounting
 {

@@ -1,7 +1,7 @@
 ﻿using Elsa.App.ImportExport;
 using Elsa.Commerce.Core.VirtualProducts;
 using Elsa.Commerce.Core.VirtualProducts.Model;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

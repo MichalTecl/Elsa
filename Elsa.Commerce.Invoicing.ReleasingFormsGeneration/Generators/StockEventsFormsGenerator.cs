@@ -14,22 +14,22 @@ using Elsa.Core.Entities.Commerce.Inventory;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Invoicing.Core.Contract;
 using Elsa.Invoicing.Core.Data;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 {
     public class StockEventsFormsGenerator : ReleaseFormsGeneratorBase<StockEventDescriptor>
     {
-        private readonly IStockEventRepository m_stockEventRepository;
-        private readonly IDatabase m_database;
+        private readonly IStockEventRepository _stockEventRepository;
+        private readonly IDatabase _database;
 
         public StockEventsFormsGenerator(IMaterialBatchFacade batchFacade,
             IInvoiceFormsRepository invoiceFormsRepository, IMaterialRepository materialRepository,
             IStockEventRepository stockEventRepository, IDatabase database) : base(batchFacade, invoiceFormsRepository,
             materialRepository)
         {
-            m_stockEventRepository = stockEventRepository;
-            m_database = database;
+            _stockEventRepository = stockEventRepository;
+            _database = database;
         }
 
         protected override string GetExplanation(List<ItemReleaseModel> item, IInvoiceForm invoiceForm)
@@ -51,7 +51,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
         {
             DateUtil.GetMonthDt(year, month, out var dtFrom, out var dtTo);
 
-            var events = m_stockEventRepository.GetEvents(dtFrom, dtTo, forInventory.Id).Where(e => e.Type.IsSubtracting).ToList();
+            var events = _stockEventRepository.GetEvents(dtFrom, dtTo, forInventory.Id).Where(e => e.Type.IsSubtracting).ToList();
 
             foreach(var evt in events)
             {
@@ -96,7 +96,7 @@ namespace Elsa.Commerce.Invoicing.ReleasingFormsGeneration.Generators
 
         protected override void OnAfterItemSaved(IInvoiceForm form, IInvoiceFormItem item, ItemReleaseModel releaseModel)
         {
-            m_database.Save(m_database.New<IStockEventInvoiceFormItem>(b =>
+            _database.Save(_database.New<IStockEventInvoiceFormItem>(b =>
                 {
                     b.MaterialStockEventId = releaseModel.Descriptor.StockEventId;
                     b.InvoiceFormItemId = item.Id;

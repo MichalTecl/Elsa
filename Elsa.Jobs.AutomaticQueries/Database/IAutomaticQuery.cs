@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using Elsa.Core.Entities.Commerce.Common;
 using Elsa.Core.Entities.Commerce.Core;
-using Robowire.RobOrm.Core;
-using Robowire.RobOrm.SqlServer.Attributes;
+using RobOrm.Core;
+using RobOrm.SqlServer.Attributes;
 
 namespace Elsa.Jobs.AutomaticQueries.Database
 {

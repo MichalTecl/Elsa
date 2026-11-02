@@ -3,26 +3,26 @@ using System.Linq;
 
 using Elsa.Core.Entities.Commerce.Commerce;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Repositories
 {
     public class OrderStatusRepository : IOrderStatusRepository
     {
-        private readonly IOrderStatusTranslator m_translator;
-        private readonly IDatabase m_database;
+        private readonly IOrderStatusTranslator _translator;
+        private readonly IDatabase _database;
 
-        private List<IOrderStatus> m_statuses;
+        private List<IOrderStatus> _statuses;
 
         public OrderStatusRepository(IOrderStatusTranslator translator, IDatabase database)
         {
-            m_translator = translator;
-            m_database = database;
+            _translator = translator;
+            _database = database;
         }
 
         public string Translate(int statusId)
         {
-            return m_translator.Translate(statusId);
+            return _translator.Translate(statusId);
         }
 
         public string Translate(IOrderStatus status)
@@ -32,12 +32,12 @@ namespace Elsa.Commerce.Core.Repositories
 
         public IEnumerable<IOrderStatus> GetAllStatuses()
         {
-            return m_statuses ?? (m_statuses = m_database.SelectFrom<IOrderStatus>().Execute().ToList());
+            return _statuses ?? (_statuses = _database.SelectFrom<IOrderStatus>().Execute().ToList());
         }
 
         public IOrderStatus GetStatus(int statusId)
         {
-            return m_statuses.FirstOrDefault(s => s.Id == statusId);
+            return _statuses.FirstOrDefault(s => s.Id == statusId);
         }
     }
 }

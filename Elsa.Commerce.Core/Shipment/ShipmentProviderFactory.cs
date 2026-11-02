@@ -5,7 +5,7 @@ using Elsa.Common.Interfaces;
 using Elsa.Common.Utils;
 using Elsa.Core.Entities.Commerce.Integration;
 using Robowire;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Commerce.Core.Shipment
 {

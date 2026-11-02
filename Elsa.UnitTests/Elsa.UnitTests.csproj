@@ -81,8 +81,22 @@
     <Compile Include="Mocks\CacheMock.cs" />
     <Compile Include="Mocks\SessionMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RobOrmTests\LegacyEntityGenerator.cs" />
+    <Compile Include="RobOrmTests\RobOrmEntityGenerationTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\RobOrm\RobOrm.Core\RobOrm.Core.csproj">
+      <Project>{ff79ecb2-9a11-45ba-be08-e6d4471e7a0f}</Project>
+      <Name>RobOrm.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\RobowireCore\Robowire.csproj">
+      <Project>{1edcbab3-da52-40b1-998b-88f878ff2875}</Project>
+      <Name>Robowire</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robowire\CodeGeneration\CodeGeneration.csproj">
+      <Project>{8d5fb7d2-8960-4bf7-938e-2ec9584bdec5}</Project>
+      <Name>CodeGeneration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DocGen\DocGen.csproj">
       <Project>{0A638FAC-F3AA-442A-9696-431F12B997CC}</Project>
       <Name>DocGen</Name>

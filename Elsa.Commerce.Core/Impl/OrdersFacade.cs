@@ -9,7 +9,7 @@ using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Integration;
 using Elsa.Core.Entities.Commerce.Inventory.Batches;
 using Elsa.Smtp.Core;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

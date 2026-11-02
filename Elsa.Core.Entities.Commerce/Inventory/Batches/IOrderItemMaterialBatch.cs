@@ -4,7 +4,7 @@
 using Elsa.Core.Entities.Commerce.Commerce;
 using Elsa.Core.Entities.Commerce.Common.Security;
 
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 
 namespace Elsa.Core.Entities.Commerce.Inventory.Batches
 {

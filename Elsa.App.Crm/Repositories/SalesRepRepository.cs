@@ -2,7 +2,7 @@
 using Elsa.App.Crm.Model;
 using Elsa.Common.Interfaces;
 using Elsa.Core.Entities.Commerce.Crm;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,5 +1,5 @@
 ﻿using OfficeOpenXml;
-using Robowire.RobOrm.Core;
+using RobOrm.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,11 +11,11 @@ namespace Elsa.App.ImportExport
     public abstract class XlsImportExportModuleBase<TModel> : IImportExportModule 
         where TModel : new()
     {
-        private readonly IDatabase m_database;
+        private readonly IDatabase _database;
 
         protected XlsImportExportModuleBase(IDatabase database)
         {
-            m_database = database;
+            _database = database;
         }
 
         public abstract string Title { get; }
@@ -26,7 +26,7 @@ namespace Elsa.App.ImportExport
 
         public byte[] Export(out string exportFileName)
         {
-            var export = ExportData(out exportFileName, m_database);
+            var export = ExportData(out exportFileName, _database);
             return XlsxSerializer.Instance.Serialize(export);
         }
 
@@ -38,9 +38,9 @@ namespace Elsa.App.ImportExport
 
                 string res = null;
 
-                using (var tx = m_database.OpenTransaction())
+                using (var tx = _database.OpenTransaction())
                 {
-                    res = ImportDataInTransaction(data, m_database, tx);
+                    res = ImportDataInTransaction(data, _database, tx);
                     tx.Commit();
                 }
 
