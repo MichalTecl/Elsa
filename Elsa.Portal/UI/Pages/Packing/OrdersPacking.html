@@ -31,6 +31,10 @@
             </a>
             <div id="packingUiMainCont">
                 <div id="orderSearchPanel">
+                    <div id="notSentBanner" style="display:none">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="notSentBannerText"></span>
+                    </div>
                     <div id="tbSearchContainer">
                         <input id="tbSearch" event-bind="keydown:onSearchKeyDown(event, this.value)" data-bind="value:currentQuery"/>
                     </div>
@@ -142,11 +146,21 @@
                         </div>
 
                     </div>
-                    <div id="packingControlPanel" class="stackRight">
-                        
-                        <button style="margin-right: 100px; font-size: 9px" class="restricted-OrderBatchAssignment" id="butReleaseAllocations" event-bind="click:releaseBatches" >Uvolnit šarže v neodeslaných zásilkách</button>
-                        
-                        <span style="display:block">
+                    <div id="packingControlPanel">
+
+                        <div id="batchReleaseButtons">
+                            <button class="restricted-OrderBatchAssignment" id="butReleaseAllocations" event-bind="click:releaseBatches">Uvolnit šarže v neodeslaných zásilkách</button>
+                        </div>
+
+                        <div id="packingActions">
+                            <button class="restricted-OrderBatchAssignment"
+                                    id="butReleaseOrderAllocations"
+                                    title="Odebere šarže této objednávce a vrátí se na zadání čísla objednávky. Objednávka NEBUDE zabalena."
+                                    event-bind="click:releaseCurrentOrderBatches">
+                                <i class="fas fa-sign-out-alt fa-flip-horizontal"></i>
+                                <span>Odebrat této objednávce šarže</span>
+                            </button>
+                            <span style="display:block">
                             <div id="butMarkPacked" 
                                  class="restricted-MarkOrderPacked"
                                  event-bind="mousedown:onPackButtonMouseDown(this); mouseup:onPackButtonMouseUp(this); mouseout:onPackButtonMouseUp(this); blur:onPackButtonMouseUp(this); mouseenter:onPackButtonHover(this); hover:onPackButtonHover(this)">
@@ -155,7 +169,8 @@
                                 </div>
                                 <div id="packingText">Zabaleno</div>
                             </div>
-                        </span>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -284,6 +299,12 @@
                 });
             };
 
+            this.bind(function(notSentBanner) {
+                var banner = document.getElementById("notSentBanner");
+                document.getElementById("notSentBannerText").textContent = notSentBanner || "";
+                banner.style.display = (!!notSentBanner) ? "flex" : "none";
+            });
+
             this.bind(function(currentOrder) {
                 if (currentOrder === null || currentOrder === undefined) {
                     orderSearchPanel.style.display = 'block';
@@ -329,7 +350,7 @@
                 try {
                     app.ordersPacking.vm.packOrder();
                 } catch (e) {
-                    alert(e.Message);
+                    alert(e.message);
                 } 
             };
 
@@ -363,6 +384,10 @@
 
             self.releaseBatches = function() {
                 app.ordersPacking.vm.releaseBatches();
+            };
+
+            self.releaseCurrentOrderBatches = function() {
+                app.ordersPacking.vm.releaseCurrentOrderBatches();
             };
 
             document.onkeydown = function (evt) {

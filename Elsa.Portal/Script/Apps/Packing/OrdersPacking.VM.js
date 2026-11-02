@@ -14,6 +14,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     self.ordersToPack = null;
     self.checklistMode = false;
     self.loadingInternalNote = false;
+    self.notSentBanner = null;
 
     var loadedIntNotes = {};
 
@@ -128,7 +129,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
                 // ask the user whether they wants to proceed 
                 var result = confirm("Všechny položky nebyly zaškrtnuty. Chcete přesto pokračovat?");
                 if (!result)
-                    return;
+                    throw new Error("Objednávka nebyla zabalena - nejsou zaškrtnuté všechny položky.");
             }
         }
 
@@ -249,6 +250,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         lt.api("/ordersPacking/findOrder").query({ "number": qry }).get(function(order) {
             adjustServerOrderObject(order);
             self.currentOrder = order;
+            self.notSentBanner = null;
             loadInternalNote(order.OrderId);
 
             self.currentQuery = qry;
@@ -261,10 +263,97 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     };
 
-    self.cancelCurrentOrder = function() {
+    // Zavre aktualni (nezabalenou) objednavku a nad vyhledavanim zobrazi banner, ze nebyla odeslana
+    var closeCurrentOrderAsNotSent = function () {
+        var order = self.currentOrder;
+
         self.currentOrder = null;
+
+        if (!!order) {
+            self.notSentBanner = "Objednávka #" + order.OrderNumber + " " + (order.CustomerName || "") + " nebyla odeslána";
+        }
+
         lt.notify();
     };
+
+    var hasAssignedBatches = function (batchAssignment) {
+        if (!batchAssignment) {
+            return false;
+        }
+
+        for (var i = 0; i < batchAssignment.length; i++) {
+            if ((!!batchAssignment[i].MaterialBatchId) && (batchAssignment[i].MaterialBatchId > 0)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    var currentOrderHasAssignedBatches = function () {
+        var order = self.currentOrder;
+        if ((!order) || (!order.Items)) {
+            return false;
+        }
+
+        for (var i = 0; i < order.Items.length; i++) {
+            var orderItem = order.Items[i];
+
+            if (hasAssignedBatches(orderItem.BatchAssignment)) {
+                return true;
+            }
+
+            var kitItems = orderItem.KitItems || [];
+            for (var j = 0; j < kitItems.length; j++) {
+                if ((!!kitItems[j].SelectedItem) && hasAssignedBatches(kitItems[j].SelectedItem.BatchAssignment)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
+
+    var releaseOrderBatchAllocations = function (orderId, callback) {
+        lt.api("/ordersPacking/releaseOrderBatchAllocations").query({ "orderId": orderId }).get(callback);
+    };
+
+    // Odchod z rozpracovane objednavky (sipka zpet / Esc)
+    self.cancelCurrentOrder = function() {
+        if (!self.currentOrder) {
+            return;
+        }
+
+        if (!currentOrderHasAssignedBatches()) {
+            closeCurrentOrderAsNotSent();
+            return;
+        }
+
+        var release = confirm("Objednávka " + self.currentOrder.OrderNumber + " nebyla zabalena.\n\nChcete jí odebrat přiřazené šarže?\n\nOK = odebrat šarže\nZrušit = ponechat šarže");
+        if (!release) {
+            closeCurrentOrderAsNotSent();
+            return;
+        }
+
+        releaseOrderBatchAllocations(self.currentOrder.OrderId, closeCurrentOrderAsNotSent);
+    };
+
+    self.releaseCurrentOrderBatches = function () {
+        if (!self.currentOrder) {
+            return;
+        }
+
+        releaseOrderBatchAllocations(self.currentOrder.OrderId, closeCurrentOrderAsNotSent);
+    };
+
+    // Tvrde zavreni / refresh stranky s otevrenou objednavkou - prohlizec ukaze svuj standardni dialog
+    window.addEventListener("beforeunload", function (evt) {
+        if (!!self.currentOrder) {
+            evt.preventDefault();
+            evt.returnValue = "";
+            return "";
+        }
+    });
 
     self.selectKitItem = function(orderItemId, kitItemId, kitItemIndex) {
 
@@ -368,8 +457,13 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
     setTimeout(loadOrdersToPack, 0);
 
     self.releaseBatches = function() {
+        var confirmed = confirm("Opravdu chcete uvolnit šarže ve VŠECH neodeslaných zásilkách?\n\nTato akce se netýká jen otevřené objednávky - odebere přiřazení šarží všem objednávkám, které ještě nebyly zabaleny. Otevřená objednávka se zavře a NEBUDE označena jako zabalená.");
+        if (!confirmed) {
+            return;
+        }
+
         lt.api("/materialBatches/releaseUnsentOrdersAllocations").get(function() {
-            self.cancelCurrentOrder();
+            closeCurrentOrderAsNotSent();
         });
     };
 

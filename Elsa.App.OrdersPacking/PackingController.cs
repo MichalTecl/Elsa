@@ -196,6 +196,32 @@ namespace Elsa.App.OrdersPacking
             }
         }
 
+        public void ReleaseOrderBatchAllocations(long orderId)
+        {
+            WebSession.EnsureUserRight(OrdersPackingUserRights.OrderBatchAssignment);
+
+            using (var tx = _database.OpenTransaction())
+            {
+                var blocker = _orderRepository.TryGetProcessBlockMessage(orderId, OrderProcessingStageNames.BatchesAssignment);
+                if (!string.IsNullOrWhiteSpace(blocker))
+                {
+                    throw new InvalidOperationException($"Šarže objednávky nelze uvolnit: {blocker}");
+                }
+
+                var order = _orderRepository.GetOrder(orderId);
+                if (order == null)
+                {
+                    throw new InvalidOperationException("Objednávka nenalezena");
+                }
+
+                Log.Info($"Releasing batch allocations of order {order.Id} {order.OrderNumber} on user request");
+
+                _batchFacade.CutOrderAllocation(orderId, null);
+
+                tx.Commit();
+            }
+        }
+
         public PackingOrderModel SetItemBatchAllocation(BatchAllocationChangeRequest request)
         {
             WebSession.EnsureUserRight(OrdersPackingUserRights.OrderBatchAssignment);
