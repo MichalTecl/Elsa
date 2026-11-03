@@ -345,6 +345,7 @@ namespace Elsa.App.OrdersPacking
                 foreach (var sourceKitItem in _kitProductRepository.GetKitForOrderItem(entity, sourceItem).OrderBy(ki => ki.KitItemIndex))
                 {
                     var model = new KitItemsCollectionModel(sourceKitItem);
+                    model.ShowPackingCheckboxes = _kitProductRepository.GetKitDefinition(sourceKitItem.KitDefinitionId)?.ShowPackingCheckboxes == true;
                     
                     if (sourceKitItem.SelectedItem != null)
                     {

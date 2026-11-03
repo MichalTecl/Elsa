@@ -25,5 +25,10 @@ namespace Elsa.App.OrdersPacking.Model
 
         [JsonProperty("SelectedItem")]
         public PackingOrderItemModel SelectedItemModel { get; set; }
+
+        /// <summary>
+        /// Definice sady vyžaduje při balení vždy zobrazit zaškrtávátka (bez ohledu na checklist mode).
+        /// </summary>
+        public bool ShowPackingCheckboxes { get; set; }
     }
 }

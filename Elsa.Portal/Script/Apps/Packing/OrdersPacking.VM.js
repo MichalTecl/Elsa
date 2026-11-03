@@ -4,8 +4,6 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
     var self = this;
 
-    const AUTO_CHECKLIST_FOR_KITS = false;
-
     self.customerNoteExpanded = true;
     self.internalNoteExpanded = true;
 
@@ -57,7 +55,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
 
         var checklistItems = getChecklistItems(items);
         for (var i = 0; i < checklistItems.length; i++) {
-            checklistItems[i].showCheckbox = !!mode;
+            checklistItems[i].showCheckbox = (!!mode) || (!!checklistItems[i].forceCheckbox);
         }
     };
 
@@ -123,14 +121,13 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
             throw new Error("Neni vybrana objednavka");
         }
 
-        if (!!self.checklistMode) {
-            var uncheckedItem = getChecklistItems(self.currentOrder.Items).filter(i => !i.isChecked);
-            if (uncheckedItem.length > 0) {
-                // ask the user whether they wants to proceed 
-                var result = confirm("Všechny položky nebyly zaškrtnuty. Chcete přesto pokračovat?");
-                if (!result)
-                    throw new Error("Objednávka nebyla zabalena - nejsou zaškrtnuté všechny položky.");
-            }
+        // in checklist mode all items have showCheckbox; otherwise only items of kits with ShowPackingCheckboxes
+        var uncheckedItems = getChecklistItems(self.currentOrder.Items).filter(i => (!!i.showCheckbox) && (!i.isChecked));
+        if (uncheckedItems.length > 0) {
+            // ask the user whether they wants to proceed 
+            var result = confirm("Všechny položky nebyly zaškrtnuty. Chcete přesto pokračovat?");
+            if (!result)
+                throw new Error("Objednávka nebyla zabalena - nejsou zaškrtnuté všechny položky.");
         }
 
         for (var i = 0; i < self.currentOrder.Items.length; i++) {
@@ -157,6 +154,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         orderItem.highlightQuantity = orderItem.Quantity !== "1";
         orderItem.isKit = (!!orderItem.KitItems) && (orderItem.KitItems.length > 0);
         orderItem.isChecked = checkedItems.indexOf(orderItem.ItemId) >= 0;
+        orderItem.forceCheckbox = orderItem.isKit && orderItem.KitItems.some(function (k) { return !!k.ShowPackingCheckboxes; });
 
         const adjustBatchAssignment = (batchAssignment) => {
             for (var i = 0; i < batchAssignment.length; i++) {
@@ -192,6 +190,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
                 kitItem.hasSelectedItem = (!!kitItem.SelectedItem);
                 if (kitItem.hasSelectedItem) {
                     kitItem.SelectedItem.isChecked = checkedItems.indexOf(kitItem.SelectedItem.ItemId) >= 0;
+                    kitItem.SelectedItem.forceCheckbox = !!kitItem.ShowPackingCheckboxes;
                 }
 
                 kitItem.isKitItemIndexHead = (kitItem.KitItemIndex !== lastKitIndex);
@@ -223,9 +222,7 @@ app.ordersPacking.ViewModel = app.ordersPacking.ViewModel || function() {
         var localOrderRecord = getLocalOrderRecord(order.OrderId, false, null);
 
         var checkedItems = [];
-        self.checklistMode = order.Items.length >= 10 || (AUTO_CHECKLIST_FOR_KITS && order.Items.some(function (item) {
-            return !!item.KitItems && item.KitItems.length > 0;
-        }));
+        self.checklistMode = order.Items.length >= 10;
         if (!!localOrderRecord) {
             if (typeof localOrderRecord.checklistMode === "boolean") {
                 self.checklistMode = localOrderRecord.checklistMode;
